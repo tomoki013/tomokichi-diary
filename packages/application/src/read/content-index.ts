@@ -12,6 +12,8 @@ import {
   type ArticleRevision,
   type Author,
   type Category,
+  type Collection,
+  type CollectionId,
   type Instant,
   type Location,
   type MediaAsset,
@@ -54,6 +56,7 @@ export class ContentIndex {
   private readonly categoryById = new Map<string, Category>();
   private readonly tagById = new Map<string, Tag>();
   private readonly placeById = new Map<string, Place>();
+  private readonly collectionById = new Map<string, Collection>();
 
   constructor(
     readonly snapshot: ContentSnapshot,
@@ -74,6 +77,7 @@ export class ContentIndex {
     for (const c of snapshot.categories) this.categoryById.set(c.id, c);
     for (const t of snapshot.tags) this.tagById.set(t.id, t);
     for (const p of snapshot.places) this.placeById.set(p.id, p);
+    for (const c of snapshot.collections) this.collectionById.set(c.id, c);
   }
 
   publicArticles(): readonly Article[] {
@@ -160,6 +164,30 @@ export class ContentIndex {
       const view = this.viewOf(r.articleId);
       return view ? [view] : [];
     });
+  }
+
+  collectionsOf(id: ArticleId): readonly Collection[] {
+    return this.snapshot.articleCollections
+      .filter((m) => m.articleId === id)
+      .flatMap((m) => {
+        const collection = this.collectionById.get(m.collectionId);
+        return collection ? [collection] : [];
+      });
+  }
+
+  /** Members of a collection in editorial order, drafts excluded. */
+  membersOf(collectionId: CollectionId): readonly ArticleView[] {
+    return this.snapshot.articleCollections
+      .filter((m) => m.collectionId === collectionId)
+      .toSorted((a, b) => a.sortOrder - b.sortOrder)
+      .flatMap((m) => {
+        const view = this.viewOf(m.articleId);
+        return view ? [view] : [];
+      });
+  }
+
+  collection(id: CollectionId): Collection | null {
+    return this.collectionById.get(id) ?? null;
   }
 
   primaryLocationOf(id: ArticleId): Location | null {

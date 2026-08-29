@@ -33,7 +33,10 @@ export async function migrate(
   for (const migration of migrations.toSorted((a, b) => a.name.localeCompare(b.name))) {
     if (done.has(migration.name)) continue;
     await db.exec(migration.sql);
-    await db.prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)").bind(migration.name, now()).run();
+    await db
+      .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+      .bind(migration.name, now())
+      .run();
     applied.push(migration.name);
   }
 
@@ -42,6 +45,8 @@ export async function migrate(
 
 export async function currentSchemaVersion(db: SqlDatabase): Promise<string | null> {
   await db.exec(LEDGER);
-  const row = await db.prepare("SELECT name FROM schema_migrations ORDER BY name DESC LIMIT 1").first<{ name: string }>();
+  const row = await db
+    .prepare("SELECT name FROM schema_migrations ORDER BY name DESC LIMIT 1")
+    .first<{ name: string }>();
   return row?.name ?? null;
 }

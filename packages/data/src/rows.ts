@@ -8,6 +8,8 @@ import type {
   ArticlePlace,
   ArticleRevision,
   ArticleTag,
+  ArticleCollection,
+  Collection,
   Author,
   Category,
   Location,
@@ -67,6 +69,8 @@ export const articleRow = {
     publishedAt: nullableStr(row, "published_at") as Article["publishedAt"],
     archivedAt: nullableStr(row, "archived_at") as Article["archivedAt"],
     noindex: bool(row, "noindex"),
+    travelStartDate: nullableStr(row, "travel_start_date") as Article["travelStartDate"],
+    travelEndDate: nullableStr(row, "travel_end_date") as Article["travelEndDate"],
   }),
   from: (article: Article): Row => ({
     id: article.id,
@@ -82,6 +86,8 @@ export const articleRow = {
     published_at: article.publishedAt,
     archived_at: article.archivedAt,
     noindex: flag(article.noindex),
+    travel_start_date: article.travelStartDate,
+    travel_end_date: article.travelEndDate,
   }),
 };
 
@@ -375,5 +381,43 @@ export const aiArtifactRow = {
     content: JSON.stringify(artifact.content),
     created_at: artifact.createdAt,
     generator: artifact.generator,
+  }),
+};
+
+export const collectionRow = {
+  to: (row: Row): Collection => ({
+    id: str(row, "id") as Collection["id"],
+    slug: str(row, "slug") as Collection["slug"],
+    kind: str(row, "kind") as Collection["kind"],
+    title: str(row, "title"),
+    description: nullableStr(row, "description"),
+    coverMediaId: nullableStr(row, "cover_media_id") as Collection["coverMediaId"],
+    startDate: nullableStr(row, "start_date") as Collection["startDate"],
+    endDate: nullableStr(row, "end_date") as Collection["endDate"],
+    sortOrder: num(row, "sort_order"),
+  }),
+  from: (collection: Collection): Row => ({
+    id: collection.id,
+    slug: collection.slug,
+    kind: collection.kind,
+    title: collection.title,
+    description: collection.description,
+    cover_media_id: collection.coverMediaId,
+    start_date: collection.startDate,
+    end_date: collection.endDate,
+    sort_order: collection.sortOrder,
+  }),
+};
+
+export const articleCollectionRow = {
+  to: (row: Row): ArticleCollection => ({
+    articleId: str(row, "article_id") as ArticleCollection["articleId"],
+    collectionId: str(row, "collection_id") as ArticleCollection["collectionId"],
+    sortOrder: num(row, "sort_order"),
+  }),
+  from: (relation: ArticleCollection): Row => ({
+    article_id: relation.articleId,
+    collection_id: relation.collectionId,
+    sort_order: relation.sortOrder,
   }),
 };

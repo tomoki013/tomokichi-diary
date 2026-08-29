@@ -2,8 +2,16 @@ import type { MediaUrlResolver, ObjectStorage, StoredObject } from "@tomokichi/a
 
 /** The slice of the R2 binding this adapter uses. */
 export interface R2Like {
-  put(key: string, value: ArrayBuffer, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown>;
-  get(key: string): Promise<{ arrayBuffer(): Promise<ArrayBuffer>; httpMetadata?: { contentType?: string }; size: number } | null>;
+  put(
+    key: string,
+    value: ArrayBuffer,
+    options?: { httpMetadata?: { contentType?: string } },
+  ): Promise<unknown>;
+  get(key: string): Promise<{
+    arrayBuffer(): Promise<ArrayBuffer>;
+    httpMetadata?: { contentType?: string };
+    size: number;
+  } | null>;
   delete(key: string): Promise<void>;
   head(key: string): Promise<unknown>;
 }

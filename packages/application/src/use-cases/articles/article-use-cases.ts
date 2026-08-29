@@ -79,6 +79,8 @@ export async function createArticle(
     publishedAt: null,
     archivedAt: null,
     noindex: false,
+    travelStartDate: null,
+    travelEndDate: null,
   };
   const revision = nextRevision({
     article,

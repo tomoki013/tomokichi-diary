@@ -23,7 +23,12 @@ export async function createTestContext(now = "2026-08-30T00:00:00.000Z"): Promi
 
   const repos = createRepositories(db);
   // Every article references an author, so the fixture author exists from the start.
-  await repos.authors.save({ id: "author-tomokichi" as AuthorId, name: "ともきち", url: null, bio: null });
+  await repos.authors.save({
+    id: "author-tomokichi" as AuthorId,
+    name: "ともきち",
+    url: null,
+    bio: null,
+  });
 
   let counter = 0;
   return {

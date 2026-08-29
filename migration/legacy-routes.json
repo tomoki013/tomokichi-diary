@@ -1,0 +1,1166 @@
+[
+  {
+    "path": "/",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/about",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/affiliates",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/contact",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/cookie-policy",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/abu-simbel",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/africa",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/agra",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/asia",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/aswan",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/athens",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/bangkok",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/barcelona",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/belgium",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/brussels",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/cairo",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/cappadocia",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/changi",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/china",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/egypt",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/europe",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/france",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/giza",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/greece",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/hanoi",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/hokkaido",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/india",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/indonesia",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/istanbul",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/jaipur",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/japan",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/kuala-lumpur",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/kyoto",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/madrid",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/malaysia",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/new-delhi",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/osaka",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/paris",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/putrajaya",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/santorini",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/seminyak",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/sentosa",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/seoul",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/shanghai",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/singapore",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/singapore-city",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/south-korea",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/destination/spain",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/thailand",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/toledo",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/turkey",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/varanasi",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/vietnam",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/destination/yogyakarta",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/editorial-policy",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/faq",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/gallery",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/journey",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2024-02-26",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2024-03-01",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2024-09-21",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2025-02-13",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2025-06-10",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2025-11-29",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/journey/j-2026-03-12",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/airport-access-athens",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/airport-access-donmuang",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/airport-access-kansai",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/airport-access-santorini",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/airport-access-suvarnabhumi",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/arabic-number",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/architecture1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/architecture2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/ashumina-pilgrimage-in-spain",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/bangkok-localbus",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/bangkok-tourism",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/bankok-sandaijiin",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/bathing-ganga",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/batu-caves-guide",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/best-city-for-student",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/chagee-kuala-lumpur-stores",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/chagee-menu-explained",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/chagee-ordering-china-malaysia-singapore",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/chagee-singapore-stores",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/changi-airport-liquids",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/changi-airport-lounge",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/changi-airport-overnight",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/chaophraya-express",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/china-alipay-useful",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/china1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/china2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/china3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/china4",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/city-to-changi-airport",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/city-to-sultan-abdul-aziz-shah-airport",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/developing-country-sunset",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/egypt1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/egypt2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/egypt3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/egypt4",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/europe-itinerary",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/exchange-rate",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/france1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/france2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/france3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/google-maps-bus-developing-countries",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/greece1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/greece2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/greece3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/hokkaido1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/hokkaido2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/howtoget-abusimbel-from-asuwan",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/howtoget-mirador-del-valle",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india-street-food-tips",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india-visa",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india4",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india5",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india6",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/india7",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/indonesia1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/indonesia2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/indonesia3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/introduce",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/kyoto-view1",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/landscape1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/malaysia-before-thailand",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/malaysia-night-vibes",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/malaysia1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/malaysia2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/malaysia3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/oia-sunset-guide",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/omio-reservation",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/paris-navigo-easy",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/paris-restraunt",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/putra-mosque-guide",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/putra-mosque-ramadan-hours",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/route-of-arrival-to-arl-at-suvarnabhumi",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/santorini-tourism",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/santorini-transportation",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/seletar-airport-to-city",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/shanghai-chagee",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/shanghai-chagee-menu",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/shanghai-chagee-stores",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/singapore1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/singapore2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/singapore3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain-restaurant",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain4",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain5",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain6",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/spain7",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/sunset1",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/posts/thai-itinerary",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai-traditional-massage",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai-transportation",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai4",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai5",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/thai6",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/touch-n-go-how-much",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/travel-history1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/travel-history2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/trip_com-lounge-benefits",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/turkey1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/turkey2",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/turkey3",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/vietnam-transit",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/vietnam1",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/wat-arun",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/wat-phra-kaew",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/posts/why-travelers-dont-return",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/privacy",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  },
+  {
+    "path": "/request",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/roadmap",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/architecture",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/kyoto",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/landscape",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/sunset",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/travel-diary",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/series/travel-history",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/sitemap",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/social",
+    "source": "repository",
+    "status": 200,
+    "inSitemap": false
+  },
+  {
+    "path": "/terms",
+    "source": "both",
+    "status": 200,
+    "inSitemap": true
+  }
+]

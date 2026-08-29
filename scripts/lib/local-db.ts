@@ -40,7 +40,9 @@ export async function createLocalContext(path = LOCAL_DB_PATH): Promise<AppConte
     logger: silentLogger,
     // Media bytes live in R2 in production; the tooling only records keys.
     storage: createMemoryStorage(),
-    mediaUrls: createMediaUrlResolver(process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"),
+    mediaUrls: createMediaUrlResolver(
+      process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com",
+    ),
     ai: null,
   };
 }

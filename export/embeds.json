@@ -1,1 +1,76 @@
-[]
+[
+  {
+    "id": "6773d79f-f1a6-838b-9a99-408959989e62",
+    "revisionId": "17e732f4-9a45-85df-991a-8e07113bb2c8",
+    "anchorKey": "promotion-disclosure",
+    "type": "notice",
+    "schemaVersion": 1,
+    "payload": {
+      "programs": [
+        "Trip.com"
+      ]
+    }
+  },
+  {
+    "id": "94b417a5-c8f2-82a4-a589-a255f95cf140",
+    "revisionId": "2f5a22f9-4e1b-8bb3-9d75-847813746186",
+    "anchorKey": "promotion-disclosure",
+    "type": "notice",
+    "schemaVersion": 1,
+    "payload": {
+      "programs": [
+        "Omio"
+      ]
+    }
+  },
+  {
+    "id": "94f5d0e7-ee3f-8d03-a532-45a8b759b810",
+    "revisionId": "6a44a9fa-3dd6-85f9-b629-e38c88f31c44",
+    "anchorKey": "cost-report",
+    "type": "table",
+    "schemaVersion": 1,
+    "payload": {
+      "budget": {
+        "amount": 368509,
+        "currency": "JPY"
+      },
+      "costs": {
+        "currency": "JPY",
+        "items": {
+          "flight": 123940,
+          "train": 5180,
+          "hotel": 116328,
+          "transport": 17939,
+          "sightseeing": 17126,
+          "food": 78346,
+          "other": 9650
+        }
+      }
+    }
+  },
+  {
+    "id": "53fb5f45-0c4a-8241-a37d-e896fa090f2e",
+    "revisionId": "362d123d-ce88-845d-83b3-612888f782ac",
+    "anchorKey": "cost-report",
+    "type": "table",
+    "schemaVersion": 1,
+    "payload": {
+      "budget": {
+        "amount": 110613,
+        "currency": "JPY"
+      },
+      "costs": {
+        "currency": "JPY",
+        "items": {
+          "flight": 85140,
+          "train": 0,
+          "hotel": 10324,
+          "transport": 2087,
+          "sightseeing": 5075,
+          "food": 3574,
+          "other": 4413
+        }
+      }
+    }
+  }
+]

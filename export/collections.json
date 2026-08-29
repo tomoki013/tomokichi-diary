@@ -1,0 +1,145 @@
+[
+  {
+    "id": "1bb04f9d-27d1-85a3-9e2e-a66796243764",
+    "slug": "j-2024-02-26",
+    "kind": "journey",
+    "title": "北海道の食を堪能する旅",
+    "description": "北海道の美味しい食べ物を堪能する旅。",
+    "coverMediaId": "fb86b284-6a1c-8ea6-8962-d48addd7d491",
+    "startDate": "2024-02-26",
+    "endDate": "2024-02-28",
+    "sortOrder": 0
+  },
+  {
+    "id": "7f0f11aa-890d-848f-816e-3a7bd3e5e587",
+    "slug": "travel-diary",
+    "kind": "series",
+    "title": "旅行日記",
+    "description": "私が旅した各地の旅行記",
+    "coverMediaId": "45252547-c9c5-8663-bc6d-85259fb89beb",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 0
+  },
+  {
+    "id": "b8ceb24e-cd10-8031-ba5b-926826b3c84e",
+    "slug": "j-2024-03-01",
+    "kind": "journey",
+    "title": "アジアの熱気を感じて",
+    "description": "活気あふれるナイトマーケットと、荘厳な寺院のコントラスト。スパイスの効いた料理に舌鼓。",
+    "coverMediaId": "c244f2ef-1c6e-87ac-85e8-4c83ef007109",
+    "startDate": "2024-03-01",
+    "endDate": "2024-03-04",
+    "sortOrder": 1
+  },
+  {
+    "id": "178f854a-a224-85b6-91c2-24fa0fa8b436",
+    "slug": "travel-history",
+    "kind": "series",
+    "title": "ともきちの海外旅行遍歴",
+    "description": "これまでに訪れた国々との出会いと別れの物語",
+    "coverMediaId": "9241d90b-227b-8532-8b8c-f53b1ee0bd18",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 1
+  },
+  {
+    "id": "467d94d8-4ac7-827e-9fc5-e193c111697d",
+    "slug": "j-2024-09-21",
+    "kind": "journey",
+    "title": "インド 混沌と祈りの旅",
+    "description": "ニューデリーの喧騒、タージマハルの白亜の美しさ、そしてガンジス川の祈り。人生観を揺さぶる体験。",
+    "coverMediaId": "a16e475a-85ba-8613-8c2e-4704d056e855",
+    "startDate": "2024-09-21",
+    "endDate": "2024-09-30",
+    "sortOrder": 2
+  },
+  {
+    "id": "b0573905-7582-824e-8279-b13ab2126afb",
+    "slug": "sunset",
+    "kind": "series",
+    "title": "世界の夕陽から",
+    "description": "各地で出会った忘れられない夕陽の瞬間",
+    "coverMediaId": "43e73c29-8da0-8944-9c4a-866f63239d0b",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 2
+  },
+  {
+    "id": "e7699446-3290-8716-9171-382056de81f6",
+    "slug": "j-2025-02-13",
+    "kind": "journey",
+    "title": "西欧 芸術と美食の周遊",
+    "description": "エッフェル塔の下でピクニック、サグラダ・ファミリアの荘厳さ、本場のパエリアとチョコレート。感性を磨く旅。",
+    "coverMediaId": "5cee5707-fe7d-87e5-a0df-99e9b038959e",
+    "startDate": "2025-02-13",
+    "endDate": "2025-02-28",
+    "sortOrder": 3
+  },
+  {
+    "id": "78ea9dba-1722-8b02-a07a-b927c0591566",
+    "slug": "landscape",
+    "kind": "series",
+    "title": "世界の絶景・街並み編",
+    "description": "心に残る美しい街並みと風景の記録",
+    "coverMediaId": "5393ca2e-ad36-881a-ab28-42fae1db3c7d",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 3
+  },
+  {
+    "id": "21533941-b913-8a79-94ea-42b3dd473ee1",
+    "slug": "architecture",
+    "kind": "series",
+    "title": "世界の絶景・建築編",
+    "description": "歴史と文化が刻まれた美しい建築物たち",
+    "coverMediaId": "a16e475a-85ba-8613-8c2e-4704d056e855",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 4
+  },
+  {
+    "id": "b5c92001-976c-8801-8d9c-00a6f7b3ad1a",
+    "slug": "j-2025-06-10",
+    "kind": "journey",
+    "title": "大陸横断 古代文明を巡る冒険",
+    "description": "バンコクからイスタンブール、カッパドキアの奇岩、エジプトのピラミッド、そしてサントリーニ島の夕日。壮大なスケールの旅。",
+    "coverMediaId": "5393ca2e-ad36-881a-ab28-42fae1db3c7d",
+    "startDate": "2025-06-10",
+    "endDate": "2025-06-30",
+    "sortOrder": 4
+  },
+  {
+    "id": "d204fa1c-cbe1-805d-bcbe-1745c8795478",
+    "slug": "j-2025-11-29",
+    "kind": "journey",
+    "title": "上海 新旧が交錯する魔都",
+    "description": "外灘の歴史的建築群と浦東の近未来的なスカイライン。小籠包の湯気と夜景に酔いしれる。",
+    "coverMediaId": "735b6b9a-9107-8d41-ba9f-da480ada31c3",
+    "startDate": "2025-11-29",
+    "endDate": "2025-12-02",
+    "sortOrder": 5
+  },
+  {
+    "id": "96865e1c-448a-850d-b347-25c44f8d9615",
+    "slug": "kyoto",
+    "kind": "series",
+    "title": "京都の景色",
+    "description": "京都在住大学生が見つけた古都の隠れた美しさ",
+    "coverMediaId": "846915e0-64b7-84fa-b59d-fd5ad93a2714",
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 5
+  },
+  {
+    "id": "d6dc5a01-e7ab-811d-a48b-756dbc209f31",
+    "slug": "j-2026-03-12",
+    "kind": "journey",
+    "title": "東南アジアをつないで巡る食と街歩きの旅",
+    "description": "クアラルンプールの食べ歩きから始まり、シンガポールの定番観光、バリの街歩き、そしてジョグジャカルタへの移動まで。ローカル交通と食を詰め込んだ周遊旅。",
+    "coverMediaId": "0d4352a0-35df-8196-a352-3d847cd35e1c",
+    "startDate": "2026-03-12",
+    "endDate": "2026-03-20",
+    "sortOrder": 6
+  }
+]

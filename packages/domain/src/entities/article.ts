@@ -1,5 +1,5 @@
 import type { ArticleId, AuthorId, RevisionId } from "../primitives/id.js";
-import type { Instant } from "../primitives/datetime.js";
+import type { Instant, PlainDate } from "../primitives/datetime.js";
 import type { Locale } from "../primitives/locale.js";
 import type { Slug } from "../primitives/slug.js";
 
@@ -26,6 +26,9 @@ export interface Article {
   readonly scheduledAt: Instant | null;
   readonly publishedAt: Instant | null;
   readonly archivedAt: Instant | null;
+  /** When the trip actually happened, which is rarely when it was published. */
+  readonly travelStartDate: PlainDate | null;
+  readonly travelEndDate: PlainDate | null;
   /** Excluded from sitemap and marked noindex while true. */
   readonly noindex: boolean;
 }

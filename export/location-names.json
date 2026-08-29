@@ -1,1 +1,352 @@
-[]
+[
+  {
+    "locationId": "05059158-f25a-8c1c-9764-57ea1d6e72df",
+    "locale": "ja",
+    "name": "世界",
+    "shortName": null,
+    "romanizedName": "Global"
+  },
+  {
+    "locationId": "b9971c05-c6b8-87d9-a587-7a86cf4613fd",
+    "locale": "ja",
+    "name": "アジア",
+    "shortName": null,
+    "romanizedName": "Asia"
+  },
+  {
+    "locationId": "af74c2d8-86a8-89ca-a7f2-e3b64f944385",
+    "locale": "ja",
+    "name": "日本",
+    "shortName": null,
+    "romanizedName": "Japan"
+  },
+  {
+    "locationId": "0d5ede9a-bc02-830f-b8dd-d8202e397a60",
+    "locale": "ja",
+    "name": "京都",
+    "shortName": null,
+    "romanizedName": "Kyoto"
+  },
+  {
+    "locationId": "b5bee2c0-019d-8321-8a94-5822833dc152",
+    "locale": "ja",
+    "name": "大阪",
+    "shortName": null,
+    "romanizedName": "Osaka"
+  },
+  {
+    "locationId": "6d5f43ff-c590-8dc3-a498-601f1422d05b",
+    "locale": "ja",
+    "name": "北海道",
+    "shortName": null,
+    "romanizedName": "Hokkaido"
+  },
+  {
+    "locationId": "f1a50c09-aafe-8b60-bcb3-906de7b2c09b",
+    "locale": "ja",
+    "name": "韓国",
+    "shortName": null,
+    "romanizedName": "South Korea"
+  },
+  {
+    "locationId": "2ac3d887-af6d-8d7d-a215-f09dc15843a4",
+    "locale": "ja",
+    "name": "ソウル",
+    "shortName": null,
+    "romanizedName": "Seoul"
+  },
+  {
+    "locationId": "80459748-5f2a-8b54-a414-a7c25db44f57",
+    "locale": "ja",
+    "name": "インド",
+    "shortName": null,
+    "romanizedName": "India"
+  },
+  {
+    "locationId": "8235d017-c004-88fb-b209-680a617c3eba",
+    "locale": "ja",
+    "name": "ニューデリー",
+    "shortName": null,
+    "romanizedName": "New Delhi"
+  },
+  {
+    "locationId": "df2e6921-46e7-8bbc-8237-4ff812ae1b62",
+    "locale": "ja",
+    "name": "アグラ",
+    "shortName": null,
+    "romanizedName": "Agra"
+  },
+  {
+    "locationId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
+    "locale": "ja",
+    "name": "ジャイプル",
+    "shortName": null,
+    "romanizedName": "Jaipur"
+  },
+  {
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "locale": "ja",
+    "name": "バラナシ",
+    "shortName": null,
+    "romanizedName": "Varanasi"
+  },
+  {
+    "locationId": "73b38a58-8223-8b7e-8609-be141e2b334e",
+    "locale": "ja",
+    "name": "タイ",
+    "shortName": null,
+    "romanizedName": "Thailand"
+  },
+  {
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "locale": "ja",
+    "name": "バンコク",
+    "shortName": null,
+    "romanizedName": "Bangkok"
+  },
+  {
+    "locationId": "f9734b79-5d02-8382-ad2c-abb2afa5a14c",
+    "locale": "ja",
+    "name": "ベトナム",
+    "shortName": null,
+    "romanizedName": "Vietnam"
+  },
+  {
+    "locationId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
+    "locale": "ja",
+    "name": "ハノイ",
+    "shortName": null,
+    "romanizedName": "Hanoi"
+  },
+  {
+    "locationId": "259ff185-35dc-809e-92d3-5e11628a57d5",
+    "locale": "ja",
+    "name": "中国",
+    "shortName": null,
+    "romanizedName": "China"
+  },
+  {
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "locale": "ja",
+    "name": "上海",
+    "shortName": null,
+    "romanizedName": "Shanghai"
+  },
+  {
+    "locationId": "bb692828-f4cd-8bea-bd70-ae3210c535fe",
+    "locale": "ja",
+    "name": "マレーシア",
+    "shortName": null,
+    "romanizedName": "Malaysia"
+  },
+  {
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "locale": "ja",
+    "name": "クアラルンプール",
+    "shortName": null,
+    "romanizedName": "Kuala Lumpur"
+  },
+  {
+    "locationId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
+    "locale": "ja",
+    "name": "プトラジャヤ",
+    "shortName": null,
+    "romanizedName": "Putrajaya"
+  },
+  {
+    "locationId": "ac33549c-4940-80b7-ae0e-8ab6b439fd01",
+    "locale": "ja",
+    "name": "シンガポール",
+    "shortName": null,
+    "romanizedName": "Singapore"
+  },
+  {
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "locale": "ja",
+    "name": "シンガポール市内",
+    "shortName": null,
+    "romanizedName": "Singapore City"
+  },
+  {
+    "locationId": "66ec0788-951d-8e93-8746-0539604045f2",
+    "locale": "ja",
+    "name": "セントーサ島",
+    "shortName": null,
+    "romanizedName": "Sentosa"
+  },
+  {
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "locale": "ja",
+    "name": "チャンギ",
+    "shortName": null,
+    "romanizedName": "Changi"
+  },
+  {
+    "locationId": "a9528b2f-72e9-8e82-8fc6-1fc82e569cf1",
+    "locale": "ja",
+    "name": "インドネシア",
+    "shortName": null,
+    "romanizedName": "Indonesia"
+  },
+  {
+    "locationId": "ae1160ed-bec1-8698-b401-c439049aca96",
+    "locale": "ja",
+    "name": "スミニャック",
+    "shortName": null,
+    "romanizedName": "Seminyak"
+  },
+  {
+    "locationId": "e91f1594-d11b-84db-a013-1312dff7316c",
+    "locale": "ja",
+    "name": "ジョグジャカルタ",
+    "shortName": null,
+    "romanizedName": "Yogyakarta"
+  },
+  {
+    "locationId": "324a38ca-3c61-857e-86d0-095a3914ce4d",
+    "locale": "ja",
+    "name": "ヨーロッパ",
+    "shortName": null,
+    "romanizedName": "Europe"
+  },
+  {
+    "locationId": "f6510ff9-fa1d-8f0c-8b21-4eff13452023",
+    "locale": "ja",
+    "name": "フランス",
+    "shortName": null,
+    "romanizedName": "France"
+  },
+  {
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "locale": "ja",
+    "name": "パリ",
+    "shortName": null,
+    "romanizedName": "Paris"
+  },
+  {
+    "locationId": "3f30d489-8ec6-884e-86e1-f9f910f71b0f",
+    "locale": "ja",
+    "name": "スペイン",
+    "shortName": null,
+    "romanizedName": "Spain"
+  },
+  {
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "locale": "ja",
+    "name": "バルセロナ",
+    "shortName": null,
+    "romanizedName": "Barcelona"
+  },
+  {
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "locale": "ja",
+    "name": "マドリード",
+    "shortName": null,
+    "romanizedName": "Madrid"
+  },
+  {
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "locale": "ja",
+    "name": "トレド",
+    "shortName": null,
+    "romanizedName": "Toledo"
+  },
+  {
+    "locationId": "51369dff-354e-8706-9fc4-19157064b47b",
+    "locale": "ja",
+    "name": "ベルギー",
+    "shortName": null,
+    "romanizedName": "Belgium"
+  },
+  {
+    "locationId": "0a435875-44ff-8b8c-bb93-67c3a11cdf5e",
+    "locale": "ja",
+    "name": "ブリュッセル",
+    "shortName": null,
+    "romanizedName": "Brussels"
+  },
+  {
+    "locationId": "8f2f8c6c-48dd-807d-a5d6-bcd57b7d6d05",
+    "locale": "ja",
+    "name": "ギリシャ",
+    "shortName": null,
+    "romanizedName": "Greece"
+  },
+  {
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "locale": "ja",
+    "name": "サントリーニ",
+    "shortName": null,
+    "romanizedName": "Santorini"
+  },
+  {
+    "locationId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "locale": "ja",
+    "name": "アテネ",
+    "shortName": null,
+    "romanizedName": "Athens"
+  },
+  {
+    "locationId": "edddd2bd-9bf1-8dd7-a616-0ce08d7d7fba",
+    "locale": "ja",
+    "name": "トルコ",
+    "shortName": null,
+    "romanizedName": "Turkey"
+  },
+  {
+    "locationId": "8bd1ede6-e733-8f7f-8d6f-bba918975a90",
+    "locale": "ja",
+    "name": "イスタンブール",
+    "shortName": null,
+    "romanizedName": "Istanbul"
+  },
+  {
+    "locationId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "locale": "ja",
+    "name": "カッパドキア",
+    "shortName": null,
+    "romanizedName": "Cappadocia"
+  },
+  {
+    "locationId": "cb5ae3cc-4627-816d-897e-48f613a0863e",
+    "locale": "ja",
+    "name": "アフリカ",
+    "shortName": null,
+    "romanizedName": "Africa"
+  },
+  {
+    "locationId": "b6a54d56-351c-8410-9671-5bace37407a9",
+    "locale": "ja",
+    "name": "エジプト",
+    "shortName": null,
+    "romanizedName": "Egypt"
+  },
+  {
+    "locationId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "locale": "ja",
+    "name": "カイロ",
+    "shortName": null,
+    "romanizedName": "Cairo"
+  },
+  {
+    "locationId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
+    "locale": "ja",
+    "name": "ギザ",
+    "shortName": null,
+    "romanizedName": "Giza"
+  },
+  {
+    "locationId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "locale": "ja",
+    "name": "アブシンベル",
+    "shortName": null,
+    "romanizedName": "Abu Simbel"
+  },
+  {
+    "locationId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "locale": "ja",
+    "name": "アスワン",
+    "shortName": null,
+    "romanizedName": "Aswan"
+  }
+]

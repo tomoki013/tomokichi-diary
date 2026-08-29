@@ -34,6 +34,8 @@ export function makeArticle(overrides: Partial<Article> = {}): Article {
     publishedAt: null,
     archivedAt: null,
     noindex: false,
+    travelStartDate: null,
+    travelEndDate: null,
     ...overrides,
   };
 }

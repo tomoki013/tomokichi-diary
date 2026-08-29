@@ -9,6 +9,7 @@ export const ROUTE_TARGET_TYPES = [
   "category",
   "tag",
   "series",
+  "journey",
   "static",
   "redirect",
 ] as const;

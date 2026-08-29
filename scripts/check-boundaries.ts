@@ -61,6 +61,10 @@ const RULES: Rule[] = [
   },
 ];
 
+// Test files are not shipped, so they may reach for in-memory adapters.
+const isExcluded = (path: string): boolean =>
+  path.includes("node_modules") || path.includes("__tests__") || path.endsWith(".test.ts");
+
 const IMPORT_RE =
   /(?:^|\n)\s*(?:import|export)[\s\S]{0,200}?from\s+["']([^"']+)["']|require\(["']([^"']+)["']\)/g;
 
@@ -76,9 +80,6 @@ function specifiersOf(source: string): string[] {
 function check(): Finding[] {
   const findings: Finding[] = [];
   for (const rule of RULES) {
-    // Test files are not shipped, so they may reach for in-memory adapters.
-    const isExcluded = (p: string) =>
-      p.includes("node_modules") || p.includes("__tests__") || p.endsWith(".test.ts");
     for (const file of globSync(rule.files, { exclude: isExcluded })) {
       const source = readFileSync(file, "utf8");
       for (const spec of specifiersOf(source)) {

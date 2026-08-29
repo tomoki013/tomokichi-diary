@@ -1,1 +1,442 @@
-[]
+[
+  {
+    "id": "3b07621d-b7c0-885c-8f4e-c528eb570f44",
+    "slug": "chagee",
+    "name": "CHAGEE"
+  },
+  {
+    "id": "2e454aeb-24cf-8045-886f-33c9ff0b84e7",
+    "slug": "google",
+    "name": "Googleマップ"
+  },
+  {
+    "id": "db43f155-b298-807e-9b64-73d689ce4c56",
+    "slug": "omio",
+    "name": "Omio"
+  },
+  {
+    "id": "2c5bf6a1-674d-8fee-9331-b79a257a61aa",
+    "slug": "tag-01f24058",
+    "name": "ワットアルン"
+  },
+  {
+    "id": "0c2051eb-0359-8fa9-99eb-ae84f08f9b39",
+    "slug": "tag-05548a9d",
+    "name": "ワット・プラケオ"
+  },
+  {
+    "id": "c5987b04-41ce-87ce-bb8f-7ea25ba2b107",
+    "slug": "tag-0bfd59a2",
+    "name": "アジア"
+  },
+  {
+    "id": "e98b2dff-9277-890a-814f-fc6f017fa254",
+    "slug": "tag-10f38a66",
+    "name": "ビザ"
+  },
+  {
+    "id": "2848acf0-7466-81c4-9f58-0b394de4cd49",
+    "slug": "tag-193372af",
+    "name": "海外旅行が好きな理由"
+  },
+  {
+    "id": "790cf8e2-e972-8259-bee0-acbcbe55e7ba",
+    "slug": "tag-1a369e55",
+    "name": "アクティビティ"
+  },
+  {
+    "id": "2436dc60-a594-80a6-8c0c-82ddf7b0ce56",
+    "slug": "tag-1ad2d636",
+    "name": "サントリーニ"
+  },
+  {
+    "id": "63faa768-dbfc-883a-be5a-8594137fe68c",
+    "slug": "tag-1b16c703",
+    "name": "アフリカ"
+  },
+  {
+    "id": "57680490-801d-8758-8868-ca54456c3748",
+    "slug": "tag-1dd182a4",
+    "name": "日本三大祭"
+  },
+  {
+    "id": "c5d40503-9772-86f0-b456-cfc7bdff125e",
+    "slug": "tag-1ecf32d1",
+    "name": "タリンチャン水上マーケット"
+  },
+  {
+    "id": "acc33197-64c5-8eda-9245-66a8f3e4171a",
+    "slug": "tag-228aaf9a",
+    "name": "トレド"
+  },
+  {
+    "id": "549d4d4e-84f0-8cb7-ae9f-318b790d69bb",
+    "slug": "tag-22a3084e",
+    "name": "ピラミッド"
+  },
+  {
+    "id": "2be7eecb-3a9a-8bf4-9c20-a4dd79de5115",
+    "slug": "tag-24ad9999",
+    "name": "チャトゥチャック市場"
+  },
+  {
+    "id": "387e8ace-6470-8282-acd0-f6edb4945889",
+    "slug": "tag-26187f7e",
+    "name": "チャオプラヤー川"
+  },
+  {
+    "id": "90622bb1-a911-890f-b789-cb1487451306",
+    "slug": "tag-2c751c61",
+    "name": "鉄道予約"
+  },
+  {
+    "id": "fbc85a70-eb11-8c21-9992-6baf3b3c8b7d",
+    "slug": "tag-2cc0af02",
+    "name": "バス"
+  },
+  {
+    "id": "ca621b46-db66-8740-84ee-b28e77dcb14d",
+    "slug": "tag-30fa11fd",
+    "name": "国内旅行"
+  },
+  {
+    "id": "650de6a9-816c-8ab2-b306-f21823d646e2",
+    "slug": "tag-335985ef",
+    "name": "空港ラウンジ"
+  },
+  {
+    "id": "cb826b40-6ed6-8afb-ad80-d3fee1224861",
+    "slug": "tag-3608d1c2",
+    "name": "聖地巡礼"
+  },
+  {
+    "id": "889cb50e-15b3-8901-a858-0bd3e1261529",
+    "slug": "tag-3666882c",
+    "name": "空港アクセス"
+  },
+  {
+    "id": "e97321ac-0d59-8cfd-90f4-0bedc92361bd",
+    "slug": "tag-397d270a",
+    "name": "タージマハル"
+  },
+  {
+    "id": "b37406d9-dbdf-80bc-b474-61cf6e81f04e",
+    "slug": "tag-3daf01fb",
+    "name": "グルメ"
+  },
+  {
+    "id": "59df3a84-268c-8cb2-a736-fcae3005a732",
+    "slug": "tag-3f03e028",
+    "name": "旅の原点"
+  },
+  {
+    "id": "79effaa7-e0ad-8580-9269-986c1738f981",
+    "slug": "tag-4034f5d1",
+    "name": "キャッシュレス"
+  },
+  {
+    "id": "25ed42c1-036b-8be5-87c6-47d7bb3f1803",
+    "slug": "tag-41cfa51f",
+    "name": "街歩き"
+  },
+  {
+    "id": "7182ecc9-7e56-8ac9-9473-62a98cd51765",
+    "slug": "tag-467422ed",
+    "name": "ワット・アルン"
+  },
+  {
+    "id": "128c9e20-8b31-8ce5-90ca-7ca33797cae2",
+    "slug": "tag-4906a49a",
+    "name": "上海"
+  },
+  {
+    "id": "535b8db4-8d6b-8f03-838e-e561eced863c",
+    "slug": "tag-4cadae2b",
+    "name": "クアラルンプール"
+  },
+  {
+    "id": "d9b92ad7-9e57-8786-b3e4-2cf14feb69f6",
+    "slug": "tag-50c1f064",
+    "name": "清水寺"
+  },
+  {
+    "id": "92f3e5a5-fe51-8912-b65d-acfeb3f4dc4f",
+    "slug": "tag-534a2527",
+    "name": "ワットパクナム"
+  },
+  {
+    "id": "1a3b4946-feae-8d5a-adde-5d0f5b0f9edb",
+    "slug": "tag-57f78ba1",
+    "name": "交通"
+  },
+  {
+    "id": "8f08ea1c-2879-8fd2-a297-eb7f4acaffeb",
+    "slug": "tag-5c300a48",
+    "name": "紅葉"
+  },
+  {
+    "id": "9b7e1b5d-fe6e-8004-acc1-9659803bb8af",
+    "slug": "tag-5c8e2239",
+    "name": "ヨーロッパ"
+  },
+  {
+    "id": "ff448764-f841-8e51-acaa-415afd75ac68",
+    "slug": "tag-5e92ec80",
+    "name": "予約"
+  },
+  {
+    "id": "002655ef-4564-8404-a555-06a567620622",
+    "slug": "tag-61556210",
+    "name": "液体持ち込み"
+  },
+  {
+    "id": "3a7009c4-75a1-82c6-be7f-d3581e3ee2a0",
+    "slug": "tag-62865cc5",
+    "name": "タイ"
+  },
+  {
+    "id": "2829a8c8-1be1-87b3-98e0-9813fe741eb8",
+    "slug": "tag-659b2df0",
+    "name": "海外旅行"
+  },
+  {
+    "id": "be962a97-5fd8-8f3e-a588-d69cbef88721",
+    "slug": "tag-6d47778c",
+    "name": "カッパドキア"
+  },
+  {
+    "id": "f88c8f82-0a8d-8636-80fe-af50750e777d",
+    "slug": "tag-6f1ca05a",
+    "name": "会員特典"
+  },
+  {
+    "id": "4d11b6fc-d784-8b70-8487-9b553be6eba8",
+    "slug": "tag-782fb841",
+    "name": "バトゥ洞窟"
+  },
+  {
+    "id": "83342038-3b54-82b7-be9e-92c5f55d9ae2",
+    "slug": "tag-784f6aca",
+    "name": "マレーシア"
+  },
+  {
+    "id": "8d9af497-cd23-8af0-b877-bd39c56cfe99",
+    "slug": "tag-8a3122e4",
+    "name": "動物園"
+  },
+  {
+    "id": "5bba9fd8-d498-83ba-9b52-0ba81474dcdb",
+    "slug": "tag-8e248494",
+    "name": "京都観光"
+  },
+  {
+    "id": "8bd0d711-d2be-8d04-8cb8-922ba280f8a2",
+    "slug": "tag-8f05b93b",
+    "name": "カフェ"
+  },
+  {
+    "id": "dde030df-3c1d-83f8-8cd1-e150ea65abf3",
+    "slug": "tag-90081cd5",
+    "name": "お金・決済"
+  },
+  {
+    "id": "076f9c1c-46da-8d47-acc3-fc1bdcfb1bbb",
+    "slug": "tag-91ccd16f",
+    "name": "スペイン高速鉄道"
+  },
+  {
+    "id": "a0e1185b-614f-8033-86a8-96c0198146e3",
+    "slug": "tag-92d4ca79",
+    "name": "暁の寺"
+  },
+  {
+    "id": "fadb3d09-955c-8068-8b94-b5a2f92d5e63",
+    "slug": "tag-93f69f82",
+    "name": "一人旅"
+  },
+  {
+    "id": "618bd0a1-5a1a-8006-9a6e-fa5b95969cd0",
+    "slug": "tag-94512d7d",
+    "name": "モスク"
+  },
+  {
+    "id": "e95f119e-e111-8683-891e-79df735a4e65",
+    "slug": "tag-9504a0bd",
+    "name": "気球"
+  },
+  {
+    "id": "23e85a39-9f00-87a4-9c02-348efd7ebfbb",
+    "slug": "tag-95e8924d",
+    "name": "タイ旅行記"
+  },
+  {
+    "id": "a34a2df7-7703-8c8a-b752-0031b0833b13",
+    "slug": "tag-9c90825e",
+    "name": "プトラジャヤ"
+  },
+  {
+    "id": "32808974-c5fb-8eb7-aadb-7c7f219f0314",
+    "slug": "tag-9e7b2570",
+    "name": "長距離移動"
+  },
+  {
+    "id": "18c2d9f9-e657-8871-b088-a41eaa5de824",
+    "slug": "tag-a429ee67",
+    "name": "交通情報"
+  },
+  {
+    "id": "49cfb3fc-e2e8-866d-b05d-cbe9fbd81d72",
+    "slug": "tag-ac551f09",
+    "name": "観光スポット"
+  },
+  {
+    "id": "b121ec10-2383-8461-aab3-e9d1ea47b886",
+    "slug": "tag-addb6958",
+    "name": "エッフェル塔"
+  },
+  {
+    "id": "8ed50806-b6f6-88a3-ae4a-db1a61d35af4",
+    "slug": "tag-b1a8dd9c",
+    "name": "国内旅行と海外旅行の違い"
+  },
+  {
+    "id": "adf07b1c-ed68-8ffe-83bf-52bc9e71d4c5",
+    "slug": "tag-b289b272",
+    "name": "シンガポール"
+  },
+  {
+    "id": "dd04884d-e5e5-8d5d-9e75-e178842d4765",
+    "slug": "tag-b496099a",
+    "name": "チャトゥチャックウィークエンドマーケット"
+  },
+  {
+    "id": "e24ea7e5-d9ac-8a2b-bdc8-f136d4c858a3",
+    "slug": "tag-b763192e",
+    "name": "空港泊"
+  },
+  {
+    "id": "b74376a8-a182-81d5-9f9e-9225db0c3da0",
+    "slug": "tag-b95ef0df",
+    "name": "夜景"
+  },
+  {
+    "id": "a3e913a4-9486-868d-ac19-d34fecc591e9",
+    "slug": "tag-bc5622c2",
+    "name": "空港"
+  },
+  {
+    "id": "6e5b69f5-0280-8730-b2aa-f6ece9ff824f",
+    "slug": "tag-be6bc7fc",
+    "name": "カオサンロード"
+  },
+  {
+    "id": "3e0a2f3e-b23c-8d33-b244-b772c07509c7",
+    "slug": "tag-bf2c1b81",
+    "name": "リゾート"
+  },
+  {
+    "id": "3a8736d0-256e-82bf-b7fd-5871a53a1b00",
+    "slug": "tag-c43d763c",
+    "name": "歴史"
+  },
+  {
+    "id": "991b18c2-90b7-8a19-8741-31500cdb5ba3",
+    "slug": "tag-c71fbd3a",
+    "name": "サグラダファミリア"
+  },
+  {
+    "id": "dd857c1a-209b-8ecd-a9d9-f74158404b3c",
+    "slug": "tag-cb957dcc",
+    "name": "トラブル"
+  },
+  {
+    "id": "b4ff38af-cf5f-8488-afd1-89145c6cb503",
+    "slug": "tag-cd8bfb80",
+    "name": "中国茶"
+  },
+  {
+    "id": "28c17e94-3929-8efb-8dc7-346015412b6f",
+    "slug": "tag-cecddae6",
+    "name": "夕陽"
+  },
+  {
+    "id": "1c2dd8f3-eb49-877c-9327-387fcded9c09",
+    "slug": "tag-cf89aaf0",
+    "name": "絶景建築"
+  },
+  {
+    "id": "eeddc464-c1de-8103-933e-6e8e50e979d2",
+    "slug": "tag-d0a893ff",
+    "name": "チャンギ空港"
+  },
+  {
+    "id": "faa5a59f-a241-8e94-89a3-c5d1cc193eaf",
+    "slug": "tag-d8fe69ec",
+    "name": "絶景"
+  },
+  {
+    "id": "32f4f1a5-5c61-8559-9b5f-dd7dde9beb74",
+    "slug": "tag-d9b49f40",
+    "name": "バックパッカー"
+  },
+  {
+    "id": "4c228a6e-d083-89d8-a8fa-9faa3a9f766d",
+    "slug": "tag-dc5866d6",
+    "name": "ワット・ポー"
+  },
+  {
+    "id": "889ed0f3-0a5c-8c3b-b436-be9457b836e2",
+    "slug": "tag-de2439ed",
+    "name": "三島由紀夫"
+  },
+  {
+    "id": "144dd4c8-f8d8-8ecb-908e-1acc9dd675eb",
+    "slug": "tag-de2596ff",
+    "name": "移動"
+  },
+  {
+    "id": "252e956c-15dd-89c7-bd75-e4f9b3f3b3e3",
+    "slug": "tag-e797d910",
+    "name": "トランジット"
+  },
+  {
+    "id": "e17fb9a1-c24a-8fed-8c1b-7ef7f7e4f5de",
+    "slug": "tag-e7ff96de",
+    "name": "祇園祭"
+  },
+  {
+    "id": "174c03e7-6157-8076-810c-8175f1913896",
+    "slug": "tag-eadd5284",
+    "name": "嵐山"
+  },
+  {
+    "id": "7373951c-830d-8ad5-9386-61c51a551f62",
+    "slug": "tag-ec7a4018",
+    "name": "帰国"
+  },
+  {
+    "id": "fe3a41d3-4eb6-85f0-9d2d-56064bc388f2",
+    "slug": "tag-f0e95216",
+    "name": "中国"
+  },
+  {
+    "id": "4375233f-dd84-8cd8-a8dd-8075668eabc3",
+    "slug": "tag-f1315665",
+    "name": "その他"
+  },
+  {
+    "id": "041c9839-72ae-8cca-9913-2f1f84af62c5",
+    "slug": "tag-f3986461",
+    "name": "注意点"
+  },
+  {
+    "id": "6ebc8c73-6e64-83c2-99fe-d54895f7f7e5",
+    "slug": "tag-f5a6d17a",
+    "name": "アブシンベル神殿"
+  },
+  {
+    "id": "62e4a416-cdc4-8ea9-93d8-53c3bd3dbbb2",
+    "slug": "tag-f666fdd1",
+    "name": "初海外"
+  }
+]

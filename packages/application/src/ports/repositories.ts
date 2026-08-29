@@ -9,6 +9,9 @@ import type {
   ArticlePlace,
   ArticleRevision,
   ArticleTag,
+  ArticleCollection,
+  Collection,
+  CollectionId,
   Author,
   AuthorId,
   Category,
@@ -109,6 +112,14 @@ export interface RelationRepository {
   ): Promise<void>;
 }
 
+export interface CollectionRepository {
+  listAll(): Promise<readonly Collection[]>;
+  findById(id: CollectionId): Promise<Collection | null>;
+  save(collection: Collection): Promise<void>;
+  listMemberships(): Promise<readonly ArticleCollection[]>;
+  replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
+}
+
 export interface AuthorRepository {
   findById(id: AuthorId): Promise<Author | null>;
   listAll(): Promise<readonly Author[]>;
@@ -134,6 +145,7 @@ export interface Repositories {
   readonly media: MediaRepository;
   readonly taxonomy: TaxonomyRepository;
   readonly relations: RelationRepository;
+  readonly collections: CollectionRepository;
   readonly authors: AuthorRepository;
   readonly aiArtifacts: AIArtifactRepository;
 }

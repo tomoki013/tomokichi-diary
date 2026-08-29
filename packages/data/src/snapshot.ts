@@ -8,6 +8,8 @@ import type {
   ArticlePlace,
   ArticleRevision,
   ArticleTag,
+  ArticleCollection,
+  Collection,
   Author,
   Category,
   Location,
@@ -37,6 +39,7 @@ export interface ContentSnapshot {
   readonly places: readonly Place[];
   readonly categories: readonly Category[];
   readonly tags: readonly Tag[];
+  readonly collections: readonly Collection[];
   readonly authors: readonly Author[];
   readonly media: readonly MediaAsset[];
   readonly articleMedia: readonly ArticleMedia[];
@@ -44,6 +47,7 @@ export interface ContentSnapshot {
   readonly articlePlaces: readonly ArticlePlace[];
   readonly articleCategories: readonly ArticleCategory[];
   readonly articleTags: readonly ArticleTag[];
+  readonly articleCollections: readonly ArticleCollection[];
   readonly aiArtifacts: readonly AIArtifact[];
 }
 
@@ -58,6 +62,7 @@ export const EMPTY_SNAPSHOT: ContentSnapshot = {
   places: [],
   categories: [],
   tags: [],
+  collections: [],
   authors: [],
   media: [],
   articleMedia: [],
@@ -65,5 +70,6 @@ export const EMPTY_SNAPSHOT: ContentSnapshot = {
   articlePlaces: [],
   articleCategories: [],
   articleTags: [],
+  articleCollections: [],
   aiArtifacts: [],
 };

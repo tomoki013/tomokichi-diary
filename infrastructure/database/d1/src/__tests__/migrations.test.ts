@@ -33,7 +33,10 @@ describe("migrations", () => {
     const db = fromNodeSqlite(openInMemoryDatabase());
     await migrate(db, loadMigrations());
 
-    const next: Migration = { name: "9999_test_append.sql", sql: "CREATE TABLE probe (id TEXT PRIMARY KEY)" };
+    const next: Migration = {
+      name: "9999_test_append.sql",
+      sql: "CREATE TABLE probe (id TEXT PRIMARY KEY)",
+    };
     const result = await migrate(db, [...loadMigrations(), next]);
     expect(result.applied).toEqual([next.name]);
   });
@@ -42,7 +45,10 @@ describe("migrations", () => {
     const sqlite = openInMemoryDatabase();
     await migrate(fromNodeSqlite(sqlite), loadMigrations());
     const tables = new Set(
-      sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => String(row["name"])),
+      sqlite
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+        .all()
+        .map((row) => String(row["name"])),
     );
     for (const table of [
       "authors",

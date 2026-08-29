@@ -1,1 +1,827 @@
-[]
+[
+  {
+    "articleId": "83ce59d8-edd3-8e18-90ab-f96d8f02533a",
+    "locationId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4b9e865e-71d7-8540-97e9-d3f187a353a4",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0b099bdb-91ab-808b-97ca-bf1c1ba5d91b",
+    "locationId": "b5bee2c0-019d-8321-8a94-5822833dc152",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0b099bdb-91ab-808b-97ca-bf1c1ba5d91b",
+    "locationId": "0d5ede9a-bc02-830f-b8dd-d8202e397a60",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "71e30e0b-989e-8873-8504-4a5d42bbe870",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "947d6c5f-2561-8765-9c1b-039794bf58ac",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "bf84c2a5-821f-88a0-a171-0fffe3b45b76",
+    "locationId": "b6a54d56-351c-8410-9671-5bace37407a9",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4576f477-7f73-8ace-84ee-570b25a8d83c",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4576f477-7f73-8ace-84ee-570b25a8d83c",
+    "locationId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "4576f477-7f73-8ace-84ee-570b25a8d83c",
+    "locationId": "df2e6921-46e7-8bbc-8237-4ff812ae1b62",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "e3b3dac3-2997-81f5-886b-2490eafda99c",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "e3b3dac3-2997-81f5-886b-2490eafda99c",
+    "locationId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "e3b3dac3-2997-81f5-886b-2490eafda99c",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "574617ab-b833-8521-bdf4-c67829c28c84",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "574617ab-b833-8521-bdf4-c67829c28c84",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "7f6d920c-bc3f-8963-9a72-96ece1b62dbb",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "30039f22-2e87-889d-9fdf-ee90467e6649",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a0857281-9fba-862d-a4b0-d0da9d1c20d7",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4da6fe75-290a-8080-9f94-66035a948991",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "primary"
+  },
+  {
+    "articleId": "57ceb9eb-0c4a-8c50-87e0-11b28602fd4c",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "locationId": "8235d017-c004-88fb-b209-680a617c3eba",
+    "relation": "primary"
+  },
+  {
+    "articleId": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "locationId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "locationId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "locationId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "cd879190-5f59-8e81-9344-ab7d8efb21e0",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "bb7301bb-31b8-8347-9056-a95530739223",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "bb7301bb-31b8-8347-9056-a95530739223",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "bb7301bb-31b8-8347-9056-a95530739223",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "36e965b9-cc50-82d1-b54a-3762181be974",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "36e965b9-cc50-82d1-b54a-3762181be974",
+    "locationId": "66ec0788-951d-8e93-8746-0539604045f2",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "36e965b9-cc50-82d1-b54a-3762181be974",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d0fd313b-fb9d-8d9f-966f-104048a85a2f",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a0ba40dc-5b69-8fc3-ada0-a428ed994ce7",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "primary"
+  },
+  {
+    "articleId": "f3ee37a3-eab4-8693-ac5f-80d14b9707c6",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "primary"
+  },
+  {
+    "articleId": "c103c46c-b099-8556-bce8-171265489609",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "d408e860-a104-82ba-9b68-ca20a8aeeb2a",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "b77c7d5c-5df3-8add-9ecd-24355370a733",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "68c9477f-06ed-8fee-adbe-48720da6198b",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "053575cc-84a1-8f83-bc73-3b11fd70fac4",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "2801b470-b31e-87e3-9b19-7a22efce6991",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "3b67a2fb-3ae1-861e-b304-191913581fb5",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "primary"
+  },
+  {
+    "articleId": "23ca3df8-d7bc-8fe2-b4ec-be07c71615d2",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "3a1a80e2-8210-8f13-acba-500b391c63dc",
+    "locationId": "05059158-f25a-8c1c-9764-57ea1d6e72df",
+    "relation": "primary"
+  },
+  {
+    "articleId": "dc8cfc6c-4037-891c-b4e4-52ee9b7eafbd",
+    "locationId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "relation": "primary"
+  },
+  {
+    "articleId": "8879a896-b683-8127-af3a-c596d1ab68b1",
+    "locationId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
+    "relation": "primary"
+  },
+  {
+    "articleId": "8879a896-b683-8127-af3a-c596d1ab68b1",
+    "locationId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "e05d5e67-f436-8696-b306-115f124db8a3",
+    "locationId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "relation": "primary"
+  },
+  {
+    "articleId": "e05d5e67-f436-8696-b306-115f124db8a3",
+    "locationId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "595f9a50-8430-89c2-aeeb-3f8783c28343",
+    "locationId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "relation": "primary"
+  },
+  {
+    "articleId": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d905fed5-ec46-8d4e-ad9c-989970d78ddb",
+    "locationId": "af74c2d8-86a8-89ca-a7f2-e3b64f944385",
+    "relation": "primary"
+  },
+  {
+    "articleId": "c9b5a75a-70d1-8ee6-bcee-b2ede6b9c1e3",
+    "locationId": "2ac3d887-af6d-8d7d-a215-f09dc15843a4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "c9b5a75a-70d1-8ee6-bcee-b2ede6b9c1e3",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "c43ba4a0-7177-82a4-9dea-742eb6a11c5c",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "1e8ea302-807d-84dc-a6ab-af22874883d5",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
+    "locationId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
+    "relation": "primary"
+  },
+  {
+    "articleId": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
+    "locationId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
+    "locationId": "b6a54d56-351c-8410-9671-5bace37407a9",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "03343de2-ba31-8b4f-9ccf-bb81dcbed044",
+    "locationId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "267ada19-1140-8887-b5a9-4db0cd6068c2",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "267ada19-1140-8887-b5a9-4db0cd6068c2",
+    "locationId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "45be5181-7a86-8b89-8bb3-0d1cd56e2dd2",
+    "locationId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "45be5181-7a86-8b89-8bb3-0d1cd56e2dd2",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "ee478705-3df6-863a-bb19-af4e56f55bf8",
+    "locationId": "6d5f43ff-c590-8dc3-a498-601f1422d05b",
+    "relation": "primary"
+  },
+  {
+    "articleId": "d5009eb8-2559-8894-a405-30bb0c728fe1",
+    "locationId": "6d5f43ff-c590-8dc3-a498-601f1422d05b",
+    "relation": "primary"
+  },
+  {
+    "articleId": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "locationId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "relation": "primary"
+  },
+  {
+    "articleId": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "locationId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "ec5a4c60-e280-8bc7-b533-c5811a5451d2",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "primary"
+  },
+  {
+    "articleId": "9217a13b-81e3-8f42-9714-436784e1dc1d",
+    "locationId": "80459748-5f2a-8b54-a414-a7c25db44f57",
+    "relation": "primary"
+  },
+  {
+    "articleId": "8aa6bd3e-d3a3-8a79-805f-359e820a317c",
+    "locationId": "80459748-5f2a-8b54-a414-a7c25db44f57",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a02080e2-03cd-8b31-95af-54bcaa1c9a9c",
+    "locationId": "8235d017-c004-88fb-b209-680a617c3eba",
+    "relation": "primary"
+  },
+  {
+    "articleId": "2903bd88-4e7d-84f2-b4b5-07b238815821",
+    "locationId": "df2e6921-46e7-8bbc-8237-4ff812ae1b62",
+    "relation": "primary"
+  },
+  {
+    "articleId": "2903bd88-4e7d-84f2-b4b5-07b238815821",
+    "locationId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "00b68fc6-3d44-8bf2-ae2e-ffa8a7edda99",
+    "locationId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
+    "relation": "primary"
+  },
+  {
+    "articleId": "3035a248-2154-8b81-943f-8b15d9a039f0",
+    "locationId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
+    "relation": "primary"
+  },
+  {
+    "articleId": "3035a248-2154-8b81-943f-8b15d9a039f0",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "bfbb93de-a42f-8eb2-af54-edeb6235687e",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "primary"
+  },
+  {
+    "articleId": "8bab7da6-ab5f-8636-a202-0ff2138b4524",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "primary"
+  },
+  {
+    "articleId": "bd6f1fdf-386e-828e-b710-0f3d69820a76",
+    "locationId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "relation": "primary"
+  },
+  {
+    "articleId": "120d37a0-d395-8766-8e46-12e2effe0907",
+    "locationId": "ae1160ed-bec1-8698-b401-c439049aca96",
+    "relation": "primary"
+  },
+  {
+    "articleId": "120d37a0-d395-8766-8e46-12e2effe0907",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "30d26063-0014-83d1-8fdf-a41db74bb0ed",
+    "locationId": "ae1160ed-bec1-8698-b401-c439049aca96",
+    "relation": "primary"
+  },
+  {
+    "articleId": "ae39d7cb-99f9-88be-b469-5bc6ea73b3b3",
+    "locationId": "e91f1594-d11b-84db-a013-1312dff7316c",
+    "relation": "primary"
+  },
+  {
+    "articleId": "ae39d7cb-99f9-88be-b469-5bc6ea73b3b3",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d6bb731a-96fc-8b1c-b5ca-1d13a008ba4f",
+    "locationId": "0d5ede9a-bc02-830f-b8dd-d8202e397a60",
+    "relation": "primary"
+  },
+  {
+    "articleId": "18f74da4-0360-8aa3-90a2-2df84855fc42",
+    "locationId": "0d5ede9a-bc02-830f-b8dd-d8202e397a60",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0c3d2abf-8eb3-8b71-aec4-9f133adb2275",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0c3d2abf-8eb3-8b71-aec4-9f133adb2275",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "0c3d2abf-8eb3-8b71-aec4-9f133adb2275",
+    "locationId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "7726885a-54d1-83ca-b275-5635da44be19",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "7726885a-54d1-83ca-b275-5635da44be19",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "35598e2f-c52f-890c-a16f-1e6ab60b6165",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "6561712c-d018-89ad-885c-4078700c6aeb",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "98d2e0ab-2608-89b3-a1b1-701b0484a8e5",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "242dfd00-2c51-8b81-87f7-662889ee18b6",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "242dfd00-2c51-8b81-87f7-662889ee18b6",
+    "locationId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "c9981e1b-292f-8681-ae38-8d887577a066",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
+    "locationId": "3f30d489-8ec6-884e-86e1-f9f910f71b0f",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "e961810f-344d-8b5d-9088-de69f0056f87",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a4418ede-f3b9-8136-bdf5-44b1d227f69d",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "b9cfc506-bee1-8d8a-91cd-faa61e377dae",
+    "locationId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
+    "relation": "primary"
+  },
+  {
+    "articleId": "85007683-cdd2-8b3a-9214-d1b8e45c9ed1",
+    "locationId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a500e3d7-69aa-8167-9453-5da95155ed3a",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "7342692c-27c7-80e5-8538-7be1edfca1b5",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "8441de9a-5066-8cf1-a349-90f052fc07fc",
+    "locationId": "591a2082-379a-82d2-964e-c95410455165",
+    "relation": "primary"
+  },
+  {
+    "articleId": "5721b825-24ea-892c-9ba5-ac087e29b604",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "52b1cb6d-eb74-85a3-b6a1-392f83313051",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "52b1cb6d-eb74-85a3-b6a1-392f83313051",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "52b1cb6d-eb74-85a3-b6a1-392f83313051",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "relation": "primary"
+  },
+  {
+    "articleId": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "f515dea1-ff9c-81d7-b063-639c0b6e5356",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a9d0c4ac-288e-80f9-9ddc-1a13a6905f08",
+    "locationId": "66ec0788-951d-8e93-8746-0539604045f2",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a9d0c4ac-288e-80f9-9ddc-1a13a6905f08",
+    "locationId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "9fa0e427-fa3f-8f9e-a548-6f89f7431722",
+    "locationId": "a847c904-5112-8373-a295-df7db632cb67",
+    "relation": "primary"
+  },
+  {
+    "articleId": "7f4548a7-cd59-8a67-ad0e-200ce7321c9f",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "7f4548a7-cd59-8a67-ad0e-200ce7321c9f",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "7f4548a7-cd59-8a67-ad0e-200ce7321c9f",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "1edc494e-7843-8173-9464-ecefe56f1de6",
+    "locationId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "relation": "primary"
+  },
+  {
+    "articleId": "1edc494e-7843-8173-9464-ecefe56f1de6",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "b3a83249-a187-8faa-9a42-996ed0f54ae4",
+    "locationId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "relation": "primary"
+  },
+  {
+    "articleId": "7421688c-d21d-89bf-84bf-e6eb169d531e",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "95c25619-d9d5-8214-af72-5b4cecf220b7",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "e1db2f2a-edfe-81ec-ae67-fa0a7e1fd7ac",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "fd608f15-40cf-8675-8944-566d10fd854e",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "relation": "primary"
+  },
+  {
+    "articleId": "b56333ac-7453-865c-bb61-6c49a257f1dc",
+    "locationId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "relation": "primary"
+  },
+  {
+    "articleId": "b56333ac-7453-865c-bb61-6c49a257f1dc",
+    "locationId": "0a435875-44ff-8b8c-bb93-67c3a11cdf5e",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "d3a1690d-6b6a-8850-8d83-85feac208cb0",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "3bcefbca-a133-8794-a7dc-7de0b17eadb5",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "f29bbabc-3618-86ed-b348-d3374acda92d",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "666785b9-ae12-89ce-8376-70ad7c6d78bb",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "e30efa73-c13c-8ce2-bced-0ebd54b36cce",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "1041e60a-352f-8c56-8a21-0afc42c5cd32",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "5a064233-c900-8289-a4a9-94caf84a4e22",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "19e12281-809e-891c-8aaf-29d64a521ca8",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "dc64b75e-0b3a-8998-ad7b-68b0d2fda9dc",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "12ff6f1f-55a5-8688-b19f-e0570eee98a0",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "48e81f38-c2cb-84aa-9870-c63e7ce71920",
+    "locationId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "relation": "primary"
+  },
+  {
+    "articleId": "059d70ce-3854-8e6d-b5d7-26c96f5e7cab",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "75cbd1c4-8e81-8ce1-932e-e3ae5d2e894d",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a7cf9391-c07a-8709-b467-da1496fe1e53",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a7cf9391-c07a-8709-b467-da1496fe1e53",
+    "locationId": "ac33549c-4940-80b7-ae0e-8ab6b439fd01",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "ac7e2084-5054-83df-a569-449a9c8a68d9",
+    "locationId": "8bd1ede6-e733-8f7f-8d6f-bba918975a90",
+    "relation": "primary"
+  },
+  {
+    "articleId": "80b7982a-71be-812b-9b0e-63773f94d8cf",
+    "locationId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0d4d62b2-7e34-8393-a23b-5450c1de00e3",
+    "locationId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "relation": "primary"
+  },
+  {
+    "articleId": "0d4d62b2-7e34-8393-a23b-5450c1de00e3",
+    "locationId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "relation": "mentioned"
+  },
+  {
+    "articleId": "c3612dcf-f7bd-839d-bd96-d95f2520dd06",
+    "locationId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
+    "relation": "primary"
+  },
+  {
+    "articleId": "a9dec31f-ad5b-8e55-b51e-8a384622b0f8",
+    "locationId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
+    "relation": "primary"
+  },
+  {
+    "articleId": "e63de725-3186-861c-9697-a2fd15bfff3a",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "1555383f-f8bb-8f48-83ee-b3e4904a813c",
+    "locationId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "relation": "primary"
+  },
+  {
+    "articleId": "74e63e8e-9a96-8aed-98e5-7ef3272e3b63",
+    "locationId": "05059158-f25a-8c1c-9764-57ea1d6e72df",
+    "relation": "primary"
+  }
+]

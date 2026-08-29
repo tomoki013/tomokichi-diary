@@ -1,0 +1,3238 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "title": "ともきちの旅行日記 | Travel Diary",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "次の冒険は、どこへ？"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/about",
+    "status": 200,
+    "title": "About-旅の記録と発見の物語 | ともきちの旅行日記",
+    "description": "旅は新しい自分に出会う物語。『ともきちの旅行日記』へようこそ！このページでは、管理人ともきちの自己紹介と、旅の記録に込めた想いをお伝えします。あなたも一緒に、発見の旅に出かけませんか？",
+    "canonical": "https://tomokichidiary.com/about",
+    "robots": null,
+    "indexable": true,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "About-旅の記録と発見の物語",
+    "ogImage": null
+  },
+  {
+    "path": "/affiliates",
+    "status": 200,
+    "title": "ともきちの旅行日記 | Travel Diary",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "アフィリエイトポリシー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/contact",
+    "status": 200,
+    "title": "お問い合わせ | ともきちの旅行日記",
+    "description": "ご質問、ご意見、ご提案などがございましたら、お気軽にお問い合わせください。",
+    "canonical": "https://tomokichidiary.com/contact",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "お問い合わせ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "お問い合わせ",
+    "ogImage": null
+  },
+  {
+    "path": "/cookie-policy",
+    "status": 200,
+    "title": "クッキーポリシー | ともきちの旅行日記",
+    "description": "ともきちの旅行日記のクッキーポリシーです。Cookieの使用目的、種類、および管理方法について詳しく説明しています。",
+    "canonical": "https://tomokichidiary.com/cookie-policy",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "クッキーポリシー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "クッキーポリシー",
+    "ogImage": null
+  },
+  {
+    "path": "/destination",
+    "status": 200,
+    "title": "地域別一覧 | ともきちの旅行日記",
+    "description": "地域別に記事を探すことができます。",
+    "canonical": "https://tomokichidiary.com/destination",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "DESTINATIONS"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "地域別一覧",
+    "ogImage": null
+  },
+  {
+    "path": "/destination/abu-simbel",
+    "status": 200,
+    "title": "アブシンベルの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/abu-simbel",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "abu-simbel - アブシンベル"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/africa",
+    "status": 200,
+    "title": "アフリカの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/africa",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "africa - アフリカ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/agra",
+    "status": 200,
+    "title": "アグラの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/agra",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "agra - アグラ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/asia",
+    "status": 200,
+    "title": "アジアの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/asia",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "asia - アジア"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/aswan",
+    "status": 200,
+    "title": "アスワンの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/aswan",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "aswan - アスワン"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/athens",
+    "status": 200,
+    "title": "アテネの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/athens",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "athens - アテネ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/bangkok",
+    "status": 200,
+    "title": "バンコクの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/bangkok",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "bangkok - バンコク"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/barcelona",
+    "status": 200,
+    "title": "バルセロナの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/barcelona",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "barcelona - バルセロナ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/belgium",
+    "status": 200,
+    "title": "ベルギーの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/belgium",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "belgium - ベルギー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/brussels",
+    "status": 200,
+    "title": "ブリュッセルの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/brussels",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "brussels - ブリュッセル"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/cairo",
+    "status": 200,
+    "title": "カイロの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/cairo",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "cairo - カイロ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/cappadocia",
+    "status": 200,
+    "title": "カッパドキアの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/cappadocia",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "cappadocia - カッパドキア"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/changi",
+    "status": 200,
+    "title": "チャンギの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/changi",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "changi - チャンギ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/china",
+    "status": 200,
+    "title": "中国の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/china",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "china - 中国"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/egypt",
+    "status": 200,
+    "title": "エジプトの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/egypt",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "egypt - エジプト"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/europe",
+    "status": 200,
+    "title": "ヨーロッパの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/europe",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "europe - ヨーロッパ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/france",
+    "status": 200,
+    "title": "フランスの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/france",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "france - フランス"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/giza",
+    "status": 200,
+    "title": "ギザの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/giza",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "giza - ギザ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/greece",
+    "status": 200,
+    "title": "ギリシャの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/greece",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "greece - ギリシャ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/hanoi",
+    "status": 200,
+    "title": "ハノイの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/hanoi",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "hanoi - ハノイ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/hokkaido",
+    "status": 200,
+    "title": "北海道の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/hokkaido",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "hokkaido - 北海道"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/india",
+    "status": 200,
+    "title": "インドの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/india",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "india - インド"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/indonesia",
+    "status": 200,
+    "title": "インドネシアの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/indonesia",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "indonesia - インドネシア"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/istanbul",
+    "status": 200,
+    "title": "イスタンブールの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/istanbul",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "istanbul - イスタンブール"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/jaipur",
+    "status": 200,
+    "title": "ジャイプルの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/jaipur",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "jaipur - ジャイプル"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/japan",
+    "status": 200,
+    "title": "日本の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/japan",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "japan - 日本"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/kuala-lumpur",
+    "status": 200,
+    "title": "クアラルンプールの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/kuala-lumpur",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "kuala-lumpur - クアラルンプール"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/kyoto",
+    "status": 200,
+    "title": "京都の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/kyoto",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "kyoto - 京都"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/madrid",
+    "status": 200,
+    "title": "マドリードの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/madrid",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "madrid - マドリード"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/malaysia",
+    "status": 200,
+    "title": "マレーシアの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/malaysia",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "malaysia - マレーシア"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/new-delhi",
+    "status": 200,
+    "title": "ニューデリーの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/new-delhi",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "new-delhi - ニューデリー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/osaka",
+    "status": 200,
+    "title": "大阪の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/osaka",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "osaka - 大阪"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/paris",
+    "status": 200,
+    "title": "パリの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/paris",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "paris - パリ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/putrajaya",
+    "status": 200,
+    "title": "プトラジャヤの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/putrajaya",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "putrajaya - プトラジャヤ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/santorini",
+    "status": 200,
+    "title": "サントリーニの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/santorini",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "santorini - サントリーニ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/seminyak",
+    "status": 200,
+    "title": "スミニャックの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/seminyak",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "seminyak - スミニャック"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/sentosa",
+    "status": 200,
+    "title": "セントーサ島の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/sentosa",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "sentosa - セントーサ島"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/seoul",
+    "status": 200,
+    "title": "ソウルの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/seoul",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "seoul - ソウル"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/shanghai",
+    "status": 200,
+    "title": "上海の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/shanghai",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "shanghai - 上海"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/singapore",
+    "status": 200,
+    "title": "シンガポールの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/singapore",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "singapore - シンガポール"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/singapore-city",
+    "status": 200,
+    "title": "シンガポール市内の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/singapore-city",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "singapore-city - シンガポール市内"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/south-korea",
+    "status": 200,
+    "title": "韓国の旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/south-korea",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "south-korea - 韓国"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/spain",
+    "status": 200,
+    "title": "スペインの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/spain",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "spain - スペイン"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/thailand",
+    "status": 200,
+    "title": "タイの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/thailand",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "thailand - タイ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/toledo",
+    "status": 200,
+    "title": "トレドの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/toledo",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "toledo - トレド"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/turkey",
+    "status": 200,
+    "title": "トルコの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/turkey",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "turkey - トルコ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/varanasi",
+    "status": 200,
+    "title": "バラナシの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/varanasi",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "varanasi - バラナシ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/vietnam",
+    "status": 200,
+    "title": "ベトナムの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/vietnam",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "vietnam - ベトナム"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/destination/yogyakarta",
+    "status": 200,
+    "title": "ジョグジャカルタの旅行記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": "https://tomokichidiary.com/destination/yogyakarta",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "yogyakarta - ジョグジャカルタ"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/editorial-policy",
+    "status": 200,
+    "title": "執筆・編集ポリシー | ともきちの旅行日記",
+    "description": "ともきちの旅行日記の記事がどのような基準で書かれ、更新されているかをまとめたページです。体験談と実用情報の扱い、情報確認の方針、公式リンクの考え方などを説明しています。",
+    "canonical": "https://tomokichidiary.com/editorial-policy",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "執筆・編集ポリシー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "執筆・編集ポリシー",
+    "ogImage": null
+  },
+  {
+    "path": "/faq",
+    "status": 200,
+    "title": "FAQ | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "記事の探し方、旅行記と実用記事の違い、Gallery や補助機能の使い方など、ともきちの旅行日記に関するよくある質問をまとめています。",
+    "canonical": "https://tomokichidiary.com/faq",
+    "robots": null,
+    "indexable": true,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "FAQ | ともきちの旅行日記",
+    "ogImage": null
+  },
+  {
+    "path": "/gallery",
+    "status": 200,
+    "title": "写真ギャラリー | 気になる景色から旅先の記事へ | ともきちの旅行日記",
+    "description": "ともきちの旅行日記の写真ギャラリーでは、気になる景色から地域の記事や旅行記へ入れます。世界各地の写真を眺めながら、次に読みたい旅先を見つけられるページです。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "Gallery"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "写真ギャラリー | 気になる景色から旅先の記事へ",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/journey",
+    "status": 200,
+    "title": "Journey - 旅の軌跡 | ともきちの旅行日記",
+    "description": "ともきちのこれまでの旅の記録。訪れた国々、出会った風景、心に残る瞬間をタイムライン形式で振り返ります。",
+    "canonical": "https://tomokichidiary.com/journey",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "Journey History"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "Journey - 旅の軌跡",
+    "ogImage": null
+  },
+  {
+    "path": "/journey/j-2024-02-26",
+    "status": 200,
+    "title": "北海道の食を堪能する旅 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "北海道の美味しい食べ物を堪能する旅。",
+    "canonical": "https://tomokichidiary.com/journey/j-2024-02-26",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "北海道の食を堪能する旅"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2024-03-01",
+    "status": 200,
+    "title": "アジアの熱気を感じて - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "活気あふれるナイトマーケットと、荘厳な寺院のコントラスト。スパイスの効いた料理に舌鼓。",
+    "canonical": "https://tomokichidiary.com/journey/j-2024-03-01",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "アジアの熱気を感じて"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2024-09-21",
+    "status": 200,
+    "title": "インド 混沌と祈りの旅 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "ニューデリーの喧騒、タージマハルの白亜の美しさ、そしてガンジス川の祈り。人生観を揺さぶる体験。",
+    "canonical": "https://tomokichidiary.com/journey/j-2024-09-21",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "インド 混沌と祈りの旅"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2025-02-13",
+    "status": 200,
+    "title": "西欧 芸術と美食の周遊 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "エッフェル塔の下でピクニック、サグラダ・ファミリアの荘厳さ、本場のパエリアとチョコレート。感性を磨く旅。",
+    "canonical": "https://tomokichidiary.com/journey/j-2025-02-13",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "西欧 芸術と美食の周遊"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2025-06-10",
+    "status": 200,
+    "title": "大陸横断 古代文明を巡る冒険 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "バンコクからイスタンブール、カッパドキアの奇岩、エジプトのピラミッド、そしてサントリーニ島の夕日。壮大なスケールの旅。",
+    "canonical": "https://tomokichidiary.com/journey/j-2025-06-10",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "大陸横断 古代文明を巡る冒険"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2025-11-29",
+    "status": 200,
+    "title": "上海 新旧が交錯する魔都 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "外灘の歴史的建築群と浦東の近未来的なスカイライン。小籠包の湯気と夜景に酔いしれる。",
+    "canonical": "https://tomokichidiary.com/journey/j-2025-11-29",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "上海 新旧が交錯する魔都"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/journey/j-2026-03-12",
+    "status": 200,
+    "title": "東南アジアをつないで巡る食と街歩きの旅 - 旅の記録 | ともきちの旅行日記 | ともきちの旅行日記",
+    "description": "クアラルンプールの食べ歩きから始まり、シンガポールの定番観光、バリの街歩き、そしてジョグジャカルタへの移動まで。ローカル交通と食を詰め込んだ周遊旅。",
+    "canonical": "https://tomokichidiary.com/journey/j-2026-03-12",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "東南アジアをつないで巡る食と街歩きの旅"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/posts",
+    "status": 200,
+    "title": "全記事一覧 - Blog | ともきちの旅行日記",
+    "description": "「ともきちの旅行日記」の記事一覧です。新着だけでなく、初めて読む人向けのおすすめ、実用情報、旅行記から入口を選べます。",
+    "canonical": "https://tomokichidiary.com/posts",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "BLOG"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "全記事一覧 - Blog",
+    "ogImage": null
+  },
+  {
+    "path": "/posts/airport-access-athens",
+    "status": 200,
+    "title": "アテネ空港から市内へのアクセス比較。メトロ・バス・タクシーの使い分け | ともきちの旅行日記",
+    "description": "アテネ空港から市内中心部（約33km）へ向かう、メトロ・バス・タクシーの3手段を料金・所要時間・乗り場で比較しました。短期滞在で迷いやすい「速さ重視か、安さ重視か」の使い分けを中心に整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/airport-access-athens",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "アテネ空港から市内へのアクセス比較。メトロ・バス・タクシーの使い分け"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "アテネ空港から市内へのアクセス比較。メトロ・バス・タクシーの使い分け",
+    "ogImage": "https://tomokichidiary.com/images/Greece/parthenon.jpg"
+  },
+  {
+    "path": "/posts/airport-access-donmuang",
+    "status": 200,
+    "title": "ドンムアン空港からバンコク市内へのアクセス比較。電車・空港バス・タクシーの選び方 | ともきちの旅行日記",
+    "description": "ドンムアン空港からバンコク市内へ入る方法を比較しました。SRTレッドライン、空港バス、タクシーの使い分けと、目的地別に選びやすい考え方を整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/airport-access-donmuang",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ドンムアン空港からバンコク市内へのアクセス比較。電車・空港バス・タクシーの選び方"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ドンムアン空港からバンコク市内へのアクセス比較。電車・空港バス・タクシーの選び方",
+    "ogImage": "https://tomokichidiary.com/images/Thai/victory-monument.jpg"
+  },
+  {
+    "path": "/posts/airport-access-kansai",
+    "status": 200,
+    "title": "関空から梅田・難波・京都へ行くなら。目的地別のアクセス比較 | ともきちの旅行日記",
+    "description": "関西国際空港から梅田、難波、京都へ向かうときの移動手段を目的地別に整理しました。はるか、ラピート、関空快速、リムジンバスの向き不向きが分かるようにまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/airport-access-kansai",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "関空から梅田・難波・京都へ行くなら。目的地別のアクセス比較"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "関空から梅田・難波・京都へ行くなら。目的地別のアクセス比較",
+    "ogImage": "https://tomokichidiary.com/images/Osaka/kansai-airport.jpg"
+  },
+  {
+    "path": "/posts/airport-access-santorini",
+    "status": 200,
+    "title": "サントリーニ空港からフィラ・イアへの移動方法。バスと送迎の使い分け | ともきちの旅行日記",
+    "description": "サントリーニ空港からフィラ・イアへ入る方法を、ローカルバス・タクシー・ホテル送迎・レンタカーで比較しました。特に直行バスがなく乗り換えが必要なイアについて、「安く行くか、待たずに入るか」の判断を中心にまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/airport-access-santorini",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "サントリーニ空港からフィラ・イアへの移動方法。バスと送迎の使い分け"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "サントリーニ空港からフィラ・イアへの移動方法。バスと送迎の使い分け",
+    "ogImage": "https://tomokichidiary.com/images/Greece/fira-view.jpg"
+  },
+  {
+    "path": "/posts/airport-access-suvarnabhumi",
+    "status": 200,
+    "title": "スワンナプーム空港からバンコク市内へのアクセス比較。ARLとタクシーの使い分け | ともきちの旅行日記",
+    "description": "スワンナプーム空港からバンコク市内へ入る方法を、エアポートリンク（ARL）・タクシー・バスで比較しました。旅行者が迷いやすい「ARLで入るか、タクシーで楽をするか」を、料金・乗り場・渋滞の観点から整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/airport-access-suvarnabhumi",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スワンナプーム空港からバンコク市内へのアクセス比較。ARLとタクシーの使い分け"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スワンナプーム空港からバンコク市内へのアクセス比較。ARLとタクシーの使い分け",
+    "ogImage": "https://tomokichidiary.com/images/Thai/suvarnabhumi1.jpg"
+  },
+  {
+    "path": "/posts/arabic-number",
+    "status": 200,
+    "title": "エジプト旅行前に覚えておくと楽だった、アラビア語の数字の読み方 | ともきちの旅行日記",
+    "description": "エジプト旅行でタクシーが見つからない、値段が読めない…。そんな「数字の壁」で困らないために、出発前にアラビア語数字を覚えてみませんか？この記事では、旅行が驚くほど快適になるアラビア語数字（0〜9）の読み方と、簡単な覚え方のコツを体験談と共に解説します。これで旅の不安を解消し、もっとスムーズにエジプトを楽しみましょう！",
+    "canonical": "https://tomokichidiary.com/posts/arabic-number",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "エジプト旅行前に覚えておくと楽だった、アラビア語の数字の読み方"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "エジプト旅行前に覚えておくと楽だった、アラビア語の数字の読み方",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/arabic-number.jpg"
+  },
+  {
+    "path": "/posts/architecture1",
+    "status": 200,
+    "title": "私が見た世界の絶景建築3選。サグラダ・ファミリア、ピラミッド、タージ・マハル | ともきちの旅行日記",
+    "description": "【絶景建築シリーズ 第1弾】世界中を旅して見てきた絶景建築を紹介するシリーズ。実際に旅して感動した建築から、スペインのサグラダ・ファミリア、エジプトのギザの三大ピラミッド、インドのタージ・マハルを厳選して紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/architecture1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "私が見た世界の絶景建築3選。サグラダ・ファミリア、ピラミッド、タージ・マハル"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "私が見た世界の絶景建築3選。サグラダ・ファミリア、ピラミッド、タージ・マハル",
+    "ogImage": "https://tomokichidiary.com/images/India/tajmahal.jpg"
+  },
+  {
+    "path": "/posts/architecture2",
+    "status": 200,
+    "title": "王道から穴場まで、実際に見てよかった世界の建築3選。エッフェル塔、アブシンベル、ワット・パクナム | ともきちの旅行日記",
+    "description": "【絶景建築シリーズ 第2弾】世界中を旅して見てきた絶景建築を紹介するシリーズ。今回はパリの象徴エッフェル塔、エジプトの秘境アブシンベル神殿、SNSで話題のタイのワット・パクナムを紹介。王道の名所から静かな穴場まで、それぞれの魅力をお届けします。",
+    "canonical": "https://tomokichidiary.com/posts/architecture2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "王道から穴場まで、実際に見てよかった世界の建築3選。エッフェル塔、アブシンベル、ワット・パクナム"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "王道から穴場まで、実際に見てよかった世界の建築3選。エッフェル塔、アブシンベル、ワット・パクナム",
+    "ogImage": "https://tomokichidiary.com/images/France/eiffel-tower.jpg"
+  },
+  {
+    "path": "/posts/ashumina-pilgrimage-in-spain",
+    "status": 200,
+    "title": "スペインで回った、あしゅみな聖地巡礼の記録 | ともきちの旅行日記",
+    "description": "「AbemaTVの『乃木坂世界旅 今野さんほっといてよ！』で齋藤飛鳥さん＆星野みなみさん（あしゅみな）が訪れたスペインの聖地巡礼レポート！オペラ座、サンタ・エウラリア、サン・ミゲル市場、トレドなど2人の足跡をたどって、スペインの魅力をたっぷり紹介しています。乃木坂ファン＆旅行好き必見！」",
+    "canonical": "https://tomokichidiary.com/posts/ashumina-pilgrimage-in-spain",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スペインで回った、あしゅみな聖地巡礼の記録"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スペインで回った、あしゅみな聖地巡礼の記録",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/posts/bangkok-localbus",
+    "status": 200,
+    "title": "バンコクの赤バスの乗り方。8バーツ路線を使う前に知っておくこと | ともきちの旅行日記",
+    "description": "バンコクの交通費を抑えるなら、どこまで乗っても8バーツのローカルバス（赤バス）。Googleマップを使った路線の調べ方から、手を挙げて乗る作法、渋滞・ルート変更といった現地ならではの注意点まで、実際に使って分かったことをまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/bangkok-localbus",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バンコクの赤バスの乗り方。8バーツ路線を使う前に知っておくこと"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バンコクの赤バスの乗り方。8バーツ路線を使う前に知っておくこと",
+    "ogImage": "https://tomokichidiary.com/images/Thai/bangkok-red-bus.jpg"
+  },
+  {
+    "path": "/posts/bangkok-tourism",
+    "status": 200,
+    "title": "バンコク旅行の全体像。2度の滞在で実際に回った場所と注意点 | ともきちの旅行日記",
+    "description": "2度のバンコク滞在で実際に回った場所をベースに、初回の旅程の組み立て方を整理しました。三大寺院や市内の移動手段、実際に警戒していたぼったくりの手口、屋台グルメまで。行けていない場所は正直に「次回の候補」として分けています。",
+    "canonical": "https://tomokichidiary.com/posts/bangkok-tourism",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バンコク旅行の全体像。2度の滞在で実際に回った場所と注意点"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バンコク旅行の全体像。2度の滞在で実際に回った場所と注意点",
+    "ogImage": "https://tomokichidiary.com/images/Thai/emotional-wat-arun.jpg"
+  },
+  {
+    "path": "/posts/bankok-sandaijiin",
+    "status": 200,
+    "title": "バンコク三大寺院の回り方。ワット・プラ・ケオ、ワット・ポー、ワット・アルン | ともきちの旅行日記",
+    "description": "バンコク三大寺院「ワット・プラ・ケオ」「ワット・ポー」「ワット・アルン」を巡るガイド。それぞれの見どころ、入場料、服装の注意点、チャオプラヤエクスプレスでの回り方まで、実際に1日で回った経験からまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/bankok-sandaijiin",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バンコク三大寺院の回り方。ワット・プラ・ケオ、ワット・ポー、ワット・アルン"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バンコク三大寺院の回り方。ワット・プラ・ケオ、ワット・ポー、ワット・アルン",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-arun-right-up.jpg"
+  },
+  {
+    "path": "/posts/bathing-ganga",
+    "status": 200,
+    "title": "ガンジス川で沐浴する前に知っておきたい作法と注意点 | ともきちの旅行日記",
+    "description": "インドの聖地バラナシでガンジス川の沐浴を体験する前に。現地の作法や服装、安全・衛生面の注意点まで、初心者にも分かりやすくまとめます。無理せず雰囲気を味わうための実用ガイドです。",
+    "canonical": "https://tomokichidiary.com/posts/bathing-ganga",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ガンジス川で沐浴する前に知っておきたい作法と注意点"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ガンジス川で沐浴する前に知っておきたい作法と注意点",
+    "ogImage": "https://tomokichidiary.com/images/India/ganga.jpg"
+  },
+  {
+    "path": "/posts/batu-caves-guide",
+    "status": 200,
+    "title": "バトゥ洞窟観光ガイド｜行き方・料金・現地で迷いやすいポイント | ともきちの旅行日記",
+    "description": "バトゥ洞窟の入場料(無料エリアと有料エリアの違い)とクアラルンプールからの行き方、現地で迷いやすいポイントを体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/batu-caves-guide",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バトゥ洞窟観光ガイド｜行き方・料金・現地で迷いやすいポイント"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バトゥ洞窟観光ガイド｜行き方・料金・現地で迷いやすいポイント",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/the-rainbow-stairs-at-batu-caves.jpg"
+  },
+  {
+    "path": "/posts/best-city-for-student",
+    "status": 200,
+    "title": "学生のうちに行っておいてよかった都市を3つに絞るなら | ともきちの旅行日記",
+    "description": "時間はあるけどお金がない学生必見！世界10ヶ国20都市を旅した筆者が、体力と時間がある学生のうちに絶対行くべき海外都市をランキング形式で厳選。社会人になったら行けない？価値観を揺さぶる強烈な体験ができる旅先とは。次の休みの旅行先に迷っている方はぜひ参考にしてください。",
+    "canonical": "https://tomokichidiary.com/posts/best-city-for-student",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "学生のうちに行っておいてよかった都市を3つに絞るなら"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "学生のうちに行っておいてよかった都市を3つに絞るなら",
+    "ogImage": "https://tomokichidiary.com/images/Turkey/balloons-in-cappadocia.jpg"
+  },
+  {
+    "path": "/posts/chagee-kuala-lumpur-stores",
+    "status": 200,
+    "title": "クアラルンプールのCHAGEE実際に行った3店舗｜旅行中ならどこが行きやすい？ | ともきちの旅行日記",
+    "description": "クアラルンプールで実際に利用したCHAGEE 3店舗を比較。NU Sentral、Pavilion Kuala Lumpur、WOLO KLについて、KL Sentral・Pavilion・アロー通りなど観光ルート別に行きやすい店舗を紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/chagee-kuala-lumpur-stores",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "クアラルンプールのCHAGEE実際に行った3店舗｜旅行中ならどこが行きやすい？"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "クアラルンプールのCHAGEE実際に行った3店舗｜旅行中ならどこが行きやすい？",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/pavilion.jpg"
+  },
+  {
+    "path": "/posts/chagee-menu-explained",
+    "status": 200,
+    "title": "CHAGEEのメニューを日本語で解説｜実際に飲んだ4種類の茶葉・香り・特徴 | ともきちの旅行日記",
+    "description": "CHAGEE（霸王茶姬）の代表的な4メニューを日本語で解説。伯牙絶弦、白雾红尘、桂馥兰香、花田乌龙について、使われている茶葉や香り、公式説明から分かる特徴を整理します。",
+    "canonical": "https://tomokichidiary.com/posts/chagee-menu-explained",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "CHAGEEのメニューを日本語で解説｜実際に飲んだ4種類の茶葉・香り・特徴"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "CHAGEEのメニューを日本語で解説｜実際に飲んだ4種類の茶葉・香り・特徴",
+    "ogImage": "https://tomokichidiary.com/images/China/chagee-in-shanghai1.jpg"
+  },
+  {
+    "path": "/posts/chagee-ordering-china-malaysia-singapore",
+    "status": 200,
+    "title": "CHAGEEの注文方法｜中国・マレーシア・シンガポールで実際に注文して分かった違い | ともきちの旅行日記",
+    "description": "CHAGEE（霸王茶姬）の注文方法を中国・マレーシア・シンガポールでの実体験から解説。中国はAlipay、マレーシアは公式アプリ、シンガポールはMobile Webを使った注文の流れや甘さ・氷の選び方をまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/chagee-ordering-china-malaysia-singapore",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "CHAGEEの注文方法｜中国・マレーシア・シンガポールで実際に注文して分かった違い"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "CHAGEEの注文方法｜中国・マレーシア・シンガポールで実際に注文して分かった違い",
+    "ogImage": "https://tomokichidiary.com/images/China/chagee-in-shanghai1.jpg"
+  },
+  {
+    "path": "/posts/chagee-singapore-stores",
+    "status": 200,
+    "title": "シンガポールのCHAGEE実際に行った4店舗｜観光ルート別にどこへ寄る？ | ともきちの旅行日記",
+    "description": "シンガポールで実際に利用したCHAGEE 4店舗を観光ルート別に紹介。Arab Street・Bugis、Sentosa、Lau Pa Sat・Raffles Place、Changi Airport T2で立ち寄りやすい店舗と注意点をまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/chagee-singapore-stores",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "シンガポールのCHAGEE実際に行った4店舗｜観光ルート別にどこへ寄る？"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "シンガポールのCHAGEE実際に行った4店舗｜観光ルート別にどこへ寄る？",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/jewel-and-chagee-at-changi-international-airport.jpg"
+  },
+  {
+    "path": "/posts/changi-airport-liquids",
+    "status": 200,
+    "title": "チャンギ空港で液体は持ち込める？搭乗前検査と空ボトル持参のすすめ | ともきちの旅行日記",
+    "description": "チャンギ空港の保安検査(手荷物検査)後は水を持ち込めるか、空ボトル持参や検査後の飲料購入など実際の対処法を体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/changi-airport-liquids",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "チャンギ空港で液体は持ち込める？搭乗前検査と空ボトル持参のすすめ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "チャンギ空港で液体は持ち込める？搭乗前検査と空ボトル持参のすすめ",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/views-around-marina-bay-sands-and-the-merlion.jpg"
+  },
+  {
+    "path": "/posts/changi-airport-lounge",
+    "status": 200,
+    "title": "チャンギ空港のPlaza Premium Loungeを利用｜料金・シャワー・食事を実体験で紹介 | ともきちの旅行日記",
+    "description": "チャンギ空港ターミナル1のPlaza Premium Loungeを深夜トランジットで実際に利用。現在の料金、場所、営業時間、シャワー、食事、休憩スペースと、長い乗り継ぎで使う価値があるかを体験ベースで紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/changi-airport-lounge",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "チャンギ空港のPlaza Premium Loungeを利用｜料金・シャワー・食事を実体験で紹介"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "チャンギ空港のPlaza Premium Loungeを利用｜料金・シャワー・食事を実体験で紹介",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/changi-international-airport-lounge-plaza-premium-lounge.jpg"
+  },
+  {
+    "path": "/posts/changi-airport-overnight",
+    "status": 200,
+    "title": "チャンギ空港で空港泊してみた｜無料で休める場所・深夜の過ごし方を実体験で解説 | ともきちの旅行日記",
+    "description": "チャンギ空港で実際に空港泊した体験を紹介。無料で休めるSnooze Lounge、深夜の過ごし方、シャワー、ラウンジ、トランジットホテル、水や保安検査の注意点をまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/changi-airport-overnight",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "チャンギ空港で空港泊してみた｜無料で休める場所・深夜の過ごし方を実体験で解説"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "チャンギ空港で空港泊してみた｜無料で休める場所・深夜の過ごし方を実体験で解説",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/jewel-and-chagee-at-changi-international-airport.jpg"
+  },
+  {
+    "path": "/posts/chaophraya-express",
+    "status": 200,
+    "title": "チャオプラヤエクスプレスの使い方。寺院巡りで使うならまずこれ | ともきちの旅行日記",
+    "description": "バンコク旧市街側の寺院をまとめて回るのに便利なチャオプラヤエクスプレスについて、料金・乗り方・路線と主要観光地へのアクセスを整理しました。オレンジ旗のローカル船とツーリストボートの違いや使い分けもまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/chaophraya-express",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "チャオプラヤエクスプレスの使い方。寺院巡りで使うならまずこれ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "チャオプラヤエクスプレスの使い方。寺院巡りで使うならまずこれ",
+    "ogImage": "https://tomokichidiary.com/images/Thai/interior-of-chao-phraya-express.jpg"
+  },
+  {
+    "path": "/posts/china-alipay-useful",
+    "status": 200,
+    "title": "中国旅行で Alipay はかなり便利でした | ともきちの旅行日記",
+    "description": "上海旅行で実感した、Alipayの便利さを5つに分けて紹介します。 支払い、交通、配車、モバイル注文、支出管理まで 旅行中の行動がアプリ1つで完結した体験談です。",
+    "canonical": "https://tomokichidiary.com/posts/china-alipay-useful",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "中国旅行で Alipay はかなり便利でした"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "中国旅行で Alipay はかなり便利でした",
+    "ogImage": "https://tomokichidiary.com/images/China/alipay-app-icon.jpg"
+  },
+  {
+    "path": "/posts/china1",
+    "status": 200,
+    "title": "3時間遅延でも南京東路と外灘まで駆け抜けた上海初日 | ともきちの旅行日記",
+    "description": "【上海旅行記 第1回】エアバスのソフトウェア改修による3時間遅延という波乱の幕開けから、南京東路の食べ歩き、CHAGEEでの休憩、外灘の夜景まで。上海初日をたっぷり楽しんだ1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/china1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "3時間遅延でも南京東路と外灘まで駆け抜けた上海初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "3時間遅延でも南京東路と外灘まで駆け抜けた上海初日",
+    "ogImage": "https://tomokichidiary.com/images/China/the-night-view-of-the-bund.jpg"
+  },
+  {
+    "path": "/posts/china2",
+    "status": 200,
+    "title": "静安寺から予園の夜まで、中華と洋風が交差した上海 | ともきちの旅行日記",
+    "description": "【上海旅行記 第2回】Starbucks Reserve Roastery、静安寺、張園、田子坊、そして夜の予園まで。中華とヨーロッパの空気が混ざり合う上海の1日の旅日記。人気店に予約なしで入れなかったハプニングも。",
+    "canonical": "https://tomokichidiary.com/posts/china2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "静安寺から予園の夜まで、中華と洋風が交差した上海"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "静安寺から予園の夜まで、中華と洋風が交差した上海",
+    "ogImage": "https://tomokichidiary.com/images/China/yuen-garden-illuminated-at-night.jpg"
+  },
+  {
+    "path": "/posts/china3",
+    "status": 200,
+    "title": "朝から閉園まで詰め込み、上海ディズニーをかなり回れた1日 | ともきちの旅行日記",
+    "description": "【上海旅行記 第3回】上海旅行3日目は、もう一つの目的だった上海ディズニーへ。人気アトラクションを短い待ち時間で何度も楽しみ、朝から閉園まで満喫した1日のルートを時系列でまとめた旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/china3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "朝から閉園まで詰め込み、上海ディズニーをかなり回れた1日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "朝から閉園まで詰め込み、上海ディズニーをかなり回れた1日",
+    "ogImage": "https://tomokichidiary.com/images/China/shanghai-disney-castle.jpg"
+  },
+  {
+    "path": "/posts/china4",
+    "status": 200,
+    "title": "蟹料理と昼の予園で締めた、少し慌ただしい上海最終日 | ともきちの旅行日記",
+    "description": "【上海旅行記 最終回】最終日は成隆行蟹王府のリベンジから昼の豫園、そして空港での最後のCHAGEEまで。3泊4日の上海旅を締めくくった1日を振り返る旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/china4",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "蟹料理と昼の予園で締めた、少し慌ただしい上海最終日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "蟹料理と昼の予園で締めた、少し慌ただしい上海最終日",
+    "ogImage": "https://tomokichidiary.com/images/China/chenglong-hang-crab-palace.jpg"
+  },
+  {
+    "path": "/posts/city-to-changi-airport",
+    "status": 200,
+    "title": "シンガポール市内からチャンギ空港へバスで行く｜実際に使って分かったこと | ともきちの旅行日記",
+    "description": "シンガポール市内からチャンギ空港まで実際に路線バスで移動しました。空港行きバスの路線、乗り方、支払い方法、Google Mapsでの調べ方、荷物や渋滞の注意点を実体験ベースで紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/city-to-changi-airport",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "シンガポール市内からチャンギ空港へバスで行く｜実際に使って分かったこと"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "シンガポール市内からチャンギ空港へバスで行く｜実際に使って分かったこと",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/jewel-rain-vortex.jpg"
+  },
+  {
+    "path": "/posts/city-to-sultan-abdul-aziz-shah-airport",
+    "status": 200,
+    "title": "クアラルンプール市内からスバン空港へ772番バスで行く｜RM3で実際に移動 | ともきちの旅行日記",
+    "description": "クアラルンプール市内からスバン空港まで772番バスで実際に移動。6:50ごろ乗車、運賃RM3、降車後は徒歩すぐ。早朝便で使った流れと注意点を実体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/city-to-sultan-abdul-aziz-shah-airport",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "クアラルンプール市内からスバン空港へ772番バスで行く｜RM3で実際に移動"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "クアラルンプール市内からスバン空港へ772番バスで行く｜RM3で実際に移動",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/daytime-views-of-urban-areas-in-kuala-lumpur.jpg"
+  },
+  {
+    "path": "/posts/developing-country-sunset",
+    "status": 200,
+    "title": "発展途上国で見る夕陽って綺麗に見えるよね | ともきちの旅行日記",
+    "description": "発展途上国で見る夕陽が印象的に感じられる理由を、 科学面と心理面の両方から考えてみます。 旅先での体験をもとにした考察記事です。",
+    "canonical": "https://tomokichidiary.com/posts/developing-country-sunset",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "発展途上国で見る夕陽って綺麗に見えるよね"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "発展途上国で見る夕陽って綺麗に見えるよね",
+    "ogImage": "https://tomokichidiary.com/images/India/indian-gate-at-night.jpg"
+  },
+  {
+    "path": "/posts/egypt1",
+    "status": 200,
+    "title": "学生証の強さとバザールの混沌で始まったカイロ観光 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第7回】エジプト観光初日。カイロ市内の移動は激安タクシーが正解。日本の学生証で半額になるエジプト考古学博物館や、ジョジョの聖地「ディオの館」、活気あふれるハンハリーリ・バザールでの値切り交渉とローカルフードを満喫した一日。",
+    "canonical": "https://tomokichidiary.com/posts/egypt1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "学生証の強さとバザールの混沌で始まったカイロ観光"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "学生証の強さとバザールの混沌で始まったカイロ観光",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/the-three-great-pyramids-of-giza-with-sunset.jpg"
+  },
+  {
+    "path": "/posts/egypt2",
+    "status": 200,
+    "title": "ピラミッドビューの宿から入り、内部まで潜ったギザの日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第8回】エジプト旅行のメイン、ギザのピラミッドへ。目の前にピラミッドが広がる宿のルーフトップでシーシャを楽しみ、翌日は内部への潜入やラクダ乗りに挑戦。夜はアスワン行きの寝台列車で発券トラブルに見舞われた旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/egypt2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ピラミッドビューの宿から入り、内部まで潜ったギザの日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ピラミッドビューの宿から入り、内部まで潜ったギザの日",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/the-three-great-pyramids-of-giza-with-sunset.jpg"
+  },
+  {
+    "path": "/posts/egypt3",
+    "status": 200,
+    "title": "砂漠のミニバスに揺られ、アブシンベル神殿まで往復で削られた日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第9回】寝台列車でエジプト南部の都市アスワンへ。金曜で長距離バスが運休という誤算のなか、エアコンなしのすし詰めミニバスで砂漠を激走し、大迫力のアブシンベル神殿へ。神殿以上に移動が記憶に残った1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/egypt3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "砂漠のミニバスに揺られ、アブシンベル神殿まで往復で削られた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "砂漠のミニバスに揺られ、アブシンベル神殿まで往復で削られた日",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/abusimbel-temple.jpg"
+  },
+  {
+    "path": "/posts/egypt4",
+    "status": 200,
+    "title": "アスワンで行き先を外し、逃げ場のない島に連れて行かれかけた日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第10回】エジプト旅行最大のトラブル。アスワン市内で配車アプリが使えずトゥクトゥクに乗ったら、頼んでもいないのにボートに乗せられ、ナイル川の島へ連れて行かれそうに。逃げ場のない恐怖を味わった1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/egypt4",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "アスワンで行き先を外し、逃げ場のない島に連れて行かれかけた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "アスワンで行き先を外し、逃げ場のない島に連れて行かれかけた日",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/aswan-morning-nile-view.jpg"
+  },
+  {
+    "path": "/posts/europe-itinerary",
+    "status": 200,
+    "title": "ヨーロッパ13泊15日ひとり旅の旅程と総費用まとめ | ともきちの旅行日記",
+    "description": "フランスとスペインを巡った13泊15日のひとり旅について、日ごとの動きと総費用をまとめました。都市間移動、宿泊費、現地交通、食費まで実額ベースで整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/europe-itinerary",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ヨーロッパ13泊15日ひとり旅の旅程と総費用まとめ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ヨーロッパ13泊15日ひとり旅の旅程と総費用まとめ",
+    "ogImage": "https://tomokichidiary.com/images/France/louvre-museum1.jpg"
+  },
+  {
+    "path": "/posts/exchange-rate",
+    "status": 200,
+    "title": "海外旅行の両替はどう考えるか。現地両替と日本両替の基本整理 | ともきちの旅行日記",
+    "description": "海外旅行での両替を、日本で替えるべき通貨と現地で替えるべき通貨に分けて整理しました。余った外貨の扱いや、海外キャッシングを含めた考え方もまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/exchange-rate",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "海外旅行の両替はどう考えるか。現地両替と日本両替の基本整理"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "海外旅行の両替はどう考えるか。現地両替と日本両替の基本整理",
+    "ogImage": "https://tomokichidiary.com/images/Thai/exchange-rate-at-suvarnabhumi.jpg"
+  },
+  {
+    "path": "/posts/france1",
+    "status": 200,
+    "title": "韓国で一泊してから、ようやくパリの夜に着いた旅の初日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第1回】初めての一人旅でフランスとスペインへ。韓国トランジットで一泊し、15時間のフライトを経てパリへ。RERでの市内移動の迷子っぷりと、初めて生で見た夜のエッフェル塔の感動まで。ヨーロッパ旅の序章となる初日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/france1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "韓国で一泊してから、ようやくパリの夜に着いた旅の初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "韓国で一泊してから、ようやくパリの夜に着いた旅の初日",
+    "ogImage": "https://tomokichidiary.com/images/Korea/monument.jpg"
+  },
+  {
+    "path": "/posts/france2",
+    "status": 200,
+    "title": "4万歩で詰め込み、パリの強さをまとめて浴びた1日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第2回】パリ観光1日目。朝のクロワッサンからルーブルのモナリザ、エッフェル塔登頂、そして1日3回のシャンパンフラッシュまで。凱旋門からの夜景も含めて4万歩で歩き倒した1日の旅日記。割引チケットや穴場の実用メモも。",
+    "canonical": "https://tomokichidiary.com/posts/france2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "4万歩で詰め込み、パリの強さをまとめて浴びた1日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "4万歩で詰め込み、パリの強さをまとめて浴びた1日",
+    "ogImage": "https://tomokichidiary.com/images/France/louvre-museum1.jpg"
+  },
+  {
+    "path": "/posts/france3",
+    "status": 200,
+    "title": "ヴェルサイユ宮殿の規模に削られ、夜は重めのフレンチで締めた日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第3回】ヴェルサイユ宮殿への日帰り。壮大な宮殿と「鏡の間」の美しさ、広すぎて心が折れかける庭園、大小トリアノン宮殿までの散策。入場の待ち時間や園内移動のコツも交えつつ、夜はパリでザ・フレンチを堪能した1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/france3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ヴェルサイユ宮殿の規模に削られ、夜は重めのフレンチで締めた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ヴェルサイユ宮殿の規模に削られ、夜は重めのフレンチで締めた日",
+    "ogImage": "https://tomokichidiary.com/images/France/chateau-de-versailles.jpg"
+  },
+  {
+    "path": "/posts/google-maps-bus-developing-countries",
+    "status": 200,
+    "title": "発展途上国のバスはGoogleマップを信用しすぎると危ない話 | ともきちの旅行日記",
+    "description": "海外旅行ではGoogleマップが便利ですが、発展途上国寄りの地域のバスはそのまま信じると危ないことがあります。 タイ、ベトナム、マレーシア、エジプトで感じたズレをもとに、使い方の距離感を整理します。",
+    "canonical": "https://tomokichidiary.com/posts/google-maps-bus-developing-countries",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "発展途上国のバスはGoogleマップを信用しすぎると危ない話"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "発展途上国のバスはGoogleマップを信用しすぎると危ない話",
+    "ogImage": "https://tomokichidiary.com/images/Thai/bangkok-red-bus.jpg"
+  },
+  {
+    "path": "/posts/greece1",
+    "status": 200,
+    "title": "カイロ空港で11時間止まり、それでもアテネで持ち直せた初日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第11回】アスワンでの恐怖体験を乗り越え、エジプトを脱出してギリシャ・アテネへ。カイロ空港では何もないエリアで11時間の足止め。それでもアテネ到着後は、パルテノン神殿と絶品のギリシャ料理に癒やされた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/greece1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "カイロ空港で11時間止まり、それでもアテネで持ち直せた初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "カイロ空港で11時間止まり、それでもアテネで持ち直せた初日",
+    "ogImage": "https://tomokichidiary.com/images/Greece/parthenon.jpg"
+  },
+  {
+    "path": "/posts/greece2",
+    "status": 200,
+    "title": "サントリーニ島の白い街並みと、待ったぶんだけ強かったイアの夕日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第12回】アテネから国内線で、憧れのサントリーニ島へ。白と青のコントラストが美しいイアの街並み散策、2時間前から場所取りしたイア城のサンセット、そしてリゾート価格の物価事情まで。終盤の山場になった1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/greece2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "サントリーニ島の白い街並みと、待ったぶんだけ強かったイアの夕日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "サントリーニ島の白い街並みと、待ったぶんだけ強かったイアの夕日",
+    "ogImage": "https://tomokichidiary.com/images/Greece/oia-castle-sunset-view.jpg"
+  },
+  {
+    "path": "/posts/greece3",
+    "status": 200,
+    "title": "サントリーニ発の搭乗券トラブルと、アテネ空港泊を挟んだ帰国日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 最終回】19日間の大陸横断旅もフィナーレ。サントリーニ空港での搭乗券消失トラブルに冷や汗をかきつつアテネへ戻り、空港泊を経てシンガポール・チャンギでのトランジットを満喫し、無事に関西空港へ帰還するまでの帰国編の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/greece3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "サントリーニ発の搭乗券トラブルと、アテネ空港泊を挟んだ帰国日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "サントリーニ発の搭乗券トラブルと、アテネ空港泊を挟んだ帰国日",
+    "ogImage": "https://tomokichidiary.com/images/Greece/santorini-view.jpg"
+  },
+  {
+    "path": "/posts/hokkaido1",
+    "status": 200,
+    "title": "雪と寒さに振り回されながら、札幌の初日を回った日 | ともきちの旅行日記",
+    "description": "【北海道旅行記 第1回】初めての北海道、冬の札幌1日目。新千歳空港のバター味噌ラーメンに始まり、羊ヶ丘展望台の雪景色、ライトアップされた札幌テレビ塔、2時間待ちの人気回転寿司まで。厳しい寒さと格闘しながらグルメと絶景を詰め込んだ初日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/hokkaido1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "雪と寒さに振り回されながら、札幌の初日を回った日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "雪と寒さに振り回されながら、札幌の初日を回った日",
+    "ogImage": "https://tomokichidiary.com/images/Hokkaido/sapporo-tv-tower.jpg"
+  },
+  {
+    "path": "/posts/hokkaido2",
+    "status": 200,
+    "title": "小樽の雪景色と食事を詰め込み、最後まで北海道らしさが濃かった日 | ともきちの旅行日記",
+    "description": "【北海道旅行記 第2回】北海道旅行2日目。二条市場の海鮮丼に始まり、雪の小樽運河とオルゴール堂を堪能。夜は札幌で名物ジンギスカン、締めにセイコーマートのホットシェフ。最終日はまたトリトンで寿司を頬張った、食の印象が濃い北海道の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/hokkaido2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "小樽の雪景色と食事を詰め込み、最後まで北海道らしさが濃かった日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "小樽の雪景色と食事を詰め込み、最後まで北海道らしさが濃かった日",
+    "ogImage": "https://tomokichidiary.com/images/Hokkaido/otaru-canal.jpg"
+  },
+  {
+    "path": "/posts/howtoget-abusimbel-from-asuwan",
+    "status": 200,
+    "title": "アスワンからアブシンベル神殿への行き方。バス・ツアー・飛行機の比較 | ともきちの旅行日記",
+    "description": "アスワンからアブシンベル神殿へ行く方法を、バス、ツアー、タクシー、飛行機で比較しました。金曜運休や駅からバスステーションへの動き方など、現地で詰まりやすい点も整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/howtoget-abusimbel-from-asuwan",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "アスワンからアブシンベル神殿への行き方。バス・ツアー・飛行機の比較"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "アスワンからアブシンベル神殿への行き方。バス・ツアー・飛行機の比較",
+    "ogImage": "https://tomokichidiary.com/images/Egypt/abusimbel-temple.jpg"
+  },
+  {
+    "path": "/posts/howtoget-mirador-del-valle",
+    "status": 200,
+    "title": "ミラドール・デル・バイエへの行き方。バスと徒歩の使い分け | ともきちの旅行日記",
+    "description": "トレド旧市街を一望できる展望台「ミラドール・デル・バイエ」への行き方を、観光列車・バス・徒歩・タクシー・レンタカーで比較しました。限られた滞在時間でも回りやすい手段の選び方を中心に整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/howtoget-mirador-del-valle",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ミラドール・デル・バイエへの行き方。バスと徒歩の使い分け"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ミラドール・デル・バイエへの行き方。バスと徒歩の使い分け",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/posts/india-street-food-tips",
+    "status": 200,
+    "title": "インドに行って気付いた、お腹を壊さない屋台の選び方 | ともきちの旅行日記",
+    "description": "インド旅行で実際に試して学んだ、屋台選びのポイントを3つに整理しました。 加熱の有無や現地の人の集まり方など、 お腹を壊しにくくするための実体験ベースの考え方を紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/india-street-food-tips",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "インドに行って気付いた、お腹を壊さない屋台の選び方"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "インドに行って気付いた、お腹を壊さない屋台の選び方",
+    "ogImage": "https://tomokichidiary.com/images/India/chai1.jpg"
+  },
+  {
+    "path": "/posts/india-visa",
+    "status": 200,
+    "title": "インドのe-VISA申請方法。必要書類と詰まりやすい点の整理 | ともきちの旅行日記",
+    "description": "インドのe-VISA申請手順と必要書類を、申請時に詰まりやすい点を中心に整理しました。利用可能な空港・港の情報も含め、実体験ベースでまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/india-visa",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "インドのe-VISA申請方法。必要書類と詰まりやすい点の整理"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "インドのe-VISA申請方法。必要書類と詰まりやすい点の整理",
+    "ogImage": "https://tomokichidiary.com/images/India/tajmahal.jpg"
+  },
+  {
+    "path": "/posts/india1",
+    "status": 200,
+    "title": "深夜のデリーで詰まりかけたのに、最後は人の親切さに救われた初日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第2回】入国時のビザ書類でつまずき、深夜のタクシーでは見知らぬ場所に降ろされる。それでも現地の人の親切に救われ、本場のマサラチャイとカレーを味わい、インド門やロータス寺院を巡る。予想外続きで始まったデリーの濃い1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "深夜のデリーで詰まりかけたのに、最後は人の親切さに救われた初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "深夜のデリーで詰まりかけたのに、最後は人の親切さに救われた初日",
+    "ogImage": "https://tomokichidiary.com/images/India/indian-gate-at-noon.jpg"
+  },
+  {
+    "path": "/posts/india2",
+    "status": 200,
+    "title": "タージマハルの強さに圧倒され、そのままジャイプルまで流れた日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第3回】デリーからアグラへの道中で見たインドの道路事情、写真を超えてきたタージマハルとの対面、そして夜はジャイプルで運転手さんの友人宅の屋上でいただいた家庭のマトンカレー。建築の迫力と人の温かさに触れた充実の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "タージマハルの強さに圧倒され、そのままジャイプルまで流れた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "タージマハルの強さに圧倒され、そのままジャイプルまで流れた日",
+    "ogImage": "https://tomokichidiary.com/images/India/tajmahal.jpg"
+  },
+  {
+    "path": "/posts/india3",
+    "status": 200,
+    "title": "ジャイプルを駆け足で見て、そのまま寝台列車でバラナシへ向かった日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第4回】壮大なアンベール城、湖に浮かぶジャル・マハル、ピンクに染まる街並みと風の宮殿ハワー・マハル。ラジャスタンの古都ジャイプルを駆け足で巡ったあとは、インドならではの寝台列車でバラナシへ。移動が旅の一部になっていく旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ジャイプルを駆け足で見て、そのまま寝台列車でバラナシへ向かった日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ジャイプルを駆け足で見て、そのまま寝台列車でバラナシへ向かった日",
+    "ogImage": "https://tomokichidiary.com/images/India/amber-palace1.jpg"
+  },
+  {
+    "path": "/posts/india4",
+    "status": 200,
+    "title": "寝台列車を越えてバラナシへ入り、雨季の街に足を踏み入れた日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第5回】思っていたより快適だった寝台列車の車窓の旅、バラナシ到着後のローカルすぎる朝食、そして街を水浸しにする突然のスコール。インドの日常と非日常が交差する聖地バラナシでの、最初の1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india4",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "寝台列車を越えてバラナシへ入り、雨季の街に足を踏み入れた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "寝台列車を越えてバラナシへ入り、雨季の街に足を踏み入れた日",
+    "ogImage": "https://tomokichidiary.com/images/India/train-view1.jpg"
+  },
+  {
+    "path": "/posts/india5",
+    "status": 200,
+    "title": "スコールの勢いでガンジス川に入り、そのまま夜まで余韻が残った日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第6回】スコールをきっかけに急遽決行したガンジス川での沐浴。現地の人に教わった作法、聖なる水に身を委ねた体験、そして川を眺めながらの夜ご飯まで。バラナシでしか味わえない、忘れられない1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india5",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スコールの勢いでガンジス川に入り、そのまま夜まで余韻が残った日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スコールの勢いでガンジス川に入り、そのまま夜まで余韻が残った日",
+    "ogImage": "https://tomokichidiary.com/images/India/ganga.jpg"
+  },
+  {
+    "path": "/posts/india6",
+    "status": 200,
+    "title": "バラナシの路地と火葬場を歩き、街の濃さを最後に浴びた日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第7回】牛が居座る迷路のような路地、ローカルすぎる衣料品店での買い物、念願のタンドリーチキン、そして火葬場まで。観光地とは一味違う、等身大のバラナシの姿に触れた最終日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india6",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バラナシの路地と火葬場を歩き、街の濃さを最後に浴びた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バラナシの路地と火葬場を歩き、街の濃さを最後に浴びた日",
+    "ogImage": "https://tomokichidiary.com/images/India/varanasi-alley4.jpg"
+  },
+  {
+    "path": "/posts/india7",
+    "status": 200,
+    "title": "バラナシの祭りを見届けたあと、体調を崩したまま帰国した最終日 | ともきちの旅行日記",
+    "description": "【インド旅行記 最終回】土器チャイと特大ラッシーで味わう本場の味、ガンジス川沿いのお祭り、そして予期せぬ体調不良での長い帰国の道のり。苦楽をともにしたインド旅行の、最後の1日とその余韻を綴る旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/india7",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バラナシの祭りを見届けたあと、体調を崩したまま帰国した最終日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バラナシの祭りを見届けたあと、体調を崩したまま帰国した最終日",
+    "ogImage": "https://tomokichidiary.com/images/India/festival-of-ganga1.jpg"
+  },
+  {
+    "path": "/posts/indonesia1",
+    "status": 200,
+    "title": "Jewelを見送ってバリへ、スミニャックの夜に旅の速度が緩んだ | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第6回】シンガポールからバリへ移動して、スミニャックで街歩き。KYND、両替、スパ、ビーチ、夜ご飯まで、旅のテンポが少しゆるく変わっていく感覚がそのまま残った1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/indonesia1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "Jewelを見送ってバリへ、スミニャックの夜に旅の速度が緩んだ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "Jewelを見送ってバリへ、スミニャックの夜に旅の速度が緩んだ",
+    "ogImage": "https://tomokichidiary.com/images/Indonesia/the-interior-design-of-a-spa-in-bali.jpg"
+  },
+  {
+    "path": "/posts/indonesia2",
+    "status": 200,
+    "title": "Sisterfieldsの朝と夜行バス、本土へ向かう長い移動 | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第7回】スミニャックでの最後の朝ご飯と買い物を終えたあと、MTransの夜行バスとフェリーで本土へ移動。思ったより快適だった車内と、想像以上に寒かった夜の移動が強く印象に残った1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/indonesia2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "Sisterfieldsの朝と夜行バス、本土へ向かう長い移動"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "Sisterfieldsの朝と夜行バス、本土へ向かう長い移動",
+    "ogImage": "https://tomokichidiary.com/images/Indonesia/the-rice-fields-of-bali-and-the-ocean-visible-in-the-distance.jpg"
+  },
+  {
+    "path": "/posts/indonesia3",
+    "status": 200,
+    "title": "マリオボロ通りを歩き、空港鉄道で抜けたジョグジャカルタ | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第8回】夜行移動のあとジョグジャカルタに到着。先に空港鉄道を押さえてからマリオボロ通りを歩き、最後はノンストップの空港鉄道で空港へ戻る、短いながらも旅らしさの濃い1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/indonesia3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "マリオボロ通りを歩き、空港鉄道で抜けたジョグジャカルタ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "マリオボロ通りを歩き、空港鉄道で抜けたジョグジャカルタ",
+    "ogImage": "https://tomokichidiary.com/images/Indonesia/malioboro-street.jpg"
+  },
+  {
+    "path": "/posts/introduce",
+    "status": 200,
+    "title": "はじめまして。旅ブログを始めた理由と、このブログで書いていくこと | ともきちの旅行日記",
+    "description": "ともきちが旅ブログを始めた理由と、このブログで書いていく内容をまとめた最初の記事です。自己紹介と、旅行記だけでなく移動の工夫や現地で感じたことも含めて残していく方針、ブログの歩き方を整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/introduce",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "はじめまして。旅ブログを始めた理由と、このブログで書いていくこと"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "はじめまして。旅ブログを始めた理由と、このブログで書いていくこと",
+    "ogImage": "https://tomokichidiary.com/images/Introduce/introduce.jpg"
+  },
+  {
+    "path": "/posts/kyoto-view1",
+    "status": 200,
+    "title": "京都でまず見てほしい景色3つ。清水寺、嵐山、祇園祭 | ともきちの旅行日記",
+    "description": "京都在住の大学生が、地元目線で京都の定番スポットを紹介。清水寺の幻想的なライトアップ、四季折々の顔を持つ嵐山、日本三大祭りの一つ祇園祭の熱気まで。人混みの実情にも触れつつ、古都・京都のリアルな景色を綴ります。",
+    "canonical": "https://tomokichidiary.com/posts/kyoto-view1",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "京都でまず見てほしい景色3つ。清水寺、嵐山、祇園祭"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "京都でまず見てほしい景色3つ。清水寺、嵐山、祇園祭",
+    "ogImage": "https://tomokichidiary.com/images/Kyoto/kiyomizu-temple-autumn-leaves-lightup.jpg"
+  },
+  {
+    "path": "/posts/landscape1",
+    "status": 200,
+    "title": "実際に見て忘れにくかった世界の風景3選。サントリーニ、トレド、カッパドキア | ともきちの旅行日記",
+    "description": "世界の絶景を紹介する街並み・風景編。実際に見て「王道と呼ばれるだけある」と感じた風景を厳選。世界一とも称されるサントリーニ島の夕陽、スペインの古都トレドの旧市街、トルコ・カッパドキアの気球が舞う朝の景色を紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/landscape1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "実際に見て忘れにくかった世界の風景3選。サントリーニ、トレド、カッパドキア"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "実際に見て忘れにくかった世界の風景3選。サントリーニ、トレド、カッパドキア",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/posts/malaysia-before-thailand",
+    "status": 200,
+    "title": "初海外ならタイよりマレーシアの方がいいかもしれないと思った | ともきちの旅行日記",
+    "description": "初海外でタイがしんどかった私が、マレーシアへ行って感じた違いを整理しました。 刺激が強すぎる旅先が不安な人には、入口としてマレーシアの方が合うかもしれません。",
+    "canonical": "https://tomokichidiary.com/posts/malaysia-before-thailand",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "初海外ならタイよりマレーシアの方がいいかもしれないと思った"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "初海外ならタイよりマレーシアの方がいいかもしれないと思った",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/petronas-twin-towers.jpg"
+  },
+  {
+    "path": "/posts/malaysia-night-vibes",
+    "status": 200,
+    "title": "クアラルンプールは夜が強い。屋台街と夜景の振れ幅がかなり大きかった | ともきちの旅行日記",
+    "description": "クアラルンプールを歩いていて印象に残ったのは、夜の街の強さでした。 ライトアップ、ショッピングモール、屋台街まで含めて、夜に街がちゃんと生きている感じをまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/malaysia-night-vibes",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "クアラルンプールは夜が強い。屋台街と夜景の振れ幅がかなり大きかった"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "クアラルンプールは夜が強い。屋台街と夜景の振れ幅がかなり大きかった",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/the-illuminated-lights-spreading-across-downtown-kuala-lumpur-at-night.jpg"
+  },
+  {
+    "path": "/posts/malaysia1",
+    "status": 200,
+    "title": "アロー通りの熱気と深夜マッサージで始まったクアラルンプール | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第1回】東南アジア周遊の最初の夜はクアラルンプール。雨の到着から始まり、KLIA Expressで市内へ入り、アロー通りの熱気に飲まれ、深夜のマッサージと夜ご飯まで一気に駆け抜けた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/malaysia1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "アロー通りの熱気と深夜マッサージで始まったクアラルンプール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "アロー通りの熱気と深夜マッサージで始まったクアラルンプール",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/people-enjoying-the-food-stalls-along-arrow-street-at-night.jpg"
+  },
+  {
+    "path": "/posts/malaysia2",
+    "status": 200,
+    "title": "Nu SentralからKLCCまで、寝坊のあとに街を横断したクアラルンプール | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第2回】盛大に寝坊したクアラルンプール滞在の中日。それでもNu Sentral、セントラルマーケット、パビリオン、KLCCまでしっかり歩いて、街の便利さと華やかさが両方見えた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/malaysia2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "Nu SentralからKLCCまで、寝坊のあとに街を横断したクアラルンプール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "Nu SentralからKLCCまで、寝坊のあとに街を横断したクアラルンプール",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/petronas-twin-towers.jpg"
+  },
+  {
+    "path": "/posts/malaysia3",
+    "status": 200,
+    "title": "バトゥ洞窟とピンクモスクを回り、最後は食べ歩きに着地したクアラルンプール | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第3回】観光らしい予定をしっかり入れた3日目。バトゥ洞窟とピンクモスクではそれぞれ小さく失敗しつつ、最後はロティ、クナーファ、ドリアンまでちゃんと回収して終わったクアラルンプール最終日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/malaysia3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バトゥ洞窟とピンクモスクを回り、最後は食べ歩きに着地したクアラルンプール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バトゥ洞窟とピンクモスクを回り、最後は食べ歩きに着地したクアラルンプール",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/the-rainbow-stairs-at-batu-caves.jpg"
+  },
+  {
+    "path": "/posts/oia-sunset-guide",
+    "status": 200,
+    "title": "イアのサンセットを見るなら。場所取りの目安と混雑の実感 | ともきちの旅行日記",
+    "description": "サントリーニ島・イアの夕日を見るとき、実際に効くのは景色そのものよりも「どこで・何分前から待つか」でした。混雑必至のイア城跡周辺での場所取りの目安と、現地での見え方を体験ベースで整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/oia-sunset-guide",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "イアのサンセットを見るなら。場所取りの目安と混雑の実感"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "イアのサンセットを見るなら。場所取りの目安と混雑の実感",
+    "ogImage": "https://tomokichidiary.com/images/Greece/oia-castle-sunset-view.jpg"
+  },
+  {
+    "path": "/posts/omio-reservation",
+    "status": 200,
+    "title": "スペインの高速鉄道を予約したときの話｜Renfe・Iryo・Ouigoを比較した記録 | ともきちの旅行日記",
+    "description": "スペイン旅行でバルセロナ〜マドリード、マドリード〜トレドの高速鉄道を予約したときの記録です。Renfe・Iryo・Ouigoの3社をどう比較し、最終的にどう決めたか、実際に使った予約サービス Omio の使い勝手も含めて正直に書きました。",
+    "canonical": "https://tomokichidiary.com/posts/omio-reservation",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スペインの高速鉄道を予約したときの話｜Renfe・Iryo・Ouigoを比較した記録"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スペインの高速鉄道を予約したときの話｜Renfe・Iryo・Ouigoを比較した記録",
+    "ogImage": "https://tomokichidiary.com/images/Spain/renfe-at-barcelona-sants.jpg"
+  },
+  {
+    "path": "/posts/paris-navigo-easy",
+    "status": 200,
+    "title": "パリのメトロの乗り方とチケットの選び方。短期滞在はNavigo Easyで足りる | ともきちの旅行日記",
+    "description": "パリのメトロ・RER・バスのチケットの違いと、旅行者がどれを選ぶべきかを整理しました。短期滞在の軸になる交通系ICカード「Navigo Easy」の購入・チャージ・使い方を中心に、実際に使った経験からまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/paris-navigo-easy",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "パリのメトロの乗り方とチケットの選び方。短期滞在はNavigo Easyで足りる"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "パリのメトロの乗り方とチケットの選び方。短期滞在はNavigo Easyで足りる",
+    "ogImage": "https://tomokichidiary.com/images/France/navigo-easy.jpg"
+  },
+  {
+    "path": "/posts/paris-restraunt",
+    "status": 200,
+    "title": "パリで入ってよかったレストランとカフェ5軒 | ともきちの旅行日記",
+    "description": "パリ旅行で訪れたいおすすめのレストラン＆カフェ5選をご紹介。エッフェル塔近くのビストロから、スイーツが絶品の老舗カフェ、クレープの名店まで、美味しいと雰囲気が両方楽しめるスポットを厳選しました。",
+    "canonical": "https://tomokichidiary.com/posts/paris-restraunt",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "パリで入ってよかったレストランとカフェ5軒"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "パリで入ってよかったレストランとカフェ5軒",
+    "ogImage": "https://tomokichidiary.com/images/France/steak-at-le-vieux-bistrot.jpg"
+  },
+  {
+    "path": "/posts/putra-mosque-guide",
+    "status": 200,
+    "title": "プトラモスク観光ガイド｜見学時間・行き方・ラマダン中の注意点 | ともきちの旅行日記",
+    "description": "プトラモスクの営業時間・見学時間とラマダン中の変則対応、最寄り駅からの行き方、現金のみのバス事情を体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/putra-mosque-guide",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "プトラモスク観光ガイド｜見学時間・行き方・ラマダン中の注意点"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "プトラモスク観光ガイド｜見学時間・行き方・ラマダン中の注意点",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/exterior-of-the-putra-mosque.jpg"
+  },
+  {
+    "path": "/posts/putra-mosque-ramadan-hours",
+    "status": 200,
+    "title": "ラマダン中にピンクモスクへ行くなら要注意。通常の観光時間では動けません | ともきちの旅行日記",
+    "description": "プトラモスクは礼拝の場でもあり、通常時とラマダン期間中で観光時間が変わります。 ネットでは通常時の時間が多く、ラマダン中だけ見落としやすかった点を体験ベースで整理します。",
+    "canonical": "https://tomokichidiary.com/posts/putra-mosque-ramadan-hours",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ラマダン中にピンクモスクへ行くなら要注意。通常の観光時間では動けません"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ラマダン中にピンクモスクへ行くなら要注意。通常の観光時間では動けません",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/exterior-of-the-putra-mosque.jpg"
+  },
+  {
+    "path": "/posts/route-of-arrival-to-arl-at-suvarnabhumi",
+    "status": 200,
+    "title": "スワンナプーム空港でARLに乗るまでの動線と両替の考え方 | ともきちの旅行日記",
+    "description": "スワンナプーム空港に着いたら、もう迷わない！到着ロビーから地下1階のエアポートリンク駅までのルートを写真付きで徹底解説します。レートの良い両替所の選び方から、現金のみのチケット購入方法まで、知っているだけで得をする情報が満載。スマートなバンコク旅行はここから始まります。",
+    "canonical": "https://tomokichidiary.com/posts/route-of-arrival-to-arl-at-suvarnabhumi",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スワンナプーム空港でARLに乗るまでの動線と両替の考え方"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スワンナプーム空港でARLに乗るまでの動線と両替の考え方",
+    "ogImage": "https://tomokichidiary.com/images/Thai/suvarnabhumi1.jpg"
+  },
+  {
+    "path": "/posts/santorini-tourism",
+    "status": 200,
+    "title": "サントリーニ島で見るならこの3エリア。フィラ・イア・イメロヴィグリの違い | ともきちの旅行日記",
+    "description": "断崖に輝く白壁の街並みと紺碧の海。活気あふれる中心地「フィラ」、静寂と絶景が広がる「イメロヴィグリ」、世界一ロマンチックな夕日の「イア」。絶対に外せない必見の3都市に絞り、その魅力を余すことなく徹底解説します。初心者でも安心のモデルコースを網羅。この記事を手に、一生忘れられない感動の旅を計画しましょう。",
+    "canonical": "https://tomokichidiary.com/posts/santorini-tourism",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "サントリーニ島で見るならこの3エリア。フィラ・イア・イメロヴィグリの違い"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "サントリーニ島で見るならこの3エリア。フィラ・イア・イメロヴィグリの違い",
+    "ogImage": "https://tomokichidiary.com/images/Greece/santorini-view.jpg"
+  },
+  {
+    "path": "/posts/santorini-transportation",
+    "status": 200,
+    "title": "サントリーニ島内の移動手段比較。バス・レンタカー・バギーの向き不向き | ともきちの旅行日記",
+    "description": "サントリーニ島内の移動手段を、路線バス・レンタカー・バギー（ATV）・タクシーで比較しました。費用を抑えるならバス、複数スポットを回るならレンタカーなど、滞在スタイル別の向き不向きを中心に整理しています。",
+    "canonical": "https://tomokichidiary.com/posts/santorini-transportation",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "サントリーニ島内の移動手段比較。バス・レンタカー・バギーの向き不向き"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "サントリーニ島内の移動手段比較。バス・レンタカー・バギーの向き不向き",
+    "ogImage": "https://tomokichidiary.com/images/Greece/oia-castle-view.jpg"
+  },
+  {
+    "path": "/posts/seletar-airport-to-city",
+    "status": 200,
+    "title": "セレター空港からシンガポール市内へ｜102番バス＋MRTで実際に移動 | ともきちの旅行日記",
+    "description": "セレター空港からシンガポール市内まで、102番バスとMRTを使って実際に移動した流れを紹介。Buangkok駅での乗り継ぎ、空港からバス停までの動き方、荷物があるときの注意点をまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/seletar-airport-to-city",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "セレター空港からシンガポール市内へ｜102番バス＋MRTで実際に移動"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "セレター空港からシンガポール市内へ｜102番バス＋MRTで実際に移動",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/seletar-airport-arrival.jpg"
+  },
+  {
+    "path": "/posts/shanghai-chagee",
+    "status": 200,
+    "title": "CHAGEE（霸王茶姬）とは？おすすめメニュー・注文方法・店舗ガイドまとめ | ともきちの旅行日記",
+    "description": "中国発のティーブランドCHAGEE（霸王茶姬）を実体験ベースで紹介。おすすめメニュー、茶葉の違い、中国・マレーシア・シンガポールの注文方法、上海・クアラルンプール・シンガポールの店舗ガイドをまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/shanghai-chagee",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "CHAGEE（霸王茶姬）とは？おすすめメニュー・注文方法・店舗ガイドまとめ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "CHAGEE（霸王茶姬）とは？おすすめメニュー・注文方法・店舗ガイドまとめ",
+    "ogImage": "https://tomokichidiary.com/images/China/chagee-in-shanghai1.jpg"
+  },
+  {
+    "path": "/posts/shanghai-chagee-menu",
+    "status": 200,
+    "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー | ともきちの旅行日記",
+    "description": "中国・マレーシア・シンガポールで実際にCHAGEEを飲んだ中から、おすすめの4メニューを紹介。看板の伯牙絶弦、大紅袍の白雾红尘、金木犀が香る桂馥兰香、白桃ウーロンの花田乌龙を実体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/shanghai-chagee-menu",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+    "ogImage": "https://tomokichidiary.com/images/China/chagee-in-shanghai1.jpg"
+  },
+  {
+    "path": "/posts/shanghai-chagee-stores",
+    "status": 200,
+    "title": "上海のCHAGEE（霸王茶姬）実際に行った3店舗｜南京東路・豫園・浦東空港 | ともきちの旅行日記",
+    "description": "上海で実際に利用したCHAGEE（霸王茶姬）3店舗を紹介。南京東路、豫園、浦東国際空港での立ち寄り方と、Baidu Mapsで店舗を探すときの注意点を実体験ベースでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/shanghai-chagee-stores",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "上海のCHAGEE（霸王茶姬）実際に行った3店舗｜南京東路・豫園・浦東空港"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "上海のCHAGEE（霸王茶姬）実際に行った3店舗｜南京東路・豫園・浦東空港",
+    "ogImage": "https://tomokichidiary.com/images/China/chagee-in-shanghai1.jpg"
+  },
+  {
+    "path": "/posts/singapore1",
+    "status": 200,
+    "title": "ラクサとマリーナベイ、夜はナイトサファリまで駆け抜けたシンガポール | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第4回】クアラルンプールから移動して、そのままシンガポール観光へ。ラクサ、アラブ通り、マリーナベイ、ナイトサファリまで、移動日とは思えない密度で動き続けた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/singapore1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ラクサとマリーナベイ、夜はナイトサファリまで駆け抜けたシンガポール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ラクサとマリーナベイ、夜はナイトサファリまで駆け抜けたシンガポール",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/views-around-marina-bay-sands-and-the-merlion.jpg"
+  },
+  {
+    "path": "/posts/singapore2",
+    "status": 200,
+    "title": "セントーサの風とラオパサの夜、王道を詰め込んだシンガポール | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 第5回】セントーサでLugeを楽しみ、ハリーポッターの世界に入り込み、ラオパサで夜ご飯を食べて、最後はガーデンズ・バイ・ザ・ベイまで。王道をしっかり回ったシンガポール滞在の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/singapore2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "セントーサの風とラオパサの夜、王道を詰め込んだシンガポール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "セントーサの風とラオパサの夜、王道を詰め込んだシンガポール",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/the-nighttime-view-of-gardens-by-the-bay.jpg"
+  },
+  {
+    "path": "/posts/singapore3",
+    "status": 200,
+    "title": "チャンギ空港で夜を越え、静かに関空へ戻った旅の終わり | ともきちの旅行日記",
+    "description": "【東南アジア周遊旅行記 最終回】ジョグジャカルタから戻った夜はチャンギ空港で過ごし、そのまま朝の便で関空へ。派手な観光はないけれど、旅が閉じていく感じがしっかり残った東南アジア周遊の最終日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/singapore3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "チャンギ空港で夜を越え、静かに関空へ戻った旅の終わり"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "チャンギ空港で夜を越え、静かに関空へ戻った旅の終わり",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/jewel-and-chagee-at-changi-international-airport.jpg"
+  },
+  {
+    "path": "/posts/spain-restaurant",
+    "status": 200,
+    "title": "スペインおすすめレストランガイド | ともきちの旅行日記",
+    "description": "スペイン各都市の特色を活かした絶品グルメを堪能できる、食の旅ガイド。マドリードの老舗タパスバー、バルセロナの洗練された創作料理、トレドの伝統的なビアレストランなど、旅の計画に役立つおすすめレストランを厳選紹介。",
+    "canonical": "https://tomokichidiary.com/posts/spain-restaurant",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "スペインおすすめレストランガイド"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "スペインおすすめレストランガイド",
+    "ogImage": "https://tomokichidiary.com/images/Spain/la-casa-del-abuelos-ajilo.jpg"
+  },
+  {
+    "path": "/posts/spain1",
+    "status": 200,
+    "title": "パリを離れてバルセロナへ入り、ガウディ建築を外から浴びた日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第4回】パリ最終日のガレット朝食とショッピング、コスパ抜群のフレンチで締めたあとはバルセロナへ。EU内フライトの免税の注意点、到着後のガウディ建築巡り、初めてのパエリアとサングリアまで。フランスからスペインへ、旅の色が変わる1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "パリを離れてバルセロナへ入り、ガウディ建築を外から浴びた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "パリを離れてバルセロナへ入り、ガウディ建築を外から浴びた日",
+    "ogImage": "https://tomokichidiary.com/images/Spain/casa-mira.jpg"
+  },
+  {
+    "path": "/posts/spain2",
+    "status": 200,
+    "title": "ガウディ建築と地中海を同じ日に詰め込み、バルセロナを掴んだ日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第5回】カサ・ミラの曲線美と屋上からの絶景、未完の大聖堂サグラダ・ファミリアの圧倒的なスケール。本場のチュロス・コン・チョコラテ、絶品の生ハム、濃厚なイカ墨パエリアまで。建築と食と地中海をまとめて浴びたバルセロナの旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ガウディ建築と地中海を同じ日に詰め込み、バルセロナを掴んだ日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ガウディ建築と地中海を同じ日に詰め込み、バルセロナを掴んだ日",
+    "ogImage": "https://tomokichidiary.com/images/Spain/sagrada-familia.jpg"
+  },
+  {
+    "path": "/posts/spain3",
+    "status": 200,
+    "title": "バルセロナからマドリードへ移り、広場とアヒージョで掴まれた日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第6回】バルセロナから高速列車でマドリードへ。マヨール広場やサン・ミゲル市場で街の第一印象を掴み、La Casa del Abueloの陽気なアヒージョと、王宮前広場のバイオリンの音色で、マドリードとの相性の良さを感じた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バルセロナからマドリードへ移り、広場とアヒージョで掴まれた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バルセロナからマドリードへ移り、広場とアヒージョで掴まれた日",
+    "ogImage": "https://tomokichidiary.com/images/Spain/plaza-de-mayor.jpg"
+  },
+  {
+    "path": "/posts/spain4",
+    "status": 200,
+    "title": "マドリードを歩き続け、気づいたらかなり好きになっていた日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第7回】マドリードを本格的に歩き始めた日。聖地巡礼でカフェや街を巡り、レティーロ公園でのんびり、プラド美術館前では行列を見て戦略的撤退。観光名所より、街そのものの居心地の良さに引かれ始めた転換点の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain4",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "マドリードを歩き続け、気づいたらかなり好きになっていた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "マドリードを歩き続け、気づいたらかなり好きになっていた日",
+    "ogImage": "https://tomokichidiary.com/images/Spain/prado-museum.jpg"
+  },
+  {
+    "path": "/posts/spain5",
+    "status": 200,
+    "title": "観光を減らし、マドリードの生活リズムに寄せて過ごした2日間 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第8回】マドリードの空気が気に入りすぎて、観光優先をやめた2日間。ラスベンタス闘牛場やセバダ市場、サン・ミゲル市場の本場生ハム、VIANDASの生ハムサンド、Puerto Ricoのタコグリルまで。地元のリズムに溶け込んだ滞在の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain5",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "観光を減らし、マドリードの生活リズムに寄せて過ごした2日間"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "観光を減らし、マドリードの生活リズムに寄せて過ごした2日間",
+    "ogImage": "https://tomokichidiary.com/images/Spain/royal-palace-in-the-daytime.jpg"
+  },
+  {
+    "path": "/posts/spain6",
+    "status": 200,
+    "title": "トレドを昼も夜も見て、日帰りでも強烈に残った1日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 第9回】世界遺産トレドへの日帰り。迷路のような中世の街並みとトレド大聖堂、ミラドール・デル・バイエからの絶景、タホ川を滑空するFlyトレド、伝統料理カルカムサスと名物マサパンまで。昼と夜で表情を変える古都を堪能した旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain6",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "トレドを昼も夜も見て、日帰りでも強烈に残った1日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "トレドを昼も夜も見て、日帰りでも強烈に残った1日",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/posts/spain7",
+    "status": 200,
+    "title": "マドリードを離れ、ブリュッセル経由で一人旅を閉じた帰国日 | ともきちの旅行日記",
+    "description": "【ヨーロッパ旅行記 最終回】スペイン最終日からブリュッセル経由の帰国まで。マドリード最後の生ハム、ブリュッセルでのグランプラスやサン・ミッシェル大聖堂、シェ・レオンのベルギービールとエスカルゴ。13日間の初一人旅を締めくくるエピローグの旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/spain7",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "マドリードを離れ、ブリュッセル経由で一人旅を閉じた帰国日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "マドリードを離れ、ブリュッセル経由で一人旅を閉じた帰国日",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/galeries-royales-saint-hubert.jpg"
+  },
+  {
+    "path": "/posts/sunset1",
+    "status": 200,
+    "title": "バンコクで見た夕景の中でも印象に残った、ワット・アルンと夕陽 | ともきちの旅行日記",
+    "description": "タイ・バンコクの「暁の寺」ワット・アルンと夕陽が織りなす景色を紹介。チャオプラヤー川の対岸から望む夕暮れの姿や、ライトアップされた夜の魅力、おすすめの鑑賞スポットまでまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/sunset1",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "バンコクで見た夕景の中でも印象に残った、ワット・アルンと夕陽"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バンコクで見た夕景の中でも印象に残った、ワット・アルンと夕陽",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-arun-with-sunset.jpg"
+  },
+  {
+    "path": "/posts/thai-itinerary",
+    "status": 200,
+    "title": "タイ・バンコク2泊4日ひとり旅の旅程と総費用まとめ | ともきちの旅行日記",
+    "description": "タイ・バンコクを2泊4日で巡った旅程と費用を一人分で詳しく公開。飛行機・ホテル・食事・観光の内訳から、ワット・アルンや水上マーケット、チャトゥチャック市場まで。約11万円で回れたバンコク旅行の記録です。",
+    "canonical": "https://tomokichidiary.com/posts/thai-itinerary",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "タイ・バンコク2泊4日ひとり旅の旅程と総費用まとめ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "タイ・バンコク2泊4日ひとり旅の旅程と総費用まとめ",
+    "ogImage": "https://tomokichidiary.com/images/Thai/emotional-wat-arun.jpg"
+  },
+  {
+    "path": "/posts/thai-traditional-massage",
+    "status": 200,
+    "title": "ワットポーのタイ古式マッサージ料金は320THB〜。待ち時間・営業時間まとめ | ともきちの旅行日記",
+    "description": "ワットポーのタイ古式マッサージは60分480THB〜。料金表・営業時間・混雑しやすい時間帯と待ち時間の目安を体験ベースで解説します。",
+    "canonical": "https://tomokichidiary.com/posts/thai-traditional-massage",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ワットポーのタイ古式マッサージ料金は320THB〜。待ち時間・営業時間まとめ"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ワットポーのタイ古式マッサージ料金は320THB〜。待ち時間・営業時間まとめ",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-pho-massage.jpg"
+  },
+  {
+    "path": "/posts/thai-transportation",
+    "status": 200,
+    "title": "バンコク市内移動の選び方。BTS・MRT・川船・バスの使い分け | ともきちの旅行日記",
+    "description": "バンコク観光の交通手段を整理。渋滞を避けるならBTS・MRT、寺院側はチャオプラヤエクスプレス、節約や寄り道にはローカルバス。タクシーやトゥクトゥク、配車アプリも含めて、料金と特徴、観光地との組み合わせ方を解説します。",
+    "canonical": "https://tomokichidiary.com/posts/thai-transportation",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "バンコク市内移動の選び方。BTS・MRT・川船・バスの使い分け"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "バンコク市内移動の選び方。BTS・MRT・川船・バスの使い分け",
+    "ogImage": "https://tomokichidiary.com/images/Thai/suvarnabhumi1.jpg"
+  },
+  {
+    "path": "/posts/thai1",
+    "status": 200,
+    "title": "初めての海外でバンコクに着き、最初の違和感から始まった旅 | ともきちの旅行日記",
+    "description": "【タイ旅行記 第1回】初めての海外旅行で選んだのはタイ・バンコク。パスポート取得のドタバタから、想像と全然違う街並みへの戸惑い、ローカル食堂の絶品パッタイ、35円バスでの待ちぼうけまで。初海外1日目のリアルをそのまま書いた旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "初めての海外でバンコクに着き、最初の違和感から始まった旅"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "初めての海外でバンコクに着き、最初の違和感から始まった旅",
+    "ogImage": "https://tomokichidiary.com/images/Thai/river-view-from-the-hotel-at-noon.jpg"
+  },
+  {
+    "path": "/posts/thai2",
+    "status": 200,
+    "title": "水上マーケットとワット・アルンで、バンコクの輪郭が見えた日 | ともきちの旅行日記",
+    "description": "【タイ旅行記 第2回】タイ旅行2日目。タリンチャン水上マーケットの運河ツアーで陽気なガイドに笑い、川魚の塩焼きに感動。夕日に染まるワット・アルンを対岸から眺め、夜はカオサンロードの熱気へ。バンコクの昼と夜の顔が見えてきた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "水上マーケットとワット・アルンで、バンコクの輪郭が見えた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "水上マーケットとワット・アルンで、バンコクの輪郭が見えた日",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-arun-right-up.jpg"
+  },
+  {
+    "path": "/posts/thai3",
+    "status": 200,
+    "title": "寺院を回り切っても、最後まで帰りたさが勝っていた最終日 | ともきちの旅行日記",
+    "description": "【タイ旅行記 第3回】タイ旅行最終日。荘厳なワット・プラケオと全長46メートルの涅槃仏に圧倒され、チャトゥチャック市場の熱気に飛び込んだ。それでも心の中はずっと「早く帰りたい」。楽しさと戸惑いが交錯した初海外の、正直な結末を綴る旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "寺院を回り切っても、最後まで帰りたさが勝っていた最終日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "寺院を回り切っても、最後まで帰りたさが勝っていた最終日",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-pho-nirvana-buddha.jpg"
+  },
+  {
+    "path": "/posts/thai4",
+    "status": 200,
+    "title": "3時間遅れで始まり、テント泊まで転がり込んだバンコク初日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第1回】タイ・トルコ・エジプト・ギリシャ周遊のスタート。関空のシステムエラーで出発が3時間遅れる波乱の幕開けから、レートの良い両替所、激安ローカルバス、そして1泊900円のテント泊「Do Dee Cafe」まで。ハプニング満載の初日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai4",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "3時間遅れで始まり、テント泊まで転がり込んだバンコク初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "3時間遅れで始まり、テント泊まで転がり込んだバンコク初日",
+    "ogImage": "https://tomokichidiary.com/images/Thai/do-dee-cafe.jpg"
+  },
+  {
+    "path": "/posts/thai5",
+    "status": 200,
+    "title": "ワット・ポーからRCAまで詰め込み、最後は深夜に歩いて帰ったバンコク | ともきちの旅行日記",
+    "description": "【周遊旅行記 第2回】バンコク2日目。ワット・ポーで本格タイマッサージ、カオサン通りで食べ歩き、夜はクラブエリアRCAへ。しかし終バスを逃し、深夜のバンコクを1時間歩いて帰る洗礼を受けることに。良くも悪くもバンコクらしい1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai5",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ワット・ポーからRCAまで詰め込み、最後は深夜に歩いて帰ったバンコク"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ワット・ポーからRCAまで詰め込み、最後は深夜に歩いて帰ったバンコク",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-pho-massage.jpg"
+  },
+  {
+    "path": "/posts/thai6",
+    "status": 200,
+    "title": "ワット・パクナムを見て出国し、成都で厳しい乗り継ぎに削られた日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第3回】バンコク最終日は、幻想的な天井画で有名なワット・パクナムへ。スマホなしで1年前のホテルを再訪する小さな挑戦のあと、タイを出国。経由地の成都天府国際空港では、靴の中まで確認される想像以上に厳格なチェックが待っていた旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/thai6",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ワット・パクナムを見て出国し、成都で厳しい乗り継ぎに削られた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ワット・パクナムを見て出国し、成都で厳しい乗り継ぎに削られた日",
+    "ogImage": "https://tomokichidiary.com/images/Thai/ceiling-at-wat-pak-nam.jpg"
+  },
+  {
+    "path": "/posts/touch-n-go-how-much",
+    "status": 200,
+    "title": "Touch&#x27;n Goカードは必要？買い方・使い方・チャージ額の目安をまとめました | ともきちの旅行日記",
+    "description": "クアラルンプール観光で便利だったTouch&#x27;n Goカードについて、買い方・使い方・チャージ額の目安をまとめました。 電車・市内バスでの使いどころ、KL中心部のバス事情、50RM入れすぎた失敗談、郊外で現金が必要だった点まで整理します。",
+    "canonical": "https://tomokichidiary.com/posts/touch-n-go-how-much",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "Touch&#x27;n Goカードは必要？買い方・使い方・チャージ額の目安をまとめました"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "Touch&#x27;n Goカードは必要？買い方・使い方・チャージ額の目安をまとめました",
+    "ogImage": "https://tomokichidiary.com/images/Malaysia/touch-n-go-card.jpg"
+  },
+  {
+    "path": "/posts/travel-history1",
+    "status": 200,
+    "title": "初めての海外でバンコクに着いた日。日本の当たり前が一気に崩れた話 | ともきちの旅行日記",
+    "description": "【旅の原点 第1回】海外旅行にハマるきっかけになった、初めてのタイ・バンコク旅行の体験。日本との違いに「臭い、汚い、暑い」と感じた強烈な第一印象と、当時のカルチャーショック、そして1年後の再訪で感じた変化を正直に綴ります。",
+    "canonical": "https://tomokichidiary.com/posts/travel-history1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "初めての海外でバンコクに着いた日。日本の当たり前が一気に崩れた話"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "初めての海外でバンコクに着いた日。日本の当たり前が一気に崩れた話",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-arun-right-up.jpg"
+  },
+  {
+    "path": "/posts/travel-history2",
+    "status": 200,
+    "title": "初海外のバンコクで、ローカル食堂と赤バスが旅の見方を変えた話 | ともきちの旅行日記",
+    "description": "【旅の原点 第2回】「帰りたかった」初海外バンコク旅行の続き。友人に連れ出されて入った地元のレストランでの食事が転機に。激安ローカルバス「赤バス」にも乗り、次第にタイの魅力に引き込まれていく。旅の楽しさを見出すまでの体験記です。",
+    "canonical": "https://tomokichidiary.com/posts/travel-history2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "初海外のバンコクで、ローカル食堂と赤バスが旅の見方を変えた話"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "初海外のバンコクで、ローカル食堂と赤バスが旅の見方を変えた話",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-phra-kaew2.jpg"
+  },
+  {
+    "path": "/posts/trip_com-lounge-benefits",
+    "status": 200,
+    "title": "空港ラウンジの会員特典は実際どこまで使えたか｜深夜便と長い乗継での記録 | ともきちの旅行日記",
+    "description": "会員特典として付いてくる空港ラウンジを、実際に使った範囲で整理しました。深夜便前や長い乗り継ぎではかなり助かった一方、24時間前予約や2時間制限など、先に知っておいたほうがよい条件もあったので、体験ベースでまとめています。",
+    "canonical": "https://tomokichidiary.com/posts/trip_com-lounge-benefits",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "空港ラウンジの会員特典は実際どこまで使えたか｜深夜便と長い乗継での記録"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "空港ラウンジの会員特典は実際どこまで使えたか｜深夜便と長い乗継での記録",
+    "ogImage": "https://tomokichidiary.com/images/Singapore/changi-international-airport-lounge-plaza-premium-lounge.jpg"
+  },
+  {
+    "path": "/posts/turkey1",
+    "status": 200,
+    "title": "インフレに驚きつつ、モスクと海峡クルーズで始まったイスタンブール | ともきちの旅行日記",
+    "description": "【周遊旅行記 第4回】アジアからヨーロッパへの玄関口、トルコ・イスタンブールに到着。荘厳なモスクとボスポラス海峡のサンセットクルーズを満喫する一方で、数か月で激変した飲食店の超インフレ価格にも驚かされた1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/turkey1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "インフレに驚きつつ、モスクと海峡クルーズで始まったイスタンブール"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "インフレに驚きつつ、モスクと海峡クルーズで始まったイスタンブール",
+    "ogImage": "https://tomokichidiary.com/images/Turkey/meidens-tower.jpg"
+  },
+  {
+    "path": "/posts/turkey2",
+    "status": 200,
+    "title": "カッパドキアへ移動し、気球予約の判断を外した日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第5回】イスタンブールから飛行機を乗り継ぎ、奇岩群の絶景が広がるカッパドキア（ギョレメ）へ大移動。しかし現地でのんびりしすぎて、翌朝の気球ツアーが満席になるという痛恨のミス。予約は最優先で、と学んだ1日の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/turkey2",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "カッパドキアへ移動し、気球予約の判断を外した日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "カッパドキアへ移動し、気球予約の判断を外した日",
+    "ogImage": "https://tomokichidiary.com/images/Turkey/balloons-in-cappadocia.jpg"
+  },
+  {
+    "path": "/posts/turkey3",
+    "status": 200,
+    "title": "気球サンライズの余韻のまま、エジプトの洗礼へ落とされた日 | ともきちの旅行日記",
+    "description": "【周遊旅行記 第6回】カッパドキア旅行のハイライト、気球の上から見る感動的なサンライズ。一生の思い出を作ったあとは、空路でエジプト・カイロへ大移動。到着早々、空港での大喧嘩や強烈な客引きの洗礼を浴びることになった旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/turkey3",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "気球サンライズの余韻のまま、エジプトの洗礼へ落とされた日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "気球サンライズの余韻のまま、エジプトの洗礼へ落とされた日",
+    "ogImage": "https://tomokichidiary.com/images/Turkey/balloons-in-cappadocia.jpg"
+  },
+  {
+    "path": "/posts/vietnam-transit",
+    "status": 200,
+    "title": "ハノイ旧市街はトランジットでも行けるか。短時間観光の組み方 | ともきちの旅行日記",
+    "description": "ハノイでの短いトランジット時間も有効活用。ノイバイ国際空港から旧市街へ、バスやタクシーでアクセスし、地元市場やエッグコーヒー、ホエンキアム湖などを効率よく楽しむための移動・時間配分ガイドです。",
+    "canonical": "https://tomokichidiary.com/posts/vietnam-transit",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ハノイ旧市街はトランジットでも行けるか。短時間観光の組み方"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ハノイ旧市街はトランジットでも行けるか。短時間観光の組み方",
+    "ogImage": "https://tomokichidiary.com/images/Vietnam/vietnam-old-town.jpg"
+  },
+  {
+    "path": "/posts/vietnam1",
+    "status": 200,
+    "title": "インドへ向かう途中、ハノイ旧市街を数時間だけ歩いた初日 | ともきちの旅行日記",
+    "description": "【インド旅行記 第1回】目的地はインド。その道中、7時間のトランジットを使ってベトナム・ハノイの旧市街を数時間だけ歩いた。バインミーを頬張り、ホエンキエム湖のほとりで濃いベトナムコーヒーを味わう、予期せぬ寄り道の旅日記。",
+    "canonical": "https://tomokichidiary.com/posts/vietnam1",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "インドへ向かう途中、ハノイ旧市街を数時間だけ歩いた初日"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "インドへ向かう途中、ハノイ旧市街を数時間だけ歩いた初日",
+    "ogImage": "https://tomokichidiary.com/images/Vietnam/dong-kinh-nghia-thuc-square.jpg"
+  },
+  {
+    "path": "/posts/wat-arun",
+    "status": 200,
+    "title": "ワット・アルンの見どころ。夕景で見るなら外さなくていい場所 | ともきちの旅行日記",
+    "description": "バンコク三大寺院の一つ、ワット・アルン（暁の寺）の見どころを解説。壮大な仏塔や美しい装飾、ライトアップ、夕景での見え方まで。朝焼けや夕焼けに映える神秘的な寺院の魅力をまとめます。",
+    "canonical": "https://tomokichidiary.com/posts/wat-arun",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ワット・アルンの見どころ。夕景で見るなら外さなくていい場所"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ワット・アルンの見どころ。夕景で見るなら外さなくていい場所",
+    "ogImage": "https://tomokichidiary.com/images/Thai/wat-arun-with-sunset.jpg"
+  },
+  {
+    "path": "/posts/wat-phra-kaew",
+    "status": 200,
+    "title": "ワット・プラ・ケオの見どころ。王宮と一緒に見るなら最優先候補 | ともきちの旅行日記",
+    "description": "タイ旅行の必見スポット、ワット・プラ・ケオ（エメラルド寺院）の魅力を解説。エメラルド仏像や壮麗な建築、歴史的な壁画など、訪れる際のポイントやアクセス情報も詳しく紹介します。",
+    "canonical": "https://tomokichidiary.com/posts/wat-phra-kaew",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "ワット・プラ・ケオの見どころ。王宮と一緒に見るなら最優先候補"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "ワット・プラ・ケオの見どころ。王宮と一緒に見るなら最優先候補",
+    "ogImage": "https://tomokichidiary.com/images/Thai/thai-royal-palace.jpg"
+  },
+  {
+    "path": "/posts/why-travelers-dont-return",
+    "status": 200,
+    "title": "なぜ旅好きは同じところに二度行かないのか？ | ともきちの旅行日記",
+    "description": "旅好きが再訪より新規開拓を選びがちな理由を、体験ベースで整理しました。 刺激、初回体験の価値、思い出との向き合い方など、 個人の視点で掘り下げます。",
+    "canonical": "https://tomokichidiary.com/posts/why-travelers-dont-return",
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "なぜ旅好きは同じところに二度行かないのか？"
+    ],
+    "jsonLdTypes": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "ogTitle": "なぜ旅好きは同じところに二度行かないのか？",
+    "ogImage": "https://tomokichidiary.com/images/Spain/toledo-view.jpg"
+  },
+  {
+    "path": "/privacy",
+    "status": 200,
+    "title": "プライバシーポリシー | ともきちの旅行日記",
+    "description": "ともきちの旅行日記のプライバシーポリシーです。個人情報の取り扱いやCookieの使用について詳しく説明しています。",
+    "canonical": "https://tomokichidiary.com/privacy",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "プライバシーポリシー"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "プライバシーポリシー",
+    "ogImage": null
+  },
+  {
+    "path": "/request",
+    "status": 200,
+    "title": "記事テーマ リクエストボックス | ともきちの旅行日記",
+    "description": "あなたの「知りたい」「見てみたい」を教えてください。tomokichidiaryで扱う記事のテーマを募集しています。あなたの声が次の冒険のテーマになるかもしれません。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "記事テーマ リクエストボックス"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/roadmap",
+    "status": 200,
+    "title": "ともきちの旅行日記 | Travel Diary",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "Updates & Roadmap"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series",
+    "status": 200,
+    "title": "テーマで旅を深掘り - Series | ともきちの旅行日記",
+    "description": "「ともきちの旅行日記」の連載企画（シリーズ）を一覧でご紹介。「世界の夕陽から」や「絶景建築編」など、特定のテーマで旅の記録を深掘りできます。あなたの好奇心を刺激する物語を見つけてください。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "SERIES"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/architecture",
+    "status": 200,
+    "title": "Series: 世界の絶景・建築編 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/kyoto",
+    "status": 200,
+    "title": "Series: 京都の景色 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/landscape",
+    "status": 200,
+    "title": "Series: 世界の絶景・街並み編 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/sunset",
+    "status": 200,
+    "title": "Series: 世界の夕陽から | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/travel-diary",
+    "status": 200,
+    "title": "Series: 旅行日記 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/series/travel-history",
+    "status": 200,
+    "title": "Series: ともきちの海外旅行遍歴 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記は、実際に旅した体験をもとに、旅行記・観光や移動のガイド・写真ギャラリーをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/sitemap",
+    "status": 200,
+    "title": "サイトマップ | ともきちの旅行日記",
+    "description": "サイトの全コンテンツ一覧。主要ページ、シリーズ、国・地域、全記事へのリンクをまとめています。目的のページを素早く見つけるためにご活用ください。",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "SITEMAP"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/social",
+    "status": 200,
+    "title": "Follow Me | ともきちの旅行日記",
+    "description": "YouTube, TikTok, note, GitHubなど、各種SNSアカウントの活動内容やコンセプトをご紹介します。お好きなプラットフォームで、お気軽にフォローしてください！",
+    "canonical": null,
+    "robots": "noindex, follow",
+    "indexable": false,
+    "h1": [
+      "Follow Me"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "ともきちの旅行日記 | Travel Diary",
+    "ogImage": "https://tomokichidiary.com/images/Belgium/grand-place.jpg"
+  },
+  {
+    "path": "/terms",
+    "status": 200,
+    "title": "利用規約 | ともきちの旅行日記",
+    "description": "ともきちの旅行日記の利用規約です。サイトの利用条件や禁止事項、免責事項などを詳しく説明しています。",
+    "canonical": "https://tomokichidiary.com/terms",
+    "robots": null,
+    "indexable": true,
+    "h1": [
+      "利用規約"
+    ],
+    "jsonLdTypes": [],
+    "ogTitle": "利用規約",
+    "ogImage": null
+  }
+]

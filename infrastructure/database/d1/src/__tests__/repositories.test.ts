@@ -43,14 +43,22 @@ describe("D1 repositories", () => {
 
     const stored = await ctx.repos.articles.findById(created.value.article.id);
     expect(stored).toMatchObject({ slug: "chagee-menu-explained", status: "draft", locale: "ja" });
-    expect(await ctx.repos.revisions.findLatest(created.value.article.id)).toMatchObject({ revisionNumber: 1 });
+    expect(await ctx.repos.revisions.findLatest(created.value.article.id)).toMatchObject({
+      revisionNumber: 1,
+    });
 
     const resolved = await resolveRoute(ctx, "/posts/chagee-menu-explained/");
     expect(resolved.ok && resolved.value.route.targetId).toBe(created.value.article.id);
   });
 
   it("rejects a duplicate slug and a duplicate path", async () => {
-    const input = { slug: "dup", locale: "ja" as const, authorId: AUTHOR, draft, path: "/posts/dup" };
+    const input = {
+      slug: "dup",
+      locale: "ja" as const,
+      authorId: AUTHOR,
+      draft,
+      path: "/posts/dup",
+    };
     expect((await createArticle(ctx, input)).ok).toBe(true);
     const again = await createArticle(ctx, input);
     expect(again.ok).toBe(false);
@@ -103,19 +111,38 @@ describe("D1 repositories", () => {
 
   it("deduplicates identical uploads by content hash", async () => {
     const bytes = new TextEncoder().encode("fake-image-bytes").buffer as ArrayBuffer;
-    const first = await uploadMedia(ctx, { body: bytes, mimeType: "image/jpeg", originalName: "a.jpg" });
-    const second = await uploadMedia(ctx, { body: bytes, mimeType: "image/jpeg", originalName: "b.jpg" });
+    const first = await uploadMedia(ctx, {
+      body: bytes,
+      mimeType: "image/jpeg",
+      originalName: "a.jpg",
+    });
+    const second = await uploadMedia(ctx, {
+      body: bytes,
+      mimeType: "image/jpeg",
+      originalName: "b.jpg",
+    });
     expect(first.ok && second.ok && first.value.id).toBe(second.ok ? second.value.id : null);
     expect((await ctx.repos.media.listAll()).length).toBe(1);
   });
 
   it("refuses an unsupported media type and images without alt text", async () => {
     const bytes = new TextEncoder().encode("x").buffer as ArrayBuffer;
-    const bad = await uploadMedia(ctx, { body: bytes, mimeType: "application/pdf", originalName: "a.pdf" });
+    const bad = await uploadMedia(ctx, {
+      body: bytes,
+      mimeType: "application/pdf",
+      originalName: "a.pdf",
+    });
     expect(!bad.ok && bad.errors[0]?.code).toBe("API_VALIDATION_FAILED");
 
     const result = await setArticleMedia(ctx, "article-x" as ArticleId, [
-      { articleId: "article-x" as ArticleId, mediaId: "m" as MediaId, role: "cover", sortOrder: 0, alt: " ", caption: null },
+      {
+        articleId: "article-x" as ArticleId,
+        mediaId: "m" as MediaId,
+        role: "cover",
+        sortOrder: 0,
+        alt: " ",
+        caption: null,
+      },
     ]);
     expect(!result.ok && result.errors[0]?.code).toBe("SEO_IMAGE_ALT_MISSING");
   });
@@ -140,8 +167,20 @@ describe("D1 repositories", () => {
   });
 
   it("builds a snapshot that contains only published revisions", async () => {
-    const live = await createArticle(ctx, { slug: "live", locale: "ja", authorId: AUTHOR, draft, path: "/posts/live" });
-    const hidden = await createArticle(ctx, { slug: "hidden", locale: "ja", authorId: AUTHOR, draft, path: "/posts/hidden" });
+    const live = await createArticle(ctx, {
+      slug: "live",
+      locale: "ja",
+      authorId: AUTHOR,
+      draft,
+      path: "/posts/live",
+    });
+    const hidden = await createArticle(ctx, {
+      slug: "hidden",
+      locale: "ja",
+      authorId: AUTHOR,
+      draft,
+      path: "/posts/hidden",
+    });
     if (!live.ok || !hidden.ok) throw new Error("setup failed");
 
     await attachCover(ctx, live.value.article.id);
@@ -156,9 +195,20 @@ describe("D1 repositories", () => {
 
 async function attachCover(ctx: AppContext, articleId: ArticleId): Promise<void> {
   const bytes = new TextEncoder().encode(`cover-${articleId}`).buffer as ArrayBuffer;
-  const upload = await uploadMedia(ctx, { body: bytes, mimeType: "image/jpeg", originalName: "cover.jpg" });
+  const upload = await uploadMedia(ctx, {
+    body: bytes,
+    mimeType: "image/jpeg",
+    originalName: "cover.jpg",
+  });
   if (!upload.ok) throw new Error("upload failed");
   await setArticleMedia(ctx, articleId, [
-    { articleId, mediaId: upload.value.id, role: "cover", sortOrder: 0, alt: "カバー画像", caption: null },
+    {
+      articleId,
+      mediaId: upload.value.id,
+      role: "cover",
+      sortOrder: 0,
+      alt: "カバー画像",
+      caption: null,
+    },
   ]);
 }

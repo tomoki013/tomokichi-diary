@@ -29,6 +29,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     places: await repos.places.listAll(),
     categories: await repos.taxonomy.listCategories(),
     tags: await repos.taxonomy.listTags(),
+    collections: await repos.collections.listAll(),
     authors: await repos.authors.listAll(),
     media: await repos.media.listAll(),
     articleMedia,
@@ -36,6 +37,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articlePlaces: await repos.relations.listArticlePlaces(),
     articleCategories: await repos.relations.listArticleCategories(),
     articleTags: await repos.relations.listArticleTags(),
+    articleCollections: await repos.collections.listMemberships(),
     aiArtifacts: [],
   };
 }

@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "36a99405-027a-8798-8c86-15f46beb1c5b",
+    "slug": "tourism",
+    "name": "観光情報",
+    "description": null,
+    "sortOrder": 0
+  },
+  {
+    "id": "4f072174-b500-896b-8a0f-2ac66f23a582",
+    "slug": "itinerary",
+    "name": "旅程&費用レポート",
+    "description": null,
+    "sortOrder": 1
+  },
+  {
+    "id": "0224ca7e-d334-8af1-9e40-c6e7370b22e5",
+    "slug": "series",
+    "name": "シリーズ",
+    "description": null,
+    "sortOrder": 2
+  },
+  {
+    "id": "ba1b09cb-62cf-8a1b-a23d-c69ccea4bd2b",
+    "slug": "one-off",
+    "name": "単発企画",
+    "description": null,
+    "sortOrder": 3
+  }
+]
