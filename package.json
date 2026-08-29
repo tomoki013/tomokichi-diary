@@ -1,0 +1,39 @@
+{
+  "name": "tomokichi-diary",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.11.0",
+  "engines": {
+    "node": ">=24.18.0"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "oxlint . && eslint apps/web",
+    "typecheck": "tsc --build --pretty false && tsc -p scripts --pretty false && tsc -p apps/admin --pretty false",
+    "test": "vitest run",
+    "build": "pnpm -r --filter \"./apps/*\" build",
+    "ci": "tsx scripts/ci.ts",
+    "diagnostics": "tsx scripts/diagnostics.ts",
+    "check:routes": "tsx scripts/check-routes.ts",
+    "check:seo": "tsx scripts/check-seo.ts",
+    "check:links": "tsx scripts/check-links.ts",
+    "perf": "tsx scripts/perf.ts",
+    "baseline": "tsx scripts/legacy-baseline.ts",
+    "export:data": "tsx scripts/export-data.ts",
+    "import:legacy": "tsx scripts/import-legacy.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "eslint": "^10.9.1",
+    "eslint-plugin-astro": "^3.1.0",
+    "oxlint": "^1.44.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11",
+    "@tomokichi/contracts": "workspace:*"
+  }
+}

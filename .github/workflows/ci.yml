@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# CI carries no business logic: everything it runs is `pnpm run ci`, which
+# behaves identically on a developer machine (see docs/ARCHITECTURE.md).
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ci
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: ci-artifacts
+          path: .artifacts/
+          retention-days: 14
