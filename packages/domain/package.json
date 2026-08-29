@@ -14,5 +14,8 @@
   "scripts": {
     "build": "tsc --build",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@tomokichi/contracts": "workspace:*"
   }
 }

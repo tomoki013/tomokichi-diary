@@ -28,21 +28,25 @@ const FRAMEWORKS = [
 ];
 
 const RULES: Rule[] = [
-  { files: "packages/domain/src/**/*.ts", allowedWorkspace: [], forbidden: FRAMEWORKS },
+  {
+    files: "packages/domain/src/**/*.ts",
+    allowedWorkspace: ["@tomokichi/contracts"],
+    forbidden: FRAMEWORKS,
+  },
   { files: "packages/contracts/src/**/*.ts", allowedWorkspace: [], forbidden: FRAMEWORKS },
   {
     files: "packages/application/src/**/*.ts",
-    allowedWorkspace: ["@tomokichi/domain"],
+    allowedWorkspace: ["@tomokichi/domain", "@tomokichi/data", "@tomokichi/contracts"],
     forbidden: FRAMEWORKS,
   },
   {
     files: "packages/data/src/**/*.ts",
-    allowedWorkspace: ["@tomokichi/domain"],
+    allowedWorkspace: ["@tomokichi/domain", "@tomokichi/contracts"],
     forbidden: FRAMEWORKS,
   },
   {
     files: "packages/seo/src/**/*.ts",
-    allowedWorkspace: ["@tomokichi/domain"],
+    allowedWorkspace: ["@tomokichi/domain", "@tomokichi/contracts"],
     forbidden: FRAMEWORKS,
   },
   {

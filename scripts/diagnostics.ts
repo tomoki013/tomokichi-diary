@@ -9,7 +9,12 @@ import { execFileSync } from "node:child_process";
 interface Diagnostics {
   runtime: { node: string; pnpm: string };
   schema: { latestMigration: string | null; count: number };
-  content: { articles: number | null; published: number | null; routes: number | null; media: number | null };
+  content: {
+    articles: number | null;
+    published: number | null;
+    routes: number | null;
+    media: number | null;
+  };
   ci: { status: string; finishedChecks: number; failedChecks: number } | null;
 }
 
@@ -24,7 +29,9 @@ function version(command: string, args: string[]): string {
 function migrations(): Diagnostics["schema"] {
   const dir = join(process.cwd(), "migrations");
   if (!existsSync(dir)) return { latestMigration: null, count: 0 };
-  const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".sql"))
+    .toSorted();
   return { latestMigration: files.at(-1) ?? null, count: files.length };
 }
 
@@ -54,7 +61,11 @@ function ci(): Diagnostics["ci"] {
     checks: unknown[];
     failedChecks: unknown[];
   };
-  return { status: summary.status, finishedChecks: summary.checks.length, failedChecks: summary.failedChecks.length };
+  return {
+    status: summary.status,
+    finishedChecks: summary.checks.length,
+    failedChecks: summary.failedChecks.length,
+  };
 }
 
 const diagnostics: Diagnostics = {

@@ -17,5 +17,6 @@
   },
   "dependencies": {
     "@tomokichi/domain": "workspace:*"
-  }
+  },
+  "devDependencies": {}
 }

@@ -160,6 +160,9 @@ importers:
 
   packages/application:
     dependencies:
+      '@tomokichi/data':
+        specifier: workspace:*
+        version: link:../data
       '@tomokichi/domain':
         specifier: workspace:*
         version: link:../domain
@@ -172,7 +175,11 @@ importers:
         specifier: workspace:*
         version: link:../domain
 
-  packages/domain: {}
+  packages/domain:
+    dependencies:
+      '@tomokichi/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
   packages/seo:
     dependencies:
