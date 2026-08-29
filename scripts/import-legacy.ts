@@ -101,9 +101,6 @@ const STATIC_PAGES: StaticPage[] = [
   { path: "/contact", key: "contact" },
   { path: "/faq", key: "faq" },
   { path: "/gallery", key: "gallery", noindex: true },
-  { path: "/social", key: "social", noindex: true },
-  { path: "/request", key: "request", noindex: true },
-  { path: "/roadmap", key: "roadmap", noindex: true },
   { path: "/sitemap", key: "sitemap", noindex: true },
   { path: "/legal/privacy", key: "privacy" },
   { path: "/legal/terms", key: "terms" },
@@ -114,6 +111,11 @@ const STATIC_PAGES: StaticPage[] = [
 
 const LEGACY_STATIC_REDIRECTS: Record<string, string> = {
   "/journey": "/trips",
+  // Thin noindex pages whose purpose is already served elsewhere. The URLs stay
+  // alive; the pages do not.
+  "/social": "/contact",
+  "/request": "/contact",
+  "/roadmap": "/about",
   "/privacy": "/legal/privacy",
   "/terms": "/legal/terms",
   "/cookie-policy": "/legal/cookies",

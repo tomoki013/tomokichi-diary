@@ -29,6 +29,7 @@
     ],
     "react/react-in-jsx-scope": "off",
     "import/no-named-as-default-member": "off",
-    "eslint/no-await-in-loop": "off"
+    "eslint/no-await-in-loop": "off",
+    "import/no-unassigned-import": "off"
   }
 }

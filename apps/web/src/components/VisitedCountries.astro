@@ -1,0 +1,54 @@
+---
+import { content } from "../lib/content";
+
+/**
+ * The legacy About page showed a world map driven by hard-coded counts. The
+ * same fact is derivable from the article/location relations, so it is
+ * computed instead of maintained.
+ */
+const countries = new Map<string, { name: string; path: string | null; articles: number }>();
+
+for (const article of content.publicArticles()) {
+  const seen = new Set<string>();
+  for (const relation of content.relations.locations.filter((r) => r.articleId === article.id)) {
+    const country = content.locations.countryOf(relation.locationId);
+    if (!country || seen.has(country.id)) continue;
+    seen.add(country.id);
+
+    const existing = countries.get(country.id);
+    if (existing) existing.articles++;
+    else
+      countries.set(country.id, {
+        name: content.locations.nameOf(country.id, "ja"),
+        path: content.routes.canonicalFor("location", country.id)?.path ?? null,
+        articles: 1,
+      });
+  }
+}
+
+const visited = [...countries.values()].toSorted((a, b) => b.articles - a.articles);
+---
+
+{
+  visited.length > 0 && (
+    <section class="section" aria-labelledby="footprints-heading">
+      <h2 id="footprints-heading">旅の記録 — 訪れた国</h2>
+      <p>これまでに {visited.length} か国の記事を公開しています。</p>
+      <ul class="chips">
+        {visited.map((country) => (
+          <li>
+            {country.path ? (
+              <a href={country.path}>
+                {country.name} ({country.articles})
+              </a>
+            ) : (
+              <span class="chip">
+                {country.name} ({country.articles})
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

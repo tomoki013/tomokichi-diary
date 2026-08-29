@@ -1,0 +1,37 @@
+---
+import type { Route } from "@tomokichi/domain";
+import { buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import { content } from "../lib/content";
+import { seoConfig } from "../lib/site";
+
+const metadata = buildPageMetadata(seoConfig, {
+  title: "ページが見つかりません",
+  description: "お探しのページは見つかりませんでした。",
+  route: { path: "/404" } as Route,
+  noindex: true,
+});
+
+const latest = content
+  .publicArticles()
+  .slice(0, 3)
+  .flatMap((article) => {
+    const view = content.viewOf(article.id);
+    return view ? [view] : [];
+  });
+---
+
+<BaseLayout metadata={metadata}>
+  <header class="page-header">
+    <h1>ページが見つかりません</h1>
+    <p>お探しのページは移動または削除された可能性があります。</p>
+  </header>
+  <p><a href="/posts">記事一覧から探す</a></p>
+  <section class="section">
+    <h2>最近の記事</h2>
+    <ul class="card-grid">
+      {latest.map((view) => <ArticleCard view={view} level={3} />)}
+    </ul>
+  </section>
+</BaseLayout>

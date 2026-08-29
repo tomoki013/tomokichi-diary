@@ -1,0 +1,414 @@
+/*
+ * One stylesheet, no framework: the public site ships almost no JavaScript and
+ * the CSS is small enough that a build step would cost more than it saves.
+ */
+:root {
+  --bg: #fdfcfa;
+  --surface: #ffffff;
+  --border: #e7e2d9;
+  --text: #23201c;
+  --muted: #6b645b;
+  --accent: #b45309;
+  --accent-soft: #fdf3e7;
+  --max-width: 44rem;
+  --wide-width: 68rem;
+  --radius: 0.5rem;
+  --font-sans:
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17150f;
+    --surface: #1f1c16;
+    --border: #35302६;
+    --border: #35302a;
+    --text: #ece7dd;
+    --muted: #a8a094;
+    --accent: #f0b25f;
+    --accent-soft: #2a2118;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.85;
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  background: var(--surface);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+}
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wide-width);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.wrap--narrow {
+  max-width: var(--max-width);
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem 1.5rem;
+  padding-block: 1rem;
+}
+
+.site-header__brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.site-nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--accent);
+}
+
+main {
+  flex: 1;
+  padding-block: 2.5rem 4rem;
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding-block: 2rem;
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.site-footer a {
+  color: var(--muted);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.2rem);
+  margin-block: 0 0.5rem;
+}
+
+.page-header {
+  margin-bottom: 2.5rem;
+}
+
+.page-header p {
+  color: var(--muted);
+  margin-block: 0.5rem 0;
+}
+
+.breadcrumbs {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs li + li::before {
+  content: "/";
+  margin-right: 0.4rem;
+  color: var(--border);
+}
+
+.breadcrumbs a {
+  color: var(--muted);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-block: 0.75rem 0;
+}
+
+.prose {
+  font-size: 1.02rem;
+}
+
+.prose > * + * {
+  margin-top: 1.4em;
+}
+
+.prose h2 {
+  font-size: 1.4rem;
+  margin-top: 2.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose h3 {
+  font-size: 1.15rem;
+  margin-top: 2em;
+}
+
+.prose img {
+  border-radius: var(--radius);
+  display: block;
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding: 0.2rem 1.1rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+
+.prose code {
+  background: var(--accent-soft);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: var(--radius);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.prose :is(th, td) {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--accent-soft);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 100%;
+}
+
+.card img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  width: 100%;
+}
+
+.card__body {
+  padding: 1rem 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.card__title {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card__title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.card__title a:hover {
+  color: var(--accent);
+}
+
+.card__summary {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.card__meta {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+.chips a,
+.chip {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.section {
+  margin-top: 3.5rem;
+}
+
+.section > h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1.25rem;
+}
+
+.hero {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.hero img {
+  border-radius: var(--radius);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+}
+
+.notice {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gallery img {
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius);
+  width: 100%;
+}
+
+.cost-table caption {
+  text-align: left;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}

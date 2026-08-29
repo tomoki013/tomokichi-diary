@@ -1,0 +1,32 @@
+---
+import type { ArticleEmbed } from "@tomokichi/domain";
+import CostReport from "./CostReport.astro";
+
+interface Props {
+  embed: ArticleEmbed;
+}
+
+const { embed } = Astro.props;
+const programs = (embed.payload["programs"] ?? []) as { name?: string }[];
+---
+
+{
+  embed.type === "table" && embed.anchorKey === "cost-report" && (
+    <CostReport payload={embed.payload as Parameters<typeof CostReport>[0]["payload"]} />
+  )
+}
+{
+  embed.type === "notice" && (
+    <aside class="notice">
+      <p>
+        この記事にはプロモーションが含まれます。
+        {programs.length > 0 &&
+          `（${programs
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join("、")}）`}
+        紹介の方針は<a href="/legal/affiliates">アフィリエイトポリシー</a>をご覧ください。
+      </p>
+    </aside>
+  )
+}

@@ -1,0 +1,46 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import { mediaUrl } from "../lib/site";
+
+interface Props {
+  view: ArticleView;
+  /** The first cards on a page carry the LCP image and must not be lazy. */
+  eager?: boolean;
+  /** Kept in step with the surrounding section so the heading order never jumps. */
+  level?: 2 | 3;
+}
+
+const { view, eager = false, level = 2 } = Astro.props;
+const Heading = `h${level}` as "h2" | "h3";
+const cover = view.cover;
+const published = view.article.publishedAt?.slice(0, 10);
+---
+
+<li class="card">
+  {
+    cover && (
+      <a href={view.route.path} tabindex="-1" aria-hidden="true">
+        <img
+          src={mediaUrl(cover.asset.storageKey)}
+          alt={cover.usage.alt}
+          width={cover.asset.width ?? 900}
+          height={cover.asset.height ?? 600}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+          fetchpriority={eager ? "high" : "auto"}
+        />
+      </a>
+    )
+  }
+  <div class="card__body">
+    <Heading class="card__title"><a href={view.route.path}>{view.revision.title}</a></Heading>
+    <p class="card__summary">{view.revision.summary}</p>
+    {
+      published && (
+        <p class="card__meta">
+          <time datetime={published}>{published}</time>
+        </p>
+      )
+    }
+  </div>
+</li>

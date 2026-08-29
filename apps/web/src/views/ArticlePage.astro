@@ -1,0 +1,125 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import type { Route } from "@tomokichi/domain";
+import { buildArticleJsonLd, buildArticleMetadata, buildBreadcrumbJsonLd } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleBody from "../components/ArticleBody.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import { content } from "../lib/content";
+import { articleTrail } from "../lib/navigation";
+import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
+
+interface Props {
+  view: ArticleView;
+  route: Route;
+}
+
+const { view, route } = Astro.props;
+const { article, revision, cover, author } = view;
+
+const coverUrl = cover ? absoluteUrl(mediaUrl(cover.asset.storageKey)) : null;
+const metadata = buildArticleMetadata(seoConfig, {
+  article,
+  revision,
+  route,
+  coverImageUrl: coverUrl,
+  authorName: author?.name ?? null,
+});
+const trail = articleTrail(article.id, route);
+
+const jsonLd = [
+  buildArticleJsonLd(seoConfig, {
+    article,
+    revision,
+    route,
+    description: metadata.description,
+    coverImageUrl: coverUrl,
+    author: author ? { name: author.name, url: author.url } : null,
+    about: [...view.places, ...view.locations].map((entry) =>
+      "place" in entry ? entry.place : entry.location,
+    ),
+  }),
+  buildBreadcrumbJsonLd(seoConfig, trail),
+];
+
+const related = content.relatedTo(article.id, 3);
+const published = article.publishedAt?.slice(0, 10);
+const updated = article.updatedAt.slice(0, 10);
+const travel =
+  article.travelStartDate &&
+  (article.travelEndDate && article.travelEndDate !== article.travelStartDate
+    ? `${article.travelStartDate} 〜 ${article.travelEndDate}`
+    : article.travelStartDate);
+---
+
+<BaseLayout metadata={metadata} jsonLd={jsonLd} width="narrow">
+  <article>
+    <Breadcrumbs trail={trail} />
+    <header class="page-header">
+      <h1>{revision.title}</h1>
+      <p>{revision.summary}</p>
+      <div class="meta">
+        {
+          published && (
+            <span>
+              公開 <time datetime={published}>{published}</time>
+            </span>
+          )
+        }
+        {
+          updated !== published && (
+            <span>
+              更新 <time datetime={updated}>{updated}</time>
+            </span>
+          )
+        }
+        {travel && <span>訪問 {travel}</span>}
+        {author && <span>著者 {author.name}</span>}
+      </div>
+      {
+        view.categories.length + view.tags.length > 0 && (
+          <ul class="chips" style="margin-top:0.9rem">
+            {view.categories.map((category) => (
+              <li class="chip">{category.name}</li>
+            ))}
+            {view.tags.map((tag) => (
+              <li class="chip">{tag.name}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      cover && (
+        <figure class="hero">
+          <img
+            src={mediaUrl(cover.asset.storageKey)}
+            alt={cover.usage.alt}
+            width={cover.asset.width ?? 1600}
+            height={cover.asset.height ?? 900}
+            fetchpriority="high"
+            decoding="async"
+          />
+          {cover.usage.caption && <figcaption>{cover.usage.caption}</figcaption>}
+        </figure>
+      )
+    }
+
+    <ArticleBody slug={article.slug} embeds={view.embeds} />
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="section" aria-labelledby="related-heading">
+        <h2 id="related-heading">関連する記事</h2>
+        <ul class="card-grid">
+          {related.map((item) => (
+            <ArticleCard view={item} level={3} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>

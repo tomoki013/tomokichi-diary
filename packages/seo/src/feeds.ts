@@ -22,7 +22,10 @@ export function buildSitemap(
   return inputs
     .filter(
       (input) =>
-        input.indexable && input.route.targetType !== "redirect" && input.route.isCanonical,
+        input.indexable &&
+        !input.route.noindex &&
+        input.route.targetType !== "redirect" &&
+        input.route.isCanonical,
     )
     .map((input) => ({
       loc: toAbsoluteUrl(config.siteUrl, input.route.path, config.trailingSlash),

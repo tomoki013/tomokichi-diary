@@ -248,6 +248,17 @@ describe("sitemap, rss and robots", () => {
     },
   ];
 
+  it("drops routes the table itself marks noindex", () => {
+    const entries = buildSitemap(config, [
+      {
+        route: { ...route, path: "/destination/thin", noindex: true } as Route,
+        lastmod: null,
+        indexable: true,
+      },
+    ]);
+    expect(entries).toEqual([]);
+  });
+
   it("includes only indexable canonical non-redirect routes", () => {
     const entries = buildSitemap(config, inputs);
     expect(entries.map((e) => e.loc)).toEqual([

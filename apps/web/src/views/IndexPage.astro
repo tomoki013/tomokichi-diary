@@ -1,0 +1,243 @@
+---
+import type { Route } from "@tomokichi/domain";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebSiteJsonLd } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import { content } from "../lib/content";
+import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
+
+interface Props {
+  route: Route;
+}
+
+const { route } = Astro.props;
+const articles = content.publicArticles().flatMap((article) => {
+  const view = content.viewOf(article.id);
+  return view ? [view] : [];
+});
+
+const PAGES: Record<string, { title: string; description: string }> = {
+  "/": { title: seoConfig.siteName, description: siteDescription },
+  "/posts": {
+    title: "記事一覧",
+    description: `公開しているすべての記事${articles.length}件を新しい順に掲載しています。`,
+  },
+  "/destination": {
+    title: "旅先から探す",
+    description: "訪れた国と都市ごとに、観光情報や移動手段、費用の記録をまとめています。",
+  },
+  "/series": { title: "シリーズ", description: "テーマごとにまとめた連載記事の一覧です。" },
+  "/trips": { title: "旅の記録", description: "これまでの旅程を時系列でまとめています。" },
+  "/gallery": { title: "ギャラリー", description: "旅先で撮影した写真をまとめています。" },
+  "/sitemap": { title: "サイトマップ", description: "サイト内のすべてのページの一覧です。" },
+};
+
+const page = PAGES[route.path] ?? { title: seoConfig.siteName, description: siteDescription };
+const metadata = buildPageMetadata(seoConfig, {
+  title: page.title,
+  description: page.description,
+  route,
+  noindex: route.noindex,
+});
+
+const trail =
+  route.path === "/"
+    ? []
+    : [
+        { name: "ホーム", route: { path: "/" } as Route },
+        { name: page.title, route },
+      ];
+
+const continents = content.locations
+  .roots()
+  .flatMap((root) => {
+    const hub = content.routes.canonicalFor("location", root.id);
+    if (!hub) return [];
+    const countries = content.locations.children(root.id).flatMap((country) => {
+      const countryHub = content.routes.canonicalFor("location", country.id);
+      return countryHub
+        ? [{ name: content.locations.nameOf(country.id, "ja"), path: countryHub.path }]
+        : [];
+    });
+    return [{ name: content.locations.nameOf(root.id, "ja"), path: hub.path, countries }];
+  })
+  .filter((continent) => continent.countries.length > 0);
+
+const collections = (kind: "series" | "journey") =>
+  content.snapshot.collections
+    .filter((collection) => collection.kind === kind)
+    .flatMap((collection) => {
+      const hub = content.routes.canonicalFor(kind, collection.id);
+      const members = content.membersOf(collection.id);
+      return hub && members.length > 0
+        ? [{ collection, path: hub.path, count: members.length }]
+        : [];
+    });
+
+const galleryImages = articles
+  .flatMap((view) => view.media.filter((item) => item.usage.role !== "og"))
+  .slice(0, 60);
+
+const sitemapGroups = [
+  { label: "記事", routes: content.routes.renderable().filter((r) => r.targetType === "article") },
+  { label: "旅先", routes: content.routes.renderable().filter((r) => r.targetType === "location") },
+  {
+    label: "シリーズ・旅の記録",
+    routes: content.routes
+      .renderable()
+      .filter((r) => r.targetType === "series" || r.targetType === "journey"),
+  },
+  { label: "その他", routes: content.routes.renderable().filter((r) => r.targetType === "static") },
+];
+
+const labelOf = (target: Route): string => {
+  switch (target.targetType) {
+    case "article":
+      return content.titleOf((target.targetId ?? "") as never) || target.path;
+    case "location":
+      return content.locations.nameOf((target.targetId ?? "") as never, "ja");
+    case "series":
+    case "journey":
+      return content.collection((target.targetId ?? "") as never)?.title ?? target.path;
+    default:
+      return (
+        PAGES[target.path]?.title ??
+        (content.titleOf((target.targetId ?? "") as never) || target.path)
+      );
+  }
+};
+---
+
+<BaseLayout
+  metadata={metadata}
+  jsonLd={[
+    route.path === "/" ? buildWebSiteJsonLd(seoConfig) : null,
+    buildBreadcrumbJsonLd(seoConfig, trail),
+  ]}
+>
+  <Breadcrumbs trail={trail} />
+  <header class="page-header">
+    <h1>{page.title}</h1>
+    <p>{page.description}</p>
+  </header>
+
+  {
+    route.path === "/" && (
+      <>
+        <section class="section" aria-labelledby="latest-heading">
+          <h2 id="latest-heading">新着の記事</h2>
+          <ul class="card-grid">
+            {articles.slice(0, 6).map((view, index) => (
+              <ArticleCard view={view} eager={index < 3} level={3} />
+            ))}
+          </ul>
+          <p style="margin-top:1.5rem">
+            <a href="/posts">すべての記事を見る</a>
+          </p>
+        </section>
+        <section class="section" aria-labelledby="destinations-heading">
+          <h2 id="destinations-heading">旅先から探す</h2>
+          {continents.map((continent) => (
+            <>
+              <h3>{continent.name}</h3>
+              <ul class="chips" style="margin-bottom:1.25rem">
+                {continent.countries.map((country) => (
+                  <li>
+                    <a href={country.path}>{country.name}</a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ))}
+        </section>
+      </>
+    )
+  }
+
+  {
+    route.path === "/posts" && (
+      <ul class="card-grid">
+        {articles.map((view, index) => (
+          <ArticleCard view={view} eager={index < 3} />
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    route.path === "/destination" &&
+      continents.map((continent) => (
+        <section class="section">
+          <h2>
+            <a href={continent.path}>{continent.name}</a>
+          </h2>
+          <ul class="chips">
+            {continent.countries.map((country) => (
+              <li>
+                <a href={country.path}>{country.name}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+  }
+
+  {
+    (route.path === "/series" || route.path === "/trips") && (
+      <ul class="card-grid">
+        {collections(route.path === "/series" ? "series" : "journey").map((entry) => (
+          <li class="card">
+            <div class="card__body">
+              <h2 class="card__title">
+                <a href={entry.path}>{entry.collection.title}</a>
+              </h2>
+              {entry.collection.description && (
+                <p class="card__summary">{entry.collection.description}</p>
+              )}
+              <p class="card__meta">
+                {entry.collection.startDate && `${entry.collection.startDate} · `}
+                {entry.count}件の記事
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    route.path === "/gallery" && (
+      <ul class="gallery">
+        {galleryImages.map((item, index) => (
+          <li>
+            <img
+              src={mediaUrl(item.asset.storageKey)}
+              alt={item.usage.alt}
+              width={item.asset.width ?? 600}
+              height={item.asset.height ?? 400}
+              loading={index < 8 ? "eager" : "lazy"}
+              decoding="async"
+            />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    route.path === "/sitemap" &&
+      sitemapGroups.map((group) => (
+        <section class="section">
+          <h2>{group.label}</h2>
+          <ul>
+            {group.routes.map((target) => (
+              <li>
+                <a href={target.path}>{labelOf(target)}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+  }
+</BaseLayout>

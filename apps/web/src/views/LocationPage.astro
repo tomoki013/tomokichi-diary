@@ -1,0 +1,77 @@
+---
+import type { LocationId, Route } from "@tomokichi/domain";
+import { listPublicArticles } from "@tomokichi/domain";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import { content, now } from "../lib/content";
+import { locationTrail } from "../lib/navigation";
+import { seoConfig } from "../lib/site";
+
+interface Props {
+  route: Route;
+}
+
+const { route } = Astro.props;
+const locationId = (route.targetId ?? "") as LocationId;
+const location = content.locations.get(locationId);
+const name = content.locations.nameOf(locationId, "ja");
+
+const descendants = content.locations.descendantIds(locationId);
+const articles = listPublicArticles({
+  articles: content.snapshot.articles,
+  relations: content.relations,
+  filter: { locationId, locationDescendants: descendants },
+  now,
+});
+const views = articles.flatMap((article) => {
+  const view = content.viewOf(article.id);
+  return view ? [view] : [];
+});
+
+const children = content.locations.children(locationId).flatMap((child) => {
+  const hub = content.routes.canonicalFor("location", child.id);
+  return hub ? [{ name: content.locations.nameOf(child.id, "ja"), path: hub.path }] : [];
+});
+
+const trail = locationTrail(route);
+const metadata = buildPageMetadata(seoConfig, {
+  title: `${name}の記事`,
+  description: `${name}に関する記事を${views.length}件掲載しています。実際に訪れた体験をもとにした観光情報や移動手段、費用の記録をまとめています。`,
+  route,
+  imageUrl: null,
+  noindex: route.noindex,
+});
+---
+
+<BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}>
+  <Breadcrumbs trail={trail} />
+  <header class="page-header">
+    <h1>{name}の記事</h1>
+    <p>{views.length}件の記事があります。</p>
+  </header>
+
+  {
+    children.length > 0 && (
+      <nav class="section" aria-label={`${name}の下位エリア`}>
+        <h2>エリアから探す</h2>
+        <ul class="chips">
+          {children.map((child) => (
+            <li>
+              <a href={child.path}>{child.name}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+
+  <section class="section" aria-label="記事一覧">
+    <ul class="card-grid">
+      {views.map((view, index) => <ArticleCard view={view} eager={index < 3} />)}
+    </ul>
+  </section>
+
+  {location === undefined && <p>この地域の情報は準備中です。</p>}
+</BaseLayout>

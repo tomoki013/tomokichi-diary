@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import { routeArtifacts } from "./src/integrations/route-artifacts.ts";
+import { snapshot } from "./src/lib/content.ts";
 
 const site = process.env.PUBLIC_SITE_URL ?? "https://tomokichidiary.com";
 
@@ -11,6 +13,6 @@ export default defineConfig({
   output: "static",
   trailingSlash: "ignore",
   build: { format: "directory" },
-  integrations: [react()],
+  integrations: [react(), routeArtifacts(snapshot.routes)],
   devToolbar: { enabled: false },
 });

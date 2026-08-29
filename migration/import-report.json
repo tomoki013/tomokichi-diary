@@ -14,9 +14,6 @@
   "bodiesWithRewrittenLinks": 4,
   "legacyNoindexStatic": [
     "/gallery",
-    "/social",
-    "/request",
-    "/roadmap",
     "/sitemap",
     "/legal/affiliates"
   ],

@@ -1,0 +1,45 @@
+---
+import { getEntry, render } from "astro:content";
+import type { ArticleEmbed } from "@tomokichi/domain";
+import EmbedBlock from "./EmbedBlock.astro";
+
+interface Props {
+  slug: string;
+  embeds: readonly ArticleEmbed[];
+}
+
+const { slug, embeds } = Astro.props;
+const entry = await getEntry("articles", slug);
+if (!entry) throw new Error(`no exported body for article ${slug}`);
+
+const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
+
+/**
+ * `{{embed:key}}` markers survive Markdown rendering as their own paragraph.
+ * Splitting on them keeps the body a single rendered document while letting
+ * structured blocks be real components rather than serialised HTML.
+ */
+const PLACEHOLDER = /<p>\s*\{\{embed:([a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
+const html = entry.rendered?.html ?? null;
+const segments = html === null ? null : html.split(PLACEHOLDER);
+
+const { Content } = html === null ? await render(entry) : { Content: null };
+---
+
+<div class="prose">
+  {
+    segments === null ? (
+      <Content />
+    ) : (
+      segments.map((segment, index) =>
+        index % 2 === 1 ? (
+          embedByAnchor.has(segment) ? (
+            <EmbedBlock embed={embedByAnchor.get(segment)!} />
+          ) : null
+        ) : (
+          <Fragment set:html={segment} />
+        ),
+      )
+    )
+  }
+</div>

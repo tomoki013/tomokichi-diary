@@ -1,0 +1,60 @@
+---
+interface CostReportPayload {
+  budget?: { amount?: number; currency?: string };
+  costs?: { currency?: string; items?: Record<string, number> };
+}
+
+interface Props {
+  payload: CostReportPayload;
+}
+
+const { payload } = Astro.props;
+const currency = payload.costs?.currency ?? payload.budget?.currency ?? "JPY";
+const items = Object.entries(payload.costs?.items ?? {});
+const total = items.reduce((sum, [, value]) => sum + value, 0);
+
+const LABELS: Record<string, string> = {
+  flight: "航空券",
+  train: "鉄道",
+  hotel: "宿泊",
+  transport: "現地交通",
+  sightseeing: "観光",
+  food: "食事",
+  other: "その他",
+};
+
+const format = (value: number): string =>
+  new Intl.NumberFormat("ja-JP", { style: "currency", currency, maximumFractionDigits: 0 }).format(
+    value,
+  );
+---
+
+{
+  items.length > 0 && (
+    <div class="table-scroll">
+      <table class="cost-table">
+        <caption>費用の内訳</caption>
+        <thead>
+          <tr>
+            <th scope="col">項目</th>
+            <th scope="col">金額</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(([key, value]) => (
+            <tr>
+              <th scope="row">{LABELS[key] ?? key}</th>
+              <td>{format(value)}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">合計</th>
+            <td>{format(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  )
+}

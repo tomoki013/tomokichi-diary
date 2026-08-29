@@ -1,0 +1,39 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import type { Route } from "@tomokichi/domain";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleBody from "../components/ArticleBody.astro";
+import VisitedCountries from "../components/VisitedCountries.astro";
+import { pageTrail } from "../lib/navigation";
+import { seoConfig } from "../lib/site";
+
+interface Props {
+  view: ArticleView;
+  route: Route;
+}
+
+const { view, route } = Astro.props;
+const metadata = buildPageMetadata(seoConfig, {
+  title: view.revision.seoTitleOverride ?? view.revision.title,
+  description: view.revision.summary,
+  route,
+  noindex: route.noindex || view.article.noindex,
+});
+const trail = pageTrail(route, view.revision.title);
+const updated = view.article.updatedAt.slice(0, 10);
+---
+
+<BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]} width="narrow">
+  <article>
+    <Breadcrumbs trail={trail} />
+    <header class="page-header">
+      <h1>{view.revision.title}</h1>
+      {view.revision.summary && <p>{view.revision.summary}</p>}
+      <div class="meta"><span>更新 <time datetime={updated}>{updated}</time></span></div>
+    </header>
+    <ArticleBody slug={view.article.slug} embeds={view.embeds} />
+    {route.path === "/about" && <VisitedCountries />}
+  </article>
+</BaseLayout>

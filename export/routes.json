@@ -2631,25 +2631,25 @@
     "id": "fd8443ac-21f0-86da-b41d-89cde7d40b7a",
     "path": "/request",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "request",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/contact",
+    "redirectStatus": 301,
     "isLegacy": true,
-    "noindex": true
+    "noindex": false
   },
   {
     "id": "efd6565d-5a85-8e64-a61a-b0c02dd53e59",
     "path": "/roadmap",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "roadmap",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/about",
+    "redirectStatus": 301,
     "isLegacy": true,
-    "noindex": true
+    "noindex": false
   },
   {
     "id": "25670c66-7286-8960-a648-3605903835e7",
@@ -2751,13 +2751,13 @@
     "id": "f83a51ed-ca5f-8c39-a89b-9043006a6801",
     "path": "/social",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "social",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/contact",
+    "redirectStatus": 301,
     "isLegacy": true,
-    "noindex": true
+    "noindex": false
   },
   {
     "id": "105ec05e-2728-860f-ab16-9899875bdb2f",

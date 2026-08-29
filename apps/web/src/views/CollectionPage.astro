@@ -1,0 +1,50 @@
+---
+import type { CollectionId, Route } from "@tomokichi/domain";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import { content } from "../lib/content";
+import { collectionTrail } from "../lib/navigation";
+import { seoConfig } from "../lib/site";
+
+interface Props {
+  route: Route;
+}
+
+const { route } = Astro.props;
+const collectionId = (route.targetId ?? "") as CollectionId;
+const collection = content.collection(collectionId);
+const members = content.membersOf(collectionId);
+
+const title = collection?.title ?? "";
+const trail = collectionTrail(route, title);
+const period =
+  collection?.startDate &&
+  (collection.endDate && collection.endDate !== collection.startDate
+    ? `${collection.startDate} 〜 ${collection.endDate}`
+    : collection.startDate);
+
+const metadata = buildPageMetadata(seoConfig, {
+  title,
+  description: collection?.description ?? `${title}に含まれる記事の一覧です。`,
+  route,
+  noindex: route.noindex,
+});
+---
+
+<BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}>
+  <Breadcrumbs trail={trail} />
+  <header class="page-header">
+    <h1>{title}</h1>
+    {collection?.description && <p>{collection.description}</p>}
+    <div class="meta">
+      {period && <span>{period}</span>}
+      <span>{members.length}件の記事</span>
+    </div>
+  </header>
+
+  <ul class="card-grid">
+    {members.map((view, index) => <ArticleCard view={view} eager={index < 3} />)}
+  </ul>
+</BaseLayout>

@@ -1,0 +1,21 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "apps/web/dist",
+      "numberOfRuns": 3,
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/posts/index.html",
+        "http://localhost/posts/chagee-menu-explained/index.html",
+        "http://localhost/destination/japan/index.html",
+        "http://localhost/destination/japan/kyoto/index.html",
+        "http://localhost/trips/paris-2025-02/index.html"
+      ],
+      "settings": {
+        "preset": "desktop",
+        "chromeFlags": "--headless=new --no-sandbox"
+      }
+    },
+    "upload": { "target": "filesystem", "outputDir": ".artifacts/ci/lighthouse" }
+  }
+}

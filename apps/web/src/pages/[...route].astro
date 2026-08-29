@@ -1,0 +1,43 @@
+---
+/**
+ * Every public page is generated from the Route table, so the site cannot
+ * drift from the URL data: a route that exists is rendered, and a page that is
+ * rendered has a route (docs/adr/0002-route-independent-from-slug.md).
+ */
+import type { ArticleId, Route } from "@tomokichi/domain";
+import { content } from "../lib/content";
+import ArticlePage from "../views/ArticlePage.astro";
+import PagePage from "../views/PagePage.astro";
+import LocationPage from "../views/LocationPage.astro";
+import CollectionPage from "../views/CollectionPage.astro";
+import IndexPage from "../views/IndexPage.astro";
+
+export function getStaticPaths() {
+  return content.routes.renderable().map((route) => ({
+    // Astro's catch-all wants the path without its leading slash; the home page
+    // is the empty string.
+    params: { route: route.path === "/" ? undefined : route.path.slice(1) },
+    props: { route },
+  }));
+}
+
+const { route } = Astro.props as { route: Route };
+const targetArticle =
+  route.targetType === "article" || route.targetType === "static"
+    ? content.viewOf((route.targetId ?? "") as ArticleId)
+    : null;
+---
+
+{
+  route.targetType === "article" && targetArticle && (
+    <ArticlePage view={targetArticle} route={route} />
+  )
+}
+{route.targetType === "static" && targetArticle && <PagePage view={targetArticle} route={route} />}
+{route.targetType === "static" && !targetArticle && <IndexPage route={route} />}
+{route.targetType === "location" && <LocationPage route={route} />}
+{
+  (route.targetType === "series" || route.targetType === "journey") && (
+    <CollectionPage route={route} />
+  )
+}
