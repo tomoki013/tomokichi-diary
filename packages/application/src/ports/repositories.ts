@@ -112,6 +112,7 @@ export interface RelationRepository {
 export interface AuthorRepository {
   findById(id: AuthorId): Promise<Author | null>;
   listAll(): Promise<readonly Author[]>;
+  save(author: Author): Promise<void>;
 }
 
 export interface AIArtifactRepository {

@@ -100,6 +100,9 @@ export async function createArticle(
     isLegacy: false,
   };
 
+  // The article row exists first so the revision's foreign key resolves, then
+  // the article is updated to point at the revision it now owns.
+  await ctx.repos.articles.save(article);
   await ctx.repos.revisions.save(revision);
   await ctx.repos.articles.save({ ...article, currentRevisionId: revision.id });
   await ctx.repos.routes.save(route);

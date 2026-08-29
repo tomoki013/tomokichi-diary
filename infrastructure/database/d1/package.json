@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./testing": {
+      "types": "./dist/node-sqlite.d.ts",
+      "default": "./src/node-sqlite.ts"
     }
   },
   "main": "./src/index.ts",
@@ -21,6 +25,8 @@
     "@tomokichi/data": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260101.0"
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "@types/node": "^26.4.0",
+    "@tomokichi/infra-r2": "workspace:*"
   }
 }

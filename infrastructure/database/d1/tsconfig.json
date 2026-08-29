@@ -4,13 +4,29 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "types": ["@cloudflare/workers-types"]
+    "types": [
+      "@cloudflare/workers-types",
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.ts"],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ],
   "references": [
-    { "path": "../../../packages/domain" },
-    { "path": "../../../packages/application" },
-    { "path": "../../../packages/data" }
+    {
+      "path": "../../../packages/domain"
+    },
+    {
+      "path": "../../../packages/application"
+    },
+    {
+      "path": "../../../packages/data"
+    },
+    {
+      "path": "../../storage/r2"
+    }
   ]
 }

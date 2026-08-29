@@ -34,6 +34,12 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11",
-    "@tomokichi/contracts": "workspace:*"
+    "@tomokichi/contracts": "workspace:*",
+    "@tomokichi/application": "workspace:*",
+    "@tomokichi/data": "workspace:*",
+    "@tomokichi/domain": "workspace:*",
+    "@tomokichi/infra-d1": "workspace:*",
+    "@tomokichi/infra-r2": "workspace:*",
+    "@tomokichi/seo": "workspace:*"
   }
 }

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-29T16:37:09.495Z",
+  "counts": {
+    "articles": 0,
+    "revisions": 0,
+    "embeds": 0,
+    "routes": 0,
+    "locations": 0,
+    "locationNames": 0,
+    "places": 0,
+    "categories": 0,
+    "tags": 0,
+    "authors": 0,
+    "media": 0,
+    "articleMedia": 0,
+    "articleLocations": 0,
+    "articlePlaces": 0,
+    "articleCategories": 0,
+    "articleTags": 0
+  }
+}

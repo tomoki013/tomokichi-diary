@@ -76,7 +76,10 @@ function specifiersOf(source: string): string[] {
 function check(): Finding[] {
   const findings: Finding[] = [];
   for (const rule of RULES) {
-    for (const file of globSync(rule.files, { exclude: (p) => p.includes("node_modules") })) {
+    // Test files are not shipped, so they may reach for in-memory adapters.
+    const isExcluded = (p: string) =>
+      p.includes("node_modules") || p.includes("__tests__") || p.endsWith(".test.ts");
+    for (const file of globSync(rule.files, { exclude: isExcluded })) {
       const source = readFileSync(file, "utf8");
       for (const spec of specifiersOf(source)) {
         if (spec.startsWith(".") || spec.startsWith("node:")) continue;

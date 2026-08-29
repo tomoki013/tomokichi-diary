@@ -8,9 +8,27 @@ importers:
 
   .:
     devDependencies:
+      '@tomokichi/application':
+        specifier: workspace:*
+        version: link:packages/application
       '@tomokichi/contracts':
         specifier: workspace:*
         version: link:packages/contracts
+      '@tomokichi/data':
+        specifier: workspace:*
+        version: link:packages/data
+      '@tomokichi/domain':
+        specifier: workspace:*
+        version: link:packages/domain
+      '@tomokichi/infra-d1':
+        specifier: workspace:*
+        version: link:infrastructure/database/d1
+      '@tomokichi/infra-r2':
+        specifier: workspace:*
+        version: link:infrastructure/storage/r2
+      '@tomokichi/seo':
+        specifier: workspace:*
+        version: link:packages/seo
       '@types/node':
         specifier: ^26.4.0
         version: 26.4.0
@@ -147,6 +165,12 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20260101.0
         version: 4.20260702.1
+      '@tomokichi/infra-r2':
+        specifier: workspace:*
+        version: link:../../storage/r2
+      '@types/node':
+        specifier: ^26.4.0
+        version: 26.4.0
 
   infrastructure/storage/r2:
     dependencies:
