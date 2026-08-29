@@ -34,7 +34,8 @@ export function listBuiltPages(dir = DIST_DIR): BuiltPage[] {
       if (!entry.endsWith(".html")) continue;
       const relativePath = relative(dir, full).split(sep).join("/");
       pages.push({
-        path: normalizeRoutePath(`/${relativePath.replace(/(?:^|\/)index\.html$/, "")}`),
+        // `about.html` and `about/index.html` both address `/about`.
+        path: normalizeRoutePath(`/${relativePath.replace(/(?:(?:^|\/)index)?\.html$/, "")}`),
         file: full,
       });
     }

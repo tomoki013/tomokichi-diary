@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "./lib/run.js";
+import { run, tail } from "./lib/run.js";
 import type { Finding } from "./lib/report.js";
 import { report } from "./lib/built-site.js";
 
@@ -52,8 +52,15 @@ const reports = existsSync(OUT_DIR)
 if (reports.length === 0) {
   // Chrome is not available everywhere; a missing run is reported as skipped
   // rather than as a pass, so it can never hide a regression.
+  // The reason is carried through so a skipped gate is still diagnosable from
+  // the summary alone.
   process.stdout.write(
-    `${JSON.stringify({ skipped: true, reason: outcome.ok ? "no lighthouse reports produced" : "lighthouse failed" })}\n`,
+    `${JSON.stringify({
+      skipped: true,
+      reason: outcome.ok
+        ? "no lighthouse reports produced"
+        : `lighthouse failed: ${tail(outcome.output, 4)}`,
+    })}\n`,
   );
   process.exit(0);
 }

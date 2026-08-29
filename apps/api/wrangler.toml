@@ -3,5 +3,21 @@ main = "src/index.ts"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN`.
+# It is never committed, and a missing value closes the admin API.
+[vars]
+PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
+ALLOWED_ORIGINS = "https://admin.tomokichidiary.com,https://tomokichi-diary-admin.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tomokichi-diary"
+database_id = "b799453b-ada9-454e-81dc-26999c2c29db"
+migrations_dir = "../../migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "tomokichi-diary-media"
+
 [observability]
 enabled = true

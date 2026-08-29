@@ -87,8 +87,13 @@ for (const page of pages) {
 }
 
 // A page the previous site allowed into the index must not become noindex.
+// Preview builds turn indexing off deliberately, so the comparison only makes
+// sense against a build that is meant to be indexed.
+const indexableBuild = process.env.PUBLIC_INDEXABLE !== "false";
 const builtByPath = new Map(pages.map((page) => [page.path, page]));
-for (const legacy of loadLegacyBaseline<{ path: string; indexable: boolean }>("legacy-seo.json")) {
+for (const legacy of indexableBuild
+  ? loadLegacyBaseline<{ path: string; indexable: boolean }>("legacy-seo.json")
+  : []) {
   if (!legacy.indexable) continue;
   const resolved = table.resolve(legacy.path);
   const destination = resolved.ok ? resolved.value.destination : null;

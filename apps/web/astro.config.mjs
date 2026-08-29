@@ -11,8 +11,11 @@ const site = process.env.PUBLIC_SITE_URL ?? "https://tomokichidiary.com";
 export default defineConfig({
   site,
   output: "static",
-  trailingSlash: "ignore",
-  build: { format: "directory" },
+  // The previous site served every URL without a trailing slash and redirected
+  // the slashed form to it. `file` output keeps that exact behaviour on
+  // Cloudflare Pages; `directory` output would 308 in the opposite direction.
+  trailingSlash: "never",
+  build: { format: "file" },
   integrations: [react(), routeArtifacts(snapshot.routes)],
   devToolbar: { enabled: false },
 });
