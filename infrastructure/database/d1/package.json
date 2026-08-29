@@ -11,6 +11,10 @@
     "./testing": {
       "types": "./dist/node-sqlite.d.ts",
       "default": "./src/node-sqlite.ts"
+    },
+    "./testing-context": {
+      "types": "./dist/__tests__/context.d.ts",
+      "default": "./src/__tests__/context.ts"
     }
   },
   "main": "./src/index.ts",

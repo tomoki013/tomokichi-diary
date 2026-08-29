@@ -1,1 +1,3 @@
-export const PLACEHOLDER = true;
+import { createApp } from "./app.js";
+
+export default createApp();

@@ -5,15 +5,28 @@
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "lib": ["ES2023"],
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types", "node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts"],
   "references": [
-    { "path": "../../packages/domain" },
-    { "path": "../../packages/application" },
-    { "path": "../../packages/contracts" },
-    { "path": "../../infrastructure/database/d1" },
-    { "path": "../../infrastructure/storage/r2" }
+    {
+      "path": "../../packages/domain"
+    },
+    {
+      "path": "../../packages/application"
+    },
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../infrastructure/database/d1"
+    },
+    {
+      "path": "../../infrastructure/storage/r2"
+    },
+    {
+      "path": "../../packages/data"
+    }
   ]
 }
