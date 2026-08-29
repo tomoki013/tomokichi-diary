@@ -22,6 +22,7 @@ export function articleId(n: number): ArticleId {
 export function makeArticle(overrides: Partial<Article> = {}): Article {
   return {
     id: articleId(1),
+    kind: "article",
     status: "draft",
     locale: "ja",
     slug: "chagee-menu-explained" as Slug,
@@ -68,6 +69,7 @@ export function makeRoute(overrides: Partial<Route> = {}): Route {
     redirectTo: null,
     redirectStatus: null,
     isLegacy: true,
+    noindex: false,
     ...overrides,
   };
 }

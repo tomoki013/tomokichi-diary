@@ -8,51 +8,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "cc4f451a-86d9-8cfe-82bd-133abe43120a",
     "path": "/about",
     "locale": "ja",
     "targetType": "static",
-    "targetId": "about",
+    "targetId": "85deccb9-fed2-8b23-be2f-2cd73551ab04",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0135070c-19e9-88d6-b879-9c99cda6defb",
     "path": "/affiliates",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "affiliates",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/legal/affiliates",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "8bc02356-b520-80c1-aea9-0687abdf3116",
     "path": "/contact",
     "locale": "ja",
     "targetType": "static",
-    "targetId": "contact",
+    "targetId": "54775ea0-bbfc-83a3-b263-90af03305c18",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "2f4d29cf-8f8d-884b-9616-7d2f1e0df02e",
     "path": "/cookie-policy",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "cookie-policy",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/legal/cookies",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "63e31535-ee46-81c5-8cde-6cf2fb1b37c5",
@@ -63,18 +68,20 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "8621d334-154c-8bc2-9a83-39a0b6c28511",
     "path": "/destination/abu-simbel",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/egypt/abu-simbel",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "644ccc76-6d0d-8272-bb4a-9bd76b0ae459",
@@ -85,18 +92,20 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0cb0f7fa-6e7a-8a9f-a22f-ad8761c3a218",
     "path": "/destination/agra",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "df2e6921-46e7-8bbc-8237-4ff812ae1b62",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/india/agra",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "09267391-3810-8d93-a5a6-fa0b4c5cda46",
@@ -107,51 +116,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f3e84477-aa0d-8b73-822d-0a7b54373be7",
     "path": "/destination/aswan",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/egypt/aswan",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "527b4b7d-6103-86cd-b91f-a2c41589acaa",
     "path": "/destination/athens",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/greece/athens",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "74fc9fc5-c0fa-8032-8caa-89668192c2a7",
     "path": "/destination/bangkok",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "e36e2357-77a7-81b8-b135-57cdd918de59",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/thailand/bangkok",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1b1792d4-ee4b-8b78-870e-670436252cc1",
     "path": "/destination/barcelona",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/spain/barcelona",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7031ddb3-5416-8397-86b9-ab0f48f7f27a",
@@ -162,51 +176,68 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
-    "id": "47336f05-f79b-8c93-91ab-dde45b7fbaa0",
-    "path": "/destination/brussels",
+    "id": "f5c1700d-e6d5-8d5d-87e5-4b720398dfb5",
+    "path": "/destination/belgium/brussels",
     "locale": "ja",
     "targetType": "location",
     "targetId": "0a435875-44ff-8b8c-bb93-67c3a11cdf5e",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "47336f05-f79b-8c93-91ab-dde45b7fbaa0",
+    "path": "/destination/brussels",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/belgium/brussels",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "faa84a1d-3416-8f90-b690-605a7d543448",
     "path": "/destination/cairo",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/egypt/cairo",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "6344aab1-c846-8775-8542-2d80915520e5",
     "path": "/destination/cappadocia",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/turkey/cappadocia",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7868974d-310a-8fdc-9458-aba53cbae67e",
     "path": "/destination/changi",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "a847c904-5112-8373-a295-df7db632cb67",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/singapore/changi",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "288a55a4-a307-89f2-98e5-150de3c9e25f",
@@ -217,7 +248,20 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "5365331b-b161-805c-b5e7-e2890ffc8173",
+    "path": "/destination/china/shanghai",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1d92160d-c438-8afd-a824-146a62141d46",
@@ -228,7 +272,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "c09ac980-299b-8dd7-9738-5bf5583dad34",
+    "path": "/destination/egypt/abu-simbel",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "809352fb-a05f-8e76-97f0-2f1eb03e96b8",
+    "path": "/destination/egypt/aswan",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "19aea49b-9ecd-8bbd-b44d-a32b69e8c5e4",
+    "path": "/destination/egypt/cairo",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "9f35f31e-67a4-8c18-b29b-cd245eb321af",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "1f168336-f7eb-89b5-bb99-c24f4c3edf83",
+    "path": "/destination/egypt/giza",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "13401bd1-6339-8f01-9f41-13b2863424f8",
@@ -239,7 +332,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c489be66-143f-8c39-967a-f1b83b10073f",
@@ -250,18 +344,32 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "575e5487-70cb-8559-9ef6-f88df6ce5a1d",
+    "path": "/destination/france/paris",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c109d8c2-7a71-8e50-a485-3224e103b209",
     "path": "/destination/giza",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "0bda1619-cc49-8bec-935a-c8e4f8d208d5",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/egypt/giza",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "24dbd509-b636-8322-b9ad-5a714e6d1473",
@@ -272,7 +380,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "d6ba96c5-3190-80fb-8f77-9628ee0eaa8a",
@@ -283,29 +392,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "96e9fd0a-4a47-83b9-92b7-d84ea5e10bb2",
+    "path": "/destination/greece/athens",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "87ea7e46-cbf7-89b6-b92d-4b6dc7d6e1a8",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "f07cbf52-cff2-85f7-9a68-ad9033d82d51",
+    "path": "/destination/greece/santorini",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "591a2082-379a-82d2-964e-c95410455165",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7e22bd3c-d12c-8d41-aa7c-58bc6ddfdcd8",
     "path": "/destination/hanoi",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/vietnam/hanoi",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "3afad721-32d6-834f-9215-6b41f0db76f0",
     "path": "/destination/hokkaido",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "6d5f43ff-c590-8dc3-a498-601f1422d05b",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/japan/hokkaido",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "ab4e9bd4-c21c-8829-bac3-a7c4acc121de",
@@ -316,7 +452,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "eb8c629e-4dbd-83ec-9c16-12207ec9b842",
+    "path": "/destination/india/agra",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "df2e6921-46e7-8bbc-8237-4ff812ae1b62",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "685c0abb-83f6-8d19-a7d6-9236c841e815",
+    "path": "/destination/india/jaipur",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "cbf488d8-7f2a-8d96-9997-9c146672484e",
+    "path": "/destination/india/new-delhi",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "8235d017-c004-88fb-b209-680a617c3eba",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "eedf9612-633d-8fd6-ab21-bb05427231d0",
+    "path": "/destination/india/varanasi",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "63a90856-cc63-89c7-87cb-a2627ef7a8e5",
@@ -327,29 +512,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "8ad86e35-4f58-8a22-bf88-0647a8e9d564",
+    "path": "/destination/indonesia/seminyak",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "ae1160ed-bec1-8698-b401-c439049aca96",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "073f82e1-36b2-8477-88cb-f1ee6460677b",
+    "path": "/destination/indonesia/yogyakarta",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "e91f1594-d11b-84db-a013-1312dff7316c",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "5046d23f-5ba1-8133-a769-cf7e7b89b439",
     "path": "/destination/istanbul",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "8bd1ede6-e733-8f7f-8d6f-bba918975a90",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/turkey/istanbul",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4e0797e1-a3d2-8575-989d-61770dcd48e0",
     "path": "/destination/jaipur",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "ab615c88-1aa4-886b-ad84-b54b3044cc8a",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/india/jaipur",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "6f7e4b7f-45da-8cc8-9a27-1172e83a7ff4",
@@ -360,40 +572,80 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
-    "id": "c080d5ff-4af0-81f8-8426-657e89d3a92e",
-    "path": "/destination/kuala-lumpur",
+    "id": "263dc15b-16a4-8384-bf15-7a970a8c2215",
+    "path": "/destination/japan/hokkaido",
     "locale": "ja",
     "targetType": "location",
-    "targetId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
+    "targetId": "6d5f43ff-c590-8dc3-a498-601f1422d05b",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
-    "id": "ef38b9fd-4a17-8159-a44d-2ab9b42f941c",
-    "path": "/destination/kyoto",
+    "id": "431e5381-1aab-85cc-ac24-7dce874985d5",
+    "path": "/destination/japan/kyoto",
     "locale": "ja",
     "targetType": "location",
     "targetId": "0d5ede9a-bc02-830f-b8dd-d8202e397a60",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "314cc40a-0905-85ce-952d-2676adfb925a",
+    "path": "/destination/japan/osaka",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "b5bee2c0-019d-8321-8a94-5822833dc152",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "c080d5ff-4af0-81f8-8426-657e89d3a92e",
+    "path": "/destination/kuala-lumpur",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/malaysia/kuala-lumpur",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "ef38b9fd-4a17-8159-a44d-2ab9b42f941c",
+    "path": "/destination/kyoto",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/japan/kyoto",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "8c5744fc-89da-8bec-b845-75f703c7a7eb",
     "path": "/destination/madrid",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/spain/madrid",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "435d505f-fea9-82a9-943d-4fc8e6e1129d",
@@ -404,106 +656,140 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
-    "id": "5dfdd8ee-f39d-82e5-aaf9-7f5a7c127921",
-    "path": "/destination/new-delhi",
+    "id": "1ec061f3-86de-86ab-ab7c-b03f02679f18",
+    "path": "/destination/malaysia/kuala-lumpur",
     "locale": "ja",
     "targetType": "location",
-    "targetId": "8235d017-c004-88fb-b209-680a617c3eba",
+    "targetId": "ad69a3ba-1b06-8d20-99ad-f5d462dda390",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
-    "id": "c8390e74-64a5-86ad-828a-06da65322aa4",
-    "path": "/destination/osaka",
-    "locale": "ja",
-    "targetType": "location",
-    "targetId": "b5bee2c0-019d-8321-8a94-5822833dc152",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
-  },
-  {
-    "id": "4400cc9a-0d00-878d-9358-851d324867ed",
-    "path": "/destination/paris",
-    "locale": "ja",
-    "targetType": "location",
-    "targetId": "67cc97a7-03e7-84f7-9252-b377df9b4bc4",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
-  },
-  {
-    "id": "f100d0ae-6a65-8833-b29c-48d32ff6ab47",
-    "path": "/destination/putrajaya",
+    "id": "8137fc5f-55d7-86a8-9f80-8b3a81aa00bb",
+    "path": "/destination/malaysia/putrajaya",
     "locale": "ja",
     "targetType": "location",
     "targetId": "93e158a9-7243-8cd4-b714-53a5a87535cc",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "5dfdd8ee-f39d-82e5-aaf9-7f5a7c127921",
+    "path": "/destination/new-delhi",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/india/new-delhi",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "c8390e74-64a5-86ad-828a-06da65322aa4",
+    "path": "/destination/osaka",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/japan/osaka",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "4400cc9a-0d00-878d-9358-851d324867ed",
+    "path": "/destination/paris",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/france/paris",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "f100d0ae-6a65-8833-b29c-48d32ff6ab47",
+    "path": "/destination/putrajaya",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/malaysia/putrajaya",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4c192985-7777-8fe5-b48f-837a59455ff1",
     "path": "/destination/santorini",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "591a2082-379a-82d2-964e-c95410455165",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/greece/santorini",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d6a857ea-9ded-821e-bd8c-c399bd5cd9fa",
     "path": "/destination/seminyak",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "ae1160ed-bec1-8698-b401-c439049aca96",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/indonesia/seminyak",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1e3678a1-80f5-8a0e-8611-d3b6b2a5806e",
     "path": "/destination/sentosa",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "66ec0788-951d-8e93-8746-0539604045f2",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/singapore/sentosa",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c414ccbc-f315-8dbb-a386-cc2d4c95248f",
     "path": "/destination/seoul",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "2ac3d887-af6d-8d7d-a215-f09dc15843a4",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/south-korea/seoul",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "22b0af2d-0466-879f-a7fe-5cd9cc41c3da",
     "path": "/destination/shanghai",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/china/shanghai",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e518b051-9bb6-8f2f-ab53-fc2d661b5b2c",
@@ -514,18 +800,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d585503e-2ab3-84b9-8c15-d5e79dad26ed",
     "path": "/destination/singapore-city",
+    "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/singapore/singapore-city",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "1f32451f-16a3-8445-8b1f-a8744cadf3a8",
+    "path": "/destination/singapore/changi",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "a847c904-5112-8373-a295-df7db632cb67",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "1f8348b4-e29a-81c6-91a7-24c3dffd83e4",
+    "path": "/destination/singapore/sentosa",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "66ec0788-951d-8e93-8746-0539604045f2",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "89fee8b4-01db-8406-840d-fcc8ee02e89f",
+    "path": "/destination/singapore/singapore-city",
     "locale": "ja",
     "targetType": "location",
     "targetId": "3f633d17-5d6b-872a-ad91-dfb79444b0f8",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "13634023-0205-8b4e-8523-f7a7d68bbc1e",
@@ -536,7 +860,20 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "7c966a04-b8b1-8815-a3eb-d7d2d435abf1",
+    "path": "/destination/south-korea/seoul",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "2ac3d887-af6d-8d7d-a215-f09dc15843a4",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "bd881478-f3e1-8102-94f6-b0335db61dd4",
@@ -547,7 +884,44 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "35649c4b-b27e-8443-aa96-3327afb57719",
+    "path": "/destination/spain/barcelona",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "a1a6f76d-ec7e-800f-aa14-5678bd88b8ce",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "0ca719ba-b41e-887f-995f-1f819fe01bde",
+    "path": "/destination/spain/madrid",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "aa7f39ce-7f37-88d5-8c42-d987b4f0b91d",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "5cccf60e-c7fe-8ad8-8887-1cc4d3b91a9a",
+    "path": "/destination/spain/toledo",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7b591225-8193-8df6-8393-b06331d64fe4",
@@ -558,18 +932,32 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "f7dbf26b-d726-8344-8ff1-c4476cf30cc6",
+    "path": "/destination/thailand/bangkok",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "e36e2357-77a7-81b8-b135-57cdd918de59",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "413d9ad2-bfd3-8146-b1ec-e44ae5075650",
     "path": "/destination/toledo",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/spain/toledo",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "3754feb7-2607-8f1a-b0a0-fef81e63cb0d",
@@ -580,18 +968,44 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "93c5c33b-5b87-8e71-b61c-b47e40a2fe5f",
+    "path": "/destination/turkey/cappadocia",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "8fb14bd5-7c89-81ff-8d0e-f33853f4f127",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "f7bb3605-ed52-826f-bbce-a0e267bb1258",
+    "path": "/destination/turkey/istanbul",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "8bd1ede6-e733-8f7f-8d6f-bba918975a90",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "c492eea7-602e-8010-8dc6-88b62b474e77",
     "path": "/destination/varanasi",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "e4d2240b-d37f-8f2c-b0d4-f727b4701395",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/india/varanasi",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9f2257ec-310a-83ca-9be7-04a4850cdf62",
@@ -602,40 +1016,56 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "c837e75a-e3c2-8e6d-b52a-8d124f6bb0bc",
+    "path": "/destination/vietnam/hanoi",
+    "locale": "ja",
+    "targetType": "location",
+    "targetId": "f8bbaa27-53e5-8ba0-9d94-87211cc983d9",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9053d486-bdb6-8f14-bfe6-17b0a354960e",
     "path": "/destination/yogyakarta",
     "locale": "ja",
-    "targetType": "location",
-    "targetId": "e91f1594-d11b-84db-a013-1312dff7316c",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/destination/indonesia/yogyakarta",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e07e6d68-c0fd-890e-82b5-7fc3663f4b53",
     "path": "/editorial-policy",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "editorial-policy",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/legal/editorial-policy",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "74b06503-ad9a-806d-853f-de7f429de7ea",
     "path": "/faq",
     "locale": "ja",
     "targetType": "static",
-    "targetId": "faq",
+    "targetId": "33dfa068-0c82-8e2a-98a3-2fc8547a0432",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e2a2f637-4e1d-8904-b896-94c86219b021",
@@ -646,95 +1076,164 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "6e3a4e53-ddcb-8719-83da-21f1e548f3fe",
     "path": "/journey",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "journey",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "b3f0cd06-eb96-87ae-b952-15f0c0bdf157",
     "path": "/journey/j-2024-02-26",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "1bb04f9d-27d1-85a3-9e2e-a66796243764",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/hokkaido-2024-02",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9fbc565b-9342-80bd-aa84-04ecceaf360a",
     "path": "/journey/j-2024-03-01",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "b8ceb24e-cd10-8031-ba5b-926826b3c84e",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/bangkok-2024-03",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "fe60a5b5-c13b-8123-983f-dc612bb2f3bf",
     "path": "/journey/j-2024-09-21",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "467d94d8-4ac7-827e-9fc5-e193c111697d",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/new-delhi-2024-09",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "3173e276-9860-8484-aab9-0488b875eee7",
     "path": "/journey/j-2025-02-13",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "e7699446-3290-8716-9171-382056de81f6",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/paris-2025-02",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "fba32c2d-e8b4-8ce0-8157-abf731f769e5",
     "path": "/journey/j-2025-06-10",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "b5c92001-976c-8801-8d9c-00a6f7b3ad1a",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/bangkok-to-santorini-2025-06",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d0efd741-1d6f-8b7b-9d53-ea688a2ddabe",
     "path": "/journey/j-2025-11-29",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "d204fa1c-cbe1-805d-bcbe-1745c8795478",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/shanghai-2025-11",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "13b0adc3-9067-858b-87ec-de8a1a6c495e",
     "path": "/journey/j-2026-03-12",
     "locale": "ja",
-    "targetType": "journey",
-    "targetId": "d6dc5a01-e7ab-811d-a48b-756dbc209f31",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/trips/kuala-lumpur-2026-03",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "2482a8b2-e90c-8cf3-843a-496d5278cc66",
+    "path": "/legal/affiliates",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "41a89bca-e5ef-86fe-8123-8d3d400842ff",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
+  },
+  {
+    "id": "0c82189f-fb74-86cf-9344-41f64d5480cb",
+    "path": "/legal/cookies",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "20e8ad93-bb1e-8f7b-976f-0e0356dd7481",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "4b2b7071-e70f-8750-924e-a46691716e0d",
+    "path": "/legal/editorial-policy",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "623c2125-3027-83fc-b109-316b326cd6ec",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "0a027bc1-1392-8477-a632-a619797e4f2f",
+    "path": "/legal/privacy",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "b23f6484-1a81-87e4-80ca-6cc9a456d27e",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "0f7f2326-7061-8653-bfd4-9d328898ab4f",
+    "path": "/legal/terms",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "1a265c5a-6644-81bc-bfe8-6d3080036bd8",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1d62d3a0-7248-831b-b67d-f6bc98b56c88",
@@ -745,7 +1244,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "a3b971ec-3bac-8dd0-88d3-146ee47e583d",
@@ -756,7 +1256,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0aea90fd-66fc-8a0e-b922-2ee6c54ba497",
@@ -767,7 +1268,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0237ec6f-37b5-895c-83c8-549af760311c",
@@ -778,7 +1280,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "133afeb2-ef5e-87af-9de6-a1be1b33eebc",
@@ -789,7 +1292,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "19ebf410-61c6-8323-8576-1671c8d12b19",
@@ -800,7 +1304,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9b3414a9-fd5a-8645-92a0-4b122358527d",
@@ -811,7 +1316,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "264338a2-78db-87a1-83c6-908eb013dc70",
@@ -822,7 +1328,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "20648d1d-0559-846e-acc0-839ff281914a",
@@ -833,7 +1340,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "8bfa5115-b19e-8fd6-8e53-bde8b3e1486e",
@@ -844,7 +1352,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "ed1f89a3-d372-834a-a6e5-2c28ce3f1670",
@@ -855,7 +1364,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e23c5413-4e94-8265-81e6-ff34732e72bc",
@@ -866,7 +1376,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "76f70a91-fe4f-8b30-a439-490203ef34f7",
@@ -877,7 +1388,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "b15ae826-f0ce-870c-98a5-57d5a858f510",
@@ -888,7 +1400,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4064860a-d77b-8642-af73-268fec68255d",
@@ -899,7 +1412,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "31cbba99-ef77-8b6e-aad6-0ba61342ffb4",
@@ -910,7 +1424,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "52e4e771-df8e-884e-a7da-a13b73a02c97",
@@ -921,7 +1436,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "08260119-d63a-85b1-8b5e-ed25b266f9be",
@@ -932,7 +1448,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "85bb5df9-863d-8014-9ea8-0118a95c5b89",
@@ -943,7 +1460,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "07292db4-d03c-804c-ade4-e604c4bd3b21",
@@ -954,7 +1472,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d4b2a3ce-5426-8eec-812e-8e30eb49826e",
@@ -965,7 +1484,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "20e856eb-76d3-8fc6-9258-69d76beedf36",
@@ -976,7 +1496,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "31ae45ac-8807-80fa-955c-3fa27fe797a4",
@@ -987,7 +1508,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "16bad8b9-40ff-86c2-ac1a-c2398bef573b",
@@ -998,7 +1520,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4ad0f2c3-a407-877c-9ab1-5f92055665ae",
@@ -1009,7 +1532,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e45dce10-5833-8818-868b-44d2170ab7d8",
@@ -1020,7 +1544,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f2726fba-dc0a-8b86-892b-3dd45f9df87d",
@@ -1031,7 +1556,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "a90c09d5-994f-8e7f-8570-3bfe9ee50645",
@@ -1042,7 +1568,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "89588c70-17bd-84c6-ba1e-d882d6df54ab",
@@ -1053,7 +1580,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "932bf70e-ebb8-8312-8cee-4f09b5f1e134",
@@ -1064,7 +1592,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "b3a9f8b5-f1ee-8754-976e-2a3fba999a51",
@@ -1075,7 +1604,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "a0592302-02a9-83f4-9d2f-c35ae8fd81d1",
@@ -1086,7 +1616,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0f50f0c5-66d8-8b9b-8ef6-79adea64fa78",
@@ -1097,7 +1628,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "11f2a51f-5f6a-821b-ba23-afa1fe2f720c",
@@ -1108,7 +1640,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "52f4904e-7593-808b-a4d3-04f196d8868b",
@@ -1119,7 +1652,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4fd84aaa-e596-8d9b-ba35-19863e70d36c",
@@ -1130,7 +1664,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "bde3571f-62d1-8cb5-8546-1d1bb6fe00d9",
@@ -1141,7 +1676,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7f425ee6-f82a-808e-8e21-63b90bd5ef02",
@@ -1152,7 +1688,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "149c189b-2135-890a-bb8b-f81e45a32ab4",
@@ -1163,7 +1700,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c36f8a8b-8e46-8860-8dad-6200837af829",
@@ -1174,7 +1712,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "5834fea1-ed8a-8077-87fa-bccefe307f7d",
@@ -1185,7 +1724,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "222dd46f-2282-83e3-b2b6-5fcfe7b139ae",
@@ -1196,7 +1736,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "58607cbd-f90b-8799-a02f-60700ed5e3d3",
@@ -1207,7 +1748,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1315f0d5-42c2-8396-ae78-4f5c603768ca",
@@ -1218,7 +1760,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "3edace7f-6cc0-8205-9fc7-699350ed63f5",
@@ -1229,7 +1772,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "94054fda-bcfe-895c-84a5-2376ce488f37",
@@ -1240,7 +1784,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0652d6ca-e4d4-8918-9039-88e0956d4c6f",
@@ -1251,7 +1796,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "444cbe3e-8739-8661-9b4e-e9eff5f72bf7",
@@ -1262,7 +1808,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9208a435-7a1a-85d7-9350-218160152ff1",
@@ -1273,7 +1820,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "83188449-c6d3-8350-86a6-7869caca93d9",
@@ -1284,7 +1832,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9a0a6fe4-9df9-8316-b6ce-ad1e42b7f3aa",
@@ -1295,7 +1844,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "94cbbdc5-ef0d-8c55-b60b-b7255da3e36e",
@@ -1306,7 +1856,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "724e078f-22b7-814a-a8e0-a6f541173e67",
@@ -1317,7 +1868,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "337d3840-8acc-8c90-b831-edf6c3aba33c",
@@ -1328,7 +1880,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "2dfa93c7-8d4d-8150-8670-af25a411ac5d",
@@ -1339,7 +1892,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7b5be0dc-ba5c-84e9-b7d3-c58d1e6a65f5",
@@ -1350,7 +1904,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7a50b780-34df-8037-994d-3cfc5d7345a6",
@@ -1361,7 +1916,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "fd5fcc1f-244c-8630-9eca-684f1604adf3",
@@ -1372,7 +1928,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "63ae117d-8287-8626-a031-a12327ab0e9a",
@@ -1383,7 +1940,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "07f2a966-4553-8354-b337-a053dd41a938",
@@ -1394,7 +1952,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "1e291c15-8df7-8aa6-94b5-ca3c745c547c",
@@ -1405,7 +1964,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "fed6f725-2f7c-8348-8eb7-0b018b548fea",
@@ -1416,7 +1976,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0b1429ad-3f5c-8e13-9394-c15b77ab7133",
@@ -1427,7 +1988,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "de417698-a6bc-8fff-b7a3-d3aaae5ed743",
@@ -1438,7 +2000,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "4aaf2aac-aa7a-8928-a8a0-10dbd4cd231a",
@@ -1449,7 +2012,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "5196dbdc-a6a0-8164-885b-c4bf6e9baaa9",
@@ -1460,7 +2024,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f110e9a5-7620-868b-8f46-42119a6095fb",
@@ -1471,7 +2036,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9abd7c19-92a8-8d8b-bede-729b1448064d",
@@ -1482,7 +2048,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c3685187-63b1-845a-a6d6-16198d87bdb8",
@@ -1493,7 +2060,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "9bc1c5be-6112-8c77-acaf-72627d1cb2d3",
@@ -1504,7 +2072,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "97d05c1f-6214-8d45-abc3-149977f91167",
@@ -1515,7 +2084,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "6a538959-dcb7-81e6-b633-9fc3e14b2ecc",
@@ -1526,7 +2096,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d4fa4a02-2822-8f79-aa73-69a79f06b814",
@@ -1537,7 +2108,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "34dfa993-2674-8ab5-b2ed-32a7ffda41c1",
@@ -1548,7 +2120,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "472f83b6-f7fb-854e-ae0d-964f2c3c13db",
@@ -1559,7 +2132,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "a92bb3f7-c086-8a1a-81f1-0fedd5af6786",
@@ -1570,7 +2144,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "b35668a2-d07c-849c-a0cd-9fb2aae140e7",
@@ -1581,7 +2156,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f7f6436a-c929-8c4d-b0b3-03c7a75d8fe9",
@@ -1592,7 +2168,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "a5daf339-60f3-8ddd-95d2-f766700561c8",
@@ -1603,7 +2180,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7299f8e1-7afb-87ee-84c7-e5045570901e",
@@ -1614,7 +2192,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "d1cbb063-553c-8977-803b-45677077e71f",
@@ -1625,7 +2204,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f21bd04d-5878-8d00-a108-3ac0aa5e4da1",
@@ -1636,7 +2216,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "118f72d5-00b0-8daf-9d8c-0986b7cc6142",
@@ -1647,7 +2228,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "20e2283a-bc96-8ee3-b1b0-4b17a3172f75",
@@ -1658,7 +2240,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "2bfc0167-fe04-84f4-83cb-741c1a497b05",
@@ -1669,7 +2252,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "88f8eecf-0a87-8819-add1-2e0f98b5f13c",
@@ -1680,7 +2264,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c9fb32bb-6ca2-879a-80fd-0e011dcddb11",
@@ -1691,7 +2276,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "554e22af-03bb-81dd-b94e-96032e133653",
@@ -1702,7 +2288,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "6fc629d8-90ed-8518-8f51-27ab65da6541",
@@ -1713,7 +2300,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "58c02bc8-48ef-8bd7-9179-b6bc650f6751",
@@ -1724,7 +2312,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "62a50c40-6fe7-8947-bfee-fdc0ace0c141",
@@ -1735,7 +2324,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "75327aaf-e58a-8856-a953-4bd8b188a2f2",
@@ -1746,7 +2336,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "f1ef47ad-35e3-8c4d-8380-9dfc06d6e9a2",
@@ -1757,7 +2348,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e49e9f43-2afe-8542-b3c2-b5d1373d3818",
@@ -1768,7 +2360,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "b669fc42-ff0d-8637-ad24-4361707b29ad",
@@ -1779,7 +2372,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "89d233c7-cb8f-8053-9bfd-528b34941b7a",
@@ -1790,7 +2384,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "97a990a8-d32e-80e3-9847-47655f15566b",
@@ -1801,7 +2396,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "70122dfb-651f-84ac-ac97-f40166bae438",
@@ -1812,7 +2408,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "32c159ed-c0da-8fc3-a077-0446a44fd1d1",
@@ -1823,7 +2420,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "927ceac2-1e3b-880f-893e-5857ab51ce45",
@@ -1834,7 +2432,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "2e0c197d-d3fe-844a-b88c-f8a88c0e5509",
@@ -1845,7 +2444,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "2da5d017-fe6a-899f-8a31-267afdb65128",
@@ -1856,7 +2456,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "26a939d5-c30f-87ff-9cc2-1f2c73897b12",
@@ -1867,7 +2468,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "7da79ba1-3b49-8370-8524-cfd1c83d3606",
@@ -1878,7 +2480,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "23843ab2-c8ed-8fcc-afe6-038baab022b1",
@@ -1889,7 +2492,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "ffe921fb-26ab-8461-8ca7-057956992176",
@@ -1900,7 +2504,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "bd7843a4-86be-8087-adcb-752162ca348c",
@@ -1911,7 +2516,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e6c65091-a0e2-8c5e-9ef2-b100e2baf1dc",
@@ -1922,7 +2528,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "928f6d61-8717-8f0f-802a-8563012b0808",
@@ -1933,7 +2540,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "e7477fd4-9694-841f-867e-dcc1f269140c",
@@ -1944,7 +2552,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "8957c562-0241-84d0-b00a-805b78d50949",
@@ -1955,7 +2564,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "071dd20b-4275-85ff-a5ea-381f6fdf50f1",
@@ -1966,7 +2576,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "0a5a2558-eb58-8c6f-b739-af4f225db3fb",
@@ -1977,7 +2588,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "af44ecef-79fe-8b69-9822-467cc016daaf",
@@ -1988,7 +2600,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "47b5f943-b4b0-8660-8f6f-6597f4ecd7fe",
@@ -1999,18 +2612,20 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c98ebb6d-1cf6-81db-9299-e3abf987c8af",
     "path": "/privacy",
     "locale": "ja",
-    "targetType": "static",
-    "targetId": "privacy",
-    "isCanonical": true,
-    "redirectTo": null,
-    "redirectStatus": null,
-    "isLegacy": true
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/legal/privacy",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "fd8443ac-21f0-86da-b41d-89cde7d40b7a",
@@ -2021,7 +2636,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "efd6565d-5a85-8e64-a61a-b0c02dd53e59",
@@ -2032,7 +2648,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "25670c66-7286-8960-a648-3605903835e7",
@@ -2043,7 +2660,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "c8ba797b-9bd6-8f4c-be31-c1eb42c4c904",
@@ -2054,7 +2672,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "5b3e9560-f4d9-8680-b443-ec156d668e83",
@@ -2065,7 +2684,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "6d9ad56a-e2b0-823a-8c69-c34812532e56",
@@ -2076,7 +2696,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "79ee28db-3f14-8743-8435-624d2d47f79f",
@@ -2087,7 +2708,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "af77ff4c-ded0-860c-b27b-763b5c7fb245",
@@ -2098,7 +2720,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "5c079355-2020-80ef-931b-5bcc96c0f48f",
@@ -2109,7 +2732,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
   },
   {
     "id": "52f61bac-1a51-87f3-8789-96d74fca9843",
@@ -2120,7 +2744,8 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "f83a51ed-ca5f-8c39-a89b-9043006a6801",
@@ -2131,17 +2756,115 @@
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": true
   },
   {
     "id": "105ec05e-2728-860f-ab16-9899875bdb2f",
     "path": "/terms",
     "locale": "ja",
+    "targetType": "redirect",
+    "targetId": null,
+    "isCanonical": false,
+    "redirectTo": "/legal/terms",
+    "redirectStatus": 301,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "0df5c9ef-0096-8a3c-ad16-d9cd281e18e8",
+    "path": "/trips",
+    "locale": "ja",
     "targetType": "static",
-    "targetId": "terms",
+    "targetId": "trips",
     "isCanonical": true,
     "redirectTo": null,
     "redirectStatus": null,
-    "isLegacy": true
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "30cf9300-da90-8545-8642-ae9b365348d6",
+    "path": "/trips/bangkok-2024-03",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "b8ceb24e-cd10-8031-ba5b-926826b3c84e",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "693a77a8-cf58-8ea3-a620-d58c3931c103",
+    "path": "/trips/bangkok-to-santorini-2025-06",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "b5c92001-976c-8801-8d9c-00a6f7b3ad1a",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "b5bd3baa-010e-82cf-b18c-323749b089f5",
+    "path": "/trips/hokkaido-2024-02",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "1bb04f9d-27d1-85a3-9e2e-a66796243764",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "345187e7-505b-824c-8ea8-09119b137004",
+    "path": "/trips/kuala-lumpur-2026-03",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "d6dc5a01-e7ab-811d-a48b-756dbc209f31",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "c98bcc6b-f905-8979-a774-85fe7b1fd8fb",
+    "path": "/trips/new-delhi-2024-09",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "467d94d8-4ac7-827e-9fc5-e193c111697d",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "7bcb8aa7-c7e3-84af-a373-48b28f21b5fe",
+    "path": "/trips/paris-2025-02",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "e7699446-3290-8716-9171-382056de81f6",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "9911549f-2f18-80ef-a61c-49f72f46c004",
+    "path": "/trips/shanghai-2025-11",
+    "locale": "ja",
+    "targetType": "journey",
+    "targetId": "d204fa1c-cbe1-805d-bcbe-1745c8795478",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": true,
+    "noindex": false
   }
 ]

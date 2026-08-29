@@ -35,4 +35,6 @@ export interface Route {
   readonly redirectStatus: RedirectStatus | null;
   /** Present in the legacy baseline; must keep resolving after the rewrite. */
   readonly isLegacy: boolean;
+  /** Reachable, but kept out of the index and the sitemap. */
+  readonly noindex: boolean;
 }

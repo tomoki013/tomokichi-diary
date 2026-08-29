@@ -1,6 +1,151 @@
 [
   {
+    "id": "b23f6484-1a81-87e4-80ca-6cc9a456d27e",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "privacy",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "ab7d5f24-0a9b-8c0f-9342-ae9ec830a374",
+    "publishedRevisionId": "ab7d5f24-0a9b-8c0f-9342-ae9ec830a374",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "1a265c5a-6644-81bc-bfe8-6d3080036bd8",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "terms",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "17410693-2d01-86a4-a4cd-aec24ca57962",
+    "publishedRevisionId": "17410693-2d01-86a4-a4cd-aec24ca57962",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "20e8ad93-bb1e-8f7b-976f-0e0356dd7481",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "cookie-policy",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "45f6032a-8abd-84fb-b14f-be155f356368",
+    "publishedRevisionId": "45f6032a-8abd-84fb-b14f-be155f356368",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "623c2125-3027-83fc-b109-316b326cd6ec",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "editorial-policy",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "d798a9bc-3500-847a-96dd-09a2c020feaf",
+    "publishedRevisionId": "d798a9bc-3500-847a-96dd-09a2c020feaf",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "41a89bca-e5ef-86fe-8123-8d3d400842ff",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "affiliates",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "14c7531e-3669-8a3d-bd2f-280b38b8df8e",
+    "publishedRevisionId": "14c7531e-3669-8a3d-bd2f-280b38b8df8e",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "54775ea0-bbfc-83a3-b263-90af03305c18",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "contact",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "697cb8ff-af62-838c-8a9f-b725a6bf9009",
+    "publishedRevisionId": "697cb8ff-af62-838c-8a9f-b725a6bf9009",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "85deccb9-fed2-8b23-be2f-2cd73551ab04",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "about",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "6b59d27a-f759-8400-9e19-685c986f0ee6",
+    "publishedRevisionId": "6b59d27a-f759-8400-9e19-685c986f0ee6",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
+    "id": "33dfa068-0c82-8e2a-98a3-2fc8547a0432",
+    "kind": "page",
+    "status": "published",
+    "locale": "ja",
+    "slug": "faq",
+    "authorId": "ec4c0379-0ceb-8192-a7f0-33d591504335",
+    "currentRevisionId": "32acce9b-ed23-85ee-ac50-41dcdb90db3b",
+    "publishedRevisionId": "32acce9b-ed23-85ee-ac50-41dcdb90db3b",
+    "createdAt": "2026-08-30T00:00:00.000Z",
+    "updatedAt": "2026-08-30T00:00:00.000Z",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-30T00:00:00.000Z",
+    "archivedAt": null,
+    "noindex": false,
+    "travelStartDate": null,
+    "travelEndDate": null
+  },
+  {
     "id": "a0ba40dc-5b69-8fc3-ada0-a428ed994ce7",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "changi-airport-lounge",
@@ -18,6 +163,7 @@
   },
   {
     "id": "f3ee37a3-eab4-8693-ac5f-80d14b9707c6",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "changi-airport-overnight",
@@ -35,6 +181,7 @@
   },
   {
     "id": "3b67a2fb-3ae1-861e-b304-191913581fb5",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "city-to-changi-airport",
@@ -52,6 +199,7 @@
   },
   {
     "id": "23ca3df8-d7bc-8fe2-b4ec-be07c71615d2",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "city-to-sultan-abdul-aziz-shah-airport",
@@ -69,6 +217,7 @@
   },
   {
     "id": "5721b825-24ea-892c-9ba5-ac087e29b604",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "seletar-airport-to-city",
@@ -86,6 +235,7 @@
   },
   {
     "id": "cd879190-5f59-8e81-9344-ab7d8efb21e0",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "chagee-kuala-lumpur-stores",
@@ -103,6 +253,7 @@
   },
   {
     "id": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "chagee-menu-explained",
@@ -120,6 +271,7 @@
   },
   {
     "id": "bb7301bb-31b8-8347-9056-a95530739223",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "chagee-ordering-china-malaysia-singapore",
@@ -137,6 +289,7 @@
   },
   {
     "id": "36e965b9-cc50-82d1-b54a-3762181be974",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "chagee-singapore-stores",
@@ -154,6 +307,7 @@
   },
   {
     "id": "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "shanghai-chagee-stores",
@@ -171,6 +325,7 @@
   },
   {
     "id": "57ceb9eb-0c4a-8c50-87e0-11b28602fd4c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "batu-caves-guide",
@@ -188,6 +343,7 @@
   },
   {
     "id": "d0fd313b-fb9d-8d9f-966f-104048a85a2f",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "changi-airport-liquids",
@@ -205,6 +361,7 @@
   },
   {
     "id": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "google-maps-bus-developing-countries",
@@ -222,6 +379,7 @@
   },
   {
     "id": "7726885a-54d1-83ca-b275-5635da44be19",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "malaysia-before-thailand",
@@ -239,6 +397,7 @@
   },
   {
     "id": "35598e2f-c52f-890c-a16f-1e6ab60b6165",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "malaysia-night-vibes",
@@ -256,6 +415,7 @@
   },
   {
     "id": "b9cfc506-bee1-8d8a-91cd-faa61e377dae",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "putra-mosque-guide",
@@ -273,6 +433,7 @@
   },
   {
     "id": "85007683-cdd2-8b3a-9214-d1b8e45c9ed1",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "putra-mosque-ramadan-hours",
@@ -290,6 +451,7 @@
   },
   {
     "id": "48e81f38-c2cb-84aa-9870-c63e7ce71920",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "touch-n-go-how-much",
@@ -307,6 +469,7 @@
   },
   {
     "id": "9fa0e427-fa3f-8f9e-a548-6f89f7431722",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "singapore3",
@@ -324,6 +487,7 @@
   },
   {
     "id": "ae39d7cb-99f9-88be-b469-5bc6ea73b3b3",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "indonesia3",
@@ -341,6 +505,7 @@
   },
   {
     "id": "30d26063-0014-83d1-8fdf-a41db74bb0ed",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "indonesia2",
@@ -358,6 +523,7 @@
   },
   {
     "id": "120d37a0-d395-8766-8e46-12e2effe0907",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "indonesia1",
@@ -375,6 +541,7 @@
   },
   {
     "id": "a9d0c4ac-288e-80f9-9ddc-1a13a6905f08",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "singapore2",
@@ -392,6 +559,7 @@
   },
   {
     "id": "f515dea1-ff9c-81d7-b063-639c0b6e5356",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "singapore1",
@@ -409,6 +577,7 @@
   },
   {
     "id": "242dfd00-2c51-8b81-87f7-662889ee18b6",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "malaysia3",
@@ -426,6 +595,7 @@
   },
   {
     "id": "98d2e0ab-2608-89b3-a1b1-701b0484a8e5",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "malaysia2",
@@ -443,6 +613,7 @@
   },
   {
     "id": "6561712c-d018-89ad-885c-4078700c6aeb",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "malaysia1",
@@ -460,6 +631,7 @@
   },
   {
     "id": "74e63e8e-9a96-8aed-98e5-7ef3272e3b63",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "why-travelers-dont-return",
@@ -477,6 +649,7 @@
   },
   {
     "id": "52b1cb6d-eb74-85a3-b6a1-392f83313051",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "shanghai-chagee-menu",
@@ -494,6 +667,7 @@
   },
   {
     "id": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "shanghai-chagee",
@@ -511,6 +685,7 @@
   },
   {
     "id": "9217a13b-81e3-8f42-9714-436784e1dc1d",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india-street-food-tips",
@@ -528,6 +703,7 @@
   },
   {
     "id": "3a1a80e2-8210-8f13-acba-500b391c63dc",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "developing-country-sunset",
@@ -545,6 +721,7 @@
   },
   {
     "id": "2801b470-b31e-87e3-9b19-7a22efce6991",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "china4",
@@ -562,6 +739,7 @@
   },
   {
     "id": "053575cc-84a1-8f83-bc73-3b11fd70fac4",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "china3",
@@ -579,6 +757,7 @@
   },
   {
     "id": "68c9477f-06ed-8fee-adbe-48720da6198b",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "china2",
@@ -596,6 +775,7 @@
   },
   {
     "id": "b77c7d5c-5df3-8add-9ecd-24355370a733",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "china1",
@@ -613,6 +793,7 @@
   },
   {
     "id": "d408e860-a104-82ba-9b68-ca20a8aeeb2a",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "china-alipay-useful",
@@ -630,6 +811,7 @@
   },
   {
     "id": "a7cf9391-c07a-8709-b467-da1496fe1e53",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "trip_com-lounge-benefits",
@@ -647,6 +829,7 @@
   },
   {
     "id": "18f74da4-0360-8aa3-90a2-2df84855fc42",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "kyoto-view1",
@@ -664,6 +847,7 @@
   },
   {
     "id": "e3b3dac3-2997-81f5-886b-2490eafda99c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "architecture2",
@@ -681,6 +865,7 @@
   },
   {
     "id": "4576f477-7f73-8ace-84ee-570b25a8d83c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "architecture1",
@@ -698,6 +883,7 @@
   },
   {
     "id": "d3a1690d-6b6a-8850-8d83-85feac208cb0",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "sunset1",
@@ -715,6 +901,7 @@
   },
   {
     "id": "0c3d2abf-8eb3-8b71-aec4-9f133adb2275",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "landscape1",
@@ -732,6 +919,7 @@
   },
   {
     "id": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "best-city-for-student",
@@ -749,6 +937,7 @@
   },
   {
     "id": "75cbd1c4-8e81-8ce1-932e-e3ae5d2e894d",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "travel-history2",
@@ -766,6 +955,7 @@
   },
   {
     "id": "059d70ce-3854-8e6d-b5d7-26c96f5e7cab",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "travel-history1",
@@ -783,6 +973,7 @@
   },
   {
     "id": "d905fed5-ec46-8d4e-ad9c-989970d78ddb",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "exchange-rate",
@@ -800,6 +991,7 @@
   },
   {
     "id": "0b099bdb-91ab-808b-97ca-bf1c1ba5d91b",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "airport-access-kansai",
@@ -817,6 +1009,7 @@
   },
   {
     "id": "45be5181-7a86-8b89-8bb3-0d1cd56e2dd2",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "greece3",
@@ -834,6 +1027,7 @@
   },
   {
     "id": "71e30e0b-989e-8873-8504-4a5d42bbe870",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "airport-access-santorini",
@@ -851,6 +1045,7 @@
   },
   {
     "id": "c9981e1b-292f-8681-ae38-8d887577a066",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "oia-sunset-guide",
@@ -868,6 +1063,7 @@
   },
   {
     "id": "7342692c-27c7-80e5-8538-7be1edfca1b5",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "santorini-tourism",
@@ -885,6 +1081,7 @@
   },
   {
     "id": "8441de9a-5066-8cf1-a349-90f052fc07fc",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "santorini-transportation",
@@ -902,6 +1099,7 @@
   },
   {
     "id": "267ada19-1140-8887-b5a9-4db0cd6068c2",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "greece2",
@@ -919,6 +1117,7 @@
   },
   {
     "id": "83ce59d8-edd3-8e18-90ab-f96d8f02533a",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "airport-access-athens",
@@ -936,6 +1135,7 @@
   },
   {
     "id": "03343de2-ba31-8b4f-9ccf-bb81dcbed044",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "greece1",
@@ -953,6 +1153,7 @@
   },
   {
     "id": "595f9a50-8430-89c2-aeeb-3f8783c28343",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "egypt4",
@@ -970,6 +1171,7 @@
   },
   {
     "id": "e05d5e67-f436-8696-b306-115f124db8a3",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "egypt3",
@@ -987,6 +1189,7 @@
   },
   {
     "id": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "howtoget-abusimbel-from-asuwan",
@@ -1004,6 +1207,7 @@
   },
   {
     "id": "8879a896-b683-8127-af3a-c596d1ab68b1",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "egypt2",
@@ -1021,6 +1225,7 @@
   },
   {
     "id": "bf84c2a5-821f-88a0-a171-0fffe3b45b76",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "arabic-number",
@@ -1038,6 +1243,7 @@
   },
   {
     "id": "dc8cfc6c-4037-891c-b4e4-52ee9b7eafbd",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "egypt1",
@@ -1055,6 +1261,7 @@
   },
   {
     "id": "0d4d62b2-7e34-8393-a23b-5450c1de00e3",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "turkey3",
@@ -1072,6 +1279,7 @@
   },
   {
     "id": "80b7982a-71be-812b-9b0e-63773f94d8cf",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "turkey2",
@@ -1089,6 +1297,7 @@
   },
   {
     "id": "ac7e2084-5054-83df-a569-449a9c8a68d9",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "turkey1",
@@ -1106,6 +1315,7 @@
   },
   {
     "id": "947d6c5f-2561-8765-9c1b-039794bf58ac",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "airport-access-suvarnabhumi",
@@ -1123,6 +1333,7 @@
   },
   {
     "id": "7f6d920c-bc3f-8963-9a72-96ece1b62dbb",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "bangkok-localbus",
@@ -1140,6 +1351,7 @@
   },
   {
     "id": "30039f22-2e87-889d-9fdf-ee90467e6649",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "bangkok-tourism",
@@ -1157,6 +1369,7 @@
   },
   {
     "id": "c103c46c-b099-8556-bce8-171265489609",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "chaophraya-express",
@@ -1174,6 +1387,7 @@
   },
   {
     "id": "a500e3d7-69aa-8167-9453-5da95155ed3a",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "route-of-arrival-to-arl-at-suvarnabhumi",
@@ -1191,6 +1405,7 @@
   },
   {
     "id": "12ff6f1f-55a5-8688-b19f-e0570eee98a0",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai6",
@@ -1208,6 +1423,7 @@
   },
   {
     "id": "f29bbabc-3618-86ed-b348-d3374acda92d",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai-traditional-massage",
@@ -1225,6 +1441,7 @@
   },
   {
     "id": "dc64b75e-0b3a-8998-ad7b-68b0d2fda9dc",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai5",
@@ -1242,6 +1459,7 @@
   },
   {
     "id": "4b9e865e-71d7-8540-97e9-d3f187a353a4",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "airport-access-donmuang",
@@ -1259,6 +1477,7 @@
   },
   {
     "id": "19e12281-809e-891c-8aaf-29d64a521ca8",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai4",
@@ -1276,6 +1495,7 @@
   },
   {
     "id": "574617ab-b833-8521-bdf4-c67829c28c84",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "ashumina-pilgrimage-in-spain",
@@ -1293,6 +1513,7 @@
   },
   {
     "id": "7f4548a7-cd59-8a67-ad0e-200ce7321c9f",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain-restaurant",
@@ -1310,6 +1531,7 @@
   },
   {
     "id": "b56333ac-7453-865c-bb61-6c49a257f1dc",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain7",
@@ -1327,6 +1549,7 @@
   },
   {
     "id": "ec5a4c60-e280-8bc7-b533-c5811a5451d2",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "howtoget-mirador-del-valle",
@@ -1344,6 +1567,7 @@
   },
   {
     "id": "fd608f15-40cf-8675-8944-566d10fd854e",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain6",
@@ -1361,6 +1585,7 @@
   },
   {
     "id": "e1db2f2a-edfe-81ec-ae67-fa0a7e1fd7ac",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain5",
@@ -1378,6 +1603,7 @@
   },
   {
     "id": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "omio-reservation",
@@ -1395,6 +1621,7 @@
   },
   {
     "id": "95c25619-d9d5-8214-af72-5b4cecf220b7",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain4",
@@ -1412,6 +1639,7 @@
   },
   {
     "id": "a4418ede-f3b9-8136-bdf5-44b1d227f69d",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "paris-restraunt",
@@ -1429,6 +1657,7 @@
   },
   {
     "id": "7421688c-d21d-89bf-84bf-e6eb169d531e",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain3",
@@ -1446,6 +1675,7 @@
   },
   {
     "id": "b3a83249-a187-8faa-9a42-996ed0f54ae4",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain2",
@@ -1463,6 +1693,7 @@
   },
   {
     "id": "1edc494e-7843-8173-9464-ecefe56f1de6",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "spain1",
@@ -1480,6 +1711,7 @@
   },
   {
     "id": "1e8ea302-807d-84dc-a6ab-af22874883d5",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "france3",
@@ -1497,6 +1729,7 @@
   },
   {
     "id": "c43ba4a0-7177-82a4-9dea-742eb6a11c5c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "france2",
@@ -1514,6 +1747,7 @@
   },
   {
     "id": "c9b5a75a-70d1-8ee6-bcee-b2ede6b9c1e3",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "france1",
@@ -1531,6 +1765,7 @@
   },
   {
     "id": "e961810f-344d-8b5d-9088-de69f0056f87",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "paris-navigo-easy",
@@ -1548,6 +1783,7 @@
   },
   {
     "id": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "europe-itinerary",
@@ -1565,6 +1801,7 @@
   },
   {
     "id": "bd6f1fdf-386e-828e-b710-0f3d69820a76",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india7",
@@ -1582,6 +1819,7 @@
   },
   {
     "id": "4da6fe75-290a-8080-9f94-66035a948991",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "bathing-ganga",
@@ -1599,6 +1837,7 @@
   },
   {
     "id": "8bab7da6-ab5f-8636-a202-0ff2138b4524",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india6",
@@ -1616,6 +1855,7 @@
   },
   {
     "id": "3035a248-2154-8b81-943f-8b15d9a039f0",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india4",
@@ -1633,6 +1873,7 @@
   },
   {
     "id": "bfbb93de-a42f-8eb2-af54-edeb6235687e",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india5",
@@ -1650,6 +1891,7 @@
   },
   {
     "id": "00b68fc6-3d44-8bf2-ae2e-ffa8a7edda99",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india3",
@@ -1667,6 +1909,7 @@
   },
   {
     "id": "2903bd88-4e7d-84f2-b4b5-07b238815821",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india2",
@@ -1684,6 +1927,7 @@
   },
   {
     "id": "a02080e2-03cd-8b31-95af-54bcaa1c9a9c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india1",
@@ -1701,6 +1945,7 @@
   },
   {
     "id": "c3612dcf-f7bd-839d-bd96-d95f2520dd06",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "vietnam-transit",
@@ -1718,6 +1963,7 @@
   },
   {
     "id": "a9dec31f-ad5b-8e55-b51e-8a384622b0f8",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "vietnam1",
@@ -1735,6 +1981,7 @@
   },
   {
     "id": "8aa6bd3e-d3a3-8a79-805f-359e820a317c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "india-visa",
@@ -1752,6 +1999,7 @@
   },
   {
     "id": "a0857281-9fba-862d-a4b0-d0da9d1c20d7",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "bankok-sandaijiin",
@@ -1769,6 +2017,7 @@
   },
   {
     "id": "666785b9-ae12-89ce-8376-70ad7c6d78bb",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai-transportation",
@@ -1786,6 +2035,7 @@
   },
   {
     "id": "5a064233-c900-8289-a4a9-94caf84a4e22",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai3",
@@ -1803,6 +2053,7 @@
   },
   {
     "id": "1555383f-f8bb-8f48-83ee-b3e4904a813c",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "wat-phra-kaew",
@@ -1820,6 +2071,7 @@
   },
   {
     "id": "1041e60a-352f-8c56-8a21-0afc42c5cd32",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai2",
@@ -1837,6 +2089,7 @@
   },
   {
     "id": "e63de725-3186-861c-9697-a2fd15bfff3a",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "wat-arun",
@@ -1854,6 +2107,7 @@
   },
   {
     "id": "3bcefbca-a133-8794-a7dc-7de0b17eadb5",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai-itinerary",
@@ -1871,6 +2125,7 @@
   },
   {
     "id": "e30efa73-c13c-8ce2-bced-0ebd54b36cce",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "thai1",
@@ -1888,6 +2143,7 @@
   },
   {
     "id": "d5009eb8-2559-8894-a405-30bb0c728fe1",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "hokkaido2",
@@ -1905,6 +2161,7 @@
   },
   {
     "id": "ee478705-3df6-863a-bb19-af4e56f55bf8",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "hokkaido1",
@@ -1922,6 +2179,7 @@
   },
   {
     "id": "d6bb731a-96fc-8b1c-b5ca-1d13a008ba4f",
+    "kind": "article",
     "status": "published",
     "locale": "ja",
     "slug": "introduce",

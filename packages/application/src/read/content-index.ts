@@ -84,6 +84,15 @@ export class ContentIndex {
     return listPublicArticles({ articles: this.snapshot.articles, now: this.now });
   }
 
+  /** Standalone pages (about, FAQ, legal), which listings and feeds exclude. */
+  publicPages(): readonly Article[] {
+    return listPublicArticles({
+      articles: this.snapshot.articles,
+      filter: { kind: "page" },
+      now: this.now,
+    });
+  }
+
   indexableArticles(): readonly Article[] {
     return this.publicArticles().filter((a) => isIndexable(a, this.now));
   }

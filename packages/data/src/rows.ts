@@ -54,6 +54,7 @@ const json = <T>(row: Row, key: string, fallback: T): T => {
 export const articleRow = {
   to: (row: Row): Article => ({
     id: str(row, "id") as Article["id"],
+    kind: (str(row, "kind") || "article") as Article["kind"],
     status: str(row, "status") as Article["status"],
     locale: str(row, "locale") as Article["locale"],
     slug: str(row, "slug") as Article["slug"],
@@ -74,6 +75,7 @@ export const articleRow = {
   }),
   from: (article: Article): Row => ({
     id: article.id,
+    kind: article.kind,
     status: article.status,
     locale: article.locale,
     slug: article.slug,
@@ -150,6 +152,7 @@ export const routeRow = {
     redirectTo: nullableStr(row, "redirect_to") as Route["redirectTo"],
     redirectStatus: nullableNum(row, "redirect_status") as Route["redirectStatus"],
     isLegacy: bool(row, "is_legacy"),
+    noindex: bool(row, "noindex"),
   }),
   from: (route: Route): Row => ({
     id: route.id,
@@ -161,6 +164,7 @@ export const routeRow = {
     redirect_to: route.redirectTo,
     redirect_status: route.redirectStatus,
     is_legacy: flag(route.isLegacy),
+    noindex: flag(route.noindex),
   }),
 };
 

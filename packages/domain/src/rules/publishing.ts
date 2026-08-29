@@ -38,14 +38,18 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
     fail(`body must be at least ${MIN_BODY_LENGTH} characters`, "bodyMarkdown");
   }
 
+  const expectedTarget = article.kind === "page" ? "static" : "article";
   if (!canonicalRoute) fail("a canonical route is required", "route");
-  else if (canonicalRoute.targetType !== "article" || canonicalRoute.targetId !== article.id) {
+  else if (canonicalRoute.targetType !== expectedTarget || canonicalRoute.targetId !== article.id) {
     fail("canonical route points at a different target", "route");
   }
 
-  const cover = media.filter((m) => m.role === "cover");
-  if (cover.length === 0) fail("a cover image is required", "media");
-  if (cover.some((m) => m.alt.trim() === "")) fail("cover image requires alt text", "media");
+  // A standalone page has no card anywhere, so it needs no cover image.
+  if (article.kind === "article") {
+    const cover = media.filter((m) => m.role === "cover");
+    if (cover.length === 0) fail("a cover image is required", "media");
+    if (cover.some((m) => m.alt.trim() === "")) fail("cover image requires alt text", "media");
+  }
 
   if (
     article.status === "scheduled" &&

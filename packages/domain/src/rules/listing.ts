@@ -12,6 +12,8 @@ import { isPubliclyVisible } from "./publishing.js";
 export type ArticleSort = "published_desc" | "published_asc" | "updated_desc" | "title_asc";
 
 export interface ArticleFilter {
+  /** Defaults to `article`: pages never appear in listings or feeds. */
+  readonly kind?: Article["kind"];
   readonly categoryId?: CategoryId;
   readonly tagId?: TagId;
   readonly locationId?: LocationId;
@@ -36,6 +38,7 @@ export const EMPTY_RELATIONS: RelationIndex = {
 
 function matches(article: Article, filter: ArticleFilter, relations: RelationIndex): boolean {
   const { id } = article;
+  if (article.kind !== (filter.kind ?? "article")) return false;
   if (
     filter.categoryId &&
     !relations.categories.some((r) => r.articleId === id && r.categoryId === filter.categoryId)

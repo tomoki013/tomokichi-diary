@@ -20,6 +20,7 @@ import {
   type CategoryId,
   type Collection,
   type CollectionId,
+  LocationTree,
   type Location,
   type LocationId,
   type LocationName,
@@ -43,6 +44,7 @@ import {
   readLegacyPosts,
   type LegacyRegionNode,
 } from "./lib/legacy-source.js";
+import { readLegacyPages } from "./lib/legacy-pages.js";
 import { readImageSize } from "./lib/image-size.js";
 import { stableId } from "./lib/stable-id.js";
 
@@ -75,38 +77,49 @@ const TRAVEL_TOPIC_TITLES: Record<string, string> = {
   insurance: "保険",
 };
 
-/** Pages that exist in the legacy app but hold no article content. */
-const STATIC_PAGES = [
-  "/",
-  "/about",
-  "/affiliates",
-  "/contact",
-  "/cookie-policy",
-  "/editorial-policy",
-  "/faq",
-  "/gallery",
-  "/journey",
-  "/posts",
-  "/privacy",
-  "/request",
-  "/roadmap",
-  "/series",
-  "/sitemap",
-  "/social",
-  "/terms",
-  "/destination",
+/**
+ * Pages that hold no article content, with the tidied URL structure.
+ *
+ * Article URLs are frozen; everything else was free to move, so the legal and
+ * disclosure pages are grouped under `/legal` and the trip timeline moved off
+ * the opaque `/journey/j-2024-02-26` ids. Every old path is kept alive as a
+ * 301 (see `LEGACY_STATIC_REDIRECTS`).
+ */
+interface StaticPage {
+  path: string;
+  key: string;
+  noindex?: boolean;
+}
+
+const STATIC_PAGES: StaticPage[] = [
+  { path: "/", key: "home" },
+  { path: "/posts", key: "posts" },
+  { path: "/destination", key: "destination" },
+  { path: "/series", key: "series" },
+  { path: "/trips", key: "trips" },
+  { path: "/about", key: "about" },
+  { path: "/contact", key: "contact" },
+  { path: "/faq", key: "faq" },
+  { path: "/gallery", key: "gallery", noindex: true },
+  { path: "/social", key: "social", noindex: true },
+  { path: "/request", key: "request", noindex: true },
+  { path: "/roadmap", key: "roadmap", noindex: true },
+  { path: "/sitemap", key: "sitemap", noindex: true },
+  { path: "/legal/privacy", key: "privacy" },
+  { path: "/legal/terms", key: "terms" },
+  { path: "/legal/cookies", key: "cookie-policy" },
+  { path: "/legal/editorial-policy", key: "editorial-policy" },
+  { path: "/legal/affiliates", key: "affiliates", noindex: true },
 ];
 
-/** Legacy pages that declare noindex; the rewrite must not silently start indexing them. */
-const NOINDEX_STATIC = new Set([
-  "/gallery",
-  "/social",
-  "/request",
-  "/sitemap",
-  "/series",
-  "/roadmap",
-  "/affiliates",
-]);
+const LEGACY_STATIC_REDIRECTS: Record<string, string> = {
+  "/journey": "/trips",
+  "/privacy": "/legal/privacy",
+  "/terms": "/legal/terms",
+  "/cookie-policy": "/legal/cookies",
+  "/editorial-policy": "/legal/editorial-policy",
+  "/affiliates": "/legal/affiliates",
+};
 
 interface Collected {
   locations: Location[];
@@ -135,7 +148,17 @@ function route(
     redirectTo: options.redirectTo ?? null,
     redirectStatus: options.redirectStatus ?? null,
     isLegacy: options.isLegacy ?? true,
+    noindex: options.noindex ?? false,
   };
+}
+
+/** An old URL that keeps working by pointing at wherever the page lives now. */
+function redirect(from: string, to: string): Route {
+  return route(from, "redirect", null, {
+    isCanonical: false,
+    redirectTo: normalizeRoutePath(to) as Route["redirectTo"],
+    redirectStatus: 301,
+  });
 }
 
 function collectLocations(regions: readonly LegacyRegionNode[]): {
@@ -312,7 +335,6 @@ async function main(): Promise<void> {
       location,
       collected.locationNames.filter((n) => n.locationId === location.id),
     );
-    collected.routes.push(route(`/destination/${location.slug}`, "location", location.id));
   }
 
   for (const [index, series] of legacySeries.entries()) {
@@ -337,9 +359,12 @@ async function main(): Promise<void> {
     const id = stableId("collection", `journey:${journey.id}`) as CollectionId;
     const cover = journey.image ? await registerMedia(ctx, collected, journey.image) : null;
     const { start, end } = journeyDates(journey.date);
+    // `j-2024-02-26` says nothing to a reader; the destination and month do.
+    const place = slugify(journey.location.split(",")[0] ?? "") || "trip";
+    const tripSlug = `${place}-${(start ?? journey.date.replaceAll(".", "-")).slice(0, 7)}`;
     collected.collections.push({
       id,
-      slug: journey.id as Slug,
+      slug: tripSlug as Slug,
       kind: "journey",
       title: journey.title,
       description: journey.description,
@@ -348,11 +373,13 @@ async function main(): Promise<void> {
       endDate: end,
       sortOrder: index,
     });
-    collected.routes.push(route(`/journey/${journey.id}`, "journey", id));
+    collected.routes.push(route(`/trips/${tripSlug}`, "journey", id));
+    collected.routes.push(redirect(`/journey/${journey.id}`, `/trips/${tripSlug}`));
   }
 
   for (const collection of collected.collections) await ctx.repos.collections.save(collection);
 
+  const allArticleLocations: ArticleLocation[] = [];
   const missingRegions = new Set<string>();
   const missingImages = new Set<string>();
   let articleCount = 0;
@@ -366,6 +393,7 @@ async function main(): Promise<void> {
 
     const article: Article = {
       id: articleId,
+      kind: "article",
       status: "published",
       locale: "ja",
       slug: post.slug as Slug,
@@ -479,6 +507,8 @@ async function main(): Promise<void> {
       });
     }
 
+    allArticleLocations.push(...articleLocations);
+
     const tags = [
       ...(fm.tags ?? []).map((name) => tagFor(collected, name)),
       ...(fm.travelTopics ?? []).map((topic) =>
@@ -520,11 +550,146 @@ async function main(): Promise<void> {
     articleCount++;
   }
 
-  for (const path of STATIC_PAGES) {
-    collected.routes.push(route(path, "static", path === "/" ? "home" : path.slice(1)));
+  // Location hubs are laid out by ancestry rather than as a flat namespace, and
+  // a hub with nothing to list is not generated at all: the old flat URL points
+  // at the nearest hub that does have content.
+  const tree = new LocationTree(collected.locations, collected.locationNames);
+  const articlesPerLocation = new Map<string, number>();
+  for (const relation of allArticleLocations) {
+    articlesPerLocation.set(
+      relation.locationId,
+      (articlesPerLocation.get(relation.locationId) ?? 0) + 1,
+    );
+  }
+  const totalFor = (location: Location): number =>
+    [location.id, ...tree.descendantIds(location.id)].reduce(
+      (sum, id) => sum + (articlesPerLocation.get(id) ?? 0),
+      0,
+    );
+
+  const canonicalLocationPath = (location: Location): string => {
+    const country = tree.countryOf(location.id);
+    if (location.type === "continent" || !country) return `/destination/${location.slug}`;
+    return location.id === country.id
+      ? `/destination/${country.slug}`
+      : `/destination/${country.slug}/${location.slug}`;
+  };
+
+  const generated = new Map<string, string>();
+  for (const location of collected.locations) {
+    if (totalFor(location) === 0) continue;
+    const path = canonicalLocationPath(location);
+    generated.set(location.id, path);
+    // A hub with one or two articles is too thin to index, which is what the
+    // legacy site already decided page by page.
+    collected.routes.push(
+      route(path, "location", location.id, { noindex: totalFor(location) <= 2 }),
+    );
+  }
+
+  for (const location of collected.locations) {
+    const legacyPath = `/destination/${location.slug}`;
+    const canonical = generated.get(location.id);
+    if (canonical === legacyPath) continue;
+
+    const fallback =
+      canonical ??
+      tree
+        .ancestors(location.id)
+        .toReversed()
+        .map((ancestor) => generated.get(ancestor.id))
+        .find((path) => path !== undefined) ??
+      "/destination";
+    collected.routes.push(redirect(legacyPath, fallback));
+  }
+
+  // Standalone pages become `page`-kind articles so they gain revisions, SEO
+  // handling and the same publishing rules as the rest of the content.
+  const pageArticleIds = new Map<string, string>();
+  const pageUnknowns: Record<string, string[]> = {};
+  for (const page of await readLegacyPages()) {
+    const articleId = stableId("article", `page:${page.key}`) as ArticleId;
+    const revisionId = stableId("revision", `page:${page.key}:1`) as RevisionId;
+    const article: Article = {
+      id: articleId,
+      kind: "page",
+      status: "published",
+      locale: "ja",
+      slug: page.key as Slug,
+      authorId: AUTHOR_ID,
+      currentRevisionId: revisionId,
+      publishedRevisionId: revisionId,
+      createdAt: NOW,
+      updatedAt: NOW,
+      scheduledAt: null,
+      publishedAt: NOW,
+      archivedAt: null,
+      noindex: false,
+      travelStartDate: null,
+      travelEndDate: null,
+    };
+    await ctx.repos.articles.save({
+      ...article,
+      currentRevisionId: null,
+      publishedRevisionId: null,
+    });
+    await ctx.repos.revisions.save({
+      id: revisionId,
+      articleId,
+      revisionNumber: 1,
+      title: page.title,
+      summary: page.summary,
+      bodyMarkdown: page.bodyMarkdown,
+      seoTitleOverride: null,
+      seoDescriptionOverride: null,
+      changeSummary: "imported from travel-diary",
+      createdAt: NOW,
+      createdBy: AUTHOR_ID,
+    });
+    await ctx.repos.articles.save(article);
+    pageArticleIds.set(page.key, articleId);
+    if (page.unknown.length > 0) pageUnknowns[page.path] = page.unknown;
+  }
+
+  for (const page of STATIC_PAGES) {
+    collected.routes.push(
+      route(page.path, "static", pageArticleIds.get(page.key) ?? page.key, {
+        noindex: page.noindex ?? false,
+      }),
+    );
+  }
+  for (const [from, to] of Object.entries(LEGACY_STATIC_REDIRECTS)) {
+    collected.routes.push(redirect(from, to));
   }
 
   for (const r of collected.routes) await ctx.repos.routes.save(r);
+
+  // Internal links are pointed at the tidied URLs. The redirects still cover
+  // anything that is missed; this only removes a needless hop for readers and
+  // crawlers, and never changes the wording around the link.
+  const movedPaths = new Map(
+    collected.routes
+      .filter((r) => r.targetType === "redirect" && r.redirectTo !== null)
+      .map((r) => [r.path as string, r.redirectTo as string]),
+  );
+  let rewritten = 0;
+  for (const article of await ctx.repos.articles.listAll()) {
+    const revisionId = article.publishedRevisionId;
+    if (!revisionId) continue;
+    const revision = await ctx.repos.revisions.findById(revisionId);
+    if (!revision) continue;
+
+    const body = revision.bodyMarkdown.replace(
+      /\]\((\/[^)\s#]*)((?:#[^)\s]*)?)\)/g,
+      (match, path: string, fragment: string) => {
+        const destination = movedPaths.get(normalizeRoutePath(path));
+        return destination === undefined ? match : `](${destination}${fragment})`;
+      },
+    );
+    if (body === revision.bodyMarkdown) continue;
+    await ctx.repos.revisions.save({ ...revision, bodyMarkdown: body });
+    rewritten++;
+  }
 
   // The import is only complete when every URL the old site served still
   // resolves; anything else is a silent SEO regression.
@@ -550,9 +715,13 @@ async function main(): Promise<void> {
         missingRoutes,
         missingRegions: [...missingRegions],
         missingImages: [...missingImages],
+        bodiesWithRewrittenLinks: rewritten,
         // Carried forward so the rewrite cannot silently start indexing a page
         // the legacy site kept out of the index.
-        legacyNoindexStatic: [...NOINDEX_STATIC],
+        legacyNoindexStatic: STATIC_PAGES.filter((p) => p.noindex).map((p) => p.path),
+        // Dynamic fragments of the legacy pages that a template now renders
+        // instead; listed so nothing is assumed to have been carried over.
+        pagesNeedingReview: pageUnknowns,
       },
       null,
       2,

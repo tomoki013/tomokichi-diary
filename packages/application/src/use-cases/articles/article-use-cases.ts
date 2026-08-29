@@ -27,6 +27,7 @@ import type { AppContext } from "../../context.js";
 
 export interface CreateArticleInput {
   readonly slug: string;
+  readonly kind?: "article" | "page";
   readonly locale: Locale;
   readonly authorId: AuthorId;
   readonly draft: DraftInput;
@@ -67,6 +68,7 @@ export async function createArticle(
   const id = ctx.ids.next<ArticleId>();
   const article: Article = {
     id,
+    kind: input.kind ?? "article",
     status: "draft",
     locale: input.locale,
     slug: slug.value,
@@ -100,6 +102,7 @@ export async function createArticle(
     redirectTo: null,
     redirectStatus: null,
     isLegacy: false,
+    noindex: false,
   };
 
   // The article row exists first so the revision's foreign key resolves, then

@@ -3,6 +3,13 @@ import type { Instant, PlainDate } from "../primitives/datetime.js";
 import type { Locale } from "../primitives/locale.js";
 import type { Slug } from "../primitives/slug.js";
 
+/**
+ * `page` covers standalone editorial pages (about, FAQ, legal). They carry the
+ * same content model as an article but never appear in listings or feeds.
+ */
+export const ARTICLE_KINDS = ["article", "page"] as const;
+export type ArticleKind = (typeof ARTICLE_KINDS)[number];
+
 export const ARTICLE_STATUSES = ["draft", "scheduled", "published", "archived"] as const;
 export type ArticleStatus = (typeof ARTICLE_STATUSES)[number];
 
@@ -12,6 +19,7 @@ export type ArticleStatus = (typeof ARTICLE_STATUSES)[number];
  */
 export interface Article {
   readonly id: ArticleId;
+  readonly kind: ArticleKind;
   readonly status: ArticleStatus;
   readonly locale: Locale;
   /** Editorial identifier; never used to build URLs. */

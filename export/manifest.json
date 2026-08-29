@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-29T16:45:37.669Z",
+  "generatedAt": "2026-08-29T19:42:56.873Z",
   "counts": {
-    "articles": 114,
-    "revisions": 114,
+    "articles": 122,
+    "revisions": 122,
     "embeds": 4,
-    "routes": 195,
+    "routes": 239,
     "locations": 50,
     "locationNames": 50,
     "places": 0,
