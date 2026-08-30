@@ -16,10 +16,11 @@ routes = [{ pattern = "api.tomokichidiary.com", custom_domain = true }]
 [vars]
 # Where the contact form redirects back to after a submission.
 PUBLIC_SITE_URL = "https://tomokichi-diary-web.tomoki-ttttt.workers.dev"
-# Set once the Access application exists; until then the bearer token is the
-# only gate. See docs/OPERATIONS.md.
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
+# The Access application in front of admin.tomokichidiary.com. Neither value is
+# secret — both appear in the login redirect — but both must match exactly or
+# every identity token is rejected.
+ACCESS_TEAM_DOMAIN = "tomoki-ttttt.cloudflareaccess.com"
+ACCESS_AUD = "edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"
 PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
 # Admin calls are same-origin through the admin Worker, so CORS is only for
 # local development against a deployed API.
