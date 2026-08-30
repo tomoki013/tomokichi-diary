@@ -35,6 +35,9 @@ export function Login({
   return (
     <main style={{ maxWidth: "22rem", marginTop: "18vh" }}>
       <h1 style={{ fontSize: "1.1rem" }}>Tomokichi Diary Admin</h1>
+      <p className="muted" style={{ fontSize: "0.85rem" }}>
+        シングルサインオンが有効な場合、このページは表示されません。
+      </p>
       <form onSubmit={(event) => void submit(event)}>
         <label>
           <span>管理トークン</span>

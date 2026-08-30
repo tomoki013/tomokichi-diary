@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, api, clearToken, getToken } from "./api";
+import { ApiError, api, clearToken } from "./api";
 import { ArticleList } from "./views/ArticleList";
 import { ArticleEditor } from "./views/ArticleEditor";
 import { Messages } from "./views/Messages";
@@ -22,8 +22,19 @@ function useHashRoute(): string {
 
 export function App() {
   const route = useHashRoute();
-  const [authenticated, setAuthenticated] = useState(() => getToken() !== "");
+  // `checking` covers the moment before we know whether Cloudflare Access has
+  // already let us in, so the login form never flashes for an authorised user.
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  useEffect(() => {
+    // With Access in front, an authorised browser is already authenticated and
+    // there is nothing to type. Probing beats asking.
+    api.listArticles().then(
+      () => setAuthenticated(true),
+      () => setAuthenticated(false),
+    );
+  }, []);
 
   const notify = useCallback((message: ToastMessage) => {
     setToast(message);
@@ -46,6 +57,7 @@ export function App() {
     setAuthenticated(false);
   }, []);
 
+  if (authenticated === null) return <main className="muted">確認中…</main>;
   if (!authenticated) {
     return <Login onAuthenticated={() => setAuthenticated(true)} onError={reportError} />;
   }

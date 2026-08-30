@@ -155,9 +155,26 @@ false positive is still readable.
 
 ### `API_UNAUTHORIZED`
 
-`ADMIN_TOKEN` is unset on the Worker, or the admin is sending a stale token.
-`wrangler secret put ADMIN_TOKEN`. A missing secret closes the admin API — it
-never opens it.
+Admin access is granted two ways, and either is enough:
+
+1. **Cloudflare Access** — a valid `Cf-Access-Jwt-Assertion` on the request,
+   verified against the team's public keys. Requires `ACCESS_TEAM_DOMAIN` and
+   `ACCESS_AUD` to be set as vars.
+2. **Bearer token** — `ADMIN_TOKEN`, compared in constant time.
+
+Configuring Access does not disable the token. Delete `ADMIN_TOKEN`
+(`wrangler secret delete ADMIN_TOKEN`) to make Access the only way in.
+
+A missing secret closes the admin API — it never opens it.
+
+The admin is served from `admin.tomokichidiary.com`, which also carries the API
+under `/api/*` through a service binding. That is what makes the browser's
+calls same-origin, so one Access application covers the UI and the API it talks
+to. Neither Worker has a workers.dev URL, because that would sit outside Access
+and outside the custom domain.
+
+`api.tomokichidiary.com` stays public: it serves the contact form, whose whole
+purpose is to accept requests from people who are not signed in.
 
 ### `API_VALIDATION_FAILED`
 

@@ -9,6 +9,7 @@ import { mediaRoutes } from "./routes/media.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
+import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
@@ -18,15 +19,28 @@ export type ChallengeVerifier = (
   ip: string | undefined,
 ) => Promise<boolean>;
 
+/** Verifies a Cloudflare Access identity token. Injected so tests can stand in for it. */
+export type AccessVerifier = (
+  token: string,
+  teamDomain: string,
+  audience: string,
+) => Promise<AccessIdentity | null>;
+
 export type AppEnv = {
   Bindings: Env;
-  Variables: { requestId: string; ctx: AppContext; verifyChallenge: ChallengeVerifier };
+  Variables: {
+    requestId: string;
+    ctx: AppContext;
+    verifyChallenge: ChallengeVerifier;
+    verifyAccess: AccessVerifier;
+  };
 };
 
 export interface AppOptions {
   /** Overridden by tests so the HTTP layer can run against in-memory adapters. */
   contextFactory?: (env: Env, requestId: string) => AppContext;
   verifyChallenge?: ChallengeVerifier;
+  verifyAccess?: AccessVerifier;
 }
 
 /**
@@ -54,6 +68,7 @@ function secretsMatch(expected: string, provided: string): boolean {
 export function createApp(options: AppOptions = {}) {
   const buildContext = options.contextFactory ?? createContext;
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
+  const verifyAccess = options.verifyAccess ?? verifyAccessJwt;
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
@@ -61,6 +76,7 @@ export function createApp(options: AppOptions = {}) {
     c.set("requestId", requestId);
     c.set("ctx", buildContext(c.env, requestId));
     c.set("verifyChallenge", verifyChallenge);
+    c.set("verifyAccess", verifyAccess);
     await next();
     c.header("x-request-id", requestId);
   });
@@ -98,7 +114,29 @@ export function createApp(options: AppOptions = {}) {
 
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.
+  /*
+   * Admin access is granted by Cloudflare Access once it is configured, and by
+   * the shared bearer token otherwise. Configuring Access does not silently
+   * disable the token — remove `ADMIN_TOKEN` to make Access the only way in.
+   */
   v1.use("/admin/*", async (c, next) => {
+    const teamDomain = c.env.ACCESS_TEAM_DOMAIN?.trim();
+    const audience = c.env.ACCESS_AUD?.trim();
+    const assertion = c.req.header("cf-access-jwt-assertion");
+
+    if (teamDomain && audience && assertion) {
+      const identity = await c.get("verifyAccess")(assertion, teamDomain, audience);
+      if (identity) {
+        c.get("ctx").logger.info("admin.authenticated", { via: "access", email: identity.email });
+        await next();
+        return;
+      }
+      c.get("ctx").logger.warn("admin.access_rejected", {
+        code: "API_UNAUTHORIZED",
+        route: c.req.path,
+      });
+    }
+
     const expected = c.env.ADMIN_TOKEN?.trim();
     const provided = c.req
       .header("authorization")

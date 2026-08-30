@@ -47,10 +47,19 @@ Nothing in `packages/` may import Astro, React, Hono, Vite or Cloudflare.
 Everything except `/health` is served under a version prefix:
 
 ```
-GET  /health                      unversioned — liveness, not a contract
-POST /v1/contact                  public, Turnstile-protected
-     /v1/admin/*                  bearer token required
+api.tomokichidiary.com            public
+  GET  /health                    unversioned — liveness, not a contract
+  POST /v1/contact                Turnstile-protected
+
+admin.tomokichidiary.com          behind Cloudflare Access
+  /                               the admin SPA (static assets)
+  /api/*                          the same API, via a service binding
 ```
+
+Putting the API under the admin's own hostname is what makes the browser's
+calls same-origin: one Access application covers both, the Access cookie rides
+along on its own, and no shared secret has to live in the page. Neither Worker
+exposes a workers.dev URL — that would sit outside Access.
 
 The prefix exists because clients outlive the server they were built against:
 the contact endpoint is baked into static HTML that sits in caches and

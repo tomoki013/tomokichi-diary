@@ -1,11 +1,26 @@
 name = "tomokichi-diary-admin"
+main = "worker/index.ts"
 compatibility_date = "2026-08-01"
 
+# No workers.dev URL: it would sit outside Cloudflare Access and outside the
+# custom domain, which is exactly the door this is meant to close.
+workers_dev = false
+
+# One hostname for the UI and the API it talks to, so a single Cloudflare
+# Access application protects both and the calls stay same-origin.
+routes = [{ pattern = "admin.tomokichidiary.com", custom_domain = true }]
+
 [assets]
+binding = "ASSETS"
 directory = "./dist"
 # A single-page app: every unknown path renders index.html and the hash router
 # takes over.
 not_found_handling = "single-page-application"
+
+# The API is reached over the internal network, never over the internet.
+[[services]]
+binding = "API"
+service = "tomokichi-diary-api"
 
 [observability]
 enabled = true

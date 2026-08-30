@@ -1,15 +1,29 @@
 name = "tomokichi-diary-api"
 main = "src/index.ts"
 compatibility_date = "2026-08-01"
+
+# No workers.dev URL: it would sit outside Cloudflare Access and outside the
+# custom domain, which is exactly the door this is meant to close.
+workers_dev = false
 compatibility_flags = ["nodejs_compat"]
+
+# The public face of the API. Admin traffic arrives instead through the admin
+# Worker's service binding, behind Cloudflare Access.
+routes = [{ pattern = "api.tomokichidiary.com", custom_domain = true }]
 
 # ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN`.
 # It is never committed, and a missing value closes the admin API.
 [vars]
 # Where the contact form redirects back to after a submission.
 PUBLIC_SITE_URL = "https://tomokichi-diary-web.tomoki-ttttt.workers.dev"
+# Set once the Access application exists; until then the bearer token is the
+# only gate. See docs/OPERATIONS.md.
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
 PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
-ALLOWED_ORIGINS = "https://admin.tomokichidiary.com,https://tomokichi-diary-admin.tomoki-ttttt.workers.dev"
+# Admin calls are same-origin through the admin Worker, so CORS is only for
+# local development against a deployed API.
+ALLOWED_ORIGINS = "http://localhost:5173"
 
 [[d1_databases]]
 binding = "DB"

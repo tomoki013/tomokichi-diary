@@ -18,4 +18,8 @@ export interface Env {
   TURNSTILE_SECRET_KEY?: string;
   /** Salt for the sender-address hash used to rate-limit the contact form. */
   IP_HASH_SALT?: string;
+  /** Cloudflare Access team domain, e.g. `example.cloudflareaccess.com`. */
+  ACCESS_TEAM_DOMAIN?: string;
+  /** Audience tag of the Access application protecting the admin. */
+  ACCESS_AUD?: string;
 }

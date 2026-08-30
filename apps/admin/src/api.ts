@@ -11,7 +11,15 @@ import type {
 
 // The version prefix lives here so every call carries it and nothing else
 // in the admin has to think about it.
-const BASE = `${(import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "")}/v1`;
+/**
+ * Same-origin by default: the admin Worker carries the API under `/api`, so
+ * Cloudflare Access protects both with one application and the browser sends
+ * its Access cookie automatically. `VITE_API_URL` points at a deployed API for
+ * local development.
+ */
+const ORIGIN = (import.meta.env["VITE_API_URL"] ?? "/api").replace(/\/+$/, "");
+const BASE = `${ORIGIN}/v1`;
+
 const TOKEN_KEY = "tomokichi.admin.token";
 
 /**
@@ -50,16 +58,18 @@ export class ApiError extends Error {
   }
 }
 
-const ORIGIN = (import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "");
-
 async function request<T>(path: string, init: RequestInit = {}, base: string = BASE): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set("authorization", `Bearer ${getToken()}`);
+  // Sent only when a token is stored: once Access is the sole gate, there is
+  // none, and the request carries the Access cookie instead.
+  const token = getToken();
+  if (token !== "") headers.set("authorization", `Bearer ${token}`);
   if (init.body !== undefined && !(init.body instanceof FormData)) {
     headers.set("content-type", "application/json");
   }
 
-  const response = await fetch(`${base}${path}`, { ...init, headers });
+  // The Access cookie must ride along on same-origin calls.
+  const response = await fetch(`${base}${path}`, { ...init, headers, credentials: "same-origin" });
   if (response.status === 204) return undefined as T;
 
   const body: unknown = await response.json().catch(() => null);
