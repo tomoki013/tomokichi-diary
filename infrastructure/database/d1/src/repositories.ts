@@ -7,6 +7,7 @@ import type {
   MediaRepository,
   PlaceRepository,
   CollectionRepository,
+  ContactMessageRepository,
   RelationRepository,
   Repositories,
   RevisionRepository,
@@ -25,6 +26,7 @@ import {
   authorRow,
   categoryRow,
   collectionRow,
+  contactMessageRow,
   embedRow,
   locationNameRow,
   locationRow,
@@ -291,6 +293,33 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  const contactMessages: ContactMessageRepository = {
+    save: async (message) => {
+      await upsert(db, "contact_messages", contactMessageRow.from(message), ["id"]).run();
+    },
+    list: async (limit) =>
+      (await all("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?", limit)).map(
+        contactMessageRow.to,
+      ),
+    findLatestByIpHash: async (ipHash) => {
+      const row = await first(
+        "SELECT * FROM contact_messages WHERE ip_hash = ? ORDER BY created_at DESC LIMIT 1",
+        ipHash,
+      );
+      return row ? contactMessageRow.to(row) : null;
+    },
+    setStatus: async (id, status) => {
+      await db
+        .prepare("UPDATE contact_messages SET status = ? WHERE id = ?")
+        .bind(status, id)
+        .run();
+    },
+    countUnread: async () => {
+      const row = await first("SELECT COUNT(*) AS n FROM contact_messages WHERE status = 'unread'");
+      return Number(row?.["n"] ?? 0);
+    },
+  };
+
   const authors: AuthorRepository = {
     findById: async (id) => {
       const row = await first("SELECT * FROM authors WHERE id = ?", id);
@@ -327,6 +356,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     taxonomy,
     relations,
     collections,
+    contactMessages,
     authors,
     aiArtifacts,
   };

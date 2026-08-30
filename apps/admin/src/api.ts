@@ -100,6 +100,12 @@ export const api = {
       body: JSON.stringify({ media }),
     }),
   listRoutes: () => request<{ items: RouteDto[] }>("/admin/routes"),
+  listMessages: () => request<{ items: ContactMessageDto[]; unread: number }>("/admin/messages"),
+  setMessageStatus: (id: string, status: ContactMessageDto["status"]) =>
+    request<{ ok: boolean }>(`/admin/messages/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
   listLocations: () => request<{ items: LocationDto[] }>("/admin/locations"),
   taxonomy: () => request<TaxonomyDto>("/admin/taxonomy"),
 };
@@ -127,4 +133,14 @@ export interface RelationsInput {
   categoryIds: string[];
   tagIds: string[];
   collectionIds: string[];
+}
+
+export interface ContactMessageDto {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  body: string;
+  status: "unread" | "read" | "spam";
+  createdAt: string;
 }

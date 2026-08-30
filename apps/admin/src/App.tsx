@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError, api, getToken, setToken } from "./api";
 import { ArticleList } from "./views/ArticleList";
 import { ArticleEditor } from "./views/ArticleEditor";
+import { Messages } from "./views/Messages";
 import { Login } from "./views/Login";
 import { Toast, type ToastMessage } from "./components/Toast";
 
@@ -57,6 +58,7 @@ export function App() {
         <h1>
           <a href="#/">Tomokichi Diary Admin</a>
         </h1>
+        <a href="#/messages">お問い合わせ</a>
         <button
           onClick={() =>
             void api
@@ -71,6 +73,8 @@ export function App() {
       <main>
         {editorMatch ? (
           <ArticleEditor id={editorMatch[1]!} notify={notify} onError={reportError} />
+        ) : route === "/messages" ? (
+          <Messages notify={notify} onError={reportError} />
         ) : (
           <ArticleList notify={notify} onError={reportError} />
         )}

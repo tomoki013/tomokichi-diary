@@ -56,11 +56,17 @@ export function jsxProseToMarkdown(source: string): ConversionResult {
   // Links are rewritten before tokenising so the label and href stay together.
   text = text.replace(
     /<(?:a|Link)\b[^>]*?(?:href|to)="([^"]*)"[^>]*>([\s\S]*?)<\/(?:a|Link)>/g,
-    (_match, href: string, label: string) =>
-      `[${label
+    (_match, href: string, inner: string) => {
+      const label = inner
         .replace(/<[^>]*>/g, "")
         .replace(/\s+/g, " ")
-        .trim()}](${href})`,
+        .trim();
+      const link = `[${label}](${href})`;
+      // A link that wrapped block content was its own card in the layout;
+      // inlining it would run several of them into one paragraph.
+      // Emitted as a list item so the tokeniser gives each one its own line.
+      return /<(?:h[1-6]|p|div|section)\b/i.test(inner) ? `<li>${link}</li>` : link;
+    },
   );
   text = text.replace(/<(?:img|Image)\b([^>]*)\/?>/g, (_match, attrs: string) => {
     const src = /src="([^"]*)"/.exec(attrs)?.[1] ?? "";
@@ -162,7 +168,13 @@ export function jsxProseToMarkdown(source: string): ConversionResult {
     markdown: lines
       .join("\n")
       .split("\n")
-      .filter((line) => !/^[\s(){}[\]<>;,)]*$/.test(line) || line === "")
+      .filter(
+        (line) =>
+          line === "" ||
+          // Punctuation left over once an interpolation was dropped, and the
+          // unclosed opener of a `{items.map(… => (` expression.
+          (!/^[\s(){}[\]<>;,)]*$/.test(line) && !/^\{[^}]*$/.test(line.trim())),
+      )
       .join("\n")
       .replace(/\n{3,}/g, "\n\n")
       .trim(),

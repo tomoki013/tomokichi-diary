@@ -6,6 +6,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
 import VisitedCountries from "../components/VisitedCountries.astro";
+import ContactForm from "../components/ContactForm.astro";
 import { pageTrail } from "../lib/navigation";
 import { seoConfig } from "../lib/site";
 
@@ -35,5 +36,6 @@ const updated = view.article.updatedAt.slice(0, 10);
     </header>
     <ArticleBody slug={view.article.slug} embeds={view.embeds} />
     {route.path === "/about" && <VisitedCountries />}
+    {route.path === "/contact" && <ContactForm />}
   </article>
 </BaseLayout>

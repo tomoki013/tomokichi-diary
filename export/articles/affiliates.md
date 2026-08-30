@@ -21,8 +21,6 @@ noindex: false
 
 当サイトは、以下のアフィリエイトプログラムに参加しています。 これらのプログラムは、商品およびサービスを提供している企業との提携を可能にするためのものです。
 
-{appsToShow.map((app) => (
-
 - [Trip.com](https://jp.trip.com/partners/index)
 - [Klook](https://affiliate.klook.com/ja/)
 - [GetYourGuide](https://partner.getyourguide.com/)

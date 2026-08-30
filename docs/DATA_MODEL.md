@@ -71,6 +71,12 @@ _usage_, because the same photo describes something different in each article.
 Derived formats are rebuildable and are not stored: `pnpm media:build`
 regenerates the AVIF/WebP ladder from the originals in `media/`.
 
+## ContactMessage
+
+Contact form submissions. The sender's address is stored as a salted hash and
+never in the clear: enough to rate-limit a sender, not enough to identify one
+afterwards.
+
 ## AIArtifact
 
 Sidecar output attached to an entity and the revision it was derived from.

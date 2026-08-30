@@ -1,0 +1,82 @@
+---
+import { apiUrl, turnstileSiteKey } from "../lib/site";
+
+/**
+ * A plain form POST to the API: submitting needs no JavaScript, and the API
+ * redirects back here with a result in the query string. Turnstile is the only
+ * script on the page, and without a site key the form is not rendered at all
+ * rather than shipped unprotected.
+ */
+/**
+ * Shows the result banner after the API redirects back. Kept as a string
+ * because the markup below sits inside a conditional expression, where an
+ * element's children are parsed as JSX rather than as script text.
+ */
+const RESULT_SCRIPT = `
+  var params = new URLSearchParams(location.search);
+  var result = params.get("sent") ? "sent" : params.get("error");
+  var message = result && document.querySelector('[data-message="' + result + '"]');
+  if (message) {
+    message.hidden = false;
+    message.scrollIntoView({ block: "center" });
+  }
+`;
+
+const MESSAGES = [
+  ["sent", "ok", "お問い合わせを受け付けました。ありがとうございます。"],
+  ["challenge", "error", "認証に失敗しました。もう一度お試しください。"],
+  ["invalid", "error", "入力内容をご確認のうえ、もう一度お試しください。"],
+  ["toofast", "error", "送信間隔が短すぎます。しばらく時間をおいてからお試しください。"],
+] as const;
+---
+
+{
+  turnstileSiteKey === "" ? (
+    <p class="notice">
+      現在フォームからのお問い合わせを受け付けていません。上記のメールアドレスをご利用ください。
+    </p>
+  ) : (
+    <section class="section" aria-labelledby="contact-form-heading">
+      <h2 id="contact-form-heading">フォームからのお問い合わせ</h2>
+
+      {MESSAGES.map(([key, tone, text]) => (
+        <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
+          {text}
+        </p>
+      ))}
+
+      <form class="contact-form" method="post" action={`${apiUrl}/contact`}>
+        <label>
+          <span>お名前</span>
+          <input type="text" name="name" required maxlength="100" autocomplete="name" />
+        </label>
+        <label>
+          <span>メールアドレス</span>
+          <input type="email" name="email" required maxlength="254" autocomplete="email" />
+        </label>
+        <label>
+          <span>件名</span>
+          <input type="text" name="subject" required maxlength="150" />
+        </label>
+        <label>
+          <span>お問い合わせ内容</span>
+          <textarea name="body" rows="8" required minlength="10" maxlength="4000" />
+        </label>
+
+        {/* Not shown to anyone reading the page; only automation fills it in. */}
+        <div class="honeypot" aria-hidden="true">
+          <label>
+            <span>Website</span>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-language="ja" />
+        <button type="submit">送信する</button>
+      </form>
+
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <script is:inline set:html={RESULT_SCRIPT} />
+    </section>
+  )
+}

@@ -18,20 +18,24 @@ const findings: Finding[] = [];
 const assetExists = (path: string): boolean =>
   path.startsWith("/") && existsSync(join(DIST_DIR, decodeURIComponent(path).replace(/^\/+/, "")));
 
-const MEDIA_BASE = (process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com").replace(
-  /\/+$/,
-  "",
-);
 const MEDIA_DIR = join(process.cwd(), "media");
 const DERIVATIVE_DIR = join(process.cwd(), ".cache", "images");
 
-/** Resolves a media URL back to the file the sync step will upload. */
+/**
+ * Resolves a media URL back to the file the sync step uploads. Matching on the
+ * path rather than on the origin keeps the check correct whichever media host
+ * a build was configured with.
+ */
 const mediaExists = (url: string): boolean => {
-  if (!url.startsWith(MEDIA_BASE)) return false;
-  const key = decodeURIComponent(url.slice(MEDIA_BASE.length).replace(/^\/+/, ""));
-  return key.startsWith("_img/")
-    ? existsSync(join(DERIVATIVE_DIR, key.slice("_img/".length)))
-    : existsSync(join(MEDIA_DIR, key));
+  let path: string;
+  try {
+    path = url.startsWith("http") ? new URL(url).pathname : url;
+  } catch {
+    return false;
+  }
+  const key = decodeURIComponent(path.replace(/^\/+/, ""));
+  if (key.startsWith("_img/")) return existsSync(join(DERIVATIVE_DIR, key.slice("_img/".length)));
+  return key.startsWith("images/") && existsSync(join(MEDIA_DIR, key));
 };
 
 let checkedLinks = 0;

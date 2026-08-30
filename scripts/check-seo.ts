@@ -36,6 +36,17 @@ interface PageSeo {
   imagesWithoutAlt: number;
 }
 
+/** Titles round-trip through HTML escaping, so both sides are compared decoded. */
+function decodeEntities(value: string): string {
+  return value
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&");
+}
+
 function readSeo(html: string): PageSeo {
   const value = (pattern: RegExp): string | null => pattern.exec(html)?.[1]?.trim() ?? null;
   return {
@@ -83,6 +94,31 @@ for (const page of pages) {
     } catch {
       add("SEO_JSONLD_INVALID", page.path);
     }
+  }
+}
+
+// Every piece of published content must actually render its own title. This
+// catches a page falling through to a generic template, which still passes the
+// structural checks above while serving none of its content.
+const revisionById = new Map(snapshot.revisions.map((revision) => [revision.id, revision]));
+for (const article of snapshot.articles) {
+  const revisionId = article.publishedRevisionId;
+  if (article.status !== "published" || revisionId === null) continue;
+
+  const route = table.canonicalFor(article.kind === "page" ? "static" : "article", article.id);
+  const title = revisionById.get(revisionId)?.title;
+  if (!route || title === undefined) continue;
+
+  const page = pages.find((candidate) => candidate.path === route.path);
+  if (!page) continue;
+
+  const html = readBuiltPage(page);
+  const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1] ?? "";
+  const rendered = decodeEntities(h1.replace(/<[^>]*>/g, ""))
+    .replace(/\s+/g, "")
+    .trim();
+  if (!rendered.includes(title.replace(/\s+/g, "").trim())) {
+    add("SEO_H1_MISSING", route.path, `h1 does not render the content title "${title}"`);
   }
 }
 

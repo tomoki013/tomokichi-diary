@@ -8,15 +8,25 @@ import { articleRoutes } from "./routes/articles.js";
 import { mediaRoutes } from "./routes/media.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
+import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
+import { messageRoutes } from "./routes/messages.js";
+
+/** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
+export type ChallengeVerifier = (
+  secret: string,
+  token: string,
+  ip: string | undefined,
+) => Promise<boolean>;
 
 export type AppEnv = {
   Bindings: Env;
-  Variables: { requestId: string; ctx: AppContext };
+  Variables: { requestId: string; ctx: AppContext; verifyChallenge: ChallengeVerifier };
 };
 
 export interface AppOptions {
   /** Overridden by tests so the HTTP layer can run against in-memory adapters. */
   contextFactory?: (env: Env, requestId: string) => AppContext;
+  verifyChallenge?: ChallengeVerifier;
 }
 
 /**
@@ -25,12 +35,14 @@ export interface AppOptions {
  */
 export function createApp(options: AppOptions = {}) {
   const buildContext = options.contextFactory ?? createContext;
+  const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
     const requestId = c.req.header("x-request-id") ?? generateId();
     c.set("requestId", requestId);
     c.set("ctx", buildContext(c.env, requestId));
+    c.set("verifyChallenge", verifyChallenge);
     await next();
     c.header("x-request-id", requestId);
   });
@@ -53,6 +65,9 @@ export function createApp(options: AppOptions = {}) {
 
   app.get("/health", (c) => c.json({ status: "ok", requestId: c.get("requestId") }));
 
+  // The only unauthenticated write: a challenge-protected contact form.
+  app.route("/contact", contactRoutes());
+
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.
   app.use("/admin/*", async (c, next) => {
@@ -71,6 +86,7 @@ export function createApp(options: AppOptions = {}) {
   app.route("/admin/articles", articleRoutes());
   app.route("/admin/media", mediaRoutes());
   app.route("/admin/routes", routeRoutes());
+  app.route("/admin/messages", messageRoutes());
   app.route("/admin", referenceRoutes());
 
   app.notFound((c) => errorResponse(c, "API_NOT_FOUND", `no route for ${c.req.path}`, 404));

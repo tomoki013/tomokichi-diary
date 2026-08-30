@@ -35,6 +35,15 @@ export function mediaUrl(storageKey: string): string {
   return `${mediaBaseUrl}/${storageKey.replace(/^\/+/, "")}`;
 }
 
+/** The API origin the contact form posts to. */
+export const apiUrl = (process.env.PUBLIC_API_URL ?? "https://api.tomokichidiary.com").replace(
+  /\/+$/,
+  "",
+);
+
+/** Public Turnstile key. Empty disables the form rather than shipping it unprotected. */
+export const turnstileSiteKey = process.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
 export function absoluteUrl(path: string): string {
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }

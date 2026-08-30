@@ -6,6 +6,8 @@ compatibility_flags = ["nodejs_compat"]
 # ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN`.
 # It is never committed, and a missing value closes the admin API.
 [vars]
+# Where the contact form redirects back to after a submission.
+PUBLIC_SITE_URL = "https://tomokichi-diary-web.tomoki-ttttt.workers.dev"
 PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
 ALLOWED_ORIGINS = "https://admin.tomokichidiary.com,https://tomokichi-diary-admin.tomoki-ttttt.workers.dev"
 

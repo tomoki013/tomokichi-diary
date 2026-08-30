@@ -12,6 +12,9 @@ import type {
   ArticleCollection,
   Collection,
   CollectionId,
+  ContactMessage,
+  ContactMessageId,
+  ContactMessageStatus,
   Author,
   AuthorId,
   Category,
@@ -120,6 +123,15 @@ export interface CollectionRepository {
   replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
 }
 
+export interface ContactMessageRepository {
+  save(message: ContactMessage): Promise<void>;
+  list(limit: number): Promise<readonly ContactMessage[]>;
+  /** Most recent submission from the same sender, for rate limiting. */
+  findLatestByIpHash(ipHash: string): Promise<ContactMessage | null>;
+  setStatus(id: ContactMessageId, status: ContactMessageStatus): Promise<void>;
+  countUnread(): Promise<number>;
+}
+
 export interface AuthorRepository {
   findById(id: AuthorId): Promise<Author | null>;
   listAll(): Promise<readonly Author[]>;
@@ -146,6 +158,7 @@ export interface Repositories {
   readonly taxonomy: TaxonomyRepository;
   readonly relations: RelationRepository;
   readonly collections: CollectionRepository;
+  readonly contactMessages: ContactMessageRepository;
   readonly authors: AuthorRepository;
   readonly aiArtifacts: AIArtifactRepository;
 }

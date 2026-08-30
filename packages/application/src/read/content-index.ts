@@ -116,7 +116,12 @@ export class ContentIndex {
   }
 
   private buildView(article: Article, revision: ArticleRevision | null): ArticleView | null {
-    const route = this.routes.canonicalFor("article", article.id);
+    // Standalone pages are addressed in the static namespace, articles in the
+    // article one; both are content and both need their route to render.
+    const route = this.routes.canonicalFor(
+      article.kind === "page" ? "static" : "article",
+      article.id,
+    );
     if (!revision || !route) return null;
 
     const media = this.snapshot.articleMedia

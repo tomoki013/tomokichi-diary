@@ -132,6 +132,27 @@ failures. `LINK_INTERNAL_BROKEN` catches all three before a deploy.
 
 ## API
 
+### Contact form
+
+The form posts to `POST /contact` on the API, which verifies a Turnstile token,
+rate-limits the sender and stores the message in D1. Submissions are read in
+the admin under お問い合わせ; nothing is emailed and no third party sees them.
+
+Three secrets gate it, and a missing one closes the form rather than opening it:
+
+| Secret                 | Purpose                                      |
+| ---------------------- | -------------------------------------------- |
+| `TURNSTILE_SECRET_KEY` | Verifies the challenge token                 |
+| `IP_HASH_SALT`         | Salts the sender hash used for rate limiting |
+| `ADMIN_TOKEN`          | Guards reading the messages                  |
+
+The public site needs `PUBLIC_TURNSTILE_SITE_KEY` at build time; without it the
+form is not rendered at all.
+
+A submission is stored with status `spam` when it trips the heuristic (link
+floods, bbcode or HTML link markup). It is flagged rather than dropped, so a
+false positive is still readable.
+
 ### `API_UNAUTHORIZED`
 
 `ADMIN_TOKEN` is unset on the Worker, or the admin is sending a stale token.

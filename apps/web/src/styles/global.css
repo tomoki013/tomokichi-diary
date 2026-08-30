@@ -416,3 +416,71 @@ h1 {
 .muted {
   color: var(--muted);
 }
+
+.contact-form {
+  display: grid;
+  gap: 1.1rem;
+  max-width: 34rem;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.contact-form label > span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.contact-form :is(input, textarea) {
+  font: inherit;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.contact-form textarea {
+  resize: vertical;
+  line-height: 1.8;
+}
+
+.contact-form button {
+  font: inherit;
+  justify-self: start;
+  padding: 0.55rem 1.6rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Off-screen rather than display:none, which some bots skip. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-message {
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+}
+
+.form-message--ok {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.form-message--error {
+  border-left: 3px solid #c2410c;
+  background: var(--accent-soft);
+}

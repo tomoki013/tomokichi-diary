@@ -14,3 +14,4 @@ export type { ContentSnapshot } from "@tomokichi/data";
 export * from "./use-cases/articles/article-use-cases.js";
 export * from "./use-cases/media/media-use-cases.js";
 export * from "./use-cases/routes/route-use-cases.js";
+export * from "./use-cases/contact/contact-use-cases.js";

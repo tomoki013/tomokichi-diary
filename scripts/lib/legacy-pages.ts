@@ -152,6 +152,21 @@ async function buildFaqPage(): Promise<LegacyPage> {
   };
 }
 
+/**
+ * The legacy layouts rendered the page title inside the body, which the
+ * converter turns into a leading `h2`. The new template renders the title
+ * itself, so keeping it would show it twice.
+ */
+const withoutWhitespace = (value: string): string => value.replace(/\s+/g, "").trim();
+
+function dropLeadingTitle(markdown: string, title: string): string {
+  const [first, ...rest] = markdown.split("\n");
+  if (first === undefined || !first.startsWith("## ")) return markdown;
+  return withoutWhitespace(first.slice(3)) === withoutWhitespace(title)
+    ? rest.join("\n").trimStart()
+    : markdown;
+}
+
 export async function readLegacyPages(): Promise<LegacyPage[]> {
   const pages: LegacyPage[] = [];
 
@@ -167,10 +182,13 @@ export async function readLegacyPages(): Promise<LegacyPage[]> {
       path: source.path,
       title: metadata.title,
       summary: metadata.summary,
-      bodyMarkdown: (
-        parts.map((part) => part.markdown).join("\n\n") +
-        (source.key === "affiliates" ? affiliateProgramList() : "")
-      ).trim(),
+      bodyMarkdown: dropLeadingTitle(
+        (
+          parts.map((part) => part.markdown).join("\n\n") +
+          (source.key === "affiliates" ? affiliateProgramList() : "")
+        ).trim(),
+        metadata.title,
+      ),
       unknown: [...new Set(parts.flatMap((part) => part.unknown))],
     });
   }

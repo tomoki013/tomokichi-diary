@@ -10,6 +10,7 @@ import type {
   ArticleTag,
   ArticleCollection,
   Collection,
+  ContactMessage,
   Author,
   Category,
   Location,
@@ -423,5 +424,28 @@ export const articleCollectionRow = {
     article_id: relation.articleId,
     collection_id: relation.collectionId,
     sort_order: relation.sortOrder,
+  }),
+};
+
+export const contactMessageRow = {
+  to: (row: Row): ContactMessage => ({
+    id: str(row, "id") as ContactMessage["id"],
+    name: str(row, "name"),
+    email: str(row, "email"),
+    subject: str(row, "subject"),
+    body: str(row, "body"),
+    ipHash: str(row, "ip_hash"),
+    status: str(row, "status") as ContactMessage["status"],
+    createdAt: str(row, "created_at") as ContactMessage["createdAt"],
+  }),
+  from: (message: ContactMessage): Row => ({
+    id: message.id,
+    name: message.name,
+    email: message.email,
+    subject: message.subject,
+    body: message.body,
+    ip_hash: message.ipHash,
+    status: message.status,
+    created_at: message.createdAt,
   }),
 };
