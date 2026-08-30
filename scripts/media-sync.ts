@@ -23,6 +23,17 @@ interface Upload {
   size: number;
 }
 
+/**
+ * Cache headers travel with the object, so the CDN can serve it without asking
+ * the bucket. Derivative names contain a content hash and can never change;
+ * originals are addressed by their legacy path, so they get a finite lifetime.
+ */
+function cacheControlFor(key: string): string {
+  return key.startsWith("_img/")
+    ? "public, max-age=31536000, immutable"
+    : "public, max-age=604800";
+}
+
 function walk(dir: string, prefix: string): Upload[] {
   if (!existsSync(dir)) return [];
   const out: Upload[] = [];
@@ -45,12 +56,15 @@ function walk(dir: string, prefix: string): Upload[] {
   return out;
 }
 
-const manifest: Record<string, number> = existsSync(MANIFEST)
-  ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, number>)
+// Keyed by size *and* cache header, so changing the header re-uploads.
+const manifest: Record<string, string> = existsSync(MANIFEST)
+  ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, string>)
   : {};
 
+const fingerprint = (upload: Upload): string => `${upload.size}:${cacheControlFor(upload.key)}`;
+
 const all = [...walk(MEDIA_DIR, ""), ...walk(CACHE_DIR, "_img/")];
-const pending = all.filter((upload) => manifest[upload.key] !== upload.size);
+const pending = all.filter((upload) => manifest[upload.key] !== fingerprint(upload));
 
 const failures: string[] = [];
 let done = 0;
@@ -64,10 +78,11 @@ const worker = async (): Promise<void> => {
       "put",
       `${BUCKET}/${upload.key}`,
       `--file=${upload.file}`,
+      `--cache-control=${cacheControlFor(upload.key)}`,
       "--remote",
     ]);
     if (outcome.ok) {
-      manifest[upload.key] = upload.size;
+      manifest[upload.key] = fingerprint(upload);
       done++;
       if (done % 100 === 0) {
         mkdirSync(join(process.cwd(), ".cache"), { recursive: true });

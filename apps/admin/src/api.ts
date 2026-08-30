@@ -9,7 +9,9 @@ import type {
   TaxonomyDto,
 } from "@tomokichi/contracts";
 
-const BASE = (import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "");
+// The version prefix lives here so every call carries it and nothing else
+// in the admin has to think about it.
+const BASE = `${(import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "")}/v1`;
 const TOKEN_KEY = "tomokichi.admin.token";
 
 export function getToken(): string {
@@ -33,14 +35,16 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+const ORIGIN = (import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "");
+
+async function request<T>(path: string, init: RequestInit = {}, base: string = BASE): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("authorization", `Bearer ${getToken()}`);
   if (init.body !== undefined && !(init.body instanceof FormData)) {
     headers.set("content-type", "application/json");
   }
 
-  const response = await fetch(`${BASE}${path}`, { ...init, headers });
+  const response = await fetch(`${base}${path}`, { ...init, headers });
   if (response.status === 204) return undefined as T;
 
   const body: unknown = await response.json().catch(() => null);
@@ -57,7 +61,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  health: () => request<{ status: string }>("/health"),
+  health: () => request<{ status: string }>("/health", {}, ORIGIN),
   listArticles: () => request<{ items: ArticleSummaryDto[] }>("/admin/articles"),
   getArticle: (id: string) => request<ArticleDetailDto>(`/admin/articles/${id}`),
   createArticle: (input: {

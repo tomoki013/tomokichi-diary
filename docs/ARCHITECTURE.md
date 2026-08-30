@@ -42,6 +42,20 @@ apps/api ─┘         ▲              ▲
 Nothing in `packages/` may import Astro, React, Hono, Vite or Cloudflare.
 `scripts/check-boundaries.ts` enforces this and runs as part of CI.
 
+## API
+
+Everything except `/health` is served under a version prefix:
+
+```
+GET  /health                      unversioned — liveness, not a contract
+POST /v1/contact                  public, Turnstile-protected
+     /v1/admin/*                  bearer token required
+```
+
+The prefix exists because clients outlive the server they were built against:
+the contact endpoint is baked into static HTML that sits in caches and
+bookmarks, and the admin is deployed separately from the API.
+
 ## Media
 
 Images live in `media/` and are delivered from an R2 bucket behind its own

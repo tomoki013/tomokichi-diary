@@ -63,14 +63,24 @@ export function createApp(options: AppOptions = {}) {
     await next();
   });
 
+  // `/health` is deliberately unversioned: it answers "is this Worker up",
+  // which is not a contract that can change shape.
   app.get("/health", (c) => c.json({ status: "ok", requestId: c.get("requestId") }));
 
+  /*
+   * Everything else is versioned. The public site bakes the contact endpoint
+   * into static HTML that lives in caches and bookmarks, and the admin is
+   * deployed separately from the API — so a client can outlive the server it
+   * was built against, which is exactly what a version prefix is for.
+   */
+  const v1 = new Hono<AppEnv>();
+
   // The only unauthenticated write: a challenge-protected contact form.
-  app.route("/contact", contactRoutes());
+  v1.route("/contact", contactRoutes());
 
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.
-  app.use("/admin/*", async (c, next) => {
+  v1.use("/admin/*", async (c, next) => {
     const expected = c.env.ADMIN_TOKEN;
     const provided = c.req.header("authorization")?.replace(/^Bearer\s+/i, "");
     if (!expected || !provided || provided !== expected) {
@@ -83,11 +93,13 @@ export function createApp(options: AppOptions = {}) {
     await next();
   });
 
-  app.route("/admin/articles", articleRoutes());
-  app.route("/admin/media", mediaRoutes());
-  app.route("/admin/routes", routeRoutes());
-  app.route("/admin/messages", messageRoutes());
-  app.route("/admin", referenceRoutes());
+  v1.route("/admin/articles", articleRoutes());
+  v1.route("/admin/media", mediaRoutes());
+  v1.route("/admin/routes", routeRoutes());
+  v1.route("/admin/messages", messageRoutes());
+  v1.route("/admin", referenceRoutes());
+
+  app.route("/v1", v1);
 
   app.notFound((c) => errorResponse(c, "API_NOT_FOUND", `no route for ${c.req.path}`, 404));
 

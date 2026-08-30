@@ -26,7 +26,7 @@ async function request(path: string, init: RequestInit = {}): Promise<Response> 
 }
 
 async function createArticle(overrides: Record<string, unknown> = {}): Promise<string> {
-  const response = await request("/admin/articles", {
+  const response = await request("/v1/admin/articles", {
     method: "POST",
     headers: auth,
     body: JSON.stringify({
@@ -55,21 +55,21 @@ describe("authentication", () => {
 
   it("rejects admin requests without a valid token", async () => {
     for (const headers of [{}, { authorization: "Bearer wrong" }]) {
-      const response = await request("/admin/articles", { headers });
+      const response = await request("/v1/admin/articles", { headers });
       expect(response.status).toBe(401);
       expect((await response.json()).error.code).toBe("API_UNAUTHORIZED");
     }
   });
 
   it("closes the admin API when no token is configured", async () => {
-    const response = await app.request("/admin/articles", { headers: auth }, {} as Env);
+    const response = await app.request("/v1/admin/articles", { headers: auth }, {} as Env);
     expect(response.status).toBe(401);
   });
 });
 
 describe("validation", () => {
   it("reports every invalid field with a path", async () => {
-    const response = await request("/admin/articles", {
+    const response = await request("/v1/admin/articles", {
       method: "POST",
       headers: auth,
       body: JSON.stringify({ slug: "Not A Slug", locale: "fr", path: "", draft: { title: "" } }),
@@ -82,7 +82,7 @@ describe("validation", () => {
   });
 
   it("rejects a body that is not an object", async () => {
-    const response = await request("/admin/articles", {
+    const response = await request("/v1/admin/articles", {
       method: "POST",
       headers: auth,
       body: "not json",
@@ -95,7 +95,7 @@ describe("article lifecycle", () => {
   it("creates, reads and lists an article", async () => {
     const id = await createArticle();
 
-    const detail = await (await request(`/admin/articles/${id}`, { headers: auth })).json();
+    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
     expect(detail).toMatchObject({
       slug: "chagee-menu",
       status: "draft",
@@ -103,13 +103,13 @@ describe("article lifecycle", () => {
     });
     expect(detail.currentRevision.revisionNumber).toBe(1);
 
-    const list = await (await request("/admin/articles", { headers: auth })).json();
+    const list = await (await request("/v1/admin/articles", { headers: auth })).json();
     expect(list.items).toHaveLength(1);
   });
 
   it("refuses a duplicate slug with a conflict", async () => {
     await createArticle();
-    const response = await request("/admin/articles", {
+    const response = await request("/v1/admin/articles", {
       method: "POST",
       headers: auth,
       body: JSON.stringify({ slug: "chagee-menu", locale: "ja", path: "/posts/other", draft }),
@@ -119,7 +119,7 @@ describe("article lifecycle", () => {
   });
 
   it("returns 404 for an unknown article", async () => {
-    const response = await request("/admin/articles/does-not-exist", { headers: auth });
+    const response = await request("/v1/admin/articles/does-not-exist", { headers: auth });
     expect(response.status).toBe(404);
     expect((await response.json()).error.code).toBe("ARTICLE_NOT_FOUND");
   });
@@ -128,12 +128,12 @@ describe("article lifecycle", () => {
     const id = await createArticle();
 
     const check = await (
-      await request(`/admin/articles/${id}/publish-check`, { headers: auth })
+      await request(`/v1/admin/articles/${id}/publish-check`, { headers: auth })
     ).json();
     expect(check.publishable).toBe(false);
     expect(check.problems.map((p: { field: string }) => p.field)).toContain("media");
 
-    const blocked = await request(`/admin/articles/${id}/publish`, {
+    const blocked = await request(`/v1/admin/articles/${id}/publish`, {
       method: "POST",
       headers: auth,
     });
@@ -145,14 +145,14 @@ describe("article lifecycle", () => {
       new File([new Uint8Array([1, 2, 3])], "cover.jpg", { type: "image/jpeg" }),
     );
     const uploaded = await (
-      await request("/admin/media", {
+      await request("/v1/admin/media", {
         method: "POST",
         headers: { authorization: auth.authorization },
         body: upload,
       })
     ).json();
 
-    await request(`/admin/media/article/${id}`, {
+    await request(`/v1/admin/media/article/${id}`, {
       method: "PUT",
       headers: auth,
       body: JSON.stringify({
@@ -162,7 +162,7 @@ describe("article lifecycle", () => {
       }),
     });
 
-    const published = await request(`/admin/articles/${id}/publish`, {
+    const published = await request(`/v1/admin/articles/${id}/publish`, {
       method: "POST",
       headers: auth,
     });
@@ -178,13 +178,13 @@ describe("article lifecycle", () => {
       new File([new Uint8Array([4, 5, 6])], "cover.jpg", { type: "image/jpeg" }),
     );
     const uploaded = await (
-      await request("/admin/media", {
+      await request("/v1/admin/media", {
         method: "POST",
         headers: { authorization: auth.authorization },
         body: upload,
       })
     ).json();
-    await request(`/admin/media/article/${id}`, {
+    await request(`/v1/admin/media/article/${id}`, {
       method: "PUT",
       headers: auth,
       body: JSON.stringify({
@@ -193,15 +193,15 @@ describe("article lifecycle", () => {
         ],
       }),
     });
-    await request(`/admin/articles/${id}/publish`, { method: "POST", headers: auth });
+    await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth });
 
-    await request(`/admin/articles/${id}/draft`, {
+    await request(`/v1/admin/articles/${id}/draft`, {
       method: "PUT",
       headers: auth,
       body: JSON.stringify({ ...draft, title: "編集後" }),
     });
 
-    const detail = await (await request(`/admin/articles/${id}`, { headers: auth })).json();
+    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
     expect(detail.hasUnpublishedChanges).toBe(true);
     expect(detail.isLive).toBe(true);
   });
@@ -211,7 +211,7 @@ describe("media", () => {
   it("rejects an unsupported media type", async () => {
     const upload = new FormData();
     upload.append("file", new File([new Uint8Array([1])], "a.pdf", { type: "application/pdf" }));
-    const response = await request("/admin/media", {
+    const response = await request("/v1/admin/media", {
       method: "POST",
       headers: { authorization: auth.authorization },
       body: upload,
@@ -222,7 +222,7 @@ describe("media", () => {
 
   it("rejects image usage without alt text", async () => {
     const id = await createArticle();
-    const response = await request(`/admin/media/article/${id}`, {
+    const response = await request(`/v1/admin/media/article/${id}`, {
       method: "PUT",
       headers: auth,
       body: JSON.stringify({
@@ -238,11 +238,11 @@ describe("routes", () => {
     await createArticle();
 
     const before = await (
-      await request("/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
+      await request("/v1/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
     ).json();
     expect(before.kind).toBe("target");
 
-    const moved = await request("/admin/routes/move", {
+    const moved = await request("/v1/admin/routes/move", {
       method: "POST",
       headers: auth,
       body: JSON.stringify({ from: "/posts/chagee-menu", to: "/posts/chagee-menu-explained" }),
@@ -250,7 +250,7 @@ describe("routes", () => {
     expect(moved.status).toBe(200);
 
     const after = await (
-      await request("/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
+      await request("/v1/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
     ).json();
     expect(after).toMatchObject({
       kind: "redirect",
@@ -258,23 +258,25 @@ describe("routes", () => {
       status: 301,
     });
 
-    const integrity = await (await request("/admin/routes/integrity", { headers: auth })).json();
+    const integrity = await (await request("/v1/admin/routes/integrity", { headers: auth })).json();
     expect(integrity.ok).toBe(true);
   });
 
   it("404s an unknown path and 400s a missing parameter", async () => {
-    expect((await request("/admin/routes/resolve?path=/nope", { headers: auth })).status).toBe(404);
-    expect((await request("/admin/routes/resolve", { headers: auth })).status).toBe(400);
+    expect((await request("/v1/admin/routes/resolve?path=/nope", { headers: auth })).status).toBe(
+      404,
+    );
+    expect((await request("/v1/admin/routes/resolve", { headers: auth })).status).toBe(400);
   });
 });
 
 describe("reference data", () => {
   it("returns taxonomy and locations for the editor", async () => {
-    const taxonomy = await (await request("/admin/taxonomy", { headers: auth })).json();
+    const taxonomy = await (await request("/v1/admin/taxonomy", { headers: auth })).json();
     expect(taxonomy).toHaveProperty("categories");
     expect(taxonomy).toHaveProperty("collections");
 
-    const locations = await (await request("/admin/locations", { headers: auth })).json();
+    const locations = await (await request("/v1/admin/locations", { headers: auth })).json();
     expect(Array.isArray(locations.items)).toBe(true);
   });
 });
@@ -297,7 +299,7 @@ describe("contact form", () => {
     const form = new FormData();
     for (const [key, value] of Object.entries(fields)) form.append(key, value);
     return contactApp.request(
-      "/contact",
+      "/v1/contact",
       { method: "POST", body: form, headers: { "cf-connecting-ip": options.ip ?? "203.0.113.1" } },
       contactEnv,
     );
@@ -366,7 +368,7 @@ describe("contact form", () => {
     });
     const form = new FormData();
     for (const [key, value] of Object.entries(valid)) form.append(key, value);
-    const response = await unconfigured.request("/contact", { method: "POST", body: form }, {
+    const response = await unconfigured.request("/v1/contact", { method: "POST", body: form }, {
       ADMIN_TOKEN: TOKEN,
     } as Env);
     expect(response.status).toBe(500);
@@ -375,20 +377,20 @@ describe("contact form", () => {
 
   it("lists and re-files messages in the admin", async () => {
     await submit(valid);
-    const listed = await (await request("/admin/messages", { headers: auth })).json();
+    const listed = await (await request("/v1/admin/messages", { headers: auth })).json();
     expect(listed.unread).toBe(1);
 
     const id = listed.items[0].id;
-    const updated = await request(`/admin/messages/${id}/status`, {
+    const updated = await request(`/v1/admin/messages/${id}/status`, {
       method: "PUT",
       headers: auth,
       body: JSON.stringify({ status: "read" }),
     });
     expect(updated.status).toBe(200);
-    expect((await (await request("/admin/messages", { headers: auth })).json()).unread).toBe(0);
+    expect((await (await request("/v1/admin/messages", { headers: auth })).json()).unread).toBe(0);
   });
 
   it("requires a token to read messages", async () => {
-    expect((await request("/admin/messages")).status).toBe(401);
+    expect((await request("/v1/admin/messages")).status).toBe(401);
   });
 });
