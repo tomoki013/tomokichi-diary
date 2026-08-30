@@ -1,0 +1,47 @@
+---
+import { imageSources } from "../lib/images";
+
+interface Props {
+  storageKey: string;
+  alt: string;
+  /** Tells the browser how wide the image will render, so it picks the right candidate. */
+  sizes: string;
+  loading?: "eager" | "lazy";
+  fetchpriority?: "high" | "auto";
+  class?: string;
+  /** Falls back to the asset's intrinsic size; both are always emitted to reserve space. */
+  width?: number;
+  height?: number;
+}
+
+const {
+  storageKey,
+  alt,
+  sizes,
+  loading = "lazy",
+  fetchpriority = "auto",
+  class: className,
+  width,
+  height,
+} = Astro.props;
+
+const image = imageSources(storageKey);
+---
+
+<picture>
+  {
+    image.sources.map((source) => (
+      <source type={source.type} srcset={source.srcset} sizes={sizes} />
+    ))
+  }
+  <img
+    src={image.src}
+    alt={alt}
+    width={width ?? image.width ?? undefined}
+    height={height ?? image.height ?? undefined}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding="async"
+    class={className}
+  />
+</picture>

@@ -5,7 +5,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import { content } from "../lib/content";
-import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
+import Picture from "../components/Picture.astro";
+import { SIZES } from "../lib/images";
+import { seoConfig, siteDescription } from "../lib/site";
 
 interface Props {
   route: Route;
@@ -27,8 +29,10 @@ const PAGES: Record<string, { title: string; description: string }> = {
     title: "旅先から探す",
     description: "訪れた国と都市ごとに、観光情報や移動手段、費用の記録をまとめています。",
   },
-  "/series": { title: "シリーズ", description: "テーマごとにまとめた連載記事の一覧です。" },
-  "/trips": { title: "旅の記録", description: "これまでの旅程を時系列でまとめています。" },
+  "/collections": {
+    title: "コレクション",
+    description: "テーマごとの連載と、旅程ごとの記録をまとめています。",
+  },
   "/gallery": { title: "ギャラリー", description: "旅先で撮影した写真をまとめています。" },
   "/sitemap": { title: "サイトマップ", description: "サイト内のすべてのページの一覧です。" },
 };
@@ -49,19 +53,17 @@ const trail =
         { name: page.title, route },
       ];
 
+// Continents group the country list rather than having pages of their own:
+// they sat at the same URL depth as the countries they contain.
 const continents = content.locations
   .roots()
-  .flatMap((root) => {
-    const hub = content.routes.canonicalFor("location", root.id);
-    if (!hub) return [];
-    const countries = content.locations.children(root.id).flatMap((country) => {
-      const countryHub = content.routes.canonicalFor("location", country.id);
-      return countryHub
-        ? [{ name: content.locations.nameOf(country.id, "ja"), path: countryHub.path }]
-        : [];
-    });
-    return [{ name: content.locations.nameOf(root.id, "ja"), path: hub.path, countries }];
-  })
+  .map((root) => ({
+    name: content.locations.nameOf(root.id, "ja"),
+    countries: content.locations.children(root.id).flatMap((country) => {
+      const hub = content.routes.canonicalFor("location", country.id);
+      return hub ? [{ name: content.locations.nameOf(country.id, "ja"), path: hub.path }] : [];
+    }),
+  }))
   .filter((continent) => continent.countries.length > 0);
 
 const collections = (kind: "series" | "journey") =>
@@ -169,9 +171,7 @@ const labelOf = (target: Route): string => {
     route.path === "/destination" &&
       continents.map((continent) => (
         <section class="section">
-          <h2>
-            <a href={continent.path}>{continent.name}</a>
-          </h2>
+          <h2>{continent.name}</h2>
           <ul class="chips">
             {continent.countries.map((country) => (
               <li>
@@ -184,26 +184,36 @@ const labelOf = (target: Route): string => {
   }
 
   {
-    (route.path === "/series" || route.path === "/trips") && (
-      <ul class="card-grid">
-        {collections(route.path === "/series" ? "series" : "journey").map((entry) => (
-          <li class="card">
-            <div class="card__body">
-              <h2 class="card__title">
-                <a href={entry.path}>{entry.collection.title}</a>
-              </h2>
-              {entry.collection.description && (
-                <p class="card__summary">{entry.collection.description}</p>
-              )}
-              <p class="card__meta">
-                {entry.collection.startDate && `${entry.collection.startDate} · `}
-                {entry.count}件の記事
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    )
+    route.path === "/collections" &&
+      (
+        [
+          { kind: "series" as const, heading: "シリーズ", note: "テーマごとの連載" },
+          { kind: "journey" as const, heading: "旅の記録", note: "旅程ごとのまとめ" },
+        ] as const
+      ).map((group) => (
+        <section class="section">
+          <h2>{group.heading}</h2>
+          <p class="muted">{group.note}</p>
+          <ul class="card-grid">
+            {collections(group.kind).map((entry) => (
+              <li class="card">
+                <div class="card__body">
+                  <h3 class="card__title">
+                    <a href={entry.path}>{entry.collection.title}</a>
+                  </h3>
+                  {entry.collection.description && (
+                    <p class="card__summary">{entry.collection.description}</p>
+                  )}
+                  <p class="card__meta">
+                    {entry.collection.startDate && `${entry.collection.startDate} · `}
+                    {entry.count}件の記事
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
   }
 
   {
@@ -211,13 +221,11 @@ const labelOf = (target: Route): string => {
       <ul class="gallery">
         {galleryImages.map((item, index) => (
           <li>
-            <img
-              src={mediaUrl(item.asset.storageKey)}
+            <Picture
+              storageKey={item.asset.storageKey}
               alt={item.usage.alt}
-              width={item.asset.width ?? 600}
-              height={item.asset.height ?? 400}
+              sizes={SIZES.gallery}
               loading={index < 8 ? "eager" : "lazy"}
-              decoding="async"
             />
           </li>
         ))}

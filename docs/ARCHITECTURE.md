@@ -42,6 +42,22 @@ apps/api ─┘         ▲              ▲
 Nothing in `packages/` may import Astro, React, Hono, Vite or Cloudflare.
 `scripts/check-boundaries.ts` enforces this and runs as part of CI.
 
+## Media
+
+Images live in `media/` and are delivered from an R2 bucket behind its own
+domain — the site Worker ships only HTML and CSS.
+
+```
+media/**  ──▶ pnpm media:build ──▶ .cache/images (AVIF + WebP ladder)
+                                        │
+media/**  ──────────────────────────────┴──▶ pnpm media:sync ──▶ R2 ──▶ media domain
+```
+
+Derivatives are content-addressed build artifacts: cached between builds, never
+committed, and rebuildable from the originals. The previous site's
+`/images/...` URLs are redirected to the media domain so nothing that linked to
+them breaks.
+
 ## How content reaches the public site
 
 ```
@@ -91,5 +107,5 @@ Three Workers, no Pages:
 `_redirects` and `_headers` are emitted into the build output from the route
 table, so redirects stay data rather than configuration.
 
-After a content change: `pnpm export:data`, commit, then `pnpm db:seed` and
-`pnpm deploy:web`.
+After a content change: `pnpm export:data`, commit, then `pnpm db:seed`,
+`pnpm media:build && pnpm media:sync`, and `pnpm deploy:web`.

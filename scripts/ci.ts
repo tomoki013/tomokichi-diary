@@ -107,6 +107,17 @@ const STEPS: Step[] = [
     },
   },
   {
+    name: "media",
+    code: "BUILD_FAILED",
+    command: "pnpm",
+    args: ["run", "media:build"],
+    rerun: "pnpm media:build",
+    interpret: (output) => {
+      const match = /(\d+) derivatives \((\d+) cached\)/.exec(output);
+      return match ? { metrics: { media: `${match[1]}` } } : {};
+    },
+  },
+  {
     name: "build",
     code: "BUILD_FAILED",
     command: "pnpm",

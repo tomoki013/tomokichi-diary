@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { serializeJsonLd, type JsonLd, type PageMetadata } from "@tomokichi/seo";
-import { seoConfig } from "../lib/site";
+import { mediaBaseUrl, seoConfig } from "../lib/site";
 
 interface Props {
   metadata: PageMetadata;
@@ -17,8 +17,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const primaryNav = [
   { href: "/posts", label: "記事" },
   { href: "/destination", label: "旅先" },
-  { href: "/trips", label: "旅の記録" },
-  { href: "/series", label: "シリーズ" },
+  { href: "/collections", label: "コレクション" },
   { href: "/about", label: "About" },
 ];
 
@@ -38,6 +37,12 @@ const footerNav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {
+      /* Media is on its own origin, so the connection is opened before the
+        first image is discovered rather than after. */
+    }
+    <link rel="preconnect" href={mediaBaseUrl} crossorigin />
+    <link rel="dns-prefetch" href={mediaBaseUrl} />
     <title>{metadata.title}</title>
     <meta name="description" content={metadata.description} />
     <meta name="robots" content={metadata.robots} />

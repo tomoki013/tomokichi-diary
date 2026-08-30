@@ -1,6 +1,7 @@
 ---
 import type { ArticleView } from "@tomokichi/application";
-import { mediaUrl } from "../lib/site";
+import Picture from "./Picture.astro";
+import { SIZES } from "../lib/images";
 
 interface Props {
   view: ArticleView;
@@ -20,13 +21,11 @@ const published = view.article.publishedAt?.slice(0, 10);
   {
     cover && (
       <a href={view.route.path} tabindex="-1" aria-hidden="true">
-        <img
-          src={mediaUrl(cover.asset.storageKey)}
+        <Picture
+          storageKey={cover.asset.storageKey}
           alt={cover.usage.alt}
-          width={cover.asset.width ?? 900}
-          height={cover.asset.height ?? 600}
+          sizes={SIZES.card}
           loading={eager ? "eager" : "lazy"}
-          decoding="async"
           fetchpriority={eager ? "high" : "auto"}
         />
       </a>

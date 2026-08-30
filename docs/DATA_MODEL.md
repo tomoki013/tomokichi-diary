@@ -68,7 +68,8 @@ a 301 in this table.
 
 The asset stores bytes and intrinsic size. Alt text and caption live on the
 _usage_, because the same photo describes something different in each article.
-Derived formats (AVIF, thumbnails) are rebuildable and are not stored.
+Derived formats are rebuildable and are not stored: `pnpm media:build`
+regenerates the AVIF/WebP ladder from the originals in `media/`.
 
 ## AIArtifact
 

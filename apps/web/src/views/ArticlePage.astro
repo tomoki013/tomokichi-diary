@@ -6,6 +6,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
 import ArticleCard from "../components/ArticleCard.astro";
+import Picture from "../components/Picture.astro";
+import { SIZES } from "../lib/images";
 import { content } from "../lib/content";
 import { articleTrail } from "../lib/navigation";
 import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
@@ -94,13 +96,12 @@ const travel =
     {
       cover && (
         <figure class="hero">
-          <img
-            src={mediaUrl(cover.asset.storageKey)}
+          <Picture
+            storageKey={cover.asset.storageKey}
             alt={cover.usage.alt}
-            width={cover.asset.width ?? 1600}
-            height={cover.asset.height ?? 900}
+            sizes={SIZES.hero}
+            loading="eager"
             fetchpriority="high"
-            decoding="async"
           />
           {cover.usage.caption && <figcaption>{cover.usage.caption}</figcaption>}
         </figure>

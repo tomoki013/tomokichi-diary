@@ -22,11 +22,17 @@ export const seoConfig: SeoConfig = {
 export const siteDescription =
   "実際に旅した体験をもとに、旅行記・観光や移動のガイドをまとめた個人旅行ブログです。空港から市内へのアクセスや現地の交通、費用の記録など、旅の計画に役立つ一次情報を発信しています。";
 
-/** Legacy image URLs are preserved as site-relative paths; uploads go to object storage. */
+/**
+ * All media is served from the R2 bucket behind its own domain, so the site
+ * Worker ships only HTML and CSS. The previous site's `/images/...` URLs are
+ * kept alive by a redirect in the build output.
+ */
+export const mediaBaseUrl = (
+  process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"
+).replace(/\/+$/, "");
+
 export function mediaUrl(storageKey: string): string {
-  return storageKey.startsWith("originals/")
-    ? `${process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"}/${storageKey}`
-    : `/${storageKey.replace(/^\/+/, "")}`;
+  return `${mediaBaseUrl}/${storageKey.replace(/^\/+/, "")}`;
 }
 
 export function absoluteUrl(path: string): string {

@@ -56,7 +56,9 @@ import { stableId } from "./lib/stable-id.js";
  * rewrite must not happen in the same step (instruction §83).
  */
 
-const WEB_PUBLIC = join(process.cwd(), "apps", "web", "public");
+// Originals live outside every app bundle: they are delivered from object
+// storage, not from the site Worker.
+const MEDIA_DIR = join(process.cwd(), "media");
 const LEGACY_PUBLIC = join(LEGACY_REPO, "public");
 const AUTHOR_ID = stableId("author", "tomokichi") as AuthorId;
 const NOW = instantFrom("2026-08-30T00:00:00.000Z");
@@ -95,8 +97,7 @@ const STATIC_PAGES: StaticPage[] = [
   { path: "/", key: "home" },
   { path: "/posts", key: "posts" },
   { path: "/destination", key: "destination" },
-  { path: "/series", key: "series" },
-  { path: "/trips", key: "trips" },
+  { path: "/collections", key: "collections" },
   { path: "/about", key: "about" },
   { path: "/contact", key: "contact" },
   { path: "/faq", key: "faq" },
@@ -110,7 +111,11 @@ const STATIC_PAGES: StaticPage[] = [
 ];
 
 const LEGACY_STATIC_REDIRECTS: Record<string, string> = {
-  "/journey": "/trips",
+  // Series and trips are the same shape of thing — an ordered group of
+  // articles — so they share one URL space instead of two.
+  "/series": "/collections",
+  "/trips": "/collections",
+  "/journey": "/collections",
   // Thin noindex pages whose purpose is already served elsewhere. The URLs stay
   // alive; the pages do not.
   "/social": "/contact",
@@ -264,9 +269,9 @@ async function registerMedia(
   collected.media.set(key, asset);
   await ctx.repos.media.save(asset);
 
-  // Legacy images keep their existing public URLs, so the rewrite changes no
-  // image address (instruction §60). New uploads go to object storage instead.
-  const destination = join(WEB_PUBLIC, key);
+  // The archive keeps the legacy key, so `/images/...` still addresses the same
+  // bytes after they move into object storage (instruction §60).
+  const destination = join(MEDIA_DIR, key);
   mkdirSync(dirname(destination), { recursive: true });
   copyFileSync(source, destination);
 
@@ -354,7 +359,8 @@ async function main(): Promise<void> {
       sortOrder: index,
     };
     collected.collections.push(collection);
-    collected.routes.push(route(`/series/${series.slug}`, "series", id));
+    collected.routes.push(route(`/collections/${series.slug}`, "series", id));
+    collected.routes.push(redirect(`/series/${series.slug}`, `/collections/${series.slug}`));
   }
 
   for (const [index, journey] of legacyJourneys.entries()) {
@@ -375,8 +381,10 @@ async function main(): Promise<void> {
       endDate: end,
       sortOrder: index,
     });
-    collected.routes.push(route(`/trips/${tripSlug}`, "journey", id));
-    collected.routes.push(redirect(`/journey/${journey.id}`, `/trips/${tripSlug}`));
+    collected.routes.push(route(`/collections/${tripSlug}`, "journey", id));
+    // Straight to the destination rather than through `/trips/…`: a redirect
+    // chain costs a round trip and dilutes the signal.
+    collected.routes.push(redirect(`/journey/${journey.id}`, `/collections/${tripSlug}`));
   }
 
   for (const collection of collected.collections) await ctx.repos.collections.save(collection);
@@ -580,6 +588,10 @@ async function main(): Promise<void> {
   const generated = new Map<string, string>();
   for (const location of collected.locations) {
     if (totalFor(location) === 0) continue;
+    // Continents sat at the same URL depth as the countries they contain, and
+    // `global` is not a place at all; both are dropped in favour of the one
+    // level readers actually navigate by.
+    if (location.type === "continent" || location.slug === "global") continue;
     const path = canonicalLocationPath(location);
     generated.set(location.id, path);
     // A hub with one or two articles is too thin to index, which is what the
@@ -596,12 +608,15 @@ async function main(): Promise<void> {
 
     const fallback =
       canonical ??
-      tree
-        .ancestors(location.id)
-        .toReversed()
-        .map((ancestor) => generated.get(ancestor.id))
-        .find((path) => path !== undefined) ??
-      "/destination";
+      // `global` has no geographic parent to fall back to, so it points at the
+      // article index rather than at a destination that does not exist.
+      (location.slug === "global"
+        ? "/posts"
+        : (tree
+            .ancestors(location.id)
+            .toReversed()
+            .map((ancestor) => generated.get(ancestor.id))
+            .find((path) => path !== undefined) ?? "/destination"));
     collected.routes.push(redirect(legacyPath, fallback));
   }
 

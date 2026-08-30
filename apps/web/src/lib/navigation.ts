@@ -43,12 +43,7 @@ export function locationTrail(route: Route): Breadcrumb[] {
 }
 
 export function collectionTrail(route: Route, title: string): Breadcrumb[] {
-  const isTrip = route.targetType === "journey";
-  return [
-    HOME,
-    crumb(isTrip ? "/trips" : "/series", isTrip ? "旅の記録" : "シリーズ"),
-    { name: title, route },
-  ];
+  return [HOME, crumb("/collections", "コレクション"), { name: title, route }];
 }
 
 export function pageTrail(route: Route, title: string): Breadcrumb[] {

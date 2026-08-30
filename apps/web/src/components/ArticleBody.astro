@@ -2,6 +2,7 @@
 import { getEntry, render } from "astro:content";
 import type { ArticleEmbed } from "@tomokichi/domain";
 import EmbedBlock from "./EmbedBlock.astro";
+import { enhanceBodyImages } from "../lib/images";
 
 interface Props {
   slug: string;
@@ -21,7 +22,7 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
  */
 const PLACEHOLDER = /<p>\s*\{\{embed:([a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
 const html = entry.rendered?.html ?? null;
-const segments = html === null ? null : html.split(PLACEHOLDER);
+const segments = html === null ? null : enhanceBodyImages(html).split(PLACEHOLDER);
 
 const { Content } = html === null ? await render(entry) : { Content: null };
 ---

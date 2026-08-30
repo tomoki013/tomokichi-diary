@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import type { AstroIntegration } from "astro";
 import type { Route } from "@tomokichi/domain";
+import { mediaBaseUrl } from "../lib/site.js";
 
 /**
  * Redirects are route data, not configuration: this emits Cloudflare's
@@ -19,6 +20,10 @@ export function routeArtifacts(routes: readonly Route[]): AstroIntegration {
         const redirects = routes
           .filter((route) => route.targetType === "redirect" && route.redirectTo !== null)
           .map((route) => `${route.path} ${route.redirectTo} ${route.redirectStatus ?? 301}`);
+
+        // Media moved to object storage; the previous site's image URLs are
+        // indexed and linked, so they are redirected rather than dropped.
+        redirects.push(`/images/* ${mediaBaseUrl}/images/:splat 301`);
         writeFileSync(join(outDir, "_redirects"), `${redirects.join("\n")}\n`);
 
         // Workers static assets apply *every* matching rule and concatenate
@@ -26,8 +31,6 @@ export function routeArtifacts(routes: readonly Route[]): AstroIntegration {
         // HTML keeps the platform default (`max-age=0, must-revalidate`),
         // which is what makes a republish visible immediately.
         const headers = [
-          "/images/*",
-          "  Cache-Control: public, max-age=31536000, immutable",
           "/_astro/*",
           "  Cache-Control: public, max-age=31536000, immutable",
           "/*",

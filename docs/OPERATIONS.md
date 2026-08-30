@@ -120,6 +120,16 @@ empty database on each run.
 `pnpm export:data` reads the local SQLite database at `.data/tomokichi.db`.
 If it is missing, re-run `pnpm import:legacy` or restore from `export/`.
 
+## Media
+
+Images are served from R2, not from the site Worker. `pnpm media:build`
+generates the responsive ladder into `.cache/images`; `pnpm media:sync` uploads
+originals and derivatives, skipping anything already sent.
+
+If an image 404s on the site, check in order: the file exists under `media/`,
+`pnpm media:build` produced its derivatives, and `pnpm media:sync` reported no
+failures. `LINK_INTERNAL_BROKEN` catches all three before a deploy.
+
 ## API
 
 ### `API_UNAUTHORIZED`
