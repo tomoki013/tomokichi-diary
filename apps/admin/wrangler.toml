@@ -1,0 +1,11 @@
+name = "tomokichi-diary-admin"
+compatibility_date = "2026-08-01"
+
+[assets]
+directory = "./dist"
+# A single-page app: every unknown path renders index.html and the hash router
+# takes over.
+not_found_handling = "single-page-application"
+
+[observability]
+enabled = true

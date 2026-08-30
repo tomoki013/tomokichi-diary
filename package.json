@@ -26,8 +26,8 @@
     "seed:sql": "tsx scripts/seed-d1.ts",
     "db:migrate": "pnpm --filter @tomokichi/api exec wrangler d1 migrations apply tomokichi-diary --remote",
     "db:seed": "pnpm seed:sql && pnpm --filter @tomokichi/api exec wrangler d1 execute tomokichi-diary --remote --file=../../.artifacts/seed.sql",
-    "deploy:web": "pnpm --filter @tomokichi/web exec wrangler pages deploy dist --project-name=tomokichi-diary",
-    "deploy:admin": "pnpm --filter @tomokichi/admin exec wrangler pages deploy dist --project-name=tomokichi-diary-admin",
+    "deploy:web": "pnpm --filter @tomokichi/web exec wrangler deploy",
+    "deploy:admin": "pnpm --filter @tomokichi/admin exec wrangler deploy",
     "deploy:api": "pnpm --filter @tomokichi/api exec wrangler deploy",
     "verify:live": "tsx scripts/verify-live.ts"
   },

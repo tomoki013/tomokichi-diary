@@ -42,8 +42,9 @@ const footerNav = [
     <meta name="description" content={metadata.description} />
     <meta name="robots" content={metadata.robots} />
     <link rel="canonical" href={metadata.canonical} />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="alternate" type="application/rss+xml" title={seoConfig.siteName} href="/rss.xml" />
     {
       Object.entries(metadata.openGraph).map(([property, content]) => (

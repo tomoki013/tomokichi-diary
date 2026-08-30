@@ -1,0 +1,16 @@
+name = "tomokichi-diary-web"
+compatibility_date = "2026-08-01"
+
+# A static-asset Worker: no `main`, so requests are served straight from the
+# edge with no Worker invocation and no per-request cost.
+[assets]
+directory = "./dist"
+# `_redirects` and `_headers` in the build output are honoured here, so the
+# route table still drives every redirect (see the route-artifacts integration).
+not_found_handling = "404-page"
+# The previous site served every URL without a trailing slash and redirected
+# the slashed form to it.
+html_handling = "drop-trailing-slash"
+
+[observability]
+enabled = true

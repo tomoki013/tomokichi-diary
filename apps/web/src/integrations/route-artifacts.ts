@@ -21,15 +21,16 @@ export function routeArtifacts(routes: readonly Route[]): AstroIntegration {
           .map((route) => `${route.path} ${route.redirectTo} ${route.redirectStatus ?? 301}`);
         writeFileSync(join(outDir, "_redirects"), `${redirects.join("\n")}\n`);
 
-        // Images and fingerprinted assets are immutable; pages are revalidated
-        // so a republish is visible immediately.
+        // Workers static assets apply *every* matching rule and concatenate
+        // the values, so Cache-Control is set only on the immutable paths.
+        // HTML keeps the platform default (`max-age=0, must-revalidate`),
+        // which is what makes a republish visible immediately.
         const headers = [
           "/images/*",
           "  Cache-Control: public, max-age=31536000, immutable",
           "/_astro/*",
           "  Cache-Control: public, max-age=31536000, immutable",
           "/*",
-          "  Cache-Control: public, max-age=0, must-revalidate",
           "  X-Content-Type-Options: nosniff",
           "  Referrer-Policy: strict-origin-when-cross-origin",
         ];

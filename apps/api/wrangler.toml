@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 # It is never committed, and a missing value closes the admin API.
 [vars]
 PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
-ALLOWED_ORIGINS = "https://admin.tomokichidiary.com,https://tomokichi-diary-admin.pages.dev"
+ALLOWED_ORIGINS = "https://admin.tomokichidiary.com,https://tomokichi-diary-admin.tomoki-ttttt.workers.dev"
 
 [[d1_databases]]
 binding = "DB"

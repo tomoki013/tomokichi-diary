@@ -36,7 +36,12 @@ jobs:
         run: pnpm deploy:web
 
       - name: Deploy admin
-        run: pnpm deploy:admin
+        env:
+          VITE_API_URL: https://api.tomokichidiary.com
+        run: pnpm --filter @tomokichi/admin build && pnpm deploy:admin
+
+      - name: Verify every legacy URL on the deployed site
+        run: pnpm verify:live https://tomokichidiary.com
 
       - if: always()
         uses: actions/upload-artifact@v5

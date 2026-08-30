@@ -77,3 +77,19 @@ data. See [ADR 0002](adr/0002-route-independent-from-slug.md).
 
 `pnpm ci` is a built-in pnpm command (a clean install), so always use
 `pnpm run ci`.
+
+## Deployment
+
+Three Workers, no Pages:
+
+| Worker                  | What it serves                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `tomokichi-diary-web`   | The public site as static assets — no `main`, so no Worker invocation per request |
+| `tomokichi-diary-admin` | The admin SPA as static assets                                                    |
+| `tomokichi-diary-api`   | The Hono API, bound to D1 and R2                                                  |
+
+`_redirects` and `_headers` are emitted into the build output from the route
+table, so redirects stay data rather than configuration.
+
+After a content change: `pnpm export:data`, commit, then `pnpm db:seed` and
+`pnpm deploy:web`.
