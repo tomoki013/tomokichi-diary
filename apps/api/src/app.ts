@@ -33,6 +33,24 @@ export interface AppOptions {
  * HTTP adapter only: routing, authentication, validation and response shaping.
  * Every decision about content lives in @tomokichi/application (instruction §7).
  */
+/**
+ * Compares a shared secret without leaking its length or contents through
+ * timing. Both sides are trimmed first: a secret set from a pipe can pick up a
+ * trailing newline, and silently rejecting every request afterwards is a
+ * miserable thing to debug.
+ */
+function secretsMatch(expected: string, provided: string): boolean {
+  const a = new TextEncoder().encode(expected);
+  const b = new TextEncoder().encode(provided);
+  // Compare a fixed number of bytes so the loop count never depends on input.
+  const length = Math.max(a.length, b.length);
+  let difference = a.length ^ b.length;
+  for (let index = 0; index < length; index++) {
+    difference |= (a[index] ?? 0) ^ (b[index] ?? 0);
+  }
+  return difference === 0;
+}
+
 export function createApp(options: AppOptions = {}) {
   const buildContext = options.contextFactory ?? createContext;
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
@@ -81,9 +99,12 @@ export function createApp(options: AppOptions = {}) {
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.
   v1.use("/admin/*", async (c, next) => {
-    const expected = c.env.ADMIN_TOKEN;
-    const provided = c.req.header("authorization")?.replace(/^Bearer\s+/i, "");
-    if (!expected || !provided || provided !== expected) {
+    const expected = c.env.ADMIN_TOKEN?.trim();
+    const provided = c.req
+      .header("authorization")
+      ?.replace(/^Bearer\s+/i, "")
+      .trim();
+    if (!expected || !provided || !secretsMatch(expected, provided)) {
       c.get("ctx").logger.warn("admin.unauthorized", {
         code: "API_UNAUTHORIZED",
         route: c.req.path,

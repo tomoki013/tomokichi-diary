@@ -15,7 +15,9 @@ import { CACHE_DIR, MEDIA_DIR } from "./media-build.js";
 const BUCKET = process.env.MEDIA_BUCKET ?? "tomokichi-diary-media";
 const MANIFEST = join(process.cwd(), ".cache", "r2-manifest.json");
 const WRANGLER = join(process.cwd(), "apps", "api", "node_modules", ".bin", "wrangler");
-const CONCURRENCY = 12;
+// The API rate-limits a burst of uploads; a failed object keeps its previous
+// version, so the retry below is safe to re-run.
+const CONCURRENCY = Number(process.env.MEDIA_SYNC_CONCURRENCY ?? 6);
 
 interface Upload {
   key: string;
@@ -29,9 +31,7 @@ interface Upload {
  * originals are addressed by their legacy path, so they get a finite lifetime.
  */
 function cacheControlFor(key: string): string {
-  return key.startsWith("_img/")
-    ? "public, max-age=31536000, immutable"
-    : "public, max-age=604800";
+  return key.startsWith("_img/") ? "public, max-age=31536000, immutable" : "public, max-age=604800";
 }
 
 function walk(dir: string, prefix: string): Upload[] {
@@ -90,7 +90,13 @@ const worker = async (): Promise<void> => {
         process.stderr.write(`  ${done}/${pending.length}\n`);
       }
     } else {
-      failures.push(`${upload.key}: ${outcome.output.trim().split("\n").at(-1) ?? "failed"}`);
+      // The last line is wrangler's log-file path; the line before it carries
+      // the reason.
+      const lines = outcome.output
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim() !== "");
+      failures.push(`${upload.key}: ${lines.at(-2) ?? lines.at(-1) ?? "failed"}`);
     }
   }
 };
