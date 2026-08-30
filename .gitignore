@@ -10,3 +10,6 @@ dist/
 !.env.example
 .DS_Store
 .cache/
+
+# Lighthouse CI writes here by default; the run we keep goes to .artifacts/.
+.lighthouseci/
