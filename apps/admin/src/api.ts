@@ -17,7 +17,10 @@ import type {
  * its Access cookie automatically. `VITE_API_URL` points at a deployed API for
  * local development.
  */
-const ORIGIN = (import.meta.env["VITE_API_URL"] ?? "/api").replace(/\/+$/, "");
+// `??` is not enough: an empty `VITE_API_URL` is a value, and pointing the
+// client at "" makes it call paths the SPA fallback answers with 200 HTML.
+const configured = (import.meta.env["VITE_API_URL"] ?? "").trim();
+const ORIGIN = configured === "" ? "/api" : configured.replace(/\/+$/, "");
 const BASE = `${ORIGIN}/v1`;
 
 const TOKEN_KEY = "tomokichi.admin.token";
@@ -71,6 +74,17 @@ async function request<T>(path: string, init: RequestInit = {}, base: string = B
   // The Access cookie must ride along on same-origin calls.
   const response = await fetch(`${base}${path}`, { ...init, headers, credentials: "same-origin" });
   if (response.status === 204) return undefined as T;
+
+  // A JSON API that answers with HTML has been misrouted — usually to the SPA
+  // fallback. Treating that as success hides the misconfiguration behind an
+  // empty screen.
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("json")) {
+    throw new ApiError(
+      "API_INTERNAL",
+      `expected JSON from ${path} but received ${contentType || "no content type"} (${response.status})`,
+    );
+  }
 
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
