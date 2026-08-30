@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { api, setToken } from "../api";
+import { api, clearToken, setToken } from "../api";
 
 /**
  * The admin authenticates with the same shared secret the API expects. The
@@ -14,17 +14,18 @@ export function Login({
   onError: (error: unknown) => void;
 }) {
   const [value, setValue] = useState("");
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
     setBusy(true);
-    setToken(value);
+    setToken(value, remember);
     try {
       await api.listArticles();
       onAuthenticated();
     } catch (error) {
-      setToken("");
+      clearToken();
       onError(error);
     } finally {
       setBusy(false);
@@ -44,6 +45,15 @@ export function Login({
             onChange={(event) => setValue(event.target.value)}
             required
           />
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <input
+            type="checkbox"
+            checked={remember}
+            style={{ width: "auto" }}
+            onChange={(event) => setRemember(event.target.checked)}
+          />
+          <span style={{ margin: 0 }}>この端末で記憶する</span>
         </label>
         <button className="primary" type="submit" disabled={busy || value === ""}>
           {busy ? "確認中…" : "サインイン"}

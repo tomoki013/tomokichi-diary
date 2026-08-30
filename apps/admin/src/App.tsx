@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, api, getToken, setToken } from "./api";
+import { ApiError, api, clearToken, getToken } from "./api";
 import { ArticleList } from "./views/ArticleList";
 import { ArticleEditor } from "./views/ArticleEditor";
 import { Messages } from "./views/Messages";
@@ -42,7 +42,7 @@ export function App() {
   );
 
   const signOut = useCallback(() => {
-    setToken("");
+    clearToken();
     setAuthenticated(false);
   }, []);
 

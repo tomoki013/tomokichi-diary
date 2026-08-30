@@ -14,13 +14,28 @@ import type {
 const BASE = `${(import.meta.env["VITE_API_URL"] ?? "http://localhost:8787").replace(/\/+$/, "")}/v1`;
 const TOKEN_KEY = "tomokichi.admin.token";
 
+/**
+ * The token is held in `localStorage` when the operator asks to be remembered,
+ * and in `sessionStorage` otherwise.
+ *
+ * `sessionStorage` is per-tab, so on its own it means signing in again every
+ * time the admin is opened in a new tab. This origin serves only our own
+ * bundle — no third-party scripts, no content from anyone else — so persisting
+ * the token here is a reasonable trade for that.
+ */
 export function getToken(): string {
-  return sessionStorage.getItem(TOKEN_KEY) ?? "";
+  return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY) ?? "";
 }
 
-/** Kept in session storage only: the token never reaches localStorage or a log. */
-export function setToken(token: string): void {
-  sessionStorage.setItem(TOKEN_KEY, token);
+export function setToken(token: string, remember = true): void {
+  clearToken();
+  if (token === "") return;
+  (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+}
+
+export function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export class ApiError extends Error {

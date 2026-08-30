@@ -3,3 +3,9 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
+
+# Hashed bundles only. The entry point keeps the platform default
+# (`max-age=0, must-revalidate`), which is already what it needs — and Workers
+# concatenate every matching rule, so overlapping Cache-Control is a bug.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
