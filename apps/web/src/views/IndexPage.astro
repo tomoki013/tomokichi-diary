@@ -310,16 +310,16 @@ const labelOf = (target: Route): string => {
             </div>
             <div class="home-hero__shade" />
             <div class="home-hero__intro">
-              <p class="eyebrow">REAL JOURNEYS · HONEST NOTES</p>
+              <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
               <h1 id="home-title">
-                まだ知らない景色へ、
+                一生モノの体験を、
                 <br />
-                心が動くほうへ。
+                もっと身近に。
               </h1>
               <p>
-                実際に歩いたから書ける旅の記憶と、
+                実際に旅して見つけた景色と、
                 <br />
-                次の一歩に役立つ小さなヒントを。
+                次の旅に役立つリアルな記録。
               </p>
               <a class="button button--light" href="/posts">
                 旅の記録を読む <span aria-hidden="true">→</span>
@@ -350,9 +350,8 @@ const labelOf = (target: Route): string => {
         <section class="home-discovery" aria-labelledby="home-discovery-title">
           <div class="home-discovery__intro">
             <>
-              <p class="eyebrow">FIND YOUR NEXT TRIP</p>
-              <h2 id="home-discovery-title">次の旅を、ここから探す。</h2>
-              <p>国や街、空港、気になる体験からブログを検索できます。</p>
+              <p class="eyebrow">FIND A STORY</p>
+              <h2 id="home-discovery-title">どんな旅を探していますか？</h2>
             </>
           </div>
           <form action="/posts" method="get" role="search">
@@ -365,9 +364,9 @@ const labelOf = (target: Route): string => {
                 id="home-search"
                 name="q"
                 type="search"
-                placeholder="例：バンコク、空港アクセス、夕陽"
+                placeholder="行き先・キーワードで検索"
               />
-              <button type="submit">ブログを探す&nbsp; →</button>
+              <button type="submit">検索</button>
             </>
           </form>
           <div class="home-discovery__popular">
@@ -601,58 +600,26 @@ const labelOf = (target: Route): string => {
       <div class="posts-archive">
         <header class="posts-archive__masthead">
           <div>
-            <p class="eyebrow">TRAVEL BLOG FOR YOUR NEXT JOURNEY</p>
+            <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
             <h1>
-              次の旅が、
+              旅の記録と、
               <br />
-              ここから動き出す。
+              次の旅に役立つこと。
             </h1>
           </div>
           <div class="posts-archive__lead">
             <p>
-              実際に歩いて、迷って、心が動いた旅の記録。行き先を決める前から、旅はもう始まっています。
+              実際に歩いた街、心に残った景色、旅先で困ったこと。写真とともに、自分の言葉で綴っています。
             </p>
             <span>
               <strong>{articles.length}</strong> posts
             </span>
+            <nav aria-label="ブログの探し方">
+              <a href="/destination">旅先から探す</a>
+              <a href="/collections">まとまりで読む</a>
+            </nav>
           </div>
         </header>
-
-        <nav class="posts-archive__routes" aria-label="ブログの探し方">
-          <a href="#all-stories-heading">
-            <>
-              <small>01</small>
-              <span>
-                <>
-                  <strong>すべてのブログ</strong>
-                  <b>検索・絞り込み</b>
-                </>
-              </span>
-            </>
-          </a>
-          <a href="/destination">
-            <>
-              <small>02</small>
-              <span>
-                <>
-                  <strong>旅先から探す</strong>
-                  <b>国と都市の一覧</b>
-                </>
-              </span>
-            </>
-          </a>
-          <a href="/collections">
-            <>
-              <small>03</small>
-              <span>
-                <>
-                  <strong>まとまりで読む</strong>
-                  <b>旅程とテーマ</b>
-                </>
-              </span>
-            </>
-          </a>
-        </nav>
 
         {archiveFeatured && archiveFeatured.cover && (
           <a class="posts-feature" href={archiveFeatured.route.path}>
@@ -665,7 +632,7 @@ const labelOf = (target: Route): string => {
             />
             <span class="posts-feature__shade" />
             <span class="posts-feature__copy">
-              <small>FEATURED JOURNEY</small>
+              <small>FEATURED BLOG</small>
               <strong>{archiveFeatured.revision.title}</strong>
               <span>{archiveFeatured.revision.summary}</span>
               <b>
