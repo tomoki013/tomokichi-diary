@@ -1,7 +1,10 @@
 ---
 import "../styles/global.css";
+import "../styles/refinement.css";
 import { serializeJsonLd, type JsonLd, type PageMetadata } from "@tomokichi/seo";
 import { mediaBaseUrl, seoConfig } from "../lib/site";
+import InitialSplash from "../components/InitialSplash.astro";
+import { MenuIcon, SearchIcon, XIcon } from "../components/TravelIcons";
 
 interface Props {
   metadata: PageMetadata;
@@ -15,9 +18,11 @@ const structuredData = jsonLd.filter((node) => node !== null);
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 
 const primaryNav = [
-  { href: "/posts", label: "記事" },
-  { href: "/destination", label: "旅先" },
-  { href: "/collections", label: "コレクション" },
+  { href: "/", label: "Home" },
+  { href: "/posts", label: "Blog" },
+  { href: "/destination", label: "Destinations" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/collections", label: "Collections" },
   { href: "/about", label: "About" },
 ];
 
@@ -29,6 +34,18 @@ const footerNav = [
   { href: "/legal/terms", label: "利用規約" },
   { href: "/legal/cookies", label: "クッキーポリシー" },
   { href: "/legal/editorial-policy", label: "執筆・編集ポリシー" },
+];
+const footerGroups = [
+  { title: "旅を読む", links: primaryNav.filter((item) => item.href !== "/about") },
+  {
+    title: "このブログ",
+    links: [
+      { href: "/about", label: "このブログについて" },
+      { href: "/faq", label: "よくある質問" },
+      { href: "/contact", label: "お問い合わせ" },
+    ],
+  },
+  { title: "サイトについて", links: footerNav.filter((item) => item.href.startsWith("/legal/")) },
 ];
 ---
 
@@ -68,25 +85,125 @@ const footerNav = [
     }
   </head>
   <body>
+    <InitialSplash />
     <div class="shell">
       <a class="skip-link" href="#main">本文へスキップ</a>
       <header class="site-header">
-        <div class="wrap site-header__inner">
-          <a class="site-header__brand" href="/">{seoConfig.siteName}</a>
+        <div class="wrap site-header__bar">
+          <a class="site-header__brand" href="/">
+            <span
+              ><strong>{seoConfig.siteName}<em>｜Travel Diary</em></strong><small
+                >一生モノの体験を、もっと身近に。</small
+              ></span
+            >
+          </a>
           <nav class="site-nav" aria-label="メインナビゲーション">
             {
               primaryNav.map((item) => (
                 <a
                   href={item.href}
-                  aria-current={currentPath.startsWith(item.href) ? "page" : undefined}
+                  aria-current={
+                    (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
+                      ? "page"
+                      : undefined
+                  }
                 >
                   {item.label}
                 </a>
               ))
             }
           </nav>
+          <button
+            class="site-header__action"
+            type="button"
+            data-search-open
+            aria-label="ブログを検索"><SearchIcon /></button
+          >
+          <button
+            class="site-header__menu-button"
+            type="button"
+            data-menu-open
+            aria-label="メニューを開く"
+            aria-expanded="false"><MenuIcon /></button
+          >
         </div>
       </header>
+
+      <div class="mobile-menu" data-mobile-menu hidden>
+        <button
+          class="mobile-menu__backdrop"
+          type="button"
+          data-menu-close
+          aria-label="メニューを閉じる"></button>
+        <aside class="mobile-menu__panel" aria-label="モバイルメニュー">
+          <header>
+            <strong>{seoConfig.siteName}</strong><button
+              type="button"
+              data-menu-close
+              aria-label="メニューを閉じる"><XIcon /></button>
+          </header>
+          <nav>
+            {
+              primaryNav.map((item) => (
+                <a
+                  href={item.href}
+                  aria-current={
+                    (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+          <div class="mobile-menu__sub">
+            <a href="/faq">よくある質問</a><a href="/contact">お問い合わせ</a>
+          </div>
+        </aside>
+      </div>
+
+      <div class="header-search-modal" data-search-modal hidden>
+        <button
+          class="header-search-modal__backdrop"
+          type="button"
+          data-search-close
+          aria-label="検索を閉じる"></button>
+        <section
+          class="header-search"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="header-search-title"
+        >
+          <header>
+            <div>
+              <small>ブログ内検索</small><h2 id="header-search-title">次の旅のヒントを探す</h2>
+            </div>
+            <button type="button" data-search-close aria-label="検索を閉じる"><XIcon /></button>
+          </header>
+          <label class="header-search__input"
+            ><SearchIcon /><span class="sr-only">検索キーワード</span><input
+              type="search"
+              data-global-search
+              placeholder="国・都市・空港・体験を入力"
+              autocomplete="off"
+            /></label
+          >
+          <div class="header-search__suggestions" data-search-suggestions>
+            <p>よく探されているキーワード</p>
+            <button type="button" data-search-suggestion="バンコク">バンコク</button>
+            <button type="button" data-search-suggestion="空港">空港</button>
+            <button type="button" data-search-suggestion="ヨーロッパ">ヨーロッパ</button>
+            <button type="button" data-search-suggestion="交通">交通</button>
+          </div>
+          <p class="header-search__status" data-search-status>
+            キーワードを入力すると記事候補を表示します。
+          </p>
+          <div class="header-search__results" data-search-results></div>
+          <a class="header-search__all" href="/posts" data-search-all>記事一覧から詳しく探す</a>
+        </section>
+      </div>
 
       <main id="main">
         <div class:list={["wrap", width === "narrow" && "wrap--narrow"]}>
@@ -95,13 +212,188 @@ const footerNav = [
       </main>
 
       <footer class="site-footer">
-        <div class="wrap">
-          <nav aria-label="フッターナビゲーション">
-            {footerNav.map((item) => <a href={item.href}>{item.label}</a>)}
-          </nav>
-          <p>© {new Date().getFullYear()} {seoConfig.siteName}</p>
+        <div class="wrap site-footer__inner">
+          <section class="site-footer__opening" aria-labelledby="footer-opening-title">
+            <p>THE NEXT JOURNEY</p>
+            <h2 id="footer-opening-title">一生モノの体験を、<br />もっと身近に。</h2>
+            <div>
+              <a href="/destination">旅先から探す&nbsp; →</a><a href="/posts"
+                >ブログを読む&nbsp; →</a>
+            </div>
+          </section>
+          <section class="site-footer__body">
+            <div class="site-footer__brand">
+              <a href="/" class="site-footer__logo"><strong>{seoConfig.siteName}</strong></a>
+              <p>
+                「一生モノの体験を、もっと身近に。」<br
+                />実体験に基づく旅の記録と、旅を豊かにする情報を発信しています。
+              </p>
+            </div>
+            <nav class="site-footer__groups" aria-label="フッターナビゲーション">
+              {
+                footerGroups.map((group) => (
+                  <div>
+                    <>
+                      <h2>{group.title}</h2>
+                      <ul>
+                        {group.links.map((item) => (
+                          <li>
+                            <a href={item.href}>{item.label}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  </div>
+                ))
+              }
+            </nav>
+          </section>
+          <div class="site-footer__legal">
+            <p>© 2024–{new Date().getFullYear()} {seoConfig.siteName}</p>
+            <p>掲載情報は実体験をもとにしています。旅行前には最新の公式情報もご確認ください。</p>
+            <p>Made with <span aria-label="love">♡</span> by Tomokichi</p>
+          </div>
         </div>
       </footer>
     </div>
+    <script>
+      const body = document.body;
+      const siteHeader = document.querySelector<HTMLElement>(".site-header");
+      const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
+      const menuOpen = document.querySelector<HTMLButtonElement>("[data-menu-open]");
+      const searchModal = document.querySelector<HTMLElement>("[data-search-modal]");
+      const searchInput = document.querySelector<HTMLInputElement>("[data-global-search]");
+      const searchResults = document.querySelector<HTMLElement>("[data-search-results]");
+      const searchStatus = document.querySelector<HTMLElement>("[data-search-status]");
+      const searchAll = document.querySelector<HTMLAnchorElement>("[data-search-all]");
+      let searchRecords: Array<{
+        title: string;
+        summary: string;
+        url: string;
+        publishedAt: string;
+        categories: string[];
+        locations: string[];
+      }> | null = null;
+      const scrollLocks = new Set<string>();
+
+      const setScrollLock = (key: string, locked: boolean) => {
+        if (locked) scrollLocks.add(key);
+        else scrollLocks.delete(key);
+        const shouldLock = scrollLocks.size > 0;
+        if (shouldLock === body.classList.contains("has-site-overlay")) return;
+        body.classList.toggle("has-site-overlay", shouldLock);
+        document.documentElement.classList.toggle("has-site-overlay", shouldLock);
+      };
+
+      document.addEventListener("site:overlay-change", (event) => {
+        const detail = (event as CustomEvent<{ key: string; open: boolean }>).detail;
+        if (detail?.key) setScrollLock(detail.key, detail.open);
+      });
+
+      const setOverlay = (target: HTMLElement | null, open: boolean) => {
+        if (!target) return;
+        const key = target.hasAttribute("data-mobile-menu") ? "mobile-menu" : "header-search";
+        if (open) {
+          target.hidden = false;
+          requestAnimationFrame(() => target.classList.add("is-open"));
+        } else {
+          target.classList.remove("is-open");
+          window.setTimeout(() => {
+            target.hidden = true;
+          }, 260);
+        }
+        setScrollLock(key, open);
+      };
+      const closeMenu = () => {
+        setOverlay(menu, false);
+        menuOpen?.setAttribute("aria-expanded", "false");
+      };
+      const closeSearch = () => setOverlay(searchModal, false);
+
+      menuOpen?.addEventListener("click", () => {
+        setOverlay(menu, true);
+        closeSearch();
+        menuOpen.setAttribute("aria-expanded", "true");
+      });
+      menu
+        ?.querySelectorAll("[data-menu-close]")
+        .forEach((button) => button.addEventListener("click", closeMenu));
+      document.querySelector("[data-search-open]")?.addEventListener("click", async () => {
+        setOverlay(searchModal, true);
+        closeMenu();
+        searchInput?.focus();
+        if (!searchRecords) {
+          try {
+            searchRecords = await fetch("/search-index.json").then((response) => response.json());
+            renderGlobalSearch();
+          } catch {
+            if (searchStatus) searchStatus.textContent = "検索データを読み込めませんでした。";
+          }
+        }
+      });
+      searchModal
+        ?.querySelectorAll("[data-search-close]")
+        .forEach((button) => button.addEventListener("click", closeSearch));
+
+      const renderGlobalSearch = () => {
+        if (!searchInput || !searchResults || !searchStatus) return;
+        const query = searchInput.value.trim().toLocaleLowerCase("ja");
+        searchAll?.setAttribute("href", query ? `/posts?q=${encodeURIComponent(query)}` : "/posts");
+        searchResults.replaceChildren();
+        if (!query) {
+          searchStatus.textContent = "キーワードを入力すると記事候補を表示します。";
+          return;
+        }
+        const matches = (searchRecords ?? [])
+          .filter((record) =>
+            [record.title, record.summary, ...record.categories, ...record.locations]
+              .join(" ")
+              .toLocaleLowerCase("ja")
+              .includes(query),
+          )
+          .slice(0, 6);
+        searchStatus.textContent =
+          matches.length > 0 ? `${matches.length}件の候補` : "一致する記事がありません。";
+        matches.forEach((record) => {
+          const link = document.createElement("a");
+          link.href = record.url;
+          const meta = document.createElement("small");
+          meta.textContent = [
+            ...record.locations.slice(0, 1),
+            ...record.categories.slice(0, 1),
+            record.publishedAt,
+          ]
+            .filter(Boolean)
+            .join("  ·  ");
+          const title = document.createElement("strong");
+          title.textContent = record.title;
+          link.append(meta, title);
+          searchResults.append(link);
+        });
+      };
+      searchInput?.addEventListener("input", renderGlobalSearch);
+      searchInput?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && searchInput.value.trim()) {
+          location.href = `/posts?q=${encodeURIComponent(searchInput.value.trim())}`;
+        }
+      });
+      document.querySelectorAll<HTMLButtonElement>("[data-search-suggestion]").forEach((button) =>
+        button.addEventListener("click", () => {
+          if (!searchInput) return;
+          searchInput.value = button.dataset.searchSuggestion ?? "";
+          renderGlobalSearch();
+          searchInput.focus();
+        }),
+      );
+      addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeMenu();
+          closeSearch();
+        }
+      });
+      const updateHeader = () => siteHeader?.classList.toggle("is-scrolled", scrollY > 20);
+      updateHeader();
+      addEventListener("scroll", updateHeader, { passive: true });
+    </script>
   </body>
 </html>

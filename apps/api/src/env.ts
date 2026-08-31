@@ -16,8 +16,12 @@ export interface Env {
   ALLOWED_ORIGINS?: string;
   /** Turnstile secret for the public contact form. Unset means the form is closed. */
   TURNSTILE_SECRET_KEY?: string;
+  /** Optional comma-separated hostnames asserted by Turnstile for contact submissions. */
+  TURNSTILE_EXPECTED_HOSTNAME?: string;
   /** Salt for the sender-address hash used to rate-limit the contact form. */
   IP_HASH_SALT?: string;
+  /** Salt used before anonymous like identities are persisted. */
+  LIKE_HASH_SALT?: string;
   /** Cloudflare Access team domain, e.g. `example.cloudflareaccess.com`. */
   ACCESS_TEAM_DOMAIN?: string;
   /** Audience tag of the Access application protecting the admin. */

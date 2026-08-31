@@ -233,6 +233,38 @@ describe("media", () => {
   });
 });
 
+describe("article likes", () => {
+  it("toggles one anonymous like and returns the shared count", async () => {
+    const id = await createArticle();
+    const article = await ctx.repos.articles.findById(id as never);
+    if (!article) throw new Error("article setup failed");
+    await ctx.repos.articles.save({
+      ...article,
+      status: "published",
+      publishedAt: article.updatedAt,
+    });
+
+    const visitorId = "11111111-1111-4111-8111-111111111111";
+    const liked = await request(`/v1/likes/${id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ visitorId }),
+    });
+    expect(liked.status).toBe(200);
+    expect(await liked.json()).toEqual({ count: 1, liked: true });
+
+    const state = await request(`/v1/likes/${id}?visitorId=${visitorId}`);
+    expect(await state.json()).toEqual({ count: 1, liked: true });
+
+    const unliked = await request(`/v1/likes/${id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ visitorId }),
+    });
+    expect(await unliked.json()).toEqual({ count: 0, liked: false });
+  });
+});
+
 describe("routes", () => {
   it("resolves a path and reports a redirect after a move", async () => {
     await createArticle();
@@ -316,6 +348,7 @@ describe("contact form", () => {
   it("stores a valid submission and redirects back to the site", async () => {
     const response = await submit(valid);
     expect(response.status).toBe(303);
+    expect(response.headers.get("api-version")).toBe("1");
     expect(response.headers.get("location")).toContain("/contact?sent=1");
 
     const stored = await ctx.repos.contactMessages.list(10);

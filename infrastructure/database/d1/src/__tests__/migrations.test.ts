@@ -68,6 +68,7 @@ describe("migrations", () => {
       "article_categories",
       "article_tags",
       "ai_artifacts",
+      "article_likes",
     ]) {
       expect(tables).toContain(table);
     }

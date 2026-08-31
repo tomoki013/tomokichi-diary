@@ -1,0 +1,80 @@
+---
+import type { ArticleId } from "@tomokichi/domain";
+import { apiUrl } from "../lib/site";
+
+interface Props {
+  articleId: ArticleId;
+  compact?: boolean;
+}
+
+const { articleId, compact = false } = Astro.props;
+---
+
+<button
+  class:list={["like-button", compact && "like-button--compact"]}
+  type="button"
+  data-like-button
+  data-article-id={articleId}
+  data-api-url={apiUrl}
+  aria-pressed="false"
+  aria-label="この記事にいいねする"
+>
+  <span class="like-button__heart" aria-hidden="true">♡</span>
+  <span class="like-button__label">いいね</span>
+  <output class="like-button__count" aria-label="いいね数">—</output>
+</button>
+
+<script>
+  const storageKey = "tomokichi-like-visitor";
+
+  function visitorId(): string {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) return stored;
+    const created = crypto.randomUUID();
+    localStorage.setItem(storageKey, created);
+    return created;
+  }
+
+  function render(button: HTMLButtonElement, state: { count: number; liked: boolean }) {
+    button.setAttribute("aria-pressed", String(state.liked));
+    button.setAttribute(
+      "aria-label",
+      state.liked ? "この記事のいいねを取り消す" : "この記事にいいねする",
+    );
+    const heart = button.querySelector<HTMLElement>(".like-button__heart");
+    const count = button.querySelector<HTMLOutputElement>(".like-button__count");
+    if (heart) heart.textContent = state.liked ? "♥" : "♡";
+    if (count) count.textContent = new Intl.NumberFormat("ja-JP").format(state.count);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-like-button]").forEach((button) => {
+    if (button.dataset.ready) return;
+    button.dataset.ready = "true";
+    const endpoint = `${button.dataset.apiUrl}/v1/likes/${button.dataset.articleId}`;
+    const identity = visitorId();
+
+    fetch(`${endpoint}?visitorId=${encodeURIComponent(identity)}`)
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((state) => render(button, state))
+      .catch(() => {
+        const count = button.querySelector<HTMLOutputElement>(".like-button__count");
+        if (count) count.textContent = "";
+      });
+
+    button.addEventListener("click", async () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ visitorId: identity }),
+        });
+        if (!response.ok) throw new Error("like request failed");
+        render(button, await response.json());
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+</script>

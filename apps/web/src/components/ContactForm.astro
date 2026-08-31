@@ -20,6 +20,20 @@ const RESULT_SCRIPT = `
     message.hidden = false;
     message.scrollIntoView({ block: "center" });
   }
+  var submit = document.querySelector('[data-contact-submit]');
+  var count = document.querySelector('[data-contact-count]');
+  var body = document.querySelector('[data-contact-body]');
+  window.contactTurnstileReady = function () {
+    if (submit) submit.disabled = false;
+  };
+  window.contactTurnstileReset = function () {
+    if (submit) submit.disabled = true;
+  };
+  if (body && count) {
+    var updateCount = function () { count.textContent = String(body.value.length); };
+    body.addEventListener('input', updateCount);
+    updateCount();
+  }
 `;
 
 const MESSAGES = [
@@ -32,13 +46,11 @@ const MESSAGES = [
 
 {
   turnstileSiteKey === "" ? (
-    <p class="notice">
-      現在フォームからのお問い合わせを受け付けていません。上記のメールアドレスをご利用ください。
+    <p class="notice contact-form__notice">
+      現在フォームを準備中です。お急ぎの場合はメールをご利用ください。
     </p>
   ) : (
-    <section class="section" aria-labelledby="contact-form-heading">
-      <h2 id="contact-form-heading">フォームからのお問い合わせ</h2>
-
+    <div>
       {MESSAGES.map(([key, tone, text]) => (
         <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
           {text}
@@ -46,21 +58,65 @@ const MESSAGES = [
       ))}
 
       <form class="contact-form" method="post" action={`${apiUrl}/v1/contact`}>
+        <div class="contact-form__row">
+          <label>
+            <span>
+              お名前 <small>必須</small>
+            </span>
+            <input
+              type="text"
+              name="name"
+              required
+              maxlength="100"
+              autocomplete="name"
+              placeholder="ともきち"
+            />
+          </label>
+          <label>
+            <span>
+              メールアドレス <small>必須</small>
+            </span>
+            <input
+              type="email"
+              name="email"
+              required
+              maxlength="254"
+              autocomplete="email"
+              placeholder="you@example.com"
+            />
+          </label>
+        </div>
         <label>
-          <span>お名前</span>
-          <input type="text" name="name" required maxlength="100" autocomplete="name" />
+          <span>
+            お問い合わせの種類 <small>必須</small>
+          </span>
+          <select name="subject" required>
+            <option value="" selected disabled>
+              選択してください
+            </option>
+            <option value="記事について">記事について</option>
+            <option value="旅先・記事のリクエスト">旅先・記事のリクエスト</option>
+            <option value="お仕事・取材の相談">お仕事・取材の相談</option>
+            <option value="写真の利用について">写真の利用について</option>
+            <option value="その他">その他</option>
+          </select>
         </label>
         <label>
-          <span>メールアドレス</span>
-          <input type="email" name="email" required maxlength="254" autocomplete="email" />
-        </label>
-        <label>
-          <span>件名</span>
-          <input type="text" name="subject" required maxlength="150" />
-        </label>
-        <label>
-          <span>お問い合わせ内容</span>
-          <textarea name="body" rows="8" required minlength="10" maxlength="4000" />
+          <span>
+            お問い合わせ内容 <small>必須</small>
+          </span>
+          <textarea
+            name="body"
+            rows="9"
+            required
+            minlength="10"
+            maxlength="4000"
+            placeholder="できるだけ具体的にご記入ください。"
+            data-contact-body
+          />
+          <small class="contact-form__count">
+            <span data-contact-count>0</span> / 4000
+          </small>
         </label>
 
         {/* Not shown to anyone reading the page; only automation fills it in. */}
@@ -71,12 +127,30 @@ const MESSAGES = [
           </label>
         </div>
 
-        <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-language="ja" />
-        <button type="submit">送信する</button>
+        <div class="contact-form__verification">
+          <div
+            class="cf-turnstile"
+            data-sitekey={turnstileSiteKey}
+            data-language="ja"
+            data-action="contact"
+            data-theme="light"
+            data-appearance="interaction-only"
+            data-callback="contactTurnstileReady"
+            data-expired-callback="contactTurnstileReset"
+            data-timeout-callback="contactTurnstileReset"
+          />
+          <p>送信ボタンを押す前に、セキュリティ確認を完了してください。</p>
+        </div>
+        <button type="submit" data-contact-submit disabled>
+          <>
+            <span>メッセージを送る</span>
+            <span aria-hidden="true">→</span>
+          </>
+        </button>
       </form>
 
       <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
       <script is:inline set:html={RESULT_SCRIPT} />
-    </section>
+    </div>
   )
 }

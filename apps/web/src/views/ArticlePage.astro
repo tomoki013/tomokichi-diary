@@ -7,10 +7,13 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Picture from "../components/Picture.astro";
-import { SIZES } from "../lib/images";
 import { content } from "../lib/content";
 import { articleTrail } from "../lib/navigation";
 import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
+import LikeButton from "../components/LikeButton.astro";
+import ArticleToc from "../components/ArticleToc.astro";
+import ShareButton from "../components/ShareButton.astro";
+import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 
 interface Props {
   view: ArticleView;
@@ -53,68 +56,152 @@ const travel =
   (article.travelEndDate && article.travelEndDate !== article.travelStartDate
     ? `${article.travelStartDate} 〜 ${article.travelEndDate}`
     : article.travelStartDate);
+const readingMinutes = Math.max(
+  1,
+  Math.ceil(revision.bodyMarkdown.replace(/\s/g, "").length / 500),
+);
+const locationLinks = view.locations.flatMap(({ location }) => {
+  const locationRoute = content.routes.canonicalFor("location", location.id);
+  return locationRoute
+    ? [{ name: content.locations.nameOf(location.id, "ja"), path: locationRoute.path }]
+    : [];
+});
+const articleViews = content.publicArticles().flatMap((item) => {
+  if (item.kind !== "article") return [];
+  const itemView = content.viewOf(item.id);
+  return itemView ? [itemView] : [];
+});
+const currentIndex = articleViews.findIndex((item) => item.article.id === article.id);
+const previousArticle = currentIndex >= 0 ? articleViews[currentIndex + 1] : undefined;
+const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefined;
 ---
 
-<BaseLayout metadata={metadata} jsonLd={jsonLd} width="narrow">
-  <article>
+<BaseLayout metadata={metadata} jsonLd={jsonLd} width="wide">
+  <article class="article-page">
     <Breadcrumbs trail={trail} />
-    <header class="page-header">
-      <h1>{revision.title}</h1>
-      <p>{revision.summary}</p>
-      <div class="meta">
-        {
-          published && (
-            <span>
-              公開 <time datetime={published}>{published}</time>
-            </span>
-          )
-        }
-        {
-          updated !== published && (
-            <span>
-              更新 <time datetime={updated}>{updated}</time>
-            </span>
-          )
-        }
-        {travel && <span>訪問 {travel}</span>}
-        {author && <span>著者 {author.name}</span>}
-      </div>
+    <header class:list={["article-hero", !cover && "article-hero--plain"]}>
       {
-        view.categories.length + view.tags.length > 0 && (
-          <ul class="chips" style="margin-top:0.9rem">
-            {view.categories.map((category) => (
-              <li class="chip">{category.name}</li>
-            ))}
-            {view.tags.map((tag) => (
-              <li class="chip">{tag.name}</li>
-            ))}
-          </ul>
+        cover && (
+          <div class="article-hero__media">
+            <Picture
+              storageKey={cover.asset.storageKey}
+              alt={cover.usage.alt}
+              sizes="(max-width: 760px) 100vw, 1100px"
+              loading="eager"
+              fetchpriority="high"
+            />
+            <div class="article-hero__shade" />
+          </div>
         )
       }
+      <div class="article-hero__content">
+        {view.categories.length > 0 && <p class="eyebrow">{view.categories[0]?.name}</p>}
+        <h1>{revision.title}</h1>
+        <p class="article-hero__summary">{revision.summary}</p>
+        <div class="article-hero__meta">
+          {
+            published && (
+              <span>
+                公開 <time datetime={published}>{published}</time>
+              </span>
+            )
+          }
+          {
+            updated !== published && (
+              <span>
+                更新 <time datetime={updated}>{updated}</time>
+              </span>
+            )
+          }
+          <span>読了 約{readingMinutes}分</span>
+        </div>
+      </div>
     </header>
 
-    {
-      cover && (
-        <figure class="hero">
-          <Picture
-            storageKey={cover.asset.storageKey}
-            alt={cover.usage.alt}
-            sizes={SIZES.hero}
-            loading="eager"
-            fetchpriority="high"
-          />
-          {cover.usage.caption && <figcaption>{cover.usage.caption}</figcaption>}
-        </figure>
-      )
-    }
+    <div class="article-intro">
+      <div class="article-author">
+        <span class="article-author__mark" aria-hidden="true">旅</span>
+        <div><small>WRITTEN BY</small><strong>{author?.name ?? "ともきち"}</strong></div>
+      </div>
+      <p>{revision.summary}</p>
+      <LikeButton articleId={article.id} />
+    </div>
 
-    <ArticleBody slug={article.slug} embeds={view.embeds} />
+    <div class="article-layout">
+      <div class="article-main">
+        {
+          (view.categories.length + view.tags.length > 0 || locationLinks.length > 0) && (
+            <div class="article-taxonomy">
+              {locationLinks.map((location) => (
+                <a href={location.path}>⌖ {location.name}</a>
+              ))}
+              {view.categories.map((category) => (
+                <span>{category.name}</span>
+              ))}
+              {view.tags.slice(0, 5).map((tag) => (
+                <span>#{tag.name}</span>
+              ))}
+            </div>
+          )
+        }
+        <ArticleBody slug={article.slug} embeds={view.embeds} />
+        <footer class="article-endnote">
+          <div>
+            <strong>最後まで読んでいただき、ありがとうございます。</strong><p>
+              この記録が、次の旅の小さなきっかけになればうれしいです。
+            </p>
+          </div>
+          <LikeButton articleId={article.id} />
+        </footer>
+        <div class="article-share">
+          <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
+          <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+        </div>
+        {
+          (previousArticle || nextArticle) && (
+            <nav class="post-navigation" aria-label="前後の記事">
+              {previousArticle ? (
+                <a href={previousArticle.route.path} class="post-navigation__card post-navigation__card--previous">
+                  <span><ChevronLeftIcon /> 前の記事</span>
+                  <strong>{previousArticle.revision.title}</strong>
+                </a>
+              ) : <span />}
+              {nextArticle ? (
+                <a href={nextArticle.route.path} class="post-navigation__card post-navigation__card--next">
+                  <span>次の記事 <ChevronRightIcon /></span>
+                  <strong>{nextArticle.revision.title}</strong>
+                </a>
+              ) : <span />}
+            </nav>
+          )
+        }
+      </div>
+      <div class="article-sidebar">
+        <ArticleToc />
+        <aside class="article-facts">
+          <p class="eyebrow">TRIP NOTES</p>
+          {
+            travel && (
+              <div>
+                <>
+                  <small>訪問時期</small>
+                  <strong>{travel}</strong>
+                </>
+              </div>
+            )
+          }
+          <div><small>読了時間</small><strong>約{readingMinutes}分</strong></div>
+          {locationLinks[0] && <a href={locationLinks[0].path}>この旅先の記事を見る →</a>}
+        </aside>
+      </div>
+    </div>
   </article>
 
   {
     related.length > 0 && (
-      <section class="section" aria-labelledby="related-heading">
-        <h2 id="related-heading">関連する記事</h2>
+      <section class="section article-related" aria-labelledby="related-heading">
+        <p class="eyebrow">KEEP EXPLORING</p>
+        <h2 id="related-heading">次に読みたい旅の記録</h2>
         <ul class="card-grid">
           {related.map((item) => (
             <ArticleCard view={item} level={3} />

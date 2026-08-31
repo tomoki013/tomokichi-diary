@@ -2,6 +2,7 @@
 import type { ArticleView } from "@tomokichi/application";
 import Picture from "./Picture.astro";
 import { SIZES } from "../lib/images";
+import LikeButton from "./LikeButton.astro";
 
 interface Props {
   view: ArticleView;
@@ -9,15 +10,34 @@ interface Props {
   eager?: boolean;
   /** Kept in step with the surrounding section so the heading order never jumps. */
   level?: 2 | 3;
+  variant?: "default" | "archive";
+  searchText?: string;
+  categoryText?: string;
+  countryText?: string;
 }
 
-const { view, eager = false, level = 2 } = Astro.props;
+const {
+  view,
+  eager = false,
+  level = 2,
+  variant = "default",
+  searchText,
+  categoryText,
+  countryText,
+} = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
 const cover = view.cover;
 const published = view.article.publishedAt?.slice(0, 10);
 ---
 
-<li class="card">
+<li
+  class:list={["card", variant === "archive" && "card--archive"]}
+  data-search={searchText}
+  data-category={categoryText}
+  data-country={countryText}
+  data-published={published}
+  data-title={view.revision.title.toLocaleLowerCase("ja")}
+>
   {
     cover && (
       <a href={view.route.path} tabindex="-1" aria-hidden="true">
@@ -34,12 +54,9 @@ const published = view.article.publishedAt?.slice(0, 10);
   <div class="card__body">
     <Heading class="card__title"><a href={view.route.path}>{view.revision.title}</a></Heading>
     <p class="card__summary">{view.revision.summary}</p>
-    {
-      published && (
-        <p class="card__meta">
-          <time datetime={published}>{published}</time>
-        </p>
-      )
-    }
+    <div class="card__footer">
+      {published && <time datetime={published}>{published}</time>}
+      <LikeButton articleId={view.article.id} compact />
+    </div>
   </div>
 </li>

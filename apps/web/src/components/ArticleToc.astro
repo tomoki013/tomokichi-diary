@@ -1,0 +1,141 @@
+---
+import { ListIcon, XIcon } from "./TravelIcons";
+---
+
+<aside
+  class="article-toc article-toc--desktop"
+  data-article-toc
+  aria-labelledby="article-toc-title"
+>
+  <div class="article-toc__heading">
+    <span aria-hidden="true"><ListIcon /></span>
+    <div><small>JOURNEY GUIDE</small><h2 id="article-toc-title">この旅の道しるべ</h2></div>
+  </div>
+  <nav aria-label="記事の目次"><ol data-article-toc-list></ol></nav>
+</aside>
+
+<button
+  class="mobile-toc-button"
+  type="button"
+  data-mobile-toc-open
+  aria-label="目次を開く"
+  aria-expanded="false"
+  aria-controls="mobile-article-toc"
+>
+  <ListIcon /><span>目次</span>
+</button>
+
+<div class="mobile-toc-overlay" data-mobile-toc-overlay hidden>
+  <button
+    class="mobile-toc-overlay__backdrop"
+    type="button"
+    data-mobile-toc-close
+    aria-label="目次を閉じる"></button>
+  <section
+    id="mobile-article-toc"
+    class="mobile-toc-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="mobile-toc-title"
+  >
+    <header>
+      <div><small>WHERE TO NEXT?</small><h2 id="mobile-toc-title">目次から旅をたどる</h2></div>
+      <button type="button" data-mobile-toc-close aria-label="目次を閉じる"><XIcon /></button>
+    </header>
+    <nav aria-label="モバイル記事目次"><ol data-mobile-toc-list></ol></nav>
+  </section>
+</div>
+
+<script>
+  const desktopToc = document.querySelector<HTMLElement>("[data-article-toc]");
+  const desktopList = desktopToc?.querySelector<HTMLOListElement>("[data-article-toc-list]");
+  const mobileList = document.querySelector<HTMLOListElement>("[data-mobile-toc-list]");
+  const openButton = document.querySelector<HTMLButtonElement>("[data-mobile-toc-open]");
+  const overlay = document.querySelector<HTMLElement>("[data-mobile-toc-overlay]");
+  const headings = [
+    ...document.querySelectorAll<HTMLElement>(".article-content h2, .article-content h3"),
+  ];
+
+  const closeOverlay = () => {
+    if (!overlay || !openButton || overlay.hidden) return;
+    overlay.classList.remove("is-open");
+    openButton.setAttribute("aria-expanded", "false");
+    document.dispatchEvent(
+      new CustomEvent("site:overlay-change", { detail: { key: "article-toc", open: false } }),
+    );
+    window.setTimeout(() => {
+      overlay.hidden = true;
+    }, 280);
+  };
+
+  const createLink = (heading: HTMLElement, index: number) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    const number = document.createElement("span");
+    number.textContent = String(index + 1).padStart(2, "0");
+    link.href = `#${heading.id}`;
+    link.dataset.level = heading.tagName === "H3" ? "3" : "2";
+    link.append(number, document.createTextNode(heading.textContent ?? ""));
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      heading.scrollIntoView({ behavior: "smooth", block: "start" });
+      closeOverlay();
+    });
+    item.append(link);
+    return item;
+  };
+
+  if (desktopToc && desktopList && mobileList && openButton && overlay && headings.length > 0) {
+    headings.forEach((heading, index) => {
+      desktopList.append(createLink(heading, index));
+      mobileList.append(createLink(heading, index));
+    });
+
+    const desktopLinks = [...desktopList.querySelectorAll<HTMLAnchorElement>("a")];
+    const mobileLinks = [...mobileList.querySelectorAll<HTMLAnchorElement>("a")];
+    const activate = (index: number) => {
+      [...desktopLinks, ...mobileLinks].forEach((link) => link.removeAttribute("aria-current"));
+      desktopLinks[index]?.setAttribute("aria-current", "true");
+      mobileLinks[index]?.setAttribute("aria-current", "true");
+    };
+    activate(0);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(
+          (entry) =>
+            entry.isIntersecting && activate(headings.indexOf(entry.target as HTMLElement)),
+        );
+      },
+      { rootMargin: "-20% 0px -68%" },
+    );
+    headings.forEach((heading) => observer.observe(heading));
+
+    const articleContent = document.querySelector<HTMLElement>(".article-content");
+    const updateFloatingButton = () => {
+      if (!articleContent) return;
+      const rect = articleContent.getBoundingClientRect();
+      openButton.classList.toggle("is-visible", rect.top < innerHeight * 0.45 && rect.bottom > 120);
+    };
+    updateFloatingButton();
+    addEventListener("scroll", updateFloatingButton, { passive: true });
+
+    openButton.addEventListener("click", () => {
+      overlay.hidden = false;
+      requestAnimationFrame(() => overlay.classList.add("is-open"));
+      openButton.setAttribute("aria-expanded", "true");
+      document.dispatchEvent(
+        new CustomEvent("site:overlay-change", { detail: { key: "article-toc", open: true } }),
+      );
+      overlay.querySelector<HTMLButtonElement>("[data-mobile-toc-close]")?.focus();
+    });
+    overlay
+      .querySelectorAll<HTMLButtonElement>("[data-mobile-toc-close]")
+      .forEach((button) => button.addEventListener("click", closeOverlay));
+    addEventListener("keydown", (event) => event.key === "Escape" && closeOverlay());
+  } else {
+    desktopToc?.remove();
+    openButton?.remove();
+    overlay?.remove();
+  }
+</script>

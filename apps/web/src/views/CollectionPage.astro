@@ -3,7 +3,7 @@ import type { CollectionId, Route } from "@tomokichi/domain";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
-import ArticleCard from "../components/ArticleCard.astro";
+import Picture from "../components/Picture.astro";
 import { content } from "../lib/content";
 import { collectionTrail } from "../lib/navigation";
 import { seoConfig } from "../lib/site";
@@ -16,6 +16,7 @@ const { route } = Astro.props;
 const collectionId = (route.targetId ?? "") as CollectionId;
 const collection = content.collection(collectionId);
 const members = content.membersOf(collectionId);
+const cover = content.snapshot.media.find((media) => media.id === collection?.coverMediaId) ?? members.find((member) => member.cover)?.cover?.asset ?? null;
 
 const title = collection?.title ?? "";
 const trail = collectionTrail(route, title);
@@ -31,20 +32,59 @@ const metadata = buildPageMetadata(seoConfig, {
   route,
   noindex: route.noindex,
 });
+const kindLabel = collection?.kind === "journey" ? "旅程コレクション" : "テーマコレクション";
+const places = [...new Set(members.flatMap((view) => view.locations.map(({ location }) => content.locations.nameOf(location.id, "ja"))))].slice(0, 6);
+const otherCollections = content.snapshot.collections
+  .filter((item) => item.id !== collectionId && item.kind === collection?.kind)
+  .flatMap((item) => {
+    const itemRoute = content.routes.canonicalFor(item.kind, item.id);
+    return itemRoute ? [{ item, route: itemRoute, count: content.membersOf(item.id).length }] : [];
+  })
+  .slice(0, 3);
 ---
 
 <BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}>
-  <Breadcrumbs trail={trail} />
-  <header class="page-header">
-    <h1>{title}</h1>
-    {collection?.description && <p>{collection.description}</p>}
-    <div class="meta">
-      {period && <span>{period}</span>}
-      <span>{members.length}件の記事</span>
-    </div>
-  </header>
+  <div class:list={["collection-detail", collection?.kind === "journey" ? "collection-detail--journey" : "collection-detail--series"]}>
+    <Breadcrumbs trail={trail} />
+    <header class:list={["collection-detail__hero", !cover && "collection-detail__hero--plain"]}>
+      {cover && <Picture storageKey={cover.storageKey} alt={title} sizes="(max-width: 760px) 100vw, 1100px" loading="eager" fetchpriority="high" />}
+      <span class="collection-detail__shade"></span>
+      <div class="collection-detail__copy">
+        <small>{kindLabel}</small>
+        <h1>{title}</h1>
+        {collection?.description && <p>{collection.description}</p>}
+        <div>{period && <span>{period.replaceAll("-", ".")}</span>}<span>{members.length}本の記事</span></div>
+      </div>
+    </header>
 
-  <ul class="card-grid">
-    {members.map((view, index) => <ArticleCard view={view} eager={index < 3} />)}
-  </ul>
+    <section class="collection-overview" aria-label="コレクション概要">
+      <div><small>このコレクションについて</small><p>{collection?.kind === "journey" ? "旅の始まりから終わりまで、実際に歩いた順番で読めます。移動や失敗も含めて、一つの旅としてまとめました。" : "同じテーマで心に残った景色や体験を、国や時期を越えて集めています。"}</p></div>
+      {places.length > 0 && <div class="collection-overview__places"><small>登場する旅先</small><p>{places.join("、")}</p></div>}
+    </section>
+
+    <section class="collection-members" aria-labelledby="collection-members-heading">
+      <div class="collection-members__heading"><div><small>{collection?.kind === "journey" ? "旅の順路" : "収録記事"}</small><h2 id="collection-members-heading">{collection?.kind === "journey" ? "この旅を順番に読む" : "テーマを深く読む"}</h2></div><span>{members.length} posts</span></div>
+      <ol>
+        {members.map((view, index) => {
+          const location = content.primaryLocationOf(view.article.id);
+          return (
+            <li>
+              <span class="collection-member__number">{String(index + 1).padStart(2, "0")}</span>
+              <a href={view.route.path} class="collection-member__media" tabindex="-1" aria-hidden="true">
+                {view.cover && <Picture storageKey={view.cover.asset.storageKey} alt={view.cover.usage.alt} sizes="(max-width: 760px) 42vw, 320px" loading={index < 2 ? "eager" : "lazy"} />}
+              </a>
+              <div class="collection-member__copy">
+                <small>{location ? content.locations.nameOf(location.id, "ja") : `第${index + 1}話`}{view.article.publishedAt && ` · ${view.article.publishedAt.slice(0, 10).replaceAll("-", ".")}`}</small>
+                <h3><a href={view.route.path}>{view.revision.title}</a></h3>
+                <p>{view.revision.summary}</p>
+                <a href={view.route.path}>記事を読む</a>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+
+    {otherCollections.length > 0 && <section class="collection-next"><small>ほかのコレクション</small><h2>次は、どの旅をたどる？</h2><div>{otherCollections.map(({ item, route: itemRoute, count }) => <a href={itemRoute.path}><strong>{item.title}</strong><span>{count}本の記事</span></a>)}</div></section>}
+  </div>
 </BaseLayout>

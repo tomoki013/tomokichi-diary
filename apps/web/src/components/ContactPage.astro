@@ -1,0 +1,58 @@
+---
+import ContactForm from "./ContactForm.astro";
+---
+
+<article class="contact-page">
+  <header class="contact-hero">
+    <div>
+      <p class="eyebrow">LET'S TALK ABOUT TRAVEL</p>
+      <h1>旅の話を、<br />聞かせてください。</h1>
+    </div>
+    <div>
+      <p>
+        記事の感想や掲載内容についてのご連絡、旅先のリクエスト、コラボレーションのご相談まで。ひとつずつ目を通してお返事します。
+      </p>
+      <dl>
+        <div><dt>返信の目安</dt><dd>3〜5日</dd></div><div><dt>受付</dt><dd>24時間</dd></div>
+      </dl>
+    </div>
+  </header>
+
+  <div class="contact-layout">
+    <section class="contact-form-card" aria-labelledby="contact-form-title">
+      <header>
+        <p>MESSAGE FORM</p><h2 id="contact-form-title">お問い合わせ内容</h2><span
+          >必須項目を入力して送信してください。</span>
+      </header>
+      <ContactForm />
+    </section>
+
+    <aside class="contact-guide">
+      <section>
+        <span>01</span><div>
+          <h2>記事について</h2><p>掲載内容の訂正、リンク切れ、記事の感想はこちらから。</p>
+        </div>
+      </section>
+      <section>
+        <span>02</span><div>
+          <h2>旅先のリクエスト</h2><p>
+            取り上げてほしい国や都市、知りたい移動情報を教えてください。
+          </p>
+        </div>
+      </section>
+      <section>
+        <span>03</span><div>
+          <h2>お仕事・取材</h2><p>執筆、写真利用、コラボレーションのご相談も受け付けています。</p>
+        </div>
+      </section>
+      <div class="contact-direct">
+        <small>DIRECT EMAIL</small><a href="mailto:tomokichidiary@gmail.com"
+          >tomokichidiary@gmail.com</a
+        ><p>フォームが利用できない場合はこちらへ。</p>
+      </div>
+      <p class="contact-security">
+        送信内容は不正利用防止の仕組みで保護されています。
+      </p>
+    </aside>
+  </div>
+</article>

@@ -22,15 +22,23 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
  */
 const PLACEHOLDER = /<p>\s*\{\{embed:([a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
 const html = entry.rendered?.html ?? null;
-const segments = html === null ? null : enhanceBodyImages(html).split(PLACEHOLDER);
+let headingIndex = 0;
+const withHeadingIds = (value: string) =>
+  value.replace(/<h([23])>(.*?)<\/h\1>/gi, (_match, level, inner) => {
+    const text = inner.replace(/<[^>]+>/g, "").trim();
+    const id = `section-${++headingIndex}-${text.replace(/\s+/g, "-").slice(0, 48)}`;
+    return `<h${level} id="${id}">${inner}</h${level}>`;
+  });
+const segments = html === null ? null : withHeadingIds(enhanceBodyImages(html)).split(PLACEHOLDER);
 
-const { Content } = html === null ? await render(entry) : { Content: null };
+const fallback = html === null ? await render(entry) : null;
+const FallbackContent = fallback?.Content;
 ---
 
-<div class="prose">
+<div class="prose article-content">
   {
     segments === null ? (
-      <Content />
+      FallbackContent ? <FallbackContent /> : null
     ) : (
       segments.map((segment, index) =>
         index % 2 === 1 ? (

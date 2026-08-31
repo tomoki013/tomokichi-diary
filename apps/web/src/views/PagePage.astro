@@ -5,10 +5,13 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
-import VisitedCountries from "../components/VisitedCountries.astro";
-import ContactForm from "../components/ContactForm.astro";
 import { pageTrail } from "../lib/navigation";
 import { seoConfig } from "../lib/site";
+import Picture from "../components/Picture.astro";
+import { content } from "../lib/content";
+import WorldMap from "../components/WorldMap.astro";
+import FaqPage from "../components/FaqPage.astro";
+import ContactPage from "../components/ContactPage.astro";
 
 interface Props {
   view: ArticleView;
@@ -16,26 +19,270 @@ interface Props {
 }
 
 const { view, route } = Astro.props;
+const isAbout = route.path === "/about";
+const isFaq = route.path === "/faq";
+const isContact = route.path === "/contact";
+const pageTitle = isAbout ? "このブログについて" : view.revision.title;
 const metadata = buildPageMetadata(seoConfig, {
-  title: view.revision.seoTitleOverride ?? view.revision.title,
-  description: view.revision.summary,
+  title: isAbout ? pageTitle : (view.revision.seoTitleOverride ?? view.revision.title),
+  description: isAbout
+    ? "実際に歩いた旅の記録と、次の旅に役立つ情報を届ける『ともきちの旅行日記』について。旅に込めた想いと、ブログで大切にしていることを紹介します。"
+    : view.revision.summary,
   route,
   noindex: route.noindex || view.article.noindex,
 });
-const trail = pageTrail(route, view.revision.title);
+const trail = pageTrail(route, pageTitle);
 const updated = view.article.updatedAt.slice(0, 10);
+const publicStories = content.publicArticles().filter((article) => article.kind === "article");
+const visitedCountries = [
+  ...new Set(
+    publicStories.flatMap((article) =>
+      content.relations.locations
+        .filter((relation) => relation.articleId === article.id)
+        .flatMap((relation) => {
+          const country = content.locations.countryOf(relation.locationId);
+          return country ? [content.locations.nameOf(country.id, "ja")] : [];
+        }),
+    ),
+  ),
+];
+const publicStoryIds = new Set(publicStories.map((article) => article.id));
+const aboutCountries = content.snapshot.locations
+  .filter((location) => location.type === "country")
+  .flatMap((country) => {
+    const countryRoute = content.routes.canonicalFor("location", country.id);
+    if (!countryRoute) return [];
+    const count = new Set(
+      content.relations.locations
+        .filter(
+          (relation) =>
+            publicStoryIds.has(relation.articleId) &&
+            content.locations.countryOf(relation.locationId)?.id === country.id,
+        )
+        .map((relation) => relation.articleId),
+    ).size;
+    return count > 0
+      ? [
+          {
+            slug: country.slug,
+            name: content.locations.nameOf(country.id, "ja"),
+            path: countryRoute.path,
+            count,
+          },
+        ]
+      : [];
+  });
 ---
 
-<BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]} width="narrow">
-  <article>
-    <Breadcrumbs trail={trail} />
-    <header class="page-header">
-      <h1>{view.revision.title}</h1>
-      {view.revision.summary && <p>{view.revision.summary}</p>}
-      <div class="meta"><span>更新 <time datetime={updated}>{updated}</time></span></div>
-    </header>
-    <ArticleBody slug={view.article.slug} embeds={view.embeds} />
-    {route.path === "/about" && <VisitedCountries />}
-    {route.path === "/contact" && <ContactForm />}
-  </article>
+<BaseLayout
+  metadata={metadata}
+  jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}
+  width={isAbout || isFaq || isContact ? "wide" : "narrow"}
+>
+  {
+    isAbout ? (
+      <article class="about-page">
+        <Breadcrumbs trail={trail} />
+        <header class="about-hero">
+          <div class="about-hero__copy">
+            <p>このブログについて</p>
+            <h1>
+              旅に出る前の時間も、
+              <br />
+              旅のあとに残る記憶も。
+            </h1>
+            <p>
+              実際に歩いて、迷って、心が動いた瞬間を記録する場所です。読んだ人の中に「次はどこへ行こう」という小さな衝動が生まれたら、それがこのブログのいちばん嬉しい役目です。
+            </p>
+            <a href="/posts">旅の記録を読む&nbsp; →</a>
+          </div>
+          <div class="about-hero__photos">
+            <Picture
+              storageKey="images/Greece/oia-castle-sunset-view2.jpg"
+              alt="旅先で眺めた夕景"
+              sizes="(max-width: 760px) 100vw, 680px"
+              loading="eager"
+              fetchpriority="high"
+            />
+            <Picture
+              storageKey="images/Turkey/balloons-in-cappadocia.jpg"
+              alt="カッパドキアの空を進む気球"
+              sizes="(max-width: 760px) 42vw, 260px"
+              loading="eager"
+            />
+            <span>
+              Every journey
+              <br />
+              begins with wonder.
+            </span>
+          </div>
+        </header>
+
+        <section class="about-manifesto">
+          <div>
+            <>
+              <small>WHY I WRITE</small>
+              <h2>
+                旅のワクワクを、
+                <br />
+                誰かの次の一歩に。
+              </h2>
+            </>
+          </div>
+          <div>
+            <>
+              <p>
+                「次の冒険は、どこへ？」。そんな言葉がふと浮かんだ瞬間から、新しい旅は始まっていると思います。
+              </p>
+              <p>
+                このブログでは、息をのむ景色だけでなく、空港から街へ向かう方法や、現地で迷ったこと、ふらっと入った路地の空気まで残しています。きれいな思い出と実際に役立つ情報、その両方があることで、まだ知らない場所を少し身近に感じてもらえるはずです。
+              </p>
+            </>
+          </div>
+        </section>
+
+        <section class="about-author" aria-labelledby="about-author-title">
+          <div class="about-author__portrait">
+            <Picture
+              storageKey="images/Introduce/introduce.jpg"
+              alt="ともきち"
+              sizes="(max-width: 760px) 100vw, 520px"
+            />
+          </div>
+          <div class="about-author__copy">
+            <>
+              <small>書いている人</small>
+              <h2 id="about-author-title">ともきち</h2>
+              <p>
+                京都在住の大学生。歴史を感じる建築と、その土地の空気がゆっくり変わっていく夕暮れが好きです。
+              </p>
+              <p>
+                名所を急いで巡るより、現地の人が通うカフェで過ごしたり、予定を決めずに裏路地を歩いたり。観光地の向こう側にある日常へ少しだけ混ざるような旅をしています。
+              </p>
+              <dl>
+                <>
+                  <div>
+                    <>
+                      <dt>これまでの旅先</dt>
+                      <dd>
+                        {visitedCountries.length}
+                        <span>か国</span>
+                      </dd>
+                    </>
+                  </div>
+                  <div>
+                    <>
+                      <dt>公開した記録</dt>
+                      <dd>
+                        {publicStories.length}
+                        <span>本</span>
+                      </dd>
+                    </>
+                  </div>
+                </>
+              </dl>
+            </>
+          </div>
+        </section>
+
+        <section class="about-map" aria-labelledby="about-map-title">
+          <header>
+            <>
+              <div>
+                <>
+                  <small>これまでの旅</small>
+                  <h2 id="about-map-title">今まで、これだけの場所へ行きました。</h2>
+                </>
+              </div>
+              <p>
+                <strong>{aboutCountries.length}</strong>
+                か国。地図のピンから、それぞれの旅行日記を読めます。
+              </p>
+            </>
+          </header>
+          <WorldMap countries={aboutCountries} />
+          <nav aria-label="訪れた国の一覧">
+            {aboutCountries.map((country) => (
+              <a href={country.path}>
+                {country.name}
+                <small>{country.count}本</small>
+              </a>
+            ))}
+          </nav>
+        </section>
+
+        <section class="about-values" aria-labelledby="about-values-title">
+          <header>
+            <>
+              <small>このブログで大切にしていること</small>
+              <h2 id="about-values-title">きれいな景色だけで終わらせない。</h2>
+            </>
+          </header>
+          <ol>
+            <>
+              <li>
+                <>
+                  <span>01</span>
+                  <h3>自分の足で確かめる</h3>
+                  <p>実際に歩いた経験を起点に、現地の温度や迷いやすかった点まで書きます。</p>
+                </>
+              </li>
+              <li>
+                <>
+                  <span>02</span>
+                  <h3>旅の余白を残す</h3>
+                  <p>正解を押しつけず、偶然の出会いや寄り道を楽しめる言葉を大切にします。</p>
+                </>
+              </li>
+              <li>
+                <>
+                  <span>03</span>
+                  <h3>役立つ形で届ける</h3>
+                  <p>移動や費用など、次に旅する人が一歩を踏み出せる情報へ整えます。</p>
+                </>
+              </li>
+            </>
+          </ol>
+        </section>
+
+        <section class="about-scene">
+          <Picture
+            storageKey="images/Greece/fira-shopping-street.jpg"
+            alt="旅先の路地を歩く風景"
+            sizes="100vw"
+          />
+          <div>
+            <>
+              <p>まだ知らない日常へ。</p>
+              <h2>次の景色を、探しに行こう。</h2>
+              <div>
+                <>
+                  <a href="/destination">地図から旅先を探す&nbsp; →</a>
+                  <a href="/collections">旅のまとまりから読む&nbsp; →</a>
+                </>
+              </div>
+            </>
+          </div>
+        </section>
+      </article>
+    ) : isFaq ? (
+      <FaqPage markdown={view.revision.bodyMarkdown} />
+    ) : isContact ? (
+      <ContactPage />
+    ) : (
+      <article>
+        <Breadcrumbs trail={trail} />
+        <header class="page-header">
+          <h1>{pageTitle}</h1>
+          {view.revision.summary && <p>{view.revision.summary}</p>}
+          <div class="meta">
+            <span>
+              更新 <time datetime={updated}>{updated}</time>
+            </span>
+          </div>
+        </header>
+        <ArticleBody slug={view.article.slug} embeds={view.embeds} />
+      </article>
+    )
+  }
 </BaseLayout>

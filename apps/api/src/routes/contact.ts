@@ -16,15 +16,31 @@ export async function verifyTurnstile(
   secret: string,
   token: string,
   ip: string | undefined,
+  expectedHostnames?: string,
 ): Promise<boolean> {
   const body = new FormData();
   body.append("secret", secret);
   body.append("response", token);
+  body.append("idempotency_key", crypto.randomUUID());
   if (ip !== undefined) body.append("remoteip", ip);
 
   const response = await fetch(TURNSTILE_VERIFY_URL, { method: "POST", body });
   if (!response.ok) return false;
-  return ((await response.json()) as { success?: boolean }).success === true;
+  const result = (await response.json()) as {
+    success?: boolean;
+    hostname?: string;
+    action?: string;
+  };
+  const allowedHostnames = (expectedHostnames ?? "")
+    .split(",")
+    .map((hostname) => hostname.trim())
+    .filter(Boolean);
+  return (
+    result.success === true &&
+    result.action === "contact" &&
+    (allowedHostnames.length === 0 ||
+      (result.hostname !== undefined && allowedHostnames.includes(result.hostname)))
+  );
 }
 
 /** A salted hash: enough to rate-limit a sender, not enough to identify one. */
@@ -60,7 +76,15 @@ export function contactRoutes() {
 
     const ip = c.req.header("cf-connecting-ip") ?? undefined;
     const token = String(form.get("cf-turnstile-response") ?? "");
-    if (token === "" || !(await c.get("verifyChallenge")(secret, token, ip))) {
+    if (
+      token === "" ||
+      !(await c.get("verifyChallenge")(
+        secret,
+        token,
+        ip,
+        c.env.TURNSTILE_EXPECTED_HOSTNAME?.trim(),
+      ))
+    ) {
       return back("?error=challenge");
     }
 

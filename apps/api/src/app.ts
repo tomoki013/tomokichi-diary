@@ -11,12 +11,14 @@ import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
+import { likeRoutes } from "./routes/likes.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
   secret: string,
   token: string,
   ip: string | undefined,
+  expectedHostname?: string,
 ) => Promise<boolean>;
 
 /** Verifies a Cloudflare Access identity token. Injected so tests can stand in for it. */
@@ -109,8 +111,14 @@ export function createApp(options: AppOptions = {}) {
    */
   const v1 = new Hono<AppEnv>();
 
+  v1.use("*", async (c, next) => {
+    await next();
+    c.header("api-version", "1");
+  });
+
   // The only unauthenticated write: a challenge-protected contact form.
   v1.route("/contact", contactRoutes());
+  v1.route("/likes", likeRoutes());
 
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.

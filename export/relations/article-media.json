@@ -1,5 +1,21 @@
 [
   {
+    "articleId": "3b67a2fb-3ae1-861e-b304-191913581fb5",
+    "mediaId": "4c01f719-2395-89c0-b2bd-de331a74543b",
+    "role": "cover",
+    "sortOrder": 0,
+    "alt": "シンガポール市内からチャンギ空港へ向かう旅のイメージ",
+    "caption": null
+  },
+  {
+    "articleId": "5721b825-24ea-892c-9ba5-ac087e29b604",
+    "mediaId": "0d4352a0-35df-8196-a352-3d847cd35e1c",
+    "role": "cover",
+    "sortOrder": 0,
+    "alt": "セレター空港から向かうシンガポール市内の景色",
+    "caption": null
+  },
+  {
     "articleId": "a0ba40dc-5b69-8fc3-ada0-a428ed994ce7",
     "mediaId": "a278bfee-2735-8352-b515-18841628d261",
     "role": "cover",

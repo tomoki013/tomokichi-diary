@@ -1,0 +1,127 @@
+---
+interface Props {
+  markdown: string;
+}
+
+const { markdown } = Astro.props;
+
+const plainText = (value: string) =>
+  value
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^[-*]\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const groups = markdown
+  .replace(/^##\s+/, "")
+  .split(/\n##\s+/)
+  .flatMap((section) => {
+    const [title = "", ...rest] = section.split("\n");
+    const questions = rest
+      .join("\n")
+      .split(/\n###\s+/)
+      .slice(1)
+      .flatMap((block) => {
+        const [question = "", ...answer] = block.split("\n");
+        const text = plainText(answer.join("\n"));
+        return question && text ? [{ question: plainText(question), answer: text }] : [];
+      });
+    return title && questions.length > 0 ? [{ title: plainText(title), questions }] : [];
+  });
+---
+
+<article class="faq-page">
+  <header class="faq-hero">
+    <div>
+      <p class="eyebrow">TRAVEL HELP DESK</p>
+      <h1>旅の疑問を、<br />ここで軽くする。</h1>
+      <p>記事の探し方から旅行記の読み方まで。よくいただく質問を、目的別にまとめました。</p>
+    </div>
+    <label class="faq-search">
+      <span>質問を検索</span>
+      <input type="search" placeholder="例：空港、記事、写真" autocomplete="off" data-faq-search />
+    </label>
+  </header>
+
+  <nav class="faq-topics" aria-label="質問カテゴリ">
+    {
+      groups.map((group, index) => (
+        <a href={`#faq-group-${index + 1}`}>
+          <span>{String(index + 1).padStart(2, "0")}</span>
+          {group.title}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="faq-layout">
+    <div class="faq-groups" data-faq-groups>
+      {
+        groups.map((group, groupIndex) => (
+          <section id={`faq-group-${groupIndex + 1}`} class="faq-group" data-faq-group>
+            <header>
+              <>
+                <span>{String(groupIndex + 1).padStart(2, "0")}</span>
+                <h2>{group.title}</h2>
+                <small>{group.questions.length} QUESTIONS</small>
+              </>
+            </header>
+            <div>
+              {group.questions.map((item) => (
+                <details
+                  data-faq-item
+                  data-search-text={`${item.question} ${item.answer}`.toLocaleLowerCase("ja")}
+                >
+                  <summary>
+                    <span>Q</span>
+                    <strong>{item.question}</strong>
+                    <i aria-hidden="true">＋</i>
+                  </summary>
+                  <div>
+                    <span>A</span>
+                    <p>{item.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+      <p class="faq-empty" data-faq-empty hidden>
+        該当する質問が見つかりませんでした。言葉を変えて検索するか、お問い合わせください。
+      </p>
+    </div>
+
+    <aside class="faq-contact">
+      <p class="eyebrow">STILL CURIOUS?</p>
+      <h2>見つからない疑問は、<br />気軽に聞いてください。</h2>
+      <p>掲載内容の確認、旅先のリクエスト、お仕事のご相談も受け付けています。</p>
+      <a href="/contact">お問い合わせへ&nbsp; →</a>
+    </aside>
+  </div>
+</article>
+
+<script>
+  const faqSearch = document.querySelector<HTMLInputElement>("[data-faq-search]");
+  const faqItems = [...document.querySelectorAll<HTMLDetailsElement>("[data-faq-item]")];
+  const faqGroups = [...document.querySelectorAll<HTMLElement>("[data-faq-group]")];
+  const faqEmpty = document.querySelector<HTMLElement>("[data-faq-empty]");
+  const filterFaq = () => {
+    const query = faqSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
+    let visible = 0;
+    faqItems.forEach((item) => {
+      const matches = !query || (item.dataset.searchText ?? "").includes(query);
+      item.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    faqGroups.forEach((group) => {
+      group.hidden = ![...group.querySelectorAll<HTMLElement>("[data-faq-item]")].some(
+        (item) => !item.hidden,
+      );
+    });
+    if (faqEmpty) faqEmpty.hidden = visible > 0;
+  };
+  faqSearch?.addEventListener("input", filterFaq);
+</script>

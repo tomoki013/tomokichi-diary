@@ -1,0 +1,127 @@
+---
+import { geoNaturalEarth1, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import world from "world-atlas/countries-110m.json";
+import type { FeatureCollection, Geometry } from "geojson";
+
+interface CountryLink {
+  slug: string;
+  name: string;
+  path: string;
+  count: number;
+}
+
+interface Props {
+  countries: CountryLink[];
+}
+
+const { countries } = Astro.props;
+
+const englishNameBySlug: Record<string, string> = {
+  belgium: "Belgium",
+  china: "China",
+  egypt: "Egypt",
+  france: "France",
+  greece: "Greece",
+  india: "India",
+  indonesia: "Indonesia",
+  japan: "Japan",
+  malaysia: "Malaysia",
+  singapore: "Singapore",
+  "south-korea": "South Korea",
+  spain: "Spain",
+  thailand: "Thailand",
+  turkey: "Turkey",
+  vietnam: "Vietnam",
+};
+
+const coordinatesBySlug: Record<string, [number, number]> = {
+  belgium: [4.47, 50.5],
+  china: [104.2, 35.9],
+  egypt: [30.8, 26.8],
+  france: [2.2, 46.2],
+  greece: [21.8, 39.1],
+  india: [78.9, 20.6],
+  indonesia: [117.3, -2.3],
+  japan: [138.2, 36.2],
+  malaysia: [102.1, 4.2],
+  singapore: [103.8, 1.35],
+  "south-korea": [127.8, 36.3],
+  spain: [-3.7, 40.4],
+  thailand: [100.9, 15.8],
+  turkey: [35.2, 39.1],
+  vietnam: [108.3, 14.1],
+};
+
+const countryByEnglishName = new Map(
+  countries.flatMap((country) => {
+    const englishName = englishNameBySlug[country.slug];
+    return englishName ? [[englishName, country] as const] : [];
+  }),
+);
+
+const collection = feature(
+  world as never,
+  (world as unknown as { objects: { countries: unknown } }).objects.countries as never,
+) as unknown as FeatureCollection<Geometry, { name?: string }>;
+
+const projection = geoNaturalEarth1().fitExtent(
+  [
+    [18, 18],
+    [942, 472],
+  ],
+  collection,
+);
+const path = geoPath(projection);
+const mapShapes = collection.features.flatMap((country) => {
+  const name = country.properties?.name ?? "";
+  const d = path(country);
+  return d ? [{ d, destination: countryByEnglishName.get(name) ?? null }] : [];
+});
+const pins = countries.flatMap((destination) => {
+  const coordinates = coordinatesBySlug[destination.slug];
+  const point = coordinates ? projection(coordinates) : null;
+  return point ? [{ destination, x: point[0], y: point[1] }] : [];
+});
+---
+
+<div class="world-map" aria-label="訪れた国から記事を探す">
+  <svg viewBox="0 0 960 490" role="img" aria-labelledby="world-map-title world-map-description">
+    <title id="world-map-title">ともきちが訪れた国の世界地図</title>
+    <desc id="world-map-description">色の濃い国を選ぶと、その国の旅行記事へ移動します。</desc>
+    <g>
+      {
+        mapShapes.map(({ d, destination }) =>
+          destination ? (
+            <a
+              href={destination.path}
+              aria-label={`${destination.name}の記事 ${destination.count}件`}
+            >
+              <path class="world-map__country world-map__country--visited" d={d}>
+                <title>{destination.name}</title>
+              </path>
+            </a>
+          ) : (
+            <path class="world-map__country" d={d} aria-hidden="true" />
+          ),
+        )
+      }
+    </g>
+    <g class="world-map__pins">
+      {
+        pins.map(({ destination, x, y }) => (
+          <a href={destination.path} aria-label={`${destination.name}の記事 ${destination.count}件`}>
+            <g transform={`translate(${x} ${y})`}>
+              <g class="world-map__pin">
+                <path d="M0 8s-7-7.3-7-13a7 7 0 1 1 14 0C7 .7 0 8 0 8Z" />
+                <circle cy="-5" r="2.2" />
+                <title>{destination.name}</title>
+              </g>
+            </g>
+          </a>
+        ))
+      }
+    </g>
+  </svg>
+  <p class="world-map__legend"><span aria-hidden="true"></span> 訪れた国を選ぶ</p>
+</div>

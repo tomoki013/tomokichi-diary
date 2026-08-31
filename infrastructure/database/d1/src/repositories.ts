@@ -94,6 +94,36 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  const articleLikes = {
+    count: async (articleId: string) => {
+      const row = await first(
+        "SELECT COUNT(*) AS count FROM article_likes WHERE article_id = ?",
+        articleId,
+      );
+      return Number(row?.["count"] ?? 0);
+    },
+    has: async (articleId: string, visitorHash: string) =>
+      (await first(
+        "SELECT 1 AS found FROM article_likes WHERE article_id = ? AND visitor_hash = ?",
+        articleId,
+        visitorHash,
+      )) !== null,
+    add: async (articleId: string, visitorHash: string, createdAt: string) => {
+      await db
+        .prepare(
+          "INSERT INTO article_likes (article_id, visitor_hash, created_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
+        )
+        .bind(articleId, visitorHash, createdAt)
+        .run();
+    },
+    remove: async (articleId: string, visitorHash: string) => {
+      await db
+        .prepare("DELETE FROM article_likes WHERE article_id = ? AND visitor_hash = ?")
+        .bind(articleId, visitorHash)
+        .run();
+    },
+  } satisfies Repositories["articleLikes"];
+
   const revisions: RevisionRepository = {
     findById: async (id) => {
       const row = await first("SELECT * FROM article_revisions WHERE id = ?", id);
@@ -347,6 +377,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
 
   return {
     articles,
+    articleLikes,
     revisions,
     embeds,
     routes,

@@ -134,7 +134,7 @@ failures. `LINK_INTERNAL_BROKEN` catches all three before a deploy.
 
 ### Contact form
 
-The form posts to `POST /contact` on the API, which verifies a Turnstile token,
+The form posts to the versioned `POST /v1/contact` API, which verifies a Turnstile token,
 rate-limits the sender and stores the message in D1. Submissions are read in
 the admin under お問い合わせ; nothing is emailed and no third party sees them.
 
@@ -148,6 +148,10 @@ Three secrets gate it, and a missing one closes the form rather than opening it:
 
 The public site needs `PUBLIC_TURNSTILE_SITE_KEY` at build time; without it the
 form is not rendered at all.
+
+Set `TURNSTILE_EXPECTED_HOSTNAME=tomokichidiary.com,www.tomokichidiary.com` in
+production so a valid token is also checked against an expected hostname and
+the `contact` widget action.
 
 A submission is stored with status `spam` when it trips the heuristic (link
 floods, bbcode or HTML link markup). It is flagged rather than dropped, so a

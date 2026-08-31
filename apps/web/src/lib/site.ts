@@ -42,7 +42,9 @@ export const apiUrl = (process.env.PUBLIC_API_URL ?? "https://api.tomokichidiary
 );
 
 /** Public Turnstile key. Empty disables the form rather than shipping it unprotected. */
-export const turnstileSiteKey = process.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const turnstileDevelopmentSiteKey = "1x00000000000000000000AA";
+export const turnstileSiteKey =
+  process.env.PUBLIC_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? turnstileDevelopmentSiteKey : "");
 
 export function absoluteUrl(path: string): string {
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;

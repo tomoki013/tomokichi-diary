@@ -49,6 +49,13 @@ export interface ArticleRepository {
   delete(id: ArticleId): Promise<void>;
 }
 
+export interface ArticleLikeRepository {
+  count(articleId: ArticleId): Promise<number>;
+  has(articleId: ArticleId, visitorHash: string): Promise<boolean>;
+  add(articleId: ArticleId, visitorHash: string, createdAt: string): Promise<void>;
+  remove(articleId: ArticleId, visitorHash: string): Promise<void>;
+}
+
 export interface RevisionRepository {
   findById(id: RevisionId): Promise<ArticleRevision | null>;
   findLatest(articleId: ArticleId): Promise<ArticleRevision | null>;
@@ -149,6 +156,7 @@ export interface AIArtifactRepository {
 /** Everything a use case may reach for, assembled at the composition root. */
 export interface Repositories {
   readonly articles: ArticleRepository;
+  readonly articleLikes: ArticleLikeRepository;
   readonly revisions: RevisionRepository;
   readonly embeds: EmbedRepository;
   readonly routes: RouteRepository;
