@@ -1,8 +1,11 @@
 ---
 import { getEntry, render } from "astro:content";
 import type { ArticleEmbed } from "@tomokichi/domain";
+import type { ArticleView } from "@tomokichi/application";
 import EmbedBlock from "./EmbedBlock.astro";
 import { enhanceBodyImages } from "../lib/images";
+import { content } from "../lib/content";
+import { mediaUrl } from "../lib/site";
 
 interface Props {
   slug: string;
@@ -23,13 +26,78 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
 const PLACEHOLDER = /<p>\s*\{\{embed:([a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
 const html = entry.rendered?.html ?? null;
 let headingIndex = 0;
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+const internalCard = (href: string): string | null => {
+  let pathname = href;
+  try {
+    pathname = new URL(href, "https://tomokichidiary.com").pathname;
+  } catch {
+    return null;
+  }
+  const route = content.routes.find(pathname);
+  if (!route || !route.targetId) return null;
+  let title = "";
+  let summary = "";
+  let cover: ArticleView["cover"] = null;
+  let label = "RELATED BLOG";
+  if (route.targetType === "article") {
+    const view = content.viewOf(route.targetId as never);
+    if (!view || view.article.kind !== "article") return null;
+    title = view.revision.title;
+    summary = view.revision.summary;
+    cover = view.cover;
+  } else if (route.targetType === "location") {
+    title = content.locations.nameOf(route.targetId as never, "ja");
+    const related = content.publicArticles().flatMap((article) => {
+      const view = content.viewOf(article.id);
+      if (!view || article.kind !== "article") return [];
+      const matches = content.relations.locations.some((relation) => {
+        if (relation.articleId !== article.id) return false;
+        return (
+          relation.locationId === route.targetId ||
+          content.locations.countryOf(relation.locationId)?.id === route.targetId
+        );
+      });
+      return matches ? [view] : [];
+    });
+    cover = related.find((view) => view.cover)?.cover ?? null;
+    summary = `${title}で訪れた場所、移動、心に残った景色をまとめて読む。`;
+    label = "EXPLORE DESTINATION";
+  } else if (route.targetType === "series" || route.targetType === "journey") {
+    const collection = content.collection(route.targetId as never);
+    if (!collection) return null;
+    title = collection.title;
+    summary = collection.description;
+    cover = content.membersOf(collection.id).find((member) => member.cover)?.cover ?? null;
+    label = "TRAVEL COLLECTION";
+  } else {
+    return null;
+  }
+  const image = cover
+    ? `<span class="internal-link-card__media"><img src="${escapeHtml(mediaUrl(cover.asset.storageKey))}" alt="${escapeHtml(cover.usage.alt)}" loading="lazy" decoding="async"></span>`
+    : `<span class="internal-link-card__media internal-link-card__media--empty" aria-hidden="true"><span>TRAVEL<br>NOTE</span></span>`;
+  return `<aside class="internal-link-card" aria-label="関連コンテンツ"><a href="${escapeHtml(route.path)}">${image}<span class="internal-link-card__copy"><small>${label}</small><strong>${escapeHtml(title)}</strong><span>${escapeHtml(summary)}</span><b>詳しく見る <span aria-hidden="true">→</span></b></span></a></aside>`;
+};
+const withInternalLinkCards = (value: string) =>
+  value.replace(
+    /<(p|li)>\s*<a href="([^"]+)"(?:\s[^>]*)?>(.*?)<\/a>\s*<\/\1>/gi,
+    (match, _tag, href) => internalCard(href) ?? match,
+  );
 const withHeadingIds = (value: string) =>
   value.replace(/<h([23])>(.*?)<\/h\1>/gi, (_match, level, inner) => {
     const text = inner.replace(/<[^>]+>/g, "").trim();
     const id = `section-${++headingIndex}-${text.replace(/\s+/g, "-").slice(0, 48)}`;
     return `<h${level} id="${id}">${inner}</h${level}>`;
   });
-const segments = html === null ? null : withHeadingIds(enhanceBodyImages(html)).split(PLACEHOLDER);
+const segments =
+  html === null
+    ? null
+    : withInternalLinkCards(withHeadingIds(enhanceBodyImages(html))).split(PLACEHOLDER);
 
 const fallback = html === null ? await render(entry) : null;
 const FallbackContent = fallback?.Content;
@@ -38,7 +106,9 @@ const FallbackContent = fallback?.Content;
 <div class="prose article-content">
   {
     segments === null ? (
-      FallbackContent ? <FallbackContent /> : null
+      FallbackContent ? (
+        <FallbackContent />
+      ) : null
     ) : (
       segments.map((segment, index) =>
         index % 2 === 1 ? (

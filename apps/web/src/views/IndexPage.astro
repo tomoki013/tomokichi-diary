@@ -6,8 +6,7 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import { content } from "../lib/content";
 import Picture from "../components/Picture.astro";
-import { SIZES } from "../lib/images";
-import { seoConfig, siteDescription } from "../lib/site";
+import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
 import WorldMap from "../components/WorldMap.astro";
 import { SearchIcon } from "../components/TravelIcons";
 
@@ -80,11 +79,14 @@ const continents = content.locations
               path: hub.path,
               count: countryArticles.length,
               cover: countryArticles.find((view) => view.cover)?.cover ?? null,
-              cities: content.locations.descendants(country.id)
+              cities: content.locations
+                .descendants(country.id)
                 .filter((place) => place.type === "city")
                 .flatMap((place) => {
                   const cityRoute = content.routes.canonicalFor("location", place.id);
-                  return cityRoute ? [{ name: content.locations.nameOf(place.id, "ja"), path: cityRoute.path }] : [];
+                  return cityRoute
+                    ? [{ name: content.locations.nameOf(place.id, "ja"), path: cityRoute.path }]
+                    : [];
                 }),
             },
           ]
@@ -99,15 +101,39 @@ const collections = (kind: "series" | "journey") =>
     .flatMap((collection) => {
       const hub = content.routes.canonicalFor(kind, collection.id);
       const members = content.membersOf(collection.id);
-      const cover = content.snapshot.media.find((media) => media.id === collection.coverMediaId) ?? members.find((member) => member.cover)?.cover?.asset ?? null;
+      const cover =
+        content.snapshot.media.find((media) => media.id === collection.coverMediaId) ??
+        members.find((member) => member.cover)?.cover?.asset ??
+        null;
       return hub && members.length > 0
         ? [{ collection, path: hub.path, count: members.length, cover }]
         : [];
     });
 
-const galleryImages = articles
-  .flatMap((view) => view.media.filter((item) => item.usage.role !== "og"))
-  .slice(0, 60);
+const galleryImages = [
+  ...new Map(
+    articles.flatMap((view) =>
+      view.media
+        .filter((item) => item.usage.role !== "og" && item.asset?.storageKey)
+        .map((item) => {
+          const primary = view.locations[0]?.location;
+          const country = primary ? content.locations.countryOf(primary.id) : null;
+          return [
+            item.asset.storageKey,
+            {
+              ...item,
+              articleTitle: view.revision.title,
+              articlePath: view.route.path,
+              country: country ? content.locations.nameOf(country.id, "ja") : "旅の景色",
+            },
+          ] as const;
+        }),
+    ),
+  ).values(),
+];
+const galleryCountries = [...new Set(galleryImages.map((item) => item.country))]
+  .map((name) => ({ name, count: galleryImages.filter((item) => item.country === name).length }))
+  .toSorted((a, b) => b.count - a.count);
 
 const countryCount = continents.reduce((total, continent) => total + continent.countries.length, 0);
 const featuredStories = articles
@@ -140,17 +166,28 @@ const homeArticleLead = articles.find((view) => view.cover) ?? articles[0];
 const homeArticleSide = articles
   .filter((view) => view.article.id !== homeArticleLead?.article.id && view.cover)
   .slice(0, 4);
-const homeFeaturedIds = new Set([homeArticleLead?.article.id, ...homeArticleSide.map((view) => view.article.id)]);
+const homeFeaturedIds = new Set([
+  homeArticleLead?.article.id,
+  ...homeArticleSide.map((view) => view.article.id),
+]);
 const homeLatest = articles.filter((view) => !homeFeaturedIds.has(view.article.id)).slice(0, 8);
 const homeStoryLabel = (view: (typeof articles)[number]) => {
   const primary = view.locations[0]?.location;
-  return primary ? content.locations.nameOf(primary.id, "ja") : (view.categories[0]?.name ?? "旅行日記");
+  return primary
+    ? content.locations.nameOf(primary.id, "ja")
+    : (view.categories[0]?.name ?? "旅行日記");
 };
 
 const archiveFeatured = articles.find((view) => view.cover) ?? articles[0];
 const archiveArticles = articles.filter((view) => view.article.id !== archiveFeatured?.article.id);
-const archiveCategories = [...new Set(archiveArticles.flatMap((view) => view.categories.map((item) => item.name)))]
-  .map((name) => ({ name, count: archiveArticles.filter((view) => view.categories.some((item) => item.name === name)).length }))
+const archiveCategories = [
+  ...new Set(archiveArticles.flatMap((view) => view.categories.map((item) => item.name))),
+]
+  .map((name) => ({
+    name,
+    count: archiveArticles.filter((view) => view.categories.some((item) => item.name === name))
+      .length,
+  }))
   .toSorted((a, b) => b.count - a.count)
   .slice(0, 10);
 const archiveCountries = continents
@@ -158,16 +195,30 @@ const archiveCountries = continents
   .filter((country) => country.count > 0)
   .toSorted((a, b) => b.count - a.count);
 const archiveSearchText = (view: (typeof articles)[number]) => {
-  const locations = view.locations.map(({ location }) => content.locations.nameOf(location.id, "ja"));
-  return [view.revision.title, view.revision.summary, ...view.categories.map((item) => item.name), ...view.tags.map((item) => item.name), ...locations]
+  const locations = view.locations.map(({ location }) =>
+    content.locations.nameOf(location.id, "ja"),
+  );
+  return [
+    view.revision.title,
+    view.revision.summary,
+    ...view.categories.map((item) => item.name),
+    ...view.tags.map((item) => item.name),
+    ...locations,
+  ]
     .join(" ")
     .toLocaleLowerCase("ja");
 };
-const archiveCategoryText = (view: (typeof articles)[number]) => view.categories.map((item) => item.name.toLocaleLowerCase("ja")).join("|");
-const archiveCountryText = (view: (typeof articles)[number]) => [...new Set(view.locations.flatMap(({ location }) => {
-  const country = content.locations.countryOf(location.id);
-  return country ? [content.locations.nameOf(country.id, "ja").toLocaleLowerCase("ja")] : [];
-}))].join("|");
+const archiveCategoryText = (view: (typeof articles)[number]) =>
+  view.categories.map((item) => item.name.toLocaleLowerCase("ja")).join("|");
+const archiveCountryText = (view: (typeof articles)[number]) =>
+  [
+    ...new Set(
+      view.locations.flatMap(({ location }) => {
+        const country = content.locations.countryOf(location.id);
+        return country ? [content.locations.nameOf(country.id, "ja").toLocaleLowerCase("ja")] : [];
+      }),
+    ),
+  ].join("|");
 
 const sitemapGroups = [
   { label: "記事", routes: content.routes.renderable().filter((r) => r.targetType === "article") },
@@ -208,12 +259,16 @@ const labelOf = (target: Route): string => {
 >
   <Breadcrumbs trail={trail} />
   {
-    route.path !== "/" && route.path !== "/posts" && route.path !== "/collections" && route.path !== "/destination" && (
-      <header class="page-header">
-        <h1>{page.title}</h1>
-        <p>{page.description}</p>
-      </header>
-    )
+    route.path !== "/" &&
+      route.path !== "/posts" &&
+      route.path !== "/collections" &&
+      route.path !== "/destination" &&
+      route.path !== "/gallery" && (
+        <header class="page-header">
+          <h1>{page.title}</h1>
+          <p>{page.description}</p>
+        </header>
+      )
   }
 
   {
@@ -255,16 +310,16 @@ const labelOf = (target: Route): string => {
             </div>
             <div class="home-hero__shade" />
             <div class="home-hero__intro">
-              <p class="eyebrow">TOMOKICHI'S TRAVEL DIARY</p>
+              <p class="eyebrow">REAL JOURNEYS · HONEST NOTES</p>
               <h1 id="home-title">
-                次の冒険は、
+                まだ知らない景色へ、
                 <br />
-                どこへ？
+                心が動くほうへ。
               </h1>
               <p>
-                世界を旅した記憶と体験、
+                実際に歩いたから書ける旅の記憶と、
                 <br />
-                そして次の旅のインスピレーションを。
+                次の一歩に役立つ小さなヒントを。
               </p>
               <a class="button button--light" href="/posts">
                 旅の記録を読む <span aria-hidden="true">→</span>
@@ -292,22 +347,94 @@ const labelOf = (target: Route): string => {
           </section>
         )}
 
-        <section class="home-discovery" aria-label="旅行日記を探す">
-          <form action="/posts" method="get" role="search"><label class="sr-only" for="home-search">行き先・キーワードで検索</label><input id="home-search" name="q" type="search" placeholder="行き先・キーワードで検索" /><button type="submit" aria-label="検索"><SearchIcon /></button></form>
-          <div><span>Popular</span>{continents.flatMap((continent) => continent.countries).slice(0, 6).map((country) => <a href={country.path}>{country.name}</a>)}</div>
-          <a href="/destination">地図から探す&nbsp; →</a>
+        <section class="home-discovery" aria-labelledby="home-discovery-title">
+          <div class="home-discovery__intro">
+            <>
+              <p class="eyebrow">FIND YOUR NEXT TRIP</p>
+              <h2 id="home-discovery-title">次の旅を、ここから探す。</h2>
+              <p>国や街、空港、気になる体験からブログを検索できます。</p>
+            </>
+          </div>
+          <form action="/posts" method="get" role="search">
+            <>
+              <label class="sr-only" for="home-search">
+                行き先・キーワードで検索
+              </label>
+              <SearchIcon />
+              <input
+                id="home-search"
+                name="q"
+                type="search"
+                placeholder="例：バンコク、空港アクセス、夕陽"
+              />
+              <button type="submit">ブログを探す&nbsp; →</button>
+            </>
+          </form>
+          <div class="home-discovery__popular">
+            <span>Popular</span>
+            {continents
+              .flatMap((continent) => continent.countries)
+              .slice(0, 6)
+              .map((country) => (
+                <a href={country.path}>{country.name}</a>
+              ))}
+          </div>
+          <a class="home-discovery__map" href="/destination">
+            世界地図から探す&nbsp; →
+          </a>
         </section>
 
-        {homeArticleLead && homeArticleLead.cover && <section class="home-featured-stories" aria-labelledby="home-featured-heading">
-          <div class="section-heading"><div><p class="eyebrow">EDITOR'S SELECTION</p><h2 id="home-featured-heading">まず読んでほしい旅行日記</h2><p>景色の記憶と、次の旅で役立つ実体験を選びました。</p></div><a href="/posts">すべての記事&nbsp; →</a></div>
-          <div class="home-featured-stories__layout">
-            <a class="home-lead-story" href={homeArticleLead.route.path}>
-              <Picture storageKey={homeArticleLead.cover.asset.storageKey} alt={homeArticleLead.cover.usage.alt} sizes="(max-width: 760px) 100vw, 680px" loading="eager" />
-              <span class="home-lead-story__shade"></span><span class="home-lead-story__copy"><small>{homeStoryLabel(homeArticleLead)}</small><strong>{homeArticleLead.revision.title}</strong><span>{homeArticleLead.revision.summary}</span><b>この日記を読む&nbsp; →</b></span>
-            </a>
-            <div class="home-side-stories">{homeArticleSide.map((story, index) => <a href={story.route.path}>{story.cover && <Picture storageKey={story.cover.asset.storageKey} alt={story.cover.usage.alt} sizes="(max-width: 760px) 35vw, 180px" loading={index < 2 ? "eager" : "lazy"} />}<span><small>{homeStoryLabel(story)}　{story.article.publishedAt?.slice(0, 10).replaceAll("-", ".")}</small><strong>{story.revision.title}</strong><b>読む&nbsp; →</b></span></a>)}</div>
-          </div>
-        </section>}
+        {homeArticleLead && homeArticleLead.cover && (
+          <section class="home-featured-stories" aria-labelledby="home-featured-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">EDITOR'S SELECTION</p>
+                <h2 id="home-featured-heading">まず読んでほしい旅行日記</h2>
+                <p>景色の記憶と、次の旅で役立つ実体験を選びました。</p>
+              </div>
+              <a href="/posts">すべての記事&nbsp; →</a>
+            </div>
+            <div class="home-featured-stories__layout">
+              <a class="home-lead-story" href={homeArticleLead.route.path}>
+                <Picture
+                  storageKey={homeArticleLead.cover.asset.storageKey}
+                  alt={homeArticleLead.cover.usage.alt}
+                  sizes="(max-width: 760px) 100vw, 680px"
+                  loading="eager"
+                />
+                <span class="home-lead-story__shade" />
+                <span class="home-lead-story__copy">
+                  <small>{homeStoryLabel(homeArticleLead)}</small>
+                  <strong>{homeArticleLead.revision.title}</strong>
+                  <span>{homeArticleLead.revision.summary}</span>
+                  <b>この日記を読む&nbsp; →</b>
+                </span>
+              </a>
+              <div class="home-side-stories">
+                {homeArticleSide.map((story, index) => (
+                  <a href={story.route.path}>
+                    {story.cover && (
+                      <Picture
+                        storageKey={story.cover.asset.storageKey}
+                        alt={story.cover.usage.alt}
+                        sizes="(max-width: 760px) 35vw, 180px"
+                        loading={index < 2 ? "eager" : "lazy"}
+                      />
+                    )}
+                    <span>
+                      <small>
+                        {homeStoryLabel(story)}　
+                        {story.article.publishedAt?.slice(0, 10).replaceAll("-", ".")}
+                      </small>
+                      <strong>{story.revision.title}</strong>
+                      <b>読む&nbsp; →</b>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section class="home-section" aria-labelledby="latest-heading">
           <div class="section-heading">
@@ -369,13 +496,101 @@ const labelOf = (target: Route): string => {
         </section>
 
         <section class="home-journeys" aria-labelledby="home-journeys-heading">
-          <div class="section-heading"><div><p class="eyebrow">JOURNEY COLLECTIONS</p><h2 id="home-journeys-heading">ひとつの旅を、順番にたどる</h2><p>出発から帰るまで。旅の流れに沿って読める旅行日記です。</p></div><a href="/collections">旅のまとまりを見る&nbsp; →</a></div>
-          <div>{collections("journey").slice(0, 3).map((entry, index) => <a href={entry.path}>{entry.cover && <Picture storageKey={entry.cover.storageKey} alt={entry.collection.title} sizes="(max-width: 760px) 88vw, 380px" loading={index === 0 ? "eager" : "lazy"} />}<span class="home-journey-card__shade"></span><span class="home-journey-card__copy"><small>{entry.collection.startDate?.replaceAll("-", ".") ?? "旅の記録"}</small><strong>{entry.collection.title}</strong><span>{entry.collection.description}</span><b>{entry.count}本を順番に読む&nbsp; →</b></span></a>)}</div>
+          <div class="section-heading">
+            <>
+              <div>
+                <>
+                  <p class="eyebrow">JOURNEY COLLECTIONS</p>
+                  <h2 id="home-journeys-heading">ひとつの旅を、順番にたどる</h2>
+                  <p>出発から帰るまで。旅の流れに沿って読める旅行日記です。</p>
+                </>
+              </div>
+              <a href="/collections">旅のまとまりを見る&nbsp; →</a>
+            </>
+          </div>
+          <div>
+            {collections("journey")
+              .slice(0, 3)
+              .map((entry, index) => (
+                <a href={entry.path}>
+                  {entry.cover && (
+                    <Picture
+                      storageKey={entry.cover.storageKey}
+                      alt={entry.collection.title}
+                      sizes="(max-width: 760px) 88vw, 380px"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  )}
+                  <span class="home-journey-card__shade" />
+                  <span class="home-journey-card__copy">
+                    <small>{entry.collection.startDate?.replaceAll("-", ".") ?? "旅の記録"}</small>
+                    <strong>{entry.collection.title}</strong>
+                    <span>{entry.collection.description}</span>
+                    <b>{entry.count}本を順番に読む&nbsp; →</b>
+                  </span>
+                </a>
+              ))}
+          </div>
         </section>
 
         <section class="home-closing" aria-label="テーマとこのブログについて">
-          <div class="home-themes"><div class="section-heading"><div><p class="eyebrow">TRAVEL THEMES</p><h2>好きな景色から読む</h2></div><a href="/collections">すべて見る&nbsp; →</a></div><div>{collections("series").slice(0, 3).map((entry) => <a href={entry.path}>{entry.cover && <Picture storageKey={entry.cover.storageKey} alt={entry.collection.title} sizes="(max-width: 760px) 45vw, 220px" />}<span><strong>{entry.collection.title}</strong><small>{entry.count}本の記録</small></span></a>)}</div></div>
-          <aside class="home-author-card" aria-labelledby="home-about-heading"><Picture storageKey="images/Introduce/introduce.jpg" alt="旅先に立つともきち" sizes="(max-width: 760px) 100vw, 360px" /><div><p class="eyebrow">ABOUT THIS DIARY</p><h2 id="home-about-heading">はじめまして、<br />ともきちです。</h2><p>旅先で本当に役立ったこと、思いがけず心に残った景色を、自分の言葉と写真で記録しています。</p><a href="/about">このブログについて&nbsp; →</a></div></aside>
+          <div class="home-themes">
+            <>
+              <div class="section-heading">
+                <>
+                  <div>
+                    <>
+                      <p class="eyebrow">TRAVEL THEMES</p>
+                      <h2>好きな景色から読む</h2>
+                    </>
+                  </div>
+                  <a href="/collections">すべて見る&nbsp; →</a>
+                </>
+              </div>
+              <div>
+                {collections("series")
+                  .slice(0, 3)
+                  .map((entry) => (
+                    <a href={entry.path}>
+                      {entry.cover && (
+                        <Picture
+                          storageKey={entry.cover.storageKey}
+                          alt={entry.collection.title}
+                          sizes="(max-width: 760px) 45vw, 220px"
+                        />
+                      )}
+                      <span>
+                        <strong>{entry.collection.title}</strong>
+                        <small>{entry.count}本の記録</small>
+                      </span>
+                    </a>
+                  ))}
+              </div>
+            </>
+          </div>
+          <aside class="home-author-card" aria-labelledby="home-about-heading">
+            <>
+              <Picture
+                storageKey="images/Introduce/introduce.jpg"
+                alt="旅先に立つともきち"
+                sizes="(max-width: 760px) 100vw, 360px"
+              />
+              <div>
+                <>
+                  <p class="eyebrow">ABOUT THIS DIARY</p>
+                  <h2 id="home-about-heading">
+                    はじめまして、
+                    <br />
+                    ともきちです。
+                  </h2>
+                  <p>
+                    旅先で本当に役立ったこと、思いがけず心に残った景色を、自分の言葉と写真で記録しています。
+                  </p>
+                  <a href="/about">このブログについて&nbsp; →</a>
+                </>
+              </div>
+            </>
+          </aside>
         </section>
       </div>
     )
@@ -387,13 +602,57 @@ const labelOf = (target: Route): string => {
         <header class="posts-archive__masthead">
           <div>
             <p class="eyebrow">TRAVEL BLOG FOR YOUR NEXT JOURNEY</p>
-            <h1>次の旅が、<br />ここから動き出す。</h1>
+            <h1>
+              次の旅が、
+              <br />
+              ここから動き出す。
+            </h1>
           </div>
           <div class="posts-archive__lead">
-            <p>実際に歩いて、迷って、心が動いた旅の記録。行き先を決める前から、旅はもう始まっています。</p>
-            <span><strong>{articles.length}</strong> posts</span>
+            <p>
+              実際に歩いて、迷って、心が動いた旅の記録。行き先を決める前から、旅はもう始まっています。
+            </p>
+            <span>
+              <strong>{articles.length}</strong> posts
+            </span>
           </div>
         </header>
+
+        <nav class="posts-archive__routes" aria-label="ブログの探し方">
+          <a href="#all-stories-heading">
+            <>
+              <small>01</small>
+              <span>
+                <>
+                  <strong>すべてのブログ</strong>
+                  <b>検索・絞り込み</b>
+                </>
+              </span>
+            </>
+          </a>
+          <a href="/destination">
+            <>
+              <small>02</small>
+              <span>
+                <>
+                  <strong>旅先から探す</strong>
+                  <b>国と都市の一覧</b>
+                </>
+              </span>
+            </>
+          </a>
+          <a href="/collections">
+            <>
+              <small>03</small>
+              <span>
+                <>
+                  <strong>まとまりで読む</strong>
+                  <b>旅程とテーマ</b>
+                </>
+              </span>
+            </>
+          </a>
+        </nav>
 
         {archiveFeatured && archiveFeatured.cover && (
           <a class="posts-feature" href={archiveFeatured.route.path}>
@@ -404,46 +663,106 @@ const labelOf = (target: Route): string => {
               loading="eager"
               fetchpriority="high"
             />
-            <span class="posts-feature__shade"></span>
+            <span class="posts-feature__shade" />
             <span class="posts-feature__copy">
               <small>FEATURED JOURNEY</small>
               <strong>{archiveFeatured.revision.title}</strong>
               <span>{archiveFeatured.revision.summary}</span>
-              <b>この旅を読む <span aria-hidden="true">→</span></b>
+              <b>
+                この旅を読む <span aria-hidden="true">→</span>
+              </b>
             </span>
           </a>
         )}
 
         <section class="posts-discovery" aria-labelledby="all-stories-heading">
           <div class="posts-discovery__heading">
-            <div><p class="eyebrow">EXPLORE THE BLOG</p><h2 id="all-stories-heading">旅のブログを探す</h2></div>
-            <p><span data-archive-count>{archiveArticles.length}</span>件の旅</p>
+            <div>
+              <>
+                <p class="eyebrow">EXPLORE THE BLOG</p>
+                <h2 id="all-stories-heading">旅のブログを探す</h2>
+              </>
+            </div>
+            <p>
+              <span data-archive-count>{archiveArticles.length}</span>件の旅
+            </p>
           </div>
           <div class="posts-filter">
             <div class="posts-filter__primary">
               <label class="posts-filter__search">
                 <SearchIcon />
                 <span class="sr-only">記事を検索</span>
-                <input type="search" placeholder="国・都市・空港・気になる体験から探す" data-archive-search />
+                <input
+                  type="search"
+                  placeholder="国・都市・空港・気になる体験から探す"
+                  data-archive-search
+                />
               </label>
               <div class="posts-filter__selects">
-                <label><span>旅先</span><select data-archive-country><option value="all">すべての国</option>{archiveCountries.map((country) => <option value={country.name.toLocaleLowerCase("ja")}>{country.name}（{country.count}）</option>)}</select></label>
-                <label><span>並び順</span><select data-archive-sort><option value="newest">新しい順</option><option value="oldest">古い順</option><option value="title">タイトル順</option></select></label>
+                <label>
+                  <>
+                    <span>旅先</span>
+                    <select data-archive-country>
+                      <option value="all">すべての国</option>
+                      {archiveCountries.map((country) => (
+                        <option value={country.name.toLocaleLowerCase("ja")}>
+                          {country.name}（{country.count}）
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                </label>
+                <label>
+                  <>
+                    <span>並び順</span>
+                    <select data-archive-sort>
+                      <>
+                        <option value="newest">新しい順</option>
+                        <option value="oldest">古い順</option>
+                        <option value="title">タイトル順</option>
+                      </>
+                    </select>
+                  </>
+                </label>
               </div>
             </div>
             <div class="posts-filter__chips" aria-label="カテゴリで絞り込む">
-              <button class="is-active" type="button" data-archive-filter="all">すべて</button>
-              {archiveCategories.map((category) => <button type="button" data-archive-filter={category.name.toLocaleLowerCase("ja")}>{category.name}<small>{category.count}</small></button>)}
+              <button class="is-active" type="button" data-archive-filter="all">
+                すべて
+              </button>
+              {archiveCategories.map((category) => (
+                <button type="button" data-archive-filter={category.name.toLocaleLowerCase("ja")}>
+                  {category.name}
+                  <small>{category.count}</small>
+                </button>
+              ))}
             </div>
-            <div class="posts-filter__footer"><p data-archive-summary>すべての記事を表示中</p><button type="button" data-archive-reset>条件をリセット</button></div>
+            <div class="posts-filter__footer">
+              <>
+                <p data-archive-summary>すべての記事を表示中</p>
+                <button type="button" data-archive-reset>
+                  条件をリセット
+                </button>
+              </>
+            </div>
           </div>
           <ul class="card-grid posts-grid" data-article-list>
             {archiveArticles.map((view, index) => (
-              <ArticleCard view={view} eager={index < 3} level={3} variant="archive" searchText={archiveSearchText(view)} categoryText={archiveCategoryText(view)} countryText={archiveCountryText(view)} />
+              <ArticleCard
+                view={view}
+                eager={index < 3}
+                level={3}
+                variant="archive"
+                searchText={archiveSearchText(view)}
+                categoryText={archiveCategoryText(view)}
+                countryText={archiveCountryText(view)}
+              />
             ))}
           </ul>
-          <p class="posts-empty" data-archive-empty hidden>まだ記録のない旅先です。別の条件でも探してみてください。</p>
-          <nav class="posts-pagination" data-archive-pagination aria-label="記事一覧のページ"></nav>
+          <p class="posts-empty" data-archive-empty hidden>
+            まだ記録のない旅先です。別の条件でも探してみてください。
+          </p>
+          <nav class="posts-pagination" data-archive-pagination aria-label="記事一覧のページ" />
         </section>
       </div>
     )
@@ -455,44 +774,163 @@ const labelOf = (target: Route): string => {
         <header class="destination-masthead">
           <div class="destination-masthead__copy">
             <p>旅先からブログを読む</p>
-            <h1>心が向いた場所から、<br />次の旅を始めよう。</h1>
-            <p>地図を眺める。国を選ぶ。街の記録を読む。まだ行き先が決まっていない時間も、旅の一部です。</p>
-            <dl><div><dt>訪れた国</dt><dd>{countryCount}<small>か国</small></dd></div><div><dt>旅の記録</dt><dd>{articles.length}<small>本</small></dd></div><div><dt>地域</dt><dd>{continents.length}<small>エリア</small></dd></div></dl>
+            <h1>
+              心が向いた場所から、
+              <br />
+              次の旅を始めよう。
+            </h1>
+            <p>
+              地図を眺める。国を選ぶ。街の記録を読む。まだ行き先が決まっていない時間も、旅の一部です。
+            </p>
+            <dl>
+              <>
+                <div>
+                  <>
+                    <dt>訪れた国</dt>
+                    <dd>
+                      {countryCount}
+                      <small>か国</small>
+                    </dd>
+                  </>
+                </div>
+                <div>
+                  <>
+                    <dt>旅の記録</dt>
+                    <dd>
+                      {articles.length}
+                      <small>本</small>
+                    </dd>
+                  </>
+                </div>
+                <div>
+                  <>
+                    <dt>地域</dt>
+                    <dd>
+                      {continents.length}
+                      <small>エリア</small>
+                    </dd>
+                  </>
+                </div>
+              </>
+            </dl>
           </div>
           <div class="destination-masthead__mosaic" aria-hidden="true">
-            {popularDestinations.slice(0, 3).map((country, index) => country.cover && <Picture storageKey={country.cover.asset.storageKey} alt="" sizes="(max-width: 760px) 50vw, 280px" loading={index === 0 ? "eager" : "lazy"} />)}
-            <span>Where<br />to next?</span>
+            {popularDestinations
+              .slice(0, 3)
+              .map(
+                (country, index) =>
+                  country.cover && (
+                    <Picture
+                      storageKey={country.cover.asset.storageKey}
+                      alt=""
+                      sizes="(max-width: 760px) 50vw, 280px"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  ),
+              )}
+            <span>
+              Where
+              <br />
+              to next?
+            </span>
           </div>
         </header>
 
         <section class="destination-map-section" aria-labelledby="destination-map-heading">
-          <div class="destination-section-heading"><div><small>地図から選ぶ</small><h2 id="destination-map-heading">世界を眺めて、気になる国へ</h2></div><p>オレンジのピンを選ぶと、その国のブログへ移動します。</p></div>
+          <div class="destination-section-heading">
+            <>
+              <div>
+                <>
+                  <small>地図から選ぶ</small>
+                  <h2 id="destination-map-heading">世界を眺めて、気になる国へ</h2>
+                </>
+              </div>
+              <p>オレンジのピンを選ぶと、その国のブログへ移動します。</p>
+            </>
+          </div>
           <WorldMap countries={continents.flatMap((continent) => continent.countries)} />
         </section>
 
         <section class="destination-directory" aria-labelledby="destination-directory-heading">
-          <div class="destination-section-heading"><div><small>国・都市から選ぶ</small><h2 id="destination-directory-heading">訪れた場所のすべて</h2></div><p><span data-destination-count>{countryCount}</span>か国を掲載しています。</p></div>
-          <label class="destination-search"><SearchIcon /><span class="sr-only">国または都市を検索</span><input type="search" placeholder="国・都市名で絞り込む" data-destination-search /></label>
-          <nav class="destination-tabs" aria-label="大陸で絞り込む"><button class="is-active" type="button" data-destination-filter="all">すべて</button>{continents.map((continent) => <button type="button" data-destination-filter={continent.name}>{continent.name}</button>)}</nav>
+          <div class="destination-section-heading">
+            <>
+              <div>
+                <>
+                  <small>国・都市から選ぶ</small>
+                  <h2 id="destination-directory-heading">訪れた場所のすべて</h2>
+                </>
+              </div>
+              <p>
+                <span data-destination-count>{countryCount}</span>か国を掲載しています。
+              </p>
+            </>
+          </div>
+          <label class="destination-search">
+            <>
+              <SearchIcon />
+              <span class="sr-only">国または都市を検索</span>
+              <input type="search" placeholder="国・都市名で絞り込む" data-destination-search />
+            </>
+          </label>
+          <nav class="destination-tabs" aria-label="大陸で絞り込む">
+            <button class="is-active" type="button" data-destination-filter="all">
+              すべて
+            </button>
+            {continents.map((continent) => (
+              <button type="button" data-destination-filter={continent.name}>
+                {continent.name}
+              </button>
+            ))}
+          </nav>
           <div class="destination-continents">
             {continents.map((continent) => (
               <section class="destination-continent" data-continent={continent.name}>
-                <header><h3>{continent.name}</h3><span>{continent.countries.length}か国</span></header>
+                <header>
+                  <h3>{continent.name}</h3>
+                  <span>{continent.countries.length}か国</span>
+                </header>
                 <div class="destination-country-grid">
                   {continent.countries.map((country, index) => (
-                    <a class="destination-country" href={country.path} data-destination-country data-search={`${country.name} ${country.cities.map((city) => city.name).join(" ")}`.toLocaleLowerCase("ja")}>
+                    <a
+                      class="destination-country"
+                      href={country.path}
+                      data-destination-country
+                      data-search={`${country.name} ${country.cities.map((city) => city.name).join(" ")}`.toLocaleLowerCase(
+                        "ja",
+                      )}
+                    >
                       <span class="destination-country__media">
-                        {country.cover ? <Picture storageKey={country.cover.asset.storageKey} alt={`${country.name}の旅`} sizes="(max-width: 760px) 50vw, 280px" loading={index < 4 ? "eager" : "lazy"} /> : <span class="destination-country__placeholder"></span>}
+                        {country.cover ? (
+                          <Picture
+                            storageKey={country.cover.asset.storageKey}
+                            alt={`${country.name}の旅`}
+                            sizes="(max-width: 760px) 50vw, 280px"
+                            loading={index < 4 ? "eager" : "lazy"}
+                          />
+                        ) : (
+                          <span class="destination-country__placeholder" />
+                        )}
                         <b>{country.name}</b>
                       </span>
-                      <span class="destination-country__body"><span>{country.count}本のブログ</span><small>{country.cities.slice(0, 3).map((city) => city.name).join("、") || "旅の記録を見る"}</small><i>詳しく見る&nbsp; →</i></span>
+                      <span class="destination-country__body">
+                        <span>{country.count}本のブログ</span>
+                        <small>
+                          {country.cities
+                            .slice(0, 3)
+                            .map((city) => city.name)
+                            .join("、") || "旅の記録を見る"}
+                        </small>
+                        <i>詳しく見る&nbsp; →</i>
+                      </span>
                     </a>
                   ))}
                 </div>
               </section>
             ))}
           </div>
-          <p class="destination-empty" data-destination-empty hidden>一致する旅先はまだありません。別の名前でも探してみてください。</p>
+          <p class="destination-empty" data-destination-empty hidden>
+            一致する旅先はまだありません。別の名前でも探してみてください。
+          </p>
         </section>
       </div>
     )
@@ -502,20 +940,101 @@ const labelOf = (target: Route): string => {
     route.path === "/collections" && (
       <div class="collections-page">
         <header class="collections-hero">
-          <p>旅のまとまりから読む</p>
-          <h1>一つの旅を、<br />最初から最後まで。</h1>
-          <div><span>{collections("journey").length}の旅程</span><span>{collections("series").length}のテーマ</span><span>{articles.length}本のブログ</span></div>
+          <div class="collections-hero__copy">
+            <>
+              <p>CURATED TRAVEL STORIES</p>
+              <h1>
+                旅の記憶を、
+                <br />
+                ひとつの物語として。
+              </h1>
+              <span>
+                時系列でたどる旅程と、心に残った景色を集めたテーマ。気分に合う入口から、ブログを続けて読めます。
+              </span>
+              <div>
+                <>
+                  <b>
+                    {collections("journey").length}
+                    <small>旅程</small>
+                  </b>
+                  <b>
+                    {collections("series").length}
+                    <small>テーマ</small>
+                  </b>
+                  <b>
+                    {articles.length}
+                    <small>ブログ</small>
+                  </b>
+                </>
+              </div>
+            </>
+          </div>
+          <div class="collections-hero__visual" aria-hidden="true">
+            {collections("journey")
+              .slice(0, 3)
+              .map(
+                (entry, index) =>
+                  entry.cover && (
+                    <Picture
+                      storageKey={entry.cover.storageKey}
+                      alt={entry.collection.title}
+                      sizes="(max-width: 760px) 40vw, 260px"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  ),
+              )}
+            <span>
+              Stories
+              <br />
+              worth keeping.
+            </span>
+          </div>
         </header>
 
-        <section class="collections-group collections-group--journey" aria-labelledby="journey-collections-heading">
-          <div class="collections-group__heading"><div><small>旅程コレクション</small><h2 id="journey-collections-heading">旅を順番にたどる</h2></div><p>出発から帰着まで、時系列でまとまった旅の記録です。</p></div>
+        <nav class="collections-jump" aria-label="コレクション内メニュー">
+          <>
+            <a href="#journey-collections-heading">
+              旅程から読む <span>→</span>
+            </a>
+            <a href="#series-collections-heading">
+              テーマから読む <span>→</span>
+            </a>
+          </>
+        </nav>
+
+        <section
+          class="collections-group collections-group--journey"
+          aria-labelledby="journey-collections-heading"
+        >
+          <div class="collections-group__heading">
+            <>
+              <div>
+                <>
+                  <small>旅程コレクション</small>
+                  <h2 id="journey-collections-heading">旅を順番にたどる</h2>
+                </>
+              </div>
+              <p>出発から帰着まで、時系列でまとまった旅の記録です。</p>
+            </>
+          </div>
           <div class="journey-collection-grid">
             {collections("journey").map((entry, index) => (
               <a class="journey-collection-card" href={entry.path}>
-                {entry.cover && <Picture storageKey={entry.cover.storageKey} alt={entry.collection.title} sizes="(max-width: 760px) 100vw, 520px" loading={index < 2 ? "eager" : "lazy"} />}
-                <span class="journey-collection-card__shade"></span>
+                {entry.cover && (
+                  <Picture
+                    storageKey={entry.cover.storageKey}
+                    alt={entry.collection.title}
+                    sizes="(max-width: 760px) 100vw, 520px"
+                    loading={index < 2 ? "eager" : "lazy"}
+                  />
+                )}
+                <span class="journey-collection-card__shade" />
                 <span class="journey-collection-card__copy">
-                  <small>{entry.collection.startDate ? `${entry.collection.startDate.replaceAll("-", ".")} — ${entry.collection.endDate?.replaceAll("-", ".") ?? ""}` : "旅の記録"}</small>
+                  <small>
+                    {entry.collection.startDate
+                      ? `${entry.collection.startDate.replaceAll("-", ".")} — ${entry.collection.endDate?.replaceAll("-", ".") ?? ""}`
+                      : "旅の記録"}
+                  </small>
                   <strong>{entry.collection.title}</strong>
                   <span>{entry.collection.description}</span>
                   <b>{entry.count}本の記事</b>
@@ -526,12 +1045,37 @@ const labelOf = (target: Route): string => {
         </section>
 
         <section class="collections-group" aria-labelledby="series-collections-heading">
-          <div class="collections-group__heading"><div><small>テーマコレクション</small><h2 id="series-collections-heading">好きな景色から読む</h2></div><p>夕陽、建築、街並み。心が動いた瞬間をテーマ別に集めました。</p></div>
+          <div class="collections-group__heading">
+            <>
+              <div>
+                <>
+                  <small>テーマコレクション</small>
+                  <h2 id="series-collections-heading">好きな景色から読む</h2>
+                </>
+              </div>
+              <p>夕陽、建築、街並み。心が動いた瞬間をテーマ別に集めました。</p>
+            </>
+          </div>
           <div class="series-collection-grid">
             {collections("series").map((entry, index) => (
               <a class="series-collection-card" href={entry.path}>
-                {entry.cover && <Picture storageKey={entry.cover.storageKey} alt={entry.collection.title} sizes="(max-width: 760px) 50vw, 320px" loading={index < 3 ? "eager" : "lazy"} />}
-                <span><small>{String(index + 1).padStart(2, "0")} / {String(collections("series").length).padStart(2, "0")}</small><strong>{entry.collection.title}</strong><span>{entry.collection.description}</span><b>{entry.count}本</b></span>
+                {entry.cover && (
+                  <Picture
+                    storageKey={entry.cover.storageKey}
+                    alt={entry.collection.title}
+                    sizes="(max-width: 760px) 50vw, 320px"
+                    loading={index < 3 ? "eager" : "lazy"}
+                  />
+                )}
+                <span>
+                  <small>
+                    {String(index + 1).padStart(2, "0")} /{" "}
+                    {String(collections("series").length).padStart(2, "0")}
+                  </small>
+                  <strong>{entry.collection.title}</strong>
+                  <span>{entry.collection.description}</span>
+                  <b>{entry.count}本</b>
+                </span>
               </a>
             ))}
           </div>
@@ -542,18 +1086,124 @@ const labelOf = (target: Route): string => {
 
   {
     route.path === "/gallery" && (
-      <ul class="gallery">
-        {galleryImages.map((item, index) => (
-          <li>
-            <Picture
-              storageKey={item.asset.storageKey}
-              alt={item.usage.alt}
-              sizes={SIZES.gallery}
-              loading={index < 8 ? "eager" : "lazy"}
+      <div class="gallery-page">
+        <header class="gallery-hero">
+          <div>
+            <>
+              <p class="eyebrow">PHOTO JOURNAL</p>
+              <h1>
+                旅の途中で、
+                <br />
+                心が止まった瞬間。
+              </h1>
+              <p>
+                街の光、建築の輪郭、食卓の色。記事に残した写真を、ここでは言葉より少し自由に眺められます。
+              </p>
+              <span>
+                <strong>{galleryImages.length}</strong> photographs
+              </span>
+            </>
+          </div>
+          <div class="gallery-hero__mosaic" aria-hidden="true">
+            {galleryImages.slice(0, 3).map((item, index) => (
+              <Picture
+                storageKey={item.asset.storageKey}
+                alt={item.usage.alt || item.articleTitle}
+                sizes="(max-width: 760px) 50vw, 300px"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            ))}
+          </div>
+        </header>
+
+        <section class="gallery-browser" aria-labelledby="gallery-all-heading">
+          <header>
+            <>
+              <div>
+                <>
+                  <p class="eyebrow">ALL PHOTOGRAPHS</p>
+                  <h2 id="gallery-all-heading">すべての旅の写真</h2>
+                </>
+              </div>
+              <p>
+                <span data-gallery-count>{galleryImages.length}</span>枚を表示中
+              </p>
+            </>
+          </header>
+          <div class="gallery-filters" aria-label="国で絞り込む">
+            <button class="is-active" type="button" data-gallery-filter="all">
+              すべて <small>{galleryImages.length}</small>
+            </button>
+            {galleryCountries.map((country) => (
+              <button type="button" data-gallery-filter={country.name}>
+                {country.name} <small>{country.count}</small>
+              </button>
+            ))}
+          </div>
+          <ul class="gallery-wall" data-gallery-wall>
+            {galleryImages.map((item, index) => (
+              <li
+                data-gallery-item
+                data-country={item.country}
+                data-search={`${item.country} ${item.articleTitle} ${item.usage.alt}`.toLocaleLowerCase(
+                  "ja",
+                )}
+              >
+                <button
+                  type="button"
+                  data-gallery-open
+                  data-src={mediaUrl(item.asset.storageKey)}
+                  data-alt={item.usage.alt}
+                  data-title={item.articleTitle}
+                  data-path={item.articlePath}
+                >
+                  <Picture
+                    storageKey={item.asset.storageKey}
+                    alt={item.usage.alt}
+                    sizes="(max-width: 760px) 50vw, 360px"
+                    loading={index < 8 ? "eager" : "lazy"}
+                  />
+                  <span>
+                    <small>{item.country}</small>
+                    <strong>{item.usage.alt || item.articleTitle}</strong>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p class="gallery-empty" data-gallery-empty hidden>
+            この地域の写真はまだありません。
+          </p>
+        </section>
+
+        <div class="gallery-lightbox" data-gallery-lightbox hidden>
+          <>
+            <button
+              class="gallery-lightbox__backdrop"
+              type="button"
+              data-gallery-close
+              aria-label="写真を閉じる"
             />
-          </li>
-        ))}
-      </ul>
+            <figure role="dialog" aria-modal="true" aria-label="写真の拡大表示">
+              <>
+                <button type="button" data-gallery-close aria-label="写真を閉じる">
+                  ×
+                </button>
+                <img data-gallery-lightbox-image src="" alt="" />
+                <figcaption>
+                  <>
+                    <small data-gallery-lightbox-country>PHOTO JOURNAL</small>
+                    <strong data-gallery-lightbox-title />
+                    <a data-gallery-lightbox-link href="/posts">
+                      この写真の記事を読む&nbsp; →
+                    </a>
+                  </>
+                </figcaption>
+              </>
+            </figure>
+          </>
+        </div>
+      </div>
     )
   }
 
@@ -574,11 +1224,6 @@ const labelOf = (target: Route): string => {
   }
   <script>
     const query = new URLSearchParams(location.search).get("q")?.trim().toLocaleLowerCase("ja");
-    if (query) {
-      document.querySelectorAll<HTMLElement>("[data-article-list] > li").forEach((card) => {
-        card.hidden = !card.textContent?.toLocaleLowerCase("ja").includes(query);
-      });
-    }
 
     const carousel = document.querySelector<HTMLElement>("[data-hero-carousel]");
     if (carousel) {
@@ -632,8 +1277,12 @@ const labelOf = (target: Route): string => {
     }
 
     const archiveSearch = document.querySelector<HTMLInputElement>("[data-archive-search]");
-    const archiveFilters = [...document.querySelectorAll<HTMLButtonElement>("[data-archive-filter]")];
-    const archiveCards = [...document.querySelectorAll<HTMLElement>("[data-article-list] > [data-search]")];
+    const archiveFilters = [
+      ...document.querySelectorAll<HTMLButtonElement>("[data-archive-filter]"),
+    ];
+    const archiveCards = [
+      ...document.querySelectorAll<HTMLElement>("[data-article-list] > [data-search]"),
+    ];
     const archiveGrid = document.querySelector<HTMLElement>("[data-article-list]");
     const archiveCountry = document.querySelector<HTMLSelectElement>("[data-archive-country]");
     const archiveSort = document.querySelector<HTMLSelectElement>("[data-archive-sort]");
@@ -661,7 +1310,9 @@ const labelOf = (target: Route): string => {
         button.addEventListener("click", () => {
           archivePage = page;
           updateArchive(false);
-          document.querySelector(".posts-discovery")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document
+            .querySelector(".posts-discovery")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
         archivePagination.append(button);
       };
@@ -669,7 +1320,9 @@ const labelOf = (target: Route): string => {
       for (let page = 1; page <= pages; page += 1) {
         if (pages > 7 && page > 2 && page < pages - 1 && Math.abs(page - archivePage) > 1) {
           if (page === 3 || page === pages - 2) {
-            const separator = document.createElement("span"); separator.textContent = "…"; archivePagination.append(separator);
+            const separator = document.createElement("span");
+            separator.textContent = "…";
+            archivePagination.append(separator);
           }
           continue;
         }
@@ -685,50 +1338,77 @@ const labelOf = (target: Route): string => {
         const haystack = card.dataset.search ?? "";
         const categories = (card.dataset.category ?? "").split("|");
         const countries = (card.dataset.country ?? "").split("|");
-        const matches = (!archiveQuery || haystack.includes(archiveQuery)) && (activeArchiveFilter === "all" || categories.includes(activeArchiveFilter)) && (!archiveCountry || archiveCountry.value === "all" || countries.includes(archiveCountry.value));
+        const matches =
+          (!archiveQuery || haystack.includes(archiveQuery)) &&
+          (activeArchiveFilter === "all" || categories.includes(activeArchiveFilter)) &&
+          (!archiveCountry ||
+            archiveCountry.value === "all" ||
+            countries.includes(archiveCountry.value));
         if (matches) visible += 1;
         return matches;
       });
       const sorted = archiveCards.toSorted((a, b) => {
-        if (archiveSort?.value === "oldest") return (a.dataset.published ?? "").localeCompare(b.dataset.published ?? "");
-        if (archiveSort?.value === "title") return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "", "ja");
+        if (archiveSort?.value === "oldest")
+          return (a.dataset.published ?? "").localeCompare(b.dataset.published ?? "");
+        if (archiveSort?.value === "title")
+          return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "", "ja");
         return (b.dataset.published ?? "").localeCompare(a.dataset.published ?? "");
       });
       if (archiveGrid) archiveGrid.append(...sorted);
-      archiveCards.forEach((card) => { card.hidden = true; });
+      archiveCards.forEach((card) => {
+        card.hidden = true;
+      });
       const matchedSet = new Set(matchedCards);
       const sortedMatches = sorted.filter((card) => matchedSet.has(card));
-      sortedMatches.slice((archivePage - 1) * archivePageSize, archivePage * archivePageSize).forEach((card) => { card.hidden = false; });
+      sortedMatches
+        .slice((archivePage - 1) * archivePageSize, archivePage * archivePageSize)
+        .forEach((card) => {
+          card.hidden = false;
+        });
       renderPagination(visible);
       if (archiveCount) archiveCount.textContent = String(visible);
       if (archiveEmpty) archiveEmpty.hidden = visible !== 0;
       if (archiveSummary) {
-        const conditions = [archiveQuery && `「${archiveQuery}」`, activeArchiveFilter !== "all" && activeArchiveFilter, archiveCountry?.value !== "all" && archiveCountry?.selectedOptions[0]?.text.replace(/（.*）/, "")].filter(Boolean);
-        archiveSummary.textContent = conditions.length > 0 ? `${conditions.join("・")}で絞り込み中` : "すべての記事を表示中";
+        const conditions = [
+          archiveQuery && `「${archiveQuery}」`,
+          activeArchiveFilter !== "all" && activeArchiveFilter,
+          archiveCountry?.value !== "all" &&
+            archiveCountry?.selectedOptions[0]?.text.replace(/（.*）/, ""),
+        ].filter(Boolean);
+        archiveSummary.textContent =
+          conditions.length > 0 ? `${conditions.join("・")}で絞り込み中` : "すべての記事を表示中";
       }
     };
     if (archiveSearch && query) archiveSearch.value = query;
     archiveSearch?.addEventListener("input", () => updateArchive());
     archiveCountry?.addEventListener("change", () => updateArchive());
     archiveSort?.addEventListener("change", () => updateArchive());
-    archiveFilters.forEach((button) => button.addEventListener("click", () => {
-      activeArchiveFilter = button.dataset.archiveFilter ?? "all";
-      archiveFilters.forEach((item) => item.classList.toggle("is-active", item === button));
-      updateArchive();
-    }));
+    archiveFilters.forEach((button) =>
+      button.addEventListener("click", () => {
+        activeArchiveFilter = button.dataset.archiveFilter ?? "all";
+        archiveFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+        updateArchive();
+      }),
+    );
     archiveReset?.addEventListener("click", () => {
       if (archiveSearch) archiveSearch.value = "";
       if (archiveCountry) archiveCountry.value = "all";
       if (archiveSort) archiveSort.value = "newest";
       activeArchiveFilter = "all";
-      archiveFilters.forEach((item) => item.classList.toggle("is-active", item.dataset.archiveFilter === "all"));
+      archiveFilters.forEach((item) =>
+        item.classList.toggle("is-active", item.dataset.archiveFilter === "all"),
+      );
       updateArchive();
     });
     if (archiveCards.length > 0) updateArchive(false);
 
     const destinationSearch = document.querySelector<HTMLInputElement>("[data-destination-search]");
-    const destinationFilters = [...document.querySelectorAll<HTMLButtonElement>("[data-destination-filter]")];
-    const destinationCountries = [...document.querySelectorAll<HTMLElement>("[data-destination-country]")];
+    const destinationFilters = [
+      ...document.querySelectorAll<HTMLButtonElement>("[data-destination-filter]"),
+    ];
+    const destinationCountries = [
+      ...document.querySelectorAll<HTMLElement>("[data-destination-country]"),
+    ];
     const destinationContinents = [...document.querySelectorAll<HTMLElement>("[data-continent]")];
     const destinationCount = document.querySelector<HTMLElement>("[data-destination-count]");
     const destinationEmpty = document.querySelector<HTMLElement>("[data-destination-empty]");
@@ -738,19 +1418,84 @@ const labelOf = (target: Route): string => {
       let visible = 0;
       destinationCountries.forEach((country) => {
         const continent = country.closest<HTMLElement>("[data-continent]")?.dataset.continent ?? "";
-        const matches = (activeDestination === "all" || activeDestination === continent) && (!destinationQuery || (country.dataset.search ?? "").includes(destinationQuery));
+        const matches =
+          (activeDestination === "all" || activeDestination === continent) &&
+          (!destinationQuery || (country.dataset.search ?? "").includes(destinationQuery));
         country.hidden = !matches;
         if (matches) visible += 1;
       });
-      destinationContinents.forEach((continent) => { continent.hidden = ![...continent.querySelectorAll<HTMLElement>("[data-destination-country]")].some((country) => !country.hidden); });
+      destinationContinents.forEach((continent) => {
+        continent.hidden = ![
+          ...continent.querySelectorAll<HTMLElement>("[data-destination-country]"),
+        ].some((country) => !country.hidden);
+      });
       if (destinationCount) destinationCount.textContent = String(visible);
       if (destinationEmpty) destinationEmpty.hidden = visible !== 0;
     };
     destinationSearch?.addEventListener("input", updateDestinations);
-    destinationFilters.forEach((button) => button.addEventListener("click", () => {
-      activeDestination = button.dataset.destinationFilter ?? "all";
-      destinationFilters.forEach((item) => item.classList.toggle("is-active", item === button));
-      updateDestinations();
-    }));
+    destinationFilters.forEach((button) =>
+      button.addEventListener("click", () => {
+        activeDestination = button.dataset.destinationFilter ?? "all";
+        destinationFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+        updateDestinations();
+      }),
+    );
+
+    const galleryFilters = [
+      ...document.querySelectorAll<HTMLButtonElement>("[data-gallery-filter]"),
+    ];
+    const galleryItems = [...document.querySelectorAll<HTMLElement>("[data-gallery-item]")];
+    const galleryCount = document.querySelector<HTMLElement>("[data-gallery-count]");
+    const galleryEmpty = document.querySelector<HTMLElement>("[data-gallery-empty]");
+    const galleryLightbox = document.querySelector<HTMLElement>("[data-gallery-lightbox]");
+    const galleryImage = galleryLightbox?.querySelector<HTMLImageElement>(
+      "[data-gallery-lightbox-image]",
+    );
+    const galleryTitle = galleryLightbox?.querySelector<HTMLElement>(
+      "[data-gallery-lightbox-title]",
+    );
+    const galleryLink = galleryLightbox?.querySelector<HTMLAnchorElement>(
+      "[data-gallery-lightbox-link]",
+    );
+    const setGalleryLightbox = (open: boolean) => {
+      if (!galleryLightbox) return;
+      galleryLightbox.hidden = !open;
+      requestAnimationFrame(() => galleryLightbox.classList.toggle("is-open", open));
+      document.dispatchEvent(
+        new CustomEvent("site:overlay-change", { detail: { key: "gallery-lightbox", open } }),
+      );
+    };
+    galleryFilters.forEach((button) =>
+      button.addEventListener("click", () => {
+        const filter = button.dataset.galleryFilter ?? "all";
+        let visible = 0;
+        galleryItems.forEach((item) => {
+          const matches = filter === "all" || item.dataset.country === filter;
+          item.hidden = !matches;
+          if (matches) visible += 1;
+        });
+        galleryFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+        if (galleryCount) galleryCount.textContent = String(visible);
+        if (galleryEmpty) galleryEmpty.hidden = visible !== 0;
+      }),
+    );
+    document.querySelectorAll<HTMLButtonElement>("[data-gallery-open]").forEach((button) =>
+      button.addEventListener("click", () => {
+        if (galleryImage) {
+          galleryImage.src = button.dataset.src ?? "";
+          galleryImage.alt = button.dataset.alt ?? "";
+        }
+        if (galleryTitle) galleryTitle.textContent = button.dataset.title ?? "";
+        if (galleryLink) galleryLink.href = button.dataset.path ?? "/posts";
+        setGalleryLightbox(true);
+      }),
+    );
+    galleryLightbox
+      ?.querySelectorAll<HTMLButtonElement>("[data-gallery-close]")
+      .forEach((button) => button.addEventListener("click", () => setGalleryLightbox(false)));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && galleryLightbox && !galleryLightbox.hidden)
+        setGalleryLightbox(false);
+    });
   </script>
 </BaseLayout>

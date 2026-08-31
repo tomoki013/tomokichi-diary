@@ -106,7 +106,10 @@ img {
   position: sticky;
   top: 0;
   z-index: 20;
-  transition: background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  transition:
+    background 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
 }
 .site-header.is-scrolled {
   border-color: color-mix(in srgb, var(--border) 75%, var(--accent));
@@ -258,7 +261,9 @@ img {
   border: 0;
   background: rgb(20 29 31 / 0%);
   backdrop-filter: blur(0);
-  transition: background 260ms ease, backdrop-filter 260ms ease;
+  transition:
+    background 260ms ease,
+    backdrop-filter 260ms ease;
 }
 .mobile-menu.is-open .mobile-menu__backdrop,
 .header-search-modal.is-open .header-search-modal__backdrop {
@@ -351,7 +356,9 @@ img {
   box-shadow: 0 2rem 5rem rgb(20 29 31 / 22%);
   opacity: 0;
   transform: translateY(-1rem) scale(0.98);
-  transition: opacity 220ms ease, transform 260ms ease;
+  transition:
+    opacity 220ms ease,
+    transform 260ms ease;
 }
 .header-search-modal.is-open .header-search {
   opacity: 1;
@@ -467,6 +474,10 @@ body.has-site-overlay {
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 main {
@@ -813,7 +824,9 @@ main {
   cursor: pointer;
   filter: drop-shadow(0 4px 5px rgb(44 31 20 / 24%));
   transform-origin: center;
-  transition: transform 180ms ease, color 180ms ease;
+  transition:
+    transform 180ms ease,
+    color 180ms ease;
 }
 .world-map__pin path {
   fill: currentColor;
@@ -1474,7 +1487,9 @@ main {
   border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   color: var(--muted);
   font-size: 0.62rem;
-  transition: max-height 220ms ease, opacity 180ms ease;
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease;
 }
 .site-header__utility > div {
   display: flex;
@@ -1917,7 +1932,9 @@ main {
   background: var(--surface);
   color: var(--text);
   text-decoration: none;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 .destination-country:hover {
   transform: translateY(-4px);
@@ -2005,7 +2022,9 @@ main {
   object-fit: cover;
 }
 .location-hero__shade {
-  background: linear-gradient(90deg, rgb(24 31 28 / 82%), rgb(24 31 28 / 12%) 74%), linear-gradient(0deg, rgb(24 31 28 / 35%), transparent 60%);
+  background:
+    linear-gradient(90deg, rgb(24 31 28 / 82%), rgb(24 31 28 / 12%) 74%),
+    linear-gradient(0deg, rgb(24 31 28 / 35%), transparent 60%);
 }
 .location-hero__content {
   position: absolute;
@@ -2578,7 +2597,10 @@ main {
   border-color: #e4d8ca;
   border-radius: 0.85rem;
   box-shadow: 0 0.5rem 1.6rem rgb(63 47 35 / 5%);
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
 }
 .card--archive:hover {
   transform: translateY(-4px);
@@ -3397,7 +3419,9 @@ h1 {
   background: var(--surface);
   color: var(--text);
   text-decoration: none;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 .series-collection-card:hover {
   transform: translateY(-4px);
@@ -4247,7 +4271,10 @@ h1 {
   background: var(--surface);
   color: var(--text);
   text-decoration: none;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 .post-navigation__card:hover {
   transform: translateY(-3px);
@@ -4339,7 +4366,9 @@ h1 {
   .article-facts {
     display: none;
   }
-  .article-endnote { grid-template-columns: 1fr; }
+  .article-endnote {
+    grid-template-columns: 1fr;
+  }
   .article-endnote .like-button {
     grid-column: 1 / -1;
     justify-self: start;
@@ -4377,7 +4406,9 @@ h1 {
     opacity: 0;
     pointer-events: none;
     transform: translateY(1rem) scale(0.9);
-    transition: opacity 180ms ease, transform 220ms ease;
+    transition:
+      opacity 180ms ease,
+      transform 220ms ease;
   }
   .mobile-toc-button.is-visible {
     opacity: 1;
@@ -4405,7 +4436,9 @@ h1 {
     border: 0;
     background: rgb(9 26 32 / 0%);
     backdrop-filter: blur(0);
-    transition: background 280ms ease, backdrop-filter 280ms ease;
+    transition:
+      background 280ms ease,
+      backdrop-filter 280ms ease;
   }
   .mobile-toc-overlay.is-open .mobile-toc-overlay__backdrop {
     background: rgb(9 26 32 / 58%);
@@ -4586,7 +4619,9 @@ h1 {
   border: 1px solid color-mix(in srgb, var(--accent) 70%, #b8a896);
   color: var(--text);
   text-decoration: none;
-  transition: background 180ms ease, color 180ms ease;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
 }
 .site-header__destination span {
   font-family: var(--font-serif);
