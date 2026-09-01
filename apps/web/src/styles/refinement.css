@@ -2916,12 +2916,60 @@ main > .wrap {
   padding-top: 0.65rem;
 }
 
+.posts-results {
+  min-width: 0;
+  margin-top: 2rem;
+}
+
 .posts-grid {
+  width: 100%;
+  margin: 0;
+  padding: 0;
   gap: 2.2rem 1.15rem;
 }
 
 .card--archive .card__body {
   padding: 0.9rem 0.1rem 0;
+}
+
+.posts-results__footer {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto minmax(7rem, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin-top: clamp(2.8rem, 6vw, 4.5rem);
+  padding-block: 1.25rem;
+  border-block: 1px solid var(--border);
+}
+
+.posts-results__footer > p {
+  margin: 0;
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-size: 0.67rem;
+  letter-spacing: 0.05em;
+}
+
+.posts-results__footer .posts-pagination {
+  grid-column: 2;
+  margin-top: 0;
+}
+
+.posts-results__footer:has(.posts-pagination[hidden]) > p {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.posts-pagination button {
+  min-width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.35rem;
+  background: transparent;
+}
+
+.posts-pagination button:first-child,
+.posts-pagination button:last-child {
+  min-width: 4rem;
 }
 
 @media (max-width: 760px) {
@@ -3095,5 +3143,33 @@ main > .wrap {
   .posts-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 2.4rem;
+  }
+
+  .posts-results {
+    margin-top: 1.5rem;
+  }
+
+  .posts-results__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+    margin-top: 2.8rem;
+    padding-block: 1rem;
+  }
+
+  .posts-results__footer > p {
+    text-align: center;
+  }
+
+  .posts-results__footer .posts-pagination {
+    justify-content: center;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+  }
+
+  .posts-pagination button {
+    flex: 0 0 auto;
   }
 }

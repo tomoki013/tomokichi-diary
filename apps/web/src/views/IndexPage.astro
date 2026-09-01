@@ -713,23 +713,30 @@ const labelOf = (target: Route): string => {
               </>
             </div>
           </div>
-          <ul class="card-grid posts-grid" data-article-list>
-            {archiveArticles.map((view, index) => (
-              <ArticleCard
-                view={view}
-                eager={index < 3}
-                level={3}
-                variant="archive"
-                searchText={archiveSearchText(view)}
-                categoryText={archiveCategoryText(view)}
-                countryText={archiveCountryText(view)}
-              />
-            ))}
-          </ul>
-          <p class="posts-empty" data-archive-empty hidden>
-            まだ記録のない旅先です。別の条件でも探してみてください。
-          </p>
-          <nav class="posts-pagination" data-archive-pagination aria-label="記事一覧のページ" />
+          <div class="posts-results">
+            <ul class="card-grid posts-grid" data-article-list>
+              {archiveArticles.map((view, index) => (
+                <ArticleCard
+                  view={view}
+                  eager={index < 3}
+                  level={3}
+                  variant="archive"
+                  searchText={archiveSearchText(view)}
+                  categoryText={archiveCategoryText(view)}
+                  countryText={archiveCountryText(view)}
+                />
+              ))}
+            </ul>
+            <p class="posts-empty" data-archive-empty hidden>
+              まだ記録のない旅先です。別の条件でも探してみてください。
+            </p>
+            <footer class="posts-results__footer">
+              <p data-archive-page-status aria-live="polite">
+                1–{Math.min(12, archiveArticles.length)} / {archiveArticles.length}件
+              </p>
+              <nav class="posts-pagination" data-archive-pagination aria-label="記事一覧のページ" />
+            </footer>
+          </div>
         </section>
       </div>
     )
@@ -1256,6 +1263,7 @@ const labelOf = (target: Route): string => {
     const archiveReset = document.querySelector<HTMLButtonElement>("[data-archive-reset]");
     const archiveSummary = document.querySelector<HTMLElement>("[data-archive-summary]");
     const archivePagination = document.querySelector<HTMLElement>("[data-archive-pagination]");
+    const archivePageStatus = document.querySelector<HTMLElement>("[data-archive-page-status]");
     const archiveCount = document.querySelector<HTMLElement>("[data-archive-count]");
     const archiveEmpty = document.querySelector<HTMLElement>("[data-archive-empty]");
     let activeArchiveFilter = "all";
@@ -1267,7 +1275,6 @@ const labelOf = (target: Route): string => {
       const pages = Math.ceil(total / archivePageSize);
       archivePagination.hidden = pages <= 1;
       if (pages <= 1) return;
-      archivePage = Math.min(archivePage, pages);
       const addButton = (label: string, page: number, current = false, disabled = false) => {
         const button = document.createElement("button");
         button.type = "button";
@@ -1278,7 +1285,7 @@ const labelOf = (target: Route): string => {
           archivePage = page;
           updateArchive(false);
           document
-            .querySelector(".posts-discovery")
+            .querySelector(".posts-results")
             ?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
         archivePagination.append(button);
@@ -1327,12 +1334,18 @@ const labelOf = (target: Route): string => {
       });
       const matchedSet = new Set(matchedCards);
       const sortedMatches = sorted.filter((card) => matchedSet.has(card));
-      sortedMatches
-        .slice((archivePage - 1) * archivePageSize, archivePage * archivePageSize)
-        .forEach((card) => {
-          card.hidden = false;
-        });
+      const pageCount = Math.max(1, Math.ceil(visible / archivePageSize));
+      archivePage = Math.min(archivePage, pageCount);
+      const pageStart = (archivePage - 1) * archivePageSize;
+      sortedMatches.slice(pageStart, pageStart + archivePageSize).forEach((card) => {
+        card.hidden = false;
+      });
       renderPagination(visible);
+      if (archivePageStatus) {
+        const rangeStart = visible === 0 ? 0 : pageStart + 1;
+        const rangeEnd = Math.min(pageStart + archivePageSize, visible);
+        archivePageStatus.textContent = `${rangeStart}–${rangeEnd} / ${visible}件`;
+      }
       if (archiveCount) archiveCount.textContent = String(visible);
       if (archiveEmpty) archiveEmpty.hidden = visible !== 0;
       if (archiveSummary) {
