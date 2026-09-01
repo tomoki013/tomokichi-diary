@@ -3172,4 +3172,84 @@ main > .wrap {
   .posts-pagination button {
     flex: 0 0 auto;
   }
+
+  /* Keep the fixed header and form controls from changing the mobile viewport. */
+  .site-header__bar {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    gap: 0.35rem;
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+    padding-left: max(0.85rem, env(safe-area-inset-left));
+  }
+
+  .site-header__bar .site-header__brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .site-header__bar .site-header__brand > span {
+    min-width: 0;
+  }
+
+  .site-header__bar .site-header__brand strong {
+    display: block;
+    overflow: hidden;
+    font-size: 0.82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .site-header__bar .site-header__brand strong em,
+  .site-header__bar .site-header__brand small {
+    display: none;
+  }
+
+  .site-header__bar .site-header__action {
+    margin-left: auto;
+  }
+
+  .site-header__bar .site-header__action,
+  .site-header__bar .site-header__menu-button {
+    flex: 0 0 2.4rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    touch-action: manipulation;
+  }
+
+  .header-search-modal {
+    width: 100%;
+    max-width: 100%;
+    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem 0.75rem;
+  }
+
+  .header-search {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .header-search__input input,
+  .home-discovery input,
+  .posts-filter input,
+  .posts-filter select,
+  .faq-search input,
+  .contact-form :is(input, select, textarea) {
+    font-size: 16px;
+  }
+
+  .posts-archive,
+  .posts-discovery,
+  .posts-results {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .posts-filter {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+  }
 }
