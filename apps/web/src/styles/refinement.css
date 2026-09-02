@@ -3252,4 +3252,89 @@ main > .wrap {
     max-width: 100%;
     margin-inline: 0;
   }
+
+  /* Horizontal rails must scroll inside their own box, never widen the page. */
+  html,
+  body,
+  .shell,
+  main,
+  main > .wrap {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  .home-discovery__popular,
+  .posts-filter__chips,
+  .posts-results__footer .posts-pagination,
+  .gallery-filters,
+  .destination-tabs,
+  .faq-topics {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-right: 0;
+    margin-left: 0;
+    padding-right: 0;
+    overscroll-behavior-inline: contain;
+  }
+
+  .home-discovery__popular,
+  .posts-filter__chips,
+  .posts-results__footer .posts-pagination,
+  .gallery-filters,
+  .destination-tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .home-discovery > .home-discovery__popular {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .home-card-grid,
+  .home-journeys > div:last-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .home-card-grid > li {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .home-journeys > div:last-child > a {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .faq-topics {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .posts-filter__primary,
+  .posts-filter__search,
+  .posts-filter__selects,
+  .posts-filter__selects label,
+  .posts-grid,
+  .posts-grid > li {
+    min-width: 0;
+    max-width: 100%;
+  }
 }
