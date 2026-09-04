@@ -28,6 +28,13 @@ it, or invert it behind a port in `packages/application/src/ports`.
 
 Rules live in `scripts/check-boundaries.ts`.
 
+### `KNOWLEDGE_VALIDATION_FAILED`
+
+The travel-knowledge graph violates an evidence invariant or has a broken stable-ID
+reference. Run `pnpm check:knowledge`; fix the named fact or article knowledge record.
+Never bypass a missing `verifiedBy` on firsthand data—send the candidate through the
+human verification command instead.
+
 ### `TEST_FAILED` / `BUILD_FAILED`
 
 `pnpm test` / `pnpm build`.
@@ -114,6 +121,22 @@ a `perf-baseline.json` from a green run on `main`.
 Migrations are append-only. Never edit an applied file; add
 `migrations/000N_description.sql`. `pnpm test` applies every migration to an
 empty database on each run.
+
+**Migrations must be expand/contract.** Deployment applies them before the API
+that reads the new shape is deployed, so there is always a window where the old
+API runs against the new database. A migration that the old API cannot survive
+takes the site down for the length of that window.
+
+In practice, one schema change is two releases:
+
+1. _Expand_ — add the new column/table, nullable or defaulted, and backfill.
+   The old API ignores it; the new API writes to both shapes.
+2. _Contract_ — once the new API is live, a later migration drops the old
+   column/table.
+
+So: never rename, drop, or narrow (`NOT NULL`, tightened `CHECK`) a column that
+the currently deployed API still reads or writes. Add, backfill, deploy, and
+only then remove.
 
 ### `EXPORT_FAILED` / `IMPORT_FAILED`
 

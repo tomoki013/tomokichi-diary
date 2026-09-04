@@ -1,0 +1,48 @@
+version: 2
+
+# Two ecosystems, both grouped: a single PR per ecosystem per week keeps the
+# review surface small enough that updates actually get looked at.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(actions)"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    # pnpm workspace: the root lockfile plus every workspace package manifest.
+    directories:
+      - /
+      - /apps/*
+      - /packages/*
+      - /infrastructure/*/*
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 10
+    versioning-strategy: increase-if-necessary
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      production:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
