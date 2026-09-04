@@ -19,7 +19,7 @@
     "hono": "^4.10.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260101.0",
+    "@cloudflare/workers-types": "^5.20260901.1",
     "wrangler": "^4.45.0",
     "@tomokichi/data": "workspace:*"
   }
