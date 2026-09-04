@@ -14,6 +14,7 @@ export interface KnowledgeIssue {
     | "BROKEN_KNOWLEDGE_REFERENCE"
     | "DUPLICATE_KNOWLEDGE_ID"
     | "FUTURE_EXPERIENCE_DATE"
+    | "STALE_CURRENT_FACT"
     | "INVALID_DECISION_TABLE";
   readonly target: string;
   readonly message: string;
@@ -57,6 +58,7 @@ export function validateKnowledgeGraph(input: {
     return seen;
   };
   const sourceIds = ids(input.sources, "source");
+  const sourceById = new Map(input.sources.map((source) => [source.id, source]));
   const routeIds = ids(input.travelRoutes, "travel route");
   const factIds = ids(input.travelFacts, "travel fact");
 
@@ -77,12 +79,18 @@ export function validateKnowledgeGraph(input: {
     }
     if (
       fact.provenance === "official" &&
-      (fact.verifiedAt === null || fact.sourceIds.length === 0)
+      fact.status === "verified" &&
+      (fact.verifiedAt === null ||
+        fact.sourceIds.length === 0 ||
+        fact.sourceIds.some((id) => {
+          const source = sourceById.get(id);
+          return source?.type !== "official" || !source.url || !source.checkedAt;
+        }))
     ) {
       issues.push({
         code: "OFFICIAL_REQUIRES_SOURCE_AND_DATE",
         target: fact.id,
-        message: "official facts require verifiedAt and a source",
+        message: "verified official facts require verifiedAt and a dated official source URL",
       });
     }
     if (fact.experiencedAt !== null && fact.experiencedAt > input.today)
@@ -91,6 +99,24 @@ export function validateKnowledgeGraph(input: {
         target: fact.id,
         message: "experiencedAt cannot be in the future",
       });
+    if (
+      fact.kind === "current_fact" &&
+      fact.status === "verified" &&
+      fact.verifiedAt !== null &&
+      fact.volatility !== null
+    ) {
+      const ageDays = Math.floor(
+        (Date.parse(`${input.today}T00:00:00Z`) - Date.parse(`${fact.verifiedAt}T00:00:00Z`)) /
+          86_400_000,
+      );
+      const maxAge = fact.volatility === "high" ? 90 : fact.volatility === "medium" ? 365 : 730;
+      if (ageDays > maxAge)
+        issues.push({
+          code: "STALE_CURRENT_FACT",
+          target: fact.id,
+          message: `${fact.volatility}-volatility current fact was last checked ${ageDays} days ago`,
+        });
+    }
     for (const id of fact.articleIds)
       if (!input.articleIds.has(id))
         issues.push({

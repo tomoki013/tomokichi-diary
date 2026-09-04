@@ -10,6 +10,7 @@ import { api, type DraftInput, type MediaUsageInput, type RelationsInput } from 
 import type { ToastMessage } from "../components/Toast";
 import { MediaPanel } from "../components/MediaPanel";
 import { RelationsPanel } from "../components/RelationsPanel";
+import { KnowledgePanel } from "../components/KnowledgePanel";
 
 marked.setOptions({ gfm: true, breaks: false });
 
@@ -204,6 +205,13 @@ export function ArticleEditor({
                 "関連付けを更新しました",
               )
             }
+          />
+
+          <KnowledgePanel
+            articleId={id}
+            revisionId={article.currentRevision?.id ?? null}
+            notify={notify}
+            onError={onError}
           />
         </div>
 

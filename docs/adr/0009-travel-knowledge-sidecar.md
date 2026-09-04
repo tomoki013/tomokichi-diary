@@ -19,8 +19,8 @@ reproducible adapter-neutral snapshot.
 
 ## Consequences
 
-Articles without knowledge records render exactly as before. Migrated articles gain
-human and machine-readable projections from the same data. URL routes and travel
-routes retain distinct types. More editor UI is still needed, but any future UI must
-write through the application command and cannot grant AI authority to verify
-firsthand evidence.
+Articles without knowledge records render exactly as before and appear in a generated
+human-review backlog. Migrated articles gain human and machine-readable projections
+from the same data. URL routes and travel routes retain distinct types. The editor,
+WebMCP adapter and public MCP/MCP App all call application-layer commands or projections;
+none can grant AI authority to verify firsthand evidence.

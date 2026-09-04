@@ -1,0 +1,164 @@
+[
+  {
+    "articleId": "ec5a4c60-e280-8bc7-b533-c5811a5451d2",
+    "title": "ミラドール・デル・バイエへの行き方。バスと徒歩の使い分け",
+    "summary": "トレド旧市街を一望できる展望台「ミラドール・デル・バイエ」への行き方を、観光列車・バス・徒歩・タクシー・レンタカーで比較しました。限られた滞在時間でも回りやすい手段の選び方を中心に整理しています。",
+    "path": "/posts/howtoget-mirador-del-valle",
+    "quickAnswer": "景色と途中の展望ポイントを楽しむなら片道徒歩、往復の負担を減らすならL71バスかタクシーが現実的です。",
+    "facts": [
+      {
+        "id": "30000000-0000-4000-8000-000000000001",
+        "kind": "visit",
+        "statement": "サン・マルティン橋側からミラドール・デル・バイエまで実際に歩いた。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-02-24",
+        "verifiedAt": "2025-02-24"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "kind": "observation",
+        "statement": "徒歩ルートの途中にも、旧市街を見渡せる展望ポイントがあった。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-02-24",
+        "verifiedAt": "2025-02-24"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000003",
+        "kind": "transport",
+        "statement": "夜の再訪ではL71バスを利用した。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-02-24",
+        "verifiedAt": "2025-02-24"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000004",
+        "kind": "warning",
+        "statement": "展望台周辺では帰りの交通手段を先に決めておく。バスを逃すと徒歩になる可能性がある。",
+        "provenance": "derived",
+        "experiencedAt": null,
+        "verifiedAt": "2025-02-24"
+      }
+    ],
+    "routes": [
+      {
+        "id": "20000000-0000-4000-8000-000000000001",
+        "name": "サン・マルティン橋からミラドール・デル・バイエ",
+        "mode": "walk"
+      }
+    ]
+  },
+  {
+    "articleId": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "title": "CHAGEEのメニューを日本語で解説｜実際に飲んだ4種類の茶葉・香り・特徴",
+    "summary": "CHAGEE（霸王茶姬）の代表的な4メニューを日本語で解説。伯牙絶弦、白雾红尘、桂馥兰香、花田乌龙について、使われている茶葉や香り、公式説明から分かる特徴を整理します。",
+    "path": "/posts/chagee-menu-explained",
+    "quickAnswer": "花の香りなら伯牙絶弦、焙煎感なら白雾红尘、金木犀なら桂馥兰香、白桃なら花田乌龙という違いです。",
+    "facts": [
+      {
+        "id": "30000000-0000-4000-8000-000000000005",
+        "kind": "food_drink",
+        "statement": "中国・マレーシア・シンガポールでCHAGEEを利用し、記事掲載の4種類を実際に飲んだ。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-12-05",
+        "verifiedAt": "2026-09-04"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000006",
+        "kind": "current_fact",
+        "statement": "伯牙絶弦は、ジャスミンで香り付けした緑茶をベースにしたミルクティーとして公式説明されている。",
+        "provenance": "official",
+        "experiencedAt": null,
+        "verifiedAt": "2026-09-04"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000007",
+        "kind": "current_fact",
+        "statement": "白雾红尘は、大紅袍を使った烏龍ミルクティーとして公式説明されている。",
+        "provenance": "official",
+        "experiencedAt": null,
+        "verifiedAt": "2026-09-04"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000008",
+        "kind": "current_fact",
+        "statement": "桂馥兰香は、烏龍茶と金木犀を組み合わせたミルクティーとして公式説明されている。",
+        "provenance": "official",
+        "experiencedAt": null,
+        "verifiedAt": "2026-09-04"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000009",
+        "kind": "current_fact",
+        "statement": "花田乌龙は、金観音烏龍茶と白桃の香りを組み合わせたミルクティーとして公式説明されている。",
+        "provenance": "official",
+        "experiencedAt": null,
+        "verifiedAt": "2026-09-04"
+      }
+    ],
+    "routes": []
+  },
+  {
+    "articleId": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "title": "アスワンからアブシンベル神殿への行き方。バス・ツアー・飛行機の比較",
+    "summary": "アスワンからアブシンベル神殿へ行く方法を、バス、ツアー、タクシー、飛行機で比較しました。金曜運休や駅からバスステーションへの動き方など、現地で詰まりやすい点も整理しています。",
+    "path": "/posts/howtoget-abusimbel-from-asuwan",
+    "quickAnswer": "費用を抑えるなら乗り合いミニバス、手配の簡単さならツアー、移動時間を優先するなら飛行機です。",
+    "facts": [
+      {
+        "id": "30000000-0000-4000-8000-000000000010",
+        "kind": "cost",
+        "statement": "筆者が乗り合いミニバスで実際に支払った片道料金は200 EGPだった。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-06-20",
+        "verifiedAt": "2025-06-20"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000011",
+        "kind": "duration",
+        "statement": "アスワンからアブシンベルまで、実際の移動には約3時間30分かかった。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-06-20",
+        "verifiedAt": "2025-06-20"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000012",
+        "kind": "transport",
+        "statement": "実際に利用した車両はハイエース型の乗り合いミニバスだった。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-06-20",
+        "verifiedAt": "2025-06-20"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000013",
+        "kind": "observation",
+        "statement": "筆者の利用時は、Google Mapsに表示された時刻と現地の運用が合っていなかった。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-06-20",
+        "verifiedAt": "2025-06-20"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000014",
+        "kind": "observation",
+        "statement": "筆者が訪れた金曜日は大型バスが運行していなかった。制度上の恒常的な運休とは断定しない。",
+        "provenance": "firsthand",
+        "experiencedAt": "2025-06-20",
+        "verifiedAt": "2025-06-20"
+      },
+      {
+        "id": "30000000-0000-4000-8000-000000000015",
+        "kind": "warning",
+        "statement": "到着後、観光を始める前に帰りのミニバスの乗り場と出発時刻を現地で確認する。",
+        "provenance": "derived",
+        "experiencedAt": null,
+        "verifiedAt": "2025-06-20"
+      }
+    ],
+    "routes": [
+      {
+        "id": "20000000-0000-4000-8000-000000000002",
+        "name": "アスワンからアブシンベルへのミニバス移動",
+        "mode": "bus"
+      }
+    ]
+  }
+]

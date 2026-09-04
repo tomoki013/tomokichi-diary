@@ -172,6 +172,7 @@ export async function publishArticle(
   }
   await ctx.repos.articles.save(result.value);
   ctx.logger.info("article.published", { articleId });
+  await ctx.analytics?.track({ name: "article_published", articleId });
   return result;
 }
 

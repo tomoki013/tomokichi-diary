@@ -248,6 +248,13 @@
     border: 0;
     background: rgb(26 22 17 / 45%);
     backdrop-filter: blur(3px);
+  }
+
+  /* The lightbox has no panel of its own, so the dimmed page is what the
+     photograph and its text are read against. */
+  .gallery-lightbox__backdrop {
+    background: rgb(14 12 9 / 96%);
+    backdrop-filter: blur(14px) saturate(70%);
     opacity: 0;
     transition: opacity 240ms var(--ease);
   }

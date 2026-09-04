@@ -91,6 +91,50 @@ describe("validation", () => {
   });
 });
 
+describe("travel knowledge control plane", () => {
+  it("saves and reads a validated Quick Answer for the current revision", async () => {
+    const id = await createArticle();
+    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+    const response = await request(`/v1/admin/knowledge/article/${id}`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({
+        article: {
+          articleId: id,
+          revisionId: detail.currentRevision.id,
+          schemaVersion: 1,
+          quickAnswer: { summary: "4種類を実飲した比較です。", recommendation: null },
+          decisionTable: null,
+          experienceGroups: [],
+          currentFactIds: [],
+          cautionFactIds: [],
+          routeIds: [],
+          relatedArticles: [],
+        },
+        facts: [],
+        sources: [],
+        routes: [],
+      }),
+    });
+    expect(response.status).toBe(200);
+    const stored = await (
+      await request(`/v1/admin/knowledge/article/${id}`, { headers: auth })
+    ).json();
+    expect(stored.article.quickAnswer.summary).toContain("実飲");
+    expect(stored.canSuggestWithAi).toBe(false);
+  });
+
+  it("rejects malformed knowledge before it reaches the repository", async () => {
+    const id = await createArticle();
+    const response = await request(`/v1/admin/knowledge/article/${id}`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({ article: "not-an-object" }),
+    });
+    expect(response.status).toBe(400);
+  });
+});
+
 describe("article lifecycle", () => {
   it("creates, reads and lists an article", async () => {
     const id = await createArticle();

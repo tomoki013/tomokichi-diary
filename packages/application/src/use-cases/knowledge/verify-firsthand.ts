@@ -15,5 +15,10 @@ export async function verifyFirsthandCandidate(
     ctx.clock.now().slice(0, 10) as typeof fact.verifiedAt,
   );
   await ctx.repos.knowledge.saveTravelFact(verified);
+  await ctx.analytics?.track({
+    name: "firsthand_fact_verified",
+    factId,
+    articleId: fact.articleIds[0] ?? "",
+  });
   return verified;
 }

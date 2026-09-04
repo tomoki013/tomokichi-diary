@@ -12,6 +12,7 @@ import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
 import { likeRoutes } from "./routes/likes.js";
+import { knowledgeRoutes } from "./routes/knowledge.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -164,6 +165,7 @@ export function createApp(options: AppOptions = {}) {
   v1.route("/admin/media", mediaRoutes());
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());
+  v1.route("/admin/knowledge", knowledgeRoutes());
   v1.route("/admin", referenceRoutes());
 
   app.route("/v1", v1);

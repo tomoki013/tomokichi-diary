@@ -7,6 +7,7 @@ import type {
   PublishCheckDto,
   RouteDto,
   TaxonomyDto,
+  ArticleKnowledgeBundleDto,
 } from "@tomokichi/contracts";
 
 // The version prefix lives here so every call carries it and nothing else
@@ -151,6 +152,22 @@ export const api = {
     }),
   listLocations: () => request<{ items: LocationDto[] }>("/admin/locations"),
   taxonomy: () => request<TaxonomyDto>("/admin/taxonomy"),
+  getKnowledge: (id: string) =>
+    request<ArticleKnowledgeBundleDto>(`/admin/knowledge/article/${id}`),
+  saveKnowledge: (id: string, input: Omit<ArticleKnowledgeBundleDto, "canSuggestWithAi">) =>
+    request<ArticleKnowledgeBundleDto>(`/admin/knowledge/article/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    }),
+  verifyKnowledgeFact: (id: string) =>
+    request<ArticleKnowledgeBundleDto["facts"][number]>(`/admin/knowledge/facts/${id}/verify`, {
+      method: "POST",
+    }),
+  suggestKnowledgeFacts: (id: string) =>
+    request<{ available: boolean; facts: ArticleKnowledgeBundleDto["facts"] }>(
+      `/admin/knowledge/article/${id}/suggestions`,
+      { method: "POST" },
+    ),
 };
 
 export interface DraftInput {
