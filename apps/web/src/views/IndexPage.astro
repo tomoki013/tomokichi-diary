@@ -155,7 +155,7 @@ const featuredStories = articles
     if (!country || usedCountries.has(country.id)) return stories;
     return [...stories, view];
   }, [])
-  .slice(0, 4);
+  .slice(0, 6);
 
 const popularDestinations = continents
   .flatMap((continent) => continent.countries)
@@ -271,7 +271,8 @@ const labelOf = (target: Route): string => {
       route.path !== "/posts" &&
       route.path !== "/collections" &&
       route.path !== "/destination" &&
-      route.path !== "/gallery" && (
+      route.path !== "/gallery" &&
+      route.path !== "/sitemap" && (
         <header class="page-header">
           <h1>{page.title}</h1>
           <p>{page.description}</p>
@@ -1115,19 +1116,32 @@ const labelOf = (target: Route): string => {
   }
 
   {
-    route.path === "/sitemap" &&
-      sitemapGroups.map((group) => (
-        <section class="section">
-          <h2>{group.label}</h2>
-          <ul>
-            {group.routes.map((target) => (
-              <li>
-                <a href={target.path}>{labelOf(target)}</a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
+    route.path === "/sitemap" && (
+      <div class="sitemap-page">
+        <header class="sitemap-page__header">
+          <p class="eyebrow">SITE DIRECTORY</p>
+          <h1>サイトマップ</h1>
+          <p>旅の記事、旅先、コレクション、サイト案内を一覧から探せます。</p>
+        </header>
+        <div class="sitemap-page__groups">
+          {sitemapGroups.map((group) => (
+            <section class="sitemap-group" aria-labelledby={`sitemap-${group.label}`}>
+              <header>
+                <h2 id={`sitemap-${group.label}`}>{group.label}</h2>
+                <span>{group.routes.length}</span>
+              </header>
+              <ul>
+                {group.routes.map((target) => (
+                  <li>
+                    <a href={target.path}>{labelOf(target)}</a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </div>
+    )
   }
   <script>
     /**
