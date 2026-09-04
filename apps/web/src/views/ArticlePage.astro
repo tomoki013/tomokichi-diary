@@ -152,7 +152,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           )
         }
         {knowledge && <ArticleKnowledge view={knowledge} />}
-        <ArticleBody slug={article.slug} embeds={view.embeds} />
+        <ArticleBody slug={article.slug} embeds={view.embeds} path={view.route.path} />
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong><p>

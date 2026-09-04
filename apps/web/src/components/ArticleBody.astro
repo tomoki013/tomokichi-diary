@@ -10,9 +10,12 @@ import { mediaUrl } from "../lib/site";
 interface Props {
   slug: string;
   embeds: readonly ArticleEmbed[];
+  /** The article's own path, so relative links in the body resolve like a
+      reader's browser resolves them rather than against the site root. */
+  path: string;
 }
 
-const { slug, embeds } = Astro.props;
+const { slug, embeds, path } = Astro.props;
 const entry = await getEntry("articles", slug);
 if (!entry) throw new Error(`no exported body for article ${slug}`);
 
@@ -32,10 +35,15 @@ const escapeHtml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+const ORIGIN = "https://tomokichidiary.com";
 const internalCard = (href: string): string | null => {
   let pathname = href;
   try {
-    pathname = new URL(href, "https://tomokichidiary.com").pathname;
+    // Bodies are written with links like `./other-article`, which resolve
+    // against the article they sit in. Resolving them against the site root
+    // produced `/other-article`, matched no route, and quietly left every one
+    // of them as a bare inline link.
+    pathname = new URL(href, new URL(path, ORIGIN)).pathname;
   } catch {
     return null;
   }
