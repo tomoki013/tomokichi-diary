@@ -1,6 +1,10 @@
 name = "tomokichi-diary-web"
 compatibility_date = "2026-08-01"
 
+# The apex is the production origin. Keep www on its existing redirect so old
+# links continue to converge on the canonical hostname.
+routes = [{ pattern = "tomokichidiary.com", custom_domain = true }]
+
 # A static-asset Worker: no `main`, so requests are served straight from the
 # edge with no Worker invocation and no per-request cost.
 [assets]
