@@ -512,7 +512,7 @@
   .home-explore__grid {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
     gap: var(--space-md);
   }
 
@@ -524,6 +524,17 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface);
+  }
+
+  .home-explore__grid > .world-map {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+  }
+
+  .home-explore__grid > .world-map svg {
+    height: 100%;
+    min-height: 0;
   }
 
   .popular-destinations__title {
@@ -808,7 +819,7 @@
   }
 
   @media (max-width: 52rem) {
-    .home-discovery {
+    .home > .home-discovery {
       grid-template-columns: minmax(0, 1fr);
     }
     .home-discovery__map,
@@ -844,11 +855,13 @@
       gap: 0.7rem;
     }
     .home-discovery form {
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
       padding: 0.6rem;
       border-radius: var(--radius);
     }
     .home-discovery form button {
+      grid-column: 1 / -1;
       width: 100%;
     }
   }

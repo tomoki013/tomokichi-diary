@@ -1,5 +1,82 @@
 /* Static routes: about, FAQ, contact, legal, and the error pages. */
 @layer pages {
+  .sitemap-page {
+    display: grid;
+    gap: var(--band-tight);
+    padding-block: var(--band-tight);
+  }
+
+  .sitemap-page__header {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: 44rem;
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sitemap-page__header h1 {
+    font-size: var(--step-display);
+  }
+
+  .sitemap-page__header > p:last-child {
+    color: var(--ink-soft);
+  }
+
+  .sitemap-page__groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .sitemap-group > header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .sitemap-group > header h2 {
+    font-size: var(--step-2);
+  }
+
+  .sitemap-group > header span {
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: var(--step-tiny);
+  }
+
+  .sitemap-group ul {
+    columns: 2 13rem;
+    column-gap: var(--space-md);
+    padding-top: var(--space-xs);
+  }
+
+  .sitemap-group li {
+    break-inside: avoid;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sitemap-group a {
+    display: inline-block;
+    padding-block: 0.55rem;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    text-decoration: none;
+  }
+
+  .sitemap-group a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 52rem) {
+    .sitemap-page__groups {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   /* About ------------------------------------------------------------ */
   .about-page {
     display: grid;

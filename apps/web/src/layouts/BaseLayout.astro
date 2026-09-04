@@ -41,6 +41,7 @@ const footerGroups = [
       { href: "/about", label: "このブログについて" },
       { href: "/faq", label: "よくある質問" },
       { href: "/contact", label: "お問い合わせ" },
+      { href: "/sitemap", label: "サイトマップ" },
     ],
   },
   { title: "サイトについて", links: footerNav.filter((item) => item.href.startsWith("/legal/")) },
@@ -156,7 +157,8 @@ const footerGroups = [
               ))
             }
           </nav>
-          <div class="mobile-menu__sub">
+          <div class="mobile-menu__sub" aria-label="ご案内・お問い合わせ">
+            <p>GUIDE &amp; SUPPORT</p>
             <a href="/faq">よくある質問</a><a href="/contact">お問い合わせ</a>
           </div>
         </aside>
@@ -246,12 +248,25 @@ const footerGroups = [
             </nav>
           </section>
           <div class="site-footer__legal">
-            <p>© 2024–{new Date().getFullYear()} {seoConfig.siteName}</p>
+            <div class="site-footer__legal-meta">
+              <p>© 2024–{new Date().getFullYear()} {seoConfig.siteName}</p>
+              <p>Made with <span aria-label="love">♡</span> by Tomokichi</p>
+            </div>
             <p>掲載情報は実体験をもとにしています。旅行前には最新の公式情報もご確認ください。</p>
-            <p>Made with <span aria-label="love">♡</span> by Tomokichi</p>
           </div>
         </div>
       </footer>
+
+      <aside class="cookie-banner" data-cookie-banner aria-label="Cookieのご案内" hidden>
+        <div>
+          <strong>Cookieについて</strong>
+          <p>サイトの利用状況を把握し、旅の記事をより良くするためにCookieを利用しています。</p>
+        </div>
+        <div class="cookie-banner__actions">
+          <a href="/legal/cookies">詳細を見る</a>
+          <button type="button" data-cookie-accept>同意する</button>
+        </div>
+      </aside>
     </div>
     <script>
       const body = document.body;
@@ -263,6 +278,9 @@ const footerGroups = [
       const searchResults = document.querySelector<HTMLElement>("[data-search-results]");
       const searchStatus = document.querySelector<HTMLElement>("[data-search-status]");
       const searchAll = document.querySelector<HTMLAnchorElement>("[data-search-all]");
+      const cookieBanner = document.querySelector<HTMLElement>("[data-cookie-banner]");
+      const cookieAccept = document.querySelector<HTMLButtonElement>("[data-cookie-accept]");
+      const cookieConsentKey = "tomokichi-cookie-consent-v1";
       let searchRecords: Array<{
         title: string;
         summary: string;
@@ -272,6 +290,25 @@ const footerGroups = [
         locations: string[];
       }> | null = null;
       const scrollLocks = new Set<string>();
+
+      let cookieAccepted = document.cookie
+        .split(";")
+        .some((part) => part.trim() === `${cookieConsentKey}=accepted`);
+      try {
+        cookieAccepted ||= localStorage.getItem(cookieConsentKey) === "accepted";
+      } catch {
+        // Storage can be unavailable in hardened browser modes; the cookie fallback remains.
+      }
+      if (cookieBanner && !cookieAccepted) cookieBanner.hidden = false;
+      cookieAccept?.addEventListener("click", () => {
+        try {
+          localStorage.setItem(cookieConsentKey, "accepted");
+        } catch {
+          // The first-party cookie below is enough to prevent repeat display.
+        }
+        document.cookie = `${cookieConsentKey}=accepted; Max-Age=31536000; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+        if (cookieBanner) cookieBanner.hidden = true;
+      });
 
       const setScrollLock = (key: string, locked: boolean) => {
         if (locked) scrollLocks.add(key);

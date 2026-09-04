@@ -76,7 +76,8 @@
     --radius-sm: 0.4rem;
     --radius: 0.7rem;
     --radius-lg: 1.1rem;
-    --radius-pill: 999px;
+    /* Kept as an alias for existing controls, but intentionally not pill-shaped. */
+    --radius-pill: var(--radius-sm);
 
     --shadow-sm: 0 1px 2px rgb(56 42 27 / 5%), 0 2px 8px rgb(56 42 27 / 4%);
     --shadow: 0 2px 4px rgb(56 42 27 / 5%), 0 10px 26px rgb(56 42 27 / 7%);
