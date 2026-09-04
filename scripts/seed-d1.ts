@@ -1,5 +1,5 @@
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import {
   articleCategoryRow,
   articleCollectionRow,
@@ -101,6 +101,9 @@ const sql = [
   ...insert("article_knowledge", snapshot.articleKnowledge.map(articleKnowledgeRow.from)),
 ].join("\n");
 
+// `.artifacts/` is generated and gitignored, so on a clean checkout — CI, or
+// anyone's first run — the directory this writes into does not exist yet.
+mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, `${sql}\n`);
 process.stdout.write(
   `✓ seed ${OUT} | articles ${snapshot.articles.length} | routes ${snapshot.routes.length} | media ${snapshot.media.length}\n`,
