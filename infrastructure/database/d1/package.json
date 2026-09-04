@@ -29,7 +29,7 @@
     "@tomokichi/data": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260101.0",
+    "@cloudflare/workers-types": "^5.20260901.1",
     "@types/node": "^26.4.0",
     "@tomokichi/infra-r2": "workspace:*"
   }
