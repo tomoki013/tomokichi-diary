@@ -32,7 +32,7 @@
     "deploy:web": "pnpm --filter @tomokichi/web exec wrangler deploy",
     "deploy:admin": "pnpm --filter @tomokichi/admin exec wrangler deploy",
     "deploy:api": "pnpm --filter @tomokichi/api exec wrangler deploy",
-    "deploy:mcp": "pnpm --filter @tomokichi/mcp-server deploy",
+    "deploy:mcp": "pnpm --filter @tomokichi/mcp-server run deploy",
     "verify:live": "tsx scripts/verify-live.ts",
     "media:build": "tsx scripts/media-build.ts",
     "media:sync": "tsx scripts/media-sync.ts"
