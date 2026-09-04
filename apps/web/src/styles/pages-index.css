@@ -1231,9 +1231,13 @@
     position: absolute;
     inset: 50% auto auto 50%;
     display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 0.72fr);
+    /* The picture takes the width its own proportions ask for and the text
+       keeps a fixed measure, so the pair sits together instead of being
+       pushed to opposite edges by a fractional split. */
+    grid-template-columns: minmax(0, auto) minmax(15rem, 23rem);
+    justify-content: center;
     align-items: center;
-    gap: var(--space-lg);
+    gap: clamp(1.5rem, 3vw, 3rem);
     width: min(72rem, calc(100vw - 3rem));
     max-height: min(44rem, calc(100svh - 4rem));
     margin: 0;
@@ -1250,39 +1254,51 @@
     opacity: 1;
   }
 
+  /* Sits in the corner of the viewport, not on the picture. No chrome at rest
+     — the target is larger than the mark it draws. */
   .gallery-lightbox figure > button {
     position: fixed;
-    top: 1rem;
-    right: 1.1rem;
+    top: 0.9rem;
+    right: 1rem;
     z-index: 2;
     display: grid;
     place-items: center;
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 3rem;
+    height: 3rem;
     border: 0;
     background: none;
     color: var(--on-dark-soft);
-    font-size: 1.25rem;
     line-height: 1;
   }
 
-  .gallery-lightbox figure > button:hover {
-    color: var(--accent-on-dark);
+  .gallery-lightbox figure > button svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .gallery-lightbox figure > button:is(:hover, :focus-visible) {
+    color: var(--on-dark);
+    transform: rotate(90deg);
   }
 
   .gallery-lightbox img {
-    width: 100%;
-    height: 100%;
+    width: auto;
+    max-width: 100%;
+    height: auto;
     max-height: min(44rem, calc(100svh - 4rem));
     background: none;
     object-fit: contain;
   }
 
+  /* Spacing is set per element rather than by one flex gap, so the label sits
+     tight to the title and the description keeps its own air. */
   .gallery-lightbox figcaption {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    align-items: start;
+    gap: 0;
     min-height: 0;
+    max-width: 32rem;
     padding: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1294,34 +1310,75 @@
     color: var(--accent-on-dark);
     font-family: var(--font-label);
     font-size: 0.66rem;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
+  }
+
+  /* A short rule under the label anchors the column against the photograph. */
+  .gallery-lightbox figcaption small::after {
+    content: "";
+    display: block;
+    width: 1.6rem;
+    height: 1px;
+    margin-top: 0.6rem;
+    background: currentcolor;
+    opacity: 0.5;
   }
 
   .gallery-lightbox figcaption strong {
+    margin-top: 1rem;
     font-family: var(--font-serif);
-    font-size: 1.2rem;
-    line-height: 1.6;
+    font-size: clamp(1.15rem, 1rem + 0.5vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.55;
+    word-break: auto-phrase;
   }
 
   .gallery-lightbox figcaption p {
+    margin-top: 0.8rem;
     color: var(--on-dark-soft);
     font-size: var(--step-small);
-    line-height: 1.9;
+    line-height: 1.95;
   }
 
   /* Directly under the description rather than pinned to the bottom of the
      panel, which left a large void beside a tall photo. */
+  /* The full-width hairline was left over from the panel this used to sit in;
+     it read as a divider rather than as a link. */
   .gallery-lightbox figcaption a {
-    margin-top: var(--space-xs);
-    padding-top: var(--space-sm);
-    border-top: 1px solid rgb(255 255 255 / 18%);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+    padding-bottom: 0.35rem;
     color: var(--accent-on-dark);
     font-size: var(--step-small);
+    letter-spacing: 0.02em;
     text-decoration: none;
   }
 
-  .gallery-lightbox figcaption a:hover {
-    text-decoration: underline;
+  .gallery-lightbox figcaption a::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentcolor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 260ms var(--ease);
+  }
+
+  .gallery-lightbox figcaption a:is(:hover, :focus-visible)::after {
+    transform: scaleX(1);
+  }
+
+  .gallery-lightbox figcaption a span {
+    transition: transform var(--speed) var(--ease);
+  }
+
+  .gallery-lightbox figcaption a:is(:hover, :focus-visible) span {
+    transform: translateX(0.25rem);
   }
 
   /* Responsive ------------------------------------------------------- */
@@ -1353,6 +1410,8 @@
     .gallery-lightbox figure {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto minmax(0, 1fr);
+      justify-content: stretch;
+      justify-items: center;
       align-items: start;
       gap: var(--space-md);
       width: calc(100vw - 2.2rem);
@@ -1367,6 +1426,10 @@
 
     .gallery-lightbox img {
       max-height: 46svh;
+    }
+
+    .gallery-lightbox figcaption {
+      justify-self: stretch;
     }
   }
 

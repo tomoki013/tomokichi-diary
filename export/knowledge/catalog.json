@@ -12,7 +12,10 @@
         "statement": "サン・マルティン橋側からミラドール・デル・バイエまで実際に歩いた。",
         "provenance": "firsthand",
         "experiencedAt": "2025-02-24",
-        "verifiedAt": "2025-02-24"
+        "verifiedAt": "2025-02-24",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000001"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000002",
@@ -20,7 +23,10 @@
         "statement": "徒歩ルートの途中にも、旧市街を見渡せる展望ポイントがあった。",
         "provenance": "firsthand",
         "experiencedAt": "2025-02-24",
-        "verifiedAt": "2025-02-24"
+        "verifiedAt": "2025-02-24",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000001"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000003",
@@ -28,7 +34,10 @@
         "statement": "夜の再訪ではL71バスを利用した。",
         "provenance": "firsthand",
         "experiencedAt": "2025-02-24",
-        "verifiedAt": "2025-02-24"
+        "verifiedAt": "2025-02-24",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000001"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000004",
@@ -36,7 +45,19 @@
         "statement": "展望台周辺では帰りの交通手段を先に決めておく。バスを逃すと徒歩になる可能性がある。",
         "provenance": "derived",
         "experiencedAt": null,
-        "verifiedAt": "2025-02-24"
+        "verifiedAt": "2025-02-24",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000001"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "10000000-0000-4000-8000-000000000001",
+        "type": "firsthand-note",
+        "name": "ミラドール・デル・バイエ訪問記録",
+        "url": "/posts/howtoget-mirador-del-valle",
+        "checkedAt": "2025-02-24"
       }
     ],
     "routes": [
@@ -60,7 +81,10 @@
         "statement": "中国・マレーシア・シンガポールでCHAGEEを利用し、記事掲載の4種類を実際に飲んだ。",
         "provenance": "firsthand",
         "experiencedAt": "2025-12-05",
-        "verifiedAt": "2026-09-04"
+        "verifiedAt": "2026-09-04",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000002"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000006",
@@ -68,7 +92,10 @@
         "statement": "伯牙絶弦は、ジャスミンで香り付けした緑茶をベースにしたミルクティーとして公式説明されている。",
         "provenance": "official",
         "experiencedAt": null,
-        "verifiedAt": "2026-09-04"
+        "verifiedAt": "2026-09-04",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000003"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000007",
@@ -76,7 +103,10 @@
         "statement": "白雾红尘は、大紅袍を使った烏龍ミルクティーとして公式説明されている。",
         "provenance": "official",
         "experiencedAt": null,
-        "verifiedAt": "2026-09-04"
+        "verifiedAt": "2026-09-04",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000003"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000008",
@@ -84,7 +114,10 @@
         "statement": "桂馥兰香は、烏龍茶と金木犀を組み合わせたミルクティーとして公式説明されている。",
         "provenance": "official",
         "experiencedAt": null,
-        "verifiedAt": "2026-09-04"
+        "verifiedAt": "2026-09-04",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000005"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000009",
@@ -92,7 +125,33 @@
         "statement": "花田乌龙は、金観音烏龍茶と白桃の香りを組み合わせたミルクティーとして公式説明されている。",
         "provenance": "official",
         "experiencedAt": null,
-        "verifiedAt": "2026-09-04"
+        "verifiedAt": "2026-09-04",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000003"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "10000000-0000-4000-8000-000000000002",
+        "type": "firsthand-note",
+        "name": "CHAGEE実飲記録",
+        "url": "/posts/chagee-menu-explained",
+        "checkedAt": "2026-08-24"
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000003",
+        "type": "official",
+        "name": "CHAGEE Malaysia 公式 Milk Tea Series",
+        "url": "https://chagee.com.my/product/milk-tea-series",
+        "checkedAt": "2026-09-04"
+      },
+      {
+        "id": "10000000-0000-4000-8000-000000000005",
+        "type": "official",
+        "name": "CHAGEE Global 公式 Fresh Milk Tea Series",
+        "url": "https://global.chagee.com/ph/en/product/fresh-milk-tea-series",
+        "checkedAt": "2026-09-04"
       }
     ],
     "routes": []
@@ -110,7 +169,10 @@
         "statement": "筆者が乗り合いミニバスで実際に支払った片道料金は200 EGPだった。",
         "provenance": "firsthand",
         "experiencedAt": "2025-06-20",
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000011",
@@ -118,7 +180,10 @@
         "statement": "アスワンからアブシンベルまで、実際の移動には約3時間30分かかった。",
         "provenance": "firsthand",
         "experiencedAt": "2025-06-20",
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000012",
@@ -126,7 +191,10 @@
         "statement": "実際に利用した車両はハイエース型の乗り合いミニバスだった。",
         "provenance": "firsthand",
         "experiencedAt": "2025-06-20",
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000013",
@@ -134,7 +202,10 @@
         "statement": "筆者の利用時は、Google Mapsに表示された時刻と現地の運用が合っていなかった。",
         "provenance": "firsthand",
         "experiencedAt": "2025-06-20",
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000014",
@@ -142,7 +213,10 @@
         "statement": "筆者が訪れた金曜日は大型バスが運行していなかった。制度上の恒常的な運休とは断定しない。",
         "provenance": "firsthand",
         "experiencedAt": "2025-06-20",
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
       },
       {
         "id": "30000000-0000-4000-8000-000000000015",
@@ -150,7 +224,19 @@
         "statement": "到着後、観光を始める前に帰りのミニバスの乗り場と出発時刻を現地で確認する。",
         "provenance": "derived",
         "experiencedAt": null,
-        "verifiedAt": "2025-06-20"
+        "verifiedAt": "2025-06-20",
+        "sourceIds": [
+          "10000000-0000-4000-8000-000000000004"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "10000000-0000-4000-8000-000000000004",
+        "type": "firsthand-note",
+        "name": "アスワン―アブシンベル移動記録",
+        "url": "/posts/howtoget-abusimbel-from-asuwan",
+        "checkedAt": "2025-06-20"
       }
     ],
     "routes": [

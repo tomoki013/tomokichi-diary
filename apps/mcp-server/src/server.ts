@@ -31,8 +31,23 @@ const textResult = (items: ReturnType<typeof queryCatalog>, siteOrigin: string) 
         text:
           enriched.length > 0
             ? enriched
-                .map(
-                  (entry) => `${entry.title}\n${entry.quickAnswer ?? entry.summary}\n${entry.url}`,
+                .map((entry) =>
+                  [
+                    entry.title,
+                    entry.quickAnswer ?? entry.summary,
+                    ...entry.facts.map(
+                      (fact) =>
+                        `- ${fact.statement} [${fact.provenance}${fact.experiencedAt ? ` / 体験 ${fact.experiencedAt}` : ""}${fact.verifiedAt ? ` / 確認 ${fact.verifiedAt}` : ""}]`,
+                    ),
+                    ...entry.sources.flatMap((source) =>
+                      source.url
+                        ? [
+                            `出典: ${source.name} ${source.url} (確認 ${source.checkedAt ?? "日付なし"})`,
+                          ]
+                        : [],
+                    ),
+                    entry.url,
+                  ].join("\n"),
                 )
                 .join("\n\n")
             : "条件に合う検証済みの旅行情報はありません。",

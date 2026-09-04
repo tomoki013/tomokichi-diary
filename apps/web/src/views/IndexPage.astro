@@ -8,7 +8,7 @@ import { content } from "../lib/content";
 import Picture from "../components/Picture.astro";
 import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
 import WorldMap from "../components/WorldMap.astro";
-import { SearchIcon } from "../components/TravelIcons";
+import { SearchIcon, XIcon } from "../components/TravelIcons";
 
 interface Props {
   route: Route;
@@ -1097,7 +1097,7 @@ const labelOf = (target: Route): string => {
           />
           <figure role="dialog" aria-modal="true" aria-label="写真の拡大表示">
             <button type="button" data-gallery-close aria-label="写真を閉じる">
-              ×
+              <XIcon />
             </button>
             <img data-gallery-lightbox-image src="" alt="" />
             <figcaption>
@@ -1105,7 +1105,7 @@ const labelOf = (target: Route): string => {
               <strong data-gallery-lightbox-title />
               <p data-gallery-lightbox-summary />
               <a data-gallery-lightbox-link href="/posts">
-                この写真の記事を読む&nbsp; →
+                この写真の記事を読む<span aria-hidden="true">→</span>
               </a>
             </figcaption>
           </figure>

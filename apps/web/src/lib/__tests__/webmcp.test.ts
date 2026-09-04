@@ -9,6 +9,7 @@ const catalog = [
     path: "/posts/a1",
     quickAnswer: "早朝バス",
     routes: [],
+    sources: [],
     facts: [
       {
         id: "f1",
@@ -17,6 +18,7 @@ const catalog = [
         provenance: "firsthand" as const,
         experiencedAt: "2025-01-01",
         verifiedAt: "2025-01-02",
+        sourceIds: [],
       },
     ],
   },

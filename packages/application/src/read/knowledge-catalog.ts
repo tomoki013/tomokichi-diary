@@ -14,6 +14,14 @@ export interface KnowledgeCatalogEntry {
     readonly provenance: Provenance;
     readonly experiencedAt: string | null;
     readonly verifiedAt: string | null;
+    readonly sourceIds: readonly string[];
+  }[];
+  readonly sources: readonly {
+    readonly id: string;
+    readonly type: string;
+    readonly name: string;
+    readonly url: string | null;
+    readonly checkedAt: string | null;
   }[];
   readonly routes: readonly { readonly id: string; readonly name: string; readonly mode: string }[];
 }
@@ -45,14 +53,20 @@ export function buildKnowledgeCatalog(snapshot: ContentSnapshot): readonly Knowl
         quickAnswer: knowledge.quickAnswer?.summary ?? null,
         facts: snapshot.travelFacts
           .filter((fact) => factIds.has(fact.id) && fact.status === "verified")
-          .map(({ id, kind, statement, provenance, experiencedAt, verifiedAt }) => ({
+          .map(({ id, kind, statement, provenance, experiencedAt, verifiedAt, sourceIds }) => ({
             id,
             kind,
             statement,
             provenance,
             experiencedAt,
             verifiedAt,
+            sourceIds,
           })),
+        sources: snapshot.sources.filter((source) =>
+          snapshot.travelFacts
+            .filter((fact) => factIds.has(fact.id) && fact.status === "verified")
+            .some((fact) => fact.sourceIds.includes(source.id)),
+        ),
         routes: knowledge.routeIds.flatMap((id) => {
           const travelRoute = snapshot.travelRoutes.find((item) => item.id === id);
           return travelRoute ? [{ id, name: travelRoute.name, mode: travelRoute.mode }] : [];
