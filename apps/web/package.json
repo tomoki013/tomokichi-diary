@@ -17,7 +17,7 @@
     "@tomokichi/domain": "workspace:*",
     "@tomokichi/infra-d1": "workspace:*",
     "@tomokichi/seo": "workspace:*",
-    "astro": "^5.16.2",
+    "astro": "^7.2.10",
     "d3-geo": "^3.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
