@@ -120,6 +120,9 @@
   /* Article ---------------------------------------------------------- */
   .article-page {
     display: grid;
+    /* The related section that follows draws its own top rule. Without this
+       the last card in the pager sat directly on that line. */
+    padding-bottom: var(--band-tight);
   }
 
   .article-hero {
@@ -284,7 +287,22 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--band-tight);
+  }
+
+  /* The body used to start straight under the tag row with nothing between
+     them, so there was no line to say "the article begins here". A rule sets
+     the prose apart from the metadata above it, and the opening paragraph is
+     set as a lede. */
+  .article-content {
+    padding-top: var(--band-tight);
+    border-top: 1px solid var(--line);
+  }
+
+  .article-content > p:first-child {
+    color: var(--ink);
+    font-size: 1.06rem;
+    line-height: 2;
   }
 
   .article-taxonomy :is(a, span) {
@@ -335,6 +353,12 @@
     margin-top: var(--space-md);
     padding-block: var(--space-md);
     border-block: 1px solid var(--line);
+  }
+
+  .article-share__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .article-share small {

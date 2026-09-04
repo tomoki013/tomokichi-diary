@@ -580,6 +580,13 @@
     height: 1rem;
   }
 
+  /* The secondary of the pair: same shape, quieter until it is reached for. */
+  .share-button--ghost {
+    border-color: var(--line);
+    background: transparent;
+    color: var(--ink-soft);
+  }
+
   /* World map ------------------------------------------------------- */
   .world-map {
     position: relative;

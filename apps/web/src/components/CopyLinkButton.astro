@@ -1,0 +1,41 @@
+---
+import { LinkIcon } from "./TravelIcons";
+
+interface Props {
+  url: string;
+}
+
+const { url } = Astro.props;
+---
+
+<button class="share-button share-button--ghost" type="button" data-copy-link data-url={url}>
+  <LinkIcon /><span data-copy-label>リンクをコピー</span>
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy-link]").forEach((button) => {
+    const label = button.querySelector<HTMLElement>("[data-copy-label]");
+    let reset = 0;
+
+    const say = (text: string) => {
+      if (!label) return;
+      label.textContent = text;
+      window.clearTimeout(reset);
+      reset = window.setTimeout(() => {
+        label.textContent = "リンクをコピー";
+      }, 2200);
+    };
+
+    button.addEventListener("click", async () => {
+      const url = button.dataset.url ?? location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        say("コピーしました");
+      } catch {
+        // Clipboard access is refused outside a secure context and in some
+        // embedded browsers, so fall back to selecting the text by hand.
+        say("コピーできませんでした");
+      }
+    });
+  });
+</script>

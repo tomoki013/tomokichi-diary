@@ -14,6 +14,7 @@ import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
 import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
+import CopyLinkButton from "../components/CopyLinkButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 import WebMcpTools from "../components/WebMcpTools.astro";
 import { snapshot } from "../lib/content";
@@ -162,7 +163,10 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
         </footer>
         <div class="article-share">
           <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
-          <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+          <div class="article-share__actions">
+            <CopyLinkButton url={metadata.canonical} />
+            <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+          </div>
         </div>
         {
           (previousArticle || nextArticle) && (
