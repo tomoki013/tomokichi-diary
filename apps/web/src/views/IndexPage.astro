@@ -123,6 +123,7 @@ const galleryImages = [
             {
               ...item,
               articleTitle: view.revision.title,
+              articleSummary: view.revision.summary,
               articlePath: view.route.path,
               country: country ? content.locations.nameOf(country.id, "ja") : "旅の景色",
             },
@@ -178,8 +179,15 @@ const homeStoryLabel = (view: (typeof articles)[number]) => {
     : (view.categories[0]?.name ?? "旅行日記");
 };
 
+/** How many cards the archive reveals per page. Every card is in the HTML
+ * already, so this only decides how much of it is shown at once. */
+const ARCHIVE_PAGE_SIZE = 24;
+
 const archiveFeatured = articles.find((view) => view.cover) ?? articles[0];
-const archiveArticles = articles.filter((view) => view.article.id !== archiveFeatured?.article.id);
+// The featured article stays in the list as well as in the banner above it.
+// Holding it back made the archive claim a different total from the masthead,
+// and left that one article unreachable through the search and filters.
+const archiveArticles = articles;
 const archiveCategories = [
   ...new Set(archiveArticles.flatMap((view) => view.categories.map((item) => item.name))),
 ]
@@ -349,25 +357,16 @@ const labelOf = (target: Route): string => {
 
         <section class="home-discovery" aria-labelledby="home-discovery-title">
           <div class="home-discovery__intro">
-            <>
-              <p class="eyebrow">FIND A STORY</p>
-              <h2 id="home-discovery-title">どんな旅を探していますか？</h2>
-            </>
+            <p class="eyebrow">FIND A STORY</p>
+            <h2 id="home-discovery-title">どんな旅を探していますか？</h2>
           </div>
-          <form action="/posts" method="get" role="search">
-            <>
-              <label class="sr-only" for="home-search">
-                行き先・キーワードで検索
-              </label>
-              <SearchIcon />
-              <input
-                id="home-search"
-                name="q"
-                type="search"
-                placeholder="行き先・キーワードで検索"
-              />
-              <button type="submit">検索</button>
-            </>
+          <form action="/posts#results" method="get" role="search">
+            <label class="sr-only" for="home-search">
+              行き先・キーワードで検索
+            </label>
+            <SearchIcon />
+            <input id="home-search" name="q" type="search" placeholder="行き先・キーワードで検索" />
+            <button type="submit">検索</button>
           </form>
           <div class="home-discovery__popular">
             <span>Popular</span>
@@ -494,24 +493,20 @@ const labelOf = (target: Route): string => {
           </div>
         </section>
 
-        <section class="home-journeys" aria-labelledby="home-journeys-heading">
+        <section class="home-collections" aria-labelledby="home-journeys-heading">
           <div class="section-heading">
-            <>
-              <div>
-                <>
-                  <p class="eyebrow">JOURNEY COLLECTIONS</p>
-                  <h2 id="home-journeys-heading">ひとつの旅を、順番にたどる</h2>
-                  <p>出発から帰るまで。旅の流れに沿って読める旅行日記です。</p>
-                </>
-              </div>
-              <a href="/collections">旅のまとまりを見る&nbsp; →</a>
-            </>
+            <div>
+              <p class="eyebrow">JOURNEY COLLECTIONS</p>
+              <h2 id="home-journeys-heading">ひとつの旅を、順番にたどる</h2>
+              <p>出発から帰るまで。旅の流れに沿って読める旅行日記です。</p>
+            </div>
+            <a href="/collections">旅のまとまりを見る&nbsp; →</a>
           </div>
-          <div>
+          <div class="home-journeys">
             {collections("journey")
               .slice(0, 3)
               .map((entry, index) => (
-                <a href={entry.path}>
+                <a class="home-journey-card" href={entry.path}>
                   {entry.cover && (
                     <Picture
                       storageKey={entry.cover.storageKey}
@@ -530,67 +525,50 @@ const labelOf = (target: Route): string => {
                 </a>
               ))}
           </div>
+
+          <div class="home-themes">
+            <div class="home-themes__heading">
+              <p class="eyebrow">TRAVEL THEMES</p>
+              <h3>好きな景色から読む</h3>
+            </div>
+            <a href="/collections">すべて見る&nbsp; →</a>
+            <div class="home-themes__row">
+              {collections("series")
+                .slice(0, 3)
+                .map((entry) => (
+                  <a href={entry.path}>
+                    {entry.cover && (
+                      <Picture
+                        storageKey={entry.cover.storageKey}
+                        alt={entry.collection.title}
+                        sizes="(max-width: 760px) 45vw, 220px"
+                      />
+                    )}
+                    <span>
+                      <strong>{entry.collection.title}</strong>
+                      <small>{entry.count}本の記録</small>
+                    </span>
+                  </a>
+                ))}
+            </div>
+          </div>
         </section>
 
-        <section class="home-closing" aria-label="テーマとこのブログについて">
-          <div class="home-themes">
-            <>
-              <div class="section-heading">
-                <>
-                  <div>
-                    <>
-                      <p class="eyebrow">TRAVEL THEMES</p>
-                      <h2>好きな景色から読む</h2>
-                    </>
-                  </div>
-                  <a href="/collections">すべて見る&nbsp; →</a>
-                </>
-              </div>
-              <div>
-                {collections("series")
-                  .slice(0, 3)
-                  .map((entry) => (
-                    <a href={entry.path}>
-                      {entry.cover && (
-                        <Picture
-                          storageKey={entry.cover.storageKey}
-                          alt={entry.collection.title}
-                          sizes="(max-width: 760px) 45vw, 220px"
-                        />
-                      )}
-                      <span>
-                        <strong>{entry.collection.title}</strong>
-                        <small>{entry.count}本の記録</small>
-                      </span>
-                    </a>
-                  ))}
-              </div>
-            </>
+        <aside class="home-author-card" aria-labelledby="home-about-heading">
+          <Picture
+            storageKey="images/Introduce/introduce.jpg"
+            alt="旅先に立つともきち"
+            sizes="(max-width: 760px) 100vw, 420px"
+          />
+          <div>
+            <p class="eyebrow">ABOUT THIS DIARY</p>
+            <h2 id="home-about-heading">はじめまして、ともきちです。</h2>
+            <p>
+              旅先で本当に役立ったこと、思いがけず心に残った景色を、自分の言葉と写真で記録しています。
+            </p>
+            <a href="/about">このブログについて&nbsp; →</a>
           </div>
-          <aside class="home-author-card" aria-labelledby="home-about-heading">
-            <>
-              <Picture
-                storageKey="images/Introduce/introduce.jpg"
-                alt="旅先に立つともきち"
-                sizes="(max-width: 760px) 100vw, 360px"
-              />
-              <div>
-                <>
-                  <p class="eyebrow">ABOUT THIS DIARY</p>
-                  <h2 id="home-about-heading">
-                    はじめまして、
-                    <br />
-                    ともきちです。
-                  </h2>
-                  <p>
-                    旅先で本当に役立ったこと、思いがけず心に残った景色を、自分の言葉と写真で記録しています。
-                  </p>
-                  <a href="/about">このブログについて&nbsp; →</a>
-                </>
-              </div>
-            </>
-          </aside>
-        </section>
+        </aside>
       </div>
     )
   }
@@ -645,10 +623,8 @@ const labelOf = (target: Route): string => {
         <section class="posts-discovery" aria-labelledby="all-stories-heading">
           <div class="posts-discovery__heading">
             <div>
-              <>
-                <p class="eyebrow">EXPLORE THE BLOG</p>
-                <h2 id="all-stories-heading">旅のブログを探す</h2>
-              </>
+              <p class="eyebrow">EXPLORE THE BLOG</p>
+              <h2 id="all-stories-heading">旅のブログを探す</h2>
             </div>
             <p>
               <span data-archive-count>{archiveArticles.length}</span>件の旅
@@ -667,29 +643,23 @@ const labelOf = (target: Route): string => {
               </label>
               <div class="posts-filter__selects">
                 <label>
-                  <>
-                    <span>旅先</span>
-                    <select data-archive-country>
-                      <option value="all">すべての国</option>
-                      {archiveCountries.map((country) => (
-                        <option value={country.name.toLocaleLowerCase("ja")}>
-                          {country.name}（{country.count}）
-                        </option>
-                      ))}
-                    </select>
-                  </>
+                  <span>旅先</span>
+                  <select data-archive-country>
+                    <option value="all">すべての国</option>
+                    {archiveCountries.map((country) => (
+                      <option value={country.name.toLocaleLowerCase("ja")}>
+                        {country.name}（{country.count}）
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
-                  <>
-                    <span>並び順</span>
-                    <select data-archive-sort>
-                      <>
-                        <option value="newest">新しい順</option>
-                        <option value="oldest">古い順</option>
-                        <option value="title">タイトル順</option>
-                      </>
-                    </select>
-                  </>
+                  <span>並び順</span>
+                  <select data-archive-sort>
+                    <option value="newest">新しい順</option>
+                    <option value="oldest">古い順</option>
+                    <option value="title">タイトル順</option>
+                  </select>
                 </label>
               </div>
             </div>
@@ -705,15 +675,13 @@ const labelOf = (target: Route): string => {
               ))}
             </div>
             <div class="posts-filter__footer">
-              <>
-                <p data-archive-summary>すべての記事を表示中</p>
-                <button type="button" data-archive-reset>
-                  条件をリセット
-                </button>
-              </>
+              <p data-archive-summary>すべての記事を表示中</p>
+              <button type="button" data-archive-reset>
+                条件をリセット
+              </button>
             </div>
           </div>
-          <div class="posts-results">
+          <div class="posts-results" id="results">
             <ul class="card-grid posts-grid" data-article-list>
               {archiveArticles.map((view, index) => (
                 <ArticleCard
@@ -732,9 +700,14 @@ const labelOf = (target: Route): string => {
             </p>
             <footer class="posts-results__footer">
               <p data-archive-page-status aria-live="polite">
-                1–{Math.min(12, archiveArticles.length)} / {archiveArticles.length}件
+                1–{Math.min(ARCHIVE_PAGE_SIZE, archiveArticles.length)} / {archiveArticles.length}件
               </p>
-              <nav class="posts-pagination" data-archive-pagination aria-label="記事一覧のページ" />
+              <nav
+                class="posts-pagination"
+                data-archive-pagination
+                data-page-size={ARCHIVE_PAGE_SIZE}
+                aria-label="記事一覧のページ"
+              />
             </footer>
           </div>
         </section>
@@ -757,35 +730,27 @@ const labelOf = (target: Route): string => {
               地図を眺める。国を選ぶ。街の記録を読む。まだ行き先が決まっていない時間も、旅の一部です。
             </p>
             <dl>
-              <>
-                <div>
-                  <>
-                    <dt>訪れた国</dt>
-                    <dd>
-                      {countryCount}
-                      <small>か国</small>
-                    </dd>
-                  </>
-                </div>
-                <div>
-                  <>
-                    <dt>旅の記録</dt>
-                    <dd>
-                      {articles.length}
-                      <small>本</small>
-                    </dd>
-                  </>
-                </div>
-                <div>
-                  <>
-                    <dt>地域</dt>
-                    <dd>
-                      {continents.length}
-                      <small>エリア</small>
-                    </dd>
-                  </>
-                </div>
-              </>
+              <div>
+                <dt>訪れた国</dt>
+                <dd>
+                  {countryCount}
+                  <small>か国</small>
+                </dd>
+              </div>
+              <div>
+                <dt>旅の記録</dt>
+                <dd>
+                  {articles.length}
+                  <small>本</small>
+                </dd>
+              </div>
+              <div>
+                <dt>地域</dt>
+                <dd>
+                  {continents.length}
+                  <small>エリア</small>
+                </dd>
+              </div>
             </dl>
           </div>
           <div class="destination-masthead__mosaic" aria-hidden="true">
@@ -812,39 +777,29 @@ const labelOf = (target: Route): string => {
 
         <section class="destination-map-section" aria-labelledby="destination-map-heading">
           <div class="destination-section-heading">
-            <>
-              <div>
-                <>
-                  <small>地図から選ぶ</small>
-                  <h2 id="destination-map-heading">世界を眺めて、気になる国へ</h2>
-                </>
-              </div>
-              <p>オレンジのピンを選ぶと、その国のブログへ移動します。</p>
-            </>
+            <div>
+              <small>地図から選ぶ</small>
+              <h2 id="destination-map-heading">世界を眺めて、気になる国へ</h2>
+            </div>
+            <p>オレンジのピンを選ぶと、その国のブログへ移動します。</p>
           </div>
           <WorldMap countries={continents.flatMap((continent) => continent.countries)} />
         </section>
 
         <section class="destination-directory" aria-labelledby="destination-directory-heading">
           <div class="destination-section-heading">
-            <>
-              <div>
-                <>
-                  <small>国・都市から選ぶ</small>
-                  <h2 id="destination-directory-heading">訪れた場所のすべて</h2>
-                </>
-              </div>
-              <p>
-                <span data-destination-count>{countryCount}</span>か国を掲載しています。
-              </p>
-            </>
+            <div>
+              <small>国・都市から選ぶ</small>
+              <h2 id="destination-directory-heading">訪れた場所のすべて</h2>
+            </div>
+            <p>
+              <span data-destination-count>{countryCount}</span>か国を掲載しています。
+            </p>
           </div>
           <label class="destination-search">
-            <>
-              <SearchIcon />
-              <span class="sr-only">国または都市を検索</span>
-              <input type="search" placeholder="国・都市名で絞り込む" data-destination-search />
-            </>
+            <SearchIcon />
+            <span class="sr-only">国または都市を検索</span>
+            <input type="search" placeholder="国・都市名で絞り込む" data-destination-search />
           </label>
           <nav class="destination-tabs" aria-label="大陸で絞り込む">
             <button class="is-active" type="button" data-destination-filter="all">
@@ -915,33 +870,29 @@ const labelOf = (target: Route): string => {
       <div class="collections-page">
         <header class="collections-hero">
           <div class="collections-hero__copy">
-            <>
-              <p>CURATED TRAVEL STORIES</p>
-              <h1>
-                旅の記憶を、
-                <br />
-                ひとつの物語として。
-              </h1>
-              <span>
-                時系列でたどる旅程と、心に残った景色を集めたテーマ。気分に合う入口から、ブログを続けて読めます。
-              </span>
-              <div>
-                <>
-                  <b>
-                    {collections("journey").length}
-                    <small>旅程</small>
-                  </b>
-                  <b>
-                    {collections("series").length}
-                    <small>テーマ</small>
-                  </b>
-                  <b>
-                    {articles.length}
-                    <small>ブログ</small>
-                  </b>
-                </>
-              </div>
-            </>
+            <p>CURATED TRAVEL STORIES</p>
+            <h1>
+              旅の記憶を、
+              <br />
+              ひとつの物語として。
+            </h1>
+            <span>
+              時系列でたどる旅程と、心に残った景色を集めたテーマ。気分に合う入口から、ブログを続けて読めます。
+            </span>
+            <div>
+              <b>
+                {collections("journey").length}
+                <small>旅程</small>
+              </b>
+              <b>
+                {collections("series").length}
+                <small>テーマ</small>
+              </b>
+              <b>
+                {articles.length}
+                <small>ブログ</small>
+              </b>
+            </div>
           </div>
           <div class="collections-hero__visual" aria-hidden="true">
             {collections("journey")
@@ -966,14 +917,12 @@ const labelOf = (target: Route): string => {
         </header>
 
         <nav class="collections-jump" aria-label="コレクション内メニュー">
-          <>
-            <a href="#journey-collections-heading">
-              旅程から読む <span>→</span>
-            </a>
-            <a href="#series-collections-heading">
-              テーマから読む <span>→</span>
-            </a>
-          </>
+          <a href="#journey-collections-heading">
+            旅程から読む <span>→</span>
+          </a>
+          <a href="#series-collections-heading">
+            テーマから読む <span>→</span>
+          </a>
         </nav>
 
         <section
@@ -981,15 +930,11 @@ const labelOf = (target: Route): string => {
           aria-labelledby="journey-collections-heading"
         >
           <div class="collections-group__heading">
-            <>
-              <div>
-                <>
-                  <small>旅程コレクション</small>
-                  <h2 id="journey-collections-heading">旅を順番にたどる</h2>
-                </>
-              </div>
-              <p>出発から帰着まで、時系列でまとまった旅の記録です。</p>
-            </>
+            <div>
+              <small>旅程コレクション</small>
+              <h2 id="journey-collections-heading">旅を順番にたどる</h2>
+            </div>
+            <p>出発から帰着まで、時系列でまとまった旅の記録です。</p>
           </div>
           <div class="journey-collection-grid">
             {collections("journey").map((entry, index) => (
@@ -1020,15 +965,11 @@ const labelOf = (target: Route): string => {
 
         <section class="collections-group" aria-labelledby="series-collections-heading">
           <div class="collections-group__heading">
-            <>
-              <div>
-                <>
-                  <small>テーマコレクション</small>
-                  <h2 id="series-collections-heading">好きな景色から読む</h2>
-                </>
-              </div>
-              <p>夕陽、建築、街並み。心が動いた瞬間をテーマ別に集めました。</p>
-            </>
+            <div>
+              <small>テーマコレクション</small>
+              <h2 id="series-collections-heading">好きな景色から読む</h2>
+            </div>
+            <p>夕陽、建築、街並み。心が動いた瞬間をテーマ別に集めました。</p>
           </div>
           <div class="series-collection-grid">
             {collections("series").map((entry, index) => (
@@ -1063,20 +1004,18 @@ const labelOf = (target: Route): string => {
       <div class="gallery-page">
         <header class="gallery-hero">
           <div>
-            <>
-              <p class="eyebrow">PHOTO JOURNAL</p>
-              <h1>
-                旅の途中で、
-                <br />
-                心が止まった瞬間。
-              </h1>
-              <p>
-                街の光、建築の輪郭、食卓の色。記事に残した写真を、ここでは言葉より少し自由に眺められます。
-              </p>
-              <span>
-                <strong>{galleryImages.length}</strong> photographs
-              </span>
-            </>
+            <p class="eyebrow">PHOTO JOURNAL</p>
+            <h1>
+              旅の途中で、
+              <br />
+              心が止まった瞬間。
+            </h1>
+            <p>
+              街の光、建築の輪郭、食卓の色。記事に残した写真を、ここでは言葉より少し自由に眺められます。
+            </p>
+            <span>
+              <strong>{galleryImages.length}</strong> photographs
+            </span>
           </div>
           <div class="gallery-hero__mosaic" aria-hidden="true">
             {galleryImages.slice(0, 3).map((item, index) => (
@@ -1092,17 +1031,13 @@ const labelOf = (target: Route): string => {
 
         <section class="gallery-browser" aria-labelledby="gallery-all-heading">
           <header>
-            <>
-              <div>
-                <>
-                  <p class="eyebrow">ALL PHOTOGRAPHS</p>
-                  <h2 id="gallery-all-heading">すべての旅の写真</h2>
-                </>
-              </div>
-              <p>
-                <span data-gallery-count>{galleryImages.length}</span>枚を表示中
-              </p>
-            </>
+            <div>
+              <p class="eyebrow">ALL PHOTOGRAPHS</p>
+              <h2 id="gallery-all-heading">すべての旅の写真</h2>
+            </div>
+            <p>
+              <span data-gallery-count>{galleryImages.length}</span>枚を表示中
+            </p>
           </header>
           <div class="gallery-filters" aria-label="国で絞り込む">
             <button class="is-active" type="button" data-gallery-filter="all">
@@ -1128,7 +1063,10 @@ const labelOf = (target: Route): string => {
                   data-gallery-open
                   data-src={mediaUrl(item.asset.storageKey)}
                   data-alt={item.usage.alt}
-                  data-title={item.articleTitle}
+                  data-title={item.usage.alt || item.articleTitle}
+                  data-article={item.articleTitle}
+                  data-summary={item.articleSummary}
+                  data-place={item.country}
                   data-path={item.articlePath}
                 >
                   <Picture
@@ -1151,31 +1089,26 @@ const labelOf = (target: Route): string => {
         </section>
 
         <div class="gallery-lightbox" data-gallery-lightbox hidden>
-          <>
-            <button
-              class="gallery-lightbox__backdrop"
-              type="button"
-              data-gallery-close
-              aria-label="写真を閉じる"
-            />
-            <figure role="dialog" aria-modal="true" aria-label="写真の拡大表示">
-              <>
-                <button type="button" data-gallery-close aria-label="写真を閉じる">
-                  ×
-                </button>
-                <img data-gallery-lightbox-image src="" alt="" />
-                <figcaption>
-                  <>
-                    <small data-gallery-lightbox-country>PHOTO JOURNAL</small>
-                    <strong data-gallery-lightbox-title />
-                    <a data-gallery-lightbox-link href="/posts">
-                      この写真の記事を読む&nbsp; →
-                    </a>
-                  </>
-                </figcaption>
-              </>
-            </figure>
-          </>
+          <button
+            class="gallery-lightbox__backdrop"
+            type="button"
+            data-gallery-close
+            aria-label="写真を閉じる"
+          />
+          <figure role="dialog" aria-modal="true" aria-label="写真の拡大表示">
+            <button type="button" data-gallery-close aria-label="写真を閉じる">
+              ×
+            </button>
+            <img data-gallery-lightbox-image src="" alt="" />
+            <figcaption>
+              <small data-gallery-lightbox-country>PHOTO JOURNAL</small>
+              <strong data-gallery-lightbox-title />
+              <p data-gallery-lightbox-summary />
+              <a data-gallery-lightbox-link href="/posts">
+                この写真の記事を読む&nbsp; →
+              </a>
+            </figcaption>
+          </figure>
         </div>
       </div>
     )
@@ -1197,7 +1130,29 @@ const labelOf = (target: Route): string => {
       ))
   }
   <script>
-    const query = new URLSearchParams(location.search).get("q")?.trim().toLocaleLowerCase("ja");
+    /**
+     * Filter state belongs in the query string: every list on this page can be
+     * linked to in the state the reader is looking at. Values equal to their
+     * default are dropped so a pristine list has a clean URL.
+     */
+    const setUrlParams = (
+      entries: [string, string, string][],
+      mode: "push" | "replace" = "push",
+    ) => {
+      const params = new URLSearchParams(location.search);
+      for (const [key, value, fallback] of entries) {
+        if (value === fallback || value === "") params.delete(key);
+        else params.set(key, value);
+      }
+      const search = params.toString();
+      // The fragment is how a search lands on the results rather than the top
+      // of the page, so it survives every rewrite.
+      const next = `${location.pathname}${search ? `?${search}` : ""}${location.hash}`;
+      if (next === `${location.pathname}${location.search}${location.hash}`) return;
+      history[mode === "push" ? "pushState" : "replaceState"](null, "", next);
+    };
+    const urlParam = (key: string, fallback = "") =>
+      new URLSearchParams(location.search).get(key)?.trim() || fallback;
 
     const carousel = document.querySelector<HTMLElement>("[data-hero-carousel]");
     if (carousel) {
@@ -1266,45 +1221,136 @@ const labelOf = (target: Route): string => {
     const archivePageStatus = document.querySelector<HTMLElement>("[data-archive-page-status]");
     const archiveCount = document.querySelector<HTMLElement>("[data-archive-count]");
     const archiveEmpty = document.querySelector<HTMLElement>("[data-archive-empty]");
-    let activeArchiveFilter = "all";
-    let archivePage = Math.max(1, Number(new URLSearchParams(location.search).get("page") ?? 1));
-    const archivePageSize = 12;
+    const archivePageSize = Number(archivePagination?.dataset.pageSize) || 12;
+
+    /**
+     * Every part of the archive's state lives in the query string, so a
+     * filtered, sorted, paginated view is a URL you can share, bookmark and
+     * come back to. The header search modal and the home search box hand over
+     * the same `q` parameter.
+     */
+    const ARCHIVE_DEFAULTS = { q: "", category: "all", country: "all", sort: "newest", page: "1" };
+    let activeArchiveFilter = ARCHIVE_DEFAULTS.category;
+    let archivePage = 1;
+
+    const readArchiveUrl = () => {
+      const params = new URLSearchParams(location.search);
+      return {
+        q: (params.get("q") ?? "").trim(),
+        category: params.get("category") ?? ARCHIVE_DEFAULTS.category,
+        country: params.get("country") ?? ARCHIVE_DEFAULTS.country,
+        sort: params.get("sort") ?? ARCHIVE_DEFAULTS.sort,
+        page: Math.max(1, Number(params.get("page")) || 1),
+      };
+    };
+
+    const writeArchiveUrl = (mode: "push" | "replace") =>
+      setUrlParams(
+        [
+          ["q", archiveSearch?.value.trim() ?? "", ARCHIVE_DEFAULTS.q],
+          ["category", activeArchiveFilter, ARCHIVE_DEFAULTS.category],
+          ["country", archiveCountry?.value ?? "all", ARCHIVE_DEFAULTS.country],
+          ["sort", archiveSort?.value ?? "newest", ARCHIVE_DEFAULTS.sort],
+          ["page", String(archivePage), ARCHIVE_DEFAULTS.page],
+        ],
+        mode,
+      );
+
+    /** Selecting a value the page does not offer would blank the control. */
+    const selectIfPresent = (select: HTMLSelectElement | null, value: string) => {
+      if (!select) return;
+      const exists = [...select.options].some((option) => option.value === value);
+      select.value = exists ? value : "all";
+    };
+
+    const applyArchiveUrl = () => {
+      const state = readArchiveUrl();
+      if (archiveSearch) archiveSearch.value = state.q;
+      selectIfPresent(archiveCountry, state.country);
+      if (archiveSort) archiveSort.value = state.sort;
+      activeArchiveFilter = archiveFilters.some(
+        (button) => (button.dataset.archiveFilter ?? "all") === state.category,
+      )
+        ? state.category
+        : ARCHIVE_DEFAULTS.category;
+      archiveFilters.forEach((button) =>
+        button.classList.toggle(
+          "is-active",
+          (button.dataset.archiveFilter ?? "all") === activeArchiveFilter,
+        ),
+      );
+      archivePage = state.page;
+    };
+
     const renderPagination = (total: number) => {
       if (!archivePagination) return;
       archivePagination.replaceChildren();
       const pages = Math.ceil(total / archivePageSize);
       archivePagination.hidden = pages <= 1;
       if (pages <= 1) return;
-      const addButton = (label: string, page: number, current = false, disabled = false) => {
+
+      const goToPage = (page: number) => {
+        archivePage = page;
+        updateArchive(false, "push");
+        document
+          .querySelector(".posts-results")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      const stepButton = (label: string, page: number, className: string, disabled: boolean) => {
         const button = document.createElement("button");
         button.type = "button";
+        button.className = className;
         button.textContent = label;
         button.disabled = disabled;
-        if (current) button.setAttribute("aria-current", "page");
-        button.addEventListener("click", () => {
-          archivePage = page;
-          updateArchive(false);
-          document
-            .querySelector(".posts-results")
-            ?.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-        archivePagination.append(button);
+        button.addEventListener("click", () => goToPage(page));
+        return button;
       };
-      addButton("前へ", Math.max(1, archivePage - 1), false, archivePage === 1);
+
+      // The numbered list is the desktop affordance; narrower screens get the
+      // "6 / 42" counter instead, and CSS decides which one is shown.
+      const pageList = document.createElement("div");
+      pageList.className = "posts-pagination__pages";
       for (let page = 1; page <= pages; page += 1) {
         if (pages > 7 && page > 2 && page < pages - 1 && Math.abs(page - archivePage) > 1) {
           if (page === 3 || page === pages - 2) {
             const separator = document.createElement("span");
             separator.textContent = "…";
-            archivePagination.append(separator);
+            pageList.append(separator);
           }
           continue;
         }
-        addButton(String(page), page, page === archivePage);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = String(page);
+        if (page === archivePage) button.setAttribute("aria-current", "page");
+        button.addEventListener("click", () => goToPage(page));
+        pageList.append(button);
       }
-      addButton("次へ", Math.min(pages, archivePage + 1), false, archivePage === pages);
+
+      const status = document.createElement("span");
+      status.className = "posts-pagination__status";
+      status.textContent = `${archivePage} / ${pages}`;
+
+      archivePagination.append(
+        stepButton(
+          "← 前へ",
+          Math.max(1, archivePage - 1),
+          "posts-pagination__prev",
+          archivePage === 1,
+        ),
+        pageList,
+        status,
+        stepButton(
+          "次へ →",
+          Math.min(pages, archivePage + 1),
+          "posts-pagination__next",
+          archivePage === pages,
+        ),
+      );
     };
-    const updateArchive = (resetPage = true) => {
+
+    const updateArchive = (resetPage = true, urlMode: "push" | "replace" | "none" = "push") => {
       if (resetPage) archivePage = 1;
       const archiveQuery = archiveSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
       let visible = 0;
@@ -1358,9 +1404,12 @@ const labelOf = (target: Route): string => {
         archiveSummary.textContent =
           conditions.length > 0 ? `${conditions.join("・")}で絞り込み中` : "すべての記事を表示中";
       }
+      // Written after the page has been clamped, so the URL never names a
+      // page the current filters do not have.
+      if (urlMode !== "none") writeArchiveUrl(urlMode);
     };
-    if (archiveSearch && query) archiveSearch.value = query;
-    archiveSearch?.addEventListener("input", () => updateArchive());
+
+    archiveSearch?.addEventListener("input", () => updateArchive(true, "replace"));
     archiveCountry?.addEventListener("change", () => updateArchive());
     archiveSort?.addEventListener("change", () => updateArchive());
     archiveFilters.forEach((button) =>
@@ -1380,7 +1429,17 @@ const labelOf = (target: Route): string => {
       );
       updateArchive();
     });
-    if (archiveCards.length > 0) updateArchive(false);
+
+    if (archiveCards.length > 0) {
+      applyArchiveUrl();
+      // `replace` rather than `none`: a hand-written or stale URL gets tidied
+      // into the canonical form on arrival instead of lingering.
+      updateArchive(false, "replace");
+      addEventListener("popstate", () => {
+        applyArchiveUrl();
+        updateArchive(false, "none");
+      });
+    }
 
     const destinationSearch = document.querySelector<HTMLInputElement>("[data-destination-search]");
     const destinationFilters = [
@@ -1393,7 +1452,15 @@ const labelOf = (target: Route): string => {
     const destinationCount = document.querySelector<HTMLElement>("[data-destination-count]");
     const destinationEmpty = document.querySelector<HTMLElement>("[data-destination-empty]");
     let activeDestination = "all";
-    const updateDestinations = () => {
+    const writeDestinationUrl = (mode: "push" | "replace") =>
+      setUrlParams(
+        [
+          ["q", destinationSearch?.value.trim() ?? "", ""],
+          ["area", activeDestination, "all"],
+        ],
+        mode,
+      );
+    const updateDestinations = (mode: "push" | "replace" | "none" = "push") => {
       const destinationQuery = destinationSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
       let visible = 0;
       destinationCountries.forEach((country) => {
@@ -1411,8 +1478,24 @@ const labelOf = (target: Route): string => {
       });
       if (destinationCount) destinationCount.textContent = String(visible);
       if (destinationEmpty) destinationEmpty.hidden = visible !== 0;
+      if (mode !== "none") writeDestinationUrl(mode);
     };
-    destinationSearch?.addEventListener("input", updateDestinations);
+    const applyDestinationUrl = () => {
+      if (destinationSearch) destinationSearch.value = urlParam("q");
+      const area = urlParam("area", "all");
+      activeDestination = destinationFilters.some(
+        (button) => (button.dataset.destinationFilter ?? "all") === area,
+      )
+        ? area
+        : "all";
+      destinationFilters.forEach((button) =>
+        button.classList.toggle(
+          "is-active",
+          (button.dataset.destinationFilter ?? "all") === activeDestination,
+        ),
+      );
+    };
+    destinationSearch?.addEventListener("input", () => updateDestinations("replace"));
     destinationFilters.forEach((button) =>
       button.addEventListener("click", () => {
         activeDestination = button.dataset.destinationFilter ?? "all";
@@ -1420,6 +1503,14 @@ const labelOf = (target: Route): string => {
         updateDestinations();
       }),
     );
+    if (destinationCountries.length > 0) {
+      applyDestinationUrl();
+      updateDestinations("replace");
+      addEventListener("popstate", () => {
+        applyDestinationUrl();
+        updateDestinations("none");
+      });
+    }
 
     const galleryFilters = [
       ...document.querySelectorAll<HTMLButtonElement>("[data-gallery-filter]"),
@@ -1434,31 +1525,51 @@ const labelOf = (target: Route): string => {
     const galleryTitle = galleryLightbox?.querySelector<HTMLElement>(
       "[data-gallery-lightbox-title]",
     );
+    const galleryCountry = galleryLightbox?.querySelector<HTMLElement>(
+      "[data-gallery-lightbox-country]",
+    );
+    const gallerySummary = galleryLightbox?.querySelector<HTMLElement>(
+      "[data-gallery-lightbox-summary]",
+    );
     const galleryLink = galleryLightbox?.querySelector<HTMLAnchorElement>(
       "[data-gallery-lightbox-link]",
     );
     const setGalleryLightbox = (open: boolean) => {
       if (!galleryLightbox) return;
       galleryLightbox.hidden = !open;
-      requestAnimationFrame(() => galleryLightbox.classList.toggle("is-open", open));
+      void galleryLightbox.offsetHeight;
+      galleryLightbox.classList.toggle("is-open", open);
       document.dispatchEvent(
         new CustomEvent("site:overlay-change", { detail: { key: "gallery-lightbox", open } }),
       );
     };
+    const applyGalleryFilter = (filter: string, mode: "push" | "replace" | "none") => {
+      const known =
+        filter === "all" ||
+        galleryFilters.some((button) => button.dataset.galleryFilter === filter);
+      const active = known ? filter : "all";
+      let visible = 0;
+      galleryItems.forEach((item) => {
+        const matches = active === "all" || item.dataset.country === active;
+        item.hidden = !matches;
+        if (matches) visible += 1;
+      });
+      galleryFilters.forEach((button) =>
+        button.classList.toggle("is-active", (button.dataset.galleryFilter ?? "all") === active),
+      );
+      if (galleryCount) galleryCount.textContent = String(visible);
+      if (galleryEmpty) galleryEmpty.hidden = visible !== 0;
+      if (mode !== "none") setUrlParams([["country", active, "all"]], mode);
+    };
     galleryFilters.forEach((button) =>
-      button.addEventListener("click", () => {
-        const filter = button.dataset.galleryFilter ?? "all";
-        let visible = 0;
-        galleryItems.forEach((item) => {
-          const matches = filter === "all" || item.dataset.country === filter;
-          item.hidden = !matches;
-          if (matches) visible += 1;
-        });
-        galleryFilters.forEach((item) => item.classList.toggle("is-active", item === button));
-        if (galleryCount) galleryCount.textContent = String(visible);
-        if (galleryEmpty) galleryEmpty.hidden = visible !== 0;
-      }),
+      button.addEventListener("click", () =>
+        applyGalleryFilter(button.dataset.galleryFilter ?? "all", "push"),
+      ),
     );
+    if (galleryItems.length > 0) {
+      applyGalleryFilter(urlParam("country", "all"), "replace");
+      addEventListener("popstate", () => applyGalleryFilter(urlParam("country", "all"), "none"));
+    }
     document.querySelectorAll<HTMLButtonElement>("[data-gallery-open]").forEach((button) =>
       button.addEventListener("click", () => {
         if (galleryImage) {
@@ -1466,6 +1577,8 @@ const labelOf = (target: Route): string => {
           galleryImage.alt = button.dataset.alt ?? "";
         }
         if (galleryTitle) galleryTitle.textContent = button.dataset.title ?? "";
+        if (galleryCountry) galleryCountry.textContent = button.dataset.place ?? "PHOTO JOURNAL";
+        if (gallerySummary) gallerySummary.textContent = button.dataset.summary ?? "";
         if (galleryLink) galleryLink.href = button.dataset.path ?? "/posts";
         setGalleryLightbox(true);
       }),

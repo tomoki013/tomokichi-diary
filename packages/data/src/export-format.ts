@@ -86,6 +86,10 @@ const JSON_PARTS = [
   "articleCategories",
   "articleTags",
   "articleCollections",
+  "sources",
+  "travelRoutes",
+  "travelFacts",
+  "articleKnowledge",
 ] as const;
 
 const FILE_NAMES: Record<(typeof JSON_PARTS)[number], string> = {
@@ -107,6 +111,10 @@ const FILE_NAMES: Record<(typeof JSON_PARTS)[number], string> = {
   articleCategories: "relations/article-categories.json",
   articleTags: "relations/article-tags.json",
   articleCollections: "relations/article-collections.json",
+  sources: "knowledge/sources.json",
+  travelRoutes: "knowledge/travel-routes.json",
+  travelFacts: "knowledge/travel-facts.json",
+  articleKnowledge: "knowledge/articles.json",
 };
 
 export function buildExportFiles(snapshot: ContentSnapshot): ExportFile[] {

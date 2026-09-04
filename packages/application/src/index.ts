@@ -8,6 +8,7 @@ export * from "./ports/logger.js";
 export * from "./ports/repositories.js";
 
 export * from "./read/content-index.js";
+export * from "./read/travel-knowledge.js";
 
 export * from "./use-cases/content/snapshot.js";
 export type { ContentSnapshot } from "@tomokichi/data";
@@ -16,3 +17,4 @@ export * from "./use-cases/articles/article-like-use-cases.js";
 export * from "./use-cases/media/media-use-cases.js";
 export * from "./use-cases/routes/route-use-cases.js";
 export * from "./use-cases/contact/contact-use-cases.js";
+export * from "./use-cases/knowledge/verify-firsthand.js";

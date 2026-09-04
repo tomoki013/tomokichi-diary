@@ -1,0 +1,149 @@
+/* Element defaults and the typographic rules the whole site inherits. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Smooth scrolling used to be global, which made every jump link and
+       every programmatic scroll feel sluggish. It is opt-in now: see the
+       `scroll-smooth` behaviour applied to in-page anchors in JS. */
+    scroll-behavior: auto;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--step-body);
+    line-height: 1.85;
+    font-feature-settings: "palt" 1;
+  }
+
+  body.has-site-overlay {
+    overflow: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.42;
+    letter-spacing: 0.01em;
+    /* Japanese wraps at phrase boundaries where the browser can work them
+       out, and never mid-word for Latin runs. */
+    line-break: strict;
+    word-break: auto-phrase;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+
+  h1 {
+    font-size: var(--step-h1);
+  }
+  h2 {
+    font-size: var(--step-h2);
+  }
+  h3 {
+    font-size: var(--step-h3);
+  }
+
+  p {
+    margin: 0;
+    line-break: strict;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    list-style: none;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition: color var(--speed) var(--ease);
+  }
+
+  a:hover {
+    color: var(--accent-strong);
+  }
+
+  img,
+  picture,
+  svg,
+  video {
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+    display: block;
+  }
+
+  picture {
+    display: block;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background: var(--accent-tint);
+    color: var(--accent-strong);
+  }
+
+  hr {
+    height: 1px;
+    border: 0;
+    margin: 0;
+    background: var(--line);
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

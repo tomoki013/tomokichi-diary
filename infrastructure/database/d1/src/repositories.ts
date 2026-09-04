@@ -13,6 +13,7 @@ import type {
   RevisionRepository,
   RouteRepository,
   TaxonomyRepository,
+  KnowledgeRepository,
 } from "@tomokichi/application";
 import {
   aiArtifactRow,
@@ -35,6 +36,10 @@ import {
   revisionRow,
   routeRow,
   tagRow,
+  sourceReferenceRow,
+  travelRouteRow,
+  travelFactRow,
+  articleKnowledgeRow,
   type Row,
 } from "@tomokichi/data";
 import type { SqlDatabase, SqlStatement } from "./sql.js";
@@ -375,6 +380,34 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  const knowledge: KnowledgeRepository = {
+    listSources: async () =>
+      (await all("SELECT * FROM source_references ORDER BY name")).map(sourceReferenceRow.to),
+    listTravelRoutes: async () =>
+      (await all("SELECT * FROM travel_routes ORDER BY name")).map(travelRouteRow.to),
+    listTravelFacts: async () =>
+      (await all("SELECT * FROM travel_facts ORDER BY id")).map(travelFactRow.to),
+    listArticleKnowledge: async () =>
+      (await all("SELECT * FROM article_knowledge ORDER BY article_id")).map(
+        articleKnowledgeRow.to,
+      ),
+    saveSource: async (source) => {
+      await upsert(db, "source_references", sourceReferenceRow.from(source), ["id"]).run();
+    },
+    saveTravelRoute: async (route) => {
+      await upsert(db, "travel_routes", travelRouteRow.from(route), ["id"]).run();
+    },
+    saveTravelFact: async (fact) => {
+      await upsert(db, "travel_facts", travelFactRow.from(fact), ["id"]).run();
+    },
+    saveArticleKnowledge: async (articleKnowledge) => {
+      await upsert(db, "article_knowledge", articleKnowledgeRow.from(articleKnowledge), [
+        "article_id",
+        "revision_id",
+      ]).run();
+    },
+  };
+
   return {
     articles,
     articleLikes,
@@ -390,5 +423,6 @@ export function createRepositories(db: SqlDatabase): Repositories {
     contactMessages,
     authors,
     aiArtifacts,
+    knowledge,
   };
 }

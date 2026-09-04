@@ -19,6 +19,10 @@ import {
   revisionRow,
   routeRow,
   tagRow,
+  sourceReferenceRow,
+  travelRouteRow,
+  travelFactRow,
+  articleKnowledgeRow,
   type Row,
 } from "@tomokichi/data";
 import { loadSnapshot } from "./lib/built-site.js";
@@ -91,6 +95,10 @@ const sql = [
   ...insert("article_categories", snapshot.articleCategories.map(articleCategoryRow.from)),
   ...insert("article_tags", snapshot.articleTags.map(articleTagRow.from)),
   ...insert("article_collections", snapshot.articleCollections.map(articleCollectionRow.from)),
+  ...insert("source_references", snapshot.sources.map(sourceReferenceRow.from)),
+  ...insert("travel_routes", snapshot.travelRoutes.map(travelRouteRow.from)),
+  ...insert("travel_facts", snapshot.travelFacts.map(travelFactRow.from)),
+  ...insert("article_knowledge", snapshot.articleKnowledge.map(articleKnowledgeRow.from)),
 ].join("\n");
 
 writeFileSync(OUT, `${sql}\n`);

@@ -110,12 +110,16 @@ const pins = countries.flatMap((destination) => {
     <g class="world-map__pins">
       {
         pins.map(({ destination, x, y }) => (
-          <a href={destination.path} aria-label={`${destination.name}の記事 ${destination.count}件`}>
+          <a
+            href={destination.path}
+            aria-label={`${destination.name}の記事 ${destination.count}件`}
+          >
             <g transform={`translate(${x} ${y})`}>
               <g class="world-map__pin">
-                <path d="M0 8s-7-7.3-7-13a7 7 0 1 1 14 0C7 .7 0 8 0 8Z" />
-                <circle cy="-5" r="2.2" />
-                <title>{destination.name}</title>
+                <circle r="4" />
+                <title>
+                  {destination.name}（{destination.count}件）
+                </title>
               </g>
             </g>
           </a>
@@ -123,5 +127,7 @@ const pins = countries.flatMap((destination) => {
       }
     </g>
   </svg>
-  <p class="world-map__legend"><span aria-hidden="true"></span> 訪れた国を選ぶ</p>
+  <p class="world-map__legend">
+    <span aria-hidden="true"></span>訪れた国<span aria-hidden="true"></span>記事のある都市
+  </p>
 </div>

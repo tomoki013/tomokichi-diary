@@ -11,6 +11,9 @@ export type CategoryId = Brand<string, "CategoryId">;
 export type TagId = Brand<string, "TagId">;
 export type AuthorId = Brand<string, "AuthorId">;
 export type AIArtifactId = Brand<string, "AIArtifactId">;
+export type SourceId = Brand<string, "SourceId">;
+export type TravelFactId = Brand<string, "TravelFactId">;
+export type TravelRouteId = Brand<string, "TravelRouteId">;
 
 const HEX = "0123456789abcdef";
 

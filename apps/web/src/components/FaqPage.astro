@@ -36,7 +36,7 @@ const groups = markdown
   <header class="faq-hero">
     <div>
       <p class="eyebrow">TRAVEL HELP DESK</p>
-      <h1>旅の疑問を、<br />ここで軽くする。</h1>
+      <h1><span class="sr-only">FAQ — </span>旅の疑問を、<br />ここで軽くする。</h1>
       <p>記事の探し方から旅行記の読み方まで。よくいただく質問を、目的別にまとめました。</p>
     </div>
     <label class="faq-search">
@@ -62,11 +62,9 @@ const groups = markdown
         groups.map((group, groupIndex) => (
           <section id={`faq-group-${groupIndex + 1}`} class="faq-group" data-faq-group>
             <header>
-              <>
-                <span>{String(groupIndex + 1).padStart(2, "0")}</span>
-                <h2>{group.title}</h2>
-                <small>{group.questions.length} QUESTIONS</small>
-              </>
+              <span>{String(groupIndex + 1).padStart(2, "0")}</span>
+              <h2>{group.title}</h2>
+              <small>{group.questions.length} QUESTIONS</small>
             </header>
             <div>
               {group.questions.map((item) => (

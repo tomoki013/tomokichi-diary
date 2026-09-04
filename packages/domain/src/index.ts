@@ -16,6 +16,7 @@ export * from "./entities/collection.js";
 export * from "./entities/relation.js";
 export * from "./entities/ai-artifact.js";
 export * from "./entities/contact-message.js";
+export * from "./entities/knowledge.js";
 
 export * from "./rules/publishing.js";
 export * from "./rules/revision.js";
@@ -25,3 +26,4 @@ export * from "./rules/related.js";
 export * from "./rules/contact.js";
 export * from "./rules/markdown.js";
 export * from "./rules/location-tree.js";
+export * from "./rules/knowledge.js";

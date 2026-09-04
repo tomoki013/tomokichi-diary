@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "id": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101",
+    "slug": "mirador-del-valle",
+    "locationId": "dca15c39-0129-8752-9c6a-d61ce852eaf6",
+    "kind": "landmark",
+    "name": "ミラドール・デル・バイエ",
+    "address": null,
+    "latitude": null,
+    "longitude": null,
+    "officialUrl": null,
+    "status": "open"
+  },
+  {
+    "id": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba102",
+    "slug": "chagee-shanghai-visited-store",
+    "locationId": "df9717ff-b5e2-8ae2-ac09-f1f1d68c8f03",
+    "kind": "shop",
+    "name": "CHAGEE（上海で訪問した店舗）",
+    "address": null,
+    "latitude": null,
+    "longitude": null,
+    "officialUrl": null,
+    "status": "unknown"
+  },
+  {
+    "id": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103",
+    "slug": "aswan-bus-station",
+    "locationId": "91c5a341-0668-88e2-8289-e7a3c1e040ff",
+    "kind": "station",
+    "name": "Aswan Bus Station",
+    "address": null,
+    "latitude": null,
+    "longitude": null,
+    "officialUrl": null,
+    "status": "unknown"
+  },
+  {
+    "id": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba104",
+    "slug": "abu-simbel-bus-station",
+    "locationId": "c60e0fb3-5a4f-816f-a863-5ebaf79511f1",
+    "kind": "station",
+    "name": "Abu Simbel Bus Station",
+    "address": null,
+    "latitude": null,
+    "longitude": null,
+    "officialUrl": null,
+    "status": "unknown"
+  }
+]

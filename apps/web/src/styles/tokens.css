@@ -1,0 +1,100 @@
+/*
+ * Design tokens. Every value the rest of the site is allowed to reach for
+ * lives here, so a change to the palette or the rhythm happens in one place
+ * rather than in the middle of a page rule.
+ */
+@layer tokens {
+  :root {
+    /* Paper and ink -------------------------------------------------- */
+    --bg: #f8f5ef;
+    --bg-sunk: #f1ece1;
+    --surface: #fffdf9;
+    --surface-alt: #f4efe4;
+    /* Warm near-black. The old value carried an olive cast that turned
+       muddy against the ivory page, especially under the footer. */
+    --surface-dark: #1c1a17;
+
+    --ink: #22251f;
+    --ink-soft: #5b5a51;
+    --ink-faint: #8b897e;
+    --on-dark: #f7f3ea;
+    --on-dark-soft: #b8b2a7;
+
+    --line: #e4ddce;
+    --line-strong: #d0c7b3;
+
+    /* Accent: warm travel orange, used sparingly and deliberately. */
+    --accent: #c25a28;
+    --accent-strong: #a44718;
+    --accent-tint: #fbeee3;
+    --accent-line: #eccdb4;
+    /* The accent is too dark to read on the dark surfaces, so those get
+       their own value rather than a color-mix repeated at ten sites. */
+    --accent-on-dark: #e2874f;
+
+    /* Secondary: deep olive for badges and quiet dark surfaces. */
+    --forest: #46512e;
+    --forest-tint: #eceedf;
+
+    /* Type ----------------------------------------------------------- */
+    --font-sans:
+      "Hiragino Kaku Gothic ProN", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    --font-serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", Georgia, serif;
+    --font-label: Georgia, "Times New Roman", serif;
+
+    /* Display sizes stay conservative: Japanese headings need room for a
+       whole phrase per line, and oversized type is what forces mid-word
+       breaks like 「心が向／いた場所」. */
+    --step-display: clamp(1.9rem, 1.15rem + 2.5vw, 3.1rem);
+    --step-h1: clamp(1.7rem, 1.1rem + 2vw, 2.6rem);
+    --step-h2: clamp(1.4rem, 1.05rem + 1.2vw, 1.95rem);
+    --step-h3: clamp(1.1rem, 0.98rem + 0.5vw, 1.32rem);
+    --step-body: 1rem;
+    --step-small: 0.86rem;
+    --step-tiny: 0.75rem;
+
+    /* Space ---------------------------------------------------------- */
+    --space-2xs: 0.35rem;
+    --space-xs: 0.6rem;
+    --space-sm: 0.9rem;
+    --space-md: 1.4rem;
+    --space-lg: 2.1rem;
+    --space-xl: 3.2rem;
+
+    /* Section rhythm. Tighter than before on purpose: the old page ran
+       5,500px tall on the home route because every band was padded like a
+       landing page. */
+    --band: clamp(2.8rem, 4.5vw, 4.4rem);
+    --band-tight: clamp(2rem, 3vw, 2.9rem);
+
+    /* Frame ---------------------------------------------------------- */
+    --wide: 74rem;
+    --narrow: 44rem;
+    --gutter: clamp(1.1rem, 4vw, 2rem);
+
+    --radius-sm: 0.4rem;
+    --radius: 0.7rem;
+    --radius-lg: 1.1rem;
+    --radius-pill: 999px;
+
+    --shadow-sm: 0 1px 2px rgb(56 42 27 / 5%), 0 2px 8px rgb(56 42 27 / 4%);
+    --shadow: 0 2px 4px rgb(56 42 27 / 5%), 0 10px 26px rgb(56 42 27 / 7%);
+    --shadow-lg: 0 4px 10px rgb(56 42 27 / 7%), 0 24px 56px rgb(56 42 27 / 11%);
+
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --speed: 180ms;
+
+    /* Height of the sticky masthead, so anchors and sticky sidebars can
+       offset themselves without guessing. */
+    --header-h: 4.5rem;
+
+    color-scheme: light;
+  }
+
+  @media (max-width: 46rem) {
+    :root {
+      --header-h: 3.75rem;
+    }
+  }
+}

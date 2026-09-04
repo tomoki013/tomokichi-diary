@@ -21,7 +21,7 @@ const { articleId, compact = false } = Astro.props;
 >
   <span class="like-button__heart" aria-hidden="true">♡</span>
   <span class="like-button__label">いいね</span>
-  <output class="like-button__count" aria-label="いいね数">—</output>
+  <output class="like-button__count skeleton" aria-label="いいね数" data-like-count>—</output>
 </button>
 
 <script>
@@ -44,31 +44,66 @@ const { articleId, compact = false } = Astro.props;
     const heart = button.querySelector<HTMLElement>(".like-button__heart");
     const count = button.querySelector<HTMLOutputElement>(".like-button__count");
     if (heart) heart.textContent = state.liked ? "♥" : "♡";
-    if (count) count.textContent = new Intl.NumberFormat("ja-JP").format(state.count);
+    if (count) {
+      // A row of zeroes says nothing; the number appears once there is one.
+      count.textContent = state.count > 0 ? new Intl.NumberFormat("ja-JP").format(state.count) : "";
+      count.classList.remove("skeleton");
+    }
   }
 
-  document.querySelectorAll<HTMLButtonElement>("[data-like-button]").forEach((button) => {
-    if (button.dataset.ready) return;
-    button.dataset.ready = "true";
-    const endpoint = `${button.dataset.apiUrl}/v1/likes/${button.dataset.articleId}`;
-    const identity = visitorId();
+  function settle(button: HTMLButtonElement, text: string) {
+    const count = button.querySelector<HTMLOutputElement>(".like-button__count");
+    if (!count) return;
+    count.textContent = text;
+    count.classList.remove("skeleton");
+  }
 
-    fetch(`${endpoint}?visitorId=${encodeURIComponent(identity)}`)
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
+  /**
+   * A listing page can carry a hundred cards, and fetching every count on load
+   * meant a hundred requests before the reader had scrolled anywhere. Counts
+   * are loaded when their button first comes into view instead.
+   */
+  function load(button: HTMLButtonElement) {
+    if (button.dataset.loaded) return;
+    button.dataset.loaded = "true";
+    const endpoint = `${button.dataset.apiUrl}/v1/likes/${button.dataset.articleId}`;
+    fetch(`${endpoint}?visitorId=${encodeURIComponent(visitorId())}`)
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
       .then((state) => render(button, state))
-      .catch(() => {
-        const count = button.querySelector<HTMLOutputElement>(".like-button__count");
-        if (count) count.textContent = "";
-      });
+      .catch(() => settle(button, ""));
+  }
+
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-like-button]")].filter(
+    (button) => !button.dataset.ready,
+  );
+
+  const observer =
+    "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries, self) =>
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              self.unobserve(entry.target);
+              load(entry.target as HTMLButtonElement);
+            }),
+          { rootMargin: "200px" },
+        )
+      : null;
+
+  buttons.forEach((button) => {
+    button.dataset.ready = "true";
+    if (observer) observer.observe(button);
+    else load(button);
 
     button.addEventListener("click", async () => {
       if (button.disabled) return;
       button.disabled = true;
+      const endpoint = `${button.dataset.apiUrl}/v1/likes/${button.dataset.articleId}`;
       try {
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ visitorId: identity }),
+          body: JSON.stringify({ visitorId: visitorId() }),
         });
         if (!response.ok) throw new Error("like request failed");
         render(button, await response.json());

@@ -72,7 +72,7 @@ const internalCard = (href: string): string | null => {
     const collection = content.collection(route.targetId as never);
     if (!collection) return null;
     title = collection.title;
-    summary = collection.description;
+    summary = collection.description ?? "";
     cover = content.membersOf(collection.id).find((member) => member.cover)?.cover ?? null;
     label = "TRAVEL COLLECTION";
   } else {

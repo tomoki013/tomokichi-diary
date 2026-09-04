@@ -22,9 +22,12 @@ const { view, route } = Astro.props;
 const isAbout = route.path === "/about";
 const isFaq = route.path === "/faq";
 const isContact = route.path === "/contact";
-const pageTitle = isAbout ? "このブログについて" : view.revision.title;
+// The about page used to rename itself here because its stored title was a
+// stale SEO string; the record now says what the page says, so the title comes
+// from the content like every other page.
+const pageTitle = view.revision.title;
 const metadata = buildPageMetadata(seoConfig, {
-  title: isAbout ? pageTitle : (view.revision.seoTitleOverride ?? view.revision.title),
+  title: view.revision.seoTitleOverride ?? view.revision.title,
   description: isAbout
     ? "実際に歩いた旅の記録と、次の旅に役立つ情報を届ける『ともきちの旅行日記』について。旅に込めた想いと、ブログで大切にしていることを紹介します。"
     : view.revision.summary,
@@ -87,6 +90,7 @@ const aboutCountries = content.snapshot.locations
           <div class="about-hero__copy">
             <p>このブログについて</p>
             <h1>
+              <span class="sr-only">このブログについて — </span>
               旅に出る前の時間も、
               <br />
               旅のあとに残る記憶も。
@@ -120,48 +124,38 @@ const aboutCountries = content.snapshot.locations
 
         <section class="about-principles" aria-label="このブログの読み方">
           <p>
-            <>
-              <small>01 / EXPERIENCE</small>
-              <strong>実際に歩いた旅だけ</strong>
-              <span>迷った道も、予定外の出来事も、自分の体験として残します。</span>
-            </>
+            <small>01 / EXPERIENCE</small>
+            <strong>実際に歩いた旅だけ</strong>
+            <span>迷った道も、予定外の出来事も、自分の体験として残します。</span>
           </p>
           <p>
-            <>
-              <small>02 / PRACTICAL</small>
-              <strong>次の旅に役立つ形で</strong>
-              <span>アクセス、費用、時間。現地で知りたかったことを整理します。</span>
-            </>
+            <small>02 / PRACTICAL</small>
+            <strong>次の旅に役立つ形で</strong>
+            <span>アクセス、費用、時間。現地で知りたかったことを整理します。</span>
           </p>
           <p>
-            <>
-              <small>03 / EMOTION</small>
-              <strong>心が動いた温度のまま</strong>
-              <span>写真とことばで、その場所へ向かうワクワクを手渡します。</span>
-            </>
+            <small>03 / EMOTION</small>
+            <strong>心が動いた温度のまま</strong>
+            <span>写真とことばで、その場所へ向かうワクワクを手渡します。</span>
           </p>
         </section>
 
         <section class="about-manifesto">
           <div>
-            <>
-              <small>WHY I WRITE</small>
-              <h2>
-                旅のワクワクを、
-                <br />
-                誰かの次の一歩に。
-              </h2>
-            </>
+            <small>WHY I WRITE</small>
+            <h2>
+              旅のワクワクを、
+              <br />
+              誰かの次の一歩に。
+            </h2>
           </div>
           <div>
-            <>
-              <p>
-                「次の冒険は、どこへ？」。そんな言葉がふと浮かんだ瞬間から、新しい旅は始まっていると思います。
-              </p>
-              <p>
-                このブログでは、息をのむ景色だけでなく、空港から街へ向かう方法や、現地で迷ったこと、ふらっと入った路地の空気まで残しています。きれいな思い出と実際に役立つ情報、その両方があることで、まだ知らない場所を少し身近に感じてもらえるはずです。
-              </p>
-            </>
+            <p>
+              「次の冒険は、どこへ？」。そんな言葉がふと浮かんだ瞬間から、新しい旅は始まっていると思います。
+            </p>
+            <p>
+              このブログでは、息をのむ景色だけでなく、空港から街へ向かう方法や、現地で迷ったこと、ふらっと入った路地の空気まで残しています。きれいな思い出と実際に役立つ情報、その両方があることで、まだ知らない場所を少し身近に感じてもらえるはずです。
+            </p>
           </div>
         </section>
 
@@ -174,55 +168,43 @@ const aboutCountries = content.snapshot.locations
             />
           </div>
           <div class="about-author__copy">
-            <>
-              <small>書いている人</small>
-              <h2 id="about-author-title">ともきち</h2>
-              <p>
-                京都在住の大学生。歴史を感じる建築と、その土地の空気がゆっくり変わっていく夕暮れが好きです。
-              </p>
-              <p>
-                名所を急いで巡るより、現地の人が通うカフェで過ごしたり、予定を決めずに裏路地を歩いたり。観光地の向こう側にある日常へ少しだけ混ざるような旅をしています。
-              </p>
-              <dl>
-                <>
-                  <div>
-                    <>
-                      <dt>これまでの旅先</dt>
-                      <dd>
-                        {visitedCountries.length}
-                        <span>か国</span>
-                      </dd>
-                    </>
-                  </div>
-                  <div>
-                    <>
-                      <dt>公開した記録</dt>
-                      <dd>
-                        {publicStories.length}
-                        <span>本</span>
-                      </dd>
-                    </>
-                  </div>
-                </>
-              </dl>
-            </>
+            <small>書いている人</small>
+            <h2 id="about-author-title">ともきち</h2>
+            <p>
+              京都在住の大学生。歴史を感じる建築と、その土地の空気がゆっくり変わっていく夕暮れが好きです。
+            </p>
+            <p>
+              名所を急いで巡るより、現地の人が通うカフェで過ごしたり、予定を決めずに裏路地を歩いたり。観光地の向こう側にある日常へ少しだけ混ざるような旅をしています。
+            </p>
+            <dl>
+              <div>
+                <dt>これまでの旅先</dt>
+                <dd>
+                  {visitedCountries.length}
+                  <span>か国</span>
+                </dd>
+              </div>
+              <div>
+                <dt>公開した記録</dt>
+                <dd>
+                  {publicStories.length}
+                  <span>本</span>
+                </dd>
+              </div>
+            </dl>
           </div>
         </section>
 
         <section class="about-map" aria-labelledby="about-map-title">
           <header>
-            <>
-              <div>
-                <>
-                  <small>これまでの旅</small>
-                  <h2 id="about-map-title">今まで、これだけの場所へ行きました。</h2>
-                </>
-              </div>
-              <p>
-                <strong>{aboutCountries.length}</strong>
-                か国。地図のピンから、それぞれの旅行日記を読めます。
-              </p>
-            </>
+            <div>
+              <small>これまでの旅</small>
+              <h2 id="about-map-title">今まで、これだけの場所へ行きました。</h2>
+            </div>
+            <p>
+              <strong>{aboutCountries.length}</strong>
+              か国。地図のピンから、それぞれの旅行日記を読めます。
+            </p>
           </header>
           <WorldMap countries={aboutCountries} />
           <nav aria-label="訪れた国の一覧">
@@ -237,35 +219,25 @@ const aboutCountries = content.snapshot.locations
 
         <section class="about-values" aria-labelledby="about-values-title">
           <header>
-            <>
-              <small>このブログで大切にしていること</small>
-              <h2 id="about-values-title">きれいな景色だけで終わらせない。</h2>
-            </>
+            <small>このブログで大切にしていること</small>
+            <h2 id="about-values-title">きれいな景色だけで終わらせない。</h2>
           </header>
           <ol>
-            <>
-              <li>
-                <>
-                  <span>01</span>
-                  <h3>自分の足で確かめる</h3>
-                  <p>実際に歩いた経験を起点に、現地の温度や迷いやすかった点まで書きます。</p>
-                </>
-              </li>
-              <li>
-                <>
-                  <span>02</span>
-                  <h3>旅の余白を残す</h3>
-                  <p>正解を押しつけず、偶然の出会いや寄り道を楽しめる言葉を大切にします。</p>
-                </>
-              </li>
-              <li>
-                <>
-                  <span>03</span>
-                  <h3>役立つ形で届ける</h3>
-                  <p>移動や費用など、次に旅する人が一歩を踏み出せる情報へ整えます。</p>
-                </>
-              </li>
-            </>
+            <li>
+              <span>01</span>
+              <h3>自分の足で確かめる</h3>
+              <p>実際に歩いた経験を起点に、現地の温度や迷いやすかった点まで書きます。</p>
+            </li>
+            <li>
+              <span>02</span>
+              <h3>旅の余白を残す</h3>
+              <p>正解を押しつけず、偶然の出会いや寄り道を楽しめる言葉を大切にします。</p>
+            </li>
+            <li>
+              <span>03</span>
+              <h3>役立つ形で届ける</h3>
+              <p>移動や費用など、次に旅する人が一歩を踏み出せる情報へ整えます。</p>
+            </li>
           </ol>
         </section>
 
@@ -276,16 +248,12 @@ const aboutCountries = content.snapshot.locations
             sizes="100vw"
           />
           <div>
-            <>
-              <p>まだ知らない日常へ。</p>
-              <h2>次の景色を、探しに行こう。</h2>
-              <div>
-                <>
-                  <a href="/destination">地図から旅先を探す&nbsp; →</a>
-                  <a href="/collections">旅のまとまりから読む&nbsp; →</a>
-                </>
-              </div>
-            </>
+            <p>まだ知らない日常へ。</p>
+            <h2>次の景色を、探しに行こう。</h2>
+            <div>
+              <a href="/destination">地図から旅先を探す&nbsp; →</a>
+              <a href="/collections">旅のまとまりから読む&nbsp; →</a>
+            </div>
           </div>
         </section>
       </article>

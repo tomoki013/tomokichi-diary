@@ -6,7 +6,7 @@ import ContactForm from "./ContactForm.astro";
   <header class="contact-hero">
     <div>
       <p class="eyebrow">LET'S TALK ABOUT TRAVEL</p>
-      <h1>旅の話を、<br />聞かせてください。</h1>
+      <h1><span class="sr-only">お問い合わせ — </span>旅の話を、<br />聞かせてください。</h1>
     </div>
     <div>
       <p>
@@ -22,7 +22,8 @@ import ContactForm from "./ContactForm.astro";
     <section class="contact-form-card" aria-labelledby="contact-form-title">
       <header>
         <p>MESSAGE FORM</p><h2 id="contact-form-title">お問い合わせ内容</h2><span
-          >必須項目を入力して送信してください。</span>
+          >必須項目を入力して送信してください。</span
+        >
       </header>
       <ContactForm />
     </section>
@@ -50,9 +51,7 @@ import ContactForm from "./ContactForm.astro";
           >tomokichidiary@gmail.com</a
         ><p>フォームが利用できない場合はこちらへ。</p>
       </div>
-      <p class="contact-security">
-        送信内容は不正利用防止の仕組みで保護されています。
-      </p>
+      <p class="contact-security">送信内容は不正利用防止の仕組みで保護されています。</p>
     </aside>
   </div>
 </article>

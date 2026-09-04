@@ -19,6 +19,7 @@
     "check:routes": "tsx scripts/check-routes.ts",
     "check:seo": "tsx scripts/check-seo.ts",
     "check:links": "tsx scripts/check-links.ts",
+    "check:knowledge": "tsx scripts/check-knowledge.ts",
     "perf": "tsx scripts/perf.ts",
     "baseline": "tsx scripts/legacy-baseline.ts",
     "export:data": "tsx scripts/export-data.ts",

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "name": "サン・マルティン橋からミラドール・デル・バイエ",
+    "mode": "walk",
+    "start": { "name": "サン・マルティン橋", "placeId": null, "latitude": null, "longitude": null, "externalMapUrl": null },
+    "waypoints": [{ "name": "途中の展望ポイント", "placeId": null, "latitude": null, "longitude": null, "externalMapUrl": null }],
+    "end": { "name": "ミラドール・デル・バイエ", "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101", "latitude": null, "longitude": null, "externalMapUrl": null },
+    "durationMinutes": null,
+    "distanceKm": null,
+    "experiencedAt": "2025-02-24",
+    "provenance": "firsthand",
+    "note": "坂道を歩き、途中の展望ポイントにも立ち寄ったルート。"
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000002",
+    "name": "アスワンからアブシンベルへのミニバス移動",
+    "mode": "bus",
+    "start": { "name": "Aswan Bus Station", "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103", "latitude": null, "longitude": null, "externalMapUrl": null },
+    "waypoints": [],
+    "end": { "name": "Abu Simbel Bus Station", "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba104", "latitude": null, "longitude": null, "externalMapUrl": null },
+    "durationMinutes": 210,
+    "distanceKm": null,
+    "experiencedAt": "2025-06-20",
+    "provenance": "firsthand",
+    "note": "ハイエース型の乗り合いミニバスを利用。"
+  }
+]

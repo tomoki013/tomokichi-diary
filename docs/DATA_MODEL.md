@@ -22,6 +22,10 @@ erDiagram
     COLLECTION ||--o{ ARTICLE_COLLECTION : "contains"
     ROUTE }o--|| ARTICLE : "addresses"
     AUTHOR ||--o{ ARTICLE : "wrote"
+    ARTICLE ||--o| ARTICLE_KNOWLEDGE : "projects"
+    ARTICLE_KNOWLEDGE }o--o{ TRAVEL_FACT : "selects"
+    TRAVEL_FACT }o--o{ SOURCE_REFERENCE : "supported by"
+    TRAVEL_FACT }o--o| TRAVEL_ROUTE : "occurred on"
 ```
 
 ## Article
@@ -81,3 +85,40 @@ afterwards.
 
 Sidecar output attached to an entity and the revision it was derived from.
 Never a source of truth ([ADR 0004](adr/0004-ai-artifacts-non-canonical.md)).
+
+## Travel knowledge and provenance
+
+`TravelFact` is a reusable claim, not a loose string in frontmatter. It carries a
+kind, verification state, provenance, time, optional typed value, volatility and
+stable references to articles, places, sources and a travel route.
+
+Provenance has four meanings:
+
+- `firsthand` — Tomokichi personally experienced it; `experiencedAt` is required;
+- `official` — checked against an official source; source and `verifiedAt` required;
+- `researched` — supported by a non-official external source;
+- `derived` — recommendation or inference based on other information.
+
+AI may create `candidate` facts. A `firsthand` fact can become `verified` only via
+`verifyFirsthandCandidate`, which requires a human author identity. This invariant
+is also checked against the full exported graph by `pnpm check:knowledge`.
+
+`TravelRoute` is an experienced transport/walking route. It is intentionally
+separate from the existing `Route`, which owns public URLs.
+
+`ArticleKnowledge` selects facts and routes for one immutable article revision and
+adds editorial structures such as Quick Answer and a decision table. Publishing a
+new revision can therefore keep the old live knowledge projection stable until its
+matching knowledge record is ready.
+
+## Persistence and migration
+
+Migration `0008_travel_knowledge.sql` adds portable relational identity and small
+JSON value-object columns. The public build snapshot is versioned by
+`ArticleKnowledge.schemaVersion`; incompatible changes require an append-only D1
+migration and an explicit snapshot migration. Existing Markdown remains valid, so
+articles can move incrementally rather than through a destructive rewrite.
+
+The first migrated slice covers Mirador del Valle, CHAGEE menu explanations and
+Aswan → Abu Simbel. Facts not evidenced by the existing articles or owner-provided
+architecture notes were deliberately not invented.

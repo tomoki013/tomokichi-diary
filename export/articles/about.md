@@ -3,7 +3,7 @@ id: "85deccb9-fed2-8b23-be2f-2cd73551ab04"
 slug: "about"
 locale: "ja"
 status: "published"
-title: "About-旅の記録と発見の物語"
+title: "このブログについて"
 summary: "旅は新しい自分に出会う物語。『ともきちの旅行日記』へようこそ！このページでは、管理人ともきちの自己紹介と、旅の記録に込めた想いをお伝えします。あなたも一緒に、発見の旅に出かけませんか？"
 revision: 1
 publishedAt: "2026-08-30T00:00:00.000Z"

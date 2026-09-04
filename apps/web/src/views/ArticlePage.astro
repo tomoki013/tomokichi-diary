@@ -12,6 +12,7 @@ import { articleTrail } from "../lib/navigation";
 import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
 import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
+import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 
@@ -74,6 +75,7 @@ const articleViews = content.publicArticles().flatMap((item) => {
 const currentIndex = articleViews.findIndex((item) => item.article.id === article.id);
 const previousArticle = currentIndex >= 0 ? articleViews[currentIndex + 1] : undefined;
 const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefined;
+const knowledge = content.knowledgeOf(article.id);
 ---
 
 <BaseLayout metadata={metadata} jsonLd={jsonLd} width="wide">
@@ -144,6 +146,7 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
             </div>
           )
         }
+        {knowledge && <ArticleKnowledge view={knowledge} />}
         <ArticleBody slug={article.slug} embeds={view.embeds} />
         <footer class="article-endnote">
           <div>
@@ -161,17 +164,31 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
           (previousArticle || nextArticle) && (
             <nav class="post-navigation" aria-label="前後の記事">
               {previousArticle ? (
-                <a href={previousArticle.route.path} class="post-navigation__card post-navigation__card--previous">
-                  <span><ChevronLeftIcon /> 前の記事</span>
+                <a
+                  href={previousArticle.route.path}
+                  class="post-navigation__card post-navigation__card--previous"
+                >
+                  <span>
+                    <ChevronLeftIcon /> 前の記事
+                  </span>
                   <strong>{previousArticle.revision.title}</strong>
                 </a>
-              ) : <span />}
+              ) : (
+                <span />
+              )}
               {nextArticle ? (
-                <a href={nextArticle.route.path} class="post-navigation__card post-navigation__card--next">
-                  <span>次の記事 <ChevronRightIcon /></span>
+                <a
+                  href={nextArticle.route.path}
+                  class="post-navigation__card post-navigation__card--next"
+                >
+                  <span>
+                    次の記事 <ChevronRightIcon />
+                  </span>
                   <strong>{nextArticle.revision.title}</strong>
                 </a>
-              ) : <span />}
+              ) : (
+                <span />
+              )}
             </nav>
           )
         }
@@ -183,10 +200,8 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
           {
             travel && (
               <div>
-                <>
-                  <small>訪問時期</small>
-                  <strong>{travel}</strong>
-                </>
+                <small>訪問時期</small>
+                <strong>{travel}</strong>
               </div>
             )
           }
