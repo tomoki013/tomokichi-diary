@@ -34,22 +34,43 @@ const views = articles.flatMap((article) => {
 const children = content.locations.children(locationId).flatMap((child) => {
   const hub = content.routes.canonicalFor("location", child.id);
   const childIds = new Set([child.id, ...content.locations.descendantIds(child.id)]);
-  const childViews = views.filter((view) => content.relations.locations.some((relation) => relation.articleId === view.article.id && childIds.has(relation.locationId)));
-  return hub ? [{ name: content.locations.nameOf(child.id, "ja"), path: hub.path, count: childViews.length, cover: childViews.find((view) => view.cover)?.cover ?? null }] : [];
+  const childViews = views.filter((view) =>
+    content.relations.locations.some(
+      (relation) => relation.articleId === view.article.id && childIds.has(relation.locationId),
+    ),
+  );
+  return hub
+    ? [
+        {
+          name: content.locations.nameOf(child.id, "ja"),
+          path: hub.path,
+          count: childViews.length,
+          cover: childViews.find((view) => view.cover)?.cover ?? null,
+        },
+      ]
+    : [];
 });
 
 const ancestors = content.locations.ancestors(locationId);
 const parent = ancestors.at(-1);
 const parentRoute = parent ? content.routes.canonicalFor("location", parent.id) : null;
 const parentName = parent ? content.locations.nameOf(parent.id, "ja") : null;
-const siblings = location?.parentId ? content.locations.children(location.parentId).flatMap((sibling) => {
-  if (sibling.id === locationId) return [];
-  const siblingRoute = content.routes.canonicalFor("location", sibling.id);
-  return siblingRoute ? [{ name: content.locations.nameOf(sibling.id, "ja"), path: siblingRoute.path }] : [];
-}).slice(0, 6) : [];
+const siblings = location?.parentId
+  ? content.locations
+      .children(location.parentId)
+      .flatMap((sibling) => {
+        if (sibling.id === locationId) return [];
+        const siblingRoute = content.routes.canonicalFor("location", sibling.id);
+        return siblingRoute
+          ? [{ name: content.locations.nameOf(sibling.id, "ja"), path: siblingRoute.path }]
+          : [];
+      })
+      .slice(0, 6)
+  : [];
 const heroView = views.find((view) => view.cover) ?? views[0];
 const heroCover = heroView?.cover ?? null;
-const locationKind = location?.type === "country" ? "国" : location?.type === "city" ? "街" : "地域";
+const locationKind =
+  location?.type === "country" ? "国" : location?.type === "city" ? "街" : "地域";
 
 const trail = locationTrail(route);
 const metadata = buildPageMetadata(seoConfig, {
@@ -65,38 +86,129 @@ const metadata = buildPageMetadata(seoConfig, {
   <div class="location-page">
     <Breadcrumbs trail={trail} />
     <header class:list={["location-hero", !heroCover && "location-hero--plain"]}>
-      {heroCover && <div class="location-hero__media"><Picture storageKey={heroCover.asset.storageKey} alt={heroCover.usage.alt} sizes="(max-width: 760px) 100vw, 1200px" loading="eager" fetchpriority="high" /></div>}
+      {
+        heroCover && (
+          <div class="location-hero__media">
+            <Picture
+              storageKey={heroCover.asset.storageKey}
+              alt={heroCover.usage.alt}
+              sizes="(max-width: 760px) 100vw, 1200px"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+        )
+      }
       <span class="location-hero__shade"></span>
       <div class="location-hero__content">
         <p>{parentName ? `${parentName}の${locationKind}` : `旅した${locationKind}`}</p>
         <h1>{name}</h1>
-        <p>{name}で実際に歩いて見つけた景色、移動、食事。旅の前にも、旅を思い出すときにも役立つ記録をまとめました。</p>
-        <dl><div><dt>旅ブログ</dt><dd>{views.length}本</dd></div>{children.length > 0 && <div><dt>{location?.type === "country" ? "訪れた街" : "エリア"}</dt><dd>{children.length}か所</dd></div>}</dl>
+        <p>
+          {
+            name
+          }で実際に歩いて見つけた景色、移動、食事。旅の前にも、旅を思い出すときにも役立つ記録をまとめました。
+        </p>
+        <dl>
+          <div><dt>旅ブログ</dt><dd>{views.length}本</dd></div>{
+            children.length > 0 && (
+              <div>
+                <>
+                  <dt>{location?.type === "country" ? "訪れた街" : "エリア"}</dt>
+                  <dd>{children.length}か所</dd>
+                </>
+              </div>
+            )
+          }
+        </dl>
       </div>
     </header>
 
-  {
-    children.length > 0 && (
-      <section class="location-areas" aria-labelledby="location-areas-title">
-        <header><div><small>{location?.type === "country" ? "街を選ぶ" : "エリアを選ぶ"}</small><h2 id="location-areas-title">{name}を、もう少し近くから。</h2></div><p>気になる場所を選んで、現地での記録へ。</p></header>
-        <div class="location-area-grid">
-          {children.map((child, index) => (
-            <a class:list={["location-area-card", !child.cover && "location-area-card--plain"]} href={child.path}>
-              {child.cover && <Picture storageKey={child.cover.asset.storageKey} alt={`${child.name}の旅`} sizes="(max-width: 760px) 50vw, 360px" loading={index < 3 ? "eager" : "lazy"} />}
-              <span></span><div><strong>{child.name}</strong><small>{child.count}本のブログ</small><b>この街を見る&nbsp; →</b></div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )
-  }
+    {
+      children.length > 0 && (
+        <section class="location-areas" aria-labelledby="location-areas-title">
+          <header>
+            <>
+              <div>
+                <>
+                  <small>{location?.type === "country" ? "街を選ぶ" : "エリアを選ぶ"}</small>
+                  <h2 id="location-areas-title">{name}を、もう少し近くから。</h2>
+                </>
+              </div>
+              <p>気になる場所を選んで、現地での記録へ。</p>
+            </>
+          </header>
+          <div class="location-area-grid">
+            {children.map((child, index) => (
+              <a
+                class:list={["location-area-card", !child.cover && "location-area-card--plain"]}
+                href={child.path}
+              >
+                {child.cover && (
+                  <Picture
+                    storageKey={child.cover.asset.storageKey}
+                    alt={`${child.name}の旅`}
+                    sizes="(max-width: 760px) 50vw, 360px"
+                    loading={index < 3 ? "eager" : "lazy"}
+                  />
+                )}
+                <span />
+                <div>
+                  <strong>{child.name}</strong>
+                  <small>{child.count}本のブログ</small>
+                  <b>この街を見る&nbsp; →</b>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
 
-  <section class="location-stories" aria-labelledby="location-stories-title">
-    <header><div><small>実際に歩いた記録</small><h2 id="location-stories-title">{name}の旅ブログ</h2></div><p><span>{views.length}</span>本の記事</p></header>
-    {views.length > 0 ? <ul class="card-grid location-story-grid">{views.map((view, index) => <ArticleCard view={view} eager={index < 3} level={3} variant="archive" />)}</ul> : <div class="location-no-stories"><h3>この場所の記録は、これから。</h3><p>旅の景色と言葉を準備しています。ほかの旅先も覗いてみてください。</p><a href="/destination">地図へ戻る</a></div>}
-  </section>
+    <section class="location-stories" aria-labelledby="location-stories-title">
+      <header>
+        <div>
+          <small>実際に歩いた記録</small><h2 id="location-stories-title">{name}の旅ブログ</h2>
+        </div><p><span>{views.length}</span>本の記事</p>
+      </header>
+      {
+        views.length > 0 ? (
+          <ul class="card-grid location-story-grid">
+            {views.map((view, index) => (
+              <ArticleCard view={view} eager={index < 3} level={3} variant="archive" />
+            ))}
+          </ul>
+        ) : (
+          <div class="location-no-stories">
+            <>
+              <h3>この場所の記録は、これから。</h3>
+              <p>旅の景色と言葉を準備しています。ほかの旅先も覗いてみてください。</p>
+              <a href="/destination">地図へ戻る</a>
+            </>
+          </div>
+        )
+      }
+    </section>
 
-    {(parentRoute || siblings.length > 0) && <nav class="location-next" aria-label="周辺の旅先"><div><small>もう少し旅を続ける</small><h2>近くの旅先も見る</h2></div><div>{parentRoute && <a href={parentRoute.path}>{parentName}に戻る</a>}{siblings.map((sibling) => <a href={sibling.path}>{sibling.name}</a>)}</div></nav>}
+    {
+      (parentRoute || siblings.length > 0) && (
+        <nav class="location-next" aria-label="周辺の旅先">
+          <>
+            <div>
+              <>
+                <small>もう少し旅を続ける</small>
+                <h2>近くの旅先も見る</h2>
+              </>
+            </div>
+            <div>
+              {parentRoute && <a href={parentRoute.path}>{parentName}に戻る</a>}
+              {siblings.map((sibling) => (
+                <a href={sibling.path}>{sibling.name}</a>
+              ))}
+            </div>
+          </>
+        </nav>
+      )
+    }
     {location === undefined && <p>この地域の情報は準備中です。</p>}
   </div>
 </BaseLayout>

@@ -1,0 +1,166 @@
+---
+import { projectTravelKnowledge, type TravelKnowledgeView } from "@tomokichi/application";
+
+interface Props {
+  view: TravelKnowledgeView;
+}
+
+const model = projectTravelKnowledge(Astro.props.view);
+const evidenceLabel = {
+  firsthand: "筆者の実体験",
+  official: "公式確認",
+  researched: "外部調査",
+  derived: "編集上の判断",
+} as const;
+const valueOf = (fact: (typeof model.experiences)[number]["facts"][number]) => {
+  if (!fact.value) return null;
+  return [fact.value.amount, fact.value.currency, fact.value.unit].filter(Boolean).join(" ");
+};
+const sourcesOf = (sourceIds: readonly string[]) =>
+  sourceIds.flatMap((id) => model.sources.find((source) => source.id === id)?.name ?? []);
+---
+
+<div class="article-knowledge">
+  {
+    model.quickAnswer && (
+      <section class="knowledge-answer" aria-labelledby="quick-answer-heading">
+        <h2 id="quick-answer-heading">Quick Answer</h2>
+        <p>{model.quickAnswer.summary}</p>
+        {model.quickAnswer.recommendation && <strong>{model.quickAnswer.recommendation}</strong>}
+      </section>
+    )
+  }
+
+  {
+    model.decisionTable && (
+      <section class="knowledge-decision" aria-labelledby="decision-table-heading">
+        <h2 id="decision-table-heading">{model.decisionTable.title}</h2>
+        <div class="knowledge-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                {model.decisionTable.columns.map((column) => (
+                  <th scope="col">{column}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {model.decisionTable.rows.map((row) => (
+                <tr>
+                  <th scope="row">{row.label}</th>
+                  {row.values.map((value) => (
+                    <td>{value}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    model.experiences.map((experience) => (
+      <section class="knowledge-experience" aria-labelledby={`experience-${experience.id}`}>
+        <header>
+          <>
+            <span aria-hidden="true">実</span>
+            <div>
+              <>
+                <small>FIRSTHAND EXPERIENCE</small>
+                <h2 id={`experience-${experience.id}`}>{experience.title}</h2>
+              </>
+            </div>
+          </>
+        </header>
+        <p>{experience.summary}</p>
+        <dl>
+          {experience.facts.map((fact) => (
+            <div>
+              <dt>{evidenceLabel[fact.provenance]}</dt>
+              <dd>
+                <strong>{fact.statement}</strong>
+                {valueOf(fact) && <span>{valueOf(fact)}</span>}
+              </dd>
+              {(fact.experiencedAt || fact.verifiedAt) && (
+                <small>
+                  {fact.experiencedAt
+                    ? `体験日 ${fact.experiencedAt}`
+                    : `確認日 ${fact.verifiedAt}`}
+                </small>
+              )}
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))
+  }
+
+  {
+    model.currentFacts.length > 0 && (
+      <section class="knowledge-current" aria-labelledby="current-facts-heading">
+        <>
+          <small>CURRENT FACTS</small>
+          <h2 id="current-facts-heading">現在確認できる情報</h2>
+        </>
+        <ul>
+          {model.currentFacts.map((fact) => (
+            <li>
+              <strong>{fact.statement}</strong>
+              <span>
+                {[
+                  fact.verifiedAt ? `確認日 ${fact.verifiedAt}` : "確認日未登録",
+                  sourcesOf(fact.sourceIds).length > 0
+                    ? `出典 ${sourcesOf(fact.sourceIds).join("、")}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    model.routes.map((route) => (
+      <section class="knowledge-route" aria-labelledby={`route-${route.id}`}>
+        <>
+          <small>ACTUAL ROUTE</small>
+          <h2 id={`route-${route.id}`}>{route.name}</h2>
+        </>
+        <ol>
+          <li>{route.start.name}</li>
+          {route.waypoints.map((point) => (
+            <li>{point.name}</li>
+          ))}
+          <li>{route.end.name}</li>
+        </ol>
+        <p>
+          {[route.durationMinutes ? `所要 約${route.durationMinutes}分` : null, route.note]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      </section>
+    ))
+  }
+
+  {
+    model.cautions.length > 0 && (
+      <aside class="knowledge-caution" aria-labelledby="cautions-heading">
+        <>
+          <small>BEFORE YOU GO</small>
+          <h2 id="cautions-heading">現地で困らないために</h2>
+        </>
+        <ul>
+          {model.cautions.map((fact) => (
+            <li>{fact.statement}</li>
+          ))}
+        </ul>
+      </aside>
+    )
+  }
+</div>

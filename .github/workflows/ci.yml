@@ -4,16 +4,24 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 # CI carries no business logic: everything it runs is `pnpm run ci`, which
 # behaves identically on a developer machine (see docs/ARCHITECTURE.md).
+# Deployment is a job in this same workflow rather than a separate one, so it
+# can only start from a green `ci` job — and so `pnpm run ci` runs once per push
+# instead of twice.
 jobs:
   ci:
+    name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: jdx/mise-action@v3
-      - uses: actions/cache@v4
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - uses: actions/cache@v6
         with:
           path: .cache/images
           key: image-derivatives-${{ hashFiles('export/media.json') }}
@@ -21,8 +29,93 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci
       - if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: ci-artifacts
+          path: .artifacts/
+          retention-days: 14
+
+  deploy:
+    name: Deploy
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    # Build-time configuration only. The Cloudflare credentials are deliberately
+    # NOT here: they are attached to the individual steps that talk to
+    # Cloudflare, so `pnpm install` (and any dependency install script it runs)
+    # never sees the production token.
+    env:
+      PUBLIC_SITE_URL: https://tomokichidiary.com
+      PUBLIC_INDEXABLE: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - uses: actions/cache@v6
+        with:
+          path: .cache/images
+          key: image-derivatives-${{ hashFiles('export/media.json') }}
+          restore-keys: image-derivatives-
+      - run: pnpm install --frozen-lockfile
+
+      # Rebuilt here rather than reused from `ci`: the artifacts that ship are
+      # the ones built with the production PUBLIC_* values above.
+      - run: pnpm media:build
+      - run: pnpm build
+
+      - name: Publish media to object storage
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm media:sync
+
+      # Migrations run ahead of the API that reads the new shape, so they must
+      # stay backwards compatible — see the expand/contract rule in
+      # docs/OPERATIONS.md.
+      - name: Apply database migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm db:migrate
+
+      - name: Deploy API
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm deploy:api
+
+      - name: Deploy public MCP server
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm deploy:mcp
+
+      - name: Deploy public site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm deploy:web
+
+      - name: Build admin against the deployed API
+        env:
+          VITE_API_URL: https://api.tomokichidiary.com
+        run: pnpm --filter @tomokichi/admin build
+
+      - name: Deploy admin
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm deploy:admin
+
+      - name: Verify every legacy URL on the deployed site
+        run: pnpm verify:live https://tomokichidiary.com
+
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: deploy-artifacts
           path: .artifacts/
           retention-days: 14

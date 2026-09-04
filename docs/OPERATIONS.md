@@ -28,6 +28,24 @@ it, or invert it behind a port in `packages/application/src/ports`.
 
 Rules live in `scripts/check-boundaries.ts`.
 
+### `KNOWLEDGE_VALIDATION_FAILED`
+
+The travel-knowledge graph violates an evidence invariant or has a broken stable-ID
+reference. Run `pnpm check:knowledge`; fix the named fact or article knowledge record.
+Never bypass a missing `verifiedBy` on firsthand data—send the candidate through the
+human verification command instead.
+
+`pnpm knowledge:backlog` regenerates the list of published articles that still need
+manual evidence review. A backlog item is not public structured knowledge.
+
+## Public MCP
+
+`apps/mcp-server` serves a stateless, read-only Streamable HTTP endpoint at `/mcp`
+and a liveness response at `/health`. It bundles the committed knowledge catalog, so
+it does not require D1 or an AI provider at runtime. Rebuild the catalog after content
+exports and deploy with `pnpm deploy:mcp`. MCP Apps-capable hosts render the evidence
+view; all other clients receive the same facts as text and structured content.
+
 ### `TEST_FAILED` / `BUILD_FAILED`
 
 `pnpm test` / `pnpm build`.
@@ -99,7 +117,8 @@ The budget is Performance ≥ 95, SEO = 100, LCP ≤ 2.5s, CLS ≤ 0.10, TBT ≤
 
 - Check the hero image on the named route: is `width`/`height` set, and is the
   first card `fetchpriority="high"`?
-- The public site ships no JavaScript. A non-zero TBT means an island was added.
+- The public site ships only small progressive scripts (including WebMCP). A TBT
+  regression means one of those scripts or an island needs inspection.
 - Re-run one page: `pnpm perf` (edit `lighthouserc.json` to narrow the URL list).
 
 ### `PERF_REGRESSION`
@@ -114,6 +133,22 @@ a `perf-baseline.json` from a green run on `main`.
 Migrations are append-only. Never edit an applied file; add
 `migrations/000N_description.sql`. `pnpm test` applies every migration to an
 empty database on each run.
+
+**Migrations must be expand/contract.** Deployment applies them before the API
+that reads the new shape is deployed, so there is always a window where the old
+API runs against the new database. A migration that the old API cannot survive
+takes the site down for the length of that window.
+
+In practice, one schema change is two releases:
+
+1. _Expand_ — add the new column/table, nullable or defaulted, and backfill.
+   The old API ignores it; the new API writes to both shapes.
+2. _Contract_ — once the new API is live, a later migration drops the old
+   column/table.
+
+So: never rename, drop, or narrow (`NOT NULL`, tightened `CHECK`) a column that
+the currently deployed API still reads or writes. Add, backfill, deploy, and
+only then remove.
 
 ### `EXPORT_FAILED` / `IMPORT_FAILED`
 

@@ -124,3 +124,98 @@ export interface PublishCheckDto {
     readonly message: string;
   }[];
 }
+
+export interface SourceReferenceDto {
+  readonly id: string;
+  readonly type: "firsthand-note" | "official" | "external";
+  readonly name: string;
+  readonly url: string | null;
+  readonly checkedAt: string | null;
+}
+
+export interface TravelRouteDto {
+  readonly id: string;
+  readonly name: string;
+  readonly mode: "walk" | "bus" | "train" | "car" | "air" | "mixed";
+  readonly start: TravelRoutePointDto;
+  readonly waypoints: readonly TravelRoutePointDto[];
+  readonly end: TravelRoutePointDto;
+  readonly durationMinutes: number | null;
+  readonly distanceKm: number | null;
+  readonly experiencedAt: string | null;
+  readonly provenance: "firsthand" | "official" | "researched" | "derived";
+  readonly note: string | null;
+}
+
+export interface TravelRoutePointDto {
+  readonly name: string;
+  readonly placeId: string | null;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+  readonly externalMapUrl: string | null;
+}
+
+export interface TravelFactDto {
+  readonly id: string;
+  readonly kind:
+    | "visit"
+    | "food_drink"
+    | "transport"
+    | "cost"
+    | "duration"
+    | "procedure"
+    | "observation"
+    | "recommendation"
+    | "warning"
+    | "current_fact";
+  readonly statement: string;
+  readonly provenance: "firsthand" | "official" | "researched" | "derived";
+  readonly status: "candidate" | "verified";
+  readonly experiencedAt: string | null;
+  readonly verifiedAt: string | null;
+  readonly value: {
+    readonly amount: number;
+    readonly unit: string | null;
+    readonly currency: string | null;
+  } | null;
+  readonly volatility: "low" | "medium" | "high" | null;
+  readonly articleIds: readonly string[];
+  readonly placeIds: readonly string[];
+  readonly sourceIds: readonly string[];
+  readonly travelRouteId: string | null;
+  readonly verifiedBy: string | null;
+}
+
+export interface ArticleKnowledgeDto {
+  readonly articleId: string;
+  readonly revisionId: string;
+  readonly schemaVersion: 1;
+  readonly quickAnswer: { readonly summary: string; readonly recommendation: string | null } | null;
+  readonly decisionTable: {
+    readonly title: string;
+    readonly columns: readonly string[];
+    readonly rows: readonly { readonly label: string; readonly values: readonly string[] }[];
+  } | null;
+  readonly experienceGroups: readonly {
+    readonly id: string;
+    readonly title: string;
+    readonly summary: string;
+    readonly factIds: readonly string[];
+  }[];
+  readonly currentFactIds: readonly string[];
+  readonly cautionFactIds: readonly string[];
+  readonly routeIds: readonly string[];
+  readonly relatedArticles: readonly {
+    readonly articleId: string;
+    readonly relation:
+      "detail" | "recommendation" | "how-to" | "trip-diary" | "location-guide" | "next-step";
+  }[];
+}
+
+export interface ArticleKnowledgeBundleDto {
+  readonly article: ArticleKnowledgeDto | null;
+  readonly facts: readonly TravelFactDto[];
+  readonly sources: readonly SourceReferenceDto[];
+  readonly routes: readonly TravelRouteDto[];
+  readonly canSuggestWithAi: boolean;
+}

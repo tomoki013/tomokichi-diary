@@ -1,5 +1,5 @@
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import {
   articleCategoryRow,
   articleCollectionRow,
@@ -19,6 +19,10 @@ import {
   revisionRow,
   routeRow,
   tagRow,
+  sourceReferenceRow,
+  travelRouteRow,
+  travelFactRow,
+  articleKnowledgeRow,
   type Row,
 } from "@tomokichi/data";
 import { loadSnapshot } from "./lib/built-site.js";
@@ -91,8 +95,15 @@ const sql = [
   ...insert("article_categories", snapshot.articleCategories.map(articleCategoryRow.from)),
   ...insert("article_tags", snapshot.articleTags.map(articleTagRow.from)),
   ...insert("article_collections", snapshot.articleCollections.map(articleCollectionRow.from)),
+  ...insert("source_references", snapshot.sources.map(sourceReferenceRow.from)),
+  ...insert("travel_routes", snapshot.travelRoutes.map(travelRouteRow.from)),
+  ...insert("travel_facts", snapshot.travelFacts.map(travelFactRow.from)),
+  ...insert("article_knowledge", snapshot.articleKnowledge.map(articleKnowledgeRow.from)),
 ].join("\n");
 
+// `.artifacts/` is generated and gitignored, so on a clean checkout — CI, or
+// anyone's first run — the directory this writes into does not exist yet.
+mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, `${sql}\n`);
 process.stdout.write(
   `✓ seed ${OUT} | articles ${snapshot.articles.length} | routes ${snapshot.routes.length} | media ${snapshot.media.length}\n`,

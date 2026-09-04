@@ -1,0 +1,37 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "type": "firsthand-note",
+    "name": "ミラドール・デル・バイエ訪問記録",
+    "url": "/posts/howtoget-mirador-del-valle",
+    "checkedAt": "2025-02-24"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "type": "firsthand-note",
+    "name": "CHAGEE実飲記録",
+    "url": "/posts/chagee-menu-explained",
+    "checkedAt": "2026-08-24"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000003",
+    "type": "official",
+    "name": "CHAGEE Malaysia 公式 Milk Tea Series",
+    "url": "https://chagee.com.my/product/milk-tea-series",
+    "checkedAt": "2026-09-04"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000004",
+    "type": "firsthand-note",
+    "name": "アスワン―アブシンベル移動記録",
+    "url": "/posts/howtoget-abusimbel-from-asuwan",
+    "checkedAt": "2025-06-20"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000005",
+    "type": "official",
+    "name": "CHAGEE Global 公式 Fresh Milk Tea Series",
+    "url": "https://global.chagee.com/ph/en/product/fresh-milk-tea-series",
+    "checkedAt": "2026-09-04"
+  }
+]

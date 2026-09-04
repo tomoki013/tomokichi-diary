@@ -19,6 +19,10 @@ import type {
   Place,
   Route,
   Tag,
+  SourceReference,
+  TravelRoute,
+  TravelFact,
+  ArticleKnowledge,
 } from "@tomokichi/domain";
 
 /**
@@ -139,6 +143,132 @@ export const embedRow = {
     type: embed.type,
     schema_version: embed.schemaVersion,
     payload: JSON.stringify(embed.payload),
+  }),
+};
+
+export const sourceReferenceRow = {
+  to: (row: Row): SourceReference => ({
+    id: str(row, "id") as SourceReference["id"],
+    type: str(row, "type") as SourceReference["type"],
+    name: str(row, "name"),
+    url: nullableStr(row, "url"),
+    checkedAt: nullableStr(row, "checked_at") as SourceReference["checkedAt"],
+  }),
+  from: (source: SourceReference): Row => ({
+    id: source.id,
+    type: source.type,
+    name: source.name,
+    url: source.url,
+    checked_at: source.checkedAt,
+  }),
+};
+
+export const travelRouteRow = {
+  to: (row: Row): TravelRoute => ({
+    id: str(row, "id") as TravelRoute["id"],
+    name: str(row, "name"),
+    mode: str(row, "mode") as TravelRoute["mode"],
+    start: json(row, "start_json", {} as TravelRoute["start"]),
+    waypoints: json(row, "waypoints_json", [] as unknown as TravelRoute["waypoints"]),
+    end: json(row, "end_json", {} as TravelRoute["end"]),
+    durationMinutes: nullableNum(row, "duration_minutes"),
+    distanceKm: nullableNum(row, "distance_km"),
+    experiencedAt: nullableStr(row, "experienced_at") as TravelRoute["experiencedAt"],
+    provenance: str(row, "provenance") as TravelRoute["provenance"],
+    note: nullableStr(row, "note"),
+  }),
+  from: (route: TravelRoute): Row => ({
+    id: route.id,
+    name: route.name,
+    mode: route.mode,
+    start_json: JSON.stringify(route.start),
+    waypoints_json: JSON.stringify(route.waypoints),
+    end_json: JSON.stringify(route.end),
+    duration_minutes: route.durationMinutes,
+    distance_km: route.distanceKm,
+    experienced_at: route.experiencedAt,
+    provenance: route.provenance,
+    note: route.note,
+  }),
+};
+
+export const travelFactRow = {
+  to: (row: Row): TravelFact => ({
+    id: str(row, "id") as TravelFact["id"],
+    kind: str(row, "kind") as TravelFact["kind"],
+    statement: str(row, "statement"),
+    provenance: str(row, "provenance") as TravelFact["provenance"],
+    status: str(row, "status") as TravelFact["status"],
+    experiencedAt: nullableStr(row, "experienced_at") as TravelFact["experiencedAt"],
+    verifiedAt: nullableStr(row, "verified_at") as TravelFact["verifiedAt"],
+    value: json(row, "value_json", null as TravelFact["value"]),
+    volatility: nullableStr(row, "volatility") as TravelFact["volatility"],
+    articleIds: json(row, "article_ids_json", [] as unknown as TravelFact["articleIds"]),
+    placeIds: json(row, "place_ids_json", [] as unknown as TravelFact["placeIds"]),
+    sourceIds: json(row, "source_ids_json", [] as unknown as TravelFact["sourceIds"]),
+    travelRouteId: nullableStr(row, "travel_route_id") as TravelFact["travelRouteId"],
+    verifiedBy: nullableStr(row, "verified_by") as TravelFact["verifiedBy"],
+  }),
+  from: (fact: TravelFact): Row => ({
+    id: fact.id,
+    kind: fact.kind,
+    statement: fact.statement,
+    provenance: fact.provenance,
+    status: fact.status,
+    experienced_at: fact.experiencedAt,
+    verified_at: fact.verifiedAt,
+    value_json: fact.value === null ? null : JSON.stringify(fact.value),
+    volatility: fact.volatility,
+    article_ids_json: JSON.stringify(fact.articleIds),
+    place_ids_json: JSON.stringify(fact.placeIds),
+    source_ids_json: JSON.stringify(fact.sourceIds),
+    travel_route_id: fact.travelRouteId,
+    verified_by: fact.verifiedBy,
+  }),
+};
+
+export const articleKnowledgeRow = {
+  to: (row: Row): ArticleKnowledge => ({
+    articleId: str(row, "article_id") as ArticleKnowledge["articleId"],
+    revisionId: str(row, "revision_id") as ArticleKnowledge["revisionId"],
+    schemaVersion: 1,
+    quickAnswer: json(row, "quick_answer_json", null as ArticleKnowledge["quickAnswer"]),
+    decisionTable: json(row, "decision_table_json", null as ArticleKnowledge["decisionTable"]),
+    experienceGroups: json(
+      row,
+      "experience_groups_json",
+      [] as unknown as ArticleKnowledge["experienceGroups"],
+    ),
+    currentFactIds: json(
+      row,
+      "current_fact_ids_json",
+      [] as unknown as ArticleKnowledge["currentFactIds"],
+    ),
+    cautionFactIds: json(
+      row,
+      "caution_fact_ids_json",
+      [] as unknown as ArticleKnowledge["cautionFactIds"],
+    ),
+    routeIds: json(row, "route_ids_json", [] as unknown as ArticleKnowledge["routeIds"]),
+    relatedArticles: json(
+      row,
+      "related_articles_json",
+      [] as unknown as ArticleKnowledge["relatedArticles"],
+    ),
+  }),
+  from: (knowledge: ArticleKnowledge): Row => ({
+    article_id: knowledge.articleId,
+    revision_id: knowledge.revisionId,
+    schema_version: knowledge.schemaVersion,
+    quick_answer_json:
+      knowledge.quickAnswer === null ? null : JSON.stringify(knowledge.quickAnswer),
+    decision_table_json:
+      knowledge.decisionTable === null ? null : JSON.stringify(knowledge.decisionTable),
+    experience_groups_json: JSON.stringify(knowledge.experienceGroups),
+    current_fact_ids_json: JSON.stringify(knowledge.currentFactIds),
+    caution_fact_ids_json: JSON.stringify(knowledge.cautionFactIds),
+    route_ids_json: JSON.stringify(knowledge.routeIds),
+    related_articles_json: JSON.stringify(knowledge.relatedArticles),
   }),
 };
 

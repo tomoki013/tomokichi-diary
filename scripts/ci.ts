@@ -86,6 +86,14 @@ const STEPS: Step[] = [
     interpret: (output) => parseJsonFindings(output),
   },
   {
+    name: "knowledge",
+    code: "KNOWLEDGE_VALIDATION_FAILED",
+    command: "pnpm",
+    args: ["exec", "tsx", "scripts/check-knowledge.ts", "--json"],
+    rerun: "pnpm check:knowledge",
+    interpret: (output) => parseJsonFindings(output),
+  },
+  {
     name: "test",
     code: "TEST_FAILED",
     command: "pnpm",
@@ -217,7 +225,9 @@ async function main(): Promise<void> {
     // pass surfaces every route/SEO/perf problem at once.
     if (
       status === "failed" &&
-      ["format", "lint", "typecheck", "boundaries", "test", "build"].includes(step.name)
+      ["format", "lint", "typecheck", "boundaries", "knowledge", "test", "build"].includes(
+        step.name,
+      )
     ) {
       break;
     }

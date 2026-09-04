@@ -1,0 +1,249 @@
+/* Long-form reading: article bodies and static pages. */
+@layer prose {
+  .prose {
+    font-size: 1.02rem;
+    line-height: 1.98;
+  }
+
+  .prose > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .prose h2 {
+    margin-top: 3rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--line);
+    font-size: clamp(1.28rem, 1.1rem + 0.7vw, 1.6rem);
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  .prose h3 {
+    margin-top: 2.4rem;
+    font-size: clamp(1.08rem, 1rem + 0.35vw, 1.24rem);
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  .prose h3::before {
+    content: "";
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-inline-end: 0.55rem;
+    border-radius: 2px;
+    background: var(--accent);
+    vertical-align: 0.08em;
+  }
+
+  .prose h4 {
+    margin-top: 1.9rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+  }
+
+  .prose :is(strong, b) {
+    font-weight: 700;
+  }
+
+  .prose a {
+    text-decoration: underline;
+  }
+
+  .prose :is(ul, ol) {
+    display: grid;
+    gap: 0.55rem;
+    padding-inline-start: 1.5rem;
+  }
+
+  .prose ul > li {
+    list-style: disc;
+  }
+
+  .prose ol > li {
+    list-style: decimal;
+  }
+
+  .prose li::marker {
+    color: var(--accent);
+  }
+
+  .prose li > :is(ul, ol) {
+    margin-top: 0.55rem;
+  }
+
+  .prose blockquote {
+    margin-inline: 0;
+    padding: 0.2rem 0 0.2rem 1.2rem;
+    border-inline-start: 3px solid var(--accent-line);
+    color: var(--ink-soft);
+  }
+
+  .prose :is(picture, figure) {
+    margin-inline: 0;
+  }
+
+  .prose :is(picture, figure) img {
+    width: 100%;
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+  }
+
+  .prose figcaption {
+    margin-top: 0.55rem;
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+    text-align: center;
+  }
+
+  .prose code {
+    padding: 0.1em 0.4em;
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    font-size: 0.9em;
+  }
+
+  .prose pre {
+    overflow-x: auto;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+
+  .prose pre code {
+    padding: 0;
+    background: none;
+  }
+
+  .prose table {
+    width: 100%;
+    font-size: var(--step-small);
+  }
+
+  .prose :is(th, td) {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .prose th {
+    background: var(--surface-alt);
+  }
+
+  .prose hr {
+    margin-block: var(--space-lg);
+  }
+
+  /* Internal link cards injected into the body ---------------------- */
+  .internal-link-card {
+    margin-block: var(--space-lg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    transition:
+      box-shadow var(--speed) var(--ease),
+      border-color var(--speed) var(--ease);
+  }
+
+  .internal-link-card:hover {
+    border-color: var(--accent-line);
+    box-shadow: var(--shadow);
+  }
+
+  .internal-link-card > a {
+    display: grid;
+    grid-template-columns: minmax(0, 0.38fr) minmax(0, 1fr);
+    overflow: hidden;
+    border-radius: inherit;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  /* The picture fills whatever height the copy beside it needs. Letting the
+     image size itself made a portrait photograph stretch the card to well
+     over twice the height of its own text. */
+  .internal-link-card__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+
+  .internal-link-card__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 420ms var(--ease);
+  }
+
+  .internal-link-card:hover .internal-link-card__media img {
+    transform: scale(1.04);
+  }
+
+  .internal-link-card__media--empty {
+    display: grid;
+    place-items: center;
+    min-height: 9rem;
+    background: var(--surface-dark);
+    color: var(--accent-on-dark);
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-align: center;
+  }
+
+  .internal-link-card__copy {
+    display: grid;
+    align-content: center;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: var(--space-md);
+  }
+
+  .internal-link-card__copy small {
+    color: var(--accent);
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+
+  .internal-link-card__copy strong {
+    font-family: var(--font-serif);
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  .internal-link-card__copy > span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.7;
+  }
+
+  .internal-link-card__copy b {
+    color: var(--accent);
+    font-size: var(--step-tiny);
+    font-weight: 600;
+  }
+
+  @media (max-width: 34rem) {
+    .internal-link-card > a {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .internal-link-card__media {
+      aspect-ratio: 16 / 9;
+    }
+    .internal-link-card__media--empty {
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+    }
+  }
+}

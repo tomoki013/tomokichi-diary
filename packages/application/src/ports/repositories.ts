@@ -33,6 +33,10 @@ import type {
   Slug,
   Tag,
   TagId,
+  SourceReference,
+  TravelFact,
+  TravelRoute,
+  ArticleKnowledge,
 } from "@tomokichi/domain";
 
 /**
@@ -153,6 +157,17 @@ export interface AIArtifactRepository {
   save(artifact: AIArtifact): Promise<void>;
 }
 
+export interface KnowledgeRepository {
+  listSources(): Promise<readonly SourceReference[]>;
+  listTravelRoutes(): Promise<readonly TravelRoute[]>;
+  listTravelFacts(): Promise<readonly TravelFact[]>;
+  listArticleKnowledge(): Promise<readonly ArticleKnowledge[]>;
+  saveSource(source: SourceReference): Promise<void>;
+  saveTravelRoute(route: TravelRoute): Promise<void>;
+  saveTravelFact(fact: TravelFact): Promise<void>;
+  saveArticleKnowledge(knowledge: ArticleKnowledge): Promise<void>;
+}
+
 /** Everything a use case may reach for, assembled at the composition root. */
 export interface Repositories {
   readonly articles: ArticleRepository;
@@ -169,4 +184,5 @@ export interface Repositories {
   readonly contactMessages: ContactMessageRepository;
   readonly authors: AuthorRepository;
   readonly aiArtifacts: AIArtifactRepository;
+  readonly knowledge: KnowledgeRepository;
 }

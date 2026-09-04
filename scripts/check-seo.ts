@@ -58,8 +58,11 @@ function readSeo(html: string): PageSeo {
     jsonLd: [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)].map(
       (m) => m[1]!,
     ),
-    imagesWithoutAlt: [...html.matchAll(/<img\b[^>]*>/gi)].filter((m) => !/\salt="/i.test(m[0]))
-      .length,
+    // `<img alt>` is the valid, minimised spelling of `alt=""`, which is what
+    // a deliberately decorative image renders as.
+    imagesWithoutAlt: [...html.matchAll(/<img\b[^>]*>/gi)].filter(
+      (m) => !/\salt(?:=|\s|>)/i.test(m[0]),
+    ).length,
   };
 }
 

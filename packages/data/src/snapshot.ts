@@ -17,7 +17,11 @@ import type {
   MediaAsset,
   Place,
   Route,
+  SourceReference,
   Tag,
+  TravelFact,
+  TravelRoute,
+  ArticleKnowledge,
 } from "@tomokichi/domain";
 
 /**
@@ -49,6 +53,10 @@ export interface ContentSnapshot {
   readonly articleTags: readonly ArticleTag[];
   readonly articleCollections: readonly ArticleCollection[];
   readonly aiArtifacts: readonly AIArtifact[];
+  readonly sources: readonly SourceReference[];
+  readonly travelRoutes: readonly TravelRoute[];
+  readonly travelFacts: readonly TravelFact[];
+  readonly articleKnowledge: readonly ArticleKnowledge[];
 }
 
 export const EMPTY_SNAPSHOT: ContentSnapshot = {
@@ -72,4 +80,8 @@ export const EMPTY_SNAPSHOT: ContentSnapshot = {
   articleTags: [],
   articleCollections: [],
   aiArtifacts: [],
+  sources: [],
+  travelRoutes: [],
+  travelFacts: [],
+  articleKnowledge: [],
 };

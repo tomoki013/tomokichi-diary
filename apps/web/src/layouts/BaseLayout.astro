@@ -1,9 +1,7 @@
 ---
-import "../styles/global.css";
-import "../styles/refinement.css";
+import "../styles/app.css";
 import { serializeJsonLd, type JsonLd, type PageMetadata } from "@tomokichi/seo";
 import { mediaBaseUrl, seoConfig } from "../lib/site";
-import InitialSplash from "../components/InitialSplash.astro";
 import { MenuIcon, SearchIcon, XIcon } from "../components/TravelIcons";
 
 interface Props {
@@ -85,7 +83,6 @@ const footerGroups = [
     }
   </head>
   <body>
-    <InitialSplash />
     <div class="shell">
       <a class="skip-link" href="#main">本文へスキップ</a>
       <header class="site-header">
@@ -140,7 +137,8 @@ const footerGroups = [
             <strong>{seoConfig.siteName}</strong><button
               type="button"
               data-menu-close
-              aria-label="メニューを閉じる"><XIcon /></button>
+              aria-label="メニューを閉じる"><XIcon /></button
+            >
           </header>
           <nav>
             {
@@ -218,7 +216,8 @@ const footerGroups = [
             <h2 id="footer-opening-title">一生モノの体験を、<br />もっと身近に。</h2>
             <div>
               <a href="/destination">旅先から探す&nbsp; →</a><a href="/posts"
-                >ブログを読む&nbsp; →</a>
+                >ブログを読む&nbsp; →</a
+              >
             </div>
           </section>
           <section class="site-footer__body">
@@ -233,16 +232,14 @@ const footerGroups = [
               {
                 footerGroups.map((group) => (
                   <div>
-                    <>
-                      <h2>{group.title}</h2>
-                      <ul>
-                        {group.links.map((item) => (
-                          <li>
-                            <a href={item.href}>{item.label}</a>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
+                    <h2>{group.title}</h2>
+                    <ul>
+                      {group.links.map((item) => (
+                        <li>
+                          <a href={item.href}>{item.label}</a>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ))
               }
@@ -295,7 +292,10 @@ const footerGroups = [
         const key = target.hasAttribute("data-mobile-menu") ? "mobile-menu" : "header-search";
         if (open) {
           target.hidden = false;
-          requestAnimationFrame(() => target.classList.add("is-open"));
+          // Forcing a reflow gives the transition a start value. rAF would do
+          // the same, but it is throttled to a standstill in a background tab.
+          void target.offsetHeight;
+          target.classList.add("is-open");
         } else {
           target.classList.remove("is-open");
           window.setTimeout(() => {
@@ -318,15 +318,44 @@ const footerGroups = [
       menu
         ?.querySelectorAll("[data-menu-close]")
         .forEach((button) => button.addEventListener("click", closeMenu));
+      // The archive keeps its query in `?q=`, so the modal opens showing what
+      // the page is currently filtered by rather than an empty box.
+      const currentQuery = new URLSearchParams(location.search).get("q")?.trim() ?? "";
+      if (searchInput && currentQuery) searchInput.value = currentQuery;
+      const archiveUrl = (value: string) =>
+        `/posts${value ? `?q=${encodeURIComponent(value)}` : ""}#results`;
+      searchAll?.setAttribute("href", archiveUrl(currentQuery));
+
+      const showSearchSkeleton = () => {
+        if (!searchResults) return;
+        if (searchStatus) searchStatus.textContent = "検索データを読み込んでいます…";
+        searchResults.replaceChildren(
+          ...Array.from({ length: 3 }, () => {
+            const row = document.createElement("div");
+            row.className = "header-search__placeholder";
+            const meta = document.createElement("span");
+            meta.className = "skeleton skeleton-line skeleton-line--short";
+            const title = document.createElement("span");
+            title.className = "skeleton skeleton-line";
+            row.append(meta, title);
+            return row;
+          }),
+        );
+      };
+
       document.querySelector("[data-search-open]")?.addEventListener("click", async () => {
         setOverlay(searchModal, true);
         closeMenu();
         searchInput?.focus();
         if (!searchRecords) {
+          // The index is the one thing on the site that is actually fetched,
+          // so it gets a placeholder rather than an empty panel.
+          showSearchSkeleton();
           try {
             searchRecords = await fetch("/search-index.json").then((response) => response.json());
             renderGlobalSearch();
           } catch {
+            searchResults?.replaceChildren();
             if (searchStatus) searchStatus.textContent = "検索データを読み込めませんでした。";
           }
         }
@@ -338,7 +367,7 @@ const footerGroups = [
       const renderGlobalSearch = () => {
         if (!searchInput || !searchResults || !searchStatus) return;
         const query = searchInput.value.trim().toLocaleLowerCase("ja");
-        searchAll?.setAttribute("href", query ? `/posts?q=${encodeURIComponent(query)}` : "/posts");
+        searchAll?.setAttribute("href", archiveUrl(query));
         searchResults.replaceChildren();
         if (!query) {
           searchStatus.textContent = "キーワードを入力すると記事候補を表示します。";
@@ -374,7 +403,7 @@ const footerGroups = [
       searchInput?.addEventListener("input", renderGlobalSearch);
       searchInput?.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && searchInput.value.trim()) {
-          location.href = `/posts?q=${encodeURIComponent(searchInput.value.trim())}`;
+          location.href = archiveUrl(searchInput.value.trim());
         }
       });
       document.querySelectorAll<HTMLButtonElement>("[data-search-suggestion]").forEach((button) =>

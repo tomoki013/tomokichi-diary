@@ -19,6 +19,9 @@
     "check:routes": "tsx scripts/check-routes.ts",
     "check:seo": "tsx scripts/check-seo.ts",
     "check:links": "tsx scripts/check-links.ts",
+    "check:knowledge": "tsx scripts/check-knowledge.ts",
+    "knowledge:catalog": "tsx scripts/build-knowledge-catalog.ts",
+    "knowledge:backlog": "tsx scripts/build-knowledge-backlog.ts",
     "perf": "tsx scripts/perf.ts",
     "baseline": "tsx scripts/legacy-baseline.ts",
     "export:data": "tsx scripts/export-data.ts",
@@ -29,6 +32,7 @@
     "deploy:web": "pnpm --filter @tomokichi/web exec wrangler deploy",
     "deploy:admin": "pnpm --filter @tomokichi/admin exec wrangler deploy",
     "deploy:api": "pnpm --filter @tomokichi/api exec wrangler deploy",
+    "deploy:mcp": "pnpm --filter @tomokichi/mcp-server deploy",
     "verify:live": "tsx scripts/verify-live.ts",
     "media:build": "tsx scripts/media-build.ts",
     "media:sync": "tsx scripts/media-sync.ts"

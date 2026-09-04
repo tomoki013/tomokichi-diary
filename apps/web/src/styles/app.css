@@ -1,0 +1,19 @@
+/*
+ * Single entry point for the public site's styles.
+ *
+ * The cascade order is declared once, here, so a page rule can never
+ * accidentally beat the site frame and no file needs `!important` to win.
+ * This replaced global.css + refinement.css, which had grown to 8,466 lines
+ * with the same selector redefined in up to six places.
+ */
+@layer tokens, base, layout, components, prose, pages, utilities;
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./components.css";
+@import "./prose.css";
+@import "./pages-home.css";
+@import "./pages-index.css";
+@import "./pages-article.css";
+@import "./pages-static.css";

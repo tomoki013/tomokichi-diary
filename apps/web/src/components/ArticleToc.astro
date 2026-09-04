@@ -122,7 +122,8 @@ import { ListIcon, XIcon } from "./TravelIcons";
 
     openButton.addEventListener("click", () => {
       overlay.hidden = false;
-      requestAnimationFrame(() => overlay.classList.add("is-open"));
+      void overlay.offsetHeight;
+      overlay.classList.add("is-open");
       openButton.setAttribute("aria-expanded", "true");
       document.dispatchEvent(
         new CustomEvent("site:overlay-change", { detail: { key: "article-toc", open: true } }),

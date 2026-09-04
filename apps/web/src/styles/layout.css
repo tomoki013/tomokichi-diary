@@ -1,0 +1,728 @@
+/* The site frame: shell, masthead, overlays, footer, breadcrumbs. */
+@layer layout {
+  .shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: var(--wide);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .wrap--narrow {
+    max-width: var(--narrow);
+  }
+
+  main {
+    flex: 1;
+    padding-bottom: var(--band);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform var(--speed) var(--ease);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* Masthead ------------------------------------------------------- */
+  /* The bar is a shade lighter than the page and always keeps its hairline:
+     it used to be the same colour as the page with a transparent border, so
+     at the top of a document there was nothing to separate the two. Scrolling
+     deepens the line and adds a shadow rather than introducing them. */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(16px) saturate(130%);
+    border-bottom: 1px solid var(--line);
+    transition:
+      border-color var(--speed) var(--ease),
+      box-shadow var(--speed) var(--ease),
+      background var(--speed) var(--ease);
+  }
+
+  .site-header.is-scrolled {
+    border-bottom-color: var(--line-strong);
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: 0 8px 28px rgb(56 42 27 / 8%);
+  }
+
+  .site-header__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: var(--header-h);
+  }
+
+  .site-header__brand {
+    display: flex;
+    align-items: center;
+    margin-inline-end: auto;
+    min-width: 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .site-header__brand span {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .site-header__brand strong {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: clamp(0.98rem, 0.85rem + 0.5vw, 1.18rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-header__brand em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+
+  .site-header__brand small {
+    display: block;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .site-nav a {
+    position: relative;
+    padding: 0.55rem 0.7rem;
+    border-radius: var(--radius-sm);
+    color: var(--ink-soft);
+    font-family: var(--font-label);
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color var(--speed) var(--ease),
+      background var(--speed) var(--ease);
+  }
+
+  .site-nav a::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0.7rem;
+    bottom: 0.3rem;
+    height: 1.5px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    /* Origin flips between the two states so the rule sweeps through: it
+       grows from the left on the way in and leaves to the right on the way
+       out, rather than retracting back the way it came. */
+    transform-origin: right center;
+    transition: transform 280ms var(--ease);
+  }
+
+  .site-nav a:is(:hover, :focus-visible) {
+    color: var(--accent);
+  }
+
+  .site-nav a:is(:hover, :focus-visible)::after,
+  .site-nav a[aria-current="page"]::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  .site-nav a[aria-current="page"] {
+    color: var(--accent);
+  }
+
+  /* The current page keeps its rule; leaving it means a hover on another item
+     does not read as the page having changed. */
+  .site-nav a[aria-current="page"]::after {
+    transition: none;
+  }
+
+  .site-header__action,
+  .site-header__menu-button {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--ink-soft);
+    transition:
+      background var(--speed) var(--ease),
+      border-color var(--speed) var(--ease),
+      color var(--speed) var(--ease);
+  }
+
+  .site-header__action:hover,
+  .site-header__menu-button:hover {
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .site-header__action svg,
+  .site-header__menu-button svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .site-header__menu-button {
+    display: none;
+  }
+
+  @media (max-width: 62rem) {
+    .site-nav {
+      display: none;
+    }
+    .site-header__menu-button {
+      display: grid;
+    }
+    .site-header__brand small {
+      display: none;
+    }
+  }
+
+  /* Overlays -------------------------------------------------------- */
+  .mobile-menu,
+  .header-search-modal,
+  .gallery-lightbox,
+  .mobile-toc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+  }
+
+  .mobile-menu__backdrop,
+  .header-search-modal__backdrop,
+  .gallery-lightbox__backdrop,
+  .mobile-toc-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: rgb(26 22 17 / 45%);
+    backdrop-filter: blur(3px);
+  }
+
+  /* The lightbox has no panel of its own, so the dimmed page is what the
+     photograph and its text are read against. */
+  .gallery-lightbox__backdrop {
+    background: rgb(14 12 9 / 96%);
+    backdrop-filter: blur(14px) saturate(70%);
+    opacity: 0;
+    transition: opacity 240ms var(--ease);
+  }
+
+  .mobile-menu.is-open .mobile-menu__backdrop,
+  .header-search-modal.is-open .header-search-modal__backdrop,
+  .gallery-lightbox.is-open .gallery-lightbox__backdrop,
+  .mobile-toc-overlay.is-open .mobile-toc-overlay__backdrop {
+    opacity: 1;
+  }
+
+  .mobile-menu__panel {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(21rem, 88vw);
+    padding: 1.1rem 1.25rem 2rem;
+    background: var(--bg);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 260ms var(--ease);
+  }
+
+  .mobile-menu.is-open .mobile-menu__panel {
+    transform: none;
+  }
+
+  .mobile-menu__panel > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mobile-menu__panel > header strong {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .mobile-menu__panel > header button {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink-soft);
+  }
+
+  .mobile-menu__panel nav {
+    display: grid;
+    padding-block: 0.5rem;
+  }
+
+  .mobile-menu__panel nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.25rem;
+    padding-inline: 0.2rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--font-label);
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+  }
+
+  .mobile-menu__panel nav a::after {
+    content: "→";
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+  }
+
+  .mobile-menu__panel nav a[aria-current="page"] {
+    color: var(--accent);
+  }
+
+  .mobile-menu__sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+  }
+
+  .mobile-menu__sub a {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    text-decoration: none;
+  }
+
+  /* Header search --------------------------------------------------- */
+  .header-search {
+    position: absolute;
+    top: max(3.5rem, calc(var(--header-h) + 0.5rem));
+    left: 50%;
+    width: min(38rem, calc(100vw - 2rem));
+    max-height: min(34rem, calc(100svh - var(--header-h) - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+    transform: translate(-50%, -0.6rem);
+    opacity: 0;
+    transition:
+      transform 220ms var(--ease),
+      opacity 220ms var(--ease);
+  }
+
+  .header-search-modal.is-open .header-search {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+
+  .header-search > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .header-search > header small {
+    display: block;
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .header-search > header h2 {
+    font-size: 1.18rem;
+  }
+
+  .header-search > header button {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    color: var(--ink-soft);
+  }
+
+  .header-search__input {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.2rem 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: border-color var(--speed) var(--ease);
+  }
+
+  .header-search__input:focus-within {
+    border-color: var(--accent);
+  }
+
+  .header-search__input svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    color: var(--ink-faint);
+  }
+
+  .header-search__input input {
+    flex: 1;
+    min-width: 0;
+    padding-block: 0.75rem;
+    border: 0;
+    background: none;
+    font-size: 0.98rem;
+  }
+
+  .header-search__input input:focus-visible {
+    outline: none;
+  }
+
+  .header-search__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .header-search__suggestions p {
+    margin-inline-end: 0.2rem;
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .header-search__suggestions button {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    transition:
+      border-color var(--speed) var(--ease),
+      color var(--speed) var(--ease);
+  }
+
+  .header-search__suggestions button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .header-search__status {
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .header-search__results {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .header-search__placeholder {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .header-search__results a {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background var(--speed) var(--ease);
+  }
+
+  .header-search__results a:hover {
+    background: var(--surface-alt);
+  }
+
+  .header-search__results small {
+    color: var(--ink-faint);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+
+  .header-search__results strong {
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .header-search__all {
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+    font-size: var(--step-small);
+    text-decoration: none;
+  }
+
+  .header-search__all::after {
+    content: " →";
+  }
+
+  /* Breadcrumbs ----------------------------------------------------- */
+  .breadcrumbs {
+    padding-block: 1rem 0.25rem;
+  }
+
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.5rem;
+    font-size: var(--step-tiny);
+    color: var(--ink-faint);
+  }
+
+  .breadcrumbs li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .breadcrumbs li + li::before {
+    content: "/";
+    color: var(--line-strong);
+  }
+
+  .breadcrumbs a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .breadcrumbs [aria-current="page"] {
+    overflow: hidden;
+    max-width: min(28rem, 60vw);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Footer ---------------------------------------------------------- */
+  .site-footer {
+    margin-top: auto;
+    background: var(--surface-dark);
+    color: var(--on-dark);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--band-tight);
+    padding-block: var(--band) var(--space-lg);
+  }
+
+  .site-footer__opening {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+    padding-bottom: var(--band-tight);
+    border-bottom: 1px solid rgb(247 243 234 / 12%);
+  }
+
+  .site-footer__opening p {
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    color: var(--accent-on-dark);
+  }
+
+  .site-footer__opening h2 {
+    font-size: var(--step-h1);
+    color: var(--on-dark);
+  }
+
+  .site-footer__opening div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .site-footer__opening a {
+    padding: 0.7rem 1.3rem;
+    border: 1px solid rgb(247 243 234 / 28%);
+    border-radius: var(--radius-pill);
+    color: var(--on-dark);
+    font-size: var(--step-small);
+    text-decoration: none;
+    transition:
+      background var(--speed) var(--ease),
+      border-color var(--speed) var(--ease);
+  }
+
+  .site-footer__opening a:hover {
+    border-color: transparent;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .site-footer__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: var(--space-lg);
+  }
+
+  .site-footer__brand p {
+    margin-top: 0.7rem;
+    max-width: 26rem;
+    color: var(--on-dark-soft);
+    font-size: var(--step-small);
+    line-height: 1.9;
+  }
+
+  .site-footer__logo {
+    color: var(--on-dark);
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+
+  .site-footer__groups {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-md);
+  }
+
+  .site-footer__groups h2 {
+    margin-bottom: 0.7rem;
+    color: color-mix(in srgb, var(--on-dark) 75%, transparent);
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .site-footer__groups ul {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .site-footer__groups a {
+    display: block;
+    padding-block: 0.35rem;
+    color: var(--on-dark-soft);
+    font-size: var(--step-small);
+    text-decoration: none;
+  }
+
+  .site-footer__groups a:hover {
+    color: #fff;
+  }
+
+  .site-footer__legal {
+    display: grid;
+    gap: 0.3rem;
+    padding-top: var(--space-md);
+    border-top: 1px solid rgb(247 243 234 / 12%);
+    color: color-mix(in srgb, var(--on-dark-soft) 80%, transparent);
+    font-size: var(--step-tiny);
+  }
+
+  @media (max-width: 52rem) {
+    .site-footer__body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .site-footer__groups {
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    }
+  }
+}
+
+/* A fixed box with `inset: 0` is still displaced by its own margin, and these
+   overlays live inside page wrappers that space their children apart — which
+   is what once pushed the gallery lightbox 64.8px down the page and left the
+   header uncovered. The rule has to outrank those page rules, and layer order
+   beats specificity, so it belongs in the last layer rather than next to the
+   overlay's own styles. */
+@layer utilities {
+  .mobile-menu,
+  .header-search-modal,
+  .gallery-lightbox,
+  .mobile-toc-overlay {
+    margin: 0;
+  }
+}

@@ -6,18 +6,19 @@ a plain-TypeScript core.
 
 ## Applications
 
-| Path         | What it is                | Notes                              |
-| ------------ | ------------------------- | ---------------------------------- |
-| `apps/web`   | Public site (Astro)       | Fully static, no client JavaScript |
-| `apps/admin` | Admin UI (Vite + React)   | SPA, talks only to the API         |
-| `apps/api`   | Admin API (Hono, Workers) | HTTP adapter; no business rules    |
+| Path              | What it is                     | Notes                              |
+| ----------------- | ------------------------------ | ---------------------------------- |
+| `apps/web`        | Public site (Astro)            | Fully static, no client JavaScript |
+| `apps/admin`      | Admin UI (Vite + React)        | SPA, talks only to the API         |
+| `apps/api`        | Admin API (Hono, Workers)      | HTTP adapter; no business rules    |
+| `apps/mcp-server` | Public MCP + MCP App (Workers) | Read-only Streamable HTTP adapter  |
 
 ## Packages
 
 | Package                | Responsibility                                                 |
 | ---------------------- | -------------------------------------------------------------- |
 | `packages/domain`      | Entities, value objects and rules. No framework imports.       |
-| `packages/application` | Use cases and the ports they need (repositories, storage, AI). |
+| `packages/application` | Use cases, travel queries/projections and the ports they need. |
 | `packages/contracts`   | Wire shapes, runtime validation, stable error codes.           |
 | `packages/data`        | Row ↔ entity mapping, content snapshot, export format.         |
 | `packages/seo`         | Metadata, JSON-LD, sitemap, RSS and robots — pure functions.   |
@@ -41,6 +42,31 @@ apps/api ─┘         ▲              ▲
 
 Nothing in `packages/` may import Astro, React, Hono, Vite or Cloudflare.
 `scripts/check-boundaries.ts` enforces this and runs as part of CI.
+
+## Travel knowledge
+
+Article prose and reusable travel knowledge deliberately coexist. `TravelFact`,
+`SourceReference`, `TravelRoute` and `ArticleKnowledge` live in the framework-free
+domain; D1 is one persistence adapter and `export/knowledge/*.json` is the committed
+build snapshot. Astro receives a resolved application view and never joins files or
+decides whether evidence is firsthand.
+
+The public web projects this data in three ways:
+
+- lightweight answer, decision, experience, current-fact, route and caution blocks;
+- `/knowledge/<article-slug>.json`, a protocol-neutral machine-readable projection.
+- page-scoped WebMCP tools for current context, search, firsthand evidence and heading navigation.
+
+`export/knowledge/catalog.json` is the compact read model shared by WebMCP and the
+public MCP Worker. The MCP endpoint is `/mcp`; `show_travel_evidence` progressively
+enhances its normal text and structured result with an MCP App. None of these are a
+second source of truth. Public delivery remains read-only.
+
+The admin's Travel Knowledge panel writes through an application use case that
+validates the whole graph. AI, when configured, can only create `candidate` facts;
+the separate human review action is the only path that verifies firsthand facts.
+Articles not yet migrated are listed in
+`export/knowledge/migration-backlog.json` instead of being guessed into canonical data.
 
 ## API
 
@@ -101,34 +127,54 @@ data. See [ADR 0002](adr/0002-route-independent-from-slug.md).
 
 ## Commands
 
-| Command              | What it does                                                     |
-| -------------------- | ---------------------------------------------------------------- |
-| `pnpm run ci`        | The whole pipeline. Identical locally and in CI.                 |
-| `pnpm diagnostics`   | Small snapshot of runtime, schema, content counts and CI status. |
-| `pnpm build`         | Builds every app.                                                |
-| `pnpm export:data`   | Writes the content graph to `export/`.                           |
-| `pnpm import:legacy` | One-way import from the previous Next.js site.                   |
-| `pnpm baseline`      | Records the previous site's URLs and SEO into `migration/`.      |
-| `pnpm check:routes`  | Legacy URL and route/page parity.                                |
-| `pnpm check:seo`     | Title, description, canonical, h1, JSON-LD, sitemap, noindex.    |
-| `pnpm check:links`   | Internal links and images resolve.                               |
-| `pnpm perf`          | Lighthouse budget over representative pages.                     |
+| Command                  | What it does                                                     |
+| ------------------------ | ---------------------------------------------------------------- |
+| `pnpm run ci`            | The whole pipeline. Identical locally and in CI.                 |
+| `pnpm diagnostics`       | Small snapshot of runtime, schema, content counts and CI status. |
+| `pnpm build`             | Builds every app.                                                |
+| `pnpm export:data`       | Writes the content graph to `export/`.                           |
+| `pnpm import:legacy`     | One-way import from the previous Next.js site.                   |
+| `pnpm baseline`          | Records the previous site's URLs and SEO into `migration/`.      |
+| `pnpm check:routes`      | Legacy URL and route/page parity.                                |
+| `pnpm check:seo`         | Title, description, canonical, h1, JSON-LD, sitemap, noindex.    |
+| `pnpm check:links`       | Internal links and images resolve.                               |
+| `pnpm check:knowledge`   | Evidence invariants and every knowledge graph reference.         |
+| `pnpm knowledge:catalog` | Rebuilds the WebMCP/MCP read model from the committed export.    |
+| `pnpm knowledge:backlog` | Lists every published article still requiring human migration.   |
+| `pnpm perf`              | Lighthouse budget over representative pages.                     |
 
 `pnpm ci` is a built-in pnpm command (a clean install), so always use
 `pnpm run ci`.
 
 ## Deployment
 
-Three Workers, no Pages:
+Four Workers, no Pages:
 
 | Worker                  | What it serves                                                                    |
 | ----------------------- | --------------------------------------------------------------------------------- |
 | `tomokichi-diary-web`   | The public site as static assets — no `main`, so no Worker invocation per request |
 | `tomokichi-diary-admin` | The admin SPA as static assets                                                    |
 | `tomokichi-diary-api`   | The Hono API, bound to D1 and R2                                                  |
+| `tomokichi-diary-mcp`   | Public read-only MCP server and evidence App                                      |
 
 `_redirects` and `_headers` are emitted into the build output from the route
 table, so redirects stay data rather than configuration.
 
 After a content change: `pnpm export:data`, commit, then `pnpm db:seed`,
 `pnpm media:build && pnpm media:sync`, and `pnpm deploy:web`.
+
+A push to `main` runs the `deploy` job of `.github/workflows/ci.yml`, which
+`needs` the `ci` job — so nothing ships from a red check, and `pnpm run ci`
+runs once per push rather than once per workflow. The Cloudflare credentials
+are attached to the individual steps that talk to Cloudflare rather than to the
+job, so `pnpm install` never sees the production token.
+
+The deploy job ships in a fixed order:
+
+```
+media:sync → db:migrate → deploy:api → deploy:mcp → deploy:web → deploy:admin → verify:live
+```
+
+Migrations therefore land while the previous API is still serving traffic.
+**Every migration must be expand/contract** — see the rule in
+[OPERATIONS.md](OPERATIONS.md#db_migration_failed).

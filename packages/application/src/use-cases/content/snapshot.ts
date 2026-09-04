@@ -39,5 +39,11 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleTags: await repos.relations.listArticleTags(),
     articleCollections: await repos.collections.listMemberships(),
     aiArtifacts: [],
+    sources: await repos.knowledge.listSources(),
+    travelRoutes: await repos.knowledge.listTravelRoutes(),
+    travelFacts: await repos.knowledge.listTravelFacts(),
+    articleKnowledge: (await repos.knowledge.listArticleKnowledge()).filter((knowledge) =>
+      revisionIds.includes(knowledge.revisionId),
+    ),
   };
 }

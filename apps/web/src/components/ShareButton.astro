@@ -10,7 +10,14 @@ interface Props {
 const { title, text, url } = Astro.props;
 ---
 
-<button class="share-button" type="button" data-share-button data-title={title} data-text={text} data-url={url}>
+<button
+  class="share-button"
+  type="button"
+  data-share-button
+  data-title={title}
+  data-text={text}
+  data-url={url}
+>
   <ShareIcon /><span data-share-label>この旅を共有する</span>
 </button>
 
@@ -28,7 +35,9 @@ const { title, text, url } = Astro.props;
         else {
           await navigator.clipboard.writeText(payload.url);
           if (label) label.textContent = "リンクをコピーしました";
-          window.setTimeout(() => { if (label) label.textContent = "この旅を共有する"; }, 2200);
+          window.setTimeout(() => {
+            if (label) label.textContent = "この旅を共有する";
+          }, 2200);
         }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;

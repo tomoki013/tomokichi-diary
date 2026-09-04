@@ -22,8 +22,12 @@ import {
   type Relation,
   type Route,
   type Tag,
+  type TravelFact,
+  type SourceReference,
+  type TravelRoute,
 } from "@tomokichi/domain";
 import type { ContentSnapshot } from "@tomokichi/data";
+import { searchTravelFacts, type TravelKnowledgeView } from "./travel-knowledge.js";
 
 export interface ArticleView {
   readonly article: Article;
@@ -57,6 +61,9 @@ export class ContentIndex {
   private readonly tagById = new Map<string, Tag>();
   private readonly placeById = new Map<string, Place>();
   private readonly collectionById = new Map<string, Collection>();
+  private readonly factById = new Map<string, TravelFact>();
+  private readonly sourceById = new Map<string, SourceReference>();
+  private readonly travelRouteById = new Map<string, TravelRoute>();
 
   constructor(
     readonly snapshot: ContentSnapshot,
@@ -78,6 +85,9 @@ export class ContentIndex {
     for (const t of snapshot.tags) this.tagById.set(t.id, t);
     for (const p of snapshot.places) this.placeById.set(p.id, p);
     for (const c of snapshot.collections) this.collectionById.set(c.id, c);
+    for (const f of snapshot.travelFacts) this.factById.set(f.id, f);
+    for (const s of snapshot.sources) this.sourceById.set(s.id, s);
+    for (const r of snapshot.travelRoutes) this.travelRouteById.set(r.id, r);
   }
 
   publicArticles(): readonly Article[] {
@@ -209,5 +219,31 @@ export class ContentIndex {
       this.relations.locations.find((r) => r.articleId === id && r.relation === "primary") ??
       this.relations.locations.find((r) => r.articleId === id);
     return relation ? (this.locations.get(relation.locationId) ?? null) : null;
+  }
+
+  knowledgeOf(id: ArticleId): TravelKnowledgeView | null {
+    const article = this.articleById.get(id);
+    if (!article?.publishedRevisionId) return null;
+    const knowledge = this.snapshot.articleKnowledge.find(
+      (entry) => entry.articleId === id && entry.revisionId === article.publishedRevisionId,
+    );
+    if (!knowledge) return null;
+    const factIds = new Set([
+      ...knowledge.experienceGroups.flatMap((group) => group.factIds),
+      ...knowledge.currentFactIds,
+      ...knowledge.cautionFactIds,
+    ]);
+    const facts = [...factIds].flatMap((factId) => this.factById.get(factId) ?? []);
+    const sourceIds = new Set(facts.flatMap((fact) => fact.sourceIds));
+    return {
+      article: knowledge,
+      facts,
+      sources: [...sourceIds].flatMap((sourceId) => this.sourceById.get(sourceId) ?? []),
+      routes: knowledge.routeIds.flatMap((routeId) => this.travelRouteById.get(routeId) ?? []),
+    };
+  }
+
+  searchKnowledge(input: Parameters<typeof searchTravelFacts>[1] = {}): readonly TravelFact[] {
+    return searchTravelFacts(this.snapshot.travelFacts, input);
   }
 }

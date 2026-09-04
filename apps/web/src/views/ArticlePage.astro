@@ -1,5 +1,5 @@
 ---
-import type { ArticleView } from "@tomokichi/application";
+import { buildKnowledgeCatalog, type ArticleView } from "@tomokichi/application";
 import type { Route } from "@tomokichi/domain";
 import { buildArticleJsonLd, buildArticleMetadata, buildBreadcrumbJsonLd } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -12,8 +12,12 @@ import { articleTrail } from "../lib/navigation";
 import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
 import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
+import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
+import CopyLinkButton from "../components/CopyLinkButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
+import WebMcpTools from "../components/WebMcpTools.astro";
+import { snapshot } from "../lib/content";
 
 interface Props {
   view: ArticleView;
@@ -74,9 +78,12 @@ const articleViews = content.publicArticles().flatMap((item) => {
 const currentIndex = articleViews.findIndex((item) => item.article.id === article.id);
 const previousArticle = currentIndex >= 0 ? articleViews[currentIndex + 1] : undefined;
 const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefined;
+const knowledge = content.knowledgeOf(article.id);
+const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 ---
 
 <BaseLayout metadata={metadata} jsonLd={jsonLd} width="wide">
+  <WebMcpTools catalog={knowledgeCatalog} articleId={article.id} />
   <article class="article-page">
     <Breadcrumbs trail={trail} />
     <header class:list={["article-hero", !cover && "article-hero--plain"]}>
@@ -144,7 +151,8 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
             </div>
           )
         }
-        <ArticleBody slug={article.slug} embeds={view.embeds} />
+        {knowledge && <ArticleKnowledge view={knowledge} />}
+        <ArticleBody slug={article.slug} embeds={view.embeds} path={view.route.path} />
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong><p>
@@ -155,23 +163,40 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
         </footer>
         <div class="article-share">
           <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
-          <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+          <div class="article-share__actions">
+            <CopyLinkButton url={metadata.canonical} />
+            <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+          </div>
         </div>
         {
           (previousArticle || nextArticle) && (
             <nav class="post-navigation" aria-label="前後の記事">
               {previousArticle ? (
-                <a href={previousArticle.route.path} class="post-navigation__card post-navigation__card--previous">
-                  <span><ChevronLeftIcon /> 前の記事</span>
+                <a
+                  href={previousArticle.route.path}
+                  class="post-navigation__card post-navigation__card--previous"
+                >
+                  <span>
+                    <ChevronLeftIcon /> 前の記事
+                  </span>
                   <strong>{previousArticle.revision.title}</strong>
                 </a>
-              ) : <span />}
+              ) : (
+                <span />
+              )}
               {nextArticle ? (
-                <a href={nextArticle.route.path} class="post-navigation__card post-navigation__card--next">
-                  <span>次の記事 <ChevronRightIcon /></span>
+                <a
+                  href={nextArticle.route.path}
+                  class="post-navigation__card post-navigation__card--next"
+                >
+                  <span>
+                    次の記事 <ChevronRightIcon />
+                  </span>
                   <strong>{nextArticle.revision.title}</strong>
                 </a>
-              ) : <span />}
+              ) : (
+                <span />
+              )}
             </nav>
           )
         }
@@ -183,10 +208,8 @@ const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefine
           {
             travel && (
               <div>
-                <>
-                  <small>訪問時期</small>
-                  <strong>{travel}</strong>
-                </>
+                <small>訪問時期</small>
+                <strong>{travel}</strong>
               </div>
             )
           }

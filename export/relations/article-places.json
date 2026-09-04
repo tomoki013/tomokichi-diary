@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "articleId": "ec5a4c60-e280-8bc7-b533-c5811a5451d2",
+    "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101",
+    "relation": "visited"
+  },
+  {
+    "articleId": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
+    "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba102",
+    "relation": "visited"
+  },
+  {
+    "articleId": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103",
+    "relation": "visited"
+  },
+  {
+    "articleId": "034ecf00-ab8b-803f-b77f-f661514e5626",
+    "placeId": "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba104",
+    "relation": "visited"
+  }
+]

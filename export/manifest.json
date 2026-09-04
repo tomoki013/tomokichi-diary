@@ -8,7 +8,7 @@
     "routes": 246,
     "locations": 50,
     "locationNames": 50,
-    "places": 0,
+    "places": 4,
     "categories": 4,
     "tags": 88,
     "collections": 13,
@@ -16,9 +16,13 @@
     "media": 386,
     "articleMedia": 500,
     "articleLocations": 165,
-    "articlePlaces": 0,
+    "articlePlaces": 4,
     "articleCategories": 114,
     "articleTags": 350,
-    "articleCollections": 154
+    "articleCollections": 154,
+    "sources": 4,
+    "travelRoutes": 2,
+    "travelFacts": 15,
+    "articleKnowledge": 3
   }
 }

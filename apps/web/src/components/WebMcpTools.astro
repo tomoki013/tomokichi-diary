@@ -1,0 +1,28 @@
+---
+import type { KnowledgeCatalogEntry } from "@tomokichi/application";
+
+interface Props {
+  catalog: readonly KnowledgeCatalogEntry[];
+  articleId: string;
+}
+const { catalog, articleId } = Astro.props;
+const payload = JSON.stringify({ catalog, articleId }).replaceAll("<", "\\u003c");
+---
+
+<script type="application/json" id="webmcp-context" set:html={payload} />
+<script>
+  import { registerWebMcpTools } from "../lib/webmcp";
+  import { trackSemanticEvent } from "../lib/analytics";
+  import type { KnowledgeCatalogEntry } from "@tomokichi/application";
+
+  const element = document.querySelector<HTMLScriptElement>("#webmcp-context");
+  if (element?.textContent) {
+    const context = JSON.parse(element.textContent) as {
+      catalog: readonly KnowledgeCatalogEntry[];
+      articleId: string;
+    };
+    const unregister = registerWebMcpTools(context.catalog, context.articleId);
+    trackSemanticEvent({ name: "travel_knowledge_viewed", articleId: context.articleId });
+    globalThis.addEventListener("pagehide", unregister, { once: true });
+  }
+</script>
