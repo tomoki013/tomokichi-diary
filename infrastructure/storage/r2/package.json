@@ -19,6 +19,6 @@
     "@tomokichi/application": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260101.0"
+    "@cloudflare/workers-types": "^5.20260901.1"
   }
 }
