@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:ui": "vite build",
+    "build:ui": "vite build && tsx scripts/verify-ui.ts",
     "build": "pnpm build:ui && tsc --noEmit -p tsconfig.json",
     "dev": "pnpm build:ui && wrangler dev",
     "deploy": "pnpm build:ui && wrangler deploy",

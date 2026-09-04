@@ -80,6 +80,16 @@ and a liveness response at `/health`. It bundles the committed knowledge catalog
 it does not require D1 or an AI provider at runtime. Rebuild the catalog after content
 exports and deploy with `pnpm deploy:mcp`. MCP Apps-capable hosts render the evidence
 view; all other clients receive the same facts as text and structured content.
+`pnpm check:agents` verifies the built WebMCP contexts, tools, JSON projections and
+single-file MCP App. After deployment, run
+`pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev` to exercise
+protocol negotiation, tools, firsthand filtering and the UI resource against production.
+
+### `AGENT_SURFACE_FAILED`
+
+An article knowledge record was built without its WebMCP context/tool registrations,
+its machine-readable JSON endpoint, or the MCP App bundle. Run `pnpm build` and then
+`pnpm check:agents`; fix the named generated surface rather than suppressing the check.
 
 ### `TEST_FAILED` / `BUILD_FAILED`
 
