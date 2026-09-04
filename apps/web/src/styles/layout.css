@@ -53,13 +53,17 @@
   }
 
   /* Masthead ------------------------------------------------------- */
+  /* The bar is a shade lighter than the page and always keeps its hairline:
+     it used to be the same colour as the page with a transparent border, so
+     at the top of a document there was nothing to separate the two. Scrolling
+     deepens the line and adds a shadow rather than introducing them. */
   .site-header {
     position: sticky;
     top: 0;
     z-index: 30;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
     backdrop-filter: blur(16px) saturate(130%);
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid var(--line);
     transition:
       border-color var(--speed) var(--ease),
       box-shadow var(--speed) var(--ease),
@@ -67,9 +71,9 @@
   }
 
   .site-header.is-scrolled {
-    border-bottom-color: var(--line);
-    background: color-mix(in srgb, var(--bg) 95%, transparent);
-    box-shadow: 0 6px 24px rgb(56 42 27 / 6%);
+    border-bottom-color: var(--line-strong);
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: 0 8px 28px rgb(56 42 27 / 8%);
   }
 
   .site-header__bar {
