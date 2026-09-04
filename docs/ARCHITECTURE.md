@@ -163,13 +163,13 @@ table, so redirects stay data rather than configuration.
 After a content change: `pnpm export:data`, commit, then `pnpm db:seed`,
 `pnpm media:build && pnpm media:sync`, and `pnpm deploy:web`.
 
-A push to `main` runs the `deploy` job of `.github/workflows/ci.yml`, which
-`needs` the `ci` job — so nothing ships from a red check, and `pnpm run ci`
-runs once per push rather than once per workflow. The Cloudflare credentials
-are attached to the individual steps that talk to Cloudflare rather than to the
-job, so `pnpm install` never sees the production token.
+CI checks; it does not ship. A release is run by hand from a developer machine,
+where wrangler is already authenticated, so no Cloudflare credential exists in
+the repository for a workflow, a pull request, or a dependency install script
+to reach. The sequence is the release runbook in
+[OPERATIONS.md](OPERATIONS.md#releasing).
 
-The deploy job ships in a fixed order:
+A release ships in a fixed order:
 
 ```
 media:sync → db:migrate → deploy:api → deploy:mcp → deploy:web → deploy:admin → verify:live

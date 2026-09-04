@@ -10,6 +10,41 @@ does not explain the failure.
 pnpm diagnostics
 ```
 
+## Releasing
+
+Releases are run by hand from a developer machine. CI checks; it does not ship.
+Nothing in the repository holds a Cloudflare credential — wrangler is already
+authenticated locally, so no production token has to exist in a workflow, a
+pull request, or the environment a dependency install script runs in.
+
+Start from a clean `main` with a green `pnpm run ci`. The order matters and is
+the same one the site has always shipped in:
+
+```bash
+PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm media:build && \
+PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm build && \
+pnpm media:sync && \
+pnpm db:migrate && \
+pnpm deploy:api && \
+pnpm deploy:mcp && \
+pnpm deploy:web && \
+VITE_API_URL=https://api.tomokichidiary.com pnpm --filter @tomokichi/admin build && \
+pnpm deploy:admin && \
+pnpm verify:live https://tomokichidiary.com
+```
+
+Two details that are easy to lose:
+
+- The artefacts that ship must be built with the production `PUBLIC_SITE_URL`
+  and `PUBLIC_INDEXABLE`. A build made with the defaults carries the wrong
+  canonical URLs and a `noindex`.
+- The admin SPA is built against the deployed API (`VITE_API_URL`), so it is
+  built after the API is live, not before.
+
+`db:migrate` runs ahead of the API that reads the new shape, which is why every
+migration has to be expand/contract — see
+[`DB_MIGRATION_FAILED`](#db_migration_failed).
+
 ## Pipeline
 
 ### `FORMAT_CHECK_FAILED`
@@ -134,7 +169,7 @@ Migrations are append-only. Never edit an applied file; add
 `migrations/000N_description.sql`. `pnpm test` applies every migration to an
 empty database on each run.
 
-**Migrations must be expand/contract.** Deployment applies them before the API
+**Migrations must be expand/contract.** A release applies them before the API
 that reads the new shape is deployed, so there is always a window where the old
 API runs against the new database. A migration that the old API cannot survive
 takes the site down for the length of that window.
