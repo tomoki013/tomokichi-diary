@@ -20,6 +20,7 @@
     "check:seo": "tsx scripts/check-seo.ts",
     "check:links": "tsx scripts/check-links.ts",
     "check:knowledge": "tsx scripts/check-knowledge.ts",
+    "check:agents": "tsx scripts/check-agent-surfaces.ts",
     "knowledge:catalog": "tsx scripts/build-knowledge-catalog.ts",
     "knowledge:backlog": "tsx scripts/build-knowledge-backlog.ts",
     "perf": "tsx scripts/perf.ts",
@@ -34,6 +35,7 @@
     "deploy:api": "pnpm --filter @tomokichi/api exec wrangler deploy",
     "deploy:mcp": "pnpm --filter @tomokichi/mcp-server run deploy",
     "verify:live": "tsx scripts/verify-live.ts",
+    "verify:mcp": "tsx scripts/verify-mcp.ts",
     "media:build": "tsx scripts/media-build.ts",
     "media:sync": "tsx scripts/media-sync.ts"
   },

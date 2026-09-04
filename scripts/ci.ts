@@ -142,6 +142,14 @@ const STEPS: Step[] = [
     interpret: (output) => parseJsonFindings(output),
   },
   {
+    name: "agents",
+    code: "AGENT_SURFACE_FAILED",
+    command: "pnpm",
+    args: ["exec", "tsx", "scripts/check-agent-surfaces.ts", "--json"],
+    rerun: "pnpm check:agents",
+    interpret: (output) => parseJsonFindings(output),
+  },
+  {
     name: "seo",
     code: "SEO_CANONICAL_MISSING",
     command: "pnpm",

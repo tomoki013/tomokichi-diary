@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import { queryCatalog } from "./catalog.js";
-import EVIDENCE_APP_HTML from "../ui-dist/index.html";
 
 const RESOURCE_URI = "ui://tomokichi-diary/travel-evidence.html";
 const RESOURCE_MIME_TYPE = "text/html;profile=mcp-app";
@@ -23,6 +22,10 @@ const textResult = (items: ReturnType<typeof queryCatalog>, siteOrigin: string) 
   const enriched = items.map((entry) => ({
     ...entry,
     url: new URL(entry.path, siteOrigin).toString(),
+    sources: entry.sources.map((source) => ({
+      ...source,
+      url: source.url ? new URL(source.url, siteOrigin).toString() : null,
+    })),
   }));
   return {
     content: [
@@ -57,7 +60,7 @@ const textResult = (items: ReturnType<typeof queryCatalog>, siteOrigin: string) 
   };
 };
 
-export function createServer(siteOrigin: string) {
+export function createServer(siteOrigin: string, evidenceAppHtml: string) {
   const server = new McpServer({ name: "Tomokichi Diary Travel Knowledge", version: "1.0.0" });
   server.registerTool(
     "search_travel_content",
@@ -114,7 +117,7 @@ export function createServer(siteOrigin: string) {
       mimeType: RESOURCE_MIME_TYPE,
     },
     async () => ({
-      contents: [{ uri: RESOURCE_URI, mimeType: RESOURCE_MIME_TYPE, text: EVIDENCE_APP_HTML }],
+      contents: [{ uri: RESOURCE_URI, mimeType: RESOURCE_MIME_TYPE, text: evidenceAppHtml }],
     }),
   );
   return server;
