@@ -234,9 +234,6 @@
   .mobile-toc-overlay {
     position: fixed;
     inset: 0;
-    /* A fixed box with `inset: 0` is still displaced by its own margin, and
-       these sit inside page wrappers that space their children apart. */
-    margin: 0;
     z-index: 60;
   }
 
@@ -701,5 +698,20 @@
     .site-footer__groups {
       grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
     }
+  }
+}
+
+/* A fixed box with `inset: 0` is still displaced by its own margin, and these
+   overlays live inside page wrappers that space their children apart — which
+   is what once pushed the gallery lightbox 64.8px down the page and left the
+   header uncovered. The rule has to outrank those page rules, and layer order
+   beats specificity, so it belongs in the last layer rather than next to the
+   overlay's own styles. */
+@layer utilities {
+  .mobile-menu,
+  .header-search-modal,
+  .gallery-lightbox,
+  .mobile-toc-overlay {
+    margin: 0;
   }
 }

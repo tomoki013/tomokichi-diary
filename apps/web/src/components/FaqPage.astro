@@ -106,8 +106,28 @@ const groups = markdown
   const faqItems = [...document.querySelectorAll<HTMLDetailsElement>("[data-faq-item]")];
   const faqGroups = [...document.querySelectorAll<HTMLElement>("[data-faq-group]")];
   const faqEmpty = document.querySelector<HTMLElement>("[data-faq-empty]");
-  const filterFaq = () => {
-    const query = faqSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
+
+  /**
+   * The same `q` convention the archive and the header search use: the query
+   * lives in the URL so a filtered list can be linked to, an empty query is
+   * dropped so a pristine page has a clean URL, and typing replaces rather
+   * than pushes so one search is not fifty history entries.
+   */
+  const readFaqQuery = () => new URLSearchParams(location.search).get("q")?.trim() ?? "";
+
+  const writeFaqQuery = (value: string, mode: "push" | "replace") => {
+    const params = new URLSearchParams(location.search);
+    if (value) params.set("q", value);
+    else params.delete("q");
+    const search = params.toString();
+    const next = `${location.pathname}${search ? `?${search}` : ""}${location.hash}`;
+    if (next === `${location.pathname}${location.search}${location.hash}`) return;
+    history[mode === "push" ? "pushState" : "replaceState"](null, "", next);
+  };
+
+  const filterFaq = (urlMode: "replace" | "none" = "replace") => {
+    const value = faqSearch?.value.trim() ?? "";
+    const query = value.toLocaleLowerCase("ja");
     let visible = 0;
     faqItems.forEach((item) => {
       const matches = !query || (item.dataset.searchText ?? "").includes(query);
@@ -120,6 +140,19 @@ const groups = markdown
       );
     });
     if (faqEmpty) faqEmpty.hidden = visible > 0;
+    if (urlMode !== "none") writeFaqQuery(value, urlMode);
   };
-  faqSearch?.addEventListener("input", filterFaq);
+
+  faqSearch?.addEventListener("input", () => filterFaq());
+
+  if (faqSearch) {
+    faqSearch.value = readFaqQuery();
+    // `replace` so a hand-written or stale URL is tidied into the canonical
+    // form on arrival, matching how the archive behaves.
+    filterFaq("replace");
+    addEventListener("popstate", () => {
+      faqSearch.value = readFaqQuery();
+      filterFaq("none");
+    });
+  }
 </script>

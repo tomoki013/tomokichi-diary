@@ -14,7 +14,7 @@
   .posts-archive > * + *,
   .destination-index > * + *,
   .collections-page > * + *,
-  .gallery-page > * + *:not(.gallery-lightbox) {
+  .gallery-page > * + * {
     margin-top: var(--band);
   }
 
