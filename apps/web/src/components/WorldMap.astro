@@ -3,12 +3,15 @@ import { geoNaturalEarth1, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import world from "world-atlas/countries-110m.json";
 import type { FeatureCollection, Geometry } from "geojson";
+import { imageSources } from "../lib/images";
 
 interface CountryLink {
   slug: string;
   name: string;
   path: string;
   count: number;
+  /** Optional: the card that opens from a pin shows it when the caller has one. */
+  cover?: { asset: { storageKey: string }; usage: { alt: string } } | null;
 }
 
 interface Props {
@@ -65,69 +68,316 @@ const collection = feature(
   (world as unknown as { objects: { countries: unknown } }).objects.countries as never,
 ) as unknown as FeatureCollection<Geometry, { name?: string }>;
 
+const WIDTH = 960;
+const HEIGHT = 490;
 const projection = geoNaturalEarth1().fitExtent(
   [
     [18, 18],
-    [942, 472],
+    [WIDTH - 18, HEIGHT - 18],
   ],
   collection,
 );
-const path = geoPath(projection);
+/* One decimal of a 960-unit viewBox is ~0.06px on screen, and ~0.4px at full
+   zoom — invisible, and a third off the page's HTML. */
+const path = geoPath(projection).digits(1);
 const mapShapes = collection.features.flatMap((country) => {
   const name = country.properties?.name ?? "";
   const d = path(country);
-  return d ? [{ d, destination: countryByEnglishName.get(name) ?? null }] : [];
+  return d ? [{ d, visited: countryByEnglishName.has(name) }] : [];
 });
+
+/* The card is a background image, not an <img>: a hidden subtree never
+   fetches one, so fifteen covers cost nothing until a pin is reached for. */
+const thumbnailOf = (country: CountryLink): string | null => {
+  const storageKey = country.cover?.asset.storageKey;
+  if (!storageKey) return null;
+  const image = imageSources(storageKey);
+  const webp = image.sources.find((source) => source.type === "image/webp");
+  return webp?.srcset.split(",")[0]?.trim().split(" ")[0] ?? image.src;
+};
+
 const pins = countries.flatMap((destination) => {
   const coordinates = coordinatesBySlug[destination.slug];
   const point = coordinates ? projection(coordinates) : null;
-  return point ? [{ destination, x: point[0], y: point[1] }] : [];
+  if (!point) return [];
+  const [x, y] = point;
+  return [
+    {
+      destination,
+      english: englishNameBySlug[destination.slug] ?? null,
+      thumbnail: thumbnailOf(destination),
+      /* A country with more to read gets a slightly larger marker, so the
+         map says something about weight before anything is clicked. */
+      size: (0.42 + Math.min(destination.count, 24) * 0.014).toFixed(3),
+      /* Unitless: the stylesheet multiplies these by container-query units,
+         so a pin lands on the same spot whatever size the map is drawn at. */
+      left: ((x / WIDTH) * 100).toFixed(2),
+      top: ((y / HEIGHT) * 100).toFixed(2),
+      /* Cards open away from the nearest edge, and the stylesheet clamps
+         whatever is left over against the edges of the map. */
+      side: x > WIDTH * 0.62 ? "left" : "right",
+      vertical: y < HEIGHT * 0.3 ? "down" : "up",
+    },
+  ];
 });
 ---
 
-<div class="world-map" aria-label="訪れた国から記事を探す">
-  <svg viewBox="0 0 960 490" role="img" aria-labelledby="world-map-title world-map-description">
-    <title id="world-map-title">ともきちが訪れた国の世界地図</title>
-    <desc id="world-map-description">色の濃い国を選ぶと、その国の旅行記事へ移動します。</desc>
-    <g>
-      {
-        mapShapes.map(({ d, destination }) =>
-          destination ? (
+<div class="world-map">
+  <div class="world-map__stage" data-map>
+    <div class="world-map__layer" data-map-layer>
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        role="img"
+        aria-labelledby="world-map-title world-map-description"
+      >
+        <title id="world-map-title">ともきちが訪れた国の世界地図</title>
+        <desc id="world-map-description">ピンを選ぶと、その国の旅行記事へ移動します。</desc>
+        {
+          mapShapes.map(({ d, visited }) => (
+            <path class:list={["world-map__country", visited && "is-visited"]} d={d} />
+          ))
+        }
+      </svg>
+
+      <div class="world-map__pins">
+        {
+          pins.map(({ destination, english, thumbnail, left, top, side, vertical, size }) => (
             <a
+              class="world-map__pin"
               href={destination.path}
+              style={`--pin-x:${left};--pin-y:${top};--pin-size:${size}rem;--card-h:${thumbnail ? "10.2rem" : "5.6rem"}`}
+              data-side={side}
+              data-vertical={vertical}
               aria-label={`${destination.name}の記事 ${destination.count}件`}
             >
-              <path class="world-map__country world-map__country--visited" d={d}>
-                <title>{destination.name}</title>
-              </path>
+              <span class="world-map__marker" aria-hidden="true" />
+              <span class="world-map__card" aria-hidden="true">
+                {thumbnail && (
+                  <span
+                    class="world-map__card-image"
+                    style={`background-image:url(${thumbnail})`}
+                  />
+                )}
+                <span class="world-map__card-body">
+                  <b>{destination.name}</b>
+                  {english && <small>{english}</small>}
+                  <em>
+                    {destination.count} stories <span>→</span>
+                  </em>
+                </span>
+              </span>
             </a>
-          ) : (
-            <path class="world-map__country" d={d} aria-hidden="true" />
-          ),
-        )
-      }
-    </g>
-    <g class="world-map__pins">
-      {
-        pins.map(({ destination, x, y }) => (
-          <a
-            href={destination.path}
-            aria-label={`${destination.name}の記事 ${destination.count}件`}
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="world-map__controls">
+      <button
+        class="world-map__recentre"
+        type="button"
+        data-map-zoom="reset"
+        aria-label="地図の表示を戻す"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+        >
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.6v3.2M12 18.2v3.2M2.6 12h3.2M18.2 12h3.2" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <div class="world-map__zoom">
+        <button type="button" data-map-zoom="in" aria-label="地図を拡大">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
           >
-            <g transform={`translate(${x} ${y})`}>
-              <g class="world-map__pin">
-                <circle r="4" />
-                <title>
-                  {destination.name}（{destination.count}件）
-                </title>
-              </g>
-            </g>
-          </a>
-        ))
-      }
-    </g>
-  </svg>
+            <path d="M12 5.5v13M5.5 12h13" stroke-linecap="round"></path>
+          </svg>
+        </button>
+        <button type="button" data-map-zoom="out" aria-label="地図を縮小">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path d="M5.5 12h13" stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <p class="world-map__legend">
-    <span aria-hidden="true"></span>訪れた国<span aria-hidden="true"></span>記事のある都市
+    <span aria-hidden="true"></span>訪れた国<span aria-hidden="true"></span>ピンの大きさ＝記事の多さ
   </p>
 </div>
+
+<script>
+  /*
+   * Pinch, wheel and drag zoom for every map on the page. One hoisted module
+   * for all of them, no library: the whole interaction is a scale and an
+   * offset applied to a single wrapper.
+   */
+  const MIN_SCALE = 1;
+  const MAX_SCALE = 6;
+  /* Below this a drag is a click that wobbled, not a pan. */
+  const DRAG_SLOP = 6;
+
+  const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
+
+  for (const stage of document.querySelectorAll<HTMLElement>("[data-map]")) {
+    const layer = stage.querySelector<HTMLElement>("[data-map-layer]");
+    if (!layer) continue;
+
+    const pointers = new Map<number, { x: number; y: number }>();
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let travelled = 0;
+
+    const apply = () => {
+      const { width, height } = stage.getBoundingClientRect();
+      /* Never show the page through the edge of the map. */
+      offsetX = clamp(offsetX, width * (1 - scale), 0);
+      offsetY = clamp(offsetY, height * (1 - scale), 0);
+      layer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+      /* Markers and cards divide this out, so they keep their own size. */
+      stage.style.setProperty("--zoom", String(scale));
+      stage.classList.toggle("is-zoomed", scale > 1.001);
+    };
+
+    /* Zooming around a point keeps whatever is under the fingers under them. */
+    const zoomAround = (next: number, x: number, y: number) => {
+      const target = clamp(next, MIN_SCALE, MAX_SCALE);
+      const ratio = target / scale;
+      offsetX = x - (x - offsetX) * ratio;
+      offsetY = y - (y - offsetY) * ratio;
+      scale = target;
+      apply();
+    };
+
+    const zoomFromCentre = (factor: number) => {
+      const { width, height } = stage.getBoundingClientRect();
+      zoomAround(scale * factor, width / 2, height / 2);
+    };
+
+    const localPoint = (clientX: number, clientY: number) => {
+      const box = stage.getBoundingClientRect();
+      return { x: clientX - box.left, y: clientY - box.top };
+    };
+
+    const spread = () => {
+      const [a, b] = [...pointers.values()];
+      if (!a || !b) return null;
+      return {
+        distance: Math.hypot(a.x - b.x, a.y - b.y),
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+      };
+    };
+
+    let pinch = spread();
+
+    /* A bare wheel still scrolls the page; only a deliberate pinch or
+       ctrl-wheel is read as a zoom, which is what a trackpad pinch sends. */
+    stage.addEventListener(
+      "wheel",
+      (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        const point = localPoint(event.clientX, event.clientY);
+        zoomAround(scale * Math.exp(-event.deltaY / 180), point.x, point.y);
+      },
+      { passive: false },
+    );
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if ((event.target as HTMLElement).closest(".world-map__controls")) return;
+      pointers.set(event.pointerId, localPoint(event.clientX, event.clientY));
+      travelled = 0;
+      pinch = spread();
+      /* Keeps a drag alive past the edge of the map; a pointer that has
+         already gone away is not worth an exception. */
+      try {
+        stage.setPointerCapture(event.pointerId);
+      } catch {
+        /* ignore */
+      }
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      const previous = pointers.get(event.pointerId);
+      if (!previous) return;
+      const point = localPoint(event.clientX, event.clientY);
+      pointers.set(event.pointerId, point);
+      travelled += Math.abs(point.x - previous.x) + Math.abs(point.y - previous.y);
+
+      if (pointers.size >= 2) {
+        const next = spread();
+        if (!pinch || !next || pinch.distance === 0) {
+          pinch = next;
+          return;
+        }
+        /* The midpoint moving is a pan, the fingers separating is a zoom. */
+        offsetX += next.x - pinch.x;
+        offsetY += next.y - pinch.y;
+        zoomAround(scale * (next.distance / pinch.distance), next.x, next.y);
+        pinch = next;
+        return;
+      }
+
+      if (scale <= 1.001) return;
+      offsetX += point.x - previous.x;
+      offsetY += point.y - previous.y;
+      apply();
+    });
+
+    const release = (event: PointerEvent) => {
+      pointers.delete(event.pointerId);
+      pinch = spread();
+    };
+    stage.addEventListener("pointerup", release);
+    stage.addEventListener("pointercancel", release);
+
+    /* A pan that ends on a pin must not open that country. */
+    layer.addEventListener(
+      "click",
+      (event) => {
+        if (travelled <= DRAG_SLOP) return;
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true,
+    );
+
+    layer.addEventListener("dragstart", (event) => event.preventDefault());
+
+    for (const button of stage.querySelectorAll<HTMLButtonElement>("[data-map-zoom]")) {
+      button.addEventListener("click", () => {
+        const action = button.dataset.mapZoom;
+        if (action === "in") zoomFromCentre(1.6);
+        else if (action === "out") zoomFromCentre(1 / 1.6);
+        else {
+          scale = 1;
+          offsetX = 0;
+          offsetY = 0;
+          apply();
+        }
+      });
+    }
+
+    /* A resize changes what "covered" means, so re-clamp against the new box. */
+    new ResizeObserver(() => apply()).observe(stage);
+  }
+</script>

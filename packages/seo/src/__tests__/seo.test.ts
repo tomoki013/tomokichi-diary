@@ -66,7 +66,8 @@ describe("titles and descriptions", () => {
     expect(buildTitle(config, "記事", "上書き")).toBe(
       `上書き${config.titleSeparator}${config.siteName}`,
     );
-    expect(buildTitle(config, config.siteName)).toBe(config.siteName);
+    expect(buildTitle(config, config.siteName)).toBe(config.homeTitle);
+    expect(buildTitle({ ...config, homeTitle: undefined }, config.siteName)).toBe(config.siteName);
   });
 
   it("derives a description from the summary, falling back to the body", () => {
