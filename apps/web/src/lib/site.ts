@@ -10,6 +10,7 @@ const siteUrl = (process.env.PUBLIC_SITE_URL ?? "https://tomokichidiary.com").re
 export const seoConfig: SeoConfig = {
   siteUrl,
   siteName: "ともきちの旅行日記",
+  homeTitle: "ともきちの旅行日記｜Tomokichi Diary",
   defaultLocale: "ja",
   trailingSlash: false,
   titleSeparator: "｜",

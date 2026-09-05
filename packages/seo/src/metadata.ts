@@ -34,7 +34,10 @@ export function buildCanonical(config: SeoConfig, route: Route): string {
 /** Overrides win; otherwise the title is derived, so most articles store no SEO row at all. */
 export function buildTitle(config: SeoConfig, pageTitle: string, override?: string | null): string {
   const title = override?.trim() || pageTitle.trim();
-  return title === config.siteName ? title : `${title}${config.titleSeparator}${config.siteName}`;
+  /* The home page names the site once, in its own form; everywhere else the
+     page title carries the site name as a suffix. */
+  if (title === config.siteName) return config.homeTitle?.trim() || title;
+  return `${title}${config.titleSeparator}${config.siteName}`;
 }
 
 export function buildDescription(revision: ArticleRevision): string {

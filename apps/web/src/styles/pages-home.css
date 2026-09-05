@@ -526,15 +526,13 @@
     background: var(--surface);
   }
 
+  /* The map keeps its own aspect ratio: the pin overlay is positioned in
+     percentages of the SVG box, so a stretched height would drift them off
+     their countries. */
   .home-explore__grid > .world-map {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: center;
     height: 100%;
-  }
-
-  .home-explore__grid > .world-map svg {
-    height: 100%;
-    min-height: 0;
   }
 
   .popular-destinations__title {
