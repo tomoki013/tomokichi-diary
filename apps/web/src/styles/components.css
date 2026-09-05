@@ -636,15 +636,19 @@
 
   /* Countries with no article are the quiet ground the visited ones sit on. */
   .world-map__country {
-    fill: #ebe6da;
+    fill: #ece7db;
     stroke: var(--surface);
     stroke-width: 0.5;
   }
 
   /* Visited countries are read as landmass, not as a call to action: the
-     colour that asks for a click belongs to the pins alone. */
+     colour that asks for a click still belongs to the pins alone. They take
+     the palette's secondary olive rather than a darker beige -- against warm
+     paper a beige-on-beige step has to be enormous to register at all, and
+     this one did not. Olive separates at a glance and leaves orange to mean
+     "there is something to click here". */
   .world-map__country.is-visited {
-    fill: #cbc2af;
+    fill: #87936a;
   }
 
   .world-map__pins {
@@ -664,48 +668,42 @@
     scale: calc(1 / var(--zoom));
   }
 
-  /* Not a filled dot: a fine accent ring around a small core, so fifteen of
-     them read as survey marks on the map rather than as spilled paint. */
+  /* A solid accent disc inside a paper-coloured ring, lifted off the map by a
+     soft shadow. The ring is what keeps it legible over both the olive
+     landmass and the pale sea; the thin outlined donut this replaces had
+     neither weight nor separation and read as a speck of dust. */
   .world-map__marker {
     position: absolute;
     inset: 50% auto auto 50%;
     width: var(--pin-size);
     height: var(--pin-size);
     margin: calc(var(--pin-size) / -2) 0 0 calc(var(--pin-size) / -2);
-    border: 1px solid var(--accent);
     border-radius: 50%;
-    background: var(--surface);
+    background: var(--accent);
+    /* The ring is a spread shadow, not a border: a border is drawn inside the
+       box, which would eat `--pin-size` -- the value that encodes how much
+       there is to read about the country -- down to a few pixels of colour. */
+    box-shadow:
+      0 0 0 0.14rem var(--surface),
+      0 1px 3px rgb(34 37 31 / 30%);
     transition:
       background var(--speed) var(--ease),
       box-shadow var(--speed) var(--ease),
       scale var(--speed) var(--ease);
   }
 
-  .world-map__marker::after {
-    content: "";
-    position: absolute;
-    inset: 50% auto auto 50%;
-    width: 0.19rem;
-    height: 0.19rem;
-    margin: -0.095rem 0 0 -0.095rem;
-    border-radius: 50%;
-    background: var(--accent);
-    transition: background var(--speed) var(--ease);
-  }
-
   .world-map__pin:is(:hover, :focus-visible) {
     z-index: 2;
   }
 
-  /* Reaching for a pin fills it and lights a halo the size of a fingertip. */
+  /* Reaching for a pin deepens it and lights a halo the size of a fingertip. */
   .world-map__pin:is(:hover, :focus-visible) .world-map__marker {
-    background: var(--accent);
-    box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--accent) 18%, transparent);
-    scale: 1.15;
-  }
-
-  .world-map__pin:is(:hover, :focus-visible) .world-map__marker::after {
-    background: var(--surface);
+    background: var(--accent-strong);
+    box-shadow:
+      0 0 0 0.14rem var(--surface),
+      0 0 0 0.42rem color-mix(in srgb, var(--accent) 22%, transparent),
+      0 2px 6px rgb(34 37 31 / 32%);
+    scale: 1.22;
   }
 
   .world-map__pin:focus-visible {
@@ -726,7 +724,6 @@
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: var(--shadow);
-    pointer-events: none;
   }
 
   /* Each offset is the preferred one, pulled back just far enough to keep the
@@ -752,6 +749,18 @@
   .world-map__pin:is(:hover, :focus-visible) .world-map__card {
     display: block;
     animation: world-map-card var(--speed) var(--ease);
+  }
+
+  /* The card opens a few tenths of a rem clear of the marker, so a pointer
+     travelling from one to the other crosses bare map, `:hover` drops, and the
+     card is gone before it can be clicked. Once open, the pin grows a
+     transparent moat wider than that gap, which keeps the pair one continuous
+     hover target. It only exists while the card is open, so it never widens
+     the pins into each other at rest. */
+  .world-map__pin:is(:hover, :focus-visible)::after {
+    content: "";
+    position: absolute;
+    inset: -0.8rem;
   }
 
   @keyframes world-map-card {
@@ -818,16 +827,19 @@
     width: 0.7rem;
     height: 0.7rem;
     border-radius: 2px;
-    background: #cbc2af;
+    background: #87936a;
   }
 
+  /* The pin, at legend size. Off the map the paper-coloured ring has nothing
+     to separate it from, so it gets a hairline of its own. */
   .world-map__legend span + span::before {
-    width: 0.55rem;
-    height: 0.55rem;
-    border: 1px solid var(--accent);
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 50%, var(--accent) 0 0.09rem, transparent 0.09rem)
-      var(--surface);
+    background: var(--accent);
+    box-shadow:
+      0 0 0 0.11rem var(--surface),
+      0 0 0 calc(0.11rem + 1px) var(--line-strong);
   }
 
   /* Zoom controls --------------------------------------------------- */

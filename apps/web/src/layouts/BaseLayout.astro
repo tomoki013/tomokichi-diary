@@ -9,9 +9,11 @@ interface Props {
   jsonLd?: (JsonLd | null)[];
   /** Wide layout for listings; narrow for reading. */
   width?: "narrow" | "wide";
+  /** Float the masthead over the page's own first section (the home hero). */
+  headerOverlay?: boolean;
 }
 
-const { metadata, jsonLd = [], width = "wide" } = Astro.props;
+const { metadata, jsonLd = [], width = "wide", headerOverlay = false } = Astro.props;
 const structuredData = jsonLd.filter((node) => node !== null);
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 
@@ -86,7 +88,7 @@ const footerGroups = [
   <body>
     <div class="shell">
       <a class="skip-link" href="#main">本文へスキップ</a>
-      <header class="site-header">
+      <header class:list={["site-header", headerOverlay && "site-header--overlay"]}>
         <div class="wrap site-header__bar">
           <a class="site-header__brand" href="/">
             <span
@@ -314,6 +316,9 @@ const footerGroups = [
         if (locked) scrollLocks.add(key);
         else scrollLocks.delete(key);
         const shouldLock = scrollLocks.size > 0;
+        // A transparent masthead has nothing behind it once a panel covers the
+        // hero, so it takes on its surface for as long as one is open.
+        siteHeader?.classList.toggle("is-solid", shouldLock);
         if (shouldLock === body.classList.contains("has-site-overlay")) return;
         body.classList.toggle("has-site-overlay", shouldLock);
         document.documentElement.classList.toggle("has-site-overlay", shouldLock);

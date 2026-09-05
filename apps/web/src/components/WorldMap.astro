@@ -108,7 +108,7 @@ const pins = countries.flatMap((destination) => {
       thumbnail: thumbnailOf(destination),
       /* A country with more to read gets a slightly larger marker, so the
          map says something about weight before anything is clicked. */
-      size: (0.42 + Math.min(destination.count, 24) * 0.014).toFixed(3),
+      size: (0.5 + Math.min(destination.count, 24) * 0.012).toFixed(3),
       /* Unitless: the stylesheet multiplies these by container-query units,
          so a pin lands on the same spot whatever size the map is drawn at. */
       left: ((x / WIDTH) * 100).toFixed(2),
