@@ -153,6 +153,10 @@ const featuredStories = articles
       ),
     );
     if (!country || usedCountries.has(country.id)) return stories;
+    // Two articles may share one cover; the same photo twice in the carousel
+    // reads as a slide that stalls for twice as long, not as two stories.
+    const usedCovers = new Set(stories.map((story) => story.cover!.asset.storageKey));
+    if (usedCovers.has(view.cover!.asset.storageKey)) return stories;
     return [...stories, view];
   }, [])
   .slice(0, 6);
@@ -260,6 +264,7 @@ const labelOf = (target: Route): string => {
 
 <BaseLayout
   metadata={metadata}
+  headerOverlay={route.path === "/" && featuredStories.length > 0}
   jsonLd={[
     route.path === "/" ? buildWebSiteJsonLd(seoConfig) : null,
     buildBreadcrumbJsonLd(seoConfig, trail),
@@ -288,10 +293,6 @@ const labelOf = (target: Route): string => {
             <div class="home-hero__slides" data-hero-carousel>
               {featuredStories.map((story, index) => {
                 const cover = story.cover!;
-                const country = content.relations.locations
-                  .filter((relation) => relation.articleId === story.article.id)
-                  .map((relation) => content.locations.countryOf(relation.locationId))
-                  .find(Boolean);
                 return (
                   <div
                     class:list={["home-hero__slide", index === 0 && "is-active"]}
@@ -301,23 +302,42 @@ const labelOf = (target: Route): string => {
                     <Picture
                       storageKey={cover.asset.storageKey}
                       alt={cover.usage.alt}
-                      sizes="(max-width: 760px) 100vw, 1100px"
+                      sizes="100vw"
                       loading={index === 0 ? "eager" : "lazy"}
                       fetchpriority={index === 0 ? "high" : "auto"}
                     />
-                    <a class="home-hero__feature" href={story.route.path}>
-                      <span class="eyebrow">
-                        {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
-                      </span>
-                      <strong>{story.revision.title}</strong>
-                      <span>{story.revision.summary}</span>
-                      <small>続きを読む&nbsp; →</small>
-                    </a>
                   </div>
                 );
               })}
             </div>
             <div class="home-hero__shade" />
+            {/* Outside the slides: in there the card inherited the slide's
+                slow zoom and drifted with the photo instead of holding its
+                corner. */}
+            <div class="home-hero__features">
+              {featuredStories.map((story, index) => {
+                const country = content.relations.locations
+                  .filter((relation) => relation.articleId === story.article.id)
+                  .map((relation) => content.locations.countryOf(relation.locationId))
+                  .find(Boolean);
+                return (
+                  <a
+                    class:list={["home-hero__feature", index === 0 && "is-active"]}
+                    data-hero-feature
+                    href={story.route.path}
+                    tabindex={index === 0 ? undefined : "-1"}
+                    aria-hidden={index === 0 ? undefined : "true"}
+                  >
+                    <span class="eyebrow">
+                      {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
+                    </span>
+                    <strong>{story.revision.title}</strong>
+                    <span>{story.revision.summary}</span>
+                    <small>続きを読む&nbsp; →</small>
+                  </a>
+                );
+              })}
+            </div>
             <div class="home-hero__intro">
               <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
               <h1 id="home-title">
@@ -1173,6 +1193,7 @@ const labelOf = (target: Route): string => {
       const slides = [...carousel.querySelectorAll<HTMLElement>("[data-hero-slide]")];
       const hero = carousel.closest<HTMLElement>(".home-hero");
       const dots = [...(hero?.querySelectorAll<HTMLButtonElement>("[data-hero-dot]") ?? [])];
+      const features = [...(hero?.querySelectorAll<HTMLElement>("[data-hero-feature]") ?? [])];
       let active = 0;
       let timer = 0;
 
@@ -1182,6 +1203,19 @@ const labelOf = (target: Route): string => {
           const current = index === active;
           slide.classList.toggle("is-active", current);
           slide.setAttribute("aria-hidden", String(!current));
+        });
+        features.forEach((feature, index) => {
+          const current = index === active;
+          feature.classList.toggle("is-active", current);
+          // The card is a link: the ones behind it stay out of the tab order
+          // and out of the accessibility tree while they are invisible.
+          if (current) {
+            feature.removeAttribute("tabindex");
+            feature.removeAttribute("aria-hidden");
+          } else {
+            feature.setAttribute("tabindex", "-1");
+            feature.setAttribute("aria-hidden", "true");
+          }
         });
         dots.forEach((dot, index) => {
           dot.classList.toggle("is-active", index === active);

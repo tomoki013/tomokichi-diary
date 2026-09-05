@@ -4,6 +4,9 @@
     display: flex;
     flex-direction: column;
     min-height: 100svh;
+    /* `clip` (not `hidden`) so full-bleed sections can overhang the content
+       column without turning the shell into a scroll container. */
+    overflow-x: clip;
   }
 
   .wrap {
@@ -76,6 +79,53 @@
     box-shadow: 0 8px 28px rgb(56 42 27 / 8%);
   }
 
+  /* Home only. The hero runs full-bleed to the very top of the page, so the
+     masthead floats over it and only takes on its surface once the reader
+     scrolls (`.is-scrolled`) or opens an overlay (`.is-solid`) -- an overlay
+     replaces the image behind the bar, and white-on-white would vanish.
+     `fixed` rather than `sticky` is what takes it out of flow so the hero can
+     sit behind it; every other page keeps the sticky bar. */
+  .site-header--overlay {
+    position: fixed;
+    inset-inline: 0;
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid) {
+    border-bottom-color: transparent;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid)
+    :is(.site-header__brand, .site-nav a, .site-header__action, .site-header__menu-button) {
+    color: #fff;
+    /* Tight enough to read as an edge on the letterforms. A wide blur pools
+       into a visible dark patch behind the wordmark instead. */
+    text-shadow: 0 1px 3px rgb(0 0 0 / 55%);
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid)
+    :is(.site-header__brand em, .site-header__brand small) {
+    color: rgb(255 255 255 / 74%);
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid)
+    :is(.site-nav a:is(:hover, :focus-visible), .site-nav a[aria-current="page"]) {
+    color: var(--accent-on-dark);
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid) .site-nav a::after {
+    background: var(--accent-on-dark);
+  }
+
+  .site-header--overlay:not(.is-scrolled, .is-solid)
+    :is(.site-header__action, .site-header__menu-button):hover {
+    border-color: rgb(255 255 255 / 40%);
+    background: rgb(255 255 255 / 16%);
+    color: #fff;
+  }
+
   .site-header__bar {
     display: flex;
     align-items: center;
@@ -86,6 +136,9 @@
   .site-header__brand {
     display: flex;
     align-items: center;
+    transition:
+      color var(--speed) var(--ease),
+      text-shadow var(--speed) var(--ease);
     margin-inline-end: auto;
     min-width: 0;
     color: var(--ink);
@@ -145,6 +198,7 @@
     white-space: nowrap;
     transition:
       color var(--speed) var(--ease),
+      text-shadow var(--speed) var(--ease),
       background var(--speed) var(--ease);
   }
 

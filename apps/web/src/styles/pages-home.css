@@ -6,6 +6,12 @@
     padding-top: var(--space-md);
   }
 
+  /* With the hero present the masthead floats over it (see
+     `.site-header--overlay`), so the page starts flush against the top. */
+  .home:has(> .home-hero) {
+    padding-top: 0;
+  }
+
   .home > section,
   .home > aside {
     padding-block: var(--band);
@@ -27,19 +33,31 @@
   }
 
   /* 1. Hero + search --------------------------------------------------- */
+  /* Full-bleed: the hero escapes the `.wrap` column and spans the viewport.
+     `--hero-pad` puts its text back on the content column's left edge, so the
+     copy still lines up with the bands below. `.shell` clips the overflow. */
   .home-hero {
+    --hero-pad: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+    /* One handover, one duration: the photo and the card below are timed off
+       this so they change together rather than as two separate events. */
+    --hero-fade: 550ms;
+
     position: relative;
     display: grid;
     overflow: hidden;
-    min-height: clamp(22rem, 46vw, 31rem);
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    min-height: clamp(22rem, 42vw, 34rem);
     padding: 0;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     background: var(--surface-dark);
     isolation: isolate;
   }
 
+  /* The masthead is `fixed` over the hero, so the copy is inset by its height
+     instead of starting under it. The slides stay behind it, full height. */
   .home > .home-hero {
-    padding-block: 0;
+    padding-block: var(--header-h) 0;
   }
 
   .home-hero__slides,
@@ -48,13 +66,27 @@
     inset: 0;
   }
 
+  /* Cross-fade, not a dissolve: the incoming slide is stacked on top and fades
+     in while the outgoing one stays fully opaque underneath, then drops out in
+     one step once it is covered. Fading both at once dips through a visibly
+     darker trough in the middle. The slow zoom keeps the image alive between
+     transitions, and resets on the same delay -- off-screen. */
   .home-hero__slide {
+    z-index: 0;
     opacity: 0;
-    transition: opacity 900ms var(--ease);
+    transform: scale(1.06);
+    transition:
+      opacity 0s linear var(--hero-fade),
+      transform 0s linear var(--hero-fade);
   }
 
   .home-hero__slide.is-active {
+    z-index: 1;
     opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--hero-fade) var(--ease),
+      transform 8s linear;
   }
 
   .home-hero__slide picture,
@@ -72,7 +104,10 @@
     inset: 0;
     background:
       linear-gradient(100deg, rgb(20 18 14 / 78%) 0%, rgb(20 18 14 / 38%) 52%, transparent 78%),
-      linear-gradient(0deg, rgb(20 18 14 / 55%) 0%, transparent 45%);
+      linear-gradient(0deg, rgb(20 18 14 / 55%) 0%, transparent 45%),
+      /* The masthead floats over this corner, so the image is darkened just
+         enough under it for white nav text to hold up on a bright photo. */
+        linear-gradient(180deg, rgb(20 18 14 / 42%) 0%, transparent 24%);
   }
 
   .home-hero__intro {
@@ -82,9 +117,12 @@
     align-content: center;
     justify-items: start;
     gap: 0.7rem;
-    max-width: 34rem;
-    padding: var(--space-lg) var(--space-md);
+    max-width: calc(34rem + var(--hero-pad) * 2);
+    padding: var(--space-lg) var(--hero-pad);
     color: var(--on-dark);
+    /* The box is as wide as the copy plus the full-bleed inset, so it would
+       otherwise sit invisibly across the slide and swallow clicks. */
+    pointer-events: none;
   }
 
   .home-hero__intro .eyebrow {
@@ -106,14 +144,25 @@
 
   .home-hero__intro .button {
     margin-top: 0.4rem;
+    pointer-events: auto;
   }
 
-  /* The featured-article card sits in the hero's lower-right corner. */
-  .home-hero__feature {
+  /* The featured-article card sits in the hero's lower-right corner. It is a
+     layer of its own, above the slides: inside one it rode along with that
+     slide's zoom and cross-fade. */
+  .home-hero__features {
     position: absolute;
     z-index: 3;
-    right: var(--space-md);
-    bottom: 4.2rem;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .home-hero__feature {
+    position: absolute;
+    right: var(--hero-pad);
+    /* Clears the controls row (its own inset plus the 2.3rem buttons) rather
+       than a fixed guess, so the two never touch as the hero changes height. */
+    bottom: calc(var(--space-md) + 3.1rem);
     display: grid;
     gap: 0.3rem;
     width: min(21rem, 42%);
@@ -124,10 +173,26 @@
     box-shadow: var(--shadow);
     color: var(--ink);
     text-decoration: none;
-    transition: transform var(--speed) var(--ease);
+    /* Cards are stacked in one spot and differ in height, so they hand over in
+       sequence rather than cross-fading: the outgoing one clears out first,
+       then the next one arrives. Overlapping them would show a strip of the
+       taller card standing out behind the shorter one. */
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity calc(var(--hero-fade) * 0.35) var(--ease),
+      transform var(--speed) var(--ease);
   }
 
-  .home-hero__feature:hover {
+  .home-hero__feature.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    transition:
+      opacity calc(var(--hero-fade) * 0.35) var(--ease) calc(var(--hero-fade) * 0.4),
+      transform var(--speed) var(--ease);
+  }
+
+  .home-hero__feature.is-active:hover {
     transform: translateY(-2px);
   }
 
@@ -174,7 +239,7 @@
   .home-hero__controls {
     position: absolute;
     z-index: 3;
-    right: var(--space-md);
+    right: var(--hero-pad);
     bottom: var(--space-md);
     display: flex;
     align-items: center;
@@ -831,7 +896,7 @@
       padding-block: var(--space-xl) 4.5rem;
     }
     .home-hero__controls {
-      left: var(--space-md);
+      left: var(--hero-pad);
       right: auto;
     }
   }
