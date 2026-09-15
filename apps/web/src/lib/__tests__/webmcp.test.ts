@@ -40,17 +40,12 @@ afterEach(() => {
 });
 
 describe("WebMCP adapter", () => {
-  it("exposes protocol tools backed by the shared catalog query", async () => {
+  it("serves search, the current page and firsthand-only evidence from the catalog", async () => {
     const tools = createWebMcpTools(catalog, "a1");
-    expect(tools.map((tool) => tool.name)).toContain("get_firsthand_experiences");
-    const tool = tools.find((item) => item.name === "search_travel_content")!;
-    const response = await tool.execute({ query: "バス" });
-    expect(response.structuredContent).toHaveLength(1);
-    expect(tool.annotations.readOnlyHint).toBe(true);
-  });
+    const search = tools.find((item) => item.name === "search_travel_content")!;
+    expect((await search.execute({ query: "バス" })).structuredContent).toHaveLength(1);
+    expect(search.annotations.readOnlyHint).toBe(true);
 
-  it("returns the current page and filters the returned evidence to firsthand facts", async () => {
-    const tools = createWebMcpTools(catalog, "a1");
     const current = await tools
       .find((tool) => tool.name === "get_current_page_context")!
       .execute({});

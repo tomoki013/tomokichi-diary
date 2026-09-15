@@ -1,10 +1,4 @@
-import type {
-  ArticleKnowledge,
-  Provenance,
-  SourceReference,
-  TravelFact,
-  TravelRoute,
-} from "@tomokichi/domain";
+import type { ArticleKnowledge, SourceReference, TravelFact, TravelRoute } from "@tomokichi/domain";
 
 export interface TravelKnowledgeView {
   readonly article: ArticleKnowledge;
@@ -34,17 +28,4 @@ export function projectTravelKnowledge(view: TravelKnowledgeView) {
     sources: view.sources,
     relatedArticles: view.article.relatedArticles,
   };
-}
-
-export function searchTravelFacts(
-  facts: readonly TravelFact[],
-  input: { readonly text?: string; readonly provenance?: Provenance },
-): readonly TravelFact[] {
-  const needle = input.text?.trim().toLocaleLowerCase("ja") ?? "";
-  return facts.filter(
-    (fact) =>
-      fact.status === "verified" &&
-      (input.provenance === undefined || fact.provenance === input.provenance) &&
-      (needle === "" || fact.statement.toLocaleLowerCase("ja").includes(needle)),
-  );
 }

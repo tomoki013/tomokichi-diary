@@ -27,7 +27,7 @@ import {
   type TravelRoute,
 } from "@tomokichi/domain";
 import type { ContentSnapshot } from "@tomokichi/data";
-import { searchTravelFacts, type TravelKnowledgeView } from "./travel-knowledge.js";
+import type { TravelKnowledgeView } from "./travel-knowledge.js";
 
 export interface ArticleView {
   readonly article: Article;
@@ -241,9 +241,5 @@ export class ContentIndex {
       sources: [...sourceIds].flatMap((sourceId) => this.sourceById.get(sourceId) ?? []),
       routes: knowledge.routeIds.flatMap((routeId) => this.travelRouteById.get(routeId) ?? []),
     };
-  }
-
-  searchKnowledge(input: Parameters<typeof searchTravelFacts>[1] = {}): readonly TravelFact[] {
-    return searchTravelFacts(this.snapshot.travelFacts, input);
   }
 }

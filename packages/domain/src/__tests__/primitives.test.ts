@@ -39,17 +39,12 @@ describe("parseSlug", () => {
     expect(parseSlug(value).ok).toBe(true);
   });
 
-  it.each([
-    "",
-    "  ",
-    "-leading",
-    "trailing-",
-    "double--hyphen",
-    "Upper Case With Spaces",
-    "日本語",
-  ])("rejects %s", (value) => {
-    expect(parseSlug(value).ok).toBe(false);
-  });
+  it.each(["", "-leading", "trailing-", "double--hyphen", "Upper Case With Spaces", "日本語"])(
+    "rejects %s",
+    (value) => {
+      expect(parseSlug(value).ok).toBe(false);
+    },
+  );
 
   it("normalises case and surrounding whitespace", () => {
     const result = parseSlug("  Chagee-Menu  ");

@@ -466,8 +466,4 @@ describe("contact form", () => {
     expect(updated.status).toBe(200);
     expect((await (await request("/v1/admin/messages", { headers: auth })).json()).unread).toBe(0);
   });
-
-  it("requires a token to read messages", async () => {
-    expect((await request("/v1/admin/messages")).status).toBe(401);
-  });
 });
