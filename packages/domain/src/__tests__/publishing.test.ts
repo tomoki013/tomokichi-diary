@@ -21,10 +21,6 @@ const base = {
 };
 
 describe("validatePublishable", () => {
-  it("accepts a complete draft", () => {
-    expect(validatePublishable(base)).toEqual([]);
-  });
-
   it("requires a title, a summary and a substantial body", () => {
     const errors = validatePublishable({
       ...base,

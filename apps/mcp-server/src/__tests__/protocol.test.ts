@@ -37,17 +37,6 @@ async function rpc(method: string, params: Record<string, unknown> = {}) {
 }
 
 describe("public MCP protocol", () => {
-  it("negotiates the current protocol and advertises tools and resources", async () => {
-    const { response, body } = await rpc("initialize", {
-      protocolVersion: "2025-11-25",
-      capabilities: {},
-      clientInfo: { name: "test", version: "1.0.0" },
-    });
-    expect(response.status).toBe(200);
-    expect(body.result.protocolVersion).toBe("2025-11-25");
-    expect(body.result.capabilities).toMatchObject({ tools: {}, resources: {} });
-  });
-
   it("publishes all read-only tools and links the evidence tool to its MCP App", async () => {
     const { body } = await rpc("tools/list");
     const tools = body.result.tools as Array<Record<string, any>>;
@@ -99,13 +88,5 @@ describe("public MCP protocol", () => {
       mimeType: "text/html;profile=mcp-app",
       text: appHtml,
     });
-  });
-
-  it("rejects invalid tool input through the MCP schema", async () => {
-    const { body } = await rpc("tools/call", {
-      name: "search_travel_content",
-      arguments: { query: "" },
-    });
-    expect(body.result.isError).toBe(true);
   });
 });

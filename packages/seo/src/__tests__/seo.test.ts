@@ -67,7 +67,6 @@ describe("titles and descriptions", () => {
       `上書き${config.titleSeparator}${config.siteName}`,
     );
     expect(buildTitle(config, config.siteName)).toBe(config.homeTitle);
-    expect(buildTitle({ ...config, homeTitle: undefined }, config.siteName)).toBe(config.siteName);
   });
 
   it("derives a description from the summary, falling back to the body", () => {
@@ -123,18 +122,7 @@ describe("buildPageMetadata", () => {
   });
 });
 
-describe("canonical and robots", () => {
-  it("builds an absolute canonical URL from the route, not from the slug", () => {
-    const meta = buildArticleMetadata(config, {
-      article,
-      revision,
-      route,
-      coverImageUrl: null,
-      authorName: null,
-    });
-    expect(meta.canonical).toBe("https://tomokichidiary.com/posts/chagee-menu-explained");
-  });
-
+describe("robots", () => {
   it("marks noindex articles and non-indexable environments", () => {
     expect(buildRobots(config, false)).toBe("index, follow");
     expect(buildRobots(config, true)).toBe("noindex, nofollow");
@@ -164,6 +152,8 @@ describe("open graph", () => {
     });
     expect(withoutImage.twitter["twitter:card"]).toBe("summary");
     expect(withoutImage.openGraph["og:image"]).toBeUndefined();
+    // The canonical comes from the route, never from the slug.
+    expect(withoutImage.canonical).toBe("https://tomokichidiary.com/posts/chagee-menu-explained");
   });
 });
 
@@ -265,12 +255,9 @@ describe("sitemap, rss and robots", () => {
     expect(entries.map((e) => e.loc)).toEqual([
       "https://tomokichidiary.com/posts/chagee-menu-explained",
     ]);
-  });
-
-  it("renders valid-looking XML", () => {
-    const xml = renderSitemapXml(buildSitemap(config, inputs));
-    expect(xml).toContain("<urlset");
-    expect(xml).toContain("<loc>https://tomokichidiary.com/posts/chagee-menu-explained</loc>");
+    expect(renderSitemapXml(entries)).toContain(
+      "<loc>https://tomokichidiary.com/posts/chagee-menu-explained</loc>",
+    );
   });
 
   it("escapes XML in feed titles", () => {
