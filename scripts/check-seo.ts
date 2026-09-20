@@ -10,6 +10,7 @@ import {
   readBuiltPage,
   report,
 } from "./lib/built-site.js";
+import { imageUrlProblem, jsonLdImageUrls, readSeo } from "./lib/page-seo.js";
 
 /**
  * Checks the generated HTML rather than the code that produced it, and
@@ -26,16 +27,6 @@ const findings: Finding[] = [];
 
 const articleById = new Map(snapshot.articles.map((article) => [article.id, article]));
 
-interface PageSeo {
-  title: string | null;
-  description: string | null;
-  canonical: string | null;
-  robots: string | null;
-  h1Count: number;
-  jsonLd: string[];
-  imagesWithoutAlt: number;
-}
-
 /** Titles round-trip through HTML escaping, so both sides are compared decoded. */
 function decodeEntities(value: string): string {
   return value
@@ -45,25 +36,6 @@ function decodeEntities(value: string): string {
     .replaceAll("&#39;", "'")
     .replaceAll("&apos;", "'")
     .replaceAll("&amp;", "&");
-}
-
-function readSeo(html: string): PageSeo {
-  const value = (pattern: RegExp): string | null => pattern.exec(html)?.[1]?.trim() ?? null;
-  return {
-    title: value(/<title[^>]*>([\s\S]*?)<\/title>/i),
-    description: value(/<meta[^>]+name="description"[^>]+content="([^"]*)"/i),
-    canonical: value(/<link[^>]+rel="canonical"[^>]+href="([^"]*)"/i),
-    robots: value(/<meta[^>]+name="robots"[^>]+content="([^"]*)"/i),
-    h1Count: [...html.matchAll(/<h1[\s>]/gi)].length,
-    jsonLd: [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)].map(
-      (m) => m[1]!,
-    ),
-    // `<img alt>` is the valid, minimised spelling of `alt=""`, which is what
-    // a deliberately decorative image renders as.
-    imagesWithoutAlt: [...html.matchAll(/<img\b[^>]*>/gi)].filter(
-      (m) => !/\salt(?:=|\s|>)/i.test(m[0]),
-    ).length,
-  };
 }
 
 const add = (code: Finding["code"], target: string, message?: string): void => {
@@ -97,6 +69,14 @@ for (const page of pages) {
     } catch {
       add("SEO_JSONLD_INVALID", page.path);
     }
+  }
+
+  // Share cards and rich results need one absolute image URL. Checked on the
+  // built page because the bug this catches lives in the composition (a media
+  // URL made absolute twice), which no unit under it can see.
+  for (const url of [...seo.socialImages, ...jsonLdImageUrls(seo.jsonLd)]) {
+    const problem = imageUrlProblem(url);
+    if (problem) add("SEO_IMAGE_URL_INVALID", page.path, `${problem}: ${url}`);
   }
 }
 

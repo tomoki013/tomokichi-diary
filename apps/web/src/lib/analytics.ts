@@ -1,9 +1,9 @@
 import type { SemanticEvent } from "@tomokichi/application";
 
 declare global {
-  interface Window {
-    dataLayer?: unknown[];
-  }
+  // `var` so the declaration reaches `globalThis`, which is what the call
+  // below reads; an `interface Window` member alone does not.
+  var dataLayer: unknown[] | undefined;
 }
 
 /** One semantic browser boundary; a future analytics vendor plugs in here, not in components. */
