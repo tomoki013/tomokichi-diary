@@ -114,4 +114,59 @@ describe("WebMCP adapter", () => {
     });
     expect(() => registerWebMcpTools(catalog, "a1")()).not.toThrow();
   });
+  /*
+   * 111 of 114 articles are not in the knowledge catalog yet. On those pages
+   * `get_current_page_context` answers `null`, which reads to an agent as "this
+   * page has no content" rather than "no verified facts yet". The audit asks for
+   * a minimal context (title/path) instead; this test states that contract and
+   * is marked `fails` until the adapter is changed — it must flip to a plain
+   * `it` in the same change.
+   */
+  it.fails(
+    "describes an article that is not in the catalog instead of answering null",
+    async () => {
+      const tool = createWebMcpTools(catalog, "not-in-catalog").find(
+        (candidate) => candidate.name === "get_current_page_context",
+      )!;
+      const result = await tool.execute({});
+      expect(result.structuredContent).not.toBeNull();
+      expect(result.structuredContent).toMatchObject({ articleId: "not-in-catalog" });
+    },
+  );
+
+  it("survives hostile or missing search input without throwing", async () => {
+    const tools = createWebMcpTools(catalog, "a1");
+    const search = tools.find((item) => item.name === "search_travel_content")!;
+    const firsthand = tools.find((item) => item.name === "get_firsthand_experiences")!;
+    for (const input of [
+      {},
+      { query: "" },
+      { query: 42 },
+      { query: null },
+      { query: "x".repeat(2000) },
+    ]) {
+      const searched = await search.execute(input as Record<string, unknown>);
+      expect(Array.isArray(searched.structuredContent)).toBe(true);
+      const experienced = await firsthand.execute(input as Record<string, unknown>);
+      expect(Array.isArray(experienced.structuredContent)).toBe(true);
+    }
+    // A miss is an empty list, not an error the page would have to explain.
+    expect((await search.execute({ query: "存在しない検索語" })).structuredContent).toEqual([]);
+  });
+
+  it("reports a heading that does not exist rather than scrolling somewhere", async () => {
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: { querySelectorAll: () => [{ textContent: "料金", scrollIntoView }] },
+    });
+    const tool = createWebMcpTools(catalog, "a1").find(
+      (candidate) => candidate.name === "show_article_section",
+    )!;
+    expect((await tool.execute({ heading: "存在しない見出し" })).structuredContent).toEqual({
+      found: false,
+      heading: null,
+    });
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
 });

@@ -142,6 +142,16 @@ own title and summary, so an empty summary on a new article shows up here.
 Alt text lives on the article/media relation, not on the asset. Fix it in the
 admin's 画像 panel.
 
+### `SEO_IMAGE_URL_INVALID`
+
+An `og:image`, `twitter:image` or JSON-LD `image` on the built page is not a
+single absolute `http(s)` image URL. The finding names the URL. The case this
+was written for is a media URL that was made absolute twice —
+`https://tomokichidiary.com/https://media.tomokichidiary.com/…` — which every
+crawler accepts as a URL and no share card can load. `mediaUrl()` already
+returns an absolute URL; never pass its result through `absoluteUrl()`. The
+rule itself is `imageUrlProblem` in `scripts/lib/page-seo.ts`.
+
 ## Links
 
 ### `LINK_INTERNAL_BROKEN`

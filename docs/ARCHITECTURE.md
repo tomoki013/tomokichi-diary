@@ -4,6 +4,30 @@ Tomokichi Diary is a content system whose data, business rules and URLs do not
 belong to any framework. Astro, Hono, Cloudflare, D1 and R2 are adapters around
 a plain-TypeScript core.
 
+## Where things stand (2026-09-21)
+
+The public site, admin, API and MCP Worker are deployed on Cloudflare, but
+`tomokichidiary.com` still points at the previous Next.js site on Netlify. The
+cutover plan and the audit that precedes it are in
+[audit/diary-2.0-full-audit.md](audit/diary-2.0-full-audit.md).
+
+```mermaid
+flowchart LR
+  Admin["apps/admin (React SPA)"] -- "/api same-origin, Cloudflare Access" --> API["apps/api (Hono)"]
+  API --> D1[(D1)]
+  API --> R2[(R2 media)]
+  D1 -- "pnpm export:data" --> Export["export/ (committed MD + JSON)"]
+  Export -- "astro build" --> Web["apps/web (static assets Worker)"]
+  Export -- "knowledge:catalog" --> Catalog["export/knowledge/catalog.json"]
+  Catalog --> Web
+  Catalog --> MCP["apps/mcp-server (/mcp)"]
+  Reader((reader)) --> Web
+  Reader -- "POST /v1/contact, /v1/likes" --> API
+  Agent((AI agent)) --> MCP
+  Agent -- "WebMCP tools on article pages" --> Web
+  Web -- "images" --> R2
+```
+
 ## Applications
 
 | Path              | What it is                     | Notes                              |

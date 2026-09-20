@@ -9,7 +9,7 @@ import ArticleCard from "../components/ArticleCard.astro";
 import Picture from "../components/Picture.astro";
 import { content } from "../lib/content";
 import { articleTrail } from "../lib/navigation";
-import { mediaUrl, seoConfig, absoluteUrl } from "../lib/site";
+import { mediaUrl, seoConfig } from "../lib/site";
 import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
 import ArticleKnowledge from "../components/ArticleKnowledge.astro";
@@ -27,7 +27,10 @@ interface Props {
 const { view, route } = Astro.props;
 const { article, revision, cover, author } = view;
 
-const coverUrl = cover ? absoluteUrl(mediaUrl(cover.asset.storageKey)) : null;
+// `mediaUrl` is already absolute (the media domain), so it must not be run
+// through `absoluteUrl` as well — that produced `https://site/https://media/…`
+// on every share card. `check:seo` now fails on that shape.
+const coverUrl = cover ? mediaUrl(cover.asset.storageKey) : null;
 const metadata = buildArticleMetadata(seoConfig, {
   article,
   revision,
