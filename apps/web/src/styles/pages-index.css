@@ -971,6 +971,13 @@
     z-index: 4;
   }
 
+  /* Every pin sits at 4 here, which outranks the 2 the base stylesheet gives
+     a hovered pin -- so an open card slid under whichever pins came later in
+     the DOM. The open one has to clear its neighbours. */
+  .destination-index .world-map--featured .world-map__pin:is(:hover, :focus-visible) {
+    z-index: 5;
+  }
+
   .destination-map-feature:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(calc(-50% - 2px));
