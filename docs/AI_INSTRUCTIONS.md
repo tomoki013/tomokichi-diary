@@ -58,7 +58,8 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 ## Do not
 
 - `pnpm ci`（clean install）。`pnpm run ci` を使う。
-- `export/` を手で編集しない（Admin → API → D1 → `pnpm export:data`）。
+- `export/` を手で編集しない（Admin → API → D1 → `pnpm export:data`、またはローカルで `pnpm db:restore-local` → `pnpm content:revise` → `pnpm export:data`）。
+- 旧サイト（`../travel-diary`）の `posts/` を手で編集しない。切替までは `pnpm legacy:export` の出力だけを置く（`docs/migration/legacy-content-sync.md`）。
 - `dist/` を commit しない。
 - `IndexPage.astro` に画面を増やさない（分割の方向）。
 - `WebMcpTools.astro` の inline JSON に大きなデータを足さない（fetch に変える方向、監査 §9）。

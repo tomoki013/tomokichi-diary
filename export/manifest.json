@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-30T02:25:12.634Z",
+  "generatedAt": "2026-09-21T23:55:28.117Z",
   "counts": {
     "articles": 122,
     "revisions": 122,
@@ -20,7 +20,7 @@
     "articleCategories": 114,
     "articleTags": 350,
     "articleCollections": 154,
-    "sources": 4,
+    "sources": 5,
     "travelRoutes": 2,
     "travelFacts": 15,
     "articleKnowledge": 3

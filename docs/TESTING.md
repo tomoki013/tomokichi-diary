@@ -50,6 +50,8 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 
 `.github/workflows/ci.yml`: push(main) / PR / 手動で `pnpm run ci`。`.cache/images` を `export/media.json` のハッシュでキャッシュ。artifact に `.artifacts/`（summary.json、Lighthouse、ログ）。**CI は deploy しない**（`OPERATIONS.md` Releasing）。
 
+`parity` ステップ（`pnpm content:parity`）は切替までの暫定で、`LEGACY_REPO`（CI では `tomoki013/travel-diary` の sparse checkout）の `posts/` と `export/` を `NormalizedArticle` で比較する。checkout が無ければ skip。ロジックのユニットテストは `scripts/legacy-sync/__tests__/`。
+
 `astro check` は CI に入っていない（`pnpm typecheck` は tsc のみ）。入れるなら `apps/web` の `typecheck` を `scripts/ci.ts` の typecheck ステップに足す。
 
 ## Mock / Fixture

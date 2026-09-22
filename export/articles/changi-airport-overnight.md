@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/changi-airport-overnight"
 title: "チャンギ空港で空港泊してみた｜無料で休める場所・深夜の過ごし方を実体験で解説"
 summary: "チャンギ空港で朝の便まで実際に一晩過ごしました。空港内の椅子で夜を越した体験をもとに、無料のSnooze Lounge、深夜の過ごし方、シャワーやラウンジの選択肢を紹介します。"
-revision: 1
+revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false

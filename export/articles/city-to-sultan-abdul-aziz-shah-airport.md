@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/city-to-sultan-abdul-aziz-shah-airport"
 title: "クアラルンプール市内からスバン空港へ772番バスで行く｜RM3で実際に移動"
 summary: "クアラルンプール市内からスルタン・アブドゥル・アジズ・シャー空港（スバン空港）まで772番バスで実際に移動しました。早朝の乗車時刻、運賃RM3、空港までの流れを体験ベースで紹介します。"
-revision: 1
+revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false

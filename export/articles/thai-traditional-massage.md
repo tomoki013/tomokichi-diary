@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/thai-traditional-massage"
 title: "ワットポーのタイ古式マッサージ料金は320THB〜。待ち時間・営業時間まとめ"
 summary: "タイ古式マッサージの総本山ワット・ポーでマッサージを受けるときの、料金・営業時間・混雑しやすい時間帯と待ち時間の目安を体験ベースでまとめました。寺院観光と一緒に組み込むときの注意点も整理しています。"
-revision: 1
+revision: 2
 publishedAt: "2025-06-11T00:00:00.000Z"
 updatedAt: "2025-06-11T00:00:00.000Z"
 noindex: false

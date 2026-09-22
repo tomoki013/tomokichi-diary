@@ -49,6 +49,8 @@ export const ERROR_CODES = [
   "DB_MIGRATION_FAILED",
   "EXPORT_FAILED",
   "IMPORT_FAILED",
+  /** Temporary (until the cutover): the legacy site serves different article content. */
+  "CONTENT_PARITY_MISMATCH",
 
   // --- API ---
   "API_VALIDATION_FAILED",

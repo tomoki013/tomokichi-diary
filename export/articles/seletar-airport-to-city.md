@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/seletar-airport-to-city"
 title: "セレター空港からシンガポール市内へ｜102番バス＋MRTで実際に移動"
 summary: "セレター空港から102番バスでBuangkok駅へ出て、MRTで市内まで実際に移動しました。10:50到着から12:30のホテルチェックインまで、乗り継ぎの流れを体験ベースで紹介します。"
-revision: 1
+revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false

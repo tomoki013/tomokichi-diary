@@ -21,8 +21,17 @@ jobs:
   ci:
     name: Check
     runs-on: ubuntu-latest
+    env:
+      # Temporary until the cutover: `pnpm content:parity` compares export/
+      # against the previous site's posts (scripts/legacy-sync/README.md).
+      LEGACY_REPO: ${{ github.workspace }}/.legacy/travel-diary
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: tomoki013/travel-diary
+          path: .legacy/travel-diary
+          sparse-checkout: posts
       - uses: jdx/mise-action@v4
       - uses: actions/cache@v6
         with:

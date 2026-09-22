@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/changi-airport-lounge"
 title: "チャンギ空港のPlaza Premium Loungeを利用｜料金・シャワー・食事を実体験で紹介"
 summary: "チャンギ空港ターミナル1のPlaza Premium Loungeを深夜トランジットで実際に利用。長距離フライト後に食事・シャワー・休憩をまとめて済ませられた体験と、現在の料金や場所を紹介します。"
-revision: 1
+revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false

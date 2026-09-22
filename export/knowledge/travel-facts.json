@@ -9,9 +9,15 @@
     "verifiedAt": "2025-02-24",
     "value": null,
     "volatility": null,
-    "articleIds": ["ec5a4c60-e280-8bc7-b533-c5811a5451d2"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000001"],
+    "articleIds": [
+      "ec5a4c60-e280-8bc7-b533-c5811a5451d2"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000001"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000001",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -25,9 +31,15 @@
     "verifiedAt": "2025-02-24",
     "value": null,
     "volatility": null,
-    "articleIds": ["ec5a4c60-e280-8bc7-b533-c5811a5451d2"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000001"],
+    "articleIds": [
+      "ec5a4c60-e280-8bc7-b533-c5811a5451d2"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000001"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000001",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -41,9 +53,15 @@
     "verifiedAt": "2025-02-24",
     "value": null,
     "volatility": null,
-    "articleIds": ["ec5a4c60-e280-8bc7-b533-c5811a5451d2"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000001"],
+    "articleIds": [
+      "ec5a4c60-e280-8bc7-b533-c5811a5451d2"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000001"
+    ],
     "travelRouteId": null,
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -57,9 +75,15 @@
     "verifiedAt": "2025-02-24",
     "value": null,
     "volatility": "medium",
-    "articleIds": ["ec5a4c60-e280-8bc7-b533-c5811a5451d2"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000001"],
+    "articleIds": [
+      "ec5a4c60-e280-8bc7-b533-c5811a5451d2"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba101"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000001"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   },
@@ -73,9 +97,15 @@
     "verifiedAt": "2026-09-04",
     "value": null,
     "volatility": null,
-    "articleIds": ["4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba102"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000002"],
+    "articleIds": [
+      "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba102"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000002"
+    ],
     "travelRouteId": null,
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -89,9 +119,13 @@
     "verifiedAt": "2026-09-04",
     "value": null,
     "volatility": "medium",
-    "articleIds": ["4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"],
+    "articleIds": [
+      "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000003"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000003"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   },
@@ -105,9 +139,13 @@
     "verifiedAt": "2026-09-04",
     "value": null,
     "volatility": "medium",
-    "articleIds": ["4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"],
+    "articleIds": [
+      "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000003"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000003"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   },
@@ -121,9 +159,13 @@
     "verifiedAt": "2026-09-04",
     "value": null,
     "volatility": "medium",
-    "articleIds": ["4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"],
+    "articleIds": [
+      "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000005"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000005"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   },
@@ -137,9 +179,13 @@
     "verifiedAt": "2026-09-04",
     "value": null,
     "volatility": "medium",
-    "articleIds": ["4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"],
+    "articleIds": [
+      "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000003"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000003"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   },
@@ -151,11 +197,21 @@
     "status": "verified",
     "experiencedAt": "2025-06-20",
     "verifiedAt": "2025-06-20",
-    "value": { "amount": 200, "unit": null, "currency": "EGP" },
+    "value": {
+      "amount": 200,
+      "unit": null,
+      "currency": "EGP"
+    },
     "volatility": "high",
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000002",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -167,11 +223,19 @@
     "status": "verified",
     "experiencedAt": "2025-06-20",
     "verifiedAt": "2025-06-20",
-    "value": { "amount": 210, "unit": "minutes", "currency": null },
+    "value": {
+      "amount": 210,
+      "unit": "minutes",
+      "currency": null
+    },
     "volatility": "medium",
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000002",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -185,9 +249,13 @@
     "verifiedAt": "2025-06-20",
     "value": null,
     "volatility": null,
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
     "placeIds": [],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000002",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -201,9 +269,15 @@
     "verifiedAt": "2025-06-20",
     "value": null,
     "volatility": "high",
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": "20000000-0000-4000-8000-000000000002",
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -217,9 +291,15 @@
     "verifiedAt": "2025-06-20",
     "value": null,
     "volatility": "high",
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba103"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": null,
     "verifiedBy": "ec4c0379-0ceb-8192-a7f0-33d591504335"
   },
@@ -233,9 +313,15 @@
     "verifiedAt": "2025-06-20",
     "value": null,
     "volatility": "high",
-    "articleIds": ["034ecf00-ab8b-803f-b77f-f661514e5626"],
-    "placeIds": ["0c13f6ce-f9d3-4eb0-9d0c-5be50dfba104"],
-    "sourceIds": ["10000000-0000-4000-8000-000000000004"],
+    "articleIds": [
+      "034ecf00-ab8b-803f-b77f-f661514e5626"
+    ],
+    "placeIds": [
+      "0c13f6ce-f9d3-4eb0-9d0c-5be50dfba104"
+    ],
+    "sourceIds": [
+      "10000000-0000-4000-8000-000000000004"
+    ],
     "travelRouteId": null,
     "verifiedBy": null
   }
