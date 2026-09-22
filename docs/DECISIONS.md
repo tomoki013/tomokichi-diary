@@ -38,6 +38,7 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 | **タグの slug がハッシュ（`tag-xxxxxxxx`）**                                                      | `export/tags.json`、`slugify` が非ラテンで諦める（`primitives.test`）         | 日本語タグ名から slug を作れないため。タグページを作る時に人が付ける                                                                 |
 | **お問い合わせの保持期限を決めていない**                                                          | schema に期限列無し                                                           | 未決定                                                                                                                               |
 | **likes にレート制限を付けない**                                                                  | `routes/likes.ts`                                                             | Reason unknown。監査 §15 で追加を提案                                                                                                |
+| **切替まで旧サイト（travel-diary）へ NEW → OLD の一方向同期、比較は NormalizedArticle**           | `scripts/legacy-sync/`、`docs/migration/legacy-content-sync.md`               | 暫定。双方向にしない（更新ループ・古い文章の復活・updatedAt 破壊を避ける）。切替後に丸ごと削除                                       |
 | **Lighthouse は desktop preset**                                                                  | `lighthouserc.json`                                                           | Reason unknown。mobile は 93〜95（監査 §11）                                                                                         |
 
 ## 決めるべきこと（未決定）

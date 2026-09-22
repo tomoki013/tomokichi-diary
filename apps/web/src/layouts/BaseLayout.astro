@@ -2,7 +2,18 @@
 import "../styles/app.css";
 import { serializeJsonLd, type JsonLd, type PageMetadata } from "@tomokichi/seo";
 import { mediaBaseUrl, seoConfig } from "../lib/site";
-import { MenuIcon, SearchIcon, XIcon } from "../components/TravelIcons";
+import {
+  ArrowUpIcon,
+  BookIcon,
+  MapPinIcon,
+  MenuIcon,
+  RssIcon,
+  SearchIcon,
+  XBrandIcon,
+  XIcon,
+  YouTubeIcon,
+} from "../components/TravelIcons";
+import Picture from "../components/Picture.astro";
 
 interface Props {
   metadata: PageMetadata;
@@ -48,6 +59,16 @@ const footerGroups = [
   },
   { title: "サイトについて", links: footerNav.filter((item) => item.href.startsWith("/legal/")) },
 ];
+const socialLinks = [
+  { href: "https://www.youtube.com/@tomokichi_travel", label: "YouTube", Icon: YouTubeIcon },
+  { href: "https://x.com/tomokichi178694", label: "X", Icon: XBrandIcon },
+  { href: "/rss.xml", label: "RSS", Icon: RssIcon },
+];
+/* The footer's closing photograph: one of the author's own, not stock. */
+const footerPhoto = {
+  storageKey: "images/Greece/oia-castle-sunset-view.jpg",
+  alt: "夕暮れのイアの街並みと海",
+};
 ---
 
 <!doctype html>
@@ -215,22 +236,58 @@ const footerGroups = [
 
       <footer class="site-footer">
         <div class="wrap site-footer__inner">
-          <section class="site-footer__opening" aria-labelledby="footer-opening-title">
-            <p>THE NEXT JOURNEY</p>
-            <h2 id="footer-opening-title">一生モノの体験を、<br />もっと身近に。</h2>
-            <div>
-              <a href="/destination">旅先から探す&nbsp; →</a><a href="/posts"
-                >ブログを読む&nbsp; →</a
-              >
+          <section class="site-footer__next" aria-labelledby="footer-next-title">
+            <Picture
+              storageKey={footerPhoto.storageKey}
+              alt={footerPhoto.alt}
+              sizes="(min-width: 74rem) 74rem, 100vw"
+              class="site-footer__next-photo"
+            />
+            <div class="site-footer__next-shade"></div>
+            <div class="site-footer__next-body">
+              <p class="site-footer__script">Next Adventure Awaits</p>
+              <h2 id="footer-next-title">次は、どこへ行こう？</h2>
+              <p>まだ見ぬ景色が、きっとあなたを待っています。</p>
+            </div>
+            <div class="site-footer__next-actions">
+              <a href="/destination" class="site-footer__cta site-footer__cta--primary">
+                <MapPinIcon />
+                <span>旅先から探す</span>
+                <span aria-hidden="true">→</span>
+              </a>
+              <a href="/posts" class="site-footer__cta">
+                <BookIcon />
+                <span>ブログを読む</span>
+                <span aria-hidden="true">→</span>
+              </a>
             </div>
           </section>
+
           <section class="site-footer__body">
             <div class="site-footer__brand">
-              <a href="/" class="site-footer__logo"><strong>{seoConfig.siteName}</strong></a>
-              <p>
-                「一生モノの体験を、もっと身近に。」<br
-                />実体験に基づく旅の記録と、旅を豊かにする情報を発信しています。
-              </p>
+              <a href="/" class="site-footer__logo">
+                <strong>{seoConfig.siteName}</strong>
+                <span>Travel Diary</span>
+              </a>
+              <p class="site-footer__tagline">一生モノの体験を、もっと身近に。</p>
+              <p>実体験に基づく旅の記録と、旅を豊かにする情報を発信しています。</p>
+              <ul class="site-footer__social" aria-label="SNS">
+                {
+                  socialLinks.map(({ href, label, Icon }) => (
+                    <li>
+                      <a
+                        href={href}
+                        aria-label={label}
+                        title={label}
+                        rel={href.startsWith("http") ? "noopener" : undefined}
+                        target={href.startsWith("http") ? "_blank" : undefined}
+                      >
+                        <Icon />
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
             </div>
             <nav class="site-footer__groups" aria-label="フッターナビゲーション">
               {
@@ -248,13 +305,23 @@ const footerGroups = [
                 ))
               }
             </nav>
-          </section>
-          <div class="site-footer__legal">
-            <div class="site-footer__legal-meta">
-              <p>© 2024–{new Date().getFullYear()} {seoConfig.siteName}</p>
-              <p>Made with <span aria-label="love">♡</span> by Tomokichi</p>
+            <div class="site-footer__aside" aria-hidden="true">
+              <p class="site-footer__script">Same World,<br />Different Stories</p>
+              <p>旅は、いつだって<br />新しい自分に出会わせてくれる。</p>
             </div>
+          </section>
+
+          <div class="site-footer__legal">
+            <p>
+              © 2024–{new Date().getFullYear()}
+              {seoConfig.siteName}
+              <span class="site-footer__legal-sep" aria-hidden="true">|</span>
+              Made with <span aria-label="love">♡</span> by Tomokichi
+            </p>
             <p>掲載情報は実体験をもとにしています。旅行前には最新の公式情報もご確認ください。</p>
+            <a href="#main" class="site-footer__top" aria-label="ページの先頭へ">
+              <ArrowUpIcon />
+            </a>
           </div>
         </div>
       </footer>

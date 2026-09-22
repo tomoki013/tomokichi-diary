@@ -94,6 +94,17 @@ const STEPS: Step[] = [
     interpret: (output) => parseJsonFindings(output),
   },
   {
+    // Temporary until the cutover: the legacy site must serve the same
+    // articles as export/ (scripts/legacy-sync/README.md). Skipped, not
+    // failed, when the legacy checkout is absent.
+    name: "parity",
+    code: "CONTENT_PARITY_MISMATCH",
+    command: "pnpm",
+    args: ["exec", "tsx", "scripts/content-parity.ts", "--json"],
+    rerun: "pnpm content:parity --report",
+    interpret: (output) => parseJsonFindings(output),
+  },
+  {
     name: "test",
     code: "TEST_FAILED",
     command: "pnpm",

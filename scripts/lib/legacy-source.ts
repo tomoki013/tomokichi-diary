@@ -35,11 +35,14 @@ export interface LegacyPost {
 export interface LegacyFrontmatter {
   title: string;
   excerpt: string;
+  /** Meta description when it differs from the excerpt (added after the import). */
+  description?: string;
   publishedAt: string;
   updatedAt?: string;
   category: string;
   tags: string[];
   heroImage: string;
+  heroAlt?: string;
   regionIds: string[];
   author: string;
   noindex?: boolean;

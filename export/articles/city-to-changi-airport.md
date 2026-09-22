@@ -6,7 +6,7 @@ status: "published"
 path: "/posts/city-to-changi-airport"
 title: "シンガポール市内からチャンギ空港へバスで行く｜実際に使って分かったこと"
 summary: "シンガポール市内からチャンギ空港まで実際に路線バスで移動しました。空港行きバスの考え方、乗り方、支払い方法、Google Mapsでの調べ方、荷物や渋滞の注意点を体験ベースで紹介します。"
-revision: 1
+revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false

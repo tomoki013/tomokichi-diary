@@ -12,5 +12,8 @@ ui-dist/
 .DS_Store
 .cache/
 
+# CI checkout of the previous site for the content parity check (temporary).
+.legacy/
+
 # Lighthouse CI writes here by default; the run we keep goes to .artifacts/.
 .lighthouseci/

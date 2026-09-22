@@ -151,21 +151,25 @@ data. See [ADR 0002](adr/0002-route-independent-from-slug.md).
 
 ## Commands
 
-| Command                  | What it does                                                     |
-| ------------------------ | ---------------------------------------------------------------- |
-| `pnpm run ci`            | The whole pipeline. Identical locally and in CI.                 |
-| `pnpm diagnostics`       | Small snapshot of runtime, schema, content counts and CI status. |
-| `pnpm build`             | Builds every app.                                                |
-| `pnpm export:data`       | Writes the content graph to `export/`.                           |
-| `pnpm import:legacy`     | One-way import from the previous Next.js site.                   |
-| `pnpm baseline`          | Records the previous site's URLs and SEO into `migration/`.      |
-| `pnpm check:routes`      | Legacy URL and route/page parity.                                |
-| `pnpm check:seo`         | Title, description, canonical, h1, JSON-LD, sitemap, noindex.    |
-| `pnpm check:links`       | Internal links and images resolve.                               |
-| `pnpm check:knowledge`   | Evidence invariants and every knowledge graph reference.         |
-| `pnpm knowledge:catalog` | Rebuilds the WebMCP/MCP read model from the committed export.    |
-| `pnpm knowledge:backlog` | Lists every published article still requiring human migration.   |
-| `pnpm perf`              | Lighthouse budget over representative pages.                     |
+| Command                  | What it does                                                        |
+| ------------------------ | ------------------------------------------------------------------- |
+| `pnpm run ci`            | The whole pipeline. Identical locally and in CI.                    |
+| `pnpm diagnostics`       | Small snapshot of runtime, schema, content counts and CI status.    |
+| `pnpm build`             | Builds every app.                                                   |
+| `pnpm export:data`       | Writes the content graph to `export/`.                              |
+| `pnpm import:legacy`     | One-way import from the previous Next.js site.                      |
+| `pnpm baseline`          | Records the previous site's URLs and SEO into `migration/`.         |
+| `pnpm check:routes`      | Legacy URL and route/page parity.                                   |
+| `pnpm check:seo`         | Title, description, canonical, h1, JSON-LD, sitemap, noindex.       |
+| `pnpm check:links`       | Internal links and images resolve.                                  |
+| `pnpm check:knowledge`   | Evidence invariants and every knowledge graph reference.            |
+| `pnpm knowledge:catalog` | Rebuilds the WebMCP/MCP read model from the committed export.       |
+| `pnpm knowledge:backlog` | Lists every published article still requiring human migration.      |
+| `pnpm db:restore-local`  | Rebuilds `.data/tomokichi.db` from the committed export.            |
+| `pnpm content:revise`    | Publishes a new revision of an article from a Markdown file.        |
+| `pnpm content:parity`    | Temporary: the previous site serves the same articles as `export/`. |
+| `pnpm legacy:export`     | Temporary: writes `export/` into the previous site's `posts/`.      |
+| `pnpm perf`              | Lighthouse budget over representative pages.                        |
 
 `pnpm ci` is a built-in pnpm command (a clean install), so always use
 `pnpm run ci`.

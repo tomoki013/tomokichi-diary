@@ -208,7 +208,48 @@ only then remove.
 ### `EXPORT_FAILED` / `IMPORT_FAILED`
 
 `pnpm export:data` reads the local SQLite database at `.data/tomokichi.db`.
-If it is missing, re-run `pnpm import:legacy` or restore from `export/`.
+If it is missing or older than the committed export, `pnpm db:restore-local`
+rebuilds it from `export/` (the previous file is kept beside it as `.bak`).
+
+### Editing content without the admin
+
+`pnpm content:revise <file.md>` publishes a new revision of an existing
+article through the same use cases the admin API calls, against the local
+database. The file's frontmatter names the `slug`, optional `title`,
+`summary`, `seoDescription`, a required `changeSummary` and an optional
+`updatedAt` (`keep` for a metadata-only change); the body replaces the article
+body when present. `publishedAt` is never touched. Travel knowledge attached
+to the previous revision is carried over. Always:
+
+```bash
+pnpm db:restore-local
+pnpm content:revise path/to/revision.md
+pnpm export:data && pnpm legacy:export   # legacy:export until the cutover
+```
+
+then commit `export/` (and the legacy repository) and release as usual
+(`pnpm db:seed` puts the new revision into D1).
+
+### `CONTENT_PARITY_MISMATCH` (temporary, until the cutover)
+
+The previous Next.js site (`../travel-diary`, or `LEGACY_REPO`) serves an
+article that differs from `export/` — a different title, description, body,
+heading, image, link, date, or an article missing on one side.
+`pnpm content:parity --report` lists every field in
+`docs/migration/content-parity-report.md`.
+
+Diary 2.0 is canonical, so the fix depends on which side moved:
+
+- **2.0 changed** (the usual case): `pnpm legacy:export`, then commit and push
+  the legacy repository. CI on this repository checks out the legacy `main`,
+  so push the legacy repository first or the check stays red.
+- **The legacy repository was edited directly**: do not copy the text back by
+  hand. Fold the change into 2.0 with `pnpm content:revise` (or the admin),
+  `pnpm export:data`, then `pnpm legacy:export`.
+- **The legacy checkout is missing**: the step is skipped, not failed.
+
+The whole mechanism is deleted after the cutover — see
+`scripts/legacy-sync/README.md` and `docs/migration/legacy-content-sync.md`.
 
 ## Media
 
