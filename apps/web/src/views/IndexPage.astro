@@ -85,7 +85,14 @@ const continents = content.locations
                 .flatMap((place) => {
                   const cityRoute = content.routes.canonicalFor("location", place.id);
                   return cityRoute
-                    ? [{ name: content.locations.nameOf(place.id, "ja"), path: cityRoute.path }]
+                    ? [
+                        {
+                          id: place.id,
+                          slug: place.slug,
+                          name: content.locations.nameOf(place.id, "ja"),
+                          path: cityRoute.path,
+                        },
+                      ]
                     : [];
                 }),
             },
@@ -137,6 +144,112 @@ const galleryCountries = [...new Set(galleryImages.map((item) => item.country))]
   .toSorted((a, b) => b.count - a.count);
 
 const countryCount = continents.reduce((total, continent) => total + continent.countries.length, 0);
+const cityCount = continents.reduce(
+  (total, continent) =>
+    total +
+    continent.countries.reduce((countryTotal, country) => countryTotal + country.cities.length, 0),
+  0,
+);
+
+const mediaByStorageKey = (storageKey: string) =>
+  content.snapshot.media.find((media) => media.storageKey === storageKey) ?? null;
+const articleCountForLocation = (locationId: string) =>
+  articles.filter((view) => view.locations.some(({ location }) => location.id === locationId))
+    .length;
+const cityDestinations = continents.flatMap((continent) =>
+  continent.countries.flatMap((country) => country.cities.map((city) => ({ ...city, country }))),
+);
+
+const recentJourneys = [
+  {
+    country: "CHINA",
+    title: "Shanghai",
+    tagline: "進化し続ける、もうひとつの未来",
+    path: "/destination/china/shanghai",
+    city: continents
+      .flatMap((continent) => continent.countries)
+      .flatMap((country) => country.cities)
+      .find((city) => city.name === "上海"),
+    cover: mediaByStorageKey("images/China/the-night-view-of-the-bund.jpg"),
+  },
+  {
+    country: "EGYPT",
+    title: "Cairo & Beyond",
+    tagline: "時を超えて、なお美しいもの",
+    path: "/destination/egypt/cairo",
+    city: continents
+      .flatMap((continent) => continent.countries)
+      .flatMap((country) => country.cities)
+      .find((city) => city.name === "カイロ"),
+    cover: mediaByStorageKey("images/Egypt/the-three-great-pyramids-of-giza-with-sunset.jpg"),
+  },
+  {
+    country: "TÜRKİYE",
+    title: "Cappadocia",
+    tagline: "空にゆれる、やさしい朝",
+    path: "/destination/turkey/cappadocia",
+    city: continents
+      .flatMap((continent) => continent.countries)
+      .flatMap((country) => country.cities)
+      .find((city) => city.name === "カッパドキア"),
+    cover: mediaByStorageKey("images/Turkey/balloons-in-cappadocia.jpg"),
+  },
+].map((journey) => ({
+  ...journey,
+  count: journey.city ? articleCountForLocation(journey.city.id) : 0,
+}));
+const titleFromSlug = (slug: string) =>
+  slug
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+const latestTravelView = articles
+  .filter(
+    (view) =>
+      view.article.travelStartDate &&
+      view.locations.some(({ location }) => location.type === "city"),
+  )
+  .toSorted(
+    (a, b) =>
+      (b.article.travelStartDate ?? "").localeCompare(a.article.travelStartDate ?? "") ||
+      (b.article.publishedAt ?? "").localeCompare(a.article.publishedAt ?? ""),
+  )[0];
+const latestCityLocation = latestTravelView?.locations.find(
+  ({ location }) => location.type === "city",
+)?.location;
+const latestCity = latestCityLocation
+  ? cityDestinations.find((city) => city.id === latestCityLocation.id)
+  : undefined;
+const featuredJourney =
+  latestTravelView && latestCity
+    ? {
+        slug: latestCity.country.slug,
+        path: latestCity.path,
+        title: titleFromSlug(latestCity.slug),
+        country: titleFromSlug(latestCity.country.slug),
+        count: articleCountForLocation(latestCity.id),
+        cover: latestTravelView.cover
+          ? {
+              storageKey: latestTravelView.cover.asset.storageKey,
+              alt: latestTravelView.cover.usage.alt,
+            }
+          : latestCity.country.cover
+            ? {
+                storageKey: latestCity.country.cover.asset.storageKey,
+                alt: latestCity.country.cover.usage.alt,
+              }
+            : null,
+      }
+    : {
+        slug: "china",
+        path: recentJourneys[0]!.path,
+        title: recentJourneys[0]!.title,
+        country: "China",
+        count: recentJourneys[0]!.count,
+        cover: recentJourneys[0]!.cover
+          ? { storageKey: recentJourneys[0]!.cover.storageKey, alt: "上海の夜景" }
+          : null,
+      };
 const featuredStories = articles
   .filter((view) => view.cover)
   .reduce<typeof articles>((stories, view) => {
@@ -270,7 +383,7 @@ const labelOf = (target: Route): string => {
     buildBreadcrumbJsonLd(seoConfig, trail),
   ]}
 >
-  <Breadcrumbs trail={trail} />
+  {route.path !== "/destination" && <Breadcrumbs trail={trail} />}
   {
     route.path !== "/" &&
       route.path !== "/posts" &&
@@ -739,72 +852,84 @@ const labelOf = (target: Route): string => {
   {
     route.path === "/destination" && (
       <div class="destination-index">
-        <header class="destination-masthead">
-          <div class="destination-masthead__copy">
-            <p>旅先からブログを読む</p>
-            <h1>
-              心が向いた場所から、
-              <br />
-              次の旅を始めよう。
-            </h1>
-            <p>
-              地図を眺める。国を選ぶ。街の記録を読む。まだ行き先が決まっていない時間も、旅の一部です。
-            </p>
-            <dl>
-              <div>
-                <dt>訪れた国</dt>
-                <dd>
-                  {countryCount}
-                  <small>か国</small>
-                </dd>
-              </div>
-              <div>
-                <dt>旅の記録</dt>
-                <dd>
-                  {articles.length}
-                  <small>本</small>
-                </dd>
-              </div>
-              <div>
-                <dt>地域</dt>
-                <dd>
-                  {continents.length}
-                  <small>エリア</small>
-                </dd>
-              </div>
-            </dl>
+        <header class="destination-intro">
+          <div class="destination-intro__side destination-intro__side--left" aria-hidden="true">
+            <span>PLACES</span>
+            <span>PEOPLE</span>
+            <span>STORIES</span>
+            <span>A MORE OPEN YOU</span>
+            <i />
           </div>
-          <div class="destination-masthead__mosaic" aria-hidden="true">
-            {popularDestinations
-              .slice(0, 3)
-              .map(
-                (country, index) =>
-                  country.cover && (
-                    <Picture
-                      storageKey={country.cover.asset.storageKey}
-                      alt=""
-                      sizes="(max-width: 760px) 50vw, 280px"
-                      loading={index === 0 ? "eager" : "lazy"}
-                    />
-                  ),
-              )}
-            <span>
-              Where
-              <br />
-              to next?
-            </span>
+          <div class="destination-intro__copy">
+            <p class="destination-intro__eyebrow">旅先からブログを読む</p>
+            <h1 id="destination-map-heading">Explore the world.</h1>
+            <p class="destination-intro__subtitle">これまで歩いた街と、そこで見た景色。</p>
+            <p class="destination-intro__stats">
+              {countryCount} Countries <span>·</span> {cityCount} Cities
+            </p>
+          </div>
+          <div class="destination-intro__side destination-intro__side--right" aria-hidden="true">
+            <i />
+            <span>TRAVEL</span>
+            <span>SLOWER</span>
+            <span>SEE DEEPER</span>
+            <span>LIVE RICHER</span>
           </div>
         </header>
 
         <section class="destination-map-section" aria-labelledby="destination-map-heading">
-          <div class="destination-section-heading">
-            <div>
-              <small>地図から選ぶ</small>
-              <h2 id="destination-map-heading">世界を眺めて、気になる国へ</h2>
+          <div class="destination-map-frame">
+            <div class="destination-map-note destination-map-note--left" aria-hidden="true">
+              <span>Good</span>
+              <span>Places</span>
+              <span>Better People</span>
+              <i />
             </div>
-            <p>オレンジのピンを選ぶと、その国のブログへ移動します。</p>
+            <WorldMap
+              countries={continents.flatMap((continent) => continent.countries)}
+              featured={featuredJourney}
+            />
+            <div class="destination-map-note destination-map-note--right" aria-hidden="true">
+              <b>＋</b>
+              <span>SAME PLANET</span>
+              <span>DIFFERENT STORIES</span>
+            </div>
           </div>
-          <WorldMap countries={continents.flatMap((continent) => continent.countries)} />
+        </section>
+
+        <section class="destination-recent" aria-labelledby="destination-recent-heading">
+          <header class="destination-recent__heading">
+            <div>
+              <h2 id="destination-recent-heading">Recent Journeys</h2>
+              <p>旅のつづきを、ここから。</p>
+            </div>
+            <a href="/posts">
+              View all stories <span aria-hidden="true">→</span>
+            </a>
+          </header>
+          <div class="destination-journey-grid">
+            {recentJourneys.map((journey, index) => (
+              <a class="destination-journey-card" href={journey.path}>
+                {journey.cover && (
+                  <Picture
+                    storageKey={journey.cover.storageKey}
+                    alt=""
+                    sizes="(max-width: 760px) 100vw, 33vw"
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                )}
+                <span class="destination-journey-card__shade" />
+                <span class="destination-journey-card__copy">
+                  <small>{journey.country}</small>
+                  <strong>{journey.title}</strong>
+                  <span>{journey.tagline}</span>
+                  <b>
+                    {journey.count} stories <i aria-hidden="true" />
+                  </b>
+                </span>
+              </a>
+            ))}
+          </div>
         </section>
 
         <section class="destination-directory" aria-labelledby="destination-directory-heading">

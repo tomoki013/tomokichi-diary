@@ -4,6 +4,7 @@ import { feature } from "topojson-client";
 import world from "world-atlas/countries-110m.json";
 import type { FeatureCollection, Geometry } from "geojson";
 import { imageSources } from "../lib/images";
+import Picture from "./Picture.astro";
 
 interface CountryLink {
   slug: string;
@@ -14,11 +15,22 @@ interface CountryLink {
   cover?: { asset: { storageKey: string }; usage: { alt: string } } | null;
 }
 
-interface Props {
-  countries: CountryLink[];
+interface FeaturedDestination {
+  slug: string;
+  title: string;
+  country: string;
+  path: string;
+  count: number;
+  cover: { storageKey: string; alt: string } | null;
 }
 
-const { countries } = Astro.props;
+interface Props {
+  countries: CountryLink[];
+  /** Optional card anchored to the corresponding country pin. */
+  featured?: FeaturedDestination | null;
+}
+
+const { countries, featured = null } = Astro.props;
 
 const englishNameBySlug: Record<string, string> = {
   belgium: "Belgium",
@@ -120,107 +132,149 @@ const pins = countries.flatMap((destination) => {
     },
   ];
 });
+const featuredPin = featured
+  ? (pins.find(({ destination }) => destination.slug === featured.slug) ?? null)
+  : null;
 ---
 
-<div class="world-map">
-  <div class="world-map__stage" data-map>
-    <div class="world-map__layer" data-map-layer>
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        role="img"
-        aria-labelledby="world-map-title world-map-description"
-      >
-        <title id="world-map-title">ともきちが訪れた国の世界地図</title>
-        <desc id="world-map-description">ピンを選ぶと、その国の旅行記事へ移動します。</desc>
-        {
-          mapShapes.map(({ d, visited }) => (
-            <path class:list={["world-map__country", visited && "is-visited"]} d={d} />
-          ))
-        }
-      </svg>
+<div class:list={["world-map", featured && "world-map--featured"]}>
+  <div class="world-map__layout">
+    <div class="world-map__stage-wrap">
+      <div class="world-map__stage" data-map>
+        <div class="world-map__layer" data-map-layer>
+          <svg
+            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            role="img"
+            aria-labelledby="world-map-title world-map-description"
+          >
+            <title id="world-map-title">ともきちが訪れた国の世界地図</title>
+            <desc id="world-map-description">ピンを選ぶと、その国の旅行記事へ移動します。</desc>
+            {
+              mapShapes.map(({ d, visited }) => (
+                <path class:list={["world-map__country", visited && "is-visited"]} d={d} />
+              ))
+            }
+          </svg>
 
-      <div class="world-map__pins">
-        {
-          pins.map(({ destination, english, thumbnail, left, top, side, vertical, size }) => (
-            <a
-              class="world-map__pin"
-              href={destination.path}
-              style={`--pin-x:${left};--pin-y:${top};--pin-size:${size}rem;--card-h:${thumbnail ? "10.2rem" : "5.6rem"}`}
-              data-side={side}
-              data-vertical={vertical}
-              aria-label={`${destination.name}の記事 ${destination.count}件`}
-            >
-              <span class="world-map__marker" aria-hidden="true" />
-              <span class="world-map__card" aria-hidden="true">
-                {thumbnail && (
-                  <span
-                    class="world-map__card-image"
-                    style={`background-image:url(${thumbnail})`}
-                  />
-                )}
-                <span class="world-map__card-body">
-                  <b>{destination.name}</b>
-                  {english && <small>{english}</small>}
-                  <em>
-                    {destination.count} stories <span>→</span>
-                  </em>
-                </span>
-              </span>
-            </a>
-          ))
-        }
+          <div class="world-map__pins">
+            {
+              pins.map(({ destination, english, thumbnail, left, top, side, vertical, size }) => (
+                <a
+                  class="world-map__pin"
+                  href={destination.path}
+                  style={`--pin-x:${left};--pin-y:${top};--pin-size:${size}rem;--card-h:${thumbnail ? "10.2rem" : "5.6rem"}`}
+                  data-side={side}
+                  data-vertical={vertical}
+                  aria-label={`${destination.name}の記事 ${destination.count}件`}
+                >
+                  <span class="world-map__marker" aria-hidden="true" />
+                  <span class="world-map__card" aria-hidden="true">
+                    {thumbnail && (
+                      <span
+                        class="world-map__card-image"
+                        style={`background-image:url(${thumbnail})`}
+                      />
+                    )}
+                    <span class="world-map__card-body">
+                      <b>{destination.name}</b>
+                      {english && <small>{english}</small>}
+                      <em>
+                        {destination.count} stories <span>→</span>
+                      </em>
+                    </span>
+                  </span>
+                </a>
+              ))
+            }
+          </div>
+        </div>
       </div>
+
+      {
+        featured && featuredPin && (
+          <span
+            class="destination-map-feature__connector"
+            aria-hidden="true"
+            style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
+          />
+        )
+      }
     </div>
 
-    <div class="world-map__controls">
-      <button
-        class="world-map__recentre"
-        type="button"
-        data-map-zoom="reset"
-        aria-label="地図の表示を戻す"
+    {
+      featured && featuredPin && (
+        <a
+          class="destination-map-feature"
+          data-featured-side={featuredPin.side}
+          href={featured.path}
+          style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
+        >
+          {featured.cover && (
+            <Picture
+              storageKey={featured.cover.storageKey}
+              alt={featured.cover.alt}
+              sizes="220px"
+              loading="eager"
+            />
+          )}
+          <span>
+            <strong>{featured.title}</strong>
+            <small>{featured.country}</small>
+            <em>{featured.count} stories&nbsp; →</em>
+          </span>
+        </a>
+      )
+    }
+  </div>
+
+  <div class="world-map__controls">
+    <button
+      class="world-map__recentre"
+      type="button"
+      data-map-zoom="reset"
+      aria-label="地図の表示を戻す"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
       >
+        <circle cx="12" cy="12" r="4.2"></circle>
+        <path d="M12 2.6v3.2M12 18.2v3.2M2.6 12h3.2M18.2 12h3.2" stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <div class="world-map__zoom">
+      <button type="button" data-map-zoom="in" aria-label="地図を拡大">
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
           fill="none"
           stroke="currentColor"
-          stroke-width="1.6"
+          stroke-width="1.8"
         >
-          <circle cx="12" cy="12" r="4.2"></circle>
-          <path d="M12 2.6v3.2M12 18.2v3.2M2.6 12h3.2M18.2 12h3.2" stroke-linecap="round"></path>
+          <path d="M12 5.5v13M5.5 12h13" stroke-linecap="round"></path>
         </svg>
       </button>
-      <div class="world-map__zoom">
-        <button type="button" data-map-zoom="in" aria-label="地図を拡大">
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="M12 5.5v13M5.5 12h13" stroke-linecap="round"></path>
-          </svg>
-        </button>
-        <button type="button" data-map-zoom="out" aria-label="地図を縮小">
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="M5.5 12h13" stroke-linecap="round"></path>
-          </svg>
-        </button>
-      </div>
+      <button type="button" data-map-zoom="out" aria-label="地図を縮小">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path d="M5.5 12h13" stroke-linecap="round"></path>
+        </svg>
+      </button>
     </div>
   </div>
-
-  <p class="world-map__legend">
-    <span aria-hidden="true"></span>訪れた国<span aria-hidden="true"></span>ピンの大きさ＝記事の多さ
-  </p>
 </div>
+
+<p class="world-map__legend">
+  <span aria-hidden="true"></span>訪れた国<span aria-hidden="true"></span>ピンの大きさ＝記事の多さ
+</p>
 
 <script>
   /*

@@ -722,6 +722,460 @@
     font-style: normal;
   }
 
+  /* /destination visual guide -------------------------------------- */
+  /* The destination page is deliberately quieter than the other archives:
+     the map is the first piece of content, and the directory remains below
+     it for visitors who already know where they want to go. */
+  .destination-intro {
+    display: grid;
+    grid-template-columns: minmax(7rem, 1fr) minmax(0, 3.5fr) minmax(7rem, 1fr);
+    align-items: center;
+    gap: var(--space-lg);
+    min-height: clamp(15rem, 24vw, 20rem);
+    padding-top: clamp(2.2rem, 5vw, 4.8rem);
+  }
+
+  .destination-intro__copy {
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    text-align: center;
+  }
+
+  .destination-intro__eyebrow {
+    margin: 0;
+    color: var(--accent);
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .destination-intro__copy h1 {
+    margin: 0;
+    color: #1d1c1a;
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 5vw, 4.8rem);
+    font-weight: 500;
+    letter-spacing: -0.065em;
+    line-height: 0.98;
+  }
+
+  .destination-intro__subtitle {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: clamp(0.95rem, 0.7rem + 0.6vw, 1.18rem);
+    letter-spacing: 0.05em;
+  }
+
+  .destination-intro__stats {
+    margin: 0.7rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-label);
+    font-size: clamp(1rem, 0.8rem + 0.45vw, 1.25rem);
+    letter-spacing: 0.05em;
+  }
+
+  .destination-intro__stats span {
+    padding-inline: 0.45rem;
+    color: var(--accent);
+  }
+
+  .destination-intro__side {
+    display: grid;
+    align-content: center;
+    gap: 0.3rem;
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.24em;
+    line-height: 1.35;
+  }
+
+  .destination-intro__side--right {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .destination-intro__side i,
+  .destination-map-note i {
+    display: block;
+    width: 1.8rem;
+    height: 1px;
+    margin-top: 0.9rem;
+    background: var(--line-strong);
+  }
+
+  .destination-intro__side--right i {
+    margin-top: 0;
+    margin-bottom: 0.9rem;
+  }
+
+  .destination-map-section {
+    position: relative;
+  }
+
+  .destination-map-frame {
+    position: relative;
+    min-height: clamp(24rem, 37vw, 34rem);
+  }
+
+  .destination-index .world-map {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .destination-index .world-map__stage {
+    aspect-ratio: 2.25 / 1;
+    border-radius: 0;
+  }
+
+  .destination-index .world-map__country {
+    fill: #e7e5e1;
+    stroke: var(--bg);
+    stroke-width: 0.55;
+  }
+
+  .destination-index .world-map__country.is-visited {
+    fill: #8d8f8d;
+  }
+
+  .destination-index .world-map__legend {
+    display: none;
+  }
+
+  .destination-index .world-map__controls {
+    right: 0.3rem;
+    bottom: 0.35rem;
+  }
+
+  .destination-index .world-map--featured {
+    --featured-rail: min(13rem, 20vw);
+    --featured-gap: clamp(0.8rem, 1.5vw, 1.4rem);
+  }
+
+  .destination-index .world-map--featured .world-map__layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--featured-rail);
+    gap: var(--featured-gap);
+  }
+
+  .destination-index .world-map--featured .world-map__stage-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .destination-index .world-map--featured .world-map__controls {
+    right: calc(var(--featured-rail) + var(--featured-gap) + 0.3rem);
+  }
+
+  .destination-map-note {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    gap: 0.15rem;
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    line-height: 1.35;
+    pointer-events: none;
+  }
+
+  .destination-map-note--left {
+    bottom: 1.2rem;
+    left: 0;
+    transform: rotate(-7deg);
+  }
+
+  .destination-map-note--left span:first-child {
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .destination-map-note--left span:nth-child(2) {
+    margin-left: 0.45rem;
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .destination-map-note--left span:nth-child(3) {
+    margin-left: 0.8rem;
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .destination-map-note--right {
+    right: 0;
+    bottom: 0.9rem;
+    justify-items: end;
+    text-align: right;
+  }
+
+  .destination-map-note--right b {
+    color: var(--line-strong);
+    font-family: var(--font-sans);
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 0.8;
+  }
+
+  .destination-map-feature {
+    --featured-card-width: min(11.8rem, 19vw);
+
+    position: absolute;
+    z-index: 4;
+    top: calc(var(--featured-pin-y) * 1%);
+    display: grid;
+    width: var(--featured-card-width);
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    text-decoration: none;
+    transform: translateY(-50%);
+    transition:
+      box-shadow var(--speed) var(--ease),
+      transform var(--speed) var(--ease);
+  }
+
+  .destination-index .world-map--featured .destination-map-feature {
+    top: calc(var(--featured-pin-y) * 1%);
+    right: 0;
+    left: auto;
+    width: var(--featured-rail);
+  }
+
+  .destination-map-feature__connector {
+    position: absolute;
+    z-index: 3;
+    top: calc(var(--featured-pin-y) * 1%);
+    left: calc(var(--featured-pin-x) * 1%);
+    width: calc(100% - var(--featured-pin-x) * 1% + var(--featured-gap));
+    height: 1px;
+    background: var(--ink-faint);
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  .destination-index .world-map--featured .world-map__pin {
+    z-index: 4;
+  }
+
+  .destination-map-feature:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(calc(-50% - 2px));
+  }
+
+  .destination-index
+    .world-map--featured
+    .world-map__stage-wrap:has(.world-map__stage.is-zoomed)
+    ~ .destination-map-feature {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .destination-map-feature picture,
+  .destination-map-feature img {
+    display: block;
+    width: 100%;
+  }
+
+  .destination-map-feature img {
+    aspect-ratio: 1.65 / 1;
+    object-fit: cover;
+  }
+
+  .destination-map-feature > span {
+    display: grid;
+    gap: 0.05rem;
+    padding: 0.55rem 0.7rem 0.65rem;
+  }
+
+  .destination-map-feature strong {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .destination-map-feature small {
+    color: var(--ink-faint);
+    font-size: 0.72rem;
+  }
+
+  .destination-map-feature em {
+    margin-top: 0.22rem;
+    color: var(--accent);
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    font-style: normal;
+  }
+
+  .destination-recent {
+    padding-top: 0.3rem;
+  }
+
+  .destination-recent__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-md);
+    margin-bottom: var(--space-md);
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .destination-recent__heading > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 1.6rem;
+  }
+
+  .destination-recent__heading h2 {
+    margin: 0;
+    color: #1d1c1a;
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 1.4rem + 1vw, 2.45rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+  }
+
+  .destination-recent__heading p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-family: var(--font-serif);
+    font-size: 0.98rem;
+  }
+
+  .destination-recent__heading > a {
+    color: var(--accent-strong);
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+
+  .destination-recent__heading > a span {
+    display: inline-block;
+    margin-left: 0.4rem;
+    transition: transform var(--speed) var(--ease);
+  }
+
+  .destination-recent__heading > a:hover span {
+    transform: translateX(0.2rem);
+  }
+
+  .destination-journey-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .destination-journey-card {
+    position: relative;
+    display: block;
+    min-height: clamp(14rem, 22vw, 19rem);
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    text-decoration: none;
+  }
+
+  .destination-journey-card picture,
+  .destination-journey-card img,
+  .destination-journey-card__shade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .destination-journey-card img {
+    object-fit: cover;
+    transition: transform 700ms var(--ease);
+  }
+
+  .destination-journey-card:hover img {
+    transform: scale(1.04);
+  }
+
+  .destination-journey-card__shade {
+    background: linear-gradient(
+      0deg,
+      rgb(17 16 13 / 88%) 5%,
+      rgb(17 16 13 / 28%) 58%,
+      transparent 100%
+    );
+  }
+
+  .destination-journey-card__copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-content: end;
+    gap: 0.22rem;
+    min-height: clamp(14rem, 22vw, 19rem);
+    padding: var(--space-sm);
+  }
+
+  .destination-journey-card__copy small {
+    color: rgb(255 255 255 / 78%);
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+  }
+
+  .destination-journey-card__copy strong {
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 1rem + 0.7vw, 1.7rem);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .destination-journey-card__copy > span {
+    color: rgb(255 255 255 / 82%);
+    font-family: var(--font-serif);
+    font-size: 0.82rem;
+  }
+
+  .destination-journey-card__copy b {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.2rem;
+    color: #fff;
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+
+  .destination-journey-card__copy b i {
+    display: block;
+    width: 2.8rem;
+    height: 1px;
+    background: rgb(255 255 255 / 68%);
+  }
+
+  .destination-directory {
+    padding-top: var(--space-sm);
+  }
+
+  .destination-directory .destination-section-heading {
+    margin-bottom: var(--space-lg);
+  }
+
   /* /collections ----------------------------------------------------- */
   .collections-hero {
     display: grid;
@@ -1389,6 +1843,17 @@
     .gallery-hero {
       grid-template-columns: minmax(0, 1fr);
     }
+    .destination-intro {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: auto;
+      padding-top: var(--band-tight);
+    }
+    .destination-intro__side {
+      display: none;
+    }
+    .destination-map-frame {
+      min-height: clamp(22rem, 52vw, 30rem);
+    }
     .destination-masthead__mosaic,
     .collections-hero__visual,
     .gallery-hero__mosaic {
@@ -1407,6 +1872,14 @@
 
   /* The lightbox stacks: photo on top, description scrolling underneath. */
   @media (max-width: 52rem) {
+    .destination-journey-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .destination-journey-card:last-child {
+      grid-column: 1 / -1;
+    }
+
     .gallery-lightbox figure {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto minmax(0, 1fr);
@@ -1430,6 +1903,65 @@
 
     .gallery-lightbox figcaption {
       justify-self: stretch;
+    }
+  }
+
+  @media (max-width: 46rem) {
+    .destination-intro__copy h1 {
+      font-size: clamp(2.6rem, 12vw, 3.8rem);
+    }
+
+    .destination-map-frame {
+      min-height: auto;
+    }
+
+    .destination-index .world-map__stage {
+      aspect-ratio: 1.45 / 1;
+    }
+
+    .destination-index .world-map--featured .world-map__layout {
+      display: block;
+    }
+
+    .destination-map-feature,
+    .destination-map-feature__connector,
+    .destination-map-note {
+      display: none;
+    }
+
+    .destination-index .world-map__controls {
+      right: 0.2rem;
+      bottom: 0.25rem;
+    }
+
+    .destination-index .world-map--featured .world-map__controls {
+      right: 0.2rem;
+    }
+
+    .destination-recent__heading > div {
+      gap: 0.35rem 1rem;
+    }
+
+    .destination-recent__heading p {
+      flex-basis: 100%;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .destination-intro__copy h1 {
+      font-size: 2.55rem;
+    }
+
+    .destination-intro__stats {
+      font-size: 0.9rem;
+    }
+
+    .destination-journey-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .destination-journey-card:last-child {
+      grid-column: auto;
     }
   }
 
