@@ -54,10 +54,19 @@ export const apiUrl = (process.env.PUBLIC_API_URL ?? "https://api.tomokichidiary
   "",
 );
 
-/** Public Turnstile key. Empty disables the form rather than shipping it unprotected. */
+/**
+ * Public Turnstile key (widget `tomokichi-diary-contact`, which allows
+ * tomokichidiary.com and the workers.dev preview). A site key is public by
+ * design, so it lives here rather than only in the release environment: when it
+ * was env-only, a build that forgot the variable shipped without the form.
+ * `PUBLIC_TURNSTILE_SITE_KEY=""` still disables the form; dev uses Cloudflare's
+ * always-pass test key.
+ */
 const turnstileDevelopmentSiteKey = "1x00000000000000000000AA";
+const turnstileProductionSiteKey = "0x4AAAAAAEho0EBgaV1Hn_iT";
 export const turnstileSiteKey =
-  process.env.PUBLIC_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? turnstileDevelopmentSiteKey : "");
+  process.env.PUBLIC_TURNSTILE_SITE_KEY ??
+  (import.meta.env.DEV ? turnstileDevelopmentSiteKey : turnstileProductionSiteKey);
 
 export function absoluteUrl(path: string): string {
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;

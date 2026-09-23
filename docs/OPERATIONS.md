@@ -22,8 +22,7 @@ the same one the site has always shipped in:
 
 ```bash
 PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm media:build && \
-PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true \
-  PUBLIC_TURNSTILE_SITE_KEY=<site key> pnpm build && \
+PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm build && \
 pnpm media:sync && \
 pnpm db:migrate && \
 pnpm deploy:api && \
@@ -311,8 +310,9 @@ Three secrets gate it, and a missing one closes the form rather than opening it:
 | `IP_HASH_SALT`         | Salts the sender hash used for rate limiting |
 | `ADMIN_TOKEN`          | Guards reading the messages                  |
 
-The public site needs `PUBLIC_TURNSTILE_SITE_KEY` at build time; without it the
-form is not rendered at all.
+The public site key (widget `tomokichi-diary-contact`) is built in from
+`apps/web/src/lib/site.ts`; `PUBLIC_TURNSTILE_SITE_KEY` overrides it, and an
+empty value hides the form.
 
 Set `TURNSTILE_EXPECTED_HOSTNAME=tomokichidiary.com,www.tomokichidiary.com` in
 production so a valid token is also checked against an expected hostname and
