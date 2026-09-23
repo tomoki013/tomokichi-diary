@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T23:55:28.117Z",
+  "generatedAt": "2026-09-23T07:14:36.499Z",
   "migrated": 3,
   "pending": 111,
   "items": [
@@ -131,10 +131,10 @@
     },
     {
       "articleId": "57ceb9eb-0c4a-8c50-87e0-11b28602fd4c",
-      "revisionId": "01a0c665-5b8b-7daf-9a11-8d0c276690e9",
-      "title": "バトゥ洞窟観光ガイド｜入場料・行き方・現地で迷いやすいポイント",
+      "revisionId": "01a0cd1d-c701-76e4-8c1f-98a78a6ee455",
+      "title": "バトゥ洞窟は入場無料？料金・行き方・有料エリアの違いを実体験で解説",
       "path": "/posts/batu-caves-guide",
-      "suggestedQuickAnswer": "クアラルンプール近郊の定番観光地、バトゥ洞窟について体験ベースでまとめました。入場料（無料のメイン側と有料の別洞窟の違い）、KL Sentralからの電車での行き方、現地で迷いやすかったポイントを整理します。",
+      "suggestedQuickAnswer": "バトゥ洞窟のメイン洞窟は無料。有料のCave VillaやRamayana Caveとの違い、KL SentralからKTMでの行き方、営業時間、272段の階段、現地で迷った実体験まで解説します。",
       "status": "needs-human-review",
       "requiredChecks": [
         "本文から一次体験と一般情報を分離する",
@@ -145,10 +145,10 @@
     },
     {
       "articleId": "d0fd313b-fb9d-8d9f-966f-104048a85a2f",
-      "revisionId": "01a0c665-5bad-7652-8346-e71d0d3bdc91",
-      "title": "チャンギ空港の保安検査と液体持ち込み｜手荷物検査・空ボトルの注意点",
+      "revisionId": "01a0cd1d-c704-7854-afc6-0f1ff6b03a55",
+      "title": "チャンギ空港で水は持ち込める？保安検査・液体ルールと空ボトル持参を実体験で解説",
       "path": "/posts/changi-airport-liquids",
-      "suggestedQuickAnswer": "チャンギ空港では出発前に必ず保安検査（手荷物検査）があり、液体の持ち込みルールも把握しておいた方が安心です。ターミナルごとの検査場所、液体の扱い、空ボトル持参が便利だった理由を、実際に利用した体験ベースでまとめます。",
+      "suggestedQuickAnswer": "チャンギ空港で水や液体を機内へ持ち込めるのか、100mlルール、ターミナル1〜3の搭乗ゲート前保安検査、出国後に買った水、空ボトルと給水機の使い方を解説します。",
       "status": "needs-human-review",
       "requiredChecks": [
         "本文から一次体験と一般情報を分離する",
@@ -201,10 +201,10 @@
     },
     {
       "articleId": "b9cfc506-bee1-8d8a-91cd-faa61e377dae",
-      "revisionId": "01a0c665-5bb6-7763-8429-2bc4e15e88a4",
-      "title": "プトラモスク観光ガイド｜営業時間（見学時間）・行き方・ラマダン中の注意点",
+      "revisionId": "01a0cd1d-c716-7498-ae7a-6297f6738d12",
+      "title": "プトラモスク（ピンクモスク）の営業時間・行き方｜見学時間・礼拝時間・ラマダンの注意点",
       "path": "/posts/putra-mosque-guide",
-      "suggestedQuickAnswer": "クアラルンプール近郊の人気観光地、プトラモスク（ピンクモスク）について体験ベースで整理しました。営業時間（見学可能時間）、ラマダン中の注意点、駅からの行き方、現金のみのバス事情までまとめます。",
+      "suggestedQuickAnswer": "プトラモスク（ピンクモスク）の営業時間・見学時間、礼拝時間、ラマダン中の注意点、Putrajaya Sentralからの行き方、実際に利用したT523バスまで解説します。",
       "status": "needs-human-review",
       "requiredChecks": [
         "本文から一次体験と一般情報を分離する",
@@ -901,10 +901,10 @@
     },
     {
       "articleId": "7f6d920c-bc3f-8963-9a72-96ece1b62dbb",
-      "revisionId": "01a0c665-5b97-794a-8ac6-9330fbc213b5",
-      "title": "バンコクのローカルバス（赤バス）の乗り方｜タイのバス料金・乗車方法を実体験で解説",
+      "revisionId": "01a0cd1d-c6f9-7b0f-9b6a-896acdff2cc1",
+      "title": "バンコクの路線バスの乗り方完全ガイド｜料金・支払い・Googleマップ・赤バスを実体験解説",
       "path": "/posts/bangkok-localbus",
-      "suggestedQuickAnswer": "バンコクの交通費を抑えるなら、どこまで乗っても8バーツのローカルバス（赤バス）。Google Mapsでの路線の調べ方、手を挙げて乗る作法、車掌への料金の払い方、渋滞・ルート変更といった現地ならではの注意点まで、実際に乗って分かったことをまとめます。",
+      "suggestedQuickAnswer": "バンコクの路線バスの乗り方を実体験で解説。Googleマップでの調べ方、手を挙げて乗る方法、車内での料金支払い、8バーツの赤バス、渋滞や運休などの注意点までまとめます。",
       "status": "needs-human-review",
       "requiredChecks": [
         "本文から一次体験と一般情報を分離する",
@@ -1223,10 +1223,10 @@
     },
     {
       "articleId": "e961810f-344d-8b5d-9088-de69f0056f87",
-      "revisionId": "01a0c665-5ba7-7f0c-9f3e-b2ba48e3436a",
-      "title": "パリの電車・メトロの乗り方｜チケットの選び方とNavigo Easyの使い方",
+      "revisionId": "01a0cd1d-c713-781e-a77c-bf8f5f4572be",
+      "title": "パリのメトロ・電車・バスの乗り方｜切符の買い方とNavigo Easyを実体験で解説",
       "path": "/posts/paris-navigo-easy",
-      "suggestedQuickAnswer": "パリの電車（メトロ・RER）・バスの乗り方と、チケットの違い、旅行者がどれを選ぶべきかを整理しました。短期滞在の軸になる交通系ICカード「Navigo Easy」の購入・チャージ・改札での使い方を中心に、実際に使った経験からまとめています。",
+      "suggestedQuickAnswer": "パリのメトロ・RER・電車・バスの乗り方と2026年の料金、切符の買い方、Navigo Easy、iPhoneでの乗車方法、短期旅行でのチケット選びを実体験で解説します。",
       "status": "needs-human-review",
       "requiredChecks": [
         "本文から一次体験と一般情報を分離する",

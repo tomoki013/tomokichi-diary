@@ -26,6 +26,9 @@ interface Step {
   optional?: boolean;
 }
 
+/** SGR colour codes, which some CI runners force on. */
+const ANSI_ESCAPE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
 const STEPS: Step[] = [
   {
     name: "format",
@@ -110,7 +113,10 @@ const STEPS: Step[] = [
     command: "pnpm",
     args: ["exec", "vitest", "run", "--reporter=dot"],
     rerun: "pnpm test",
-    interpret: (output) => {
+    interpret: (raw) => {
+      // GitHub Actions gets a coloured summary; the escapes sit between
+      // "Tests" and the counts, so they go before matching.
+      const output = raw.replace(ANSI_ESCAPE, "");
       const match = /Tests\s+(?:(\d+) failed \| )?(\d+) passed/.exec(output);
       const failed = match?.[1] ? Number(match[1]) : 0;
       const passed = match?.[2] ? Number(match[2]) : 0;

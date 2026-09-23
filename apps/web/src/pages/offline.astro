@@ -1,0 +1,89 @@
+---
+import type { Route } from "@tomokichi/domain";
+import { buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { seoConfig } from "../lib/site";
+
+/**
+ * What the service worker (`public/sw.js`) shows when a page cannot be fetched
+ * and was never read on this device. It is cached at install, so it carries no
+ * media -- the media origin is unreachable offline anyway.
+ */
+const metadata = buildPageMetadata(seoConfig, {
+  title: "オフラインです",
+  description: "インターネットに接続されていません。接続が戻ると、そのまま旅の記録を読めます。",
+  route: { path: "/offline" } as Route,
+  noindex: true,
+});
+---
+
+<BaseLayout metadata={metadata}>
+  <div class="error-page">
+    <section class="error-page__hero error-page__hero--text">
+      <div class="error-page__copy">
+        <p class="error-page__code"><strong>Offline</strong><span>No connection</span></p>
+        <h1>いまは電波の届かない場所にいるようです。</h1>
+        <p>
+          インターネットに接続されていません。接続が戻ったら、もう一度読み込んでください。この端末で一度開いた記事は、オフラインでも読めます。
+        </p>
+        <div class="error-page__actions">
+          <button type="button" class="button" data-offline-retry>
+            再読み込み <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="offline-saved-heading" data-offline-saved hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">READ OFFLINE</p>
+          <h2 id="offline-saved-heading">オフラインで読めるページ</h2>
+        </div>
+      </div>
+      <ul class="offline-list" data-offline-list></ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  document
+    .querySelector("[data-offline-retry]")
+    ?.addEventListener("click", () => window.location.reload());
+
+  const section = document.querySelector<HTMLElement>("[data-offline-saved]");
+  const list = document.querySelector<HTMLUListElement>("[data-offline-list]");
+  const siteSuffix = /｜ともきちの旅行日記$/;
+
+  async function showSaved(): Promise<void> {
+    if (!("caches" in window) || !section || !list) return;
+    const cacheName = (await caches.keys()).find((key) => key.startsWith("td-pages-"));
+    if (!cacheName) return;
+    const cache = await caches.open(cacheName);
+    // Most recently read first.
+    const requests = (await cache.keys()).toReversed();
+    const items = await Promise.all(
+      requests.map(async (request) => {
+        const response = await cache.match(request);
+        const html = response ? await response.text() : "";
+        const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? "";
+        const parsed = new DOMParser().parseFromString(title, "text/html");
+        return { url: new URL(request.url).pathname, title: parsed.documentElement.textContent };
+      }),
+    );
+    for (const { url, title } of items) {
+      if (url === "/offline" || !title) continue;
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = url;
+      link.textContent = title.replace(siteSuffix, "");
+      item.append(link);
+      list.append(item);
+    }
+    if (list.childElementCount > 0) section.hidden = false;
+  }
+
+  void showSaved().catch(() => {
+    // An unreadable cache just means there is nothing to offer.
+  });
+</script>

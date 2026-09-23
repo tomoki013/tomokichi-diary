@@ -36,6 +36,18 @@ export function mediaUrl(storageKey: string): string {
   return `${mediaBaseUrl}/${storageKey.replace(/^\/+/, "")}`;
 }
 
+/**
+ * GA4 property carried over from the previous site, so the history continues
+ * across the cutover. Measurement only runs on these hostnames: a workers.dev
+ * preview, a local build and Lighthouse all ship the same HTML but must not
+ * report into the production property.
+ */
+export const gaMeasurementId = process.env.PUBLIC_GA_MEASUREMENT_ID ?? "G-BZJ1EDMYTZ";
+export const analyticsHostnames = ["tomokichidiary.com", "www.tomokichidiary.com"];
+
+/** AdSense publisher (the same one `public/ads.txt` authorises). No ad script is loaded. */
+export const adsenseClient = "ca-pub-8687520805381056";
+
 /** The API origin the contact form posts to. */
 export const apiUrl = (process.env.PUBLIC_API_URL ?? "https://api.tomokichidiary.com").replace(
   /\/+$/,

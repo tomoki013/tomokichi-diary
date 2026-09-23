@@ -966,6 +966,35 @@
     gap: var(--space-lg);
   }
 
+  /* The offline page has no photograph to pair with: the media origin is
+     unreachable by definition. */
+  .error-page__hero--text {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .offline-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 0 var(--space-lg);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .offline-list a {
+    display: block;
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-size: var(--step-small);
+    line-height: 1.6;
+    text-decoration: none;
+  }
+
+  .offline-list a:hover {
+    color: var(--accent);
+  }
+
   .error-page__copy {
     display: grid;
     justify-items: start;
