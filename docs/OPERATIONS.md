@@ -231,6 +231,13 @@ pnpm export:data && pnpm legacy:export   # legacy:export until the cutover
 then commit `export/` (and the legacy repository) and release as usual
 (`pnpm db:seed` puts the new revision into D1).
 
+`db:seed` upserts on each table's primary key (`scripts/lib/seed-sql.ts`), so
+it is safe to rerun against production: rows the export does not carry --
+reader likes, contact messages, admin drafts -- are left alone. It must never
+go back to `INSERT OR REPLACE`: REPLACE deletes before inserting, and the
+`ON DELETE CASCADE` on `article_likes` and the revision tables turns that into
+a wipe (`scripts/lib/__tests__/seed-sql.test.ts` fails if it does).
+
 ### `CONTENT_PARITY_MISMATCH` (temporary, until the cutover)
 
 The previous Next.js site (`../travel-diary`, or `LEGACY_REPO`) serves an
