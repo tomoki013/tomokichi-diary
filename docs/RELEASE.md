@@ -42,7 +42,7 @@ migration は旧 API が動いている間に当たる。だから expand/contra
 
 `audit/diary-2.0-full-audit.md` §12 の Phase 0〜3。要約:
 
-1. Phase 0: og:image 修正（済）、GA4、Search Console の確認タグ、URL 移動の判断（GSC データが要る）。
+1. Phase 0: og:image 修正（済）、GA4（済・本番ホスト名のみで計測）、ads.txt / sw.js の引き継ぎ（済）、お問い合わせフォームの Turnstile site key、Search Console の確認（DNS 方式なら不要）、URL 移動の判断（GSC データが要る）。
 2. Phase 2: DNS の apex/www を `tomokichi-diary-web` の custom domain へ。Netlify はドメインを外すだけで 30 日残す。
 3. `pnpm verify:live https://tomokichidiary.com` → GSC で sitemap 再送信 → GA4 のリアルタイム。
 4. Phase 3: 30 日観測。切り戻しは DNS を戻す（5 分）。

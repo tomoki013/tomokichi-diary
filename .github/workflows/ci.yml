@@ -45,4 +45,7 @@ jobs:
         with:
           name: ci-artifacts
           path: .artifacts/
+          # upload-artifact v4+ skips dot-directories unless told otherwise,
+          # so without this the run uploaded nothing.
+          include-hidden-files: true
           retention-days: 14

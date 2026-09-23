@@ -22,7 +22,8 @@ the same one the site has always shipped in:
 
 ```bash
 PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm media:build && \
-PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm build && \
+PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true \
+  PUBLIC_TURNSTILE_SITE_KEY=<site key> pnpm build && \
 pnpm media:sync && \
 pnpm db:migrate && \
 pnpm deploy:api && \
@@ -260,6 +261,32 @@ originals and derivatives, skipping anything already sent.
 If an image 404s on the site, check in order: the file exists under `media/`,
 `pnpm media:build` produced its derivatives, and `pnpm media:sync` reported no
 failures. `LINK_INTERNAL_BROKEN` catches all three before a deploy.
+
+## Browser
+
+### Service worker
+
+`apps/web/public/sw.js` is hand-written and deliberately small: pages are
+network-first (the cached copy is only read offline, so a republish is visible
+immediately), `/_astro/*` is cache-first because it is immutable, and media and
+everything else are left to the browser. Install fetches only `/offline` and
+its stylesheet. Caches are bounded (40 pages, 60 assets).
+
+To change caching behaviour, bump `VERSION` in `sw.js`: activate deletes every
+cache that is not the current version's. To take the worker out entirely,
+replace `sw.js` with a worker that unregisters itself -- never delete the file,
+a 404 leaves the old worker running for returning visitors.
+
+### Analytics and ads
+
+GA4 (`G-BZJ1EDMYTZ`, the previous site's property) loads only on
+`tomokichidiary.com` / `www.`, after `load` and on idle, so previews, local
+builds and Lighthouse never report into it or pay for it. Semantic events go
+through `trackSemanticEvent` (`apps/web/src/lib/analytics.ts`) as
+`gtag("event", …)`.
+
+AdSense: `public/ads.txt` and the `google-adsense-account` meta are shipped.
+No ad script is loaded.
 
 ## API
 

@@ -42,8 +42,11 @@ const add = (code: Finding["code"], target: string, message?: string): void => {
   findings.push({ code, target, message, rerun: "pnpm check:seo" });
 };
 
+/** Served by the platform (404) or the service worker (offline), never by a route. */
+const SYSTEM_PAGES = new Set(["/404", "/offline"]);
+
 for (const page of pages) {
-  if (page.path === "/404") continue;
+  if (SYSTEM_PAGES.has(page.path)) continue;
   const seo = readSeo(readBuiltPage(page));
   const route = table.find(page.path);
 

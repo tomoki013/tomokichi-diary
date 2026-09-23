@@ -1,7 +1,13 @@
 ---
 import "../styles/app.css";
 import { serializeJsonLd, type JsonLd, type PageMetadata } from "@tomokichi/seo";
-import { mediaBaseUrl, seoConfig } from "../lib/site";
+import {
+  adsenseClient,
+  analyticsHostnames,
+  gaMeasurementId,
+  mediaBaseUrl,
+  seoConfig,
+} from "../lib/site";
 import {
   BookIcon,
   MapPinIcon,
@@ -88,6 +94,8 @@ const footerPhoto = {
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f8f5ef" />
+    <meta name="google-adsense-account" content={adsenseClient} />
     <link rel="alternate" type="application/rss+xml" title={seoConfig.siteName} href="/rss.xml" />
     {
       Object.entries(metadata.openGraph).map(([property, content]) => (
@@ -104,6 +112,34 @@ const footerPhoto = {
         <script type="application/ld+json" set:html={serializeJsonLd(node)} />
       ))
     }
+    {
+      /* GA4, on the production hostname only. The queue is defined up front
+        so events fired early are kept; gtag.js itself is fetched once the page
+        has loaded and the main thread is idle, so it never competes with the
+        page for bandwidth or blocks first paint. */
+    }
+    <script is:inline define:vars={{ gaMeasurementId, analyticsHostnames }}>
+      function loadGtag() {
+        const script = document.createElement("script");
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
+        document.head.append(script);
+      }
+      function loadGtagWhenIdle() {
+        if ("requestIdleCallback" in window) requestIdleCallback(loadGtag, { timeout: 4000 });
+        else setTimeout(loadGtag, 1500);
+      }
+      if (analyticsHostnames.includes(location.hostname)) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag("js", new Date());
+        window.gtag("config", gaMeasurementId);
+        if (document.readyState === "complete") loadGtagWhenIdle();
+        else addEventListener("load", loadGtagWhenIdle, { once: true });
+      }
+    </script>
   </head>
   <body>
     <div class="shell">
@@ -374,6 +410,21 @@ const footerPhoto = {
         document.cookie = `${cookieConsentKey}=accepted; Max-Age=31536000; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
         if (cookieBanner) cookieBanner.hidden = true;
       });
+
+      // The worker is registered after load so its install (the offline page
+      // and its stylesheet) never competes with the first visit. Dev builds
+      // skip it: a caching worker on localhost only hides edits.
+      if ("serviceWorker" in navigator && !import.meta.env.DEV) {
+        addEventListener(
+          "load",
+          () => {
+            navigator.serviceWorker.register("/sw.js").catch(() => {
+              // No worker simply means no offline reading.
+            });
+          },
+          { once: true },
+        );
+      }
 
       const setScrollLock = (key: string, locked: boolean) => {
         if (locked) scrollLocks.add(key);
