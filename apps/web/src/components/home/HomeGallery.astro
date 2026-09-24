@@ -34,33 +34,28 @@ const photos = [...content.withExperience("unforgettable"), ...content.withExper
       },
     ];
   })
-  .slice(0, 9);
-// The wide photo takes a 2×2 block of a four-column grid, so 5 or 9 photos
-// fill whole rows; anything in between leaves a hole in the last one.
-const shown = photos.slice(0, photos.length >= 9 ? 9 : 5);
+  .slice(0, 8);
 ---
 
 {
-  shown.length >= 5 && (
+  photos.length >= 4 && (
     <section class="home-gallery" aria-labelledby="home-gallery-title">
       <header class="section-heading">
         <div>
           <p class="eyebrow">PHOTO JOURNAL</p>
-          <h2 id="home-gallery-title">写真で、旅の空気を</h2>
+          <h2 id="home-gallery-title">ギャラリー</h2>
           <p>言葉より先に伝わるもの。気になった一枚から、その旅の話へ。</p>
         </div>
-        <a href="/gallery">ギャラリーをもっと見る&nbsp; →</a>
+        <a href="/gallery">すべて&nbsp; →</a>
       </header>
-      <ul class="home-gallery__mosaic">
-        {shown.map((item, index) => (
-          <li class:list={[index === 0 && "is-wide"]}>
+      <ul class="home-gallery__grid">
+        {photos.map((item, index) => (
+          <li class:list={[index >= 4 && "is-extra"]}>
             <a href={item.path}>
               <Picture
                 storageKey={item.photo.asset.storageKey}
                 alt={item.photo.usage.alt}
-                sizes={
-                  index === 0 ? "(max-width: 760px) 100vw, 560px" : "(max-width: 760px) 50vw, 280px"
-                }
+                sizes="(max-width: 760px) 50vw, 280px"
               />
               <span class="home-gallery__caption">
                 {item.place && <small>{item.place}</small>}

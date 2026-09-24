@@ -61,7 +61,12 @@ const published = view.article.publishedAt?.slice(0, 10);
     <ExperienceChips tags={view.article.experienceTags} />
     <div class="card__footer">
       {published && <time datetime={published}>{published}</time>}
-      <LikeButton articleId={view.article.id} compact />
+      <LikeButton
+        articleId={view.article.id}
+        compact
+        title={view.revision.title}
+        path={view.route.path}
+      />
     </div>
   </div>
 </li>

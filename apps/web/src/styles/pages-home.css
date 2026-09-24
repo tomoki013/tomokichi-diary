@@ -17,6 +17,7 @@
 
   .home > section,
   .home > aside {
+    min-width: 0;
     padding-block: var(--band);
   }
 
@@ -316,222 +317,188 @@
     font-family: var(--font-hand);
   }
 
-  /* 2. Find a story by feeling ----------------------------------------- */
-  .home-picker__heading {
+  /* 2. Find a story ------------------------------------------------- */
+  .home-picker {
     display: grid;
-    gap: 0.4rem;
-    margin-bottom: var(--space-md);
+    justify-items: center;
+    gap: var(--space-md);
+    text-align: center;
   }
 
-  .home-picker__heading h2 {
-    font-size: clamp(1.45rem, 1.1rem + 1.4vw, 2.15rem);
+  .home-picker h2 {
+    font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.9rem);
   }
 
-  .home-picker__heading > p:not(.eyebrow) {
+  .home-picker__search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: min(100%, 36rem);
+    padding: 0.25rem 0.3rem 0.25rem 1rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 0.9rem 1.1rem 0.8rem 1rem;
+    background: var(--surface);
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: box-shadow var(--speed) var(--ease);
+  }
+
+  .home-picker__search:focus-within {
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+
+  .home-picker__search svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
     color: var(--ink-soft);
+  }
+
+  .home-picker__search input {
+    flex: 1;
+    min-width: 0;
+    padding-block: 0.7rem;
+    border: 0;
+    background: none;
+  }
+
+  .home-picker__search input:focus-visible {
+    outline: none;
+  }
+
+  .home-picker__search button {
+    flex: none;
+    min-height: 2.5rem;
+    padding-inline: 1.3rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: var(--accent);
+    color: #fff;
     font-size: var(--step-small);
   }
 
-  .home-picker__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
-    gap: var(--space-sm);
+  .home-picker__search button:hover {
+    background: var(--accent-strong);
+  }
+
+  /* Hand-cut stickers: a solid ink border and a hard shadow, each one set at
+     its own slight angle. */
+  .home-picker__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem 0.55rem;
+    max-width: 44rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .home-picker__tile {
-    --tile-ink: hsl(var(--exp-hue) 48% 32%);
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+  .home-picker__chip {
+    display: inline-flex;
     align-items: center;
-    gap: 0.9rem;
-    height: 100%;
-    padding: 0.9rem 1rem;
-    border: 1.5px dashed hsl(var(--exp-hue) 42% 74%);
-    border-radius: var(--radius-lg);
-    background:
-      radial-gradient(circle at 100% 0%, hsl(var(--exp-hue) 70% 95%) 0 35%, transparent 36%),
-      var(--surface);
+    gap: 0.35rem;
+    padding: 0.45rem 0.95rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 0.55rem 0.7rem 0.5rem 0.75rem;
+    background: hsl(var(--exp-hue) 75% 94%);
+    box-shadow: 2px 2px 0 var(--ink);
     color: var(--ink);
+    font-size: var(--step-small);
     text-decoration: none;
-    transform: rotate(calc(var(--tilt) * 0.45deg));
+    transform: rotate(calc(var(--tilt) * 1.2deg));
     transition:
       transform var(--speed) var(--ease),
-      box-shadow var(--speed) var(--ease),
-      border-color var(--speed) var(--ease);
+      box-shadow var(--speed) var(--ease);
   }
 
-  .home-picker__tile:hover,
-  .home-picker__tile:focus-visible {
-    border-style: solid;
-    border-color: hsl(var(--exp-hue) 45% 58%);
-    box-shadow: var(--shadow);
-    transform: rotate(0) translateY(-2px);
+  .home-picker__chip > span {
+    color: hsl(var(--exp-hue) 55% 38%);
   }
 
-  /* A small polaroid: the newest photo carrying this feeling. */
-  .home-picker__face {
-    display: block;
-    width: 4.4rem;
-    padding: 0.22rem 0.22rem 0.6rem;
-    background: #fff;
-    box-shadow: var(--shadow-sm);
-    transform: rotate(calc(var(--tilt) * -3deg));
-  }
-
-  .home-picker__face img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-
-  .home-picker__copy {
-    display: grid;
-    gap: 0.15rem;
-    min-width: 0;
-  }
-
-  .home-picker__copy strong {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    color: var(--tile-ink);
-    font-family: var(--font-serif);
-    font-size: 1.28rem;
-    line-height: 1.3;
-  }
-
-  .home-picker__mark {
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-  }
-
-  .home-picker__copy > span {
-    color: var(--ink-soft);
-    font-size: var(--step-tiny);
-    line-height: 1.6;
-  }
-
-  .home-picker__copy small {
-    justify-self: start;
-    margin-top: 0.2rem;
-    padding: 0.05rem 0.5rem;
-    border: 1px solid hsl(var(--exp-hue) 40% 80%);
-    border-radius: 999px;
-    color: var(--tile-ink);
+  .home-picker__chip small {
+    color: var(--ink-faint);
     font-family: var(--font-label);
     font-size: 0.7rem;
   }
 
-  .home-picker__else {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-sm) var(--space-md);
-    margin-top: var(--space-md);
+  .home-picker__chip:hover,
+  .home-picker__chip:focus-visible {
+    box-shadow: 3px 4px 0 var(--ink);
+    transform: rotate(0) translateY(-2px);
   }
 
-  .home-picker__else form {
-    display: flex;
-    flex: 1 1 22rem;
-    align-items: center;
-    gap: 0.6rem;
-    max-width: 32rem;
-    padding: 0.2rem 0.25rem 0.2rem 0.9rem;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-pill);
-    background: var(--surface);
-    transition:
-      border-color var(--speed) var(--ease),
-      box-shadow var(--speed) var(--ease);
-  }
-
-  .home-picker__else form:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
-  }
-
-  .home-picker__else svg {
-    width: 1rem;
-    height: 1rem;
-    flex: none;
+  /* 3. Best episodes: one big photo at a time --------------------------- */
+  .home-best__counter {
     color: var(--ink-faint);
-  }
-
-  .home-picker__else input {
-    flex: 1;
-    min-width: 0;
-    padding-block: 0.55rem;
-    border: 0;
-    background: none;
+    font-family: var(--font-label);
     font-size: var(--step-small);
+    letter-spacing: 0.1em;
   }
 
-  .home-picker__else input:focus-visible {
-    outline: none;
+  .home-best__stage {
+    position: relative;
   }
 
-  .home-picker__else button {
-    flex: none;
-    min-height: 2.2rem;
-    padding-inline: 1.1rem;
-    border: 0;
-    border-radius: var(--radius-pill);
-    background: var(--ink);
-    color: var(--on-dark);
-    font-size: var(--step-tiny);
-  }
-
-  .home-picker__else button:hover {
-    background: var(--accent-strong);
-  }
-
-  .home-picker__else > a {
-    font-size: var(--step-small);
-    text-decoration: none;
-  }
-
-  .home-picker__else > a:hover {
-    text-decoration: underline;
-  }
-
-  /* 3. Best episodes --------------------------------------------------- */
-  .home-best__layout {
+  .home-best__track {
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    align-items: start;
+    grid-auto-columns: 100%;
+    grid-auto-flow: column;
+    overflow-x: auto;
+    margin: 0;
+    padding: 1rem 0 0.5rem;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .home-best__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-best__slide {
+    scroll-snap-align: start;
+    padding-inline: 3.2rem;
+  }
+
+  .home-best__slide > a {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: center;
     gap: var(--space-lg);
-  }
-
-  .home-best__lead {
-    display: grid;
-    gap: var(--space-md);
     color: var(--ink);
     text-decoration: none;
   }
 
-  /* A print taped into the diary rather than a full-bleed banner: the photo
-     is the story's, the frame is the author's. */
+  /* A print taped into the diary rather than a banner. */
   .home-best__photo {
     position: relative;
     display: block;
-    padding: 0.55rem 0.55rem 1.6rem;
+    padding: 0.55rem 0.55rem 1.8rem;
     background: #fff;
     box-shadow: var(--shadow-lg);
     transform: rotate(-0.8deg);
     transition: transform 400ms var(--ease);
   }
 
-  .home-best__lead:hover .home-best__photo {
+  .home-best__slide:nth-child(even) .home-best__photo {
+    transform: rotate(0.8deg);
+  }
+
+  .home-best__slide > a:hover .home-best__photo {
     transform: rotate(0);
   }
 
   .home-best__photo img {
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
+  }
+
+  .home-best__on-photo {
+    position: absolute;
+    bottom: 2.4rem;
+    left: 1.2rem;
   }
 
   .home-best__tape,
@@ -546,37 +513,28 @@
     transform: translateX(-50%) rotate(-3deg);
   }
 
-  .home-best__copy,
-  .home-best__item {
+  .home-best__copy {
     display: grid;
     justify-items: start;
-    gap: 0.45rem;
+    gap: 0.55rem;
     min-width: 0;
   }
 
-  .home-best__number {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-  }
-
-  .home-best__copy small,
-  .home-best__item small {
+  .home-best__copy small {
     color: var(--ink-faint);
     font-size: var(--step-tiny);
   }
 
   .home-best__copy strong {
     font-family: var(--font-serif);
-    font-size: clamp(1.35rem, 1.05rem + 1.2vw, 1.95rem);
+    font-size: clamp(1.3rem, 1.05rem + 1vw, 1.8rem);
     line-height: 1.45;
   }
 
   .home-best__hook {
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.9;
+    line-height: 1.95;
   }
 
   .home-best__copy b {
@@ -585,83 +543,66 @@
     font-weight: 500;
   }
 
-  .home-best__lead:hover b {
+  .home-best__slide > a:hover b {
     text-decoration: underline;
   }
 
-  .home-best__list {
+  .home-best__arrow {
+    position: absolute;
+    top: 50%;
     display: grid;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .home-best__list li + li {
-    border-top: 1px dashed var(--line-strong);
-  }
-
-  .home-best__list a {
-    display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: 1rem;
-    padding-block: 1rem;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 2px 2px 0 var(--ink);
     color: var(--ink);
-    text-decoration: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    transform: translateY(-50%);
   }
 
-  .home-best__list li:first-child a {
-    padding-top: 0;
+  .home-best__arrow:hover {
+    background: var(--accent-tint);
   }
 
-  .home-best__thumb {
-    display: block;
-    padding: 0.25rem 0.25rem 0.7rem;
-    background: #fff;
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--speed) var(--ease);
+  .home-best__arrow--prev {
+    left: 0;
   }
 
-  .home-best__list li:nth-child(odd) .home-best__thumb {
-    transform: rotate(1.6deg);
+  .home-best__arrow--next {
+    right: 0;
   }
 
-  .home-best__list li:nth-child(even) .home-best__thumb {
-    transform: rotate(-1.4deg);
+  /* 4. Latest: a row that scrolls sideways ------------------------------ */
+  .home-latest__row,
+  .home-picks__row {
+    display: grid;
+    grid-auto-flow: column;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    margin: 0;
+    padding: 0.2rem 0.2rem 1rem;
+    list-style: none;
+    scroll-snap-type: x proximity;
+    scrollbar-color: var(--line-strong) transparent;
+    scrollbar-width: thin;
   }
 
-  .home-best__list a:hover .home-best__thumb {
-    transform: rotate(0);
+  .home-latest__row {
+    grid-auto-columns: minmax(15rem, 17rem);
   }
 
-  .home-best__thumb img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
+  .home-latest__row > li {
+    scroll-snap-align: start;
   }
 
-  .home-best__item strong {
-    font-family: var(--font-serif);
-    font-size: 1.05rem;
-    line-height: 1.5;
-  }
-
-  .home-best__list a:hover strong {
-    color: var(--accent-strong);
-  }
-
-  .home-best__item .home-best__hook {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+  .home-scroll-hint {
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
     font-size: var(--step-tiny);
-    line-height: 1.75;
-  }
-
-  /* 4. Latest ---------------------------------------------------------- */
-  .home-card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
   }
 
   /* 5. Footprints map -------------------------------------------------- */
@@ -799,42 +740,40 @@
     text-decoration: underline;
   }
 
-  /* 6. Tomokichi's picks ----------------------------------------------- */
-  .home-picks__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    gap: var(--space-sm);
+  /* 6. Tomokichi's ranking: notebook pages in a sideways row ------------ */
+  .home-picks__row {
+    grid-auto-columns: minmax(16rem, 19rem);
   }
 
-  /* Each board is a page from a notebook: a margin rule, a note beside the
-     title. */
   .home-picks__board {
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 0.6rem;
-    padding: var(--space-sm) var(--space-sm) var(--space-md) calc(var(--space-sm) + 0.6rem);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-sm) + 0.7rem);
+    border: 1.5px solid var(--ink);
+    border-radius: 0.6rem 0.9rem 0.7rem 0.8rem;
     background:
       linear-gradient(
           90deg,
-          transparent 0.55rem,
-          var(--accent-line) 0.55rem calc(0.55rem + 1.5px),
-          transparent calc(0.55rem + 1.5px)
+          transparent 0.6rem,
+          var(--accent-line) 0.6rem calc(0.6rem + 1.5px),
+          transparent calc(0.6rem + 1.5px)
         )
         no-repeat,
       var(--surface);
+    box-shadow: 3px 3px 0 var(--ink);
+    scroll-snap-align: start;
   }
 
   .home-picks__board header {
     display: grid;
-    gap: 0.1rem;
+    gap: 0.15rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 1.5px solid var(--ink);
   }
 
   .home-picks__board h3 {
-    font-size: 1.08rem;
+    font-size: 0.98rem;
   }
 
   .home-picks__note {
@@ -847,7 +786,6 @@
   .home-picks__board ol {
     display: grid;
     align-content: start;
-    gap: 0.35rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -855,43 +793,27 @@
 
   .home-picks__board ol a {
     display: grid;
-    grid-template-columns: 1.6rem 3.1rem minmax(0, 1fr);
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.35rem 0.2rem;
-    border-radius: var(--radius-sm);
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.3rem;
+    padding: 0.45rem 0.2rem;
+    border-bottom: 1px dashed var(--line);
     color: var(--ink);
     text-decoration: none;
-    transition: background var(--speed) var(--ease);
   }
 
-  .home-picks__board ol a:hover {
-    background: color-mix(in srgb, var(--accent-tint) 70%, transparent);
+  .home-picks__board ol a:hover .home-picks__title {
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   .home-picks__rank {
-    display: grid;
-    place-items: center;
-    width: 1.6rem;
-    height: 1.6rem;
-    border: 1.5px solid var(--ink);
-    border-radius: 50% 45% 52% 48%;
     font-family: var(--font-serif);
-    font-size: 0.9rem;
-    line-height: 1;
+    font-size: 1.05rem;
   }
 
   .home-picks__board li:first-child .home-picks__rank {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: #fff;
-  }
-
-  .home-picks__thumb img {
-    width: 3.1rem;
-    aspect-ratio: 1;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
+    color: var(--accent);
   }
 
   .home-picks__title {
@@ -901,7 +823,7 @@
     -webkit-line-clamp: 2;
     line-clamp: 2;
     font-size: var(--step-tiny);
-    line-height: 1.6;
+    line-height: 1.65;
   }
 
   .home-picks__more {
@@ -914,45 +836,39 @@
     text-decoration: underline;
   }
 
-  /* 7. Photo journal --------------------------------------------------- */
-  .home-gallery__mosaic {
+  /* 7. Gallery --------------------------------------------------------- */
+  .home-gallery__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: 11rem;
-    gap: 0.5rem;
+    gap: 0.6rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .home-gallery__mosaic li.is-wide {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-
-  .home-gallery__mosaic a {
+  .home-gallery__grid a {
     position: relative;
     display: block;
-    height: 100%;
     overflow: hidden;
-    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--ink);
+    border-radius: 0.5rem 0.7rem 0.6rem 0.4rem;
     color: var(--on-dark);
     text-decoration: none;
   }
 
-  .home-gallery__mosaic picture,
-  .home-gallery__mosaic img {
+  .home-gallery__grid picture,
+  .home-gallery__grid img {
     display: block;
     width: 100%;
-    height: 100%;
   }
 
-  .home-gallery__mosaic img {
+  .home-gallery__grid img {
+    aspect-ratio: 1;
     object-fit: cover;
     transition: transform 600ms var(--ease);
   }
 
-  .home-gallery__mosaic a:hover img {
+  .home-gallery__grid a:hover img {
     transform: scale(1.05);
   }
 
@@ -961,15 +877,12 @@
     inset: auto 0 0;
     display: grid;
     gap: 0.1rem;
-    padding: 1.8rem 0.8rem 0.65rem;
+    padding: 1.8rem 0.7rem 0.6rem;
     background: linear-gradient(0deg, rgb(18 16 12 / 82%), transparent);
     font-size: var(--step-tiny);
     line-height: 1.5;
     opacity: 0;
-    transform: translateY(0.4rem);
-    transition:
-      opacity var(--speed) var(--ease),
-      transform var(--speed) var(--ease);
+    transition: opacity var(--speed) var(--ease);
   }
 
   .home-gallery__caption small {
@@ -986,35 +899,52 @@
     line-clamp: 2;
   }
 
-  .home-gallery__mosaic a:hover .home-gallery__caption,
-  .home-gallery__mosaic a:focus-visible .home-gallery__caption,
-  .home-gallery__mosaic li.is-wide .home-gallery__caption {
+  .home-gallery__grid a:hover .home-gallery__caption,
+  .home-gallery__grid a:focus-visible .home-gallery__caption {
     opacity: 1;
-    transform: none;
   }
 
   /* 8. About ----------------------------------------------------------- */
-  .home-about {
-    position: relative;
+  .home-about__body {
     display: grid;
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: var(--space-xl);
-    padding-right: 9rem;
+    gap: var(--space-lg);
   }
 
-  .home-about__photo {
-    position: relative;
-    padding: 0.55rem 0.55rem 1.7rem;
-    background: #fff;
-    box-shadow: var(--shadow-lg);
-    transform: rotate(-2deg);
+  .home-about__doodle {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    color: var(--ink);
   }
 
-  .home-about__photo img {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
+  .home-about__caption {
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: var(--step-tiny);
+    transform: rotate(-4deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .home-about__doodle svg {
+      transform-origin: 50% 85%;
+      animation: doodle-nod 5s var(--ease) infinite;
+    }
+  }
+
+  @keyframes doodle-nod {
+    0%,
+    75%,
+    100% {
+      transform: rotate(0);
+    }
+    82% {
+      transform: rotate(-5deg);
+    }
+    90% {
+      transform: rotate(3deg);
+    }
   }
 
   .home-about__copy {
@@ -1023,12 +953,8 @@
     gap: 0.7rem;
   }
 
-  .home-about__copy h2 {
-    font-size: var(--step-h2);
-  }
-
-  .home-about__copy > p:not(.eyebrow) {
-    max-width: 36rem;
+  .home-about__copy > p {
+    max-width: 38rem;
     color: var(--ink-soft);
     font-size: var(--step-small);
     line-height: 1.95;
@@ -1037,13 +963,12 @@
   .home-about__stance {
     display: grid;
     gap: 0.35rem;
-    margin: 0.2rem 0 0.3rem;
+    margin: 0;
     padding: 0;
     list-style: none;
     font-size: var(--step-small);
   }
 
-  /* Hand-ticked boxes. */
   .home-about__stance li {
     position: relative;
     padding-left: 1.7rem;
@@ -1072,65 +997,10 @@
     transform: rotate(40deg);
   }
 
-  .home-about__copy > a {
-    font-size: var(--step-small);
-    text-decoration: none;
-  }
-
-  .home-about__copy > a:hover {
-    text-decoration: underline;
-  }
-
-  .home-about__buddy {
-    position: absolute;
-    right: 0;
-    bottom: var(--band);
-    display: grid;
-    justify-items: center;
-    color: var(--ink);
-  }
-
-  .home-about__bubble {
-    position: relative;
-    margin-bottom: 0.4rem;
-    padding: 0.35rem 0.8rem;
-    border: 1.5px solid var(--ink);
-    border-radius: 1rem 1rem 1rem 0.2rem;
-    background: var(--surface);
-    font-size: 0.85rem;
-    transform: rotate(-3deg);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .home-about__buddy svg {
-      transform-origin: 50% 90%;
-      animation: buddy-tilt 4s var(--ease) infinite;
-    }
-  }
-
-  @keyframes buddy-tilt {
-    0%,
-    70%,
-    100% {
-      transform: rotate(0);
-    }
-    78% {
-      transform: rotate(-6deg);
-    }
-    86% {
-      transform: rotate(4deg);
-    }
-  }
-
   /* Responsive --------------------------------------------------------- */
   @media (max-width: 62rem) {
-    .home-best__layout,
     .home-map__grid {
       grid-template-columns: minmax(0, 1fr);
-    }
-    .home-about {
-      grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-      gap: var(--space-lg);
     }
   }
 
@@ -1145,57 +1015,50 @@
       left: var(--hero-pad);
       right: auto;
     }
-    .home-gallery__mosaic {
+    .home-best__slide {
+      padding-inline: 0;
+    }
+    .home-best__slide > a {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-md);
+      padding-inline: 0.4rem;
+    }
+    /* Over the photo on a phone, where there is no room beside it. */
+    .home-best__arrow {
+      top: calc(1rem + 36vw);
+      width: 2.3rem;
+      height: 2.3rem;
+    }
+    .home-best__arrow--prev {
+      left: -0.3rem;
+    }
+    .home-best__arrow--next {
+      right: -0.3rem;
+    }
+    .home-gallery__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-auto-rows: 9rem;
+    }
+    .home-gallery__grid .is-extra {
+      display: none;
     }
     .home-gallery__caption {
       opacity: 1;
-      transform: none;
     }
-    .home-about {
+    .home-about__body {
       grid-template-columns: minmax(0, 1fr);
-      padding-right: 0;
-    }
-    .home-about__photo {
-      width: min(16rem, 70%);
-    }
-    .home-about__buddy {
-      top: var(--band);
-      bottom: auto;
-    }
-    .home-about__buddy svg {
-      width: 90px;
-      height: 75px;
+      justify-items: center;
     }
   }
 
   @media (max-width: 34rem) {
-    /* Seven tiles in one column pushed the episodes a whole screen down. */
-    .home-picker__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.5rem;
-    }
-    .home-picker__tile {
-      grid-template-columns: minmax(0, 1fr);
-      padding: 0.7rem 0.8rem;
-      transform: none;
-    }
-    .home-picker__face {
-      display: none;
-    }
-    .home-picker__copy strong {
-      font-size: 1.1rem;
-    }
-    .home-best__list a {
-      grid-template-columns: 5.5rem minmax(0, 1fr);
-    }
     .home-map__stats dd {
       font-size: 1.35rem;
     }
-    .home-card-grid {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0;
+    .home-latest__row {
+      grid-auto-columns: 72vw;
+    }
+    .home-picks__row {
+      grid-auto-columns: 80vw;
     }
   }
 }

@@ -19,6 +19,7 @@ export const EXPERIENCE_COPY: Record<ExperienceTag, ExperienceCopy> = {
   exciting: { label: "ワクワク", lead: "着いた瞬間から、胸が高鳴った旅", mark: "☀", hue: 24 },
   moving: { label: "感動", lead: "景色や人に、心が動いた旅", mark: "♡", hue: 350 },
   thrilling: { label: "ハラハラ", lead: "トラブルに冷や汗をかいた旅", mark: "⚡", hue: 45 },
+  disaster: { label: "これは終わった…", lead: "もうダメだと思った旅", mark: "☂", hue: 220 },
   funny: { label: "笑える", lead: "思い出すと、つい笑ってしまう旅", mark: "☺", hue: 160 },
   discovery: { label: "発見", lead: "行ってみて、初めて分かった旅", mark: "✦", hue: 200 },
   challenge: { label: "挑戦", lead: "ちょっと無理して、踏み込んだ旅", mark: "▲", hue: 100 },

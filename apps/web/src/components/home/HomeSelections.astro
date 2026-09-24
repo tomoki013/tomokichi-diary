@@ -1,6 +1,5 @@
 ---
 import type { ArticleView } from "@tomokichi/application";
-import Picture from "../Picture.astro";
 import { experienceHref } from "../../lib/experiences";
 import type { Selection } from "../../lib/editorial";
 
@@ -8,6 +7,7 @@ interface Props {
   selections: { selection: Selection; views: ArticleView[] }[];
 }
 
+/** Rankings side by side in a row that scrolls sideways, so there is room for as many as the author likes. */
 const { selections } = Astro.props;
 ---
 
@@ -16,13 +16,16 @@ const { selections } = Astro.props;
     <section class="home-picks" aria-labelledby="home-picks-title">
       <header class="section-heading">
         <div>
-          <p class="eyebrow">TOMOKICHI'S PICKS</p>
+          <p class="eyebrow">TOMOKICHI'S RANKING</p>
           <h2 id="home-picks-title">ともきち的ランキング</h2>
           <p>人気順ではなく、自分の記憶に残った順。</p>
         </div>
+        <p class="home-scroll-hint" aria-hidden="true">
+          横にスクロール →
+        </p>
       </header>
 
-      <div class="home-picks__grid">
+      <div class="home-picks__row">
         {selections.map(({ selection, views }) => (
           <section class="home-picks__board" aria-labelledby={`pick-${selection.id}`}>
             <header>
@@ -34,13 +37,8 @@ const { selections } = Astro.props;
                 <li>
                   <a href={view.route.path}>
                     <span class="home-picks__rank" aria-hidden="true">
-                      {index + 1}
+                      {index + 1}.
                     </span>
-                    {view.cover && (
-                      <span class="home-picks__thumb">
-                        <Picture storageKey={view.cover.asset.storageKey} alt="" sizes="64px" />
-                      </span>
-                    )}
                     <span class="home-picks__title">{view.revision.title}</span>
                   </a>
                 </li>

@@ -3,16 +3,26 @@ import { LinkIcon } from "./TravelIcons";
 
 interface Props {
   url: string;
+  /** Kept with the reader's shared list. */
+  title?: string;
 }
 
-const { url } = Astro.props;
+const { url, title } = Astro.props;
 ---
 
-<button class="share-button share-button--ghost" type="button" data-copy-link data-url={url}>
+<button
+  class="share-button share-button--ghost"
+  type="button"
+  data-copy-link
+  data-url={url}
+  data-title={title}
+>
   <LinkIcon /><span data-copy-label>リンクをコピー</span>
 </button>
 
 <script>
+  import { remember } from "../lib/my-trips";
+
   document.querySelectorAll<HTMLButtonElement>("[data-copy-link]").forEach((button) => {
     const label = button.querySelector<HTMLElement>("[data-copy-label]");
     let reset = 0;
@@ -31,6 +41,8 @@ const { url } = Astro.props;
       try {
         await navigator.clipboard.writeText(url);
         say("コピーしました");
+        if (button.dataset.title)
+          remember("shared", new URL(url, location.href).pathname, button.dataset.title);
       } catch {
         // Clipboard access is refused outside a secure context and in some
         // embedded browsers, so fall back to selecting the text by hand.

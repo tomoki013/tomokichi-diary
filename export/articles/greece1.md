@@ -12,6 +12,7 @@ updatedAt: "2025-06-22T00:00:00.000Z"
 noindex: false
 experienceTags:
   - "thrilling"
+  - "disaster"
   - "challenge"
 ---
 アスワンでのきつい出来事を引きずったまま、ようやくエジプトを抜けてギリシャへ向かう。気分としては早く国を出たいだけだったんだけど、最後にカイロ空港で長時間止まることになった。

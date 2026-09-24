@@ -9,8 +9,6 @@ import {
   seoConfig,
 } from "../lib/site";
 import {
-  BookIcon,
-  MapPinIcon,
   MenuIcon,
   RssIcon,
   SearchIcon,
@@ -19,6 +17,7 @@ import {
   YouTubeIcon,
 } from "../components/TravelIcons";
 import Picture from "../components/Picture.astro";
+import MyTripsShelf from "../components/MyTripsShelf.astro";
 
 interface Props {
   metadata: PageMetadata;
@@ -281,20 +280,11 @@ const footerPhoto = {
             <div class="site-footer__next-shade"></div>
             <div class="site-footer__next-body">
               <p class="site-footer__script">Next Adventure Awaits</p>
-              <h2 id="footer-next-title">次は、どこへ行こう？</h2>
-              <p>まだ見ぬ景色が、きっとあなたを待っています。</p>
+              <h2 id="footer-next-title">さぁ、あなたはどこへ行く？</h2>
+              <p>気になった旅の話は、ここからいつでも読み返せます。</p>
             </div>
             <div class="site-footer__next-actions">
-              <a href="/destination" class="site-footer__cta site-footer__cta--primary">
-                <MapPinIcon />
-                <span>旅先から探す</span>
-                <span aria-hidden="true">→</span>
-              </a>
-              <a href="/posts" class="site-footer__cta">
-                <BookIcon />
-                <span>ブログを読む</span>
-                <span aria-hidden="true">→</span>
-              </a>
+              <MyTripsShelf />
             </div>
           </section>
 

@@ -1184,7 +1184,8 @@
     "travelStartDate": "2025-06-26",
     "travelEndDate": null,
     "experienceTags": [
-      "thrilling"
+      "thrilling",
+      "disaster"
     ]
   },
   {
@@ -1329,6 +1330,7 @@
     "travelEndDate": null,
     "experienceTags": [
       "thrilling",
+      "disaster",
       "challenge"
     ]
   },
@@ -1351,6 +1353,7 @@
     "travelEndDate": null,
     "experienceTags": [
       "thrilling",
+      "disaster",
       "unforgettable"
     ]
   },
@@ -1372,6 +1375,7 @@
     "travelStartDate": "2025-06-20",
     "travelEndDate": null,
     "experienceTags": [
+      "disaster",
       "challenge"
     ]
   },
@@ -1502,7 +1506,8 @@
     "travelStartDate": "2025-06-14",
     "travelEndDate": null,
     "experienceTags": [
-      "thrilling"
+      "thrilling",
+      "disaster"
     ]
   },
   {
@@ -1646,6 +1651,7 @@
     "travelStartDate": "2025-06-12",
     "travelEndDate": null,
     "experienceTags": [
+      "disaster",
       "challenge"
     ]
   },
@@ -1729,6 +1735,7 @@
     "travelEndDate": null,
     "experienceTags": [
       "thrilling",
+      "disaster",
       "funny"
     ]
   },
@@ -2111,6 +2118,7 @@
     "travelEndDate": null,
     "experienceTags": [
       "thrilling",
+      "disaster",
       "challenge"
     ]
   },

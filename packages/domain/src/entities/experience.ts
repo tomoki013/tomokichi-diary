@@ -17,6 +17,8 @@ export const EXPERIENCE_TAGS = [
   "moving",
   /** Trouble, close calls, scams, missed connections. */
   "thrilling",
+  /** When it all went wrong — the "this is over" days, told with a straight face. */
+  "disaster",
   /** Something that went sideways in a way worth laughing at. */
   "funny",
   /** A small surprise or a thing learnt on the spot. */

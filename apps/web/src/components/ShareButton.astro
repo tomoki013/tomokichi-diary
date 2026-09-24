@@ -22,6 +22,8 @@ const { title, text, url } = Astro.props;
 </button>
 
 <script>
+  import { remember } from "../lib/my-trips";
+
   document.querySelectorAll<HTMLButtonElement>("[data-share-button]").forEach((button) => {
     button.addEventListener("click", async () => {
       const payload = {
@@ -39,6 +41,7 @@ const { title, text, url } = Astro.props;
             if (label) label.textContent = "この旅を共有する";
           }, 2200);
         }
+        remember("shared", new URL(payload.url, location.href).pathname, payload.title);
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
         if (label) label.textContent = "共有できませんでした";

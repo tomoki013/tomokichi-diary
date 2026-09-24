@@ -1,0 +1,96 @@
+---
+import { ShareIcon, XIcon } from "./TravelIcons";
+
+/**
+ * "さぁ、あなたはどこへ行く？" — the reader's own way back into the diary:
+ * the stories they liked (♡) and the ones they shared. Both lists live in
+ * this browser (`lib/my-trips.ts`); nothing leaves it.
+ */
+---
+
+<div class="my-trips">
+  <button
+    class="site-footer__cta site-footer__cta--primary my-trips__button"
+    type="button"
+    data-shelf-open="liked"
+    data-label="いいねした旅"
+    data-empty="気になった旅の話に ♡ を押すと、ここに集まります。"
+  >
+    <span class="my-trips__icon" aria-hidden="true">♡</span>
+    <span>いいねした旅を見る</span>
+    <small data-shelf-count="liked"></small>
+    <span aria-hidden="true">→</span>
+  </button>
+  <button
+    class="site-footer__cta my-trips__button"
+    type="button"
+    data-shelf-open="shared"
+    data-label="共有した旅"
+    data-empty="記事の「共有する」「リンクをコピー」を使うと、ここに集まります。"
+  >
+    <span class="my-trips__icon" aria-hidden="true"><ShareIcon /></span>
+    <span>共有した旅を見る</span>
+    <small data-shelf-count="shared"></small>
+    <span aria-hidden="true">→</span>
+  </button>
+</div>
+
+<dialog class="my-trips__dialog" data-shelf-dialog aria-labelledby="my-trips-title">
+  <header>
+    <h2 id="my-trips-title" data-shelf-title>あなたの旅</h2>
+    <button type="button" data-shelf-close aria-label="閉じる"><XIcon /></button>
+  </header>
+  <ul data-shelf-list></ul>
+  <p class="my-trips__empty" data-shelf-empty hidden></p>
+  <p class="my-trips__note">このリストはこのブラウザにだけ保存されています。</p>
+</dialog>
+
+<script>
+  import { shelf, type ShelfKind } from "../lib/my-trips";
+
+  const dialog = document.querySelector<HTMLDialogElement>("[data-shelf-dialog]");
+
+  const updateCounts = () =>
+    document.querySelectorAll<HTMLElement>("[data-shelf-count]").forEach((badge) => {
+      const count = shelf(badge.dataset.shelfCount as ShelfKind).length;
+      badge.textContent = count > 0 ? String(count) : "";
+    });
+
+  const open = (button: HTMLButtonElement) => {
+    if (!dialog) return;
+    const kind = button.dataset.shelfOpen as ShelfKind;
+    const list = dialog.querySelector<HTMLUListElement>("[data-shelf-list]");
+    const empty = dialog.querySelector<HTMLElement>("[data-shelf-empty]");
+    const title = dialog.querySelector<HTMLElement>("[data-shelf-title]");
+    const entries = shelf(kind);
+    if (title) title.textContent = button.dataset.label ?? "";
+    list?.replaceChildren(
+      ...entries.map((entry) => {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = entry.path;
+        link.textContent = entry.title;
+        const when = document.createElement("small");
+        when.textContent = entry.at.slice(0, 10).replaceAll("-", ".");
+        item.append(link, when);
+        return item;
+      }),
+    );
+    if (empty) {
+      empty.hidden = entries.length > 0;
+      empty.textContent = button.dataset.empty ?? "";
+    }
+    dialog.showModal();
+  };
+
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-shelf-open]")
+    .forEach((button) => button.addEventListener("click", () => open(button)));
+  dialog?.querySelector("[data-shelf-close]")?.addEventListener("click", () => dialog.close());
+  // A click on the backdrop lands on the dialog element itself.
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  updateCounts();
+  addEventListener("storage", updateCounts);
+</script>

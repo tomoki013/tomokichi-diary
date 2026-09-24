@@ -55,32 +55,39 @@ export interface Selection {
 /** Rankings cut by how a trip felt to the author — never by popularity or page views. */
 export const SELECTIONS: readonly Selection[] = [
   {
-    id: "moving",
-    title: "心が震えた景色",
-    note: "写真じゃ足りなかった",
-    experience: "moving",
-    slugs: ["greece2", "india2", "egypt2"],
-  },
-  {
     id: "thrilling",
-    title: "いちばんハラハラした日",
+    title: "ともきちのハラハラしたランキング",
     note: "今だから笑える",
     experience: "thrilling",
-    slugs: ["india1", "greece3", "thai4"],
+    slugs: ["egypt4", "india1", "greece3", "greece1", "thai4"],
+  },
+  {
+    id: "regret",
+    title: "ともきちの後悔したランキング",
+    note: "次は絶対こうする",
+    experience: "disaster",
+    slugs: ["turkey2", "india7", "egypt3", "thai6", "malaysia2"],
+  },
+  {
+    id: "moving",
+    title: "ともきちの感動したランキング",
+    note: "写真じゃ足りなかった",
+    experience: "moving",
+    slugs: ["turkey3", "greece2", "india2", "egypt2", "spain6"],
   },
   {
     id: "again",
-    title: "また行きたい街",
+    title: "また行きたい街ランキング",
     note: "次は長めに滞在したい",
     experience: null,
-    slugs: ["spain4", "malaysia-night-vibes", "spain6"],
+    slugs: ["spain4", "malaysia-night-vibes", "spain5", "singapore2", "spain6"],
   },
   {
     id: "food",
-    title: "ごはんが忘れられない旅",
+    title: "ごはんが忘れられないランキング",
     note: "思い出すとお腹がすく",
     experience: null,
-    slugs: ["thai2", "hokkaido2", "spain3"],
+    slugs: ["thai2", "hokkaido2", "spain3", "china4", "hokkaido1"],
   },
 ];
 

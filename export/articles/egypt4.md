@@ -12,6 +12,7 @@ updatedAt: "2025-06-21T00:00:00.000Z"
 noindex: false
 experienceTags:
   - "thrilling"
+  - "disaster"
   - "unforgettable"
 ---
 前日のアブシンベル往復でかなり消耗してたので、この日は昼ごろまでゆっくり寝てた。友人は先に帰国し、自分は翌朝の便までアスワンに残る予定だったので、別のホテルへ移ってひとりで少し観光するつもりだった。

@@ -39,7 +39,7 @@ const heroStories = episodes.map(({ episode, view }) => ({
   hook: episode.hook,
 }));
 const heroPhotos = new Set(episodes.flatMap(({ view }) => view.cover?.asset.storageKey ?? []));
-const latest = content.articleViews().slice(0, 4);
+const latest = content.articleViews().slice(0, 8);
 ---
 
 <BaseLayout
@@ -55,12 +55,12 @@ const latest = content.articleViews().slice(0, 4);
     <section class="home-latest" aria-labelledby="home-latest-title">
       <header class="section-heading">
         <div>
-          <p class="eyebrow">LATEST STORIES</p>
-          <h2 id="home-latest-title">最近書いた旅の話</h2>
+          <p class="eyebrow">LATEST</p>
+          <h2 id="home-latest-title">新着</h2>
         </div>
-        <a href="/posts">すべての旅の話&nbsp; →</a>
+        <a href="/posts">すべて&nbsp; →</a>
       </header>
-      <ul class="card-grid home-card-grid">
+      <ul class="home-latest__row">
         {latest.map((view) => <ArticleCard view={view} level={3} />)}
       </ul>
     </section>

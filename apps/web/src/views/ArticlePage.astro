@@ -175,7 +175,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           <p>{revision.summary}</p>
         )
       }
-      <LikeButton articleId={article.id} />
+      <LikeButton articleId={article.id} title={revision.title} path={route.path} />
     </div>
 
     <div class="article-layout">
@@ -203,12 +203,12 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
               この記録が、次の旅の小さなきっかけになればうれしいです。
             </p>
           </div>
-          <LikeButton articleId={article.id} />
+          <LikeButton articleId={article.id} title={revision.title} path={route.path} />
         </footer>
         <div class="article-share">
           <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
           <div class="article-share__actions">
-            <CopyLinkButton url={metadata.canonical} />
+            <CopyLinkButton url={metadata.canonical} title={revision.title} />
             <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
           </div>
         </div>
