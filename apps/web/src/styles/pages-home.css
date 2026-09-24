@@ -952,39 +952,20 @@
     gap: var(--space-lg);
   }
 
-  .home-about__doodle {
-    display: grid;
-    justify-items: center;
-    gap: 0.2rem;
-    color: var(--ink);
+  /* The author's photo as a taped print, like the episodes above. */
+  .home-about__photo {
+    position: relative;
+    width: 17rem;
+    padding: 0.5rem 0.5rem 1.6rem;
+    background: #fff;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-2deg);
   }
 
-  .home-about__caption {
-    color: var(--ink-faint);
-    font-family: var(--font-hand);
-    font-size: var(--step-tiny);
-    transform: rotate(-4deg);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .home-about__doodle svg {
-      transform-origin: 50% 85%;
-      animation: doodle-nod 5s var(--ease) infinite;
-    }
-  }
-
-  @keyframes doodle-nod {
-    0%,
-    75%,
-    100% {
-      transform: rotate(0);
-    }
-    82% {
-      transform: rotate(-5deg);
-    }
-    90% {
-      transform: rotate(3deg);
-    }
+  .home-about__photo img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
   }
 
   .home-about__copy {
@@ -1087,6 +1068,9 @@
     .home-about__body {
       grid-template-columns: minmax(0, 1fr);
       justify-items: center;
+    }
+    .home-about__photo {
+      width: min(15rem, 70%);
     }
   }
 

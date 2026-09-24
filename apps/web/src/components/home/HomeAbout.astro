@@ -1,9 +1,5 @@
 ---
-/**
- * The author as a margin doodle — sunglasses and all — rather than a profile
- * photo: the diary's own character, drawn in the same line as the rest of the
- * hand-made touches. The photo is on /about.
- */
+import Picture from "../Picture.astro";
 ---
 
 <aside class="home-about" aria-labelledby="home-about-title">
@@ -16,38 +12,13 @@
   </header>
 
   <div class="home-about__body">
-    <div class="home-about__doodle" aria-hidden="true">
-      <svg viewBox="0 0 160 160" width="160" height="160">
-        <g
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <!-- hair -->
-          <path
-            d="M36 70c-6-22 6-44 30-50 8-9 26-9 34-2 20 2 32 18 30 42 4 6 3 14-1 18M44 44c10 8 24 10 40 6 12-3 24-2 34 6"
-          ></path>
-          <!-- face -->
-          <path d="M40 70c-2 34 16 60 42 60s42-24 40-58"></path>
-          <!-- ears -->
-          <path d="M40 82c-10-4-14 12-2 18M122 82c10-4 14 12 2 18"></path>
-          <!-- mouth -->
-          <path d="M70 110c7 6 17 6 24 0"></path>
-          <!-- nose -->
-          <path d="M82 92c-2 5-1 8 3 8"></path>
-        </g>
-        <!-- sunglasses -->
-        <g fill="currentColor">
-          <path d="M46 74h30c2 0 3 2 3 4-1 10-8 16-17 16s-16-7-17-16c0-2 0-4 1-4z"></path>
-          <path d="M88 74h30c1 0 1 2 1 4-1 9-8 16-17 16s-16-6-17-16c0-2 1-4 3-4z"></path>
-          <rect x="78" y="76" width="11" height="3" rx="1.5"></rect>
-        </g>
-        <path d="M54 79l8 -3" stroke="#fff" stroke-width="2.4" stroke-linecap="round"></path>
-        <path d="M96 79l8 -3" stroke="#fff" stroke-width="2.4" stroke-linecap="round"></path>
-      </svg>
-      <p class="home-about__caption">20秒クオリティ</p>
+    <div class="home-about__photo">
+      <Picture
+        storageKey="images/Introduce/introduce.jpg"
+        alt="旅先に立つともきち"
+        sizes="(max-width: 760px) 70vw, 280px"
+      />
+      <span class="home-about__tape" aria-hidden="true"></span>
     </div>
 
     <div class="home-about__copy">
