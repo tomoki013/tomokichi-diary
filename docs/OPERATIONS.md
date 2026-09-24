@@ -178,12 +178,17 @@ code fix.
 
 ### `PERF_SCORE` / `PERF_LCP` / `PERF_CLS` / `PERF_TBT`
 
-The budget is Performance ≥ 95, SEO = 100, LCP ≤ 2.5s, CLS ≤ 0.10, TBT ≤ 200ms.
+The budget is Performance ≥ 95, SEO = 100, LCP ≤ 2.5s, CLS ≤ 0.10, TBT ≤ 200ms,
+judged on the **median** of each page's runs (`numberOfRuns` in
+`lighthouserc.json`), not on the worst one: a single run's TBT swings widely
+depending on whether first paint lands before the initial style-and-layout task.
 
 - Check the hero image on the named route: is `width`/`height` set, and is the
   first card `fetchpriority="high"`?
 - The public site ships only small progressive scripts (including WebMCP). A TBT
-  regression means one of those scripts or an island needs inspection.
+  regression means one of those scripts or an island needs inspection — or a
+  page laying out too much up front: long listings and below-the-fold bands use
+  `content-visibility: auto` so they are skipped until scrolled near.
 - Re-run one page: `pnpm perf` (edit `lighthouserc.json` to narrow the URL list).
 
 ### `PERF_REGRESSION`
