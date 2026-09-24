@@ -10,6 +10,8 @@ revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 チャンギ空港で朝の便を待つため、実際に空港で一晩過ごしました。
 

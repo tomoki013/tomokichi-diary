@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-10T00:00:00.000Z"
 updatedAt: "2025-06-10T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "funny"
 ---
 今回の旅は、タイ・トルコ・エジプト・ギリシャをつなぐ長めの周遊だった。
 

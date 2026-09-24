@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-02-20T00:00:00.000Z"
 updatedAt: "2025-02-20T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 パリでは有名店に寄りすぎなくても、観光の動線上で満足度の高い店にかなり当たれました。ここでは実際に入って印象が良かった店だけを5軒に絞ってまとめます。
 

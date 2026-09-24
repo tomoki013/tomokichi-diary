@@ -10,6 +10,9 @@ revision: 2
 publishedAt: "2025-06-20T00:00:00.000Z"
 updatedAt: "2026-09-02T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
+  - "challenge"
 ---
 アブシンベル神殿はエジプト旅行でぜひ行きたい場所のひとつですが、アスワンからの移動は少し癖があります。
 

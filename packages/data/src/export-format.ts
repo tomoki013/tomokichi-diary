@@ -19,13 +19,19 @@ function escapeYamlScalar(value: string): string {
   return `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 }
 
-function frontmatter(fields: Record<string, string | number | boolean | null>): string {
-  const lines = Object.entries(fields)
-    .filter(([, value]) => value !== null)
-    .map(
-      ([key, value]) =>
-        `${key}: ${typeof value === "string" ? escapeYamlScalar(value) : String(value)}`,
-    );
+type FrontmatterValue = string | number | boolean | null | readonly string[];
+
+/** Nulls and empty lists are left out, so a field only appears once it says something. */
+function frontmatter(fields: Record<string, FrontmatterValue>): string {
+  const lines = Object.entries(fields).flatMap(([key, value]) => {
+    if (value === null) return [];
+    if (Array.isArray(value)) {
+      return value.length === 0
+        ? []
+        : [`${key}:`, ...value.map((item: string) => `  - ${escapeYamlScalar(item)}`)];
+    }
+    return [`${key}: ${typeof value === "string" ? escapeYamlScalar(value) : String(value)}`];
+  });
   return ["---", ...lines, "---", ""].join("\n");
 }
 
@@ -59,6 +65,7 @@ export function articleMarkdownFiles(snapshot: ContentSnapshot): ExportFile[] {
             publishedAt: article.publishedAt,
             updatedAt: article.updatedAt,
             noindex: article.noindex,
+            experienceTags: article.experienceTags,
           }) +
           revision.bodyMarkdown.trimEnd() +
           "\n",
@@ -155,11 +162,19 @@ export function parseExportFiles(read: (path: string) => string | null): Content
     ? ((JSON.parse(manifest) as { generatedAt?: string }).generatedAt ?? new Date(0).toISOString())
     : new Date(0).toISOString();
 
+  const parts = Object.fromEntries(
+    JSON_PARTS.map((name) => [name, part(FILE_NAMES[name])]),
+  ) as unknown as Omit<ContentSnapshot, "generatedAt" | "aiArtifacts">;
+
   return {
     generatedAt,
     aiArtifacts: [],
-    ...(Object.fromEntries(
-      JSON_PARTS.map((name) => [name, part(FILE_NAMES[name])]),
-    ) as unknown as Omit<ContentSnapshot, "generatedAt" | "aiArtifacts">),
+    ...parts,
+    // Archives written before experience tags existed have no such field; they
+    // read as "none yet" rather than as a malformed article.
+    articles: parts.articles.map((article) => ({
+      ...article,
+      experienceTags: article.experienceTags ?? [],
+    })),
   };
 }

@@ -10,6 +10,8 @@ revision: 3
 publishedAt: "2025-06-12T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 バンコクをできるだけ安く移動したいなら、路線バスも選択肢のひとつです。
 

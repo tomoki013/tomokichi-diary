@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-11-30T00:00:00.000Z"
 updatedAt: "2025-11-30T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "discovery"
 ---
 前日に外灘まで歩いた流れの続きで、この日は上海の街をもう少し深く見て回る日にした。
 

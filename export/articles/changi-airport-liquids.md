@@ -10,6 +10,8 @@ revision: 3
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 シンガポール・チャンギ空港から飛行機に乗る場合、**水やジュースなどの液体は保安検査の対象**になります。
 

@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-03-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 クアラルンプールに行って意外だったのが、夜の街の強さでした。
 

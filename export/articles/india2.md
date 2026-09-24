@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2024-09-26T00:00:00.000Z"
 updatedAt: "2024-09-26T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "unforgettable"
 ---
 インド2日目は、デリーを離れてタージマハルを見に行く日。写真では見慣れてたはずなのに、実物は普通にそれを超えてきて、ここまで来た意味がちゃんとある場所だと感じた。
 

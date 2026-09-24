@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-08-24T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 シンガポール旅行中にCHAGEEへ行くなら、**CHAGEEのためだけに移動するより、その日の観光ルートにある店舗へ立ち寄るのが一番楽**です。
 

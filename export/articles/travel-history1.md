@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-07-31T00:00:00.000Z"
 updatedAt: "2025-07-31T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "unforgettable"
 ---
 ## はじめに
 

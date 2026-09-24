@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-25T00:00:00.000Z"
 updatedAt: "2025-06-25T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 サントリーニ島は小さい島ですが、移動手段の選び方で快適さがかなり変わります。特にフィラを拠点にするのか、イアまで毎回動くのかで最適解が変わります。
 

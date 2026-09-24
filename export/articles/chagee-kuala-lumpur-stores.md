@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-08-24T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 クアラルンプール旅行中にCHAGEEへ行きたいけれど、**どの店舗に行けばいいのか迷っている人**もいると思います。
 

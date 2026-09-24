@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-24T00:00:00.000Z"
 updatedAt: "2025-06-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "unforgettable"
 ---
 アテネを離れて、この旅の終盤でいちばん楽しみにしてたサントリーニ島へ向かった。写真で見慣れてた場所だったけど、実際に歩くと、白い街並みの密度と海の青さが想像以上だった。
 

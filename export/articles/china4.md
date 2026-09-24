@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-12-02T00:00:00.000Z"
 updatedAt: "2025-12-02T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 上海旅行の最終日。前日の上海ディズニーの疲れが残ってて、朝から完璧に動けたわけじゃなかった。
 

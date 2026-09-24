@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-02-16T00:00:00.000Z"
 updatedAt: "2025-02-16T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 この日はパリ中心部を離れて、ヴェルサイユ宮殿へ向かった。宮殿も庭園も想像以上に広くて、豪華さというより、規模そのものに押される感覚が強かった。
 

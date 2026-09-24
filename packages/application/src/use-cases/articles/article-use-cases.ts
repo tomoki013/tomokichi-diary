@@ -6,6 +6,7 @@ import {
   nextRevision,
   ok,
   parseRoutePath,
+  parseExperienceTags,
   parseSlug,
   publish,
   schedule,
@@ -83,6 +84,7 @@ export async function createArticle(
     noindex: false,
     travelStartDate: null,
     travelEndDate: null,
+    experienceTags: [],
   };
   const revision = nextRevision({
     article,
@@ -242,4 +244,25 @@ export async function listArticlesForAdmin(
       };
     }),
   );
+}
+
+/**
+ * Replaces what an article is marked as feeling like. Metadata about the trip,
+ * not an edit of its prose: no revision is created and `updatedAt` — which
+ * readers and search engines see as "last updated" — is left alone.
+ */
+export async function setArticleExperienceTags(
+  ctx: AppContext,
+  articleId: ArticleId,
+  values: readonly unknown[],
+): Promise<Result<Article>> {
+  const article = await ctx.repos.articles.findById(articleId);
+  if (!article) return err({ code: "ARTICLE_NOT_FOUND", message: `no article ${articleId}` });
+  const tags = parseExperienceTags(values);
+  if (!tags.ok) return err(...tags.errors);
+
+  const updated: Article = { ...article, experienceTags: tags.value };
+  await ctx.repos.articles.save(updated);
+  ctx.logger.info("article.experience_tags_set", { articleId, tags: tags.value.join(",") });
+  return ok(updated);
 }

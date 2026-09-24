@@ -2,6 +2,7 @@ import type { ArticleId, AuthorId, RevisionId } from "../primitives/id.js";
 import type { Instant, PlainDate } from "../primitives/datetime.js";
 import type { Locale } from "../primitives/locale.js";
 import type { Slug } from "../primitives/slug.js";
+import type { ExperienceTag } from "./experience.js";
 
 /**
  * `page` covers standalone editorial pages (about, FAQ, legal). They carry the
@@ -37,6 +38,11 @@ export interface Article {
   /** When the trip actually happened, which is rarely when it was published. */
   readonly travelStartDate: PlainDate | null;
   readonly travelEndDate: PlainDate | null;
+  /**
+   * What the trip felt like (see `EXPERIENCE_TAGS`). Describes the article as a
+   * whole rather than one revision of its prose, like the travel dates.
+   */
+  readonly experienceTags: readonly ExperienceTag[];
   /** Excluded from sitemap and marked noindex while true. */
   readonly noindex: boolean;
 }

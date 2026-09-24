@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2024-09-29T00:00:00.000Z"
 updatedAt: "2024-09-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
+  - "unforgettable"
 ---
 バラナシ最終日は、体調に少し不安を抱えたまま街を歩き回る日になった。それでも路地、買い物、食事、火葬場まで含めて、この街の濃さを最後にもう一度浴びる感覚があった。
 

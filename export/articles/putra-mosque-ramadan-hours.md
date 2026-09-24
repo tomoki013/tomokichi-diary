@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-03-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "discovery"
 ---
 プトラモスクは、クアラルンプール近郊でもかなり人気のある観光地です。通称ピンクモスクとして知られていて、外観の可愛さを目当てに行く人も多いと思います。
 

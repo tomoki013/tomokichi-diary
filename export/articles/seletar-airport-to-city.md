@@ -10,6 +10,8 @@ revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 セレター空港からシンガポール市内へは、**102番バスでBuangkok駅まで出て、そこからMRTへ乗り継ぐ**方法で実際に移動しました。
 

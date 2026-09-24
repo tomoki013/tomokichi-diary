@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-13T00:00:00.000Z"
 updatedAt: "2025-06-13T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "moving"
 ---
 中国での過酷なトランジットを経て、朝一番でトルコ最大の都市イスタンブールに到着した。
 

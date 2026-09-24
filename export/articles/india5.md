@@ -10,6 +10,10 @@ revision: 1
 publishedAt: "2024-09-28T00:00:00.000Z"
 updatedAt: "2024-09-28T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "challenge"
+  - "unforgettable"
 ---
 前日のスコールで全身ずぶ濡れになった流れのまま、この日はそのままガンジス川へ入ることになった。準備万端で臨んだというより、現地の流れに押されて入った形だ。でも、だからこそ印象に残ってる。
 

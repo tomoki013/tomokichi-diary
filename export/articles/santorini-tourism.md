@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-25T00:00:00.000Z"
 updatedAt: "2025-06-25T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
 ---
 サントリーニ島はどこを歩いても景色が強いですが、滞在先や散策先を決めるならフィラ、イア、イメロヴィグリの違いを先に掴んでおくと組みやすいです。
 

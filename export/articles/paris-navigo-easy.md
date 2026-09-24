@@ -10,6 +10,8 @@ revision: 3
 publishedAt: "2025-02-14T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 パリ観光では、**メトロ・RER・電車・バスを使えば主要な観光スポットのほとんどへ公共交通機関で移動できます。**
 

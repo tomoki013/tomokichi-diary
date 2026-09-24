@@ -15,7 +15,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "1a265c5a-6644-81bc-bfe8-6d3080036bd8",
@@ -33,7 +34,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "20e8ad93-bb1e-8f7b-976f-0e0356dd7481",
@@ -51,7 +53,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "623c2125-3027-83fc-b109-316b326cd6ec",
@@ -69,7 +72,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "41a89bca-e5ef-86fe-8123-8d3d400842ff",
@@ -87,7 +91,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "54775ea0-bbfc-83a3-b263-90af03305c18",
@@ -105,7 +110,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "85deccb9-fed2-8b23-be2f-2cd73551ab04",
@@ -123,7 +129,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "33dfa068-0c82-8e2a-98a3-2fc8547a0432",
@@ -141,7 +148,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": null,
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "a0ba40dc-5b69-8fc3-ada0-a428ed994ce7",
@@ -159,7 +167,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-28",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "f3ee37a3-eab4-8693-ac5f-80d14b9707c6",
@@ -177,7 +188,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "3b67a2fb-3ae1-861e-b304-191913581fb5",
@@ -195,7 +209,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-17",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "23ca3df8-d7bc-8fe2-b4ec-be07c71615d2",
@@ -213,7 +230,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-15",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "5721b825-24ea-892c-9ba5-ac087e29b604",
@@ -231,7 +251,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-15",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "cd879190-5f59-8e81-9344-ab7d8efb21e0",
@@ -249,7 +272,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-12",
-    "travelEndDate": "2026-03-14"
+    "travelEndDate": "2026-03-14",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6",
@@ -267,7 +293,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-05",
-    "travelEndDate": "2026-03-16"
+    "travelEndDate": "2026-03-16",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "bb7301bb-31b8-8347-9056-a95530739223",
@@ -285,7 +314,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-05",
-    "travelEndDate": "2026-03-16"
+    "travelEndDate": "2026-03-16",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "36e965b9-cc50-82d1-b54a-3762181be974",
@@ -303,7 +335,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-15",
-    "travelEndDate": "2026-03-20"
+    "travelEndDate": "2026-03-20",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50",
@@ -321,7 +356,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-05",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "57ceb9eb-0c4a-8c50-87e0-11b28602fd4c",
@@ -339,7 +377,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery",
+      "challenge"
+    ]
   },
   {
     "id": "d0fd313b-fb9d-8d9f-966f-104048a85a2f",
@@ -357,7 +399,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "35b7fd08-2473-8a68-a3a1-1d9537e54b50",
@@ -375,7 +420,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "discovery"
+    ]
   },
   {
     "id": "7726885a-54d1-83ca-b275-5635da44be19",
@@ -393,7 +442,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "35598e2f-c52f-890c-a16f-1e6ab60b6165",
@@ -411,7 +463,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "b9cfc506-bee1-8d8a-91cd-faa61e377dae",
@@ -429,7 +484,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "85007683-cdd2-8b3a-9214-d1b8e45c9ed1",
@@ -447,7 +505,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "discovery"
+    ]
   },
   {
     "id": "48e81f38-c2cb-84aa-9870-c63e7ce71920",
@@ -465,7 +527,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "9fa0e427-fa3f-8f9e-a548-6f89f7431722",
@@ -483,7 +548,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "ae39d7cb-99f9-88be-b469-5bc6ea73b3b3",
@@ -501,7 +569,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-19",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "30d26063-0014-83d1-8fdf-a41db74bb0ed",
@@ -519,7 +590,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-18",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "120d37a0-d395-8766-8e46-12e2effe0907",
@@ -537,7 +611,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-17",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "a9d0c4ac-288e-80f9-9ddc-1a13a6905f08",
@@ -555,7 +632,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-16",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "f515dea1-ff9c-81d7-b063-639c0b6e5356",
@@ -573,7 +653,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-15",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "242dfd00-2c51-8b81-87f7-662889ee18b6",
@@ -591,7 +674,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-14",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "funny"
+    ]
   },
   {
     "id": "98d2e0ab-2608-89b3-a1b1-701b0484a8e5",
@@ -609,7 +696,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-13",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "funny"
+    ]
   },
   {
     "id": "6561712c-d018-89ad-885c-4078700c6aeb",
@@ -627,7 +717,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2026-03-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "74e63e8e-9a96-8aed-98e5-7ef3272e3b63",
@@ -645,7 +738,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2025-12-06",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "52b1cb6d-eb74-85a3-b6a1-392f83313051",
@@ -663,7 +759,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-05",
-    "travelEndDate": "2026-03-16"
+    "travelEndDate": "2026-03-16",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae",
@@ -681,7 +780,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-05",
-    "travelEndDate": "2026-03-20"
+    "travelEndDate": "2026-03-20",
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "9217a13b-81e3-8f42-9714-436784e1dc1d",
@@ -699,7 +801,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-04",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery",
+      "challenge"
+    ]
   },
   {
     "id": "3a1a80e2-8210-8f13-acba-500b391c63dc",
@@ -717,7 +823,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2025-12-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "2801b470-b31e-87e3-9b19-7a22efce6991",
@@ -735,7 +844,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-02",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "053575cc-84a1-8f83-bc73-3b11fd70fac4",
@@ -753,7 +865,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-12-01",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "68c9477f-06ed-8fee-adbe-48720da6198b",
@@ -771,7 +886,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-11-30",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "discovery"
+    ]
   },
   {
     "id": "b77c7d5c-5df3-8add-9ecd-24355370a733",
@@ -789,7 +908,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-11-29",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "thrilling"
+    ]
   },
   {
     "id": "d408e860-a104-82ba-9b68-ca20a8aeeb2a",
@@ -807,7 +930,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-11-28",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "a7cf9391-c07a-8709-b467-da1496fe1e53",
@@ -825,7 +951,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-09-21",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "18f74da4-0360-8aa3-90a2-2df84855fc42",
@@ -843,7 +972,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2025-08-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "e3b3dac3-2997-81f5-886b-2490eafda99c",
@@ -861,7 +993,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-08-09",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "4576f477-7f73-8ace-84ee-570b25a8d83c",
@@ -879,7 +1014,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-08-08",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "d3a1690d-6b6a-8850-8d83-85feac208cb0",
@@ -897,7 +1036,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2025-08-05",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "0c3d2abf-8eb3-8b71-aec4-9f133adb2275",
@@ -915,7 +1057,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-08-04",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "d315414b-d3e8-8f4d-9e29-5c5a973e3165",
@@ -933,7 +1079,10 @@
     "archivedAt": null,
     "noindex": true,
     "travelStartDate": "2025-08-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "75cbd1c4-8e81-8ce1-932e-e3ae5d2e894d",
@@ -951,7 +1100,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-08-01",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery",
+      "unforgettable"
+    ]
   },
   {
     "id": "059d70ce-3854-8e6d-b5d7-26c96f5e7cab",
@@ -969,7 +1122,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-07-31",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "unforgettable"
+    ]
   },
   {
     "id": "d905fed5-ec46-8d4e-ad9c-989970d78ddb",
@@ -987,7 +1144,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-07-07",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "0b099bdb-91ab-808b-97ca-bf1c1ba5d91b",
@@ -1005,7 +1163,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-07-04",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "45be5181-7a86-8b89-8bb3-0d1cd56e2dd2",
@@ -1023,7 +1182,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-26",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling"
+    ]
   },
   {
     "id": "71e30e0b-989e-8873-8504-4a5d42bbe870",
@@ -1041,7 +1203,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "c9981e1b-292f-8681-ae38-8d887577a066",
@@ -1059,7 +1222,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "7342692c-27c7-80e5-8538-7be1edfca1b5",
@@ -1077,7 +1243,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "8441de9a-5066-8cf1-a349-90f052fc07fc",
@@ -1095,7 +1264,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "267ada19-1140-8887-b5a9-4db0cd6068c2",
@@ -1113,7 +1285,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "83ce59d8-edd3-8e18-90ab-f96d8f02533a",
@@ -1131,7 +1307,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-22",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "03343de2-ba31-8b4f-9ccf-bb81dcbed044",
@@ -1149,7 +1326,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-22",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "challenge"
+    ]
   },
   {
     "id": "595f9a50-8430-89c2-aeeb-3f8783c28343",
@@ -1167,7 +1348,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-21",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "unforgettable"
+    ]
   },
   {
     "id": "e05d5e67-f436-8696-b306-115f124db8a3",
@@ -1185,7 +1370,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "034ecf00-ab8b-803f-b77f-f661514e5626",
@@ -1203,7 +1391,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery",
+      "challenge"
+    ]
   },
   {
     "id": "8879a896-b683-8127-af3a-c596d1ab68b1",
@@ -1221,7 +1413,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-18",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "unforgettable"
+    ]
   },
   {
     "id": "bf84c2a5-821f-88a0-a171-0fffe3b45b76",
@@ -1239,7 +1435,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-17",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "dc8cfc6c-4037-891c-b4e4-52ee9b7eafbd",
@@ -1257,7 +1456,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-17",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "discovery"
+    ]
   },
   {
     "id": "0d4d62b2-7e34-8393-a23b-5450c1de00e3",
@@ -1275,7 +1478,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-16",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "80b7982a-71be-812b-9b0e-63773f94d8cf",
@@ -1293,7 +1500,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-14",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling"
+    ]
   },
   {
     "id": "ac7e2084-5054-83df-a569-449a9c8a68d9",
@@ -1311,7 +1521,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-13",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "moving"
+    ]
   },
   {
     "id": "947d6c5f-2561-8765-9c1b-039794bf58ac",
@@ -1329,7 +1543,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "7f6d920c-bc3f-8963-9a72-96ece1b62dbb",
@@ -1347,7 +1562,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "30039f22-2e87-889d-9fdf-ee90467e6649",
@@ -1365,7 +1583,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "c103c46c-b099-8556-bce8-171265489609",
@@ -1383,7 +1604,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "a500e3d7-69aa-8167-9453-5da95155ed3a",
@@ -1401,7 +1625,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "12ff6f1f-55a5-8688-b19f-e0570eee98a0",
@@ -1419,7 +1644,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-12",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "f29bbabc-3618-86ed-b348-d3374acda92d",
@@ -1437,7 +1665,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-11",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "dc64b75e-0b3a-8998-ad7b-68b0d2fda9dc",
@@ -1455,7 +1686,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-11",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "4b9e865e-71d7-8540-97e9-d3f187a353a4",
@@ -1473,7 +1707,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-10",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "19e12281-809e-891c-8aaf-29d64a521ca8",
@@ -1491,7 +1726,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-06-10",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "funny"
+    ]
   },
   {
     "id": "574617ab-b833-8521-bdf4-c67829c28c84",
@@ -1509,7 +1748,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-27",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "7f4548a7-cd59-8a67-ad0e-200ce7321c9f",
@@ -1527,7 +1769,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-27",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "b56333ac-7453-865c-bb61-6c49a257f1dc",
@@ -1545,7 +1790,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "ec5a4c60-e280-8bc7-b533-c5811a5451d2",
@@ -1563,7 +1811,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "fd608f15-40cf-8675-8944-566d10fd854e",
@@ -1581,7 +1832,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "e1db2f2a-edfe-81ec-ae67-fa0a7e1fd7ac",
@@ -1599,7 +1854,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-23",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "73b6b342-bee5-861d-9d18-2a3c46a50e93",
@@ -1617,7 +1875,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-22",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "95c25619-d9d5-8214-af72-5b4cecf220b7",
@@ -1635,7 +1896,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-21",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "discovery"
+    ]
   },
   {
     "id": "a4418ede-f3b9-8136-bdf5-44b1d227f69d",
@@ -1653,7 +1918,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "7421688c-d21d-89bf-84bf-e6eb169d531e",
@@ -1671,7 +1939,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "b3a83249-a187-8faa-9a42-996ed0f54ae4",
@@ -1689,7 +1960,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-19",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "moving"
+    ]
   },
   {
     "id": "1edc494e-7843-8173-9464-ecefe56f1de6",
@@ -1707,7 +1982,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-18",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "1e8ea302-807d-84dc-a6ab-af22874883d5",
@@ -1725,7 +2003,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-16",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "c43ba4a0-7177-82a4-9dea-742eb6a11c5c",
@@ -1743,7 +2024,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-15",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "challenge"
+    ]
   },
   {
     "id": "c9b5a75a-70d1-8ee6-bcee-b2ede6b9c1e3",
@@ -1761,7 +2046,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-14",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "challenge"
+    ]
   },
   {
     "id": "e961810f-344d-8b5d-9088-de69f0056f87",
@@ -1779,7 +2068,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-14",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery"
+    ]
   },
   {
     "id": "dea2eadc-bf82-88ba-b23b-c1f268962c13",
@@ -1797,7 +2089,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2025-02-13",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "bd6f1fdf-386e-828e-b710-0f3d69820a76",
@@ -1815,7 +2108,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-30",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "challenge"
+    ]
   },
   {
     "id": "4da6fe75-290a-8080-9f94-66035a948991",
@@ -1833,7 +2130,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-29",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "8bab7da6-ab5f-8636-a202-0ff2138b4524",
@@ -1851,7 +2151,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-29",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "discovery",
+      "unforgettable"
+    ]
   },
   {
     "id": "3035a248-2154-8b81-943f-8b15d9a039f0",
@@ -1869,7 +2173,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-28",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting",
+      "challenge"
+    ]
   },
   {
     "id": "bfbb93de-a42f-8eb2-af54-edeb6235687e",
@@ -1887,7 +2195,12 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-28",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "challenge",
+      "unforgettable"
+    ]
   },
   {
     "id": "00b68fc6-3d44-8bf2-ae2e-ffa8a7edda99",
@@ -1905,7 +2218,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-27",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "2903bd88-4e7d-84f2-b4b5-07b238815821",
@@ -1923,7 +2239,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-26",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "unforgettable"
+    ]
   },
   {
     "id": "a02080e2-03cd-8b31-95af-54bcaa1c9a9c",
@@ -1941,7 +2261,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-25",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving",
+      "thrilling"
+    ]
   },
   {
     "id": "c3612dcf-f7bd-839d-bd96-d95f2520dd06",
@@ -1959,7 +2283,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "a9dec31f-ad5b-8e55-b51e-8a384622b0f8",
@@ -1977,7 +2304,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-24",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "8aa6bd3e-d3a3-8a79-805f-359e820a317c",
@@ -1995,7 +2325,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-09-20",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "a0857281-9fba-862d-a4b0-d0da9d1c20d7",
@@ -2013,7 +2344,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "666785b9-ae12-89ce-8376-70ad7c6d78bb",
@@ -2031,7 +2365,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "5a064233-c900-8289-a4a9-94caf84a4e22",
@@ -2049,7 +2384,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "challenge"
+    ]
   },
   {
     "id": "1555383f-f8bb-8f48-83ee-b3e4904a813c",
@@ -2067,7 +2405,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "1041e60a-352f-8c56-8a21-0afc42c5cd32",
@@ -2085,7 +2426,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-02",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "funny",
+      "discovery"
+    ]
   },
   {
     "id": "e63de725-3186-861c-9697-a2fd15bfff3a",
@@ -2103,7 +2448,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-02",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "moving"
+    ]
   },
   {
     "id": "3bcefbca-a133-8794-a7dc-7de0b17eadb5",
@@ -2121,7 +2469,8 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-01",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   },
   {
     "id": "e30efa73-c13c-8ce2-bced-0ebd54b36cce",
@@ -2139,7 +2488,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-03-01",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "thrilling",
+      "discovery"
+    ]
   },
   {
     "id": "d5009eb8-2559-8894-a405-30bb0c728fe1",
@@ -2157,7 +2510,10 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-02-28",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "exciting"
+    ]
   },
   {
     "id": "ee478705-3df6-863a-bb19-af4e56f55bf8",
@@ -2175,7 +2531,11 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-02-27",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": [
+      "funny",
+      "challenge"
+    ]
   },
   {
     "id": "d6bb731a-96fc-8b1c-b5ca-1d13a008ba4f",
@@ -2193,6 +2553,7 @@
     "archivedAt": null,
     "noindex": false,
     "travelStartDate": "2024-01-03",
-    "travelEndDate": null
+    "travelEndDate": null,
+    "experienceTags": []
   }
 ]

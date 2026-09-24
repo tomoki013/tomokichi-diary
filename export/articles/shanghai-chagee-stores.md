@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-08-24T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 上海でCHAGEE（霸王茶姬）へ行くなら、まず知っておきたいのが**店舗の探し方**です。
 

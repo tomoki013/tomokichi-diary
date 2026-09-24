@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-03-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "discovery"
 ---
 海外旅行中、Googleマップはかなり便利です。徒歩や電車では助かる場面が多いですし、バスでも路線を把握するには役立ちます。
 

@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-08-24T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 CHAGEE（霸王茶姬）のメニューには、「伯牙絶弦」「白雾红尘」「桂馥兰香」「花田乌龙」など、名前だけではどんな味なのか分かりにくい商品があります。
 

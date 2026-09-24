@@ -418,6 +418,7 @@ async function main(): Promise<void> {
       noindex: fm.noindex === true,
       travelStartDate: plainDate(fm.travelDates?.start),
       travelEndDate: plainDate(fm.travelDates?.end),
+      experienceTags: [],
     };
 
     // Structured extras the legacy frontmatter carried become embeds, appended
@@ -644,6 +645,7 @@ async function main(): Promise<void> {
       noindex: false,
       travelStartDate: null,
       travelEndDate: null,
+      experienceTags: [],
     };
     await ctx.repos.articles.save({
       ...article,

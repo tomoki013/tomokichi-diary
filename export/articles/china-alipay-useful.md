@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-11-28T00:00:00.000Z"
 updatedAt: "2025-11-28T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 どうも。先日3泊4日で上海に行ってきました。
 

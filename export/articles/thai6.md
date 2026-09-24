@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-12T00:00:00.000Z"
 updatedAt: "2025-06-12T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 深夜の徒歩帰宅の疲労もあって、バンコク最終日の朝は10時半と遅めの起床だった。
 
