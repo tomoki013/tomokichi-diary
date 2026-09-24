@@ -393,13 +393,13 @@
     padding-inline: 1.3rem;
     border: 0;
     border-radius: 0.6rem;
-    background: var(--accent);
+    background: var(--accent-strong);
     color: #fff;
     font-size: var(--step-small);
   }
 
   .home-picker__search button:hover {
-    background: var(--accent-strong);
+    background: var(--ink);
   }
 
   /* Hand-cut stickers: a solid ink border and a hard shadow, each one set at
@@ -438,7 +438,7 @@
   }
 
   .home-picker__chip small {
-    color: var(--ink-faint);
+    color: var(--ink-soft);
     font-family: var(--font-label);
     font-size: 0.7rem;
   }

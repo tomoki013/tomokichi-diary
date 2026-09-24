@@ -57,7 +57,7 @@ const photos = [...content.withExperience("unforgettable"), ...content.withExper
                 alt={item.photo.usage.alt}
                 sizes="(max-width: 760px) 50vw, 280px"
               />
-              <span class="home-gallery__caption">
+              <span class="home-gallery__caption" aria-hidden="true">
                 {item.place && <small>{item.place}</small>}
                 <span>{item.title}</span>
               </span>
