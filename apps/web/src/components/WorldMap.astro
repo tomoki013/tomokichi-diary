@@ -121,6 +121,10 @@ const projection = geoNaturalEarth1().fitExtent(
 const path = geoPath(projection).digits(1);
 const mapShapes = collection.features.flatMap((country) => {
   const name = country.properties?.name ?? "";
+  // A cropped map would still carry the Americas as invisible paths; leave
+  // out every shape that falls wholly outside the frame.
+  const [[x0, y0], [x1, y1]] = path.bounds(country);
+  if (x1 < 0 || y1 < 0 || x0 > WIDTH || y0 > HEIGHT) return [];
   const d = path(country);
   return d ? [{ d, visited: countryByEnglishName.has(name) }] : [];
 });

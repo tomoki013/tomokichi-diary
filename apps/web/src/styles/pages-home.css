@@ -21,6 +21,25 @@
     padding-block: var(--band);
   }
 
+  /* Bands below the first screen are not styled or laid out until they come
+     near the viewport: the home page carries a map, several sideways rows and
+     a gallery, and laying all of them out up front was most of its blocking
+     time. `auto` remembers each band's real size once it has been rendered. */
+  .home > section:not(.home-hero, .home-picker),
+  .home > aside {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 42rem;
+  }
+
+  /* The same inside the sideways rows: slides, cards and ranking boards
+     scrolled out to the right are skipped until they are scrolled to. */
+  .home-best__slide,
+  .home-latest__row > li,
+  .home-picks__board {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 26rem;
+  }
+
   .home > :last-child {
     padding-bottom: 0;
   }
@@ -448,7 +467,7 @@
     grid-auto-flow: column;
     overflow-x: auto;
     margin: 0;
-    padding: 1rem 0 0.5rem;
+    padding: 0;
     list-style: none;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -459,9 +478,11 @@
     display: none;
   }
 
+  /* Room inside the slide for the print's tilt, tape and shadow: the slide
+     skips rendering while off-screen, which clips whatever overhangs it. */
   .home-best__slide {
     scroll-snap-align: start;
-    padding-inline: 3.2rem;
+    padding: 1.2rem 3.2rem 2rem;
   }
 
   .home-best__slide > a {
