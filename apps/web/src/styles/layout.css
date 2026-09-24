@@ -664,6 +664,14 @@
     padding-block: var(--band-tight) var(--space-md);
   }
 
+  /* The link columns are always below the fold; skip them until reached.
+     (Not the whole footer: its closing photo overhangs the page edge, which
+     paint containment would clip.) */
+  .site-footer__body {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 22rem;
+  }
+
   /* Closing photograph: pulled up over the page edge so the band reads as
      a bridge between the ivory page and the dark footer. */
   .site-footer__next {

@@ -428,6 +428,21 @@
     grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
   }
 
+  /* Every article is in the HTML (the filters work on the page, not the
+     server), so cards below the first screen are skipped until they are
+     scrolled near: laying out all of them up front was most of the page's
+     blocking time. */
+  .posts-grid > .card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 24rem;
+  }
+
+  @media (max-width: 34rem) {
+    .posts-grid > .card {
+      contain-intrinsic-size: auto 9rem;
+    }
+  }
+
   .posts-empty,
   .destination-empty,
   .gallery-empty {
