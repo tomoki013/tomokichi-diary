@@ -3,6 +3,7 @@ import type { ArticleView } from "@tomokichi/application";
 import Picture from "./Picture.astro";
 import { SIZES } from "../lib/images";
 import LikeButton from "./LikeButton.astro";
+import ExperienceChips from "./ExperienceChips.astro";
 
 interface Props {
   view: ArticleView;
@@ -14,6 +15,7 @@ interface Props {
   searchText?: string;
   categoryText?: string;
   countryText?: string;
+  experienceText?: string;
 }
 
 const {
@@ -24,6 +26,7 @@ const {
   searchText,
   categoryText,
   countryText,
+  experienceText,
 } = Astro.props;
 const Heading = `h${level}` as "h2" | "h3";
 const cover = view.cover;
@@ -35,6 +38,7 @@ const published = view.article.publishedAt?.slice(0, 10);
   data-search={searchText}
   data-category={categoryText}
   data-country={countryText}
+  data-experience={experienceText}
   data-published={published}
   data-title={view.revision.title.toLocaleLowerCase("ja")}
 >
@@ -54,6 +58,7 @@ const published = view.article.publishedAt?.slice(0, 10);
   <div class="card__body">
     <Heading class="card__title"><a href={view.route.path}>{view.revision.title}</a></Heading>
     <p class="card__summary">{view.revision.summary}</p>
+    <ExperienceChips tags={view.article.experienceTags} />
     <div class="card__footer">
       {published && <time datetime={published}>{published}</time>}
       <LikeButton articleId={view.article.id} compact />

@@ -54,7 +54,8 @@ describe("export format: experience tags", () => {
   });
 
   it("reads an archive from before experience tags as untagged", () => {
-    const { experienceTags: _, ...legacy } = article;
+    const legacy: Record<string, unknown> = { ...article };
+    delete legacy.experienceTags;
     const snapshot = parseExportFiles((path) =>
       path === "articles.json" ? JSON.stringify([legacy]) : null,
     );

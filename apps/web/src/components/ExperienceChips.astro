@@ -1,0 +1,46 @@
+---
+import type { ExperienceTag } from "@tomokichi/domain";
+import { EXPERIENCE_COPY, experienceHref } from "../lib/experiences";
+
+interface Props {
+  tags: readonly ExperienceTag[];
+  /** Links into the filtered archive; off when the chips sit inside a link already. */
+  link?: boolean;
+  /** `light` for chips laid over a photo. */
+  tone?: "default" | "light";
+  label?: string;
+}
+
+const { tags, link = true, tone = "default", label = "この旅の体験" } = Astro.props;
+---
+
+{
+  tags.length > 0 && (
+    <ul class:list={["exp-chips", tone === "light" && "exp-chips--light"]} aria-label={label}>
+      {tags.map((tag) => {
+        const copy = EXPERIENCE_COPY[tag];
+        const inner = (
+          <>
+            <span class="exp-chip__mark" aria-hidden="true">
+              {copy.mark}
+            </span>
+            {copy.label}
+          </>
+        );
+        return (
+          <li>
+            {link ? (
+              <a class="exp-chip" style={`--exp-hue: ${copy.hue}`} href={experienceHref(tag)}>
+                {inner}
+              </a>
+            ) : (
+              <span class="exp-chip" style={`--exp-hue: ${copy.hue}`}>
+                {inner}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )
+}

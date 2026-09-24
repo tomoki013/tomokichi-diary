@@ -20,7 +20,7 @@ import { createLocalContext } from "./lib/local-db.js";
  *     - moving
  *     - unforgettable
  */
-const [file] = process.argv.slice(2).filter((arg) => !arg.startsWith("-"));
+const file = process.argv.slice(2).find((arg) => !arg.startsWith("-"));
 if (!file) {
   process.stderr.write("usage: pnpm content:experiences <experience-tags.yaml>\n");
   process.exit(2);

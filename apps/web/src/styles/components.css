@@ -1019,4 +1019,55 @@
       display: none;
     }
   }
+
+  /* Experience chips ------------------------------------------------- */
+  /* One hue per feeling (set inline from lib/experiences.ts); lightness and
+     saturation are fixed here so every chip keeps the same contrast. */
+  .exp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .exp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.12rem 0.55rem;
+    border: 1px solid hsl(var(--exp-hue) 42% 82%);
+    border-radius: 999px;
+    background: hsl(var(--exp-hue) 70% 96%);
+    color: hsl(var(--exp-hue) 50% 30%);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  a.exp-chip:hover {
+    border-color: hsl(var(--exp-hue) 45% 55%);
+    background: hsl(var(--exp-hue) 70% 92%);
+  }
+
+  .exp-chip__mark {
+    font-size: 0.8em;
+  }
+
+  .exp-chips--light .exp-chip {
+    border-color: rgb(255 255 255 / 35%);
+    background: rgb(255 255 255 / 14%);
+    color: var(--on-dark);
+    backdrop-filter: blur(4px);
+  }
+
+  .exp-chips--light a.exp-chip:hover {
+    background: rgb(255 255 255 / 26%);
+  }
+
+  .card .exp-chips {
+    margin-top: 0.1rem;
+  }
 }

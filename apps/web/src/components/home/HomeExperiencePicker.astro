@@ -1,0 +1,68 @@
+---
+import Picture from "../Picture.astro";
+import { SearchIcon } from "../TravelIcons";
+import { content } from "../../lib/content";
+import { EXPERIENCES, experienceHref } from "../../lib/experiences";
+
+/**
+ * The main way in: pick a feeling, get the stories. Search and the map stay
+ * available underneath, but a reader who does not yet know where they want to
+ * go should not have to start from a place name.
+ */
+const tiles = EXPERIENCES.map((experience) => {
+  const stories = content.withExperience(experience.tag);
+  // The newest story with a photo stands in for the whole feeling.
+  const face = stories.find((view) => view.cover)?.cover ?? null;
+  return { ...experience, count: stories.length, face };
+}).filter((tile) => tile.count > 0);
+---
+
+<section class="home-picker" id="home-stories" aria-labelledby="home-picker-title">
+  <header class="home-picker__heading">
+    <p class="eyebrow">FIND A STORY</p>
+    <h2 id="home-picker-title">
+      今日は、<span class="hand-underline">どんな旅の話</span>を読む？
+    </h2>
+    <p>行き先が決まっていなくても大丈夫。気分から選んでみてください。</p>
+  </header>
+
+  <ul class="home-picker__grid">
+    {
+      tiles.map((tile, index) => (
+        <li style={`--exp-hue: ${tile.hue}; --tilt: ${index % 2 === 0 ? -1 : 1}`}>
+          <a class="home-picker__tile" href={experienceHref(tile.tag)}>
+            {tile.face && (
+              <span class="home-picker__face">
+                <Picture
+                  storageKey={tile.face.asset.storageKey}
+                  alt=""
+                  sizes="(max-width: 760px) 30vw, 150px"
+                />
+              </span>
+            )}
+            <span class="home-picker__copy">
+              <strong>
+                <span class="home-picker__mark" aria-hidden="true">
+                  {tile.mark}
+                </span>
+                {tile.label}
+              </strong>
+              <span>{tile.lead}</span>
+              <small>{tile.count}話</small>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="home-picker__else">
+    <form action="/posts#results" method="get" role="search">
+      <label class="sr-only" for="home-search">場所・キーワードで探す</label>
+      <SearchIcon />
+      <input id="home-search" name="q" type="search" placeholder="場所やキーワードで探す" />
+      <button type="submit">探す</button>
+    </form>
+    <a href="#home-map">地図から見る&nbsp; ↓</a>
+  </div>
+</section>

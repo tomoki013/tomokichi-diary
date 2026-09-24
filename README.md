@@ -31,6 +31,7 @@ docs/         architecture, data model, runbook, ADRs
 
 - [Architecture](docs/ARCHITECTURE.md) — applications, packages, dependency direction, commands
 - [Data model](docs/DATA_MODEL.md) — entities and how they relate
+- [Editorial model](docs/EDITORIAL.md) — experience tags, home curation, how stories are presented
 - [Development](docs/DEVELOPMENT.md) — requirements (mise), setup, environment, dev servers, troubleshooting
 - [Testing](docs/TESTING.md) — the two layers (pure functions, built-site checks), how to run, critical areas
 - [Security](docs/SECURITY.md) — threat surface, secrets, data protection, logging policy

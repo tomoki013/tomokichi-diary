@@ -1,0 +1,82 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import Picture from "../Picture.astro";
+import ExperienceChips from "../ExperienceChips.astro";
+import { content } from "../../lib/content";
+import type { BestEpisode } from "../../lib/editorial";
+
+interface Props {
+  episodes: { episode: BestEpisode; view: ArticleView }[];
+}
+
+const { episodes } = Astro.props;
+const [lead, ...rest] = episodes.filter(({ view }) => view.cover);
+
+const placeOf = (view: ArticleView) => {
+  const country = content.countryOf(view.article.id);
+  return country ? content.locations.nameOf(country.id, "ja") : null;
+};
+const monthOf = (view: ArticleView) =>
+  view.article.travelStartDate?.slice(0, 7).replace("-", ".") ?? null;
+---
+
+{
+  lead && (
+    <section class="home-best" aria-labelledby="home-best-title">
+      <header class="section-heading">
+        <div>
+          <p class="eyebrow">BEST EPISODES</p>
+          <h2 id="home-best-title">まず読んでほしい旅の話</h2>
+          <p>このブログでどんな旅が読めるのか。いちばん伝わる話を選びました。</p>
+        </div>
+      </header>
+
+      <div class="home-best__layout">
+        <a class="home-best__lead" href={lead.view.route.path}>
+          <span class="home-best__photo">
+            <Picture
+              storageKey={lead.view.cover!.asset.storageKey}
+              alt={lead.view.cover!.usage.alt}
+              sizes="(max-width: 760px) 100vw, 720px"
+            />
+            <span class="home-best__tape" aria-hidden="true" />
+          </span>
+          <span class="home-best__copy">
+            <span class="home-best__number" aria-hidden="true">
+              EPISODE 01
+            </span>
+            <small>{[placeOf(lead.view), monthOf(lead.view)].filter(Boolean).join("　")}</small>
+            <strong>{lead.episode.featuredTitle}</strong>
+            <span class="home-best__hook">{lead.episode.hook}</span>
+            <ExperienceChips tags={lead.view.article.experienceTags} link={false} />
+            <b>この旅の話を読む&nbsp; →</b>
+          </span>
+        </a>
+
+        <ol class="home-best__list">
+          {rest.map(({ episode, view }, index) => (
+            <li>
+              <a href={view.route.path}>
+                <span class="home-best__thumb">
+                  <Picture
+                    storageKey={view.cover!.asset.storageKey}
+                    alt={view.cover!.usage.alt}
+                    sizes="(max-width: 760px) 34vw, 200px"
+                  />
+                </span>
+                <span class="home-best__item">
+                  <span class="home-best__number" aria-hidden="true">
+                    EPISODE {String(index + 2).padStart(2, "0")}
+                  </span>
+                  <small>{[placeOf(view), monthOf(view)].filter(Boolean).join("　")}</small>
+                  <strong>{episode.featuredTitle}</strong>
+                  <span class="home-best__hook">{episode.hook}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}

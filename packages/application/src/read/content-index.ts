@@ -14,6 +14,7 @@ import {
   type Category,
   type Collection,
   type CollectionId,
+  type ExperienceTag,
   type Instant,
   type Location,
   type MediaAsset,
@@ -219,6 +220,73 @@ export class ContentIndex {
       this.relations.locations.find((r) => r.articleId === id && r.relation === "primary") ??
       this.relations.locations.find((r) => r.articleId === id);
     return relation ? (this.locations.get(relation.locationId) ?? null) : null;
+  }
+
+  /** Every listed article as a renderable view, newest first. Built once per index. */
+  articleViews(): readonly ArticleView[] {
+    this.articleViewCache ??= this.publicArticles().flatMap((article) => {
+      const view = this.viewOf(article.id);
+      return view ? [view] : [];
+    });
+    return this.articleViewCache;
+  }
+  private articleViewCache: readonly ArticleView[] | null = null;
+
+  /** Listed articles marked with one experience, newest first. */
+  withExperience(tag: ExperienceTag): readonly ArticleView[] {
+    return this.articleViews().filter((view) => view.article.experienceTags.includes(tag));
+  }
+
+  /**
+   * Stories that felt alike: the most experience tags in common first, then
+   * newest. An article with no experience tags has no such neighbours.
+   */
+  sharingExperience(
+    id: ArticleId,
+    limit = 3,
+    exclude: ReadonlySet<ArticleId> = new Set(),
+  ): readonly ArticleView[] {
+    const own = new Set(this.articleById.get(id)?.experienceTags ?? []);
+    if (own.size === 0) return [];
+    return this.articleViews()
+      .flatMap((view, order) => {
+        if (view.article.id === id || exclude.has(view.article.id)) return [];
+        const shared = view.article.experienceTags.filter((tag) => own.has(tag)).length;
+        return shared > 0 ? [{ view, shared, order }] : [];
+      })
+      .toSorted((a, b) => b.shared - a.shared || a.order - b.order)
+      .slice(0, limit)
+      .map((entry) => entry.view);
+  }
+
+  /** The country an article is primarily about, resolved from a city if need be. */
+  countryOf(id: ArticleId): Location | null {
+    const location = this.primaryLocationOf(id);
+    return location ? (this.locations.countryOf(location.id) ?? null) : null;
+  }
+
+  /**
+   * Other stories from the same country: those primarily about it first, then
+   * roundups that merely include it, newest first within each.
+   */
+  inSameCountry(
+    id: ArticleId,
+    limit = 3,
+    exclude: ReadonlySet<ArticleId> = new Set(),
+  ): readonly ArticleView[] {
+    const country = this.countryOf(id);
+    if (!country) return [];
+    const candidates = this.articleViews().filter(
+      (view) =>
+        view.article.id !== id &&
+        !exclude.has(view.article.id) &&
+        view.locations.some(
+          ({ location }) => this.locations.countryOf(location.id)?.id === country.id,
+        ),
+    );
+    const primary = candidates.filter((view) => this.countryOf(view.article.id)?.id === country.id);
+    const secondary = candidates.filter((view) => !primary.includes(view));
+    return [...primary, ...secondary].slice(0, limit);
   }
 
   knowledgeOf(id: ArticleId): TravelKnowledgeView | null {

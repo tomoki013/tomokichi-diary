@@ -1,6 +1,6 @@
 ---
 import type { Route } from "@tomokichi/domain";
-import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebSiteJsonLd } from "@tomokichi/seo";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
@@ -8,6 +8,9 @@ import { content } from "../lib/content";
 import Picture from "../components/Picture.astro";
 import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
 import WorldMap from "../components/WorldMap.astro";
+import { visitedContinents } from "../lib/destinations";
+import { bestEpisodes } from "../lib/editorial";
+import { EXPERIENCES } from "../lib/experiences";
 import { SearchIcon, XIcon } from "../components/TravelIcons";
 
 interface Props {
@@ -15,11 +18,7 @@ interface Props {
 }
 
 const { route } = Astro.props;
-const articles = content.publicArticles().flatMap((article) => {
-  if (article.kind !== "article") return [];
-  const view = content.viewOf(article.id);
-  return view ? [view] : [];
-});
+const articles = content.articleViews();
 
 const PAGES: Record<string, { title: string; description: string }> = {
   "/": { title: seoConfig.siteName, description: siteDescription },
@@ -55,52 +54,7 @@ const trail =
         { name: page.title, route },
       ];
 
-// Continents group the country list rather than having pages of their own:
-// they sat at the same URL depth as the countries they contain.
-const continents = content.locations
-  .roots()
-  .map((root) => ({
-    name: content.locations.nameOf(root.id, "ja"),
-    countries: content.locations.children(root.id).flatMap((country) => {
-      const hub = content.routes.canonicalFor("location", country.id);
-      const countryArticles = articles.filter((view) =>
-        content.relations.locations.some(
-          (relation) =>
-            relation.articleId === view.article.id &&
-            content.locations.countryOf(relation.locationId)?.id === country.id,
-        ),
-      );
-      return hub
-        ? [
-            {
-              id: country.id,
-              slug: country.slug,
-              name: content.locations.nameOf(country.id, "ja"),
-              path: hub.path,
-              count: countryArticles.length,
-              cover: countryArticles.find((view) => view.cover)?.cover ?? null,
-              cities: content.locations
-                .descendants(country.id)
-                .filter((place) => place.type === "city")
-                .flatMap((place) => {
-                  const cityRoute = content.routes.canonicalFor("location", place.id);
-                  return cityRoute
-                    ? [
-                        {
-                          id: place.id,
-                          slug: place.slug,
-                          name: content.locations.nameOf(place.id, "ja"),
-                          path: cityRoute.path,
-                        },
-                      ]
-                    : [];
-                }),
-            },
-          ]
-        : [];
-    }),
-  }))
-  .filter((continent) => continent.countries.length > 0);
+const continents = visitedContinents();
 
 const collections = (kind: "series" | "journey") =>
   content.snapshot.collections
@@ -250,57 +204,18 @@ const featuredJourney =
           ? { storageKey: recentJourneys[0]!.cover.storageKey, alt: "上海の夜景" }
           : null,
       };
-const featuredStories = articles
-  .filter((view) => view.cover)
-  .reduce<typeof articles>((stories, view) => {
-    const country = content.relations.locations
-      .filter((relation) => relation.articleId === view.article.id)
-      .map((relation) => content.locations.countryOf(relation.locationId))
-      .find(Boolean);
-    const usedCountries = new Set(
-      stories.flatMap((story) =>
-        content.relations.locations
-          .filter((relation) => relation.articleId === story.article.id)
-          .map((relation) => content.locations.countryOf(relation.locationId)?.id)
-          .filter(Boolean),
-      ),
-    );
-    if (!country || usedCountries.has(country.id)) return stories;
-    // Two articles may share one cover; the same photo twice in the carousel
-    // reads as a slide that stalls for twice as long, not as two stories.
-    const usedCovers = new Set(stories.map((story) => story.cover!.asset.storageKey));
-    if (usedCovers.has(view.cover!.asset.storageKey)) return stories;
-    return [...stories, view];
-  }, [])
-  .slice(0, 6);
-
-const popularDestinations = continents
-  .flatMap((continent) => continent.countries)
-  .filter((country) => country.cover && country.count > 0)
-  .toSorted((a, b) => b.count - a.count)
-  .slice(0, 4);
-
-const homeArticleLead = articles.find((view) => view.cover) ?? articles[0];
-const homeArticleSide = articles
-  .filter((view) => view.article.id !== homeArticleLead?.article.id && view.cover)
-  .slice(0, 4);
-const homeFeaturedIds = new Set([
-  homeArticleLead?.article.id,
-  ...homeArticleSide.map((view) => view.article.id),
-]);
-const homeLatest = articles.filter((view) => !homeFeaturedIds.has(view.article.id)).slice(0, 8);
-const homeStoryLabel = (view: (typeof articles)[number]) => {
-  const primary = view.locations[0]?.location;
-  return primary
-    ? content.locations.nameOf(primary.id, "ja")
-    : (view.categories[0]?.name ?? "旅行日記");
-};
-
 /** How many cards the archive reveals per page. Every card is in the HTML
  * already, so this only decides how much of it is shown at once. */
 const ARCHIVE_PAGE_SIZE = 24;
 
-const archiveFeatured = articles.find((view) => view.cover) ?? articles[0];
+// The same story the home page leads with, so the archive opens on an episode
+// rather than on whichever article happened to be published last.
+const archiveLead = bestEpisodes().find(({ view }) => view.cover);
+const archiveFeatured = archiveLead?.view ?? articles.find((view) => view.cover) ?? articles[0];
+const archiveExperiences = EXPERIENCES.map((experience) => ({
+  ...experience,
+  count: articles.filter((view) => view.article.experienceTags.includes(experience.tag)).length,
+})).filter((experience) => experience.count > 0);
 // The featured article stays in the list as well as in the banner above it.
 // Holding it back made the archive claim a different total from the masthead,
 // and left that one article unreachable through the search and filters.
@@ -375,14 +290,7 @@ const labelOf = (target: Route): string => {
 };
 ---
 
-<BaseLayout
-  metadata={metadata}
-  headerOverlay={route.path === "/" && featuredStories.length > 0}
-  jsonLd={[
-    route.path === "/" ? buildWebSiteJsonLd(seoConfig) : null,
-    buildBreadcrumbJsonLd(seoConfig, trail),
-  ]}
->
+<BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}>
   {route.path !== "/destination" && <Breadcrumbs trail={trail} />}
   {
     route.path !== "/" &&
@@ -396,315 +304,6 @@ const labelOf = (target: Route): string => {
           <p>{page.description}</p>
         </header>
       )
-  }
-
-  {
-    route.path === "/" && (
-      <div class="home">
-        {featuredStories.length > 0 && (
-          <section class="home-hero" aria-labelledby="home-title">
-            <div class="home-hero__slides" data-hero-carousel>
-              {featuredStories.map((story, index) => {
-                const cover = story.cover!;
-                return (
-                  <div
-                    class:list={["home-hero__slide", index === 0 && "is-active"]}
-                    data-hero-slide
-                    aria-hidden={index === 0 ? "false" : "true"}
-                  >
-                    <Picture
-                      storageKey={cover.asset.storageKey}
-                      alt={cover.usage.alt}
-                      sizes="100vw"
-                      loading={index === 0 ? "eager" : "lazy"}
-                      fetchpriority={index === 0 ? "high" : "auto"}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-            <div class="home-hero__shade" />
-            {/* Outside the slides: in there the card inherited the slide's
-                slow zoom and drifted with the photo instead of holding its
-                corner. */}
-            <div class="home-hero__features">
-              {featuredStories.map((story, index) => {
-                const country = content.relations.locations
-                  .filter((relation) => relation.articleId === story.article.id)
-                  .map((relation) => content.locations.countryOf(relation.locationId))
-                  .find(Boolean);
-                return (
-                  <a
-                    class:list={["home-hero__feature", index === 0 && "is-active"]}
-                    data-hero-feature
-                    href={story.route.path}
-                    tabindex={index === 0 ? undefined : "-1"}
-                    aria-hidden={index === 0 ? undefined : "true"}
-                  >
-                    <span class="eyebrow">
-                      {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
-                    </span>
-                    <strong>{story.revision.title}</strong>
-                    <span>{story.revision.summary}</span>
-                    <small>続きを読む&nbsp; →</small>
-                  </a>
-                );
-              })}
-            </div>
-            <div class="home-hero__intro">
-              <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
-              <h1 id="home-title">
-                一生モノの体験を、
-                <br />
-                もっと身近に。
-              </h1>
-              <p>
-                実際に旅して見つけた景色と、
-                <br />
-                次の旅に役立つリアルな記録。
-              </p>
-              <a class="button button--light" href="/posts">
-                旅の記録を読む <span aria-hidden="true">→</span>
-              </a>
-            </div>
-            <div class="home-hero__controls" aria-label="注目記事スライド">
-              <button type="button" data-hero-prev aria-label="前の記事">
-                ←
-              </button>
-              <div class="home-hero__dots">
-                {featuredStories.map((_, index) => (
-                  <button
-                    type="button"
-                    class:list={[index === 0 && "is-active"]}
-                    data-hero-dot={index}
-                    aria-label={`${index + 1}枚目を表示`}
-                    aria-current={index === 0 ? "true" : undefined}
-                  />
-                ))}
-              </div>
-              <button type="button" data-hero-next aria-label="次の記事">
-                →
-              </button>
-            </div>
-          </section>
-        )}
-
-        <section class="home-discovery" aria-labelledby="home-discovery-title">
-          <div class="home-discovery__intro">
-            <p class="eyebrow">FIND A STORY</p>
-            <h2 id="home-discovery-title">どんな旅を探していますか？</h2>
-          </div>
-          <form action="/posts#results" method="get" role="search">
-            <label class="sr-only" for="home-search">
-              行き先・キーワードで検索
-            </label>
-            <SearchIcon />
-            <input id="home-search" name="q" type="search" placeholder="行き先・キーワードで検索" />
-            <button type="submit">検索</button>
-          </form>
-          <div class="home-discovery__popular">
-            <span>Popular</span>
-            {continents
-              .flatMap((continent) => continent.countries)
-              .slice(0, 6)
-              .map((country) => (
-                <a href={country.path}>{country.name}</a>
-              ))}
-          </div>
-          <a class="home-discovery__map" href="/destination">
-            世界地図から探す&nbsp; →
-          </a>
-        </section>
-
-        {homeArticleLead && homeArticleLead.cover && (
-          <section class="home-featured-stories" aria-labelledby="home-featured-heading">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">EDITOR'S SELECTION</p>
-                <h2 id="home-featured-heading">まず読んでほしい旅行日記</h2>
-                <p>景色の記憶と、次の旅で役立つ実体験を選びました。</p>
-              </div>
-              <a href="/posts">すべての記事&nbsp; →</a>
-            </div>
-            <div class="home-featured-stories__layout">
-              <a class="home-lead-story" href={homeArticleLead.route.path}>
-                <Picture
-                  storageKey={homeArticleLead.cover.asset.storageKey}
-                  alt={homeArticleLead.cover.usage.alt}
-                  sizes="(max-width: 760px) 100vw, 680px"
-                  loading="eager"
-                />
-                <span class="home-lead-story__shade" />
-                <span class="home-lead-story__copy">
-                  <small>{homeStoryLabel(homeArticleLead)}</small>
-                  <strong>{homeArticleLead.revision.title}</strong>
-                  <span>{homeArticleLead.revision.summary}</span>
-                  <b>この日記を読む&nbsp; →</b>
-                </span>
-              </a>
-              <div class="home-side-stories">
-                {homeArticleSide.map((story, index) => (
-                  <a href={story.route.path}>
-                    {story.cover && (
-                      <Picture
-                        storageKey={story.cover.asset.storageKey}
-                        alt={story.cover.usage.alt}
-                        sizes="(max-width: 760px) 35vw, 180px"
-                        loading={index < 2 ? "eager" : "lazy"}
-                      />
-                    )}
-                    <span>
-                      <small>
-                        {homeStoryLabel(story)}　
-                        {story.article.publishedAt?.slice(0, 10).replaceAll("-", ".")}
-                      </small>
-                      <strong>{story.revision.title}</strong>
-                      <b>読む&nbsp; →</b>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section class="home-section" aria-labelledby="latest-heading">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">LATEST BLOG</p>
-              <h2 id="latest-heading">新着の旅行日記</h2>
-            </div>
-            <a href="/posts">
-              すべての記事 <span aria-hidden="true">→</span>
-            </a>
-          </div>
-          <ul class="card-grid home-card-grid">
-            {homeLatest.map((view, index) => (
-              <ArticleCard view={view} eager={index < 3} level={3} />
-            ))}
-          </ul>
-        </section>
-
-        <section class="home-explore" aria-labelledby="destinations-heading">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">EXPLORE THE WORLD</p>
-              <h2 id="destinations-heading">地図から旅先を探す</h2>
-              <p>
-                {countryCount}の国と地域、{articles.length}本の実体験を記録しています。
-              </p>
-            </div>
-            <a href="/destination">
-              すべての旅先 <span aria-hidden="true">→</span>
-            </a>
-          </div>
-          <div class="home-explore__grid">
-            <WorldMap countries={continents.flatMap((continent) => continent.countries)} />
-
-            <div class="popular-destinations">
-              <div class="popular-destinations__title">
-                <p class="eyebrow">POPULAR PLACES</p>
-                <h3>人気の旅先</h3>
-              </div>
-              {popularDestinations.map((country, index) => (
-                <a class="popular-place" href={country.path}>
-                  <span class="popular-place__rank">0{index + 1}</span>
-                  {country.cover && (
-                    <Picture
-                      storageKey={country.cover.asset.storageKey}
-                      alt={country.cover.usage.alt}
-                      sizes="96px"
-                    />
-                  )}
-                  <span class="popular-place__copy">
-                    <strong>{country.name}</strong>
-                    <small>{country.count}件のブログ</small>
-                  </span>
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section class="home-collections" aria-labelledby="home-journeys-heading">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">JOURNEY COLLECTIONS</p>
-              <h2 id="home-journeys-heading">ひとつの旅を、順番にたどる</h2>
-              <p>出発から帰るまで。旅の流れに沿って読める旅行日記です。</p>
-            </div>
-            <a href="/collections">旅のまとまりを見る&nbsp; →</a>
-          </div>
-          <div class="home-journeys">
-            {collections("journey")
-              .slice(0, 3)
-              .map((entry, index) => (
-                <a class="home-journey-card" href={entry.path}>
-                  {entry.cover && (
-                    <Picture
-                      storageKey={entry.cover.storageKey}
-                      alt={entry.collection.title}
-                      sizes="(max-width: 760px) 88vw, 380px"
-                      loading={index === 0 ? "eager" : "lazy"}
-                    />
-                  )}
-                  <span class="home-journey-card__shade" />
-                  <span class="home-journey-card__copy">
-                    <small>{entry.collection.startDate?.replaceAll("-", ".") ?? "旅の記録"}</small>
-                    <strong>{entry.collection.title}</strong>
-                    <span>{entry.collection.description}</span>
-                    <b>{entry.count}本を順番に読む&nbsp; →</b>
-                  </span>
-                </a>
-              ))}
-          </div>
-
-          <div class="home-themes">
-            <div class="home-themes__heading">
-              <p class="eyebrow">TRAVEL THEMES</p>
-              <h3>好きな景色から読む</h3>
-            </div>
-            <a href="/collections">すべて見る&nbsp; →</a>
-            <div class="home-themes__row">
-              {collections("series")
-                .slice(0, 3)
-                .map((entry) => (
-                  <a href={entry.path}>
-                    {entry.cover && (
-                      <Picture
-                        storageKey={entry.cover.storageKey}
-                        alt={entry.collection.title}
-                        sizes="(max-width: 760px) 45vw, 220px"
-                      />
-                    )}
-                    <span>
-                      <strong>{entry.collection.title}</strong>
-                      <small>{entry.count}本の記録</small>
-                    </span>
-                  </a>
-                ))}
-            </div>
-          </div>
-        </section>
-
-        <aside class="home-author-card" aria-labelledby="home-about-heading">
-          <Picture
-            storageKey="images/Introduce/introduce.jpg"
-            alt="旅先に立つともきち"
-            sizes="(max-width: 760px) 100vw, 420px"
-          />
-          <div>
-            <p class="eyebrow">ABOUT THIS DIARY</p>
-            <h2 id="home-about-heading">はじめまして、ともきちです。</h2>
-            <p>
-              旅先で本当に役立ったこと、思いがけず心に残った景色を、自分の言葉と写真で記録しています。
-            </p>
-            <a href="/about">このブログについて&nbsp; →</a>
-          </div>
-        </aside>
-      </div>
-    )
   }
 
   {
@@ -744,9 +343,11 @@ const labelOf = (target: Route): string => {
             />
             <span class="posts-feature__shade" />
             <span class="posts-feature__copy">
-              <small>FEATURED BLOG</small>
-              <strong>{archiveFeatured.revision.title}</strong>
-              <span>{archiveFeatured.revision.summary}</span>
+              <small>{archiveLead ? "BEST EPISODE" : "FEATURED BLOG"}</small>
+              <strong>
+                {archiveLead?.episode.featuredTitle ?? archiveFeatured.revision.title}
+              </strong>
+              <span>{archiveLead?.episode.hook ?? archiveFeatured.revision.summary}</span>
               <b>
                 この旅を読む <span aria-hidden="true">→</span>
               </b>
@@ -797,6 +398,28 @@ const labelOf = (target: Route): string => {
                 </label>
               </div>
             </div>
+            {archiveExperiences.length > 0 && (
+              <div class="posts-filter__moods">
+                <p id="archive-mood-label">気分で選ぶ</p>
+                <div class="posts-filter__mood-list" aria-labelledby="archive-mood-label">
+                  <button class="is-active" type="button" data-archive-experience="all">
+                    どれでも
+                  </button>
+                  {archiveExperiences.map((experience) => (
+                    <button
+                      type="button"
+                      data-archive-experience={experience.tag}
+                      data-label={experience.label}
+                      style={`--exp-hue: ${experience.hue}`}
+                    >
+                      <span aria-hidden="true">{experience.mark}</span>
+                      {experience.label}
+                      <small>{experience.count}</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div class="posts-filter__chips" aria-label="カテゴリで絞り込む">
               <button class="is-active" type="button" data-archive-filter="all">
                 すべて
@@ -826,6 +449,7 @@ const labelOf = (target: Route): string => {
                   searchText={archiveSearchText(view)}
                   categoryText={archiveCategoryText(view)}
                   countryText={archiveCountryText(view)}
+                  experienceText={view.article.experienceTags.join("|")}
                 />
               ))}
             </ul>
@@ -1313,71 +937,6 @@ const labelOf = (target: Route): string => {
     const urlParam = (key: string, fallback = "") =>
       new URLSearchParams(location.search).get(key)?.trim() || fallback;
 
-    const carousel = document.querySelector<HTMLElement>("[data-hero-carousel]");
-    if (carousel) {
-      const slides = [...carousel.querySelectorAll<HTMLElement>("[data-hero-slide]")];
-      const hero = carousel.closest<HTMLElement>(".home-hero");
-      const dots = [...(hero?.querySelectorAll<HTMLButtonElement>("[data-hero-dot]") ?? [])];
-      const features = [...(hero?.querySelectorAll<HTMLElement>("[data-hero-feature]") ?? [])];
-      let active = 0;
-      let timer = 0;
-
-      const show = (next: number) => {
-        active = (next + slides.length) % slides.length;
-        slides.forEach((slide, index) => {
-          const current = index === active;
-          slide.classList.toggle("is-active", current);
-          slide.setAttribute("aria-hidden", String(!current));
-        });
-        features.forEach((feature, index) => {
-          const current = index === active;
-          feature.classList.toggle("is-active", current);
-          // The card is a link: the ones behind it stay out of the tab order
-          // and out of the accessibility tree while they are invisible.
-          if (current) {
-            feature.removeAttribute("tabindex");
-            feature.removeAttribute("aria-hidden");
-          } else {
-            feature.setAttribute("tabindex", "-1");
-            feature.setAttribute("aria-hidden", "true");
-          }
-        });
-        dots.forEach((dot, index) => {
-          dot.classList.toggle("is-active", index === active);
-          if (index === active) dot.setAttribute("aria-current", "true");
-          else dot.removeAttribute("aria-current");
-        });
-      };
-
-      const stop = () => window.clearInterval(timer);
-      const start = () => {
-        stop();
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          timer = window.setInterval(() => show(active + 1), 6500);
-        }
-      };
-
-      hero?.querySelector("[data-hero-prev]")?.addEventListener("click", () => {
-        show(active - 1);
-        start();
-      });
-      hero?.querySelector("[data-hero-next]")?.addEventListener("click", () => {
-        show(active + 1);
-        start();
-      });
-      dots.forEach((dot, index) =>
-        dot.addEventListener("click", () => {
-          show(index);
-          start();
-        }),
-      );
-      hero?.addEventListener("mouseenter", stop);
-      hero?.addEventListener("mouseleave", start);
-      hero?.addEventListener("focusin", stop);
-      hero?.addEventListener("focusout", start);
-      start();
-    }
-
     const archiveSearch = document.querySelector<HTMLInputElement>("[data-archive-search]");
     const archiveFilters = [
       ...document.querySelectorAll<HTMLButtonElement>("[data-archive-filter]"),
@@ -1386,6 +945,9 @@ const labelOf = (target: Route): string => {
       ...document.querySelectorAll<HTMLElement>("[data-article-list] > [data-search]"),
     ];
     const archiveGrid = document.querySelector<HTMLElement>("[data-article-list]");
+    const archiveExperienceButtons = [
+      ...document.querySelectorAll<HTMLButtonElement>("[data-archive-experience]"),
+    ];
     const archiveCountry = document.querySelector<HTMLSelectElement>("[data-archive-country]");
     const archiveSort = document.querySelector<HTMLSelectElement>("[data-archive-sort]");
     const archiveReset = document.querySelector<HTMLButtonElement>("[data-archive-reset]");
@@ -1402,14 +964,29 @@ const labelOf = (target: Route): string => {
      * come back to. The header search modal and the home search box hand over
      * the same `q` parameter.
      */
-    const ARCHIVE_DEFAULTS = { q: "", category: "all", country: "all", sort: "newest", page: "1" };
+    const ARCHIVE_DEFAULTS = {
+      q: "",
+      experience: "all",
+      category: "all",
+      country: "all",
+      sort: "newest",
+      page: "1",
+    };
     let activeArchiveFilter = ARCHIVE_DEFAULTS.category;
+    let activeExperience = ARCHIVE_DEFAULTS.experience;
+    const markExperience = () =>
+      archiveExperienceButtons.forEach((button) => {
+        const active = (button.dataset.archiveExperience ?? "all") === activeExperience;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
     let archivePage = 1;
 
     const readArchiveUrl = () => {
       const params = new URLSearchParams(location.search);
       return {
         q: (params.get("q") ?? "").trim(),
+        experience: params.get("experience") ?? ARCHIVE_DEFAULTS.experience,
         category: params.get("category") ?? ARCHIVE_DEFAULTS.category,
         country: params.get("country") ?? ARCHIVE_DEFAULTS.country,
         sort: params.get("sort") ?? ARCHIVE_DEFAULTS.sort,
@@ -1421,6 +998,7 @@ const labelOf = (target: Route): string => {
       setUrlParams(
         [
           ["q", archiveSearch?.value.trim() ?? "", ARCHIVE_DEFAULTS.q],
+          ["experience", activeExperience, ARCHIVE_DEFAULTS.experience],
           ["category", activeArchiveFilter, ARCHIVE_DEFAULTS.category],
           ["country", archiveCountry?.value ?? "all", ARCHIVE_DEFAULTS.country],
           ["sort", archiveSort?.value ?? "newest", ARCHIVE_DEFAULTS.sort],
@@ -1452,6 +1030,12 @@ const labelOf = (target: Route): string => {
           (button.dataset.archiveFilter ?? "all") === activeArchiveFilter,
         ),
       );
+      activeExperience = archiveExperienceButtons.some(
+        (button) => (button.dataset.archiveExperience ?? "all") === state.experience,
+      )
+        ? state.experience
+        : ARCHIVE_DEFAULTS.experience;
+      markExperience();
       archivePage = state.page;
     };
 
@@ -1531,8 +1115,10 @@ const labelOf = (target: Route): string => {
         const haystack = card.dataset.search ?? "";
         const categories = (card.dataset.category ?? "").split("|");
         const countries = (card.dataset.country ?? "").split("|");
+        const experiences = (card.dataset.experience ?? "").split("|");
         const matches =
           (!archiveQuery || haystack.includes(archiveQuery)) &&
+          (activeExperience === "all" || experiences.includes(activeExperience)) &&
           (activeArchiveFilter === "all" || categories.includes(activeArchiveFilter)) &&
           (!archiveCountry ||
             archiveCountry.value === "all" ||
@@ -1570,6 +1156,12 @@ const labelOf = (target: Route): string => {
       if (archiveSummary) {
         const conditions = [
           archiveQuery && `「${archiveQuery}」`,
+          activeExperience !== "all" &&
+            `「${
+              archiveExperienceButtons.find(
+                (button) => button.dataset.archiveExperience === activeExperience,
+              )?.dataset.label ?? activeExperience
+            }」な旅`,
           activeArchiveFilter !== "all" && activeArchiveFilter,
           archiveCountry?.value !== "all" &&
             archiveCountry?.selectedOptions[0]?.text.replace(/（.*）/, ""),
@@ -1592,11 +1184,20 @@ const labelOf = (target: Route): string => {
         updateArchive();
       }),
     );
+    archiveExperienceButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        activeExperience = button.dataset.archiveExperience ?? "all";
+        markExperience();
+        updateArchive();
+      }),
+    );
     archiveReset?.addEventListener("click", () => {
       if (archiveSearch) archiveSearch.value = "";
       if (archiveCountry) archiveCountry.value = "all";
       if (archiveSort) archiveSort.value = "newest";
       activeArchiveFilter = "all";
+      activeExperience = "all";
+      markExperience();
       archiveFilters.forEach((item) =>
         item.classList.toggle("is-active", item.dataset.archiveFilter === "all"),
       );

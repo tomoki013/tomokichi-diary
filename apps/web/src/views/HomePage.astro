@@ -1,0 +1,73 @@
+---
+import type { Route } from "@tomokichi/domain";
+import { buildPageMetadata, buildWebSiteJsonLd } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import HomeHero from "../components/home/HomeHero.astro";
+import HomeExperiencePicker from "../components/home/HomeExperiencePicker.astro";
+import HomeBestEpisodes from "../components/home/HomeBestEpisodes.astro";
+import HomeTravelMap from "../components/home/HomeTravelMap.astro";
+import HomeSelections from "../components/home/HomeSelections.astro";
+import HomeGallery from "../components/home/HomeGallery.astro";
+import HomeAbout from "../components/home/HomeAbout.astro";
+import { content } from "../lib/content";
+import { bestEpisodes, selections } from "../lib/editorial";
+import { seoConfig, siteDescription } from "../lib/site";
+
+/**
+ * The home page reads as a place to find *stories*: a feeling first, then the
+ * episodes worth starting with, then what is new, and only after that the map
+ * of where those stories happened. Section order follows the owner's sketch;
+ * curation lives in `lib/editorial.ts`.
+ */
+interface Props {
+  route: Route;
+}
+
+const { route } = Astro.props;
+const metadata = buildPageMetadata(seoConfig, {
+  title: seoConfig.siteName,
+  description: siteDescription,
+  route,
+  noindex: route.noindex,
+});
+
+const episodes = bestEpisodes();
+const heroStories = episodes.map(({ episode, view }) => ({
+  view,
+  title: episode.featuredTitle,
+  hook: episode.hook,
+}));
+const heroPhotos = new Set(episodes.flatMap(({ view }) => view.cover?.asset.storageKey ?? []));
+const latest = content.articleViews().slice(0, 4);
+---
+
+<BaseLayout
+  metadata={metadata}
+  headerOverlay={heroStories.some((story) => story.view.cover)}
+  jsonLd={[buildWebSiteJsonLd(seoConfig)]}
+>
+  <div class="home">
+    <HomeHero stories={heroStories} />
+    <HomeExperiencePicker />
+    <HomeBestEpisodes episodes={episodes} />
+
+    <section class="home-latest" aria-labelledby="home-latest-title">
+      <header class="section-heading">
+        <div>
+          <p class="eyebrow">LATEST STORIES</p>
+          <h2 id="home-latest-title">最近書いた旅の話</h2>
+        </div>
+        <a href="/posts">すべての旅の話&nbsp; →</a>
+      </header>
+      <ul class="card-grid home-card-grid">
+        {latest.map((view) => <ArticleCard view={view} level={3} />)}
+      </ul>
+    </section>
+
+    <HomeTravelMap />
+    <HomeSelections selections={selections()} />
+    <HomeGallery exclude={heroPhotos} />
+    <HomeAbout />
+  </div>
+</BaseLayout>

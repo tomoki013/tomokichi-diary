@@ -1,0 +1,59 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import Picture from "../Picture.astro";
+import { experienceHref } from "../../lib/experiences";
+import type { Selection } from "../../lib/editorial";
+
+interface Props {
+  selections: { selection: Selection; views: ArticleView[] }[];
+}
+
+const { selections } = Astro.props;
+---
+
+{
+  selections.length > 0 && (
+    <section class="home-picks" aria-labelledby="home-picks-title">
+      <header class="section-heading">
+        <div>
+          <p class="eyebrow">TOMOKICHI'S PICKS</p>
+          <h2 id="home-picks-title">ともきち的ランキング</h2>
+          <p>人気順ではなく、自分の記憶に残った順。</p>
+        </div>
+      </header>
+
+      <div class="home-picks__grid">
+        {selections.map(({ selection, views }) => (
+          <section class="home-picks__board" aria-labelledby={`pick-${selection.id}`}>
+            <header>
+              <h3 id={`pick-${selection.id}`}>{selection.title}</h3>
+              <p class="home-picks__note">{selection.note}</p>
+            </header>
+            <ol>
+              {views.map((view, index) => (
+                <li>
+                  <a href={view.route.path}>
+                    <span class="home-picks__rank" aria-hidden="true">
+                      {index + 1}
+                    </span>
+                    {view.cover && (
+                      <span class="home-picks__thumb">
+                        <Picture storageKey={view.cover.asset.storageKey} alt="" sizes="64px" />
+                      </span>
+                    )}
+                    <span class="home-picks__title">{view.revision.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+            {selection.experience && (
+              <a class="home-picks__more" href={experienceHref(selection.experience)}>
+                もっと読む&nbsp; →
+              </a>
+            )}
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+}
