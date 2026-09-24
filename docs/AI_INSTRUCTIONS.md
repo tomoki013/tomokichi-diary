@@ -42,7 +42,7 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 
 ## Security
 
-- 秘密は `wrangler secret`。`.env` に本番値を書かない。`ci.yml` に Cloudflare token を足さない。
+- 秘密は `wrangler secret`。`.env` に本番値を書かない。Cloudflare token は GitHub の `production` environment secret だけに置き、`ci.yml` では Cloudflare と通信する step の `env` にだけ渡す（repository secret や job 全体の env にしない）。
 - お問い合わせの IP / メールをログに出さない。`ctx.logger` に本文を渡さない。
 - `/v1/admin/*` は必ず認証ミドルウェアの下（`v1.use("/admin/*")`）。新しい admin route はその下に `route()` する。
 - 公開 write を足すなら Turnstile かレート制限。

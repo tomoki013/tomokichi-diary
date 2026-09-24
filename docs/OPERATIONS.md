@@ -12,12 +12,22 @@ pnpm diagnostics
 
 ## Releasing
 
-Releases are run by hand from a developer machine. CI checks; it does not ship.
-Nothing in the repository holds a Cloudflare credential — wrangler is already
-authenticated locally, so no production token has to exist in a workflow, a
-pull request, or the environment a dependency install script runs in.
+A push to `main` deploys itself: the `Deploy` job in `.github/workflows/ci.yml`
+starts only after the `Check` job is green and runs the sequence below. Its
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are secrets of the GitHub
+`production` environment (never repository secrets, so pull request runs cannot
+read them), attached only to the steps that talk to Cloudflare.
 
-Start from a clean `main` with a green `pnpm run ci`. The order matters and is
+- To reload `export/` into D1 as part of a release (after a batch edit made
+  through the local tooling, such as `pnpm content:experiences`), run the
+  workflow by hand on `main` with **seed** ticked.
+- Until the cutover the site is verified on workers.dev; set the environment
+  variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
+  at the Worker.
+
+The same sequence can still be run by hand from a developer machine where
+wrangler is authenticated. Start from a clean `main` with a green
+`pnpm run ci`. The order matters and is
 the same one the site has always shipped in:
 
 ```bash
