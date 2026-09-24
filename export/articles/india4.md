@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2024-09-28T00:00:00.000Z"
 updatedAt: "2024-09-28T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "challenge"
 ---
 インド旅の前半を終えて、この日は寝台列車でバラナシへ入る。過酷そうな印象があったんだけど、実際の2等寝台は思ってたより快適で、移動そのものもかなり面白かった。
 

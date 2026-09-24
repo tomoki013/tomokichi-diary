@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-15T00:00:00.000Z"
 updatedAt: "2026-03-15T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 朝、クアラルンプールを出てシンガポールへ向かった。移動日なのにかなり詰め込んでて、気づけば夜はナイトサファリにいた。
 

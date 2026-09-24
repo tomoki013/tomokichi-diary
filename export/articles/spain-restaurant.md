@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-02-27T00:00:00.000Z"
 updatedAt: "2025-02-27T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 スペインは都市ごとに食事の雰囲気がかなり違いました。ここではマドリード、バルセロナ、トレドで実際に入って印象が残った店だけをまとめています。
 

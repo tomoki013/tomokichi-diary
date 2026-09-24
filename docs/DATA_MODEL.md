@@ -37,6 +37,12 @@ Identity and lifecycle only — no title, no body.
 - `currentRevisionId` — what the editor is working on.
 - `publishedRevisionId` — what the public site renders.
 
+- `experienceTags` — what the trip felt like, from a closed vocabulary
+  (`exciting`, `moving`, `thrilling`, `funny`, `discovery`, `challenge`,
+  `unforgettable`). Identifiers only; labels are the frontend's. Stored as a
+  JSON array on the article (not the revision), exported to the Markdown
+  frontmatter. See [Editorial model](EDITORIAL.md).
+
 Saving in the admin never changes the live page: publishing swaps the pointer.
 
 ## ArticleRevision

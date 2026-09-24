@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-11T00:00:00.000Z"
 updatedAt: "2025-06-11T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 前日の波乱の到着から一夜明けて、この日は王道の観光と夜の街をまとめて回る日にした。
 

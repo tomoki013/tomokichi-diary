@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-12T00:00:00.000Z"
 updatedAt: "2025-06-12T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 寺院をまとめて回るなら、チャオプラヤエクスプレスはかなり使いやすい移動手段です。BTSやMRTだけでは届きにくい旧市街側をまとめて繋げられるので、初回のバンコクでもかなり助かります。
 

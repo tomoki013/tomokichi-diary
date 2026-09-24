@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2024-03-01T00:00:00.000Z"
 updatedAt: "2024-03-01T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "discovery"
 ---
 20歳のとき、初めての海外旅行で選んだのがタイのバンコクだった。今ならもうちょっと落ち着いて選ぶと思うけど、このときは「とにかく一回、日本の外に出てみたい」って気持ちだけが先走ってた。
 

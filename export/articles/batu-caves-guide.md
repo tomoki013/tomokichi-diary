@@ -10,6 +10,9 @@ revision: 3
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
+  - "challenge"
 ---
 クアラルンプール近郊の人気観光地「バトゥ洞窟（Batu Caves）」は、**巨大な黄金像とカラフルな272段の階段があるメインの洞窟なら入場無料**です。
 

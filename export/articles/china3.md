@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-12-01T00:00:00.000Z"
 updatedAt: "2025-12-01T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 上海旅行3日目は、この旅のもうひとつの目的だった上海ディズニーに行った日だ。
 

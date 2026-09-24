@@ -10,6 +10,8 @@ revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 クアラルンプール市内から**スルタン・アブドゥル・アジズ・シャー空港（スバン空港）**へ、実際に772番バスで移動しました。
 

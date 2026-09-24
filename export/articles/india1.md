@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2024-09-25T00:00:00.000Z"
 updatedAt: "2024-09-25T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "thrilling"
 ---
 ベトナムでの乗継を終えて、ようやくインドに入った。ここからが本番のはず……だったんだけど、到着初日から入国、深夜移動、街歩きまで、全部まとめて振れ幅の大きい一日になった。
 

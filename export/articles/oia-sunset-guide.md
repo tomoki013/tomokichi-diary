@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-25T00:00:00.000Z"
 updatedAt: "2025-06-25T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
 ---
 イアの夕日は確かに強いですが、実際に行くと重要なのは景色そのものよりも、どこで待つかと何分前に動くかです。人気スポットは想像より早く埋まります。
 

@@ -5,9 +5,12 @@ import { apiUrl } from "../lib/site";
 interface Props {
   articleId: ArticleId;
   compact?: boolean;
+  /** Kept with the reader's liked list, so it can be shown without another fetch. */
+  title?: string;
+  path?: string;
 }
 
-const { articleId, compact = false } = Astro.props;
+const { articleId, compact = false, title, path } = Astro.props;
 ---
 
 <button
@@ -16,6 +19,8 @@ const { articleId, compact = false } = Astro.props;
   data-like-button
   data-article-id={articleId}
   data-api-url={apiUrl}
+  data-title={title}
+  data-path={path}
   aria-pressed="false"
   aria-label="この記事にいいねする"
 >
@@ -25,6 +30,8 @@ const { articleId, compact = false } = Astro.props;
 </button>
 
 <script>
+  import { forget, remember } from "../lib/my-trips";
+
   const storageKey = "tomokichi-like-visitor";
 
   function visitorId(): string {
@@ -44,6 +51,12 @@ const { articleId, compact = false } = Astro.props;
     const heart = button.querySelector<HTMLElement>(".like-button__heart");
     const count = button.querySelector<HTMLOutputElement>(".like-button__count");
     if (heart) heart.textContent = state.liked ? "♥" : "♡";
+    // The server's answer is the truth; the shelf follows it.
+    const { path, title } = button.dataset;
+    if (path && title) {
+      if (state.liked) remember("liked", path, title);
+      else forget("liked", path);
+    }
     if (count) {
       // A row of zeroes says nothing; the number appears once there is one.
       count.textContent = state.count > 0 ? new Intl.NumberFormat("ja-JP").format(state.count) : "";

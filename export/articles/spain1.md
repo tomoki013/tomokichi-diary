@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-02-18T00:00:00.000Z"
 updatedAt: "2025-02-18T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 パリ滞在の最終日を過ごしたあと、この旅の後半であるスペインへ移動する。街の空気も食事もかなり違うので、ここから旅のテンポがもう一段変わる感覚があった。
 

@@ -1,0 +1,168 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import Picture from "../Picture.astro";
+import { content } from "../../lib/content";
+
+interface Props {
+  /** One slide each. The card on the slide shows the story's hook, not its SEO title. */
+  stories: { view: ArticleView; title: string; hook: string }[];
+}
+
+const { stories } = Astro.props;
+const slides = stories.filter((story) => story.view.cover);
+---
+
+{
+  slides.length > 0 && (
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="home-hero__slides" data-hero-carousel>
+        {slides.map((story, index) => {
+          const cover = story.view.cover!;
+          return (
+            <div
+              class:list={["home-hero__slide", index === 0 && "is-active"]}
+              data-hero-slide
+              aria-hidden={index === 0 ? "false" : "true"}
+            >
+              <Picture
+                storageKey={cover.asset.storageKey}
+                alt={cover.usage.alt}
+                sizes="100vw"
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchpriority={index === 0 ? "high" : "auto"}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div class="home-hero__shade" />
+      {/* Outside the slides: in there the card inherited the slide's slow zoom
+          and drifted with the photo instead of holding its corner. */}
+      <div class="home-hero__features">
+        {slides.map((story, index) => {
+          const country = content.countryOf(story.view.article.id);
+          return (
+            <a
+              class:list={["home-hero__feature", index === 0 && "is-active"]}
+              data-hero-feature
+              href={story.view.route.path}
+              tabindex={index === 0 ? undefined : "-1"}
+              aria-hidden={index === 0 ? undefined : "true"}
+            >
+              <span class="eyebrow">
+                {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
+              </span>
+              <strong>{story.title}</strong>
+              <span>{story.hook}</span>
+              <small>この旅の話を読む&nbsp; →</small>
+            </a>
+          );
+        })}
+      </div>
+      <div class="home-hero__intro">
+        <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
+        <h1 id="home-title">
+          一生モノの体験を、
+          <br />
+          もっと身近に。
+        </h1>
+        <p>
+          実際に旅して見つけた景色と、
+          <br />
+          次の旅に役立つリアルな記録。
+        </p>
+        <a class="button button--light" href="/posts">
+          旅の記録を読む <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      {slides.length > 1 && (
+        <div class="home-hero__controls" aria-label="旅の話のスライド">
+          <button type="button" data-hero-prev aria-label="前の旅の話">
+            ←
+          </button>
+          <div class="home-hero__dots">
+            {slides.map((_, index) => (
+              <button
+                type="button"
+                class:list={[index === 0 && "is-active"]}
+                data-hero-dot={index}
+                aria-label={`${index + 1}枚目を表示`}
+                aria-current={index === 0 ? "true" : undefined}
+              />
+            ))}
+          </div>
+          <button type="button" data-hero-next aria-label="次の旅の話">
+            →
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}
+
+<script>
+  const carousel = document.querySelector<HTMLElement>("[data-hero-carousel]");
+  if (carousel) {
+    const slides = [...carousel.querySelectorAll<HTMLElement>("[data-hero-slide]")];
+    const hero = carousel.closest<HTMLElement>(".home-hero");
+    const dots = [...(hero?.querySelectorAll<HTMLButtonElement>("[data-hero-dot]") ?? [])];
+    const features = [...(hero?.querySelectorAll<HTMLElement>("[data-hero-feature]") ?? [])];
+    let active = 0;
+    let timer = 0;
+
+    const show = (next: number) => {
+      active = (next + slides.length) % slides.length;
+      slides.forEach((slide, index) => {
+        const current = index === active;
+        slide.classList.toggle("is-active", current);
+        slide.setAttribute("aria-hidden", String(!current));
+      });
+      features.forEach((feature, index) => {
+        const current = index === active;
+        feature.classList.toggle("is-active", current);
+        // The card is a link: the ones behind it stay out of the tab order
+        // and out of the accessibility tree while they are invisible.
+        if (current) {
+          feature.removeAttribute("tabindex");
+          feature.removeAttribute("aria-hidden");
+        } else {
+          feature.setAttribute("tabindex", "-1");
+          feature.setAttribute("aria-hidden", "true");
+        }
+      });
+      dots.forEach((dot, index) => {
+        dot.classList.toggle("is-active", index === active);
+        if (index === active) dot.setAttribute("aria-current", "true");
+        else dot.removeAttribute("aria-current");
+      });
+    };
+
+    const stop = () => window.clearInterval(timer);
+    const start = () => {
+      stop();
+      if (slides.length > 1 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        timer = window.setInterval(() => show(active + 1), 6500);
+      }
+    };
+
+    hero?.querySelector("[data-hero-prev]")?.addEventListener("click", () => {
+      show(active - 1);
+      start();
+    });
+    hero?.querySelector("[data-hero-next]")?.addEventListener("click", () => {
+      show(active + 1);
+      start();
+    });
+    dots.forEach((dot, index) =>
+      dot.addEventListener("click", () => {
+        show(index);
+        start();
+      }),
+    );
+    hero?.addEventListener("mouseenter", stop);
+    hero?.addEventListener("mouseleave", start);
+    hero?.addEventListener("focusin", stop);
+    hero?.addEventListener("focusout", start);
+    start();
+  }
+</script>

@@ -10,6 +10,8 @@ revision: 3
 publishedAt: "2025-02-24T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 トレド旧市街から絶景展望台「ミラドール・デル・バイエ（Mirador del Valle）」へは、**徒歩・ローカルバス・観光列車・観光バス・タクシー・レンタカー**などで行けます。
 

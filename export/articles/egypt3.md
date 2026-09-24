@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-20T00:00:00.000Z"
 updatedAt: "2025-06-20T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "disaster"
+  - "challenge"
 ---
 寝台列車の揺れで何度も目が覚めたまま、朝7時ごろにアスワンへ着いた。ここからは、エジプト南部でも特に行きたかったアブシンベル神殿を、日帰りで往復する。
 

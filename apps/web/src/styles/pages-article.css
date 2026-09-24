@@ -166,6 +166,149 @@
     font-size: var(--step-small);
   }
 
+  /* The quick "when / where / how long" of the story, in place of a second
+     copy of the summary the header already shows. */
+  .article-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem var(--space-md);
+    margin: 0;
+  }
+
+  .article-overview > div {
+    display: grid;
+    gap: 0.05rem;
+  }
+
+  .article-overview dt {
+    color: var(--ink-faint);
+    font-size: 0.68rem;
+  }
+
+  .article-overview dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+  }
+
+  .article-overview a {
+    text-decoration: none;
+  }
+
+  .article-overview a:hover {
+    text-decoration: underline;
+  }
+
+  .article-hero__content .exp-chips {
+    margin-top: 0.2rem;
+  }
+
+  .article-facts .exp-chips {
+    margin-top: 0.25rem;
+  }
+
+  /* Story trail: onward by feeling and by place ----------------------- */
+  .story-trail {
+    padding-top: var(--band);
+    border-top: 1px solid var(--line);
+  }
+
+  .story-trail h2 {
+    margin-bottom: var(--space-md);
+    font-size: var(--step-h2);
+  }
+
+  .story-trail__rails {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-md);
+  }
+
+  .story-rail {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    padding: var(--space-md);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .story-rail header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.7rem;
+  }
+
+  .story-rail h3 {
+    font-size: 1.08rem;
+  }
+
+  .story-rail__note {
+    color: var(--accent);
+    font-family: var(--font-hand);
+    font-size: var(--step-tiny);
+  }
+
+  .story-rail > ul {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .story-rail > ul > li {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+    padding-block: 0.55rem;
+  }
+
+  .story-rail > ul > li + li {
+    border-top: 1px dashed var(--line-strong);
+  }
+
+  .story-rail__thumb img {
+    width: 4.6rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+
+  .story-rail > ul > li > div {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .story-rail__title {
+    color: var(--ink);
+    font-size: var(--step-small);
+    line-height: 1.6;
+    text-decoration: none;
+  }
+
+  .story-rail__title:hover {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .story-rail__more {
+    justify-self: end;
+    font-size: var(--step-tiny);
+    text-decoration: none;
+  }
+
+  .story-rail__more:hover {
+    text-decoration: underline;
+  }
+
   .article-intro > p {
     color: var(--ink-soft);
     font-size: var(--step-small);

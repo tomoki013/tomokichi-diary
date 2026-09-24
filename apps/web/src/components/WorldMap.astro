@@ -28,9 +28,14 @@ interface Props {
   countries: CountryLink[];
   /** Optional card anchored to the corresponding country pin. */
   featured?: FeaturedDestination | null;
+  /**
+   * `world` draws the whole globe; `visited` frames just the part of it the
+   * pins are in, so on a narrow screen they are not crowded into one corner.
+   */
+  fit?: "world" | "visited";
 }
 
-const { countries, featured = null } = Astro.props;
+const { countries, featured = null, fit = "world" } = Astro.props;
 
 const englishNameBySlug: Record<string, string> = {
   belgium: "Belgium",
@@ -82,18 +87,44 @@ const collection = feature(
 
 const WIDTH = 960;
 const HEIGHT = 490;
+/* The visited frame is the pins' bounding box plus a margin, sampled along
+   its edges so the projection's curvature is taken into account. Pins are
+   placed with the same projection, so they stay on their countries. */
+const visitedFrame = (() => {
+  const points = countries.flatMap((country) => {
+    const point = coordinatesBySlug[country.slug];
+    return point ? [point] : [];
+  });
+  if (points.length < 2) return null;
+  const lons = points.map(([lon]) => lon);
+  const lats = points.map(([, lat]) => lat);
+  const [west, east] = [Math.min(...lons) - 16, Math.max(...lons) + 16];
+  const [south, north] = [Math.min(...lats) - 14, Math.max(...lats) + 12];
+  const edge: [number, number][] = [];
+  for (let step = 0; step <= 10; step += 1) {
+    const lon = west + ((east - west) * step) / 10;
+    const lat = south + ((north - south) * step) / 10;
+    edge.push([lon, south], [lon, north], [west, lat], [east, lat]);
+  }
+  return { type: "MultiPoint", coordinates: edge } as const;
+})();
+
 const projection = geoNaturalEarth1().fitExtent(
   [
     [18, 18],
     [WIDTH - 18, HEIGHT - 18],
   ],
-  collection,
+  fit === "visited" && visitedFrame ? (visitedFrame as never) : collection,
 );
 /* One decimal of a 960-unit viewBox is ~0.06px on screen, and ~0.4px at full
    zoom — invisible, and a third off the page's HTML. */
 const path = geoPath(projection).digits(1);
 const mapShapes = collection.features.flatMap((country) => {
   const name = country.properties?.name ?? "";
+  // A cropped map would still carry the Americas as invisible paths; leave
+  // out every shape that falls wholly outside the frame.
+  const [[x0, y0], [x1, y1]] = path.bounds(country);
+  if (x1 < 0 || y1 < 0 || x0 > WIDTH || y0 > HEIGHT) return [];
   const d = path(country);
   return d ? [{ d, visited: countryByEnglishName.has(name) }] : [];
 });
@@ -137,7 +168,13 @@ const featuredPin = featured
   : null;
 ---
 
-<div class:list={["world-map", featured && "world-map--featured"]}>
+<div
+  class:list={[
+    "world-map",
+    featured && "world-map--featured",
+    fit === "visited" && "world-map--visited",
+  ]}
+>
   <div class="world-map__layout">
     <div class="world-map__stage-wrap">
       <div class="world-map__stage" data-map>

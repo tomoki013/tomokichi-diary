@@ -162,6 +162,29 @@ describe("article lifecycle", () => {
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
+  it("sets experience tags without creating a revision, and refuses unknown ones", async () => {
+    const id = await createArticle();
+    const put = (experienceTags: unknown) =>
+      request(`/v1/admin/articles/${id}/experience-tags`, {
+        method: "PUT",
+        headers: auth,
+        body: JSON.stringify({ experienceTags }),
+      });
+
+    const saved = await put(["moving", "exciting", "moving"]);
+    expect(saved.status).toBe(200);
+    // De-duplicated and in vocabulary order, whatever order the editor clicked.
+    expect(await saved.json()).toEqual({ experienceTags: ["exciting", "moving"] });
+
+    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+    expect(detail.experienceTags).toEqual(["exciting", "moving"]);
+    expect(detail.currentRevision.revisionNumber).toBe(1);
+
+    const rejected = await put(["sightseeing"]);
+    expect(rejected.status).toBe(400);
+    expect((await rejected.json()).error.code).toBe("API_VALIDATION_FAILED");
+  });
+
   it("returns 404 for an unknown article", async () => {
     const response = await request("/v1/admin/articles/does-not-exist", { headers: auth });
     expect(response.status).toBe(404);

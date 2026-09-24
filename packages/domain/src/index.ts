@@ -17,6 +17,7 @@ export * from "./entities/relation.js";
 export * from "./entities/ai-artifact.js";
 export * from "./entities/contact-message.js";
 export * from "./entities/knowledge.js";
+export * from "./entities/experience.js";
 
 export * from "./rules/publishing.js";
 export * from "./rules/revision.js";

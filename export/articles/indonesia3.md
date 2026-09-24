@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-19T00:00:00.000Z"
 updatedAt: "2026-03-19T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 朝、ジョグジャカルタのMTransオフィスに着いた。夜行移動のあとなので体は少し重くて、頭もまだ少し鈍いままだ。
 

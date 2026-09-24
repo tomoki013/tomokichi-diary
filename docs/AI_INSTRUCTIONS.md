@@ -28,7 +28,7 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 
 - apps: `apps/web`（Astro）、`apps/admin`（Vite+React、hash router）、`apps/api`（Hono）、`apps/mcp-server`。
 - packages: `domain`（entity / value / rule）、`application`（use case / port / read model）、`contracts`（DTO / zod / error code）、`data`（row ↔ entity、export 形式）、`seo`（純関数）。
-- Astro: `src/views/*Page.astro`（route type ごと）、`src/components/*.astro`、`src/lib/*.ts`。`IndexPage.astro` は 6 画面を持つ（分割予定、監査 §15）。
+- Astro: `src/views/*Page.astro`（route type ごと）、`src/components/*.astro`、`src/lib/*.ts`。Home は `HomePage.astro` + `components/home/*` に分割済み。`IndexPage.astro` は残り 5 画面を持つ（分割予定、監査 §15）。HOME の選定は `lib/editorial.ts`、体験タグの表示名は `lib/experiences.ts`（`docs/EDITORIAL.md`）。
 - テスト: `src/__tests__/*.test.ts` か `__tests__/` 隣接。built-site の検査は `scripts/check-*.ts` + `scripts/lib/*`。
 - id は UUID v7（`generateId`）。時刻は `Instant`（ISO 文字列）。
 
@@ -42,7 +42,7 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 
 ## Security
 
-- 秘密は `wrangler secret`。`.env` に本番値を書かない。`ci.yml` に Cloudflare token を足さない。
+- 秘密は `wrangler secret`。`.env` に本番値を書かない。Cloudflare token は GitHub の `production` environment secret だけに置き、`ci.yml` では Cloudflare と通信する step の `env` にだけ渡す（repository secret や job 全体の env にしない）。
 - お問い合わせの IP / メールをログに出さない。`ctx.logger` に本文を渡さない。
 - `/v1/admin/*` は必ず認証ミドルウェアの下（`v1.use("/admin/*")`）。新しい admin route はその下に `route()` する。
 - 公開 write を足すなら Turnstile かレート制限。

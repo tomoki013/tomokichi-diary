@@ -24,6 +24,8 @@ const articles = defineCollection({
     publishedAt: z.string().nullable().optional(),
     updatedAt: z.string(),
     noindex: z.boolean(),
+    /** Mirrors `Article.experienceTags`; the JSON graph is what pages read. */
+    experienceTags: z.array(z.string()).optional(),
   }),
 });
 

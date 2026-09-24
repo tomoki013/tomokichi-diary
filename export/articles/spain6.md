@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-02-24T00:00:00.000Z"
 updatedAt: "2025-02-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "unforgettable"
 ---
 トレドは前から評判を見てて期待値が高かったんだけど、実際に行くとその期待を普通に超えてきた。旧市街の密度、展望台からの見え方、夜景まで含めて、日帰りでも十分強く残る街だった。
 

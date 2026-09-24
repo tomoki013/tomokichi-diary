@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-02-22T00:00:00.000Z"
 updatedAt: "2025-02-22T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 {{embed:promotion-disclosure}}
 

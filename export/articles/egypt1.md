@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-17T00:00:00.000Z"
 updatedAt: "2025-06-17T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "discovery"
 ---
 到着早々の強烈な洗礼から一夜明けて、この日は本格的にカイロ市内を回ることにした。
 

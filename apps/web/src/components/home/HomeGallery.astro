@@ -1,0 +1,70 @@
+---
+import Picture from "../Picture.astro";
+import { content } from "../../lib/content";
+
+interface Props {
+  /** Photos already on the page (the hero), so the strip does not repeat them. */
+  exclude?: ReadonlySet<string>;
+}
+
+const { exclude = new Set<string>() } = Astro.props;
+
+/**
+ * One photo per story from the trips that moved the author most. Covers are
+ * the photos the author chose to stand for a story, so they carry the
+ * atmosphere better than whatever happens to come second in the body.
+ */
+const seen = new Set(exclude);
+const photos = [...content.withExperience("unforgettable"), ...content.withExperience("moving")]
+  .flatMap((view) => {
+    const photo = view.cover;
+    if (!photo || seen.has(photo.asset.storageKey)) return [];
+    seen.add(photo.asset.storageKey);
+    // A roundup spanning several countries has no single place to name.
+    const countries = new Set(
+      view.locations.flatMap(({ location }) => content.locations.countryOf(location.id)?.id ?? []),
+    );
+    const country = countries.size === 1 ? content.countryOf(view.article.id) : null;
+    return [
+      {
+        photo,
+        path: view.route.path,
+        title: view.revision.title,
+        place: country ? content.locations.nameOf(country.id, "ja") : null,
+      },
+    ];
+  })
+  .slice(0, 8);
+---
+
+{
+  photos.length >= 4 && (
+    <section class="home-gallery" aria-labelledby="home-gallery-title">
+      <header class="section-heading">
+        <div>
+          <p class="eyebrow">PHOTO JOURNAL</p>
+          <h2 id="home-gallery-title">ギャラリー</h2>
+          <p>言葉より先に伝わるもの。気になった一枚から、その旅の話へ。</p>
+        </div>
+        <a href="/gallery">すべて&nbsp; →</a>
+      </header>
+      <ul class="home-gallery__grid">
+        {photos.map((item, index) => (
+          <li class:list={[index >= 4 && "is-extra"]}>
+            <a href={item.path}>
+              <Picture
+                storageKey={item.photo.asset.storageKey}
+                alt={item.photo.usage.alt}
+                sizes="(max-width: 760px) 50vw, 280px"
+              />
+              <span class="home-gallery__caption" aria-hidden="true">
+                {item.place && <small>{item.place}</small>}
+                <span>{item.title}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

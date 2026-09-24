@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-06-17T00:00:00.000Z"
 updatedAt: "2025-06-17T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 エジプトでは、タクシーのナンバープレートや値札、バス番号などでアラビア語の数字を見る場面がかなりあります。
 

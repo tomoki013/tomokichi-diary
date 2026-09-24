@@ -1,0 +1,35 @@
+---
+import Picture from "../Picture.astro";
+---
+
+<aside class="home-about" aria-labelledby="home-about-title">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">ABOUT</p>
+      <h2 id="home-about-title">はじめまして、ともきちです。</h2>
+    </div>
+    <a href="/about">すべて&nbsp; →</a>
+  </header>
+
+  <div class="home-about__body">
+    <div class="home-about__photo">
+      <Picture
+        storageKey="images/Introduce/introduce.jpg"
+        alt="旅先に立つともきち"
+        sizes="(max-width: 760px) 70vw, 280px"
+      />
+      <span class="home-about__tape" aria-hidden="true"></span>
+    </div>
+
+    <div class="home-about__copy">
+      <p>
+        好きなのは、歴史を感じる建築と、その土地の空気を一変させる夕陽を眺める時間。有名な観光地だけでなく、現地のカフェや裏路地で、その土地の日常に溶け込む旅をしています。
+      </p>
+      <ul class="home-about__stance" aria-label="このブログの書き方">
+        <li>自分の足で行った場所だけを書く</li>
+        <li>うまくいかなかったことも、そのまま書く</li>
+        <li>景色の感動と、次の旅に役立つことをセットで</li>
+      </ul>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,62 @@
+---
+import WorldMap from "../WorldMap.astro";
+import { content } from "../../lib/content";
+import { journeys, visitedContinents } from "../../lib/destinations";
+
+/**
+ * Not a destination finder: a record of where the author has actually been,
+ * with each trip one click from its story.
+ */
+const countries = visitedContinents().flatMap((continent) => continent.countries);
+const cityCount = countries.reduce((total, country) => total + country.cities.length, 0);
+const trips = journeys().slice(0, 6);
+const month = (date: string | null) => date?.slice(0, 7).replace("-", ".") ?? "";
+---
+
+<section class="home-map" id="home-map" aria-labelledby="home-map-title">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">TOMOKICHI'S FOOTPRINTS</p>
+      <h2 id="home-map-title">地図から見る、ともきちの旅</h2>
+      <p>ピンは、実際に歩いた場所だけ。押すとその土地の旅の話へつながります。</p>
+    </div>
+    <a href="/destination">訪れた場所のすべて&nbsp; →</a>
+  </header>
+
+  <div class="home-map__grid">
+    <div class="home-map__canvas">
+      <WorldMap countries={countries} fit="visited" />
+      <dl class="home-map__stats">
+        <div><dt>国と地域</dt><dd>{countries.length}</dd></div>
+        <div><dt>歩いた街</dt><dd>{cityCount}</dd></div>
+        <div><dt>旅の話</dt><dd>{content.articleViews().length}</dd></div>
+      </dl>
+    </div>
+
+    {
+      trips.length > 0 && (
+        <div class="home-map__trips">
+          <p class="home-map__trips-title">
+            旅の足あと <span aria-hidden="true">— 新しい順</span>
+          </p>
+          <ol>
+            {trips.map((trip) => (
+              <li>
+                <a href={trip.path}>
+                  <time datetime={trip.collection.startDate ?? undefined}>
+                    {month(trip.collection.startDate)}
+                  </time>
+                  <strong>{trip.collection.title}</strong>
+                  <small>{trip.count}話</small>
+                </a>
+              </li>
+            ))}
+          </ol>
+          <a class="home-map__trips-more" href="/collections">
+            旅をまるごと読む&nbsp; →
+          </a>
+        </div>
+      )
+    }
+  </div>
+</section>

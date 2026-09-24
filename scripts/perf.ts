@@ -73,17 +73,39 @@ const baseline: Record<string, Record<string, number>> = baselinePath && existsS
 const measured: Record<string, Record<string, number>> = {};
 let worstPerformance = 1;
 
+/**
+ * Each page is loaded `numberOfRuns` times (lighthouserc.json) and judged on
+ * the median of those runs, per metric. Judging every run on its own made the
+ * gate fail on a single unlucky run: on the same commit, TBT for `/` ranged
+ * from under 100ms to over 600ms, depending on whether first paint landed
+ * before or after the initial style-and-layout task. A page that is really
+ * over budget is over budget in most of its runs, so the median still fails it.
+ */
+const median = (values: readonly number[]): number => {
+  const sorted = values.toSorted((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
+};
+
+const runsByRoute = new Map<string, LighthouseReport[]>();
 for (const result of reports) {
   const route =
     new URL(result.finalDisplayedUrl ?? result.requestedUrl).pathname
       .replace(/index\.html$/, "")
       .replace(/\/$/, "") || "/";
+  runsByRoute.set(route, [...(runsByRoute.get(route) ?? []), result]);
+}
 
-  const performance = result.categories["performance"]?.score ?? 0;
-  const seo = result.categories["seo"]?.score ?? 0;
+for (const [route, runs] of runsByRoute) {
+  const category = (name: string): number =>
+    median(runs.map((entry) => entry.categories[name]?.score ?? 0));
+  const numeric = (audit: string): number =>
+    median(runs.map((entry) => entry.audits[audit]?.numericValue ?? 0));
+
+  const performance = category("performance");
+  const seo = category("seo");
   worstPerformance = Math.min(worstPerformance, performance);
 
-  const numeric = (audit: string): number => result.audits[audit]?.numericValue ?? 0;
   measured[route] = {
     performance,
     "largest-contentful-paint": numeric("largest-contentful-paint"),
@@ -131,4 +153,8 @@ writeFileSync(
   `${JSON.stringify(measured, null, 2)}\n`,
 );
 
-report(findings, { perf: Math.round(worstPerformance * 100), pages: reports.length }, "perf");
+report(
+  findings,
+  { perf: Math.round(worstPerformance * 100), pages: runsByRoute.size, runs: reports.length },
+  "perf",
+);

@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-14T00:00:00.000Z"
 updatedAt: "2025-06-14T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "disaster"
 ---
 イスタンブールでの濃い初日を終えて、この日はカッパドキアへ向かう大移動の日だった。
 

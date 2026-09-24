@@ -8,6 +8,7 @@ import {
   listArticlesForAdmin,
   publishArticle,
   scheduleArticle,
+  setArticleExperienceTags,
   unpublishArticle,
   updateArticleDraft,
 } from "@tomokichi/application";
@@ -27,7 +28,13 @@ import {
 import type { AppEnv } from "../app.js";
 import { domainErrorResponse, errorResponse } from "../http.js";
 import { toArticleMediaDto, toArticleSummaryDto, toRevisionDto } from "../mappers.js";
-import { createArticleSchema, draftSchema, relationsSchema, scheduleSchema } from "../schemas.js";
+import {
+  createArticleSchema,
+  draftSchema,
+  experienceTagsSchema,
+  relationsSchema,
+  scheduleSchema,
+} from "../schemas.js";
 
 /** The only author the site has today; multi-author support is a data change, not an API one. */
 const DEFAULT_AUTHOR = "author-tomokichi" as AuthorId;
@@ -114,6 +121,7 @@ export function articleRoutes() {
       publishedRevisionId: article.publishedRevisionId,
       travelStartDate: article.travelStartDate,
       travelEndDate: article.travelEndDate,
+      experienceTags: article.experienceTags,
       media: usages.map((usage, index) =>
         toArticleMediaDto(
           usage,
@@ -236,6 +244,19 @@ export function articleRoutes() {
       })),
     );
     return c.json({ ok: true });
+  });
+
+  routes.put("/:id/experience-tags", async (c) => {
+    const parsed = validate(experienceTagsSchema, await c.req.json().catch(() => null));
+    if (!parsed.ok)
+      return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
+    const result = await setArticleExperienceTags(
+      c.get("ctx"),
+      c.req.param("id") as ArticleId,
+      parsed.value.experienceTags,
+    );
+    if (!result.ok) return domainErrorResponse(c, result.errors);
+    return c.json({ experienceTags: result.value.experienceTags });
   });
 
   return routes;

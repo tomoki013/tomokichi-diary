@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-03-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 クアラルンプール観光やクアラルンプールの移動方法を調べていると、かなりの確率で出てくるのが交通系カードの Touch'n Go です。
 

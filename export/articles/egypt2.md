@@ -10,6 +10,9 @@ revision: 2
 publishedAt: "2025-06-18T00:00:00.000Z"
 updatedAt: "2026-09-02T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "unforgettable"
 ---
 前日のカイロ観光を終えて、いよいよこの旅の大きな山場だったギザのピラミッドへ向かった。
 

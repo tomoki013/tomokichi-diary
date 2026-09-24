@@ -37,6 +37,7 @@ export function makeArticle(overrides: Partial<Article> = {}): Article {
     noindex: false,
     travelStartDate: null,
     travelEndDate: null,
+    experienceTags: [],
     ...overrides,
   };
 }

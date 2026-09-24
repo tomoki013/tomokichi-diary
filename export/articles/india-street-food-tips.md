@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-12-04T00:00:00.000Z"
 updatedAt: "2025-12-04T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
+  - "challenge"
 ---
 今回は、私が実際にインドに行って学んだ「お腹を壊しにくい屋台の選び方」を紹介します。
 屋台に挑戦してみたい方は、ぜひ参考にしてみてください。

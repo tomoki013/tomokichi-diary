@@ -52,6 +52,8 @@ export interface ArticleDetailDto extends ArticleSummaryDto {
   readonly publishedRevisionId: string | null;
   readonly travelStartDate: string | null;
   readonly travelEndDate: string | null;
+  /** Identifiers from the domain's experience vocabulary; labels are the client's. */
+  readonly experienceTags: readonly string[];
   readonly media: readonly ArticleMediaDto[];
   readonly relations: ArticleRelationsDto;
   readonly collectionIds: readonly string[];

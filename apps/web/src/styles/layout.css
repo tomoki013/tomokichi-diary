@@ -664,6 +664,14 @@
     padding-block: var(--band-tight) var(--space-md);
   }
 
+  /* The link columns are always below the fold; skip them until reached.
+     (Not the whole footer: its closing photo overhangs the page edge, which
+     paint containment would clip.) */
+  .site-footer__body {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 22rem;
+  }
+
   /* Closing photograph: pulled up over the page edge so the band reads as
      a bridge between the ivory page and the dark footer. */
   .site-footer__next {
@@ -790,6 +798,117 @@
   .site-footer__cta--primary:hover {
     border-color: transparent;
     background: var(--accent-strong);
+  }
+
+  /* The reader's shelf ("♡した旅" / "共有した旅") ----------------------- */
+  .my-trips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .my-trips__button {
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--step-small);
+  }
+
+  .my-trips__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 1.1rem;
+  }
+
+  .my-trips__button small {
+    min-width: 1.2rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 22%);
+    font-size: 0.7rem;
+    text-align: center;
+  }
+
+  .my-trips__button small:empty {
+    display: none;
+  }
+
+  .my-trips__dialog {
+    width: min(30rem, calc(100vw - 2rem));
+    max-height: min(34rem, 80svh);
+    padding: var(--space-md);
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .my-trips__dialog::backdrop {
+    background: rgb(20 18 14 / 55%);
+  }
+
+  .my-trips__dialog header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .my-trips__dialog h2 {
+    font-size: var(--step-h3);
+  }
+
+  .my-trips__dialog header button {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--ink-soft);
+  }
+
+  .my-trips__dialog ul {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .my-trips__dialog li {
+    display: grid;
+    gap: 0.1rem;
+    padding-block: 0.6rem;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+
+  .my-trips__dialog li a {
+    color: var(--ink);
+    font-size: var(--step-small);
+    text-decoration: none;
+  }
+
+  .my-trips__dialog li a:hover {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .my-trips__dialog li small,
+  .my-trips__note {
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .my-trips__empty {
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+  }
+
+  .my-trips__note {
+    margin-top: var(--space-sm);
   }
 
   .site-footer__body {

@@ -42,6 +42,11 @@
       sans-serif;
     --font-serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", Georgia, serif;
     --font-label: Georgia, "Times New Roman", serif;
+    /* Margin notes and doodles: a rounded face where the system has one. No
+       web font is shipped, so this never costs a request. */
+    --font-hand:
+      "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "M PLUS Rounded 1c", "Kosugi Maru",
+      var(--font-sans);
 
     /* Display sizes stay conservative: Japanese headings need room for a
        whole phrase per line, and oversized type is what forces mid-word

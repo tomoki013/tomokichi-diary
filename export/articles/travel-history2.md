@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-08-01T00:00:00.000Z"
 updatedAt: "2025-08-01T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
+  - "unforgettable"
 ---
 ## はじめに
 

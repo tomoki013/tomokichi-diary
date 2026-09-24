@@ -10,6 +10,8 @@ revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 シンガポール市内からチャンギ空港へ向かう方法はいくつかありますが、私は実際に**路線バスで空港まで移動しました**。
 

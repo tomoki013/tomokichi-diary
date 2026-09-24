@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2025-12-05T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 上海旅行で初めて飲んでからハマったティーブランド「CHAGEE（霸王茶姬）」。その後もマレーシア・クアラルンプールやシンガポールで見つけるたびに利用しました。
 

@@ -17,6 +17,9 @@ import ShareButton from "../components/ShareButton.astro";
 import CopyLinkButton from "../components/CopyLinkButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 import WebMcpTools from "../components/WebMcpTools.astro";
+import ExperienceChips from "../components/ExperienceChips.astro";
+import StoryRail from "../components/StoryRail.astro";
+import { EXPERIENCE_COPY, experienceHref } from "../lib/experiences";
 import { snapshot } from "../lib/content";
 
 interface Props {
@@ -56,6 +59,16 @@ const jsonLd = [
 ];
 
 const related = content.relatedTo(article.id, 3);
+// Two more ways on from a story — how it felt, and where it happened — each
+// skipping what the rails before it already offer.
+const shown = new Set([article.id, ...related.map((item) => item.article.id)]);
+const sameFeeling = content.sharingExperience(article.id, 3, shown);
+for (const item of sameFeeling) shown.add(item.article.id);
+const country = content.countryOf(article.id);
+const samePlace = content.inSameCountry(article.id, 3, shown);
+const countryRoute = country ? content.routes.canonicalFor("location", country.id) : undefined;
+const countryName = country ? content.locations.nameOf(country.id, "ja") : null;
+const leadExperience = article.experienceTags[0];
 const published = article.publishedAt?.slice(0, 10);
 const updated = article.updatedAt.slice(0, 10);
 const travel =
@@ -107,6 +120,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
       <div class="article-hero__content">
         {view.categories.length > 0 && <p class="eyebrow">{view.categories[0]?.name}</p>}
         <h1>{revision.title}</h1>
+        <ExperienceChips tags={article.experienceTags} tone={cover ? "light" : "default"} />
         <p class="article-hero__summary">{revision.summary}</p>
         <div class="article-hero__meta">
           {
@@ -133,8 +147,35 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
         <span class="article-author__mark" aria-hidden="true">旅</span>
         <div><small>WRITTEN BY</small><strong>{author?.name ?? "ともきち"}</strong></div>
       </div>
-      <p>{revision.summary}</p>
-      <LikeButton articleId={article.id} />
+      {
+        travel || locationLinks.length > 0 ? (
+          <dl class="article-overview">
+            {travel && (
+              <div>
+                <dt>旅した時期</dt>
+                <dd>{travel.replaceAll("-", ".")}</dd>
+              </div>
+            )}
+            {locationLinks.length > 0 && (
+              <div>
+                <dt>場所</dt>
+                <dd>
+                  {locationLinks.slice(0, 3).map((location) => (
+                    <a href={location.path}>{location.name}</a>
+                  ))}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>読了</dt>
+              <dd>約{readingMinutes}分</dd>
+            </div>
+          </dl>
+        ) : (
+          <p>{revision.summary}</p>
+        )
+      }
+      <LikeButton articleId={article.id} title={revision.title} path={route.path} />
     </div>
 
     <div class="article-layout">
@@ -162,12 +203,12 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
               この記録が、次の旅の小さなきっかけになればうれしいです。
             </p>
           </div>
-          <LikeButton articleId={article.id} />
+          <LikeButton articleId={article.id} title={revision.title} path={route.path} />
         </footer>
         <div class="article-share">
           <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
           <div class="article-share__actions">
-            <CopyLinkButton url={metadata.canonical} />
+            <CopyLinkButton url={metadata.canonical} title={revision.title} />
             <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
           </div>
         </div>
@@ -209,19 +250,57 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
         <aside class="article-facts">
           <p class="eyebrow">TRIP NOTES</p>
           {
-            travel && (
+            article.experienceTags.length > 0 && (
               <div>
-                <small>訪問時期</small>
-                <strong>{travel}</strong>
+                <small>この旅は</small>
+                <ExperienceChips tags={article.experienceTags} />
               </div>
             )
           }
-          <div><small>読了時間</small><strong>約{readingMinutes}分</strong></div>
+          {
+            travel && (
+              <div>
+                <small>旅した時期</small>
+                <strong>{travel.replaceAll("-", ".")}</strong>
+              </div>
+            )
+          }
           {locationLinks[0] && <a href={locationLinks[0].path}>この旅先の記事を見る →</a>}
         </aside>
       </div>
     </div>
   </article>
+
+  {
+    (sameFeeling.length > 0 || samePlace.length > 0) && (
+      <section class="section story-trail" aria-labelledby="story-trail-heading">
+        <p class="eyebrow">STORY TRAIL</p>
+        <h2 id="story-trail-heading">この旅の話の、その先へ</h2>
+        <div class="story-trail__rails">
+          {sameFeeling.length > 0 && leadExperience && (
+            <StoryRail
+              title="同じ気持ちになれる旅の話"
+              note={`「${EXPERIENCE_COPY[leadExperience].label}」をもっと`}
+              views={sameFeeling}
+              more={{ href: experienceHref(leadExperience), label: "この気分の旅をすべて見る" }}
+            />
+          )}
+          {samePlace.length > 0 && countryName && (
+            <StoryRail
+              title={`${countryName}の旅の話`}
+              note="同じ土地で書いたもの"
+              views={samePlace}
+              more={
+                countryRoute
+                  ? { href: countryRoute.path, label: `${countryName}の記事をすべて見る` }
+                  : null
+              }
+            />
+          )}
+        </div>
+      </section>
+    )
+  }
 
   {
     related.length > 0 && (

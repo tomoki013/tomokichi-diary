@@ -1,4 +1,5 @@
 import { v } from "@tomokichi/contracts";
+import { EXPERIENCE_TAGS } from "@tomokichi/domain";
 
 /** Every request body the admin API accepts, validated before it reaches a use case. */
 export const draftSchema = v.object({
@@ -40,6 +41,11 @@ export const mediaUsageSchema = v.object({
 });
 
 const relationSchema = v.literalUnion(["primary", "visited", "mentioned", "related"] as const);
+
+/** The whole set, replacing what the article had; `[]` clears it. */
+export const experienceTagsSchema = v.object({
+  experienceTags: v.array(v.literalUnion(EXPERIENCE_TAGS), { max: EXPERIENCE_TAGS.length }),
+});
 
 export const relationsSchema = v.object({
   locations: v.optional(

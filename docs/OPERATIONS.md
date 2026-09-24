@@ -12,12 +12,22 @@ pnpm diagnostics
 
 ## Releasing
 
-Releases are run by hand from a developer machine. CI checks; it does not ship.
-Nothing in the repository holds a Cloudflare credential — wrangler is already
-authenticated locally, so no production token has to exist in a workflow, a
-pull request, or the environment a dependency install script runs in.
+A push to `main` deploys itself: the `Deploy` job in `.github/workflows/ci.yml`
+starts only after the `Check` job is green and runs the sequence below. Its
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are secrets of the GitHub
+`production` environment (never repository secrets, so pull request runs cannot
+read them), attached only to the steps that talk to Cloudflare.
 
-Start from a clean `main` with a green `pnpm run ci`. The order matters and is
+- To reload `export/` into D1 as part of a release (after a batch edit made
+  through the local tooling, such as `pnpm content:experiences`), run the
+  workflow by hand on `main` with **seed** ticked.
+- Until the cutover the site is verified on workers.dev; set the environment
+  variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
+  at the Worker.
+
+The same sequence can still be run by hand from a developer machine where
+wrangler is authenticated. Start from a clean `main` with a green
+`pnpm run ci`. The order matters and is
 the same one the site has always shipped in:
 
 ```bash
@@ -168,13 +178,20 @@ code fix.
 
 ### `PERF_SCORE` / `PERF_LCP` / `PERF_CLS` / `PERF_TBT`
 
-The budget is Performance ≥ 95, SEO = 100, LCP ≤ 2.5s, CLS ≤ 0.10, TBT ≤ 200ms.
+The budget is Performance ≥ 95, SEO = 100, LCP ≤ 2.5s, CLS ≤ 0.10, TBT ≤ 200ms,
+judged on the **median** of each page's runs (`numberOfRuns` in
+`lighthouserc.json`), not on the worst one: a single run's TBT swings widely
+depending on whether first paint lands before the initial style-and-layout task.
 
 - Check the hero image on the named route: is `width`/`height` set, and is the
   first card `fetchpriority="high"`?
 - The public site ships only small progressive scripts (including WebMCP). A TBT
-  regression means one of those scripts or an island needs inspection.
+  regression means one of those scripts or an island needs inspection — or a
+  page laying out too much up front: long listings and below-the-fold bands use
+  `content-visibility: auto` so they are skipped until scrolled near.
 - Re-run one page: `pnpm perf` (edit `lighthouserc.json` to narrow the URL list).
+- Known structural costs and planned work are listed in
+  [audit §11.3](audit/diary-2.0-full-audit.md#113-20-で残る改善点) (P-6 onwards).
 
 ### `PERF_REGRESSION`
 

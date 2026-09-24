@@ -1,0 +1,48 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import Picture from "./Picture.astro";
+import ExperienceChips from "./ExperienceChips.astro";
+
+interface Props {
+  title: string;
+  /** A short aside next to the title. */
+  note?: string;
+  views: readonly ArticleView[];
+  more?: { href: string; label: string } | null;
+}
+
+const { title, note, views, more = null } = Astro.props;
+---
+
+<section class="story-rail">
+  <header>
+    <h3>{title}</h3>
+    {note && <p class="story-rail__note">{note}</p>}
+  </header>
+  <ul>
+    {
+      views.map((view) => (
+        <li>
+          {view.cover && (
+            <a class="story-rail__thumb" href={view.route.path} tabindex="-1" aria-hidden="true">
+              <Picture storageKey={view.cover.asset.storageKey} alt="" sizes="96px" />
+            </a>
+          )}
+          <div>
+            <a class="story-rail__title" href={view.route.path}>
+              {view.revision.title}
+            </a>
+            <ExperienceChips tags={view.article.experienceTags} />
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+  {
+    more && (
+      <a class="story-rail__more" href={more.href}>
+        {more.label}&nbsp; →
+      </a>
+    )
+  }
+</section>

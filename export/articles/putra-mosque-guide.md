@@ -10,6 +10,8 @@ revision: 3
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-09-23T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 クアラルンプール近郊の人気観光地「プトラモスク（Putra Mosque／Masjid Putra）」は、ピンク色の外観から「ピンクモスク」とも呼ばれています。
 

@@ -24,6 +24,7 @@ import type {
   TravelFact,
   ArticleKnowledge,
 } from "@tomokichi/domain";
+import { isExperienceTag } from "@tomokichi/domain";
 
 /**
  * Row ↔ entity mapping. Deliberately generic: a row is a plain object, so this
@@ -77,6 +78,9 @@ export const articleRow = {
     noindex: bool(row, "noindex"),
     travelStartDate: nullableStr(row, "travel_start_date") as Article["travelStartDate"],
     travelEndDate: nullableStr(row, "travel_end_date") as Article["travelEndDate"],
+    // Lenient on read: a value the vocabulary no longer has is dropped rather
+    // than failing the whole snapshot. Writes go through `parseExperienceTags`.
+    experienceTags: json<unknown[]>(row, "experience_tags", []).filter(isExperienceTag),
   }),
   from: (article: Article): Row => ({
     id: article.id,
@@ -95,6 +99,7 @@ export const articleRow = {
     noindex: flag(article.noindex),
     travel_start_date: article.travelStartDate,
     travel_end_date: article.travelEndDate,
+    experience_tags: JSON.stringify(article.experienceTags),
   }),
 };
 

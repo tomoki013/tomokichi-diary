@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-11-29T00:00:00.000Z"
 updatedAt: "2025-11-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "thrilling"
 ---
 3泊4日の上海旅行は、空港での3時間遅延から始まった。
 

@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-17T00:00:00.000Z"
 updatedAt: "2026-03-17T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
 ---
 シンガポールを出て、次はバリ。同じ東南アジアでも、ここから一気に旅の呼吸が変わった。
 

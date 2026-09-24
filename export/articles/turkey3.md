@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-06-16T00:00:00.000Z"
 updatedAt: "2025-06-16T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "moving"
+  - "unforgettable"
 ---
 前日の予約トラブルをなんとか乗り越えて、この日はカッパドキアの気球ツアーへ向かう朝だった。
 

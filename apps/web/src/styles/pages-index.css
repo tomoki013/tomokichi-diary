@@ -265,6 +265,71 @@
     font-size: var(--step-small);
   }
 
+  /* Mood is the first way to narrow the archive, so it is set as tactile
+     chips in each feeling's own colour; categories below stay plain type. */
+  .posts-filter__moods {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .posts-filter__moods > p {
+    color: var(--ink-soft);
+    font-family: var(--font-hand);
+    font-size: var(--step-small);
+  }
+
+  .posts-filter__mood-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .posts-filter__mood-list button {
+    --exp-hue: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.3rem;
+    padding: 0.3rem 0.85rem;
+    border: 1.5px dashed hsl(var(--exp-hue) 35% 76%);
+    border-radius: 999px;
+    background: var(--surface);
+    color: hsl(var(--exp-hue) 45% 30%);
+    font-size: var(--step-small);
+    transition:
+      background var(--speed) var(--ease),
+      border-color var(--speed) var(--ease);
+  }
+
+  .posts-filter__mood-list button:first-child {
+    color: var(--ink-soft);
+    border-color: var(--line-strong);
+  }
+
+  .posts-filter__mood-list button:is(:hover, :focus-visible) {
+    border-style: solid;
+    background: hsl(var(--exp-hue) 70% 96%);
+  }
+
+  .posts-filter__mood-list button.is-active {
+    border-style: solid;
+    border-color: hsl(var(--exp-hue) 45% 45%);
+    background: hsl(var(--exp-hue) 55% 90%);
+  }
+
+  .posts-filter__mood-list button:first-child.is-active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--on-dark);
+  }
+
+  .posts-filter__mood-list small {
+    color: inherit;
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+
   .posts-filter__chips {
     display: flex;
     flex-wrap: wrap;
@@ -361,6 +426,21 @@
 
   .posts-grid {
     grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  }
+
+  /* Every article is in the HTML (the filters work on the page, not the
+     server), so cards below the first screen are skipped until they are
+     scrolled near: laying out all of them up front was most of the page's
+     blocking time. */
+  .posts-grid > .card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 24rem;
+  }
+
+  @media (max-width: 34rem) {
+    .posts-grid > .card {
+      contain-intrinsic-size: auto 9rem;
+    }
   }
 
   .posts-empty,

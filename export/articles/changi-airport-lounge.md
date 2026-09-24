@@ -10,6 +10,8 @@ revision: 2
 publishedAt: "2026-08-29T00:00:00.000Z"
 updatedAt: "2026-08-29T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 アテネから約12時間のフライトでチャンギ空港に到着し、次の関西国際空港行きまで約4時間45分。深夜の乗り継ぎで実際に利用したのが、ターミナル1の **Plaza Premium Lounge** でした。
 

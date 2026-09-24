@@ -191,11 +191,10 @@ table, so redirects stay data rather than configuration.
 After a content change: `pnpm export:data`, commit, then `pnpm db:seed`,
 `pnpm media:build && pnpm media:sync`, and `pnpm deploy:web`.
 
-CI checks; it does not ship. A release is run by hand from a developer machine,
-where wrangler is already authenticated, so no Cloudflare credential exists in
-the repository for a workflow, a pull request, or a dependency install script
-to reach. The sequence is the release runbook in
-[OPERATIONS.md](OPERATIONS.md#releasing).
+A push to `main` that passes CI is deployed by the `Deploy` job in the same
+workflow, running the release runbook in
+[OPERATIONS.md](OPERATIONS.md#releasing). Its Cloudflare token lives only in
+the GitHub `production` environment, so pull request runs cannot read it.
 
 A release ships in a fixed order:
 

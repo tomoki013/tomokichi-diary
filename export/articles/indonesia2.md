@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-18T00:00:00.000Z"
 updatedAt: "2026-03-18T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "challenge"
 ---
 この日はスミニャックを離れて、本土へ向かう移動日だった。少し面倒な気持ちもあったけど、こういう泥くさい移動が入ると、旅全体の輪郭はむしろはっきりする。
 

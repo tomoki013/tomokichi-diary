@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-03-24T00:00:00.000Z"
 updatedAt: "2026-03-24T00:00:00.000Z"
 noindex: true
+experienceTags:
+  - "discovery"
 ---
 初海外の候補としてタイが先に挙がりやすいのは自然ですが、入口としての入りやすさだけで見ると、マレーシアの方が合う人はかなり多いと思います。
 

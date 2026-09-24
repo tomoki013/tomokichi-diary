@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-02-14T00:00:00.000Z"
 updatedAt: "2025-02-14T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "challenge"
 ---
 大学の春休みを使って、初めての一人旅でフランスとスペインを回ることにした。ずっと行ってみたかったヨーロッパなので、出発前からかなり気分が上がってた。
 

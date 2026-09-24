@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2025-02-15T00:00:00.000Z"
 updatedAt: "2025-02-15T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "challenge"
 ---
 パリ2日目は、美術館も街歩きも夜景も全部まとめて詰め込む日になった。あとから歩数を見たら4万歩を超えてて、さすがにやりすぎだったけど、そのぶんパリの密度はかなり感じられた。
 

@@ -10,6 +10,9 @@ revision: 1
 publishedAt: "2026-03-14T00:00:00.000Z"
 updatedAt: "2026-03-14T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "exciting"
+  - "funny"
 ---
 この日は観光らしい場所をちゃんと回る日にした。ただ、終わってみると順調だったというより、少しずつ予定がずれながら進んだ1日だった。
 

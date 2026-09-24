@@ -11,6 +11,7 @@ import PagePage from "../views/PagePage.astro";
 import LocationPage from "../views/LocationPage.astro";
 import CollectionPage from "../views/CollectionPage.astro";
 import IndexPage from "../views/IndexPage.astro";
+import HomePage from "../views/HomePage.astro";
 
 export function getStaticPaths() {
   return content.routes.renderable().map((route) => ({
@@ -34,7 +35,16 @@ const targetArticle =
   )
 }
 {route.targetType === "static" && targetArticle && <PagePage view={targetArticle} route={route} />}
-{route.targetType === "static" && !targetArticle && <IndexPage route={route} />}
+{
+  route.targetType === "static" && !targetArticle && route.path === "/" && (
+    <HomePage route={route} />
+  )
+}
+{
+  route.targetType === "static" && !targetArticle && route.path !== "/" && (
+    <IndexPage route={route} />
+  )
+}
 {route.targetType === "location" && <LocationPage route={route} />}
 {
   (route.targetType === "series" || route.targetType === "journey") && (

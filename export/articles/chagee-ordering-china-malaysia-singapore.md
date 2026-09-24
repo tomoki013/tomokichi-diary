@@ -10,6 +10,8 @@ revision: 1
 publishedAt: "2026-08-24T00:00:00.000Z"
 updatedAt: "2026-08-24T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "discovery"
 ---
 CHAGEE（霸王茶姬）は中国だけでなく、マレーシアやシンガポールにも店舗があります。
 

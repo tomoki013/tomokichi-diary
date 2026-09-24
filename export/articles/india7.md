@@ -10,6 +10,10 @@ revision: 1
 publishedAt: "2024-09-30T00:00:00.000Z"
 updatedAt: "2024-09-30T00:00:00.000Z"
 noindex: false
+experienceTags:
+  - "thrilling"
+  - "disaster"
+  - "challenge"
 ---
 インド旅行の最後は、バラナシの祭りを見てから帰国する日。ところが終盤で一気に体調を崩して、コルカタでもバンコクでもほとんど動けず、そのまま日本へ戻る、かなり長い帰路になった。
 
