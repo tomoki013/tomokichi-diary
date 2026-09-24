@@ -190,6 +190,8 @@ depending on whether first paint lands before the initial style-and-layout task.
   page laying out too much up front: long listings and below-the-fold bands use
   `content-visibility: auto` so they are skipped until scrolled near.
 - Re-run one page: `pnpm perf` (edit `lighthouserc.json` to narrow the URL list).
+- Known structural costs and planned work are listed in
+  [audit §11.3](audit/diary-2.0-full-audit.md#113-20-で残る改善点) (P-6 onwards).
 
 ### `PERF_REGRESSION`
 
