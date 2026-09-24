@@ -25,9 +25,9 @@ const month = (date: string | null) => date?.slice(0, 7).replace("-", ".") ?? ""
 
   <div class="home-map__grid">
     <div class="home-map__canvas">
-      <WorldMap countries={countries} />
+      <WorldMap countries={countries} fit="visited" />
       <dl class="home-map__stats">
-        <div><dt>訪れた国と地域</dt><dd>{countries.length}</dd></div>
+        <div><dt>国と地域</dt><dd>{countries.length}</dd></div>
         <div><dt>歩いた街</dt><dd>{cityCount}</dd></div>
         <div><dt>旅の話</dt><dd>{content.articleViews().length}</dd></div>
       </dl>

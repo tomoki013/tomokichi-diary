@@ -318,15 +318,18 @@
   }
 
   /* 2. Find a story ------------------------------------------------- */
-  .home-picker {
+  /* Kept short: a heading, one search box and a row of stickers, not a band
+     of its own the reader has to scroll through. */
+  .home > .home-picker {
     display: grid;
     justify-items: center;
-    gap: var(--space-md);
+    gap: var(--space-sm);
+    padding-block: var(--space-lg) var(--space-md);
     text-align: center;
   }
 
   .home-picker h2 {
-    font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.9rem);
+    font-size: clamp(1.15rem, 1rem + 0.9vw, 1.7rem);
   }
 
   .home-picker__search {
@@ -387,7 +390,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.6rem 0.55rem;
-    max-width: 44rem;
+    max-width: 52rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -397,7 +400,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.45rem 0.95rem;
+    padding: 0.35rem 0.8rem;
     border: 1.5px solid var(--ink);
     border-radius: 0.55rem 0.7rem 0.5rem 0.75rem;
     background: hsl(var(--exp-hue) 75% 94%);
@@ -597,6 +600,22 @@
 
   .home-latest__row > li {
     scroll-snap-align: start;
+  }
+
+  /* The archive turns cards into compact rows on a phone; in a sideways row
+     they stay as covers with the title underneath. */
+  @media (max-width: 34rem) {
+    .home-latest__row > .card {
+      display: flex;
+      padding-block: 0;
+      box-shadow: none;
+    }
+    .home-latest__row > .card > a img {
+      aspect-ratio: 3 / 2;
+    }
+    .home-latest__row .card__body {
+      padding-top: 0.7rem;
+    }
   }
 
   .home-scroll-hint {
@@ -1051,6 +1070,25 @@
   }
 
   @media (max-width: 34rem) {
+    /* One sideways row of stickers instead of three wrapped lines. */
+    .home-picker__chips {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      width: calc(100% + var(--gutter) * 2);
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 0.3rem var(--gutter) 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .home-picker__chips::-webkit-scrollbar {
+      display: none;
+    }
+    .home-picker__chips > li {
+      flex: none;
+    }
+    .home-map__trips li:nth-child(n + 4) {
+      display: none;
+    }
     .home-map__stats dd {
       font-size: 1.35rem;
     }
