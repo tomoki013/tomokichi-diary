@@ -63,7 +63,11 @@ record(
 );
 
 const canonical = /<link\b[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i.exec(home)?.[1];
-record("homepage canonical", canonical === BASE, canonical ? `found ${canonical}` : "missing");
+record(
+  "homepage canonical",
+  canonical === BASE || canonical === `${BASE}/`,
+  canonical ? `found ${canonical}` : "missing",
+);
 
 const robotsMeta =
   /<meta\b[^>]*name=["']robots["'][^>]*content=["']([^"']+)["']/i.exec(home)?.[1] ?? "";
@@ -105,7 +109,7 @@ const allSitemapLocations = [
 record(
   "sitemap.xml",
   sitemapResponse?.status === 200 &&
-    allSitemapLocations.includes(BASE) &&
+    (allSitemapLocations.includes(BASE) || allSitemapLocations.includes(`${BASE}/`)) &&
     allSitemapLocations
       .filter((location) => location.startsWith("http"))
       .every((location) => location === BASE || location.startsWith(`${BASE}/`)),
