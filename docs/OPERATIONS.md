@@ -24,6 +24,17 @@ read them), attached only to the steps that talk to Cloudflare.
 - Until the cutover the site is verified on workers.dev; set the environment
   variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
   at the Worker.
+- Media uploads are skipped by `.cache/r2-manifest.json`, which the job keeps
+  in the Actions cache (`r2-manifest-<run>`; each run restores the newest one
+  and saves its own, even when a later step fails). A deploy with no media
+  changes spends seconds on "Publish media to object storage"; the first run
+  without a cache entry re-sends everything (~20 min).
+- The manifest only knows what was sent, not what is in the bucket. If objects
+  were deleted or overwritten in R2 by hand, run the workflow on `main` with
+  **full_media_sync** ticked (it sets `MEDIA_SYNC_FULL=1`, which ignores the
+  manifest and re-sends every object, then saves a fresh one). Deleting every
+  `r2-manifest-` entry under Actions → Caches has the same effect on the next
+  deploy. Locally: `MEDIA_SYNC_FULL=1 pnpm media:sync`, or delete the file.
 
 The same sequence can still be run by hand from a developer machine where
 wrangler is authenticated. Start from a clean `main` with a green

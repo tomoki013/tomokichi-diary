@@ -10,6 +10,10 @@ on:
         description: "Also load export/ into D1 (pnpm db:seed) before deploying the API"
         type: boolean
         default: false
+      full_media_sync:
+        description: "Ignore the media upload manifest and re-send every object to R2"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -89,11 +93,30 @@ jobs:
       - run: pnpm media:build
       - run: pnpm build
 
+      # media:sync skips objects recorded in .cache/r2-manifest.json. Every run
+      # saves a new entry (the manifest grows as media is added) and restores
+      # the newest one; it is saved even when a later step fails, so a partial
+      # sync is not lost. Kept apart from the derivatives cache above.
+      - name: Restore media upload manifest
+        uses: actions/cache/restore@v6
+        with:
+          path: .cache/r2-manifest.json
+          key: r2-manifest-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: r2-manifest-
+
       - name: Publish media to object storage
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MEDIA_SYNC_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.full_media_sync && '1' || '' }}
         run: pnpm media:sync
+
+      - name: Save media upload manifest
+        if: always() && hashFiles('.cache/r2-manifest.json') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: .cache/r2-manifest.json
+          key: r2-manifest-${{ github.run_id }}-${{ github.run_attempt }}
 
       # Migrations run ahead of the API that reads the new shape, so they must
       # stay backwards compatible (expand/contract, docs/OPERATIONS.md).
