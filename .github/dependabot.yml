@@ -19,12 +19,10 @@ updates:
           - "*"
 
   - package-ecosystem: npm
-    # pnpm workspace: the root lockfile plus every workspace package manifest.
-    directories:
-      - /
-      - /apps/*
-      - /packages/*
-      - /infrastructure/*/*
+    # pnpm workspace: scanning / covers every package in pnpm-workspace.yaml
+    # and updates the root lockfile with it. Listing the packages as well made
+    # a second, lockfile-less PR per package that could never pass CI.
+    directory: /
     schedule:
       interval: weekly
       day: monday
