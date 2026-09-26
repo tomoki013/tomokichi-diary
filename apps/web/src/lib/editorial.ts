@@ -91,6 +91,9 @@ export const SELECTIONS: readonly Selection[] = [
   },
 ];
 
+/** Temporarily kept out of the home page while the rankings are being revised. */
+const HIDDEN_HOME_SELECTIONS = new Set(["regret", "food"]);
+
 const viewBySlug = (slug: string): ArticleView | null =>
   content.articleViews().find((view) => view.article.slug === slug) ?? null;
 
@@ -105,5 +108,5 @@ export function selections(): { selection: Selection; views: ArticleView[] }[] {
   return SELECTIONS.map((selection) => ({
     selection,
     views: selection.slugs.flatMap((slug) => viewBySlug(slug) ?? []),
-  })).filter((entry) => entry.views.length > 0);
+  })).filter((entry) => entry.views.length > 0 && !HIDDEN_HOME_SELECTIONS.has(entry.selection.id));
 }

@@ -1,9 +1,10 @@
 import type { SeoConfig } from "@tomokichi/seo";
 
 /**
- * Environment-specific configuration. Preview and staging deploys set
- * `PUBLIC_INDEXABLE=false`, which turns every page noindex and makes
- * robots.txt disallow everything — a preview must never compete with the site.
+ * Environment-specific configuration. Production explicitly sets
+ * `PUBLIC_INDEXABLE=true`; every other build is noindex by default so a
+ * preview cannot accidentally compete with the site if its environment is
+ * incomplete.
  */
 const siteUrl = (process.env.PUBLIC_SITE_URL ?? "https://tomokichidiary.com").replace(/\/+$/, "");
 
@@ -17,7 +18,7 @@ export const seoConfig: SeoConfig = {
   publisherName: "ともきちの旅行日記",
   publisherLogoUrl: `${siteUrl}/images/Introduce/introduce.jpg`,
   twitterHandle: null,
-  indexable: process.env.PUBLIC_INDEXABLE !== "false",
+  indexable: process.env.PUBLIC_INDEXABLE === "true",
 };
 
 export const siteDescription =

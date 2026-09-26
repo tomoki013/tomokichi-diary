@@ -1,5 +1,6 @@
 ---
 import type { Route } from "@tomokichi/domain";
+import type { ArticleView } from "@tomokichi/application";
 import { buildPageMetadata, buildWebSiteJsonLd } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ArticleCard from "../components/ArticleCard.astro";
@@ -39,7 +40,7 @@ const heroStories = episodes.map(({ episode, view }) => ({
   hook: episode.hook,
 }));
 const heroPhotos = new Set(episodes.flatMap(({ view }) => view.cover?.asset.storageKey ?? []));
-const latest = content.articleViews().slice(0, 8);
+const latest: ArticleView[] = content.articleViews().slice(0, 8);
 ---
 
 <BaseLayout
@@ -61,7 +62,8 @@ const latest = content.articleViews().slice(0, 8);
         <a href="/posts">すべて&nbsp; →</a>
       </header>
       <ul class="home-latest__row">
-        {latest.map((view) => <ArticleCard view={view} level={3} />)}
+        {latest.slice(0, 2).map((view) => <ArticleCard view={view} level={3} eager />)}
+        {latest.slice(2).map((view) => <ArticleCard view={view} level={3} />)}
       </ul>
     </section>
 

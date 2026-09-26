@@ -33,9 +33,6 @@ const monthOf = (view: ArticleView) =>
           <p class="eyebrow">BEST EPISODES</p>
           <h2 id="home-best-title">ともきちのベストエピソード</h2>
         </div>
-        <p class="home-best__counter" aria-hidden="true">
-          <span data-carousel-current>1</span> / {slides.length}
-        </p>
       </header>
 
       <div class="home-best__stage">
@@ -70,7 +67,7 @@ const monthOf = (view: ArticleView) =>
           ))}
         </ol>
         {slides.length > 1 && (
-          <>
+          <div class="home-best__controls" aria-label="ベストエピソードの移動">
             <button
               class="home-best__arrow home-best__arrow--prev"
               type="button"
@@ -79,6 +76,9 @@ const monthOf = (view: ArticleView) =>
             >
               ‹
             </button>
+            <p class="home-best__counter" aria-hidden="true">
+              <span data-carousel-current>1</span> / {slides.length}
+            </p>
             <button
               class="home-best__arrow home-best__arrow--next"
               type="button"
@@ -87,7 +87,7 @@ const monthOf = (view: ArticleView) =>
             >
               ›
             </button>
-          </>
+          </div>
         )}
       </div>
     </section>

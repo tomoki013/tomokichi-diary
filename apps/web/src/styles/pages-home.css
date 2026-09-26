@@ -34,10 +34,16 @@
   /* The same inside the sideways rows: slides, cards and ranking boards
      scrolled out to the right are skipped until they are scrolled to. */
   .home-best__slide,
-  .home-latest__row > li,
   .home-picks__board {
     content-visibility: auto;
     contain-intrinsic-size: auto 26rem;
+  }
+
+  /* The latest row deliberately shows the edge of the next card. Keeping
+     each item renderable prevents a lazy image from making that preview look
+     like empty space. */
+  .home-latest__row > li {
+    content-visibility: visible;
   }
 
   .home > :last-child {
@@ -451,10 +457,21 @@
 
   /* 3. Best episodes: one big photo at a time --------------------------- */
   .home-best__counter {
+    margin: 0;
     color: var(--ink-faint);
     font-family: var(--font-label);
     font-size: var(--step-small);
     letter-spacing: 0.1em;
+    min-width: 3.5rem;
+    text-align: center;
+  }
+
+  .home-best__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
   }
 
   .home-best__stage {
@@ -572,10 +589,9 @@
   }
 
   .home-best__arrow {
-    position: absolute;
-    top: 50%;
     display: grid;
     place-items: center;
+    flex: none;
     width: 2.6rem;
     height: 2.6rem;
     border: 1.5px solid var(--ink);
@@ -585,19 +601,10 @@
     color: var(--ink);
     font-size: 1.5rem;
     line-height: 1;
-    transform: translateY(-50%);
   }
 
   .home-best__arrow:hover {
     background: var(--accent-tint);
-  }
-
-  .home-best__arrow--prev {
-    left: 0;
-  }
-
-  .home-best__arrow--next {
-    right: 0;
   }
 
   /* 4. Latest: a row that scrolls sideways ------------------------------ */
@@ -626,16 +633,42 @@
   /* The archive turns cards into compact rows on a phone; in a sideways row
      they stay as covers with the title underneath. */
   @media (max-width: 34rem) {
+    .home-latest__row {
+      /* Keep a slice of the next card in view so the row reads as a carousel
+         even before the user starts swiping. */
+      padding-right: 0;
+    }
+
     .home-latest__row > .card {
       display: flex;
+      flex-direction: column;
+      min-width: 0;
       padding-block: 0;
       box-shadow: none;
+    }
+    .home-latest__row > .card > a {
+      width: 100%;
+    }
+    .home-latest__row > .card > a picture {
+      display: block;
     }
     .home-latest__row > .card > a img {
       aspect-ratio: 3 / 2;
     }
     .home-latest__row .card__body {
       padding-top: 0.7rem;
+    }
+
+    .home-latest__row .card__summary {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+    }
+
+    .home-latest__row .card__footer {
+      padding-top: 0.35rem;
     }
   }
 
@@ -1044,17 +1077,9 @@
       gap: var(--space-md);
       padding-inline: 0.4rem;
     }
-    /* Over the photo on a phone, where there is no room beside it. */
     .home-best__arrow {
-      top: calc(1rem + 36vw);
       width: 2.3rem;
       height: 2.3rem;
-    }
-    .home-best__arrow--prev {
-      left: -0.3rem;
-    }
-    .home-best__arrow--next {
-      right: -0.3rem;
     }
     .home-gallery__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1098,7 +1123,7 @@
       font-size: 1.35rem;
     }
     .home-latest__row {
-      grid-auto-columns: 72vw;
+      grid-auto-columns: minmax(15rem, 72vw);
     }
     .home-picks__row {
       grid-auto-columns: 80vw;

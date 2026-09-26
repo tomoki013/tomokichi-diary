@@ -26,6 +26,12 @@ interface Step {
   optional?: boolean;
 }
 
+// The CI suite validates the artefact that the production deploy will ship.
+// Direct preview builds remain noindex by default, but a local `pnpm run ci`
+// must not accidentally turn that safety default into a false SEO regression.
+process.env.PUBLIC_SITE_URL ??= "https://tomokichidiary.com";
+process.env.PUBLIC_INDEXABLE ??= "true";
+
 /** SGR colour codes, which some CI runners force on. */
 const ANSI_ESCAPE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
 

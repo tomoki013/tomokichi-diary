@@ -23,7 +23,8 @@ read them), attached only to the steps that talk to Cloudflare.
   workflow by hand on `main` with **seed** ticked.
 - Until the cutover the site is verified on workers.dev; set the environment
   variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
-  at the Worker.
+  at the Worker. The production build must also carry
+  `PUBLIC_INDEXABLE=true`; all other builds are noindex by default.
 - Media uploads are skipped by `.cache/r2-manifest.json`, which the job keeps
   in the Actions cache (`r2-manifest-<run>`; each run restores the newest one
   and saves its own, even when a later step fails). A deploy with no media
@@ -53,6 +54,39 @@ VITE_API_URL=https://api.tomokichidiary.com pnpm --filter @tomokichi/admin build
 pnpm deploy:admin && \
 pnpm verify:live https://tomokichidiary.com
 ```
+
+### Domain cutover preflight
+
+`verify:live` checks legacy URL coverage, but it cannot detect a wrong
+canonical host, a preview accidentally becoming indexable, a missing `www` or
+HTTP redirect, or a site/API CORS mismatch. After the web Worker and DNS are
+ready, run both checks against the real domain:
+
+```bash
+pnpm verify:live https://tomokichidiary.com
+pnpm verify:cutover https://tomokichidiary.com
+```
+
+`verify:cutover` is intentionally strict. It checks the home page canonical,
+robots.txt, sitemap host consistency, apex HTTPS, `www` and HTTP redirects,
+the service worker, a representative media asset, and the API health/CORS
+origin. Do not proceed to Search Console resubmission or announce the cutover
+while it is failing.
+
+Before changing DNS:
+
+- keep the current Netlify domain attached for the rollback window;
+- lower DNS TTL ahead of the change and switch apex and `www` together;
+- confirm the Cloudflare custom domain/redirect rules are ready, because the
+  web Worker's `wrangler.toml` deliberately does not contain a guessed zone
+  ID or an automatic domain binding;
+- deploy API and web in the documented order, then point `VERIFY_URL` at the
+  custom domain;
+- check the production contact form, API health, media URL, GSC URL
+  inspection, and GA4 realtime after the two automated checks pass.
+
+If any check fails, leave DNS on Netlify. The existing workers.dev deployment
+and Netlify site remain the safe rollback paths.
 
 Two details that are easy to lose:
 
