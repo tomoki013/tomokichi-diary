@@ -22,7 +22,7 @@
     "tsx": "^4.20.6",
     "vite": "^8.3.1",
     "vite-plugin-singlefile": "^2.3.0",
-    "vitest": "^4.1.11",
+    "vitest": "^5.0.1",
     "wrangler": "^4.45.0"
   }
 }
