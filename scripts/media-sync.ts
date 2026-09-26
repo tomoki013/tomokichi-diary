@@ -10,6 +10,11 @@ import { CACHE_DIR, MEDIA_DIR } from "./media-build.js";
  * re-run only sends what changed. Nothing here holds a credential: it drives
  * the already-authenticated wrangler CLI.
  *
+ * The manifest is written as uploads complete and again on SIGINT/SIGTERM, so
+ * a failed or cancelled run keeps its progress. It only records what this
+ * machine (or CI cache) sent; `MEDIA_SYNC_FULL=1` ignores it and re-sends
+ * everything, for when the bucket was changed behind its back.
+ *
  *   pnpm media:build && pnpm media:sync
  */
 const BUCKET = process.env.MEDIA_BUCKET ?? "tomokichi-diary-media";
@@ -18,6 +23,9 @@ const WRANGLER = join(process.cwd(), "apps", "api", "node_modules", ".bin", "wra
 // The API rate-limits a burst of uploads; a failed object keeps its previous
 // version, so the retry below is safe to re-run.
 const CONCURRENCY = Number(process.env.MEDIA_SYNC_CONCURRENCY ?? 6);
+const FULL = process.env.MEDIA_SYNC_FULL === "1";
+// How many completed uploads may be lost if the process dies without a signal.
+const SAVE_EVERY = 25;
 
 interface Upload {
   key: string;
@@ -57,9 +65,23 @@ function walk(dir: string, prefix: string): Upload[] {
 }
 
 // Keyed by size *and* cache header, so changing the header re-uploads.
-const manifest: Record<string, string> = existsSync(MANIFEST)
-  ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, string>)
-  : {};
+const manifest: Record<string, string> =
+  !FULL && existsSync(MANIFEST)
+    ? (JSON.parse(readFileSync(MANIFEST, "utf8")) as Record<string, string>)
+    : {};
+
+const saveManifest = (): void => {
+  mkdirSync(join(process.cwd(), ".cache"), { recursive: true });
+  writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 0)}\n`);
+};
+
+// A cancelled CI job is signalled before it is killed; keep what was sent.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, () => {
+    saveManifest();
+    process.exit(130);
+  });
+}
 
 const fingerprint = (upload: Upload): string => `${upload.size}:${cacheControlFor(upload.key)}`;
 
@@ -84,11 +106,8 @@ const worker = async (): Promise<void> => {
     if (outcome.ok) {
       manifest[upload.key] = fingerprint(upload);
       done++;
-      if (done % 100 === 0) {
-        mkdirSync(join(process.cwd(), ".cache"), { recursive: true });
-        writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 0)}\n`);
-        process.stderr.write(`  ${done}/${pending.length}\n`);
-      }
+      if (done % SAVE_EVERY === 0) saveManifest();
+      if (done % 100 === 0) process.stderr.write(`  ${done}/${pending.length}\n`);
     } else {
       // The last line is wrangler's log-file path; the line before it carries
       // the reason.
@@ -103,11 +122,10 @@ const worker = async (): Promise<void> => {
 
 await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
-mkdirSync(join(process.cwd(), ".cache"), { recursive: true });
-writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 0)}\n`);
+saveManifest();
 
 process.stdout.write(
-  `✓ media sync ${done}/${pending.length} uploaded | ${all.length - pending.length} unchanged | bucket ${BUCKET}\n`,
+  `✓ media sync ${done}/${pending.length} uploaded | ${all.length - pending.length} unchanged | bucket ${BUCKET}${FULL ? " | full" : ""}\n`,
 );
 for (const failure of failures.slice(0, 10)) process.stdout.write(`  ✗ ${failure}\n`);
 process.exit(failures.length > 0 ? 1 : 0);
