@@ -2,6 +2,10 @@
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023"],
+    // TypeScript 6 no longer loads every @types package by default. The core
+    // packages use the standard crypto and URL globals, which reach them
+    // through @types/node; packages that set their own "types" are unaffected.
+    "types": ["node"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "moduleDetection": "force",
