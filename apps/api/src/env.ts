@@ -1,5 +1,6 @@
 import type { D1Like } from "@tomokichi/infra-d1";
 import type { R2Like } from "@tomokichi/infra-r2";
+import type { IntakeBinding } from "@inquiry-platform/sdk";
 
 /**
  * The Worker's bindings and configuration. This is the only place in the API
@@ -20,6 +21,19 @@ export interface Env {
   TURNSTILE_EXPECTED_HOSTNAME?: string;
   /** Salt for the sender-address hash used to rate-limit the contact form. */
   IP_HASH_SALT?: string;
+  /** The inquiry platform's `Intake` entrypoint. Unset means the form refuses. */
+  INQUIRY?: IntakeBinding;
+  /** One contact submission per sender per minute. Unset means the form refuses. */
+  CONTACT_RATE_LIMITER?: RateLimit;
+  /** The inquiry platform's operator API gateway, e.g. `https://admin.tmkch.io`. */
+  INQUIRY_API_ORIGIN?: string;
+  /**
+   * Cloudflare Access service token accepted by the gateway's Access
+   * application. Secrets. Any of the three unset means the admin's inquiry
+   * screen reports "not configured" instead of calling anything.
+   */
+  INQUIRY_ACCESS_CLIENT_ID?: string;
+  INQUIRY_ACCESS_CLIENT_SECRET?: string;
   /** Salt used before anonymous like identities are persisted. */
   LIKE_HASH_SALT?: string;
   /** Cloudflare Access team domain, e.g. `example.cloudflareaccess.com`. */

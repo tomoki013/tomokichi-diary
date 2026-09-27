@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
+import type { ContactMessage } from "@tomokichi/domain";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 
@@ -380,103 +381,20 @@ describe("reference data", () => {
   });
 });
 
-describe("contact form", () => {
-  const contactEnv = {
-    ADMIN_TOKEN: TOKEN,
-    TURNSTILE_SECRET_KEY: "secret",
-    IP_HASH_SALT: "salt",
-  } as unknown as Env;
-
-  const submit = async (
-    fields: Record<string, string>,
-    options: { verified?: boolean; ip?: string } = {},
-  ): Promise<Response> => {
-    const contactApp = createApp({
-      contextFactory: () => ctx,
-      verifyChallenge: async () => options.verified ?? true,
-    });
-    const form = new FormData();
-    for (const [key, value] of Object.entries(fields)) form.append(key, value);
-    return contactApp.request(
-      "/v1/contact",
-      { method: "POST", body: form, headers: { "cf-connecting-ip": options.ip ?? "203.0.113.1" } },
-      contactEnv,
-    );
-  };
-
-  const valid = {
-    name: "ともきち",
-    email: "reader@example.com",
-    subject: "記事の感想",
-    body: "CHAGEEの記事、とても参考になりました。",
-    "cf-turnstile-response": "token",
-  };
-
-  it("stores a valid submission and redirects back to the site", async () => {
-    const response = await submit(valid);
-    expect(response.status).toBe(303);
-    expect(response.headers.get("api-version")).toBe("1");
-    expect(response.headers.get("location")).toContain("/contact?sent=1");
-
-    const stored = await ctx.repos.contactMessages.list(10);
-    expect(stored).toHaveLength(1);
-    expect(stored[0]).toMatchObject({ subject: "記事の感想", status: "unread" });
-    // The address itself is never stored, only a salted hash of it.
-    expect(stored[0]?.ipHash).not.toContain("203.0.113.1");
-  });
-
-  it("refuses a submission that fails the challenge", async () => {
-    const response = await submit(valid, { verified: false });
-    expect(response.headers.get("location")).toContain("error=challenge");
-    expect(await ctx.repos.contactMessages.list(10)).toHaveLength(0);
-  });
-
-  it("refuses a submission with no challenge token at all", async () => {
-    const withoutToken = { ...valid, "cf-turnstile-response": "" };
-    expect((await submit(withoutToken)).headers.get("location")).toContain("error=challenge");
-  });
-
-  it("swallows a honeypot submission without storing it", async () => {
-    const response = await submit({ ...valid, website: "https://spam.example" });
-    // Reported as success so the bot learns nothing.
-    expect(response.headers.get("location")).toContain("sent=1");
-    expect(await ctx.repos.contactMessages.list(10)).toHaveLength(0);
-  });
-
-  it("reports invalid input without storing it", async () => {
-    const response = await submit({ ...valid, email: "not-an-address" });
-    expect(response.headers.get("location")).toContain("error=invalid");
-    expect(await ctx.repos.contactMessages.list(10)).toHaveLength(0);
-  });
-
-  it("rate-limits the same sender", async () => {
-    await submit(valid);
-    const second = await submit({ ...valid, subject: "二通目" });
-    expect(second.headers.get("location")).toContain("error=toofast");
-    expect(await ctx.repos.contactMessages.list(10)).toHaveLength(1);
-  });
-
-  it("marks a link flood as spam rather than dropping it", async () => {
-    await submit({ ...valid, body: "https://a.com https://b.com https://c.com https://d.com" });
-    expect((await ctx.repos.contactMessages.list(10))[0]?.status).toBe("spam");
-  });
-
-  it("is closed when the challenge secret is not configured", async () => {
-    const unconfigured = createApp({
-      contextFactory: () => ctx,
-      verifyChallenge: async () => true,
-    });
-    const form = new FormData();
-    for (const [key, value] of Object.entries(valid)) form.append(key, value);
-    const response = await unconfigured.request("/v1/contact", { method: "POST", body: form }, {
-      ADMIN_TOKEN: TOKEN,
-    } as Env);
-    expect(response.status).toBe(500);
-    expect((await response.json()).error.code).toBe("API_INTERNAL");
-  });
-
-  it("lists and re-files messages in the admin", async () => {
-    await submit(valid);
+describe("admin inbox", () => {
+  // New messages go to the inquiry platform (see contact.test.ts); the inbox
+  // still lists and re-files what arrived before the switch.
+  it("lists and re-files messages received before the switch", async () => {
+    await ctx.repos.contactMessages.save({
+      id: "m1",
+      name: "ともきち",
+      email: "reader@example.com",
+      subject: "記事の感想",
+      body: "CHAGEEの記事、とても参考になりました。",
+      ipHash: "abc",
+      status: "unread",
+      createdAt: "2026-08-30T00:00:00.000Z",
+    } as ContactMessage);
     const listed = await (await request("/v1/admin/messages", { headers: auth })).json();
     expect(listed.unread).toBe(1);
 

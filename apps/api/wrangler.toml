@@ -23,6 +23,12 @@ ACCESS_TEAM_DOMAIN = "tomoki-ttttt.cloudflareaccess.com"
 ACCESS_AUD = "edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"
 PUBLIC_MEDIA_URL = "https://media.tomokichidiary.com"
 TURNSTILE_EXPECTED_HOSTNAME = "tomokichidiary.com,www.tomokichidiary.com"
+# The inquiry platform's operator API, which the admin's お問い合わせ screen
+# reads through /v1/admin/inquiry. It sits behind its own Access application:
+# INQUIRY_ACCESS_CLIENT_ID / INQUIRY_ACCESS_CLIENT_SECRET are a service token
+# that application accepts (`wrangler secret put`). Without them the screen
+# says "not configured" and nothing is called.
+INQUIRY_API_ORIGIN = "https://admin.tmkch.io"
 # Admin calls are same-origin through the admin Worker, so CORS is only for
 # local development against a deployed API.
 ALLOWED_ORIGINS = "https://tomokichidiary.com,https://www.tomokichidiary.com,https://tomokichi-diary-web.tomoki-ttttt.workers.dev,http://localhost:4321,http://127.0.0.1:4321,http://localhost:5173"
@@ -39,3 +45,23 @@ bucket_name = "tomokichi-diary-media"
 
 [observability]
 enabled = true
+
+# The contact form files every message on the shared inquiry platform
+# (github.com/tomoki013/inquiry-platform, SDK pinned at v0.2.0 in package.json)
+# through its `Intake` entrypoint: submit only, no reads. `props` is what the
+# platform checks — this Worker may file for `tomokichi-diary` and nothing else,
+# and the slug must match INQUIRY_PROJECT_SLUG in src/inquiry.ts. The project
+# must be registered on the platform, or every submission is refused.
+[[services]]
+binding = "INQUIRY"
+service = "tomokichi-admin-core"
+entrypoint = "Intake"
+props = { caller = "tomokichi-diary-api", projects = ["tomokichi-diary"], allowUnassigned = false }
+
+# One submission per sender (salted IP hash) per minute. Turnstile already
+# keeps bots out; this is what stops one person pressing send in a loop.
+# namespace_id is account-wide: tomokichi-studio uses the 2000s.
+[[ratelimits]]
+name = "CONTACT_RATE_LIMITER"
+namespace_id = "3001"
+simple = { limit = 1, period = 60 }

@@ -4,6 +4,7 @@ import { createRepositories, fromD1 } from "@tomokichi/infra-d1";
 import { createMediaUrlResolver, createR2Storage } from "@tomokichi/infra-r2";
 import type { Env } from "./env.js";
 import { createLogger } from "./logging.js";
+import { createInquiryInbox } from "./inquiry.js";
 
 /** Composition root: bindings in, ports out. Assembled once per request. */
 export function createContext(env: Env, requestId: string): AppContext {
@@ -16,5 +17,6 @@ export function createContext(env: Env, requestId: string): AppContext {
     mediaUrls: createMediaUrlResolver(env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"),
     // No AI provider is configured; every use case must work without one.
     ai: null,
+    ...(env.INQUIRY ? { inquiry: createInquiryInbox(env.INQUIRY) } : {}),
   };
 }

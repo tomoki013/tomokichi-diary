@@ -7,7 +7,7 @@ export function errorResponse(
   c: Context,
   code: ErrorCode,
   message: string,
-  status: 400 | 401 | 403 | 404 | 409 | 500,
+  status: 400 | 401 | 403 | 404 | 409 | 500 | 502 | 503,
   issues?: readonly ValidationIssue[],
 ): Response {
   const body: ErrorBody = {

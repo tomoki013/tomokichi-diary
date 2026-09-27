@@ -23,6 +23,8 @@ flowchart LR
   Catalog --> MCP["apps/mcp-server (/mcp)"]
   Reader((reader)) --> Web
   Reader -- "POST /v1/contact, /v1/likes" --> API
+  API -- "INQUIRY binding (Intake)" --> Inquiry["inquiry-platform"]
+  API -- "operator API, Access service token" --> Inquiry
   Agent((AI agent)) --> MCP
   Agent -- "WebMCP tools on article pages" --> Web
   Web -- "images" --> R2
@@ -99,11 +101,14 @@ Everything except `/health` is served under a version prefix:
 ```
 api.tomokichidiary.com            public
   GET  /health                    unversioned — liveness, not a contract
-  POST /v1/contact                Turnstile-protected
+  POST /v1/contact                Turnstile-protected; filed on the inquiry platform
 
 admin.tomokichidiary.com          behind Cloudflare Access
   /                               the admin SPA (static assets)
   /api/*                          the same API, via a service binding
+    /v1/admin/inquiry/*           this site's tickets on the inquiry platform's
+                                  operator API (admin.tmkch.io), via an Access
+                                  service token
 ```
 
 Putting the API under the admin's own hostname is what makes the browser's

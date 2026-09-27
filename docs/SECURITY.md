@@ -4,22 +4,23 @@
 
 ## Threat surface
 
-| 面                                             | 入口                                               | 守っているもの                                                                                                                                                     |
-| ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 公開サイト（`tomokichi-diary-web`）            | 静的アセットのみ。Worker コード無し（`main` 無し） | 攻撃面が無い。`_headers` で `nosniff` / `Referrer-Policy`。CSP は未設定（inline script があるため nonce 化が要る）                                                 |
-| `POST /v1/contact`                             | 誰でも                                             | Turnstile（`action=contact` + hostname）、honeypot、IP ハッシュのレート制限、本文の検証・スパム判定（フラグのみ、破棄しない）、secrets 未設定なら **500 で閉じる** |
-| `GET/POST /v1/likes/:id`                       | 誰でも                                             | `visitorId` の形（20〜80 文字 ASCII）、公開記事のみ。**レート制限なし**（監査 §15）                                                                                |
-| `/v1/admin/*`                                  | Admin SPA（same-origin `/api`）/ 直接              | Cloudflare Access（hostname）+ Worker で JWT 再検証（aud / iss / exp / iat / RS256 / kid）または `ADMIN_TOKEN`（定数時間比較）。両方無ければ閉じる                 |
-| `admin.tomokichidiary.com`                     | Access の裏                                        | Access のみ。Worker 自体は JWT を見ずに `/api/*` を service binding へ転送、静的アセットは配る。**セキュリティヘッダ無し**（Studio の `admin-web` と違う点）       |
-| 公開 MCP（`/mcp`）                             | 誰でも                                             | read-only、stateless、catalog は bundle。認証・レート制限なし                                                                                                      |
-| `/knowledge/*.json`, `/search-index.json`, RSS | 誰でも                                             | 公開記事の投影のみ                                                                                                                                                 |
-| メディア（R2 custom domain）                   | 誰でも                                             | 公開バケット（意図的）。旧 `/images/*` は 301                                                                                                                      |
-| CI                                             | GitHub Actions                                     | **Cloudflare の token を持たない**（deploy は手元から。`ci.yml` コメント）                                                                                         |
+| 面                                             | 入口                                               | 守っているもの                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公開サイト（`tomokichi-diary-web`）            | 静的アセットのみ。Worker コード無し（`main` 無し） | 攻撃面が無い。`_headers` で `nosniff` / `Referrer-Policy`。CSP は未設定（inline script があるため nonce 化が要る）                                                                                                                                                                                                  |
+| `POST /v1/contact`                             | 誰でも                                             | Turnstile（`action=contact` + hostname）、honeypot、本文の検証、IP ハッシュのレート制限（Rate Limiting binding）、共通お問い合わせ基盤へ引き渡し。secrets / limiter 未設定なら **500 で閉じる**、基盤が受け付けなければ `?error=unavailable`                                                                        |
+| `GET/POST /v1/likes/:id`                       | 誰でも                                             | `visitorId` の形（20〜80 文字 ASCII）、公開記事のみ。**レート制限なし**（監査 §15）                                                                                                                                                                                                                                 |
+| `/v1/admin/*`                                  | Admin SPA（same-origin `/api`）/ 直接              | Cloudflare Access（hostname）+ Worker で JWT 再検証（aud / iss / exp / iat / RS256 / kid）または `ADMIN_TOKEN`（定数時間比較）。両方無ければ閉じる                                                                                                                                                                  |
+| `/v1/admin/inquiry/*`                          | Admin SPA                                          | 上の admin ゲートの内側。共通お問い合わせ基盤の Operator API（`admin.tmkch.io`）を Access サービストークンで呼ぶ。一覧は `tomokichi-diary` の Project に絞り、他 Project のチケットは 404。送る本文はフィールド単位で組み立て直す（返信は本文と冪等キーのみ。宛先・件名は基盤が決める）。基盤のエラー詳細は返さない |
+| `admin.tomokichidiary.com`                     | Access の裏                                        | Access のみ。Worker 自体は JWT を見ずに `/api/*` を service binding へ転送、静的アセットは配る。**セキュリティヘッダ無し**（Studio の `admin-web` と違う点）                                                                                                                                                        |
+| 公開 MCP（`/mcp`）                             | 誰でも                                             | read-only、stateless、catalog は bundle。認証・レート制限なし                                                                                                                                                                                                                                                       |
+| `/knowledge/*.json`, `/search-index.json`, RSS | 誰でも                                             | 公開記事の投影のみ                                                                                                                                                                                                                                                                                                  |
+| メディア（R2 custom domain）                   | 誰でも                                             | 公開バケット（意図的）。旧 `/images/*` は 301                                                                                                                                                                                                                                                                       |
+| CI                                             | GitHub Actions                                     | **Cloudflare の token を持たない**（deploy は手元から。`ci.yml` コメント）                                                                                                                                                                                                                                          |
 
 ## Secret handling
 
 - リポジトリに秘密は無い。`.env.example` は公開値のみ。
-- API の secrets は `wrangler secret put`（`ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`）。`IP_HASH_SALT` を変えるとレート制限の履歴が切れる（害は無い）。
+- API の secrets は `wrangler secret put`（`ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`, `INQUIRY_ACCESS_CLIENT_ID`, `INQUIRY_ACCESS_CLIENT_SECRET`）。サービストークンは基盤の Access アプリの Service Auth ポリシーにだけ入れる。基盤側の監査ログ上の操作者はこのトークンになる。`IP_HASH_SALT` を変えるとレート制限の履歴が切れる（害は無い）。
 - `ACCESS_AUD` / `ACCESS_TEAM_DOMAIN` は vars（トークンの claim なので秘密ではない）。
 - `ADMIN_TOKEN` は Access 導入後は **削除してよい**（`OPERATIONS.md` API_UNAUTHORIZED）。残っている間は 2 つの入口がある。
 - Admin SPA は token を `localStorage`（remember）か `sessionStorage` に置く。同一 origin に第三者スクリプトが無いことが前提（`api.ts` コメント）。
@@ -32,16 +33,17 @@
 
 ## Data protection
 
-| データ                 | 場所                   | 扱い                                                                                          |
-| ---------------------- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| 記事・revision・関係   | D1 + `export/`（git）  | 公開情報。`export/` は vendor-neutral backup を兼ねる（ADR 0006）                             |
-| お問い合わせ           | D1 `contact_messages`  | 名前・メール・本文を保存。送信者 IP は **salted hash のみ**。メール送信なし。Admin でのみ閲覧 |
-| likes                  | D1                     | `visitorId` の salted hash のみ                                                               |
-| AI 生成物              | D1 `ai_artifacts`      | 人が採用するまで表示に使わない（ADR 0004）                                                    |
-| メディア原本           | `media/`（git 外）+ R2 | 公開                                                                                          |
-| 旧サイトのベースライン | `migration/*.json`     | URL・SEO・リンク。個人情報なし                                                                |
+| データ                 | 場所                   | 扱い                                                                                   |
+| ---------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| 記事・revision・関係   | D1 + `export/`（git）  | 公開情報。`export/` は vendor-neutral backup を兼ねる（ADR 0006）                      |
+| お問い合わせ           | 共通お問い合わせ基盤   | 名前・メール・本文を `Intake` binding で基盤へ渡す。本 API は保存しない。IP は渡さない |
+| 旧お問い合わせ         | D1 `contact_messages`  | 切替前の分のみ。送信者 IP は **salted hash のみ**。Admin でのみ閲覧                    |
+| likes                  | D1                     | `visitorId` の salted hash のみ                                                        |
+| AI 生成物              | D1 `ai_artifacts`      | 人が採用するまで表示に使わない（ADR 0004）                                             |
+| メディア原本           | `media/`（git 外）+ R2 | 公開                                                                                   |
+| 旧サイトのベースライン | `migration/*.json`     | URL・SEO・リンク。個人情報なし                                                         |
 
-個人情報は `contact_messages` だけ。保持期限のルールは無い（未決定。`DECISIONS.md`）。
+本 API が持つ個人情報は切替前の `contact_messages` だけ。保持期限のルールは無い（未決定。`DECISIONS.md`）。新しいお問い合わせの保持は基盤側の規則に従う。
 
 ## Encryption
 
@@ -65,7 +67,7 @@
 
 - 読者: `/contact` フォーム（Turnstile）。
 - 脆弱性: 同フォームか `about` に記載の連絡先。bug bounty は無い。
-- 受け取った側: Admin の「お問い合わせ」で確認。
+- 受け取った側: Admin の「お問い合わせ」（基盤の Operator API 経由）。切替前の分は「切替前の受信箱」。
 
 ## 既知の課題（監査より）
 

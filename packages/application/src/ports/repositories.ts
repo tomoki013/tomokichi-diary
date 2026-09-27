@@ -134,11 +134,10 @@ export interface CollectionRepository {
   replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
 }
 
+/** Messages received before the contact form moved to the inquiry platform. */
 export interface ContactMessageRepository {
   save(message: ContactMessage): Promise<void>;
   list(limit: number): Promise<readonly ContactMessage[]>;
-  /** Most recent submission from the same sender, for rate limiting. */
-  findLatestByIpHash(ipHash: string): Promise<ContactMessage | null>;
   setStatus(id: ContactMessageId, status: ContactMessageStatus): Promise<void>;
   countUnread(): Promise<number>;
 }

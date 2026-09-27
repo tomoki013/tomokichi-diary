@@ -28,17 +28,17 @@ pnpm run ci           # 全部通れば環境は正しい（約 3.5 分、Lighth
 
 `.env.example` が一覧。公開サイトはビルド時に読む（`PUBLIC_*`）、Admin は `VITE_API_URL`、API は Worker の vars / secrets。
 
-| 変数                        | 既定                               | 用途                                                                                             |
-| --------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `PUBLIC_SITE_URL`           | `https://tomokichidiary.com`       | canonical / sitemap / OG                                                                         |
-| `PUBLIC_INDEXABLE`          | `true`                             | `false` で全ページ noindex + robots 全拒否（プレビュー用）                                       |
-| `PUBLIC_MEDIA_URL`          | `https://media.tomokichidiary.com` | R2 のメディアドメイン                                                                            |
-| `PUBLIC_BUILD_TIME`         | 未設定                             | 固定すると同一コミットのビルドが byte 同一                                                       |
-| `PUBLIC_API_URL`            | `https://api.tomokichidiary.com`   | お問い合わせフォームの POST 先                                                                   |
-| `PUBLIC_TURNSTILE_SITE_KEY` | 未設定                             | 未設定ならフォームを描画しない。dev では試験キー                                                 |
-| `VITE_API_URL`              | `http://localhost:8787`            | Admin → API。本番ビルドは `https://api.tomokichidiary.com`                                       |
-| API secrets                 | `wrangler secret put`              | `ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`（`apps/api/src/env.ts`） |
-| API vars                    | `apps/api/wrangler.toml`           | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`             |
+| 変数                        | 既定                               | 用途                                                                                                                                                                                                            |
+| --------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`           | `https://tomokichidiary.com`       | canonical / sitemap / OG                                                                                                                                                                                        |
+| `PUBLIC_INDEXABLE`          | `true`                             | `false` で全ページ noindex + robots 全拒否（プレビュー用）                                                                                                                                                      |
+| `PUBLIC_MEDIA_URL`          | `https://media.tomokichidiary.com` | R2 のメディアドメイン                                                                                                                                                                                           |
+| `PUBLIC_BUILD_TIME`         | 未設定                             | 固定すると同一コミットのビルドが byte 同一                                                                                                                                                                      |
+| `PUBLIC_API_URL`            | `https://api.tomokichidiary.com`   | お問い合わせフォームの POST 先                                                                                                                                                                                  |
+| `PUBLIC_TURNSTILE_SITE_KEY` | 未設定                             | 未設定ならフォームを描画しない。dev では試験キー                                                                                                                                                                |
+| `VITE_API_URL`              | `http://localhost:8787`            | Admin → API。本番ビルドは `https://api.tomokichidiary.com`                                                                                                                                                      |
+| API secrets                 | `wrangler secret put`              | `ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`, `INQUIRY_ACCESS_CLIENT_ID`, `INQUIRY_ACCESS_CLIENT_SECRET`（`apps/api/src/env.ts`）。ローカルは `apps/api/.dev.vars`（gitignore 済み） |
+| API vars                    | `apps/api/wrangler.toml`           | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`, `INQUIRY_API_ORIGIN`                                                                                                      |
 
 ## Install / Development server
 
@@ -48,6 +48,8 @@ pnpm --filter @tomokichi/admin dev      # http://localhost:5173（VITE_API_URL �
 pnpm --filter @tomokichi/api dev        # http://localhost:8787（wrangler dev、ローカル D1/R2）
 pnpm --filter @tomokichi/mcp-server dev # 公開 MCP
 ```
+
+Claude Code の `.claude/launch.json` には `api`（8795）と `admin`（5173、`VITE_API_URL=http://localhost:8795`）もある。ローカル D1 が空なら `wrangler d1 migrations apply tomokichi-diary --local` → `pnpm seed:sql` → `wrangler d1 execute tomokichi-diary --local --file=../../.artifacts/seed.sql`（`apps/api` で実行）。Admin の「お問い合わせ」をローカルで触るときは、基盤の Operator API 互換のスタブを立てて `.dev.vars` の `INQUIRY_API_ORIGIN` をそこへ向ける。
 
 公開サイトは `export/` から静的生成するので、**D1 が無くても動く**（ADR 0006）。記事を直したいときは Admin → API → D1 → `pnpm export:data` → commit の順。ローカルの D1 は `.data/tomokichi.db`（`pnpm import:legacy` か `export/` から復元）。
 

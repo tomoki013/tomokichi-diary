@@ -49,6 +49,7 @@ export function toArticleSummaryDto(params: {
     locale: article.locale,
     path: params.path,
     publishedAt: article.publishedAt,
+    scheduledAt: article.scheduledAt,
     updatedAt: article.updatedAt,
     hasUnpublishedChanges: params.hasUnpublishedChanges,
     isLive: params.isLive,
