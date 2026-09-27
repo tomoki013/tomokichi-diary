@@ -25,6 +25,7 @@ import {
   type PlaceId,
   type TagId,
 } from "@tomokichi/domain";
+import type { AppContext } from "@tomokichi/application";
 import type { AppEnv } from "../app.js";
 import { domainErrorResponse, errorResponse } from "../http.js";
 import { toArticleMediaDto, toArticleSummaryDto, toRevisionDto } from "../mappers.js";
@@ -36,8 +37,15 @@ import {
   scheduleSchema,
 } from "../schemas.js";
 
-/** The only author the site has today; multi-author support is a data change, not an API one. */
-const DEFAULT_AUTHOR = "author-tomokichi" as AuthorId;
+/**
+ * The site has one author, whose id is whatever the data says it is (the
+ * imported one is a UUID). Multi-author support is a data change, not an API
+ * one; until then, a new article belongs to the author on record.
+ */
+async function siteAuthor(ctx: AppContext): Promise<AuthorId | null> {
+  const [author] = await ctx.repos.authors.listAll();
+  return author?.id ?? null;
+}
 
 export function articleRoutes() {
   const routes = new Hono<AppEnv>();
@@ -72,11 +80,13 @@ export function articleRoutes() {
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
 
+    const authorId = await siteAuthor(c.get("ctx"));
+    if (!authorId) return errorResponse(c, "API_INTERNAL", "no author is on record", 500);
     const result = await createArticle(c.get("ctx"), {
       slug: parsed.value.slug,
       locale: parsed.value.locale,
       kind: parsed.value.kind,
-      authorId: DEFAULT_AUTHOR,
+      authorId,
       path: parsed.value.path,
       draft: parsed.value.draft,
     });
@@ -149,12 +159,13 @@ export function articleRoutes() {
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
 
-    const result = await updateArticleDraft(
-      c.get("ctx"),
-      c.req.param("id") as ArticleId,
-      parsed.value,
-      DEFAULT_AUTHOR,
-    );
+    const ctx = c.get("ctx");
+    const articleId = c.req.param("id") as ArticleId;
+    // A revision is written by the article's own author, which is always a
+    // row that exists.
+    const article = await ctx.repos.articles.findById(articleId);
+    if (!article) return errorResponse(c, "ARTICLE_NOT_FOUND", `no article ${articleId}`, 404);
+    const result = await updateArticleDraft(ctx, articleId, parsed.value, article.authorId);
     if (!result.ok) return domainErrorResponse(c, result.errors);
     return c.json({ revision: toRevisionDto(result.value.revision) });
   });
