@@ -6,35 +6,35 @@
 @layer tokens {
   :root {
     /* Paper and ink -------------------------------------------------- */
-    --bg: #f8f5ef;
-    --bg-sunk: #f1ece1;
-    --surface: #fffdf9;
-    --surface-alt: #f4efe4;
+    --bg: #fbfaf7;
+    --bg-sunk: #f3f3ee;
+    --surface: #ffffff;
+    --surface-alt: #f4f5f2;
     /* Warm near-black. The old value carried an olive cast that turned
        muddy against the ivory page, especially under the footer. */
-    --surface-dark: #1c1a17;
+    --surface-dark: #1b1d1a;
 
-    --ink: #22251f;
-    --ink-soft: #5b5a51;
-    --ink-faint: #8b897e;
-    --on-dark: #f7f3ea;
-    --on-dark-soft: #b8b2a7;
+    --ink: #171a16;
+    --ink-soft: #464b45;
+    --ink-faint: #6d726a;
+    --on-dark: #fafcf7;
+    --on-dark-soft: #d7ddd3;
 
-    --line: #e4ddce;
-    --line-strong: #d0c7b3;
+    --line: #d9ded7;
+    --line-strong: #bfc8bd;
 
     /* Accent: warm travel orange, used sparingly and deliberately. */
-    --accent: #c25a28;
-    --accent-strong: #a44718;
-    --accent-tint: #fbeee3;
-    --accent-line: #eccdb4;
+    --accent: #b64b1c;
+    --accent-strong: #87330f;
+    --accent-tint: #fff0e5;
+    --accent-line: #e7c6ac;
     /* The accent is too dark to read on the dark surfaces, so those get
        their own value rather than a color-mix repeated at ten sites. */
-    --accent-on-dark: #e2874f;
+    --accent-on-dark: #ed9962;
 
     /* Secondary: deep olive for badges and quiet dark surfaces. */
     --forest: #46512e;
-    --forest-tint: #eceedf;
+    --forest-tint: #eef2e8;
 
     /* Type ----------------------------------------------------------- */
     --font-sans:
