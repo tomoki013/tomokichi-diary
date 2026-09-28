@@ -17,3 +17,11 @@ overrides:
   # fixed in 6.16.0. express 5 (MCP SDK) already allows it; express 4, reached
   # only through @lhci/cli, pins ~6.15 and is lifted here with it.
   qs: ^6.16.0
+  # Same-major lifts for advisories published 2026-09: fast-uri (ajv in the MCP
+  # SDK), undici (astro's unifont; wrangler's miniflare), sharp (miniflare) and
+  # ip-address (@lhci/cli's proxy agent).
+  fast-uri@3: ^3.1.8
+  undici@8: ^8.10.2
+  undici@7: ^7.29.1
+  sharp@0: ^0.35.4
+  ip-address@10: ^10.5.1
