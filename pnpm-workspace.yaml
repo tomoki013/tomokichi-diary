@@ -13,3 +13,7 @@ overrides:
   # Lighthouse's i18n pulls intl-messageformat, which needs tslib 2 helpers;
   # an older transitive tslib makes every performance audit error out.
   tslib: ^2.8.1
+  # GHSA advisories 1158506 / 1158507 (array-limit bypass, isBuffer DoS) are
+  # fixed in 6.16.0. express 5 (MCP SDK) already allows it; express 4, reached
+  # only through @lhci/cli, pins ~6.15 and is lifted here with it.
+  qs: ^6.16.0
