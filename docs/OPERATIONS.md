@@ -418,8 +418,13 @@ It needs three things, and the screen shows which are missing:
 
 The gateway sees the service token, not the person: its audit log records the
 token as the actor, and the token gets the gateway's `DEFAULT_ADMIN_ROLE`.
-Replies are sent by the platform from its own address and signature
-(`/api/support/mail-settings` sets a per-project signature).
+Replies are sent by the platform. The sender name (「ともきちの旅行日記」) and the
+notification inbox come from the studio's `deploy/inquiry-platform/seed.ts`
+(`mailSettings`, inquiry-platform v0.2.1+); the sending address stays on
+tmkch.io until tomokichidiary.com has a verified sending domain and an inbound
+route. The signature is set in the admin (お問い合わせ → 返信の署名); until it
+is, replies carry the deployment's Tomokichi Studio signature, and the screen
+says so.
 
 ### `API_UNAUTHORIZED`
 

@@ -236,6 +236,13 @@ export interface InquiryStatusDto {
   readonly mailConfigured: boolean;
 }
 
+/** The signature the platform puts under this site's replies. */
+export interface InquirySignatureDto {
+  readonly signature: string;
+  /** No signature of its own: replies are signed with the deployment's. */
+  readonly usesDefault: boolean;
+}
+
 export type InquiryTicketStatus =
   | "NEW"
   | "TRIAGE"

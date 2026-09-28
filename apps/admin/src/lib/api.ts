@@ -3,6 +3,7 @@ import type {
   ArticleKnowledgeBundleDto,
   ArticleSummaryDto,
   ErrorBody,
+  InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
   InquiryTicketStatus,
@@ -268,6 +269,9 @@ export const api = {
 
   // Inquiries (the shared platform, through the diary API)
   inquiryStatus: () => request<InquiryStatusDto>("/admin/inquiry/status"),
+  getSignature: () => request<InquirySignatureDto>("/admin/inquiry/signature"),
+  saveSignature: (signature: string) =>
+    request<InquirySignatureDto>("/admin/inquiry/signature", json("PUT", { signature })),
   listTickets: (filter: { status?: string; query?: string; offset?: number }) => {
     const query = new URLSearchParams();
     if (filter.status) query.set("status", filter.status);

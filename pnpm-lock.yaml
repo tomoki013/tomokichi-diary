@@ -109,8 +109,8 @@ importers:
   apps/api:
     dependencies:
       '@inquiry-platform/sdk':
-        specifier: github:tomoki013/inquiry-platform#v0.2.0&path:/packages/sdk
-        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/20d1dfa079146dfd94b72a7e5759b643b08f2af3#path:/packages/sdk
+        specifier: github:tomoki013/inquiry-platform#v0.2.1&path:/packages/sdk
+        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/7efa62fe60ff470ff103eb447dbba7263f0ed851#path:/packages/sdk
       '@tomokichi/application':
         specifier: workspace:*
         version: link:../../packages/application
@@ -1517,8 +1517,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/20d1dfa079146dfd94b72a7e5759b643b08f2af3#path:/packages/sdk':
-    resolution: {gitHosted: true, integrity: sha512-MrFfVOeZB045OuL9Ud/xjjSmOjoVuh8JHZWmvaEamiyWFov1YS3ORzGGNQ5ybF6cyfbx+lotOnvJQAjxsy0hEw==, path: /packages/sdk, tarball: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/20d1dfa079146dfd94b72a7e5759b643b08f2af3}
+  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/7efa62fe60ff470ff103eb447dbba7263f0ed851#path:/packages/sdk':
+    resolution: {gitHosted: true, path: /packages/sdk, tarball: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/7efa62fe60ff470ff103eb447dbba7263f0ed851}
     version: 0.2.0
 
   '@jridgewell/gen-mapping@0.3.13':
@@ -5985,7 +5985,7 @@ snapshots:
   '@img/sharp-win32-x64@0.35.4':
     optional: true
 
-  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/20d1dfa079146dfd94b72a7e5759b643b08f2af3#path:/packages/sdk': {}
+  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/7efa62fe60ff470ff103eb447dbba7263f0ed851#path:/packages/sdk': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

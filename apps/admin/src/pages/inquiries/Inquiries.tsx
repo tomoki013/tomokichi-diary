@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from "react";
+import type { InquirySignatureDto } from "@tomokichi/contracts";
 import type { InquiryStatusDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
 import { formatDateTime, formatRelative, ticketStatusLabels } from "../../lib/labels";
 import { href } from "../../lib/route";
 import { useResource, useTitle } from "../../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../../ui/parts";
+import { useToast } from "../../ui/toast";
 
 const FILTERS = [
   { key: "open", label: "未対応" },
@@ -58,6 +60,7 @@ export function Inquiries() {
         <Setup status={status.data} />
       ) : (
         <>
+          {ready && <SignaturePanel />}
           <div className="toolbar">
             <fieldset className="chips">
               <legend className="sr-only">状態で絞り込む</legend>
@@ -186,5 +189,75 @@ function Setup({ status }: { status: InquiryStatusDto }) {
         </p>
       )}
     </Panel>
+  );
+}
+
+/**
+ * The signature the platform puts under every reply from this site. Until the
+ * site has one of its own, replies carry the deployment's (Tomokichi
+ * Studio's), so the panel opens itself and says so.
+ */
+function SignaturePanel() {
+  const signature = useResource(() => api.getSignature(), "inquiry-signature");
+  if (signature.error) {
+    return (
+      <Panel title="返信の署名">
+        <ErrorState error={signature.error} onRetry={() => void signature.reload()} />
+      </Panel>
+    );
+  }
+  if (!signature.data) return null;
+  return <SignatureForm initial={signature.data} />;
+}
+
+function SignatureForm({ initial }: { initial: InquirySignatureDto }) {
+  const toast = useToast();
+  const [saved, setSaved] = useState(initial);
+  const [text, setText] = useState(initial.signature);
+  const [busy, setBusy] = useState(false);
+
+  async function save(): Promise<void> {
+    setBusy(true);
+    try {
+      const next = await api.saveSignature(text.trim());
+      setSaved(next);
+      setText(next.signature);
+      toast.info("署名を保存しました");
+    } catch (error) {
+      toast.error(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <details className="panel panel--details" open={saved.usesDefault}>
+      <summary>
+        <h2>返信の署名</h2>
+        {saved.usesDefault ? (
+          <Badge tone="warn">未設定（Tomokichi Studio の署名で送られます）</Badge>
+        ) : (
+          <span className="muted small">返信メールの末尾に付きます</span>
+        )}
+      </summary>
+      <textarea
+        rows={4}
+        maxLength={2000}
+        aria-label="返信の署名"
+        placeholder={"ともきちの旅行日記\nhttps://tomokichidiary.com"}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <div className="panel__foot">
+        <button
+          type="button"
+          className="primary"
+          disabled={busy || text.trim() === saved.signature.trim()}
+          onClick={() => void save()}
+        >
+          署名を保存
+        </button>
+      </div>
+    </details>
   );
 }

@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import { validate, v } from "@tomokichi/contracts";
 import type {
+  InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
   InquiryTicketStatus,
@@ -78,6 +79,8 @@ const replySchema = v.object({
   idempotencyKey: v.string({ min: 8, max: 200 }),
   reopenIfResolved: v.optional(v.boolean(), false),
 });
+/** Empty is allowed: it hands the project back to the deployment's signature. */
+const signatureSchema = v.object({ signature: v.string({ max: 2000 }) });
 
 type Ctx = Context<AppEnv>;
 
@@ -197,6 +200,41 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => InquiryOperator | null) {
     }
     return { operator: scoped.operator, detail: detail.value, id };
   }
+
+  /**
+   * The signature under this site's replies. Without one of its own the
+   * platform signs with the deployment's (Tomokichi Studio's), which is why
+   * the admin surfaces it.
+   */
+  routes.get("/signature", async (c) => {
+    const scoped = await scope(c);
+    if (scoped instanceof Response) return scoped;
+    const settings = await scoped.operator.request<{ appId?: string; signatureText: string }[]>(
+      "/api/support/mail-settings",
+    );
+    if (!settings.ok) return failure(c, settings);
+    const own = settings.value.find((row) => row.appId === scoped.projectId)?.signatureText ?? "";
+    return c.json({ signature: own, usesDefault: own.trim() === "" } satisfies InquirySignatureDto);
+  });
+
+  routes.put("/signature", async (c) => {
+    const parsed = validate(signatureSchema, await c.req.json().catch(() => null));
+    if (!parsed.ok)
+      return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
+    const scoped = await scope(c);
+    if (scoped instanceof Response) return scoped;
+    const result = await scoped.operator.request<unknown>("/api/support/mail-settings", {
+      method: "PUT",
+      // Always this site's project; the body never names one.
+      body: JSON.stringify({ appId: scoped.projectId, signatureText: parsed.value.signature }),
+    });
+    if (!result.ok) return failure(c, result);
+    const signature = parsed.value.signature;
+    return c.json({
+      signature,
+      usesDefault: signature.trim() === "",
+    } satisfies InquirySignatureDto);
+  });
 
   routes.get("/status", async (c) => {
     const operator = operatorFor(c);

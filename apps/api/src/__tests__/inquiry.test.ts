@@ -37,6 +37,7 @@ let calls: Call[];
 let apps: { id: string; slug: string }[];
 let tickets: Record<string, ReturnType<typeof ticket>>;
 let upstream: ((call: Call) => Response | undefined) | undefined;
+let diarySignature: string | undefined;
 
 function ticket(id: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -83,6 +84,15 @@ const platform: typeof fetch = async (input, init) => {
 
   if (url.pathname === "/api/apps") return ok(apps);
   if (url.pathname === "/api/session") return ok({ mailConfigured: true });
+  if (url.pathname === "/api/support/mail-settings" && call.method === "GET") {
+    return ok([
+      { signatureText: "Tomokichi Studio\n080-0000-0000", updatedAt: "x" },
+      { appId: "app-remeet", signatureText: "Remeet team", updatedAt: "x" },
+      ...(diarySignature === undefined
+        ? []
+        : [{ appId: DIARY, signatureText: diarySignature, updatedAt: "x" }]),
+    ]);
+  }
   if (url.pathname === "/api/tickets") return ok({ items: Object.values(tickets), total: 2 });
   const match = /^\/api\/tickets\/([^/]+)$/.exec(url.pathname);
   if (match && call.method === "GET") {
@@ -141,6 +151,7 @@ beforeEach(async () => {
   forgetInquiryProject();
   calls = [];
   upstream = undefined;
+  diarySignature = undefined;
   apps = [
     { id: DIARY, slug: "tomokichi-diary" },
     { id: "app-remeet", slug: "remeet" },
@@ -323,5 +334,43 @@ describe("/v1/admin/inquiry", () => {
     const response = await request("/tickets");
     expect(response.status).toBe(502);
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
+  });
+
+  describe("signature", () => {
+    it("reports the deployment's signature in use when the site has none", async () => {
+      const body = await (await request("/signature")).json();
+      expect(body).toEqual({ signature: "", usesDefault: true });
+      // Neither the deployment's nor another project's text is handed over.
+      expect(JSON.stringify(body)).not.toContain("080");
+      expect(JSON.stringify(body)).not.toContain("Remeet");
+    });
+
+    it("returns the site's own signature", async () => {
+      diarySignature = "ともきちの旅行日記";
+      expect(await (await request("/signature")).json()).toEqual({
+        signature: "ともきちの旅行日記",
+        usesDefault: false,
+      });
+    });
+
+    it("always saves to this site's project, whatever the body says", async () => {
+      const response = await request("/signature", {
+        method: "PUT",
+        body: JSON.stringify({ signature: "ともきち", appId: "app-remeet" }),
+      });
+      expect(response.status).toBe(200);
+      const put = calls.find((call) => call.method === "PUT")!;
+      expect(put.path).toBe("/api/support/mail-settings");
+      expect(put.body).toEqual({ appId: DIARY, signatureText: "ともきち" });
+    });
+
+    it("refuses an over-long signature before calling the platform", async () => {
+      const response = await request("/signature", {
+        method: "PUT",
+        body: JSON.stringify({ signature: "あ".repeat(2001) }),
+      });
+      expect(response.status).toBe(400);
+      expect(calls.some((call) => call.method === "PUT")).toBe(false);
+    });
   });
 });
