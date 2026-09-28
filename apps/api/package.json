@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@inquiry-platform/sdk": "github:tomoki013/inquiry-platform#v0.2.1&path:/packages/sdk",
     "@tomokichi/application": "workspace:*",
     "@tomokichi/contracts": "workspace:*",
     "@tomokichi/domain": "workspace:*",

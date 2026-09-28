@@ -1,97 +1,97 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, api, clearToken } from "./api";
-import { ArticleList } from "./views/ArticleList";
-import { ArticleEditor } from "./views/ArticleEditor";
-import { Messages } from "./views/Messages";
-import { Login } from "./views/Login";
-import { Toast, type ToastMessage } from "./components/Toast";
+import { ApiError, api, clearToken, getToken } from "./lib/api";
+import { href, section } from "./lib/route";
+import { useHashRoute } from "./ui/hooks";
+import { Dashboard } from "./pages/Dashboard";
+import { Articles } from "./pages/Articles";
+import { ArticleEditor } from "./pages/editor/ArticleEditor";
+import { MediaLibrary } from "./pages/MediaLibrary";
+import { Routes } from "./pages/Routes";
+import { Inquiries } from "./pages/inquiries/Inquiries";
+import { InquiryDetail } from "./pages/inquiries/InquiryDetail";
+import { LegacyMessages } from "./pages/inquiries/LegacyMessages";
+import { SignIn } from "./pages/SignIn";
+import { EmptyState, PageHeader } from "./ui/parts";
 
-/**
- * Hash routing rather than a router dependency: the admin has two screens, and
- * a hash keeps it deployable as plain static files behind any host.
- */
-function useHashRoute(): string {
-  const [hash, setHash] = useState(() => globalThis.location.hash.slice(1) || "/");
-  useEffect(() => {
-    const onChange = (): void => setHash(globalThis.location.hash.slice(1) || "/");
-    globalThis.addEventListener("hashchange", onChange);
-    return () => globalThis.removeEventListener("hashchange", onChange);
-  }, []);
-  return hash;
-}
+const NAV = [
+  { key: "dashboard", label: "ホーム", href: href.dashboard() },
+  { key: "articles", label: "記事", href: href.articles() },
+  { key: "media", label: "画像", href: href.media() },
+  { key: "routes", label: "URL", href: href.routes() },
+  { key: "inquiries", label: "お問い合わせ", href: href.inquiries() },
+] as const;
+
+type Auth = "checking" | "in" | "out";
 
 export function App() {
   const route = useHashRoute();
-  // `checking` covers the moment before we know whether Cloudflare Access has
-  // already let us in, so the login form never flashes for an authorised user.
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
-  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [auth, setAuth] = useState<Auth>("checking");
 
   useEffect(() => {
-    // With Access in front, an authorised browser is already authenticated and
+    // With Access in front, an authorised browser is already signed in and
     // there is nothing to type. Probing beats asking.
-    api.listArticles().then(
-      () => setAuthenticated(true),
-      () => setAuthenticated(false),
+    api.taxonomy().then(
+      () => setAuth("in"),
+      (error: unknown) => setAuth(error instanceof ApiError && error.status === 401 ? "out" : "in"),
     );
   }, []);
 
-  const notify = useCallback((message: ToastMessage) => {
-    setToast(message);
-    globalThis.setTimeout(() => setToast(null), message.tone === "error" ? 8000 : 3000);
-  }, []);
-
-  const reportError = useCallback(
-    (error: unknown) => {
-      const detail =
-        error instanceof ApiError
-          ? `${error.code}: ${error.message}${error.issues.length > 0 ? ` (${error.issues.map((i) => i.path).join(", ")})` : ""}`
-          : String(error);
-      notify({ tone: "error", text: detail });
-    },
-    [notify],
-  );
-
   const signOut = useCallback(() => {
     clearToken();
-    setAuthenticated(false);
+    setAuth("out");
   }, []);
 
-  if (authenticated === null) return <main className="muted">確認中…</main>;
-  if (!authenticated) {
-    return <Login onAuthenticated={() => setAuthenticated(true)} onError={reportError} />;
-  }
+  if (auth === "checking") return <div className="boot" aria-busy="true" />;
+  if (auth === "out") return <SignIn onSignedIn={() => setAuth("in")} />;
 
-  const editorMatch = /^\/articles\/(.+)$/.exec(route);
+  const current = section(route);
 
   return (
-    <>
-      <header className="bar">
-        <h1>
-          <a href="#/">Tomokichi Diary Admin</a>
-        </h1>
-        <a href="#/messages">お問い合わせ</a>
-        <button
-          onClick={() =>
-            void api
-              .health()
-              .then(() => notify({ tone: "info", text: "API に接続できています" }), reportError)
-          }
-        >
-          接続確認
-        </button>
-        <button onClick={signOut}>サインアウト</button>
-      </header>
-      <main>
-        {editorMatch ? (
-          <ArticleEditor id={editorMatch[1]!} notify={notify} onError={reportError} />
-        ) : route === "/messages" ? (
-          <Messages notify={notify} onError={reportError} />
-        ) : (
-          <ArticleList notify={notify} onError={reportError} />
+    <div className="shell">
+      <nav className="sidebar" aria-label="管理メニュー">
+        <a className="sidebar__brand" href={href.dashboard()}>
+          Tomokichi Diary
+          <small>Admin</small>
+        </a>
+        <ul>
+          {NAV.map((item) => (
+            <li key={item.key}>
+              <a href={item.href} aria-current={current === item.key ? "page" : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="sidebar__foot">
+          <a href="https://tomokichidiary.com/" target="_blank" rel="noopener noreferrer">
+            サイトを開く ↗
+          </a>
+          {/* Only a stored token can be forgotten; Access sessions end at Access. */}
+          {getToken() !== "" && (
+            <button type="button" className="link" onClick={signOut}>
+              サインアウト
+            </button>
+          )}
+        </div>
+      </nav>
+      <main className="main">
+        {route.name === "dashboard" && <Dashboard />}
+        {route.name === "articles" && <Articles />}
+        {route.name === "article" && <ArticleEditor key={route.id} id={route.id} />}
+        {route.name === "media" && <MediaLibrary />}
+        {route.name === "routes" && <Routes />}
+        {route.name === "inquiries" && <Inquiries />}
+        {route.name === "inquiry" && <InquiryDetail key={route.id} id={route.id} />}
+        {route.name === "legacy-messages" && <LegacyMessages />}
+        {route.name === "not-found" && (
+          <>
+            <PageHeader title="ページが見つかりません" />
+            <EmptyState>
+              <code>{route.path}</code> はありません。<a href={href.dashboard()}>ホームへ</a>
+            </EmptyState>
+          </>
         )}
       </main>
-      {toast && <Toast message={toast} />}
-    </>
+    </div>
   );
 }

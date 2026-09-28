@@ -23,7 +23,8 @@
 ## Integration（実 D1 スキーマ・実 HTTP）
 
 - `@tomokichi/infra-d1/testing-context` の `createTestContext()` が **in-memory SQLite に全 migration を適用**した `AppContext` を返す。R2 は in-memory storage。時計は固定、id は連番。
-- `apps/api/src/__tests__/` — `api.test.ts`（認証・検証・記事ライフサイクル・media・knowledge）、`access.test.ts`（Cloudflare Access JWT: aud/iss/exp/署名/alg）、`contact.test.ts`（Turnstile 注入・honeypot・fail-closed・レート）、`likes.test.ts`（visitorId・未公開記事・toggle）。
+- `apps/api/src/__tests__/` — `api.test.ts`（認証・検証・記事ライフサイクル・media・knowledge）、`access.test.ts`（Cloudflare Access JWT: aud/iss/exp/署名/alg）、`contact.test.ts`（Turnstile 注入・honeypot・fail-closed・レート・基盤への引き渡し）、`likes.test.ts`（visitorId・未公開記事・toggle）、`inquiry.test.ts`（基盤 Operator API の代理: Project への絞り込み・送るフィールド・サービストークン・エラーの隠蔽）、`authors.test.ts`（revision の作者がデータ上の作者になること）。
+- `apps/admin/src/lib/lib.test.ts` — Admin の純ロジック（ハッシュルーティング、下書きの差分判定、日本時間の変換、地域のツリー順）。画面そのものは preview で確認する。
 - `infrastructure/database/d1/src/__tests__/` — migration の冪等、content-hash 重複、snapshot が published のみ、seed 復元。
 - `apps/mcp-server/src/__tests__/protocol.test.ts` — tool 一覧、firsthand 限定、MCP App resource。
 - `apps/web/src/lib/__tests__/webmcp.test.ts` — WebMCP 4 tool、登録/解除、不正入力、catalog 外記事（`it.fails`）。

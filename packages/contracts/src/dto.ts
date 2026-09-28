@@ -29,6 +29,8 @@ export interface ArticleSummaryDto {
   readonly locale: string;
   readonly path: string | null;
   readonly publishedAt: string | null;
+  /** When a `scheduled` article goes live. */
+  readonly scheduledAt: string | null;
   readonly updatedAt: string;
   readonly hasUnpublishedChanges: boolean;
   readonly isLive: boolean;
@@ -220,4 +222,80 @@ export interface ArticleKnowledgeBundleDto {
   readonly sources: readonly SourceReferenceDto[];
   readonly routes: readonly TravelRouteDto[];
   readonly canSuggestWithAi: boolean;
+}
+
+// --- Inquiries (the shared inquiry platform, narrowed to this site) ---------
+
+/** Whether the admin can reach the platform, and why not when it cannot. */
+export interface InquiryStatusDto {
+  /** The API has an origin and a service token for the platform. */
+  readonly configured: boolean;
+  /** This site is registered as a project on the platform. */
+  readonly registered: boolean;
+  /** The platform can send mail, so replies are possible. */
+  readonly mailConfigured: boolean;
+}
+
+/** The signature the platform puts under this site's replies. */
+export interface InquirySignatureDto {
+  readonly signature: string;
+  /** No signature of its own: replies are signed with the deployment's. */
+  readonly usesDefault: boolean;
+}
+
+export type InquiryTicketStatus =
+  | "NEW"
+  | "TRIAGE"
+  | "ACKNOWLEDGED"
+  | "IN_PROGRESS"
+  | "WAITING_CUSTOMER"
+  | "WAITING_INTERNAL"
+  | "RESOLVED"
+  | "CLOSED";
+
+export interface InquiryTicketSummaryDto {
+  readonly id: string;
+  /** Human-facing, e.g. `TK-000123`. */
+  readonly number: string;
+  readonly status: InquiryTicketStatus;
+  readonly subject: string;
+  readonly requesterEmail: string | null;
+  readonly priority: string;
+  readonly slaState: "OK" | "AT_RISK" | "BREACHED";
+  readonly nextAction: string | null;
+  readonly nextActionAt: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export type InquiryTimelineItemDto =
+  | {
+      readonly kind: "message";
+      readonly id: string;
+      /** `note` is an internal note: never sent, never shown to the sender. */
+      readonly direction: "inbound" | "outbound" | "note";
+      readonly sender: string | null;
+      readonly body: string;
+      readonly createdAt: string;
+    }
+  | {
+      readonly kind: "event";
+      readonly id: string;
+      readonly type: string;
+      readonly createdAt: string;
+    };
+
+export interface InquiryTicketDetailDto extends InquiryTicketSummaryDto {
+  /** Optimistic lock: every change sends back the revision it was based on. */
+  readonly revision: number;
+  readonly resolution: string | null;
+  readonly acknowledgedAt: string | null;
+  readonly resolvedAt: string | null;
+  readonly closedAt: string | null;
+  /** Where the platform allows this ticket to move next. */
+  readonly allowedStatuses: readonly InquiryTicketStatus[];
+  /** A reply needs a mail thread and a sender address. */
+  readonly canReply: boolean;
+  readonly timeline: readonly InquiryTimelineItemDto[];
+  readonly totalTimeline: number;
 }

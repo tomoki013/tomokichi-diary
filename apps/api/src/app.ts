@@ -13,6 +13,8 @@ import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
 import { likeRoutes } from "./routes/likes.js";
 import { knowledgeRoutes } from "./routes/knowledge.js";
+import { inquiryRoutes } from "./routes/inquiry.js";
+import { createInquiryOperator, type InquiryOperator } from "./inquiry-operator.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -44,6 +46,8 @@ export interface AppOptions {
   contextFactory?: (env: Env, requestId: string) => AppContext;
   verifyChallenge?: ChallengeVerifier;
   verifyAccess?: AccessVerifier;
+  /** Overridden by tests so the inquiry screen runs against a stand-in platform. */
+  inquiryOperator?: (env: Env) => InquiryOperator | null;
 }
 
 /**
@@ -72,6 +76,7 @@ export function createApp(options: AppOptions = {}) {
   const buildContext = options.contextFactory ?? createContext;
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
   const verifyAccess = options.verifyAccess ?? verifyAccessJwt;
+  const inquiryOperator = options.inquiryOperator ?? ((env: Env) => createInquiryOperator(env));
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
@@ -93,7 +98,7 @@ export function createApp(options: AppOptions = {}) {
     if (origin && allowed.includes(origin)) {
       c.header("access-control-allow-origin", origin);
       c.header("access-control-allow-headers", "authorization, content-type, x-request-id");
-      c.header("access-control-allow-methods", "GET, POST, PUT, DELETE, OPTIONS");
+      c.header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
       c.header("vary", "origin");
     }
     if (c.req.method === "OPTIONS") return c.body(null, 204);
@@ -166,6 +171,10 @@ export function createApp(options: AppOptions = {}) {
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());
   v1.route("/admin/knowledge", knowledgeRoutes());
+  v1.route(
+    "/admin/inquiry",
+    inquiryRoutes((c) => inquiryOperator(c.env)),
+  );
   v1.route("/admin", referenceRoutes());
 
   app.route("/v1", v1);

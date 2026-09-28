@@ -336,13 +336,6 @@ export function createRepositories(db: SqlDatabase): Repositories {
       (await all("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?", limit)).map(
         contactMessageRow.to,
       ),
-    findLatestByIpHash: async (ipHash) => {
-      const row = await first(
-        "SELECT * FROM contact_messages WHERE ip_hash = ? ORDER BY created_at DESC LIMIT 1",
-        ipHash,
-      );
-      return row ? contactMessageRow.to(row) : null;
-    },
     setStatus: async (id, status) => {
       await db
         .prepare("UPDATE contact_messages SET status = ? WHERE id = ?")

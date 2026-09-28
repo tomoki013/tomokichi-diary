@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { submitContactMessage } from "@tomokichi/application";
+import { validateContactSubmission } from "@tomokichi/domain";
 import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
 
@@ -8,7 +9,8 @@ import { errorResponse } from "../http.js";
  *
  * It is a plain form POST so the contact page needs no JavaScript to submit,
  * and the response is a redirect back to the site — the browser never sees the
- * API origin in the address bar.
+ * API origin in the address bar. What passes the checks here is handed to the
+ * shared inquiry platform; this Worker keeps no copy.
  */
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
@@ -43,7 +45,7 @@ export async function verifyTurnstile(
   );
 }
 
-/** A salted hash: enough to rate-limit a sender, not enough to identify one. */
+/** A salted hash: enough to rate-limit a sender, not enough to identify one. Never stored. */
 async function hashIp(ip: string, salt: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}:${ip}`));
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -58,7 +60,8 @@ export function contactRoutes() {
 
     const secret = c.env.TURNSTILE_SECRET_KEY;
     const salt = c.env.IP_HASH_SALT;
-    if (!secret || !salt) {
+    const limiter = c.env.CONTACT_RATE_LIMITER;
+    if (!secret || !salt || !limiter) {
       // Fail closed: an unconfigured form accepts nothing rather than
       // accepting everything.
       c.get("ctx").logger.error("contact.not_configured", { code: "API_INTERNAL" });
@@ -88,17 +91,26 @@ export function contactRoutes() {
       return back("?error=challenge");
     }
 
-    const result = await submitContactMessage(c.get("ctx"), {
+    const submission = {
       name: String(form.get("name") ?? ""),
       email: String(form.get("email") ?? ""),
       subject: String(form.get("subject") ?? ""),
       body: String(form.get("body") ?? ""),
-      ipHash: await hashIp(ip ?? "unknown", salt),
+    };
+    // Checked before the limiter so fixing a typo does not cost a minute.
+    if (validateContactSubmission(submission).length > 0) return back("?error=invalid");
+
+    const { success } = await limiter.limit({ key: await hashIp(ip ?? "unknown", salt) });
+    if (!success) return back("?error=toofast");
+
+    const result = await submitContactMessage(c.get("ctx"), {
+      ...submission,
+      idempotencyKey: crypto.randomUUID(),
     });
 
     if (!result.ok) {
       const first = result.errors[0];
-      return back(`?error=${first?.code === "API_CONFLICT" ? "toofast" : "invalid"}`);
+      return back(`?error=${first?.code === "API_VALIDATION_FAILED" ? "invalid" : "unavailable"}`);
     }
     return back("?sent=1");
   });

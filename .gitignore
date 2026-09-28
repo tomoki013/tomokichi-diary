@@ -9,6 +9,9 @@ ui-dist/
 .env
 .env.*
 !.env.example
+# wrangler's local secrets
+.dev.vars
+.dev.vars.*
 .DS_Store
 .cache/
 

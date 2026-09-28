@@ -6,6 +6,19 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@tomokichi/web", "dev", "--port", "4321"],
       "port": 4321
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@tomokichi/api", "dev", "--port", "8795"],
+      "port": 8795
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@tomokichi/admin", "dev", "--port", "5173", "--strictPort"],
+      "port": 5173,
+      "env": { "VITE_API_URL": "http://localhost:8795" }
     }
   ]
 }

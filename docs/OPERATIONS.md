@@ -360,17 +360,29 @@ No ad script is loaded.
 
 ### Contact form
 
-The form posts to the versioned `POST /v1/contact` API, which verifies a Turnstile token,
-rate-limits the sender and stores the message in D1. Submissions are read in
-the admin under お問い合わせ; nothing is emailed and no third party sees them.
+The form posts to the versioned `POST /v1/contact` API, which checks the
+honeypot, verifies a Turnstile token, validates the fields, rate-limits the
+sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`) and hands
+the message to the shared inquiry platform
+([tomoki013/inquiry-platform](https://github.com/tomoki013/inquiry-platform),
+SDK pinned at `v0.2.0` in `apps/api/package.json`). Replies, status and history
+live on the platform; this API keeps no copy and emails nobody.
 
-Three secrets gate it, and a missing one closes the form rather than opening it:
+The hand-off goes through the `INQUIRY` service binding to the platform's
+`Intake` entrypoint (`tomokichi-admin-core`), declared in
+`apps/api/wrangler.toml` with `props.projects = ["tomokichi-diary"]`. The
+project slug `tomokichi-diary` must be registered on the platform; an
+unregistered slug, a missing binding or a platform error redirects the reader
+to `?error=unavailable` rather than claiming success.
 
-| Secret                 | Purpose                                      |
+Two secrets and the limiter gate it, and a missing one closes the form rather
+than opening it:
+
+| Setting                | Purpose                                      |
 | ---------------------- | -------------------------------------------- |
 | `TURNSTILE_SECRET_KEY` | Verifies the challenge token                 |
 | `IP_HASH_SALT`         | Salts the sender hash used for rate limiting |
-| `ADMIN_TOKEN`          | Guards reading the messages                  |
+| `CONTACT_RATE_LIMITER` | Rate Limiting binding in `wrangler.toml`     |
 
 The public site key (widget `tomokichi-diary-contact`) is built in from
 `apps/web/src/lib/site.ts`; `PUBLIC_TURNSTILE_SITE_KEY` overrides it, and an
@@ -380,9 +392,39 @@ Set `TURNSTILE_EXPECTED_HOSTNAME=tomokichidiary.com,www.tomokichidiary.com` in
 production so a valid token is also checked against an expected hostname and
 the `contact` widget action.
 
-A submission is stored with status `spam` when it trips the heuristic (link
-floods, bbcode or HTML link markup). It is flagged rather than dropped, so a
-false positive is still readable.
+Messages received before the switch stay in D1 `contact_messages` and are still
+readable in the admin under お問い合わせ → 切替前の受信箱. Nothing new is written
+there.
+
+### Admin inquiries
+
+The admin's お問い合わせ screen lists, answers and closes this site's tickets
+on the inquiry platform. The platform ships no UI, only an operator API on its
+gateway (`admin.tmkch.io`, behind its own Access application), so the diary API
+calls it on the operator's behalf under `/v1/admin/inquiry/*` — after the admin
+gate has let them in — and narrows every call to the `tomokichi-diary` project:
+lists are filtered by it, and another project's ticket answers 404.
+
+It needs three things, and the screen shows which are missing:
+
+1. `INQUIRY_API_ORIGIN` (a var in `wrangler.toml`, `https://admin.tmkch.io`).
+2. A Cloudflare Access **service token**, added to a _Service Auth_ policy on
+   the `admin.tmkch.io` Access application, and set on the API with
+   `wrangler secret put INQUIRY_ACCESS_CLIENT_ID` and
+   `wrangler secret put INQUIRY_ACCESS_CLIENT_SECRET`.
+3. `tomokichi-diary` registered as a project on the platform (its `projects`
+   API, or the studio's `deploy/inquiry-platform/seed/apps.ts`). The contact
+   form depends on this too.
+
+The gateway sees the service token, not the person: its audit log records the
+token as the actor, and the token gets the gateway's `DEFAULT_ADMIN_ROLE`.
+Replies are sent by the platform. The sender name (「ともきちの旅行日記」) and the
+notification inbox come from the studio's `deploy/inquiry-platform/seed.ts`
+(`mailSettings`, inquiry-platform v0.2.1+); the sending address stays on
+tmkch.io until tomokichidiary.com has a verified sending domain and an inbound
+route. The signature is set in the admin (お問い合わせ → 返信の署名); until it
+is, replies carry the deployment's Tomokichi Studio signature, and the screen
+says so.
 
 ### `API_UNAUTHORIZED`
 

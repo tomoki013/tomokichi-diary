@@ -83,9 +83,9 @@ regenerates the AVIF/WebP ladder from the originals in `media/`.
 
 ## ContactMessage
 
-Contact form submissions. The sender's address is stored as a salted hash and
-never in the clear: enough to rate-limit a sender, not enough to identify one
-afterwards.
+Contact form submissions received before the form moved to the shared inquiry
+platform. New submissions are not stored here. The sender's address was stored
+as a salted hash and never in the clear.
 
 ## AIArtifact
 
