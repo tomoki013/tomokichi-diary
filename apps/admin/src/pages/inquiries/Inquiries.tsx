@@ -176,8 +176,8 @@ function Setup({ status }: { status: InquiryStatusDto }) {
     <Panel title="共通お問い合わせ基盤への接続">
       <ol className="setup">
         <li className={status.configured ? "setup--done" : undefined}>
-          API に基盤の接続先とサービストークンを設定する（<code>INQUIRY_API_ORIGIN</code>、
-          <code>INQUIRY_ACCESS_CLIENT_ID</code>、<code>INQUIRY_ACCESS_CLIENT_SECRET</code>）
+          API の <code>INQUIRY_OPERATOR</code> binding（基盤の <code>ProjectOperator</code>）を
+          デプロイする
         </li>
         <li className={status.registered ? "setup--done" : undefined}>
           基盤に <code>tomokichi-diary</code> を Project として登録する

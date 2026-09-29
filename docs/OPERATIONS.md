@@ -399,25 +399,20 @@ there.
 ### Admin inquiries
 
 The admin's お問い合わせ screen lists, answers and closes this site's tickets
-on the inquiry platform. The platform ships no UI, only an operator API on its
-gateway (`admin.tmkch.io`, behind its own Access application), so the diary API
-calls it on the operator's behalf under `/v1/admin/inquiry/*` — after the admin
-gate has let them in — and narrows every call to the `tomokichi-diary` project:
-lists are filtered by it, and another project's ticket answers 404.
+on the inquiry platform, and everything happens from `admin.tomokichidiary.com`.
+The diary API reaches the platform through the `INQUIRY_OPERATOR` service
+binding to the core Worker's `ProjectOperator` entrypoint (inquiry-platform
+v0.3.1+), after this site's own admin gate has let the operator in. The
+binding's `props` grant only `tomokichi-diary`: the platform filters every
+list to it and answers any other project's ticket as missing. Nothing is
+configured on the platform's API gateway (`admin.tmkch.io`) or its Access
+application — that host only serves the platform's own API.
 
-It needs three things, and the screen shows which are missing:
+Each change is audited on the platform as `tomokichi-diary-api:<who>`, where
+`<who>` is `access:<Access subject>` or `admin-token`. Notification mail and
+push links open `https://admin.tomokichidiary.com/#/inquiries/<ticket number>`
+(the studio seed's `mailSettings[].ticketUrlTemplate`).
 
-1. `INQUIRY_API_ORIGIN` (a var in `wrangler.toml`, `https://admin.tmkch.io`).
-2. A Cloudflare Access **service token**, added to a _Service Auth_ policy on
-   the `admin.tmkch.io` Access application, and set on the API with
-   `wrangler secret put INQUIRY_ACCESS_CLIENT_ID` and
-   `wrangler secret put INQUIRY_ACCESS_CLIENT_SECRET`.
-3. `tomokichi-diary` registered as a project on the platform (its `projects`
-   API, or the studio's `deploy/inquiry-platform/seed/apps.ts`). The contact
-   form depends on this too.
-
-The gateway sees the service token, not the person: its audit log records the
-token as the actor, and the token gets the gateway's `DEFAULT_ADMIN_ROLE`.
 Replies are sent by the platform. The sender name (「ともきちの旅行日記」) and the
 notification inbox come from the studio's `deploy/inquiry-platform/seed.ts`
 (`mailSettings`, inquiry-platform v0.2.1+); the sending address stays on
