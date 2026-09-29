@@ -6,40 +6,28 @@ import type {
   InquiryTicketDetailDto,
   InquiryTicketStatus,
   InquiryTicketSummaryDto,
-  InquiryTimelineItemDto,
   PageDto,
 } from "@tomokichi/contracts";
+import type {
+  IntakeResult,
+  OperatorProject,
+  OperatorTicketDetail,
+  OperatorTicketSummary,
+  ProjectOperatorClient,
+} from "@inquiry-platform/sdk";
 import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
-import type {
-  InquiryOperator,
-  OperatorFailure,
-  PlatformTicket,
-  PlatformTicketDetail,
-} from "../inquiry-operator.js";
 
 /**
  * The admin's window onto this site's tickets on the shared inquiry platform.
  *
- * Mounted under `/v1/admin`, so the admin gate has already run. Every call is
- * scoped to the site's own project: a list is always filtered by it, and a
- * ticket from any other project answers 404 exactly as a missing one would.
- * Bodies are rebuilt field by field rather than passed through, so the admin
- * can do what this file names and nothing else the platform offers.
+ * Mounted under `/v1/admin`, so this site's admin gate has already decided who
+ * may be here. The platform's `ProjectOperator` binding does the rest: it
+ * scopes every call to this site's project, applies the ticket rules, and
+ * audits each change as this API and the person who passed the gate.
+ * Bodies are rebuilt field by field, so the admin can do what this file names
+ * and nothing else.
  */
-
-/** Mirrors the platform's state machine. The platform enforces it; this only
- * decides which buttons to show. */
-const TRANSITIONS: Record<InquiryTicketStatus, readonly InquiryTicketStatus[]> = {
-  NEW: ["TRIAGE", "ACKNOWLEDGED", "RESOLVED"],
-  TRIAGE: ["ACKNOWLEDGED", "RESOLVED"],
-  ACKNOWLEDGED: ["IN_PROGRESS", "RESOLVED"],
-  IN_PROGRESS: ["WAITING_CUSTOMER", "WAITING_INTERNAL", "RESOLVED"],
-  WAITING_CUSTOMER: ["IN_PROGRESS", "RESOLVED"],
-  WAITING_INTERNAL: ["IN_PROGRESS", "RESOLVED"],
-  RESOLVED: ["CLOSED", "IN_PROGRESS"],
-  CLOSED: ["IN_PROGRESS"],
-};
 
 const STATUSES = [
   "NEW",
@@ -62,7 +50,7 @@ const RESOLUTIONS = [
 ] as const;
 const PAGE_SIZE = 30;
 
-/** Absent and null read the same to the validator; `changeBody` tells them apart. */
+/** Absent and null read the same to the validator; the handler tells them apart. */
 const changeSchema = v.object({
   revision: v.number({ min: 0, integer: true }),
   status: v.nullable(v.literalUnion(STATUSES)),
@@ -83,197 +71,131 @@ const replySchema = v.object({
 const signatureSchema = v.object({ signature: v.string({ max: 2000 }) });
 
 type Ctx = Context<AppEnv>;
+type Failure = Extract<IntakeResult<unknown>, { ok: false }>;
 
-const json = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
-
-function failure(c: Ctx, result: OperatorFailure): Response {
-  switch (result.kind) {
-    case "not_configured":
-    case "not_registered":
-      return errorResponse(c, "API_INTERNAL", result.message, 503);
-    case "not_found":
+function failure(c: Ctx, result: Failure): Response {
+  const { code, message } = result.error;
+  switch (code) {
+    case "NOT_FOUND":
       return errorResponse(c, "API_NOT_FOUND", "no such inquiry", 404);
-    case "conflict":
-      return errorResponse(c, "API_CONFLICT", result.message, 409);
-    case "rejected":
-      return errorResponse(
-        c,
-        "API_VALIDATION_FAILED",
-        result.message,
-        400,
-        Object.entries(result.fields ?? {}).map(([path, message]) => ({ path, message })),
-      );
+    case "CONFLICT":
+    case "INVALID_STATUS_TRANSITION":
+      return errorResponse(c, "API_CONFLICT", message, 409);
+    case "VALIDATION_ERROR":
+      return errorResponse(c, "API_VALIDATION_FAILED", message, 400);
+    case "UNAVAILABLE":
+    case "FORBIDDEN":
+      // The binding is missing or not granted this project: configuration,
+      // not something the operator did.
+      c.get("ctx").logger.error("inquiry.not_configured", { code: "API_INTERNAL" });
+      return errorResponse(c, "API_INTERNAL", "the inquiry platform is not configured", 503);
     default:
-      // Nothing about the upstream failure beyond its own message.
       c.get("ctx").logger.error("inquiry.upstream_failed", { code: "API_INTERNAL" });
       return errorResponse(c, "API_INTERNAL", "the inquiry platform is unavailable", 502);
   }
 }
 
-function toSummary(ticket: PlatformTicket): InquiryTicketSummaryDto {
+function toSummary(ticket: OperatorTicketSummary): InquiryTicketSummaryDto {
   return {
     id: ticket.id,
-    number: ticket.ticket_number,
+    number: ticket.number,
     status: ticket.status,
     subject: ticket.subject,
-    requesterEmail: ticket.requester_email,
+    requesterEmail: ticket.requesterEmail,
     priority: ticket.priority,
-    slaState: ticket.sla_state,
-    nextAction: ticket.next_action,
-    nextActionAt: ticket.next_action_at,
-    createdAt: ticket.created_at,
-    updatedAt: ticket.updated_at,
+    slaState: ticket.slaState,
+    nextAction: ticket.nextAction,
+    nextActionAt: ticket.nextActionAt,
+    createdAt: ticket.createdAt,
+    updatedAt: ticket.updatedAt,
   };
 }
 
-function toDetail(detail: PlatformTicketDetail): InquiryTicketDetailDto {
-  const { ticket } = detail;
-  const timeline: InquiryTimelineItemDto[] = detail.timeline.map((item) =>
-    item.kind === "message"
-      ? {
-          kind: "message",
-          id: item.value.id,
-          direction:
-            item.value.visibility === "INTERNAL"
-              ? "note"
-              : item.value.direction === "INBOUND"
-                ? "inbound"
-                : "outbound",
-          sender: item.value.sender,
-          body: item.value.body,
-          createdAt: item.value.created_at,
-        }
-      : {
-          kind: "event",
-          id: item.value.id,
-          type: item.value.event_type,
-          createdAt: item.value.created_at,
-        },
-  );
+function toDetail(ticket: OperatorTicketDetail): InquiryTicketDetailDto {
   return {
     ...toSummary(ticket),
     revision: ticket.revision,
     resolution: ticket.resolution,
-    acknowledgedAt: ticket.acknowledged_at,
-    resolvedAt: ticket.resolved_at,
-    closedAt: ticket.closed_at,
-    allowedStatuses: TRANSITIONS[ticket.status] ?? [],
-    canReply: ticket.thread_id !== null && ticket.requester_email !== null,
-    timeline,
-    totalTimeline: detail.totalTimeline,
+    acknowledgedAt: ticket.acknowledgedAt,
+    resolvedAt: ticket.resolvedAt,
+    closedAt: ticket.closedAt,
+    allowedStatuses: ticket.allowedStatuses,
+    canReply: ticket.canReply,
+    timeline: ticket.timeline,
+    totalTimeline: ticket.totalTimeline,
   };
 }
 
-export function inquiryRoutes(operatorFor: (c: Ctx) => InquiryOperator | null) {
+/** The person who passed this site's admin gate, as the platform audits them. */
+const who = (c: Ctx) => ({ id: c.get("adminActor") ?? "admin" });
+
+const toSignature = (project: OperatorProject): InquirySignatureDto => ({
+  signature: project.signature,
+  usesDefault: project.signature.trim() === "",
+});
+
+export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | null) {
   const routes = new Hono<AppEnv>();
 
-  /** The operator and this site's project id, or the response explaining their absence. */
-  async function scope(
-    c: Ctx,
-  ): Promise<{ operator: InquiryOperator; projectId: string } | Response> {
+  /** The client, or the 503 explaining there is none. */
+  const client = (c: Ctx): ProjectOperatorClient | Response =>
+    operatorFor(c) ??
+    errorResponse(c, "API_INTERNAL", "the inquiry platform is not configured", 503);
+
+  routes.get("/status", async (c) => {
     const operator = operatorFor(c);
     if (!operator) {
-      return failure(c, {
-        ok: false,
-        kind: "not_configured",
-        message: "the inquiry platform is not configured",
-      });
+      return c.json({
+        configured: false,
+        registered: false,
+        mailConfigured: false,
+      } satisfies InquiryStatusDto);
     }
-    const projectId = await operator.projectId();
-    return projectId.ok ? { operator, projectId: projectId.value } : failure(c, projectId);
-  }
-
-  /** A ticket of this site's, or a 404 indistinguishable from a missing one. */
-  async function scopedTicket(
-    c: Ctx,
-    offset = 0,
-  ): Promise<{ operator: InquiryOperator; detail: PlatformTicketDetail; id: string } | Response> {
-    const scoped = await scope(c);
-    if (scoped instanceof Response) return scoped;
-    const id = c.req.param("id") ?? "";
-    const detail = await scoped.operator.request<PlatformTicketDetail>(
-      `/api/tickets/${encodeURIComponent(id)}?offset=${offset}`,
-    );
-    if (!detail.ok) return failure(c, detail);
-    if (detail.value.ticket.service_id !== scoped.projectId) {
-      return failure(c, { ok: false, kind: "not_found", message: "no such inquiry" });
-    }
-    return { operator: scoped.operator, detail: detail.value, id };
-  }
+    const project = await operator.project();
+    if (!project.ok && project.error.code !== "NOT_FOUND") return failure(c, project);
+    return c.json({
+      configured: true,
+      registered: project.ok,
+      mailConfigured: project.ok && project.value.mailConfigured,
+    } satisfies InquiryStatusDto);
+  });
 
   /**
    * The signature under this site's replies. Without one of its own the
-   * platform signs with the deployment's (Tomokichi Studio's), which is why
-   * the admin surfaces it.
+   * platform signs with the deployment's, which is why the admin shows it.
    */
   routes.get("/signature", async (c) => {
-    const scoped = await scope(c);
-    if (scoped instanceof Response) return scoped;
-    const settings = await scoped.operator.request<{ appId?: string; signatureText: string }[]>(
-      "/api/support/mail-settings",
-    );
-    if (!settings.ok) return failure(c, settings);
-    const own = settings.value.find((row) => row.appId === scoped.projectId)?.signatureText ?? "";
-    return c.json({ signature: own, usesDefault: own.trim() === "" } satisfies InquirySignatureDto);
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
+    const project = await operator.project();
+    return project.ok ? c.json(toSignature(project.value)) : failure(c, project);
   });
 
   routes.put("/signature", async (c) => {
     const parsed = validate(signatureSchema, await c.req.json().catch(() => null));
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const scoped = await scope(c);
-    if (scoped instanceof Response) return scoped;
-    const result = await scoped.operator.request<unknown>("/api/support/mail-settings", {
-      method: "PUT",
-      // Always this site's project; the body never names one.
-      body: JSON.stringify({ appId: scoped.projectId, signatureText: parsed.value.signature }),
-    });
-    if (!result.ok) return failure(c, result);
-    const signature = parsed.value.signature;
-    return c.json({
-      signature,
-      usesDefault: signature.trim() === "",
-    } satisfies InquirySignatureDto);
-  });
-
-  routes.get("/status", async (c) => {
-    const operator = operatorFor(c);
-    const body: InquiryStatusDto = {
-      configured: operator !== null,
-      registered: false,
-      mailConfigured: false,
-    };
-    if (!operator) return c.json(body);
-
-    const [projectId, session] = await Promise.all([
-      operator.projectId(),
-      operator.request<{ mailConfigured: boolean }>("/api/session"),
-    ]);
-    if (!projectId.ok && projectId.kind !== "not_registered") return failure(c, projectId);
-    return c.json({
-      ...body,
-      registered: projectId.ok,
-      mailConfigured: session.ok && session.value.mailConfigured,
-    } satisfies InquiryStatusDto);
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
+    const saved = await operator.setSignature(parsed.value.signature, who(c));
+    return saved.ok ? c.json(toSignature(saved.value)) : failure(c, saved);
   });
 
   routes.get("/tickets", async (c) => {
-    const scoped = await scope(c);
-    if (scoped instanceof Response) return scoped;
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
 
-    const query = new URLSearchParams({ service_id: scoped.projectId, limit: String(PAGE_SIZE) });
     const status = c.req.query("status");
-    if (status === "open") query.set("queue", "OPEN");
-    else if (status && (STATUSES as readonly string[]).includes(status))
-      query.set("status", status);
     const text = c.req.query("query")?.trim().slice(0, 200);
-    if (text) query.set("query", text);
     const offset = Math.max(0, Math.floor(Number(c.req.query("offset")) || 0));
-    query.set("offset", String(offset));
-
-    const page = await scoped.operator.request<{ items: PlatformTicket[]; total: number }>(
-      `/api/tickets?${query}`,
-    );
+    const page = await operator.listTickets({
+      ...(status === "open" || (STATUSES as readonly string[]).includes(status ?? "")
+        ? { status: status as InquiryTicketStatus | "open" }
+        : {}),
+      ...(text ? { query: text } : {}),
+      limit: PAGE_SIZE,
+      offset,
+    });
     if (!page.ok) return failure(c, page);
     const body: PageDto<InquiryTicketSummaryDto> = {
       items: page.value.items.map(toSummary),
@@ -285,11 +207,13 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => InquiryOperator | null) {
     return c.json(body);
   });
 
+  /** `:id` is a ticket id or its number, as a notification link carries. */
   routes.get("/tickets/:id", async (c) => {
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
     const offset = Math.max(0, Math.floor(Number(c.req.query("offset")) || 0));
-    const scoped = await scopedTicket(c, offset);
-    if (scoped instanceof Response) return scoped;
-    return c.json(toDetail(scoped.detail));
+    const ticket = await operator.getTicket(c.req.param("id"), offset);
+    return ticket.ok ? c.json(toDetail(ticket.value)) : failure(c, ticket);
   });
 
   routes.patch("/tickets/:id", async (c) => {
@@ -297,69 +221,46 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => InquiryOperator | null) {
     const parsed = validate(changeSchema, raw);
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const scoped = await scopedTicket(c);
-    if (scoped instanceof Response) return scoped;
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
 
     // Only what was sent: a status change must not clear the next action.
     const sent = (key: string): boolean => Object.hasOwn(raw as object, key);
     const change = parsed.value;
-    const result = await scoped.operator.request<unknown>(
-      `/api/tickets/${encodeURIComponent(scoped.id)}`,
+    const result = await operator.changeTicket(
+      c.req.param("id"),
       {
-        method: "PATCH",
-        body: JSON.stringify({
-          revision: change.revision,
-          ...(change.status !== null ? { status: change.status } : {}),
-          ...(change.resolution !== null ? { resolution: change.resolution } : {}),
-          ...(sent("nextAction") ? { next_action: change.nextAction } : {}),
-          ...(sent("nextActionAt") ? { next_action_at: change.nextActionAt } : {}),
-        }),
+        revision: change.revision,
+        ...(change.status !== null ? { status: change.status } : {}),
+        ...(change.resolution !== null ? { resolution: change.resolution } : {}),
+        ...(sent("nextAction") ? { nextAction: change.nextAction } : {}),
+        ...(sent("nextActionAt") ? { nextActionAt: change.nextActionAt } : {}),
       },
+      who(c),
     );
-    if (!result.ok) return failure(c, result);
-    return c.json({ ok: true });
+    return result.ok ? c.json({ ok: true }) : failure(c, result);
   });
 
   routes.post("/tickets/:id/notes", async (c) => {
     const parsed = validate(noteSchema, await c.req.json().catch(() => null));
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const scoped = await scopedTicket(c);
-    if (scoped instanceof Response) return scoped;
-
-    const result = await scoped.operator.request<unknown>(
-      `/api/tickets/${encodeURIComponent(scoped.id)}/notes`,
-      json({ body: parsed.value.body, idempotencyKey: parsed.value.idempotencyKey }),
-    );
-    if (!result.ok) return failure(c, result);
-    return c.json({ ok: true });
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
+    const result = await operator.addNote(c.req.param("id"), parsed.value, who(c));
+    return result.ok ? c.json({ ok: true }) : failure(c, result);
   });
 
-  /**
-   * Sends mail to the person who wrote in. Only a body goes up: the recipient,
-   * sender and subject are the platform's to decide from the thread.
-   */
+  /** Mails the person who wrote in. Recipient, sender and subject are the platform's. */
   routes.post("/tickets/:id/reply", async (c) => {
     const parsed = validate(replySchema, await c.req.json().catch(() => null));
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const scoped = await scopedTicket(c);
-    if (scoped instanceof Response) return scoped;
-
-    const threadId = scoped.detail.ticket.thread_id;
-    if (threadId === null || scoped.detail.ticket.requester_email === null) {
-      return errorResponse(c, "API_CONFLICT", "this inquiry has no address to reply to", 409);
-    }
-    const result = await scoped.operator.request<unknown>(
-      `/api/support/threads/${encodeURIComponent(threadId)}/reply`,
-      json({
-        bodyText: parsed.value.body,
-        idempotencyKey: parsed.value.idempotencyKey,
-        reopenIfResolved: parsed.value.reopenIfResolved,
-      }),
-    );
+    const operator = client(c);
+    if (operator instanceof Response) return operator;
+    const result = await operator.reply(c.req.param("id"), parsed.value, who(c));
     if (!result.ok) return failure(c, result);
-    c.get("ctx").logger.info("inquiry.replied", { ticketId: scoped.id });
+    c.get("ctx").logger.info("inquiry.replied", { ticketId: result.value.id });
     return c.json({ ok: true });
   });
 

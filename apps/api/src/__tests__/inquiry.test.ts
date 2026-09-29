@@ -1,162 +1,112 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
+import {
+  createProjectOperatorClient,
+  type OperatorTicketDetail,
+  type ProjectOperatorApi,
+} from "@inquiry-platform/sdk";
+import { readFileSync } from "node:fs";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
-import { createInquiryOperator, forgetInquiryProject } from "../inquiry-operator.js";
+import { INQUIRY_PROJECT_SLUG } from "../inquiry.js";
 
 /*
- * The admin's inquiry screen talks to the shared platform through this API.
- * What matters here is the narrowing: the diary admin sees this site's tickets
- * and nothing else, sends only the fields it names, and never lets the
- * platform's own errors or other projects' data through. The platform is a
- * stand-in `fetch` behind the real operator client, so the Access headers and
- * paths are checked too.
+ * The admin's inquiry screen works this site's tickets through the platform's
+ * `ProjectOperator` binding. The platform owns scope and rules; what matters
+ * here is that this API only ever names its own project, sends the fields it
+ * means to, tells the platform who acted, and turns the platform's answers
+ * into this API's errors without passing their details through.
  */
 
 const TOKEN = "test-admin-token";
 const auth = { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" };
-const DIARY = "app-diary";
-
-const env = {
-  ADMIN_TOKEN: TOKEN,
-  INQUIRY_API_ORIGIN: "https://admin.example.com",
-  INQUIRY_ACCESS_CLIENT_ID: "client-id.access",
-  INQUIRY_ACCESS_CLIENT_SECRET: "client-secret",
-} as unknown as Env;
+const env = { ADMIN_TOKEN: TOKEN } as unknown as Env;
 
 interface Call {
   method: string;
-  path: string;
-  body: unknown;
-  headers: Headers;
+  args: unknown[];
 }
 
 let ctx: AppContext;
 let calls: Call[];
-let apps: { id: string; slug: string }[];
-let tickets: Record<string, ReturnType<typeof ticket>>;
-let upstream: ((call: Call) => Response | undefined) | undefined;
-let diarySignature: string | undefined;
+let answer: Partial<Record<keyof ProjectOperatorApi, unknown>>;
 
-function ticket(id: string, overrides: Record<string, unknown> = {}) {
+function ticket(overrides: Partial<OperatorTicketDetail> = {}): OperatorTicketDetail {
   return {
-    id,
-    ticket_number: `TK-${id}`,
-    type: "INQUIRY",
+    id: "t1",
+    number: "TK-000001",
     status: "NEW",
     resolution: null,
     priority: "P3",
-    impact: "MEDIUM",
-    urgency: "MEDIUM",
-    service_id: DIARY,
     subject: "記事について",
-    summary: null,
-    requester_email: "reader@example.com",
-    created_at: "2026-09-27T00:00:00.000Z",
-    updated_at: "2026-09-27T00:00:00.000Z",
-    acknowledged_at: null,
-    first_response_at: null,
-    resolved_at: null,
-    closed_at: null,
-    next_action: "返信する",
-    next_action_at: null,
+    requesterEmail: "reader@example.com",
+    slaState: "OK",
+    nextAction: "返信する",
+    nextActionAt: null,
+    createdAt: "2026-09-27T00:00:00.000Z",
+    updatedAt: "2026-09-27T00:00:00.000Z",
     revision: 3,
-    sla_state: "OK",
-    thread_id: `thread-${id}`,
+    acknowledgedAt: null,
+    resolvedAt: null,
+    closedAt: null,
+    allowedStatuses: ["TRIAGE", "ACKNOWLEDGED", "RESOLVED"],
+    canReply: true,
+    timeline: [
+      {
+        kind: "message",
+        id: "m1",
+        direction: "inbound",
+        sender: "reader@example.com",
+        body: "バスの時刻を教えてください",
+        createdAt: "2026-09-27T00:00:00.000Z",
+      },
+    ],
+    totalTimeline: 1,
     ...overrides,
   };
 }
 
-const ok = (data: unknown): Response => Response.json({ ok: true, data, requestId: "r" });
+const project = { id: "app-diary", slug: "tomokichi-diary", name: "ともきちの旅行日記" };
 
-const platform: typeof fetch = async (input, init) => {
-  const url = new URL(String(input));
-  const call: Call = {
-    method: init?.method ?? "GET",
-    path: `${url.pathname}${url.search}`,
-    body: init?.body ? JSON.parse(String(init.body)) : undefined,
-    headers: new Headers(init?.headers),
-  };
-  calls.push(call);
-  const overridden = upstream?.(call);
-  if (overridden) return overridden;
+/** A stand-in platform: records what it was asked, answers what the test set. */
+const platform = new Proxy({} as ProjectOperatorApi, {
+  get:
+    (_target, method: string) =>
+    async (...args: unknown[]) => {
+      calls.push({ method, args });
+      return (
+        answer[method as keyof ProjectOperatorApi] ?? {
+          ok: true,
+          value:
+            method === "project" || method === "setSignature"
+              ? { ...project, mailConfigured: true, signature: "" }
+              : method === "listTickets"
+                ? { items: [ticket()], total: 31 }
+                : ticket(),
+        }
+      );
+    },
+});
 
-  if (url.pathname === "/api/apps") return ok(apps);
-  if (url.pathname === "/api/session") return ok({ mailConfigured: true });
-  if (url.pathname === "/api/support/mail-settings" && call.method === "GET") {
-    return ok([
-      { signatureText: "Tomokichi Studio\n080-0000-0000", updatedAt: "x" },
-      { appId: "app-remeet", signatureText: "Remeet team", updatedAt: "x" },
-      ...(diarySignature === undefined
-        ? []
-        : [{ appId: DIARY, signatureText: diarySignature, updatedAt: "x" }]),
-    ]);
-  }
-  if (url.pathname === "/api/tickets") return ok({ items: Object.values(tickets), total: 2 });
-  const match = /^\/api\/tickets\/([^/]+)$/.exec(url.pathname);
-  if (match && call.method === "GET") {
-    const found = tickets[match[1]!];
-    return found
-      ? ok({
-          ticket: found,
-          timeline: [
-            {
-              kind: "message",
-              value: {
-                id: "m1",
-                direction: "INBOUND",
-                visibility: "PUBLIC",
-                sender: "reader@example.com",
-                body: "バスの時刻を教えてください",
-                created_at: found.created_at,
-              },
-            },
-            {
-              kind: "message",
-              value: {
-                id: "m2",
-                direction: "OUTBOUND",
-                visibility: "INTERNAL",
-                sender: null,
-                body: "確認中",
-                created_at: found.created_at,
-              },
-            },
-          ],
-          totalTimeline: 2,
-          relations: [],
-        })
-      : Response.json(
-          { ok: false, error: { code: "NOT_FOUND", message: "x" }, requestId: "r" },
-          { status: 404 },
-        );
-  }
-  return ok({});
-};
-
-function app() {
+function app(bound = true) {
   return createApp({
     contextFactory: () => ctx,
-    inquiryOperator: (e) => createInquiryOperator(e, platform),
+    inquiryOperator: () =>
+      bound ? createProjectOperatorClient(platform, INQUIRY_PROJECT_SLUG) : null,
   });
 }
 
-function request(path: string, init: RequestInit = {}, e: Env = env) {
-  return app().request(`/v1/admin/inquiry${path}`, { headers: auth, ...init }, e);
+function request(path: string, init: RequestInit = {}, bound = true) {
+  return app(bound).request(`/v1/admin/inquiry${path}`, { headers: auth, ...init }, env);
 }
+
+const last = (method: string) => calls.findLast((call) => call.method === method);
 
 beforeEach(async () => {
   ctx = await createTestContext();
-  forgetInquiryProject();
   calls = [];
-  upstream = undefined;
-  diarySignature = undefined;
-  apps = [
-    { id: DIARY, slug: "tomokichi-diary" },
-    { id: "app-remeet", slug: "remeet" },
-  ];
-  tickets = { t1: ticket("t1"), t2: ticket("t2") };
+  answer = {};
 });
 
 describe("/v1/admin/inquiry", () => {
@@ -166,91 +116,69 @@ describe("/v1/admin/inquiry", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("reports an unconfigured platform instead of calling anything", async () => {
-    const response = await request("/status", {}, { ADMIN_TOKEN: TOKEN } as unknown as Env);
-    expect(await response.json()).toEqual({
+  it("reports an unbound platform instead of calling anything", async () => {
+    expect(await (await request("/status", {}, false)).json()).toEqual({
       configured: false,
       registered: false,
       mailConfigured: false,
     });
-    expect(calls).toHaveLength(0);
-
-    const list = await request("/tickets", {}, { ADMIN_TOKEN: TOKEN } as unknown as Env);
-    expect(list.status).toBe(503);
+    expect((await request("/tickets", {}, false)).status).toBe(503);
   });
 
-  it("reports an unregistered project, and refuses to list without one", async () => {
-    apps = [{ id: "app-remeet", slug: "remeet" }];
-    const status = await (await request("/status")).json();
-    expect(status).toMatchObject({ configured: true, registered: false });
-    expect((await request("/tickets")).status).toBe(503);
+  it("reports an unregistered project", async () => {
+    answer.project = { ok: false, error: { code: "NOT_FOUND", message: "x" } };
+    expect(await (await request("/status")).json()).toEqual({
+      configured: true,
+      registered: false,
+      mailConfigured: false,
+    });
   });
 
-  it("presents the Access service token and never follows a login redirect", async () => {
-    await request("/tickets");
-    const first = calls[0]!;
-    expect(first.headers.get("CF-Access-Client-Id")).toBe("client-id.access");
-    expect(first.headers.get("CF-Access-Client-Secret")).toBe("client-secret");
-    expect(first.headers.get("authorization")).toBeNull();
+  it("names only this site's project, whatever the request says", async () => {
+    await request("/tickets?status=open&query=%E3%83%90%E3%82%B9&offset=30&project=remeet");
+    expect(last("listTickets")?.args).toEqual([
+      "tomokichi-diary",
+      { status: "open", query: "バス", limit: 30, offset: 30 },
+    ]);
+    expect(calls.every((call) => call.args[0] === "tomokichi-diary")).toBe(true);
   });
 
-  it("lists only this site's tickets", async () => {
-    const response = await request("/tickets?status=open&query=%E3%83%90%E3%82%B9&offset=30");
-    const body = await response.json();
-    const list = calls.find((call) => call.path.startsWith("/api/tickets?"))!;
-    const params = new URL(`https://x${list.path}`).searchParams;
-    expect(params.get("service_id")).toBe(DIARY);
-    expect(params.get("queue")).toBe("OPEN");
-    expect(params.get("query")).toBe("バス");
-    expect(params.get("offset")).toBe("30");
-    expect(body.items[0]).toMatchObject({ id: "t1", number: "TK-t1", status: "NEW" });
+  it("pages what the platform returns", async () => {
+    const body = await (await request("/tickets")).json();
+    expect(body).toMatchObject({ total: 31, offset: 0, limit: 30, hasMore: true });
+    expect(body.items[0]).toMatchObject({ id: "t1", number: "TK-000001", status: "NEW" });
   });
 
   it("ignores a status filter it does not know", async () => {
     await request("/tickets?status=DROP%20TABLE");
-    const list = calls.find((call) => call.path.startsWith("/api/tickets?"))!;
-    expect(list.path).not.toContain("status=");
+    expect(last("listTickets")?.args[1]).toEqual({ limit: 30, offset: 0 });
   });
 
-  it("shows a ticket with its timeline, telling notes from mail", async () => {
-    const body = await (await request("/tickets/t1")).json();
-    expect(body).toMatchObject({
-      id: "t1",
-      revision: 3,
-      canReply: true,
-      allowedStatuses: ["TRIAGE", "ACKNOWLEDGED", "RESOLVED"],
-    });
-    expect(body.timeline.map((item: { direction: string }) => item.direction)).toEqual([
-      "inbound",
-      "note",
-    ]);
+  it("opens a ticket by number, as a notification link carries it", async () => {
+    const body = await (await request("/tickets/TK-000001")).json();
+    expect(last("getTicket")?.args).toEqual(["tomokichi-diary", "TK-000001", 0]);
+    expect(body).toMatchObject({ id: "t1", revision: 3, canReply: true });
   });
 
-  it("answers 404 for another project's ticket, exactly as for a missing one", async () => {
-    tickets["other"] = ticket("other", { service_id: "app-remeet" });
-    const other = await request("/tickets/other");
-    const missing = await request("/tickets/nope");
-    expect(other.status).toBe(404);
-    expect(missing.status).toBe(404);
-    expect(await other.json()).toMatchObject({ error: { code: "API_NOT_FOUND" } });
-
-    const reply = await request("/tickets/other/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "こんにちは", idempotencyKey: "reply-key-1" }),
-    });
-    expect(reply.status).toBe(404);
-    expect(calls.some((call) => call.path.includes("/reply"))).toBe(false);
+  it("answers 404 when the platform says the ticket is not this site's", async () => {
+    answer.getTicket = { ok: false, error: { code: "NOT_FOUND", message: "secret detail" } };
+    const response = await request("/tickets/other");
+    expect(response.status).toBe(404);
+    expect(JSON.stringify(await response.json())).not.toContain("secret detail");
   });
 
-  it("changes status without touching fields that were not sent", async () => {
+  it("changes status without touching fields that were not sent, and says who acted", async () => {
     const response = await request("/tickets/t1", {
       method: "PATCH",
       body: JSON.stringify({ revision: 3, status: "ACKNOWLEDGED" }),
     });
     expect(response.status).toBe(200);
-    const patch = calls.find((call) => call.method === "PATCH")!;
-    expect(patch.path).toBe("/api/tickets/t1");
-    expect(patch.body).toEqual({ revision: 3, status: "ACKNOWLEDGED" });
+    expect(last("changeTicket")?.args).toEqual([
+      "tomokichi-diary",
+      "t1",
+      { revision: 3, status: "ACKNOWLEDGED" },
+      { id: "admin-token" },
+    ]);
   });
 
   it("clears the next action only when asked to", async () => {
@@ -258,8 +186,11 @@ describe("/v1/admin/inquiry", () => {
       method: "PATCH",
       body: JSON.stringify({ revision: 3, nextAction: null, nextActionAt: null }),
     });
-    const patch = calls.find((call) => call.method === "PATCH")!;
-    expect(patch.body).toEqual({ revision: 3, next_action: null, next_action_at: null });
+    expect(last("changeTicket")?.args[2]).toEqual({
+      revision: 3,
+      nextAction: null,
+      nextActionAt: null,
+    });
   });
 
   it("rejects a change it does not recognise before calling the platform", async () => {
@@ -268,21 +199,14 @@ describe("/v1/admin/inquiry", () => {
       body: JSON.stringify({ revision: 3, status: "DELETED" }),
     });
     expect(response.status).toBe(400);
-    expect(calls.some((call) => call.method === "PATCH")).toBe(false);
+    expect(last("changeTicket")).toBeUndefined();
   });
 
   it("passes a stale revision back as a conflict", async () => {
-    upstream = (call) =>
-      call.method === "PATCH"
-        ? Response.json(
-            {
-              ok: false,
-              error: { code: "CONFLICT", message: "他の人が更新しました" },
-              requestId: "r",
-            },
-            { status: 409 },
-          )
-        : undefined;
+    answer.changeTicket = {
+      ok: false,
+      error: { code: "CONFLICT", message: "ほかの操作で更新されています" },
+    };
     const response = await request("/tickets/t1", {
       method: "PATCH",
       body: JSON.stringify({ revision: 1, status: "ACKNOWLEDGED" }),
@@ -291,29 +215,22 @@ describe("/v1/admin/inquiry", () => {
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
-  it("sends a reply as a body only, into the ticket's own thread", async () => {
+  it("sends a reply as a body and a key only", async () => {
     const response = await request("/tickets/t1/reply", {
       method: "POST",
       body: JSON.stringify({ body: "ご連絡ありがとうございます。", idempotencyKey: "reply-key-1" }),
     });
     expect(response.status).toBe(200);
-    const reply = calls.find((call) => call.path.endsWith("/reply"))!;
-    expect(reply.path).toBe("/api/support/threads/thread-t1/reply");
-    expect(reply.body).toEqual({
-      bodyText: "ご連絡ありがとうございます。",
-      idempotencyKey: "reply-key-1",
-      reopenIfResolved: false,
-    });
-  });
-
-  it("refuses to reply where there is nobody to reply to", async () => {
-    tickets["t1"] = ticket("t1", { requester_email: null });
-    const response = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "こんにちは", idempotencyKey: "reply-key-1" }),
-    });
-    expect(response.status).toBe(409);
-    expect(calls.some((call) => call.path.endsWith("/reply"))).toBe(false);
+    expect(last("reply")?.args).toEqual([
+      "tomokichi-diary",
+      "t1",
+      {
+        body: "ご連絡ありがとうございます。",
+        idempotencyKey: "reply-key-1",
+        reopenIfResolved: false,
+      },
+      { id: "admin-token" },
+    ]);
   });
 
   it("adds an internal note with its idempotency key", async () => {
@@ -321,16 +238,19 @@ describe("/v1/admin/inquiry", () => {
       method: "POST",
       body: JSON.stringify({ body: "調査中", idempotencyKey: "note-key-1" }),
     });
-    const note = calls.find((call) => call.path.endsWith("/notes"))!;
-    expect(note.body).toEqual({ body: "調査中", idempotencyKey: "note-key-1" });
+    expect(last("addNote")?.args.slice(1, 3)).toEqual([
+      "t1",
+      { body: "調査中", idempotencyKey: "note-key-1" },
+    ]);
   });
 
-  it("turns a rejected service token into a plain 502", async () => {
-    upstream = () =>
-      Response.json(
-        { ok: false, error: { code: "UNAUTHORIZED", message: "secret detail" }, requestId: "r" },
-        { status: 401 },
-      );
+  it("treats a binding that is not granted this project as configuration", async () => {
+    answer.listTickets = { ok: false, error: { code: "FORBIDDEN", message: "props" } };
+    expect((await request("/tickets")).status).toBe(503);
+  });
+
+  it("turns anything else the platform says into a plain 502", async () => {
+    answer.listTickets = { ok: false, error: { code: "INTERNAL_ERROR", message: "secret detail" } };
     const response = await request("/tickets");
     expect(response.status).toBe(502);
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
@@ -338,30 +258,27 @@ describe("/v1/admin/inquiry", () => {
 
   describe("signature", () => {
     it("reports the deployment's signature in use when the site has none", async () => {
-      const body = await (await request("/signature")).json();
-      expect(body).toEqual({ signature: "", usesDefault: true });
-      // Neither the deployment's nor another project's text is handed over.
-      expect(JSON.stringify(body)).not.toContain("080");
-      expect(JSON.stringify(body)).not.toContain("Remeet");
-    });
-
-    it("returns the site's own signature", async () => {
-      diarySignature = "ともきちの旅行日記";
       expect(await (await request("/signature")).json()).toEqual({
-        signature: "ともきちの旅行日記",
-        usesDefault: false,
+        signature: "",
+        usesDefault: true,
       });
     });
 
-    it("always saves to this site's project, whatever the body says", async () => {
+    it("saves this site's signature", async () => {
+      answer.setSignature = {
+        ok: true,
+        value: { ...project, mailConfigured: true, signature: "ともきち" },
+      };
       const response = await request("/signature", {
         method: "PUT",
         body: JSON.stringify({ signature: "ともきち", appId: "app-remeet" }),
       });
-      expect(response.status).toBe(200);
-      const put = calls.find((call) => call.method === "PUT")!;
-      expect(put.path).toBe("/api/support/mail-settings");
-      expect(put.body).toEqual({ appId: DIARY, signatureText: "ともきち" });
+      expect(await response.json()).toEqual({ signature: "ともきち", usesDefault: false });
+      expect(last("setSignature")?.args).toEqual([
+        "tomokichi-diary",
+        "ともきち",
+        { id: "admin-token" },
+      ]);
     });
 
     it("refuses an over-long signature before calling the platform", async () => {
@@ -370,7 +287,15 @@ describe("/v1/admin/inquiry", () => {
         body: JSON.stringify({ signature: "あ".repeat(2001) }),
       });
       expect(response.status).toBe(400);
-      expect(calls.some((call) => call.method === "PUT")).toBe(false);
+      expect(last("setSignature")).toBeUndefined();
     });
+  });
+
+  it("is bound to the platform's ProjectOperator for this project only", () => {
+    const toml = readFileSync(new URL("../../wrangler.toml", import.meta.url), "utf8");
+    const block = toml.slice(toml.indexOf('binding = "INQUIRY_OPERATOR"'));
+    expect(block).toMatch(/entrypoint = "ProjectOperator"/);
+    expect(block).toContain(`projects = ["${INQUIRY_PROJECT_SLUG}"]`);
+    expect(toml).not.toContain("INQUIRY_API_ORIGIN");
   });
 });

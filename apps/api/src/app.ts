@@ -14,7 +14,8 @@ import { messageRoutes } from "./routes/messages.js";
 import { likeRoutes } from "./routes/likes.js";
 import { knowledgeRoutes } from "./routes/knowledge.js";
 import { inquiryRoutes } from "./routes/inquiry.js";
-import { createInquiryOperator, type InquiryOperator } from "./inquiry-operator.js";
+import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
+import { createInquiryOperator } from "./inquiry-operator.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -38,6 +39,11 @@ export type AppEnv = {
     ctx: AppContext;
     verifyChallenge: ChallengeVerifier;
     verifyAccess: AccessVerifier;
+    /**
+     * Who passed the admin gate, as an opaque id for other systems' audit logs:
+     * the Access subject, or `admin-token`. Never an address.
+     */
+    adminActor: string;
   };
 };
 
@@ -47,7 +53,7 @@ export interface AppOptions {
   verifyChallenge?: ChallengeVerifier;
   verifyAccess?: AccessVerifier;
   /** Overridden by tests so the inquiry screen runs against a stand-in platform. */
-  inquiryOperator?: (env: Env) => InquiryOperator | null;
+  inquiryOperator?: (env: Env) => ProjectOperatorClient | null;
 }
 
 /**
@@ -142,6 +148,8 @@ export function createApp(options: AppOptions = {}) {
       const identity = await c.get("verifyAccess")(assertion, teamDomain, audience);
       if (identity) {
         c.get("ctx").logger.info("admin.authenticated", { via: "access", email: identity.email });
+        const subject = identity.subject.replace(/[^A-Za-z0-9._:+-]/g, "").slice(0, 80);
+        c.set("adminActor", subject ? `access:${subject}` : "access");
         await next();
         return;
       }
@@ -163,6 +171,7 @@ export function createApp(options: AppOptions = {}) {
       });
       return errorResponse(c, "API_UNAUTHORIZED", "a valid admin token is required", 401);
     }
+    c.set("adminActor", "admin-token");
     await next();
   });
 
