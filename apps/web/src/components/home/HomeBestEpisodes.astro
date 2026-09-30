@@ -25,74 +25,72 @@ const monthOf = (view: ArticleView) =>
   view.article.travelStartDate?.slice(0, 7).replace("-", ".") ?? null;
 ---
 
-{
-  slides.length > 0 && (
-    <section class="home-best" aria-labelledby="home-best-title" data-carousel>
-      <header class="section-heading">
-        <div>
-          <p class="eyebrow">BEST EPISODES</p>
-          <h2 id="home-best-title">ともきちのベストエピソード</h2>
-        </div>
-      </header>
-
-      <div class="home-best__stage">
-        <ol class="home-best__track" data-carousel-track>
-          {slides.map(({ episode, view }, index) => (
-            <li class="home-best__slide" aria-label={`${index + 1} / ${slides.length}`}>
-              <a href={view.route.path}>
-                <span class="home-best__photo">
-                  <Picture
-                    storageKey={view.cover!.asset.storageKey}
-                    alt={view.cover!.usage.alt}
-                    sizes="(max-width: 760px) 92vw, 760px"
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
-                  <span class="home-best__on-photo">
-                    <ExperienceChips
-                      tags={view.article.experienceTags.slice(0, 2)}
-                      link={false}
-                      tone="light"
-                    />
-                  </span>
-                  <span class="home-best__tape" aria-hidden="true" />
-                </span>
-                <span class="home-best__copy">
-                  <small>{[placeOf(view), monthOf(view)].filter(Boolean).join("　")}</small>
-                  <strong>{episode.featuredTitle}</strong>
-                  <span class="home-best__hook">{episode.hook}</span>
-                  <b>この旅の話を読む&nbsp; →</b>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ol>
-        {slides.length > 1 && (
-          <div class="home-best__controls" aria-label="ベストエピソードの移動">
-            <button
-              class="home-best__arrow home-best__arrow--prev"
-              type="button"
-              data-carousel-prev
-              aria-label="前のエピソード"
-            >
-              ‹
-            </button>
-            <p class="home-best__counter" aria-hidden="true">
-              <span data-carousel-current>1</span> / {slides.length}
-            </p>
-            <button
-              class="home-best__arrow home-best__arrow--next"
-              type="button"
-              data-carousel-next
-              aria-label="次のエピソード"
-            >
-              ›
-            </button>
-          </div>
-        )}
+{slides.length > 0 && (
+  <section class="home-best" aria-labelledby="home-best-title" data-carousel>
+    <header class="section-heading">
+      <div>
+        <p class="eyebrow">BEST EPISODES</p>
+        <h2 id="home-best-title">ともきちのベストエピソード</h2>
       </div>
-    </section>
-  )
-}
+    </header>
+
+    <div class="home-best__stage">
+      <ol class="home-best__track" data-carousel-track>
+        {slides.map(({ episode, view }, index) => (
+          <li class="home-best__slide" aria-label={`${index + 1} / ${slides.length}`}>
+            <a href={view.route.path}>
+              <span class="home-best__photo">
+                <Picture
+                  storageKey={view.cover!.asset.storageKey}
+                  alt={view.cover!.usage.alt}
+                  sizes="(max-width: 760px) 92vw, 760px"
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+                <span class="home-best__on-photo">
+                  <ExperienceChips
+                    tags={view.article.experienceTags.slice(0, 2)}
+                    link={false}
+                    tone="light"
+                  />
+                </span>
+                <span class="home-best__tape" aria-hidden="true" />
+              </span>
+              <span class="home-best__copy">
+                <small>{[placeOf(view), monthOf(view)].filter(Boolean).join("　")}</small>
+                <strong>{episode.featuredTitle}</strong>
+                <span class="home-best__hook">{episode.hook}</span>
+                <b>この旅の話を読む&nbsp; →</b>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      {slides.length > 1 && (
+        <div class="home-best__controls" aria-label="ベストエピソードの移動">
+          <button
+            class="home-best__arrow home-best__arrow--prev"
+            type="button"
+            data-carousel-prev
+            aria-label="前のエピソード"
+          >
+            ‹
+          </button>
+          <p class="home-best__counter" aria-hidden="true">
+            <span data-carousel-current>1</span> / {slides.length}
+          </p>
+          <button
+            class="home-best__arrow home-best__arrow--next"
+            type="button"
+            data-carousel-next
+            aria-label="次のエピソード"
+          >
+            ›
+          </button>
+        </div>
+      )}
+    </div>
+  </section>
+)}
 
 <script>
   document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((root) => {

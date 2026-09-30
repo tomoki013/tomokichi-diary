@@ -8,10 +8,17 @@ import { ListIcon, XIcon } from "./TravelIcons";
   aria-labelledby="article-toc-title"
 >
   <div class="article-toc__heading">
-    <span aria-hidden="true"><ListIcon /></span>
-    <div><small>JOURNEY GUIDE</small><h2 id="article-toc-title">この旅の道しるべ</h2></div>
+    <span aria-hidden="true">
+      <ListIcon />
+    </span>
+    <div>
+      <small>JOURNEY GUIDE</small>
+      <h2 id="article-toc-title">この旅の道しるべ</h2>
+    </div>
   </div>
-  <nav aria-label="記事の目次"><ol data-article-toc-list></ol></nav>
+  <nav aria-label="記事の目次">
+    <ol data-article-toc-list></ol>
+  </nav>
 </aside>
 
 <button
@@ -22,7 +29,8 @@ import { ListIcon, XIcon } from "./TravelIcons";
   aria-expanded="false"
   aria-controls="mobile-article-toc"
 >
-  <ListIcon /><span>目次</span>
+  <ListIcon />
+  <span>目次</span>
 </button>
 
 <div class="mobile-toc-overlay" data-mobile-toc-overlay hidden>
@@ -30,7 +38,8 @@ import { ListIcon, XIcon } from "./TravelIcons";
     class="mobile-toc-overlay__backdrop"
     type="button"
     data-mobile-toc-close
-    aria-label="目次を閉じる"></button>
+    aria-label="目次を閉じる"
+  ></button>
   <section
     id="mobile-article-toc"
     class="mobile-toc-sheet"
@@ -39,10 +48,17 @@ import { ListIcon, XIcon } from "./TravelIcons";
     aria-labelledby="mobile-toc-title"
   >
     <header>
-      <div><small>WHERE TO NEXT?</small><h2 id="mobile-toc-title">目次から旅をたどる</h2></div>
-      <button type="button" data-mobile-toc-close aria-label="目次を閉じる"><XIcon /></button>
+      <div>
+        <small>WHERE TO NEXT?</small>
+        <h2 id="mobile-toc-title">目次から旅をたどる</h2>
+      </div>
+      <button type="button" data-mobile-toc-close aria-label="目次を閉じる">
+        <XIcon />
+      </button>
     </header>
-    <nav aria-label="モバイル記事目次"><ol data-mobile-toc-list></ol></nav>
+    <nav aria-label="モバイル記事目次">
+      <ol data-mobile-toc-list></ol>
+    </nav>
   </section>
 </div>
 

@@ -29,19 +29,26 @@ const latest = content
   <div class="error-page">
     <section class="error-page__hero">
       <div class="error-page__copy">
-        <p class="error-page__code"><strong>404</strong><span>Page not found</span></p>
+        <p class="error-page__code">
+          <strong>404</strong>
+          <span>Page not found</span>
+        </p>
         <h1>この道の先は、まだ地図にありません。</h1>
         <p>
           お探しのページは移動したか、削除された可能性があります。URLを見直していただくか、下の入口から旅の記録を探してみてください。
         </p>
         <div class="error-page__actions">
-          <a class="button" href="/">ホームへ戻る <span aria-hidden="true">→</span></a>
+          <a class="button" href="/">
+            ホームへ戻る <span aria-hidden="true">→</span>
+          </a>
           <a href="/posts">記事一覧を見る</a>
           <a href="/destination">旅先から探す</a>
         </div>
         <form class="error-page__search" action="/posts" method="get" role="search">
           <SearchIcon />
-          <label class="sr-only" for="error-search">行き先・キーワードで検索</label>
+          <label class="sr-only" for="error-search">
+            行き先・キーワードで検索
+          </label>
           <input id="error-search" name="q" type="search" placeholder="行き先・キーワードで検索" />
           <button type="submit">検索</button>
         </form>
@@ -57,23 +64,21 @@ const latest = content
       </div>
     </section>
 
-    {
-      latest.length > 0 && (
-        <section aria-labelledby="error-latest-heading">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">KEEP EXPLORING</p>
-              <h2 id="error-latest-heading">最近の旅の記録</h2>
-            </div>
-            <a href="/posts">すべての記事&nbsp; →</a>
+    {latest.length > 0 && (
+      <section aria-labelledby="error-latest-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">KEEP EXPLORING</p>
+            <h2 id="error-latest-heading">最近の旅の記録</h2>
           </div>
-          <ul class="card-grid">
-            {latest.map((view) => (
-              <ArticleCard view={view} level={3} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+          <a href="/posts">すべての記事&nbsp; →</a>
+        </div>
+        <ul class="card-grid">
+          {latest.map((view) => (
+            <ArticleCard view={view} level={3} />
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </BaseLayout>

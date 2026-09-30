@@ -36,7 +36,11 @@ const groups = markdown
   <header class="faq-hero">
     <div>
       <p class="eyebrow">TRAVEL HELP DESK</p>
-      <h1><span class="sr-only">FAQ — </span>旅の疑問を、<br />ここで軽くする。</h1>
+      <h1>
+        <span class="sr-only">FAQ — </span>旅の疑問を、
+        <br />
+        ここで軽くする。
+      </h1>
       <p>記事の探し方から旅行記の読み方まで。よくいただく質問を、目的別にまとめました。</p>
     </div>
     <label class="faq-search">
@@ -46,47 +50,43 @@ const groups = markdown
   </header>
 
   <nav class="faq-topics" aria-label="質問カテゴリ">
-    {
-      groups.map((group, index) => (
-        <a href={`#faq-group-${index + 1}`}>
-          <span>{String(index + 1).padStart(2, "0")}</span>
-          {group.title}
-        </a>
-      ))
-    }
+    {groups.map((group, index) => (
+      <a href={`#faq-group-${index + 1}`}>
+        <span>{String(index + 1).padStart(2, "0")}</span>
+        {group.title}
+      </a>
+    ))}
   </nav>
 
   <div class="faq-layout">
     <div class="faq-groups" data-faq-groups>
-      {
-        groups.map((group, groupIndex) => (
-          <section id={`faq-group-${groupIndex + 1}`} class="faq-group" data-faq-group>
-            <header>
-              <span>{String(groupIndex + 1).padStart(2, "0")}</span>
-              <h2>{group.title}</h2>
-              <small>{group.questions.length} QUESTIONS</small>
-            </header>
-            <div>
-              {group.questions.map((item) => (
-                <details
-                  data-faq-item
-                  data-search-text={`${item.question} ${item.answer}`.toLocaleLowerCase("ja")}
-                >
-                  <summary>
-                    <span>Q</span>
-                    <strong>{item.question}</strong>
-                    <i aria-hidden="true">＋</i>
-                  </summary>
-                  <div>
-                    <span>A</span>
-                    <p>{item.answer}</p>
-                  </div>
-                </details>
-              ))}
-            </div>
-          </section>
-        ))
-      }
+      {groups.map((group, groupIndex) => (
+        <section id={`faq-group-${groupIndex + 1}`} class="faq-group" data-faq-group>
+          <header>
+            <span>{String(groupIndex + 1).padStart(2, "0")}</span>
+            <h2>{group.title}</h2>
+            <small>{group.questions.length} QUESTIONS</small>
+          </header>
+          <div>
+            {group.questions.map((item) => (
+              <details
+                data-faq-item
+                data-search-text={`${item.question} ${item.answer}`.toLocaleLowerCase("ja")}
+              >
+                <summary>
+                  <span>Q</span>
+                  <strong>{item.question}</strong>
+                  <i aria-hidden="true">＋</i>
+                </summary>
+                <div>
+                  <span>A</span>
+                  <p>{item.answer}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ))}
       <p class="faq-empty" data-faq-empty hidden>
         該当する質問が見つかりませんでした。言葉を変えて検索するか、お問い合わせください。
       </p>
@@ -94,7 +94,11 @@ const groups = markdown
 
     <aside class="faq-contact">
       <p class="eyebrow">STILL CURIOUS?</p>
-      <h2>見つからない疑問は、<br />気軽に聞いてください。</h2>
+      <h2>
+        見つからない疑問は、
+        <br />
+        気軽に聞いてください。
+      </h2>
       <p>掲載内容の確認、旅先のリクエスト、お仕事のご相談も受け付けています。</p>
       <a href="/contact">お問い合わせへ&nbsp; →</a>
     </aside>

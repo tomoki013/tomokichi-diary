@@ -20,29 +20,25 @@ const { title, note, views, more = null } = Astro.props;
     {note && <p class="story-rail__note">{note}</p>}
   </header>
   <ul>
-    {
-      views.map((view) => (
-        <li>
-          {view.cover && (
-            <a class="story-rail__thumb" href={view.route.path} tabindex="-1" aria-hidden="true">
-              <Picture storageKey={view.cover.asset.storageKey} alt="" sizes="96px" />
-            </a>
-          )}
-          <div>
-            <a class="story-rail__title" href={view.route.path}>
-              {view.revision.title}
-            </a>
-            <ExperienceChips tags={view.article.experienceTags} />
-          </div>
-        </li>
-      ))
-    }
+    {views.map((view) => (
+      <li>
+        {view.cover && (
+          <a class="story-rail__thumb" href={view.route.path} tabindex="-1" aria-hidden="true">
+            <Picture storageKey={view.cover.asset.storageKey} alt="" sizes="96px" />
+          </a>
+        )}
+        <div>
+          <a class="story-rail__title" href={view.route.path}>
+            {view.revision.title}
+          </a>
+          <ExperienceChips tags={view.article.experienceTags} />
+        </div>
+      </li>
+    ))}
   </ul>
-  {
-    more && (
-      <a class="story-rail__more" href={more.href}>
-        {more.label}&nbsp; →
-      </a>
-    )
-  }
+  {more && (
+    <a class="story-rail__more" href={more.href}>
+      {more.label}&nbsp; →
+    </a>
+  )}
 </section>

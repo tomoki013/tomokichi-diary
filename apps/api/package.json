@@ -17,7 +17,7 @@
     "@tomokichi/domain": "workspace:*",
     "@tomokichi/infra-d1": "workspace:*",
     "@tomokichi/infra-r2": "workspace:*",
-    "hono": "^4.10.3"
+    "hono": "^4.13.9"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260925.1",

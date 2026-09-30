@@ -8,12 +8,10 @@ interface Props {
 const { quickAnswer } = projectTravelKnowledge(Astro.props.view);
 ---
 
-{
-  quickAnswer && (
-    <section class="knowledge-answer" aria-labelledby="quick-answer-heading">
-      <h2 id="quick-answer-heading">Quick Answer</h2>
-      <p>{quickAnswer.summary}</p>
-      {quickAnswer.recommendation && <strong>{quickAnswer.recommendation}</strong>}
-    </section>
-  )
-}
+{quickAnswer && (
+  <section class="knowledge-answer" aria-labelledby="quick-answer-heading">
+    <h2 id="quick-answer-heading">Quick Answer</h2>
+    <p>{quickAnswer.summary}</p>
+    {quickAnswer.recommendation && <strong>{quickAnswer.recommendation}</strong>}
+  </section>
+)}

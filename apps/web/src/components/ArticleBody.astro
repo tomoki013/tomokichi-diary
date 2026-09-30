@@ -112,21 +112,19 @@ const FallbackContent = fallback?.Content;
 ---
 
 <div class="prose article-content">
-  {
-    segments === null ? (
-      FallbackContent ? (
-        <FallbackContent />
-      ) : null
-    ) : (
-      segments.map((segment, index) =>
-        index % 2 === 1 ? (
-          embedByAnchor.has(segment) ? (
-            <EmbedBlock embed={embedByAnchor.get(segment)!} />
-          ) : null
-        ) : (
-          <Fragment set:html={segment} />
-        ),
-      )
+  {segments === null ? (
+    FallbackContent ? (
+      <FallbackContent />
+    ) : null
+  ) : (
+    segments.map((segment, index) =>
+      index % 2 === 1 ? (
+        embedByAnchor.has(segment) ? (
+          <EmbedBlock embed={embedByAnchor.get(segment)!} />
+        ) : null
+      ) : (
+        <Fragment set:html={segment} />
+      ),
     )
-  }
+  )}
 </div>
