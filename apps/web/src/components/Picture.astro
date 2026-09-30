@@ -29,11 +29,9 @@ const image = imageSources(storageKey);
 ---
 
 <picture>
-  {
-    image.sources.map((source) => (
-      <source type={source.type} srcset={source.srcset} sizes={sizes} />
-    ))
-  }
+  {image.sources.map((source) => (
+    <source type={source.type} srcset={source.srcset} sizes={sizes} />
+  ))}
   <img
     src={image.src}
     alt={alt}

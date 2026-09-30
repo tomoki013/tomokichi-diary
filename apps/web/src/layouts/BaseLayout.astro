@@ -80,10 +80,8 @@ const footerPhoto = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {
-      /* Media is on its own origin, so the connection is opened before the
-        first image is discovered rather than after. */
-    }
+    {/* Media is on its own origin, so the connection is opened before the
+        first image is discovered rather than after. */}
     <link rel="preconnect" href={mediaBaseUrl} crossorigin />
     <link rel="dns-prefetch" href={mediaBaseUrl} />
     <title>{metadata.title}</title>
@@ -96,27 +94,19 @@ const footerPhoto = {
     <meta name="theme-color" content="#fbfaf7" />
     <meta name="google-adsense-account" content={adsenseClient} />
     <link rel="alternate" type="application/rss+xml" title={seoConfig.siteName} href="/rss.xml" />
-    {
-      Object.entries(metadata.openGraph).map(([property, content]) => (
-        <meta property={property} content={content} />
-      ))
-    }
-    {
-      Object.entries(metadata.twitter).map(([name, content]) => (
-        <meta name={name} content={content} />
-      ))
-    }
-    {
-      structuredData.map((node) => (
-        <script type="application/ld+json" set:html={serializeJsonLd(node)} />
-      ))
-    }
-    {
-      /* GA4, on the production hostname only. The queue is defined up front
+    {Object.entries(metadata.openGraph).map(([property, content]) => (
+      <meta property={property} content={content} />
+    ))}
+    {Object.entries(metadata.twitter).map(([name, content]) => (
+      <meta name={name} content={content} />
+    ))}
+    {structuredData.map((node) => (
+      <script type="application/ld+json" set:html={serializeJsonLd(node)}></script>
+    ))}
+    {/* GA4, on the production hostname only. The queue is defined up front
         so events fired early are kept; gtag.js itself is fetched once the page
         has loaded and the main thread is idle, so it never competes with the
-        page for bandwidth or blocks first paint. */
-    }
+        page for bandwidth or blocks first paint. */}
     <script is:inline define:vars={{ gaMeasurementId, analyticsHostnames }}>
       function loadGtag() {
         const script = document.createElement("script");
@@ -142,45 +132,51 @@ const footerPhoto = {
   </head>
   <body>
     <div class="shell">
-      <a class="skip-link" href="#main">本文へスキップ</a>
+      <a class="skip-link" href="#main">
+        本文へスキップ
+      </a>
       <header class:list={["site-header", headerOverlay && "site-header--overlay"]}>
         <div class="wrap site-header__bar">
           <a class="site-header__brand" href="/">
-            <span
-              ><strong>{seoConfig.siteName}<em>｜Travel Diary</em></strong><small
-                >一生モノの体験を、もっと身近に。</small
-              ></span
-            >
+            <span>
+              <strong>
+                {seoConfig.siteName}
+                <em>｜Travel Diary</em>
+              </strong>
+              <small>一生モノの体験を、もっと身近に。</small>
+            </span>
           </a>
           <nav class="site-nav" aria-label="メインナビゲーション">
-            {
-              primaryNav.map((item) => (
-                <a
-                  href={item.href}
-                  aria-current={
-                    (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
-                      ? "page"
-                      : undefined
-                  }
-                >
-                  {item.label}
-                </a>
-              ))
-            }
+            {primaryNav.map((item) => (
+              <a
+                href={item.href}
+                aria-current={
+                  (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
+                    ? "page"
+                    : undefined
+                }
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
           <button
             class="site-header__action"
             type="button"
             data-search-open
-            aria-label="ブログを検索"><SearchIcon /></button
+            aria-label="ブログを検索"
           >
+            <SearchIcon />
+          </button>
           <button
             class="site-header__menu-button"
             type="button"
             data-menu-open
             aria-label="メニューを開く"
-            aria-expanded="false"><MenuIcon /></button
+            aria-expanded="false"
           >
+            <MenuIcon />
+          </button>
         </div>
       </header>
 
@@ -189,34 +185,33 @@ const footerPhoto = {
           class="mobile-menu__backdrop"
           type="button"
           data-menu-close
-          aria-label="メニューを閉じる"></button>
+          aria-label="メニューを閉じる"
+        ></button>
         <aside class="mobile-menu__panel" aria-label="モバイルメニュー">
           <header>
-            <strong>{seoConfig.siteName}</strong><button
-              type="button"
-              data-menu-close
-              aria-label="メニューを閉じる"><XIcon /></button
-            >
+            <strong>{seoConfig.siteName}</strong>
+            <button type="button" data-menu-close aria-label="メニューを閉じる">
+              <XIcon />
+            </button>
           </header>
           <nav>
-            {
-              primaryNav.map((item) => (
-                <a
-                  href={item.href}
-                  aria-current={
-                    (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
-                      ? "page"
-                      : undefined
-                  }
-                >
-                  {item.label}
-                </a>
-              ))
-            }
+            {primaryNav.map((item) => (
+              <a
+                href={item.href}
+                aria-current={
+                  (item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href))
+                    ? "page"
+                    : undefined
+                }
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
           <div class="mobile-menu__sub" aria-label="ご案内・お問い合わせ">
             <p>GUIDE &amp; SUPPORT</p>
-            <a href="/faq">よくある質問</a><a href="/contact">お問い合わせ</a>
+            <a href="/faq">よくある質問</a>
+            <a href="/contact">お問い合わせ</a>
           </div>
         </aside>
       </div>
@@ -226,7 +221,8 @@ const footerPhoto = {
           class="header-search-modal__backdrop"
           type="button"
           data-search-close
-          aria-label="検索を閉じる"></button>
+          aria-label="検索を閉じる"
+        ></button>
         <section
           class="header-search"
           role="dialog"
@@ -235,30 +231,45 @@ const footerPhoto = {
         >
           <header>
             <div>
-              <small>ブログ内検索</small><h2 id="header-search-title">次の旅のヒントを探す</h2>
+              <small>ブログ内検索</small>
+              <h2 id="header-search-title">次の旅のヒントを探す</h2>
             </div>
-            <button type="button" data-search-close aria-label="検索を閉じる"><XIcon /></button>
+            <button type="button" data-search-close aria-label="検索を閉じる">
+              <XIcon />
+            </button>
           </header>
-          <label class="header-search__input"
-            ><SearchIcon /><span class="sr-only">検索キーワード</span><input
+          <label class="header-search__input">
+            <SearchIcon />
+            <span class="sr-only">検索キーワード</span>
+            <input
               type="search"
               data-global-search
               placeholder="国・都市・空港・体験を入力"
               autocomplete="off"
-            /></label
-          >
+            />
+          </label>
           <div class="header-search__suggestions" data-search-suggestions>
             <p>よく探されているキーワード</p>
-            <button type="button" data-search-suggestion="バンコク">バンコク</button>
-            <button type="button" data-search-suggestion="空港">空港</button>
-            <button type="button" data-search-suggestion="ヨーロッパ">ヨーロッパ</button>
-            <button type="button" data-search-suggestion="交通">交通</button>
+            <button type="button" data-search-suggestion="バンコク">
+              バンコク
+            </button>
+            <button type="button" data-search-suggestion="空港">
+              空港
+            </button>
+            <button type="button" data-search-suggestion="ヨーロッパ">
+              ヨーロッパ
+            </button>
+            <button type="button" data-search-suggestion="交通">
+              交通
+            </button>
           </div>
           <p class="header-search__status" data-search-status>
             キーワードを入力すると記事候補を表示します。
           </p>
           <div class="header-search__results" data-search-results></div>
-          <a class="header-search__all" href="/posts" data-search-all>記事一覧から詳しく探す</a>
+          <a class="header-search__all" href="/posts" data-search-all>
+            記事一覧から詳しく探す
+          </a>
         </section>
       </div>
 
@@ -297,42 +308,46 @@ const footerPhoto = {
               <p class="site-footer__tagline">一生モノの体験を、もっと身近に。</p>
               <p>実体験に基づく旅の記録と、旅を豊かにする情報を発信しています。</p>
               <ul class="site-footer__social" aria-label="SNS">
-                {
-                  socialLinks.map(({ href, label, Icon }) => (
-                    <li>
-                      <a
-                        href={href}
-                        aria-label={label}
-                        title={label}
-                        rel={href.startsWith("http") ? "noopener" : undefined}
-                        target={href.startsWith("http") ? "_blank" : undefined}
-                      >
-                        <Icon />
-                      </a>
-                    </li>
-                  ))
-                }
+                {socialLinks.map(({ href, label, Icon }) => (
+                  <li>
+                    <a
+                      href={href}
+                      aria-label={label}
+                      title={label}
+                      rel={href.startsWith("http") ? "noopener" : undefined}
+                      target={href.startsWith("http") ? "_blank" : undefined}
+                    >
+                      <Icon />
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
             <nav class="site-footer__groups" aria-label="フッターナビゲーション">
-              {
-                footerGroups.map((group) => (
-                  <div>
-                    <h2>{group.title}</h2>
-                    <ul>
-                      {group.links.map((item) => (
-                        <li>
-                          <a href={item.href}>{item.label}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
-              }
+              {footerGroups.map((group) => (
+                <div>
+                  <h2>{group.title}</h2>
+                  <ul>
+                    {group.links.map((item) => (
+                      <li>
+                        <a href={item.href}>{item.label}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </nav>
             <div class="site-footer__aside" aria-hidden="true">
-              <p class="site-footer__script">Same World,<br />Different Stories</p>
-              <p>旅は、いつだって<br />新しい自分に出会わせてくれる。</p>
+              <p class="site-footer__script">
+                Same World,
+                <br />
+                Different Stories
+              </p>
+              <p>
+                旅は、いつだって
+                <br />
+                新しい自分に出会わせてくれる。
+              </p>
             </div>
           </section>
 
@@ -340,7 +355,9 @@ const footerPhoto = {
             <p>
               © 2024–{new Date().getFullYear()}
               {seoConfig.siteName}
-              <span class="site-footer__legal-sep" aria-hidden="true">|</span>
+              <span class="site-footer__legal-sep" aria-hidden="true">
+                |
+              </span>
               Made with <span aria-label="love">♡</span> by Tomokichi
             </p>
             <p>掲載情報は実体験をもとにしています。旅行前には最新の公式情報もご確認ください。</p>
@@ -355,7 +372,9 @@ const footerPhoto = {
         </div>
         <div class="cookie-banner__actions">
           <a href="/legal/cookies">詳細を見る</a>
-          <button type="button" data-cookie-accept>同意する</button>
+          <button type="button" data-cookie-accept>
+            同意する
+          </button>
         </div>
       </aside>
     </div>

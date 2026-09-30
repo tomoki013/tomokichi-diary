@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.6",
+    "@astrojs/react": "^7.0.0",
     "@tomokichi/application": "workspace:*",
     "@tomokichi/contracts": "workspace:*",
     "@tomokichi/domain": "workspace:*",
@@ -19,8 +19,8 @@
     "@tomokichi/seo": "workspace:*",
     "astro": "^7.3.5",
     "d3-geo": "^3.1.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "topojson-client": "^3.1.0",
     "world-atlas": "^2.0.2"
   },

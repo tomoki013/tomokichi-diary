@@ -24,9 +24,13 @@ const { articleId, compact = false, title, path } = Astro.props;
   aria-pressed="false"
   aria-label="この記事にいいねする"
 >
-  <span class="like-button__heart" aria-hidden="true">♡</span>
+  <span class="like-button__heart" aria-hidden="true">
+    ♡
+  </span>
   <span class="like-button__label">いいね</span>
-  <output class="like-button__count skeleton" aria-label="いいね数" data-like-count>—</output>
+  <output class="like-button__count skeleton" aria-label="いいね数" data-like-count>
+    —
+  </output>
 </button>
 
 <script>

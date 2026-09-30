@@ -9,7 +9,7 @@ const { catalog, articleId } = Astro.props;
 const payload = JSON.stringify({ catalog, articleId }).replaceAll("<", "\\u003c");
 ---
 
-<script type="application/json" id="webmcp-context" set:html={payload} />
+<script type="application/json" id="webmcp-context" set:html={payload}></script>
 <script>
   import { registerWebMcpTools } from "../lib/webmcp";
   import { trackSemanticEvent } from "../lib/analytics";

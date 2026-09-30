@@ -37,34 +37,32 @@ const photos = [...content.withExperience("unforgettable"), ...content.withExper
   .slice(0, 8);
 ---
 
-{
-  photos.length >= 4 && (
-    <section class="home-gallery" aria-labelledby="home-gallery-title">
-      <header class="section-heading">
-        <div>
-          <p class="eyebrow">PHOTO JOURNAL</p>
-          <h2 id="home-gallery-title">ギャラリー</h2>
-          <p>言葉より先に伝わるもの。気になった一枚から、その旅の話へ。</p>
-        </div>
-        <a href="/gallery">すべて&nbsp; →</a>
-      </header>
-      <ul class="home-gallery__grid">
-        {photos.map((item, index) => (
-          <li class:list={[index >= 4 && "is-extra"]}>
-            <a href={item.path}>
-              <Picture
-                storageKey={item.photo.asset.storageKey}
-                alt={item.photo.usage.alt}
-                sizes="(max-width: 760px) 50vw, 280px"
-              />
-              <span class="home-gallery__caption" aria-hidden="true">
-                {item.place && <small>{item.place}</small>}
-                <span>{item.title}</span>
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
+{photos.length >= 4 && (
+  <section class="home-gallery" aria-labelledby="home-gallery-title">
+    <header class="section-heading">
+      <div>
+        <p class="eyebrow">PHOTO JOURNAL</p>
+        <h2 id="home-gallery-title">ギャラリー</h2>
+        <p>言葉より先に伝わるもの。気になった一枚から、その旅の話へ。</p>
+      </div>
+      <a href="/gallery">すべて&nbsp; →</a>
+    </header>
+    <ul class="home-gallery__grid">
+      {photos.map((item, index) => (
+        <li class:list={[index >= 4 && "is-extra"]}>
+          <a href={item.path}>
+            <Picture
+              storageKey={item.photo.asset.storageKey}
+              alt={item.photo.usage.alt}
+              sizes="(max-width: 760px) 50vw, 280px"
+            />
+            <span class="home-gallery__caption" aria-hidden="true">
+              {item.place && <small>{item.place}</small>}
+              <span>{item.title}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

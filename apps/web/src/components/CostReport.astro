@@ -29,32 +29,30 @@ const format = (value: number): string =>
   );
 ---
 
-{
-  items.length > 0 && (
-    <div class="table-scroll">
-      <table class="cost-table">
-        <caption>費用の内訳</caption>
-        <thead>
+{items.length > 0 && (
+  <div class="table-scroll">
+    <table class="cost-table">
+      <caption>費用の内訳</caption>
+      <thead>
+        <tr>
+          <th scope="col">項目</th>
+          <th scope="col">金額</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items.map(([key, value]) => (
           <tr>
-            <th scope="col">項目</th>
-            <th scope="col">金額</th>
+            <th scope="row">{LABELS[key] ?? key}</th>
+            <td>{format(value)}</td>
           </tr>
-        </thead>
-        <tbody>
-          {items.map(([key, value]) => (
-            <tr>
-              <th scope="row">{LABELS[key] ?? key}</th>
-              <td>{format(value)}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th scope="row">合計</th>
-            <td>{format(total)}</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  )
-}
+        ))}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">合計</th>
+          <td>{format(total)}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+)}

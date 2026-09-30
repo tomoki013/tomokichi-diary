@@ -186,82 +186,74 @@ const featuredPin = featured
           >
             <title id="world-map-title">ともきちが訪れた国の世界地図</title>
             <desc id="world-map-description">ピンを選ぶと、その国の旅行記事へ移動します。</desc>
-            {
-              mapShapes.map(({ d, visited }) => (
-                <path class:list={["world-map__country", visited && "is-visited"]} d={d} />
-              ))
-            }
+            {mapShapes.map(({ d, visited }) => (
+              <path class:list={["world-map__country", visited && "is-visited"]} d={d} />
+            ))}
           </svg>
 
           <div class="world-map__pins">
-            {
-              pins.map(({ destination, english, thumbnail, left, top, side, vertical, size }) => (
-                <a
-                  class="world-map__pin"
-                  href={destination.path}
-                  style={`--pin-x:${left};--pin-y:${top};--pin-size:${size}rem;--card-h:${thumbnail ? "10.2rem" : "5.6rem"}`}
-                  data-side={side}
-                  data-vertical={vertical}
-                  aria-label={`${destination.name}の記事 ${destination.count}件`}
-                >
-                  <span class="world-map__marker" aria-hidden="true" />
-                  <span class="world-map__card" aria-hidden="true">
-                    {thumbnail && (
-                      <span
-                        class="world-map__card-image"
-                        style={`background-image:url(${thumbnail})`}
-                      />
-                    )}
-                    <span class="world-map__card-body">
-                      <b>{destination.name}</b>
-                      {english && <small>{english}</small>}
-                      <em>
-                        {destination.count} stories <span>→</span>
-                      </em>
-                    </span>
+            {pins.map(({ destination, english, thumbnail, left, top, side, vertical, size }) => (
+              <a
+                class="world-map__pin"
+                href={destination.path}
+                style={`--pin-x:${left};--pin-y:${top};--pin-size:${size}rem;--card-h:${thumbnail ? "10.2rem" : "5.6rem"}`}
+                data-side={side}
+                data-vertical={vertical}
+                aria-label={`${destination.name}の記事 ${destination.count}件`}
+              >
+                <span class="world-map__marker" aria-hidden="true" />
+                <span class="world-map__card" aria-hidden="true">
+                  {thumbnail && (
+                    <span
+                      class="world-map__card-image"
+                      style={`background-image:url(${thumbnail})`}
+                    />
+                  )}
+                  <span class="world-map__card-body">
+                    <b>{destination.name}</b>
+                    {english && <small>{english}</small>}
+                    <em>
+                      {destination.count} stories <span>→</span>
+                    </em>
                   </span>
-                </a>
-              ))
-            }
+                </span>
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {
-        featured && featuredPin && (
-          <span
-            class="destination-map-feature__connector"
-            aria-hidden="true"
-            style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
-          />
-        )
-      }
+      {featured && featuredPin && (
+        <span
+          class="destination-map-feature__connector"
+          aria-hidden="true"
+          style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
+        />
+      )}
     </div>
 
-    {
-      featured && featuredPin && (
-        <a
-          class="destination-map-feature"
-          data-featured-side={featuredPin.side}
-          href={featured.path}
-          style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
-        >
-          {featured.cover && (
-            <Picture
-              storageKey={featured.cover.storageKey}
-              alt={featured.cover.alt}
-              sizes="220px"
-              loading="eager"
-            />
-          )}
-          <span>
-            <strong>{featured.title}</strong>
-            <small>{featured.country}</small>
-            <em>{featured.count} stories&nbsp; →</em>
-          </span>
-        </a>
-      )
-    }
+    {featured && featuredPin && (
+      <a
+        class="destination-map-feature"
+        data-featured-side={featuredPin.side}
+        href={featured.path}
+        style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
+      >
+        {featured.cover && (
+          <Picture
+            storageKey={featured.cover.storageKey}
+            alt={featured.cover.alt}
+            sizes="220px"
+            loading="eager"
+          />
+        )}
+        <span>
+          <strong>{featured.title}</strong>
+          <small>{featured.country}</small>
+          <em>{featured.count} stories&nbsp; →</em>
+        </span>
+      </a>
+    )}
   </div>
 
   <div class="world-map__controls">

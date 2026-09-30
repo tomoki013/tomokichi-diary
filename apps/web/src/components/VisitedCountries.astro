@@ -29,26 +29,24 @@ for (const article of content.publicArticles()) {
 const visited = [...countries.values()].toSorted((a, b) => b.articles - a.articles);
 ---
 
-{
-  visited.length > 0 && (
-    <section class="section" aria-labelledby="footprints-heading">
-      <h2 id="footprints-heading">旅の記録 — 訪れた国</h2>
-      <p>これまでに {visited.length} か国の記事を公開しています。</p>
-      <ul class="chips">
-        {visited.map((country) => (
-          <li>
-            {country.path ? (
-              <a href={country.path}>
-                {country.name} ({country.articles})
-              </a>
-            ) : (
-              <span class="chip">
-                {country.name} ({country.articles})
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
+{visited.length > 0 && (
+  <section class="section" aria-labelledby="footprints-heading">
+    <h2 id="footprints-heading">旅の記録 — 訪れた国</h2>
+    <p>これまでに {visited.length} か国の記事を公開しています。</p>
+    <ul class="chips">
+      {visited.map((country) => (
+        <li>
+          {country.path ? (
+            <a href={country.path}>
+              {country.name} ({country.articles})
+            </a>
+          ) : (
+            <span class="chip">
+              {country.name} ({country.articles})
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

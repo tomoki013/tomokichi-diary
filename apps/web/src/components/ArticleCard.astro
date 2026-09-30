@@ -42,21 +42,21 @@ const published = view.article.publishedAt?.slice(0, 10);
   data-published={published}
   data-title={view.revision.title.toLocaleLowerCase("ja")}
 >
-  {
-    cover && (
-      <a href={view.route.path} tabindex="-1" aria-hidden="true">
-        <Picture
-          storageKey={cover.asset.storageKey}
-          alt={cover.usage.alt}
-          sizes={SIZES.card}
-          loading={eager ? "eager" : "lazy"}
-          fetchpriority={eager ? "high" : "auto"}
-        />
-      </a>
-    )
-  }
+  {cover && (
+    <a href={view.route.path} tabindex="-1" aria-hidden="true">
+      <Picture
+        storageKey={cover.asset.storageKey}
+        alt={cover.usage.alt}
+        sizes={SIZES.card}
+        loading={eager ? "eager" : "lazy"}
+        fetchpriority={eager ? "high" : "auto"}
+      />
+    </a>
+  )}
   <div class="card__body">
-    <Heading class="card__title"><a href={view.route.path}>{view.revision.title}</a></Heading>
+    <Heading class="card__title">
+      <a href={view.route.path}>{view.revision.title}</a>
+    </Heading>
     <p class="card__summary">{view.revision.summary}</p>
     <ExperienceChips tags={view.article.experienceTags} />
     <div class="card__footer">

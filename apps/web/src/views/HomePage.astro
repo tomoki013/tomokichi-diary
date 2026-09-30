@@ -62,8 +62,12 @@ const latest: ArticleView[] = content.articleViews().slice(0, 8);
         <a href="/posts">すべて&nbsp; →</a>
       </header>
       <ul class="home-latest__row">
-        {latest.slice(0, 2).map((view) => <ArticleCard view={view} level={3} eager />)}
-        {latest.slice(2).map((view) => <ArticleCard view={view} level={3} />)}
+        {latest.slice(0, 2).map((view) => (
+          <ArticleCard view={view} level={3} eager />
+        ))}
+        {latest.slice(2).map((view) => (
+          <ArticleCard view={view} level={3} />
+        ))}
       </ul>
     </section>
 

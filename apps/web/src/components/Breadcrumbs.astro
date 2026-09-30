@@ -8,20 +8,18 @@ interface Props {
 const { trail } = Astro.props;
 ---
 
-{
-  trail.length > 1 && (
-    <nav class="breadcrumbs" aria-label="パンくずリスト">
-      <ol>
-        {trail.map((crumb, index) => (
-          <li>
-            {index === trail.length - 1 ? (
-              <span aria-current="page">{crumb.name}</span>
-            ) : (
-              <a href={crumb.route.path}>{crumb.name}</a>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )
-}
+{trail.length > 1 && (
+  <nav class="breadcrumbs" aria-label="パンくずリスト">
+    <ol>
+      {trail.map((crumb, index) => (
+        <li>
+          {index === trail.length - 1 ? (
+            <span aria-current="page">{crumb.name}</span>
+          ) : (
+            <a href={crumb.route.path}>{crumb.name}</a>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}

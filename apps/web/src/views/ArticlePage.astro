@@ -103,40 +103,34 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
   <article class="article-page">
     <Breadcrumbs trail={trail} />
     <header class:list={["article-hero", !cover && "article-hero--plain"]}>
-      {
-        cover && (
-          <div class="article-hero__media">
-            <Picture
-              storageKey={cover.asset.storageKey}
-              alt={cover.usage.alt}
-              sizes="(max-width: 760px) 100vw, 1100px"
-              loading="eager"
-              fetchpriority="high"
-            />
-            <div class="article-hero__shade" />
-          </div>
-        )
-      }
+      {cover && (
+        <div class="article-hero__media">
+          <Picture
+            storageKey={cover.asset.storageKey}
+            alt={cover.usage.alt}
+            sizes="(max-width: 760px) 100vw, 1100px"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <div class="article-hero__shade" />
+        </div>
+      )}
       <div class="article-hero__content">
         {view.categories.length > 0 && <p class="eyebrow">{view.categories[0]?.name}</p>}
         <h1>{revision.title}</h1>
         <ExperienceChips tags={article.experienceTags} tone={cover ? "light" : "default"} />
         <p class="article-hero__summary">{revision.summary}</p>
         <div class="article-hero__meta">
-          {
-            published && (
-              <span>
-                公開 <time datetime={published}>{published}</time>
-              </span>
-            )
-          }
-          {
-            updated !== published && (
-              <span>
-                更新 <time datetime={updated}>{updated}</time>
-              </span>
-            )
-          }
+          {published && (
+            <span>
+              公開 <time datetime={published}>{published}</time>
+            </span>
+          )}
+          {updated !== published && (
+            <span>
+              更新 <time datetime={updated}>{updated}</time>
+            </span>
+          )}
           <span>読了 約{readingMinutes}分</span>
         </div>
       </div>
@@ -144,175 +138,168 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 
     <div class="article-intro">
       <div class="article-author">
-        <span class="article-author__mark" aria-hidden="true">旅</span>
-        <div><small>WRITTEN BY</small><strong>{author?.name ?? "ともきち"}</strong></div>
+        <span class="article-author__mark" aria-hidden="true">
+          旅
+        </span>
+        <div>
+          <small>WRITTEN BY</small>
+          <strong>{author?.name ?? "ともきち"}</strong>
+        </div>
       </div>
-      {
-        travel || locationLinks.length > 0 ? (
-          <dl class="article-overview">
-            {travel && (
-              <div>
-                <dt>旅した時期</dt>
-                <dd>{travel.replaceAll("-", ".")}</dd>
-              </div>
-            )}
-            {locationLinks.length > 0 && (
-              <div>
-                <dt>場所</dt>
-                <dd>
-                  {locationLinks.slice(0, 3).map((location) => (
-                    <a href={location.path}>{location.name}</a>
-                  ))}
-                </dd>
-              </div>
-            )}
+      {travel || locationLinks.length > 0 ? (
+        <dl class="article-overview">
+          {travel && (
             <div>
-              <dt>読了</dt>
-              <dd>約{readingMinutes}分</dd>
+              <dt>旅した時期</dt>
+              <dd>{travel.replaceAll("-", ".")}</dd>
             </div>
-          </dl>
-        ) : (
-          <p>{revision.summary}</p>
-        )
-      }
+          )}
+          {locationLinks.length > 0 && (
+            <div>
+              <dt>場所</dt>
+              <dd>
+                {locationLinks.slice(0, 3).map((location) => (
+                  <a href={location.path}>{location.name}</a>
+                ))}
+              </dd>
+            </div>
+          )}
+          <div>
+            <dt>読了</dt>
+            <dd>約{readingMinutes}分</dd>
+          </div>
+        </dl>
+      ) : (
+        <p>{revision.summary}</p>
+      )}
       <LikeButton articleId={article.id} title={revision.title} path={route.path} />
     </div>
 
     <div class="article-layout">
       <div class="article-main">
-        {
-          (view.categories.length + view.tags.length > 0 || locationLinks.length > 0) && (
-            <div class="article-taxonomy">
-              {locationLinks.map((location) => (
-                <a href={location.path}>⌖ {location.name}</a>
-              ))}
-              {view.categories.map((category) => (
-                <span>{category.name}</span>
-              ))}
-              {view.tags.slice(0, 5).map((tag) => (
-                <span>#{tag.name}</span>
-              ))}
-            </div>
-          )
-        }
+        {(view.categories.length + view.tags.length > 0 || locationLinks.length > 0) && (
+          <div class="article-taxonomy">
+            {locationLinks.map((location) => (
+              <a href={location.path}>⌖ {location.name}</a>
+            ))}
+            {view.categories.map((category) => (
+              <span>{category.name}</span>
+            ))}
+            {view.tags.slice(0, 5).map((tag) => (
+              <span>#{tag.name}</span>
+            ))}
+          </div>
+        )}
         {knowledge && <ArticleKnowledge view={knowledge} />}
         <ArticleBody slug={article.slug} embeds={view.embeds} path={view.route.path} />
         <footer class="article-endnote">
           <div>
-            <strong>最後まで読んでいただき、ありがとうございます。</strong><p>
-              この記録が、次の旅の小さなきっかけになればうれしいです。
-            </p>
+            <strong>最後まで読んでいただき、ありがとうございます。</strong>
+            <p>この記録が、次の旅の小さなきっかけになればうれしいです。</p>
           </div>
           <LikeButton articleId={article.id} title={revision.title} path={route.path} />
         </footer>
         <div class="article-share">
-          <div><small>SHARE THE JOURNEY</small><strong>旅のワクワクを、誰かにも。</strong></div>
+          <div>
+            <small>SHARE THE JOURNEY</small>
+            <strong>旅のワクワクを、誰かにも。</strong>
+          </div>
           <div class="article-share__actions">
             <CopyLinkButton url={metadata.canonical} title={revision.title} />
             <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
           </div>
         </div>
-        {
-          (previousArticle || nextArticle) && (
-            <nav class="post-navigation" aria-label="前後の記事">
-              {previousArticle ? (
-                <a
-                  href={previousArticle.route.path}
-                  class="post-navigation__card post-navigation__card--previous"
-                >
-                  <span>
-                    <ChevronLeftIcon /> 前の記事
-                  </span>
-                  <strong>{previousArticle.revision.title}</strong>
-                </a>
-              ) : (
-                <span />
-              )}
-              {nextArticle ? (
-                <a
-                  href={nextArticle.route.path}
-                  class="post-navigation__card post-navigation__card--next"
-                >
-                  <span>
-                    次の記事 <ChevronRightIcon />
-                  </span>
-                  <strong>{nextArticle.revision.title}</strong>
-                </a>
-              ) : (
-                <span />
-              )}
-            </nav>
-          )
-        }
+        {(previousArticle || nextArticle) && (
+          <nav class="post-navigation" aria-label="前後の記事">
+            {previousArticle ? (
+              <a
+                href={previousArticle.route.path}
+                class="post-navigation__card post-navigation__card--previous"
+              >
+                <span>
+                  <ChevronLeftIcon /> 前の記事
+                </span>
+                <strong>{previousArticle.revision.title}</strong>
+              </a>
+            ) : (
+              <span />
+            )}
+            {nextArticle ? (
+              <a
+                href={nextArticle.route.path}
+                class="post-navigation__card post-navigation__card--next"
+              >
+                <span>
+                  次の記事 <ChevronRightIcon />
+                </span>
+                <strong>{nextArticle.revision.title}</strong>
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
       </div>
       <div class="article-sidebar">
         <ArticleToc />
         <aside class="article-facts">
           <p class="eyebrow">TRIP NOTES</p>
-          {
-            article.experienceTags.length > 0 && (
-              <div>
-                <small>この旅は</small>
-                <ExperienceChips tags={article.experienceTags} />
-              </div>
-            )
-          }
-          {
-            travel && (
-              <div>
-                <small>旅した時期</small>
-                <strong>{travel.replaceAll("-", ".")}</strong>
-              </div>
-            )
-          }
+          {article.experienceTags.length > 0 && (
+            <div>
+              <small>この旅は</small>
+              <ExperienceChips tags={article.experienceTags} />
+            </div>
+          )}
+          {travel && (
+            <div>
+              <small>旅した時期</small>
+              <strong>{travel.replaceAll("-", ".")}</strong>
+            </div>
+          )}
           {locationLinks[0] && <a href={locationLinks[0].path}>この旅先の記事を見る →</a>}
         </aside>
       </div>
     </div>
   </article>
 
-  {
-    (sameFeeling.length > 0 || samePlace.length > 0) && (
-      <section class="section story-trail" aria-labelledby="story-trail-heading">
-        <p class="eyebrow">STORY TRAIL</p>
-        <h2 id="story-trail-heading">この旅の話の、その先へ</h2>
-        <div class="story-trail__rails">
-          {sameFeeling.length > 0 && leadExperience && (
-            <StoryRail
-              title="同じ気持ちになれる旅の話"
-              note={`「${EXPERIENCE_COPY[leadExperience].label}」をもっと`}
-              views={sameFeeling}
-              more={{ href: experienceHref(leadExperience), label: "この気分の旅をすべて見る" }}
-            />
-          )}
-          {samePlace.length > 0 && countryName && (
-            <StoryRail
-              title={`${countryName}の旅の話`}
-              note="同じ土地で書いたもの"
-              views={samePlace}
-              more={
-                countryRoute
-                  ? { href: countryRoute.path, label: `${countryName}の記事をすべて見る` }
-                  : null
-              }
-            />
-          )}
-        </div>
-      </section>
-    )
-  }
+  {(sameFeeling.length > 0 || samePlace.length > 0) && (
+    <section class="section story-trail" aria-labelledby="story-trail-heading">
+      <p class="eyebrow">STORY TRAIL</p>
+      <h2 id="story-trail-heading">この旅の話の、その先へ</h2>
+      <div class="story-trail__rails">
+        {sameFeeling.length > 0 && leadExperience && (
+          <StoryRail
+            title="同じ気持ちになれる旅の話"
+            note={`「${EXPERIENCE_COPY[leadExperience].label}」をもっと`}
+            views={sameFeeling}
+            more={{ href: experienceHref(leadExperience), label: "この気分の旅をすべて見る" }}
+          />
+        )}
+        {samePlace.length > 0 && countryName && (
+          <StoryRail
+            title={`${countryName}の旅の話`}
+            note="同じ土地で書いたもの"
+            views={samePlace}
+            more={
+              countryRoute
+                ? { href: countryRoute.path, label: `${countryName}の記事をすべて見る` }
+                : null
+            }
+          />
+        )}
+      </div>
+    </section>
+  )}
 
-  {
-    related.length > 0 && (
-      <section class="section article-related" aria-labelledby="related-heading">
-        <p class="eyebrow">KEEP EXPLORING</p>
-        <h2 id="related-heading">次に読みたい旅の記録</h2>
-        <ul class="card-grid">
-          {related.map((item) => (
-            <ArticleCard view={item} level={3} />
-          ))}
-        </ul>
-      </section>
-    )
-  }
+  {related.length > 0 && (
+    <section class="section article-related" aria-labelledby="related-heading">
+      <p class="eyebrow">KEEP EXPLORING</p>
+      <h2 id="related-heading">次に読みたい旅の記録</h2>
+      <ul class="card-grid">
+        {related.map((item) => (
+          <ArticleCard view={item} level={3} />
+        ))}
+      </ul>
+    </section>
+  )}
 </BaseLayout>

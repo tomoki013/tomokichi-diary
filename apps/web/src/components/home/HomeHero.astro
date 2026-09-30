@@ -12,93 +12,91 @@ const { stories } = Astro.props;
 const slides = stories.filter((story) => story.view.cover);
 ---
 
-{
-  slides.length > 0 && (
-    <section class="home-hero" aria-labelledby="home-title">
-      <div class="home-hero__slides" data-hero-carousel>
-        {slides.map((story, index) => {
-          const cover = story.view.cover!;
-          return (
-            <div
-              class:list={["home-hero__slide", index === 0 && "is-active"]}
-              data-hero-slide
-              aria-hidden={index === 0 ? "false" : "true"}
-            >
-              <Picture
-                storageKey={cover.asset.storageKey}
-                alt={cover.usage.alt}
-                sizes="100vw"
-                loading={index === 0 ? "eager" : "lazy"}
-                fetchpriority={index === 0 ? "high" : "auto"}
-              />
-            </div>
-          );
-        })}
-      </div>
-      <div class="home-hero__shade" />
-      {/* Outside the slides: in there the card inherited the slide's slow zoom
-          and drifted with the photo instead of holding its corner. */}
-      <div class="home-hero__features">
-        {slides.map((story, index) => {
-          const country = content.countryOf(story.view.article.id);
-          return (
-            <a
-              class:list={["home-hero__feature", index === 0 && "is-active"]}
-              data-hero-feature
-              href={story.view.route.path}
-              tabindex={index === 0 ? undefined : "-1"}
-              aria-hidden={index === 0 ? undefined : "true"}
-            >
-              <span class="eyebrow">
-                {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
-              </span>
-              <strong>{story.title}</strong>
-              <span>{story.hook}</span>
-              <small>この旅の話を読む&nbsp; →</small>
-            </a>
-          );
-        })}
-      </div>
-      <div class="home-hero__intro">
-        <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
-        <h1 id="home-title">
-          一生モノの体験を、
-          <br />
-          もっと身近に。
-        </h1>
-        <p>
-          実際に旅して見つけた景色と、
-          <br />
-          次の旅に役立つリアルな記録。
-        </p>
-        <a class="button button--light" href="/posts">
-          旅の記録を読む <span aria-hidden="true">→</span>
-        </a>
-      </div>
-      {slides.length > 1 && (
-        <div class="home-hero__controls" aria-label="旅の話のスライド">
-          <button type="button" data-hero-prev aria-label="前の旅の話">
-            ←
-          </button>
-          <div class="home-hero__dots">
-            {slides.map((_, index) => (
-              <button
-                type="button"
-                class:list={[index === 0 && "is-active"]}
-                data-hero-dot={index}
-                aria-label={`${index + 1}枚目を表示`}
-                aria-current={index === 0 ? "true" : undefined}
-              />
-            ))}
+{slides.length > 0 && (
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-hero__slides" data-hero-carousel>
+      {slides.map((story, index) => {
+        const cover = story.view.cover!;
+        return (
+          <div
+            class:list={["home-hero__slide", index === 0 && "is-active"]}
+            data-hero-slide
+            aria-hidden={index === 0 ? "false" : "true"}
+          >
+            <Picture
+              storageKey={cover.asset.storageKey}
+              alt={cover.usage.alt}
+              sizes="100vw"
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "auto"}
+            />
           </div>
-          <button type="button" data-hero-next aria-label="次の旅の話">
-            →
-          </button>
+        );
+      })}
+    </div>
+    <div class="home-hero__shade" />
+    {/* Outside the slides: in there the card inherited the slide's slow zoom
+          and drifted with the photo instead of holding its corner. */}
+    <div class="home-hero__features">
+      {slides.map((story, index) => {
+        const country = content.countryOf(story.view.article.id);
+        return (
+          <a
+            class:list={["home-hero__feature", index === 0 && "is-active"]}
+            data-hero-feature
+            href={story.view.route.path}
+            tabindex={index === 0 ? undefined : "-1"}
+            aria-hidden={index === 0 ? undefined : "true"}
+          >
+            <span class="eyebrow">
+              {country ? content.locations.nameOf(country.id, "ja") : "TRAVEL STORY"}
+            </span>
+            <strong>{story.title}</strong>
+            <span>{story.hook}</span>
+            <small>この旅の話を読む&nbsp; →</small>
+          </a>
+        );
+      })}
+    </div>
+    <div class="home-hero__intro">
+      <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
+      <h1 id="home-title">
+        一生モノの体験を、
+        <br />
+        もっと身近に。
+      </h1>
+      <p>
+        実際に旅して見つけた景色と、
+        <br />
+        次の旅に役立つリアルな記録。
+      </p>
+      <a class="button button--light" href="/posts">
+        旅の記録を読む <span aria-hidden="true">→</span>
+      </a>
+    </div>
+    {slides.length > 1 && (
+      <div class="home-hero__controls" aria-label="旅の話のスライド">
+        <button type="button" data-hero-prev aria-label="前の旅の話">
+          ←
+        </button>
+        <div class="home-hero__dots">
+          {slides.map((_, index) => (
+            <button
+              type="button"
+              class:list={[index === 0 && "is-active"]}
+              data-hero-dot={index}
+              aria-label={`${index + 1}枚目を表示`}
+              aria-current={index === 0 ? "true" : undefined}
+            />
+          ))}
         </div>
-      )}
-    </section>
-  )
-}
+        <button type="button" data-hero-next aria-label="次の旅の話">
+          →
+        </button>
+      </div>
+    )}
+  </section>
+)}
 
 <script>
   const carousel = document.querySelector<HTMLElement>("[data-hero-carousel]");

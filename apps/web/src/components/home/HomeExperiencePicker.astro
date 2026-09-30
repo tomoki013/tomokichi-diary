@@ -19,25 +19,25 @@ const chips = EXPERIENCES.map((experience) => ({
   </h2>
 
   <form class="home-picker__search" action="/posts#results" method="get" role="search">
-    <label class="sr-only" for="home-search">旅のエピソードを検索</label>
+    <label class="sr-only" for="home-search">
+      旅のエピソードを検索
+    </label>
     <SearchIcon />
     <input id="home-search" name="q" type="search" placeholder="国・街・気になる出来事で検索" />
     <button type="submit">検索</button>
   </form>
 
   <ul class="home-picker__chips" aria-label="気分から選ぶ">
-    {
-      chips.map((chip, index) => (
-        <li
-          style={`--exp-hue: ${chip.hue}; --tilt: ${index % 3 === 0 ? -1 : index % 3 === 1 ? 1 : 0}`}
-        >
-          <a class="home-picker__chip" href={experienceHref(chip.tag)}>
-            <span aria-hidden="true">{chip.mark}</span>
-            {chip.label}
-            <small>{chip.count}</small>
-          </a>
-        </li>
-      ))
-    }
+    {chips.map((chip, index) => (
+      <li
+        style={`--exp-hue: ${chip.hue}; --tilt: ${index % 3 === 0 ? -1 : index % 3 === 1 ? 1 : 0}`}
+      >
+        <a class="home-picker__chip" href={experienceHref(chip.tag)}>
+          <span aria-hidden="true">{chip.mark}</span>
+          {chip.label}
+          <small>{chip.count}</small>
+        </a>
+      </li>
+    ))}
   </ul>
 </section>
