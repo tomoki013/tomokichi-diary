@@ -30,6 +30,11 @@ updates:
       timezone: Asia/Tokyo
     open-pull-requests-limit: 10
     versioning-strategy: increase-if-necessary
+    # agents (the MCP server's framework) peers @modelcontextprotocol/server at
+    # exactly 2.0.0, so any newer server breaks it. Drop this once agents
+    # widens that peer.
+    ignore:
+      - dependency-name: "@modelcontextprotocol/server"
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
