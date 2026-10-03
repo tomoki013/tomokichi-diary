@@ -6,62 +6,56 @@ import { bindings, defineConfig } from "cf/config";
 // D1 `migrations_dir` ("../../migrations") is passed to the migration script as a flag.
 
 export default defineConfig({
-	worker: {
-		name: "tomokichi-diary-api",
-		compatibilityDate: "2026-08-01",
-		compatibilityFlags: [
-			"nodejs_compat",
-		],
-		entrypoint: "src/index.ts",
-		workersDev: false,
-		observability: {
-			enabled: true,
-		},
-		domains: [
-			"api.tomokichidiary.com",
-		],
-		env: {
-			PUBLIC_SITE_URL: bindings.text("https://tomokichidiary.com"),
-			ACCESS_TEAM_DOMAIN: bindings.text("tomoki-ttttt.cloudflareaccess.com"),
-			ACCESS_AUD: bindings.text("edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"),
-			PUBLIC_MEDIA_URL: bindings.text("https://media.tomokichidiary.com"),
-			TURNSTILE_EXPECTED_HOSTNAME: bindings.text("tomokichidiary.com,www.tomokichidiary.com"),
-			ALLOWED_ORIGINS: bindings.text("https://tomokichidiary.com,https://www.tomokichidiary.com,https://tomokichi-diary-web.tomoki-ttttt.workers.dev,http://localhost:4321,http://127.0.0.1:4321,http://localhost:5173"),
-			DB: bindings.d1({
-				name: "tomokichi-diary",
-				id: "b799453b-ada9-454e-81dc-26999c2c29db",
-			}),
-			MEDIA: bindings.r2({
-				name: "tomokichi-diary-media",
-			}),
-			INQUIRY: bindings.worker({
-				worker: "tomokichi-admin-core",
-				exportName: "Intake",
-				props: {
-					caller: "tomokichi-diary-api",
-					projects: [
-						"tomokichi-diary",
-					],
-					allowUnassigned: false,
-				},
-			}),
-			INQUIRY_OPERATOR: bindings.worker({
-				worker: "tomokichi-admin-core",
-				exportName: "ProjectOperator",
-				props: {
-					caller: "tomokichi-diary-api",
-					projects: [
-						"tomokichi-diary",
-					],
-				},
-			}),
-			CONTACT_RATE_LIMITER: bindings.rateLimit({
-				namespace: "3001",
-				simple: {
-					limit: 1,
-					period: 60,
-				},
-			}),
-		},
-	},
+  worker: {
+    name: "tomokichi-diary-api",
+    compatibilityDate: "2026-08-01",
+    compatibilityFlags: ["nodejs_compat"],
+    entrypoint: "src/index.ts",
+    workersDev: false,
+    observability: {
+      enabled: true,
+    },
+    domains: ["api.tomokichidiary.com"],
+    env: {
+      PUBLIC_SITE_URL: bindings.text("https://tomokichidiary.com"),
+      ACCESS_TEAM_DOMAIN: bindings.text("tomoki-ttttt.cloudflareaccess.com"),
+      ACCESS_AUD: bindings.text("edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"),
+      PUBLIC_MEDIA_URL: bindings.text("https://media.tomokichidiary.com"),
+      TURNSTILE_EXPECTED_HOSTNAME: bindings.text("tomokichidiary.com,www.tomokichidiary.com"),
+      ALLOWED_ORIGINS: bindings.text(
+        "https://tomokichidiary.com,https://www.tomokichidiary.com,https://tomokichi-diary-web.tomoki-ttttt.workers.dev,http://localhost:4321,http://127.0.0.1:4321,http://localhost:5173",
+      ),
+      DB: bindings.d1({
+        name: "tomokichi-diary",
+        id: "b799453b-ada9-454e-81dc-26999c2c29db",
+      }),
+      MEDIA: bindings.r2({
+        name: "tomokichi-diary-media",
+      }),
+      INQUIRY: bindings.worker({
+        worker: "tomokichi-admin-core",
+        exportName: "Intake",
+        props: {
+          caller: "tomokichi-diary-api",
+          projects: ["tomokichi-diary"],
+          allowUnassigned: false,
+        },
+      }),
+      INQUIRY_OPERATOR: bindings.worker({
+        worker: "tomokichi-admin-core",
+        exportName: "ProjectOperator",
+        props: {
+          caller: "tomokichi-diary-api",
+          projects: ["tomokichi-diary"],
+        },
+      }),
+      CONTACT_RATE_LIMITER: bindings.rateLimit({
+        namespace: "3001",
+        simple: {
+          limit: 1,
+          period: 60,
+        },
+      }),
+    },
+  },
 });
