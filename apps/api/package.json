@@ -22,7 +22,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260925.1",
     "@tomokichi/data": "workspace:*",
-    "cf": "1.0.0-beta.7",
+    "cf": "1.0.0-beta.10",
     "wrangler": "^4.145.0"
   }
 }
