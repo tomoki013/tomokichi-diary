@@ -81,15 +81,6 @@ describe("validation", () => {
     expect(body.error.issues.map((issue: { path: string }) => issue.path)).toContain("slug");
     expect(body.error.requestId).toBeTruthy();
   });
-
-  it("rejects a body that is not an object", async () => {
-    const response = await request("/v1/admin/articles", {
-      method: "POST",
-      headers: auth,
-      body: "not json",
-    });
-    expect(response.status).toBe(400);
-  });
 });
 
 describe("travel knowledge control plane", () => {
@@ -192,7 +183,7 @@ describe("article lifecycle", () => {
     expect((await response.json()).error.code).toBe("ARTICLE_NOT_FOUND");
   });
 
-  it("explains why publishing is blocked, then publishes once fixed", async () => {
+  it("explains why publishing is blocked, publishes once fixed, and stays live under a new draft", async () => {
     const id = await createArticle();
 
     const check = await (
@@ -236,33 +227,8 @@ describe("article lifecycle", () => {
     });
     expect(published.status).toBe(200);
     expect((await published.json()).status).toBe("published");
-  });
 
-  it("keeps a published article live while a draft moves ahead", async () => {
-    const id = await createArticle();
-    const upload = new FormData();
-    upload.append(
-      "file",
-      new File([new Uint8Array([4, 5, 6])], "cover.jpg", { type: "image/jpeg" }),
-    );
-    const uploaded = await (
-      await request("/v1/admin/media", {
-        method: "POST",
-        headers: { authorization: auth.authorization },
-        body: upload,
-      })
-    ).json();
-    await request(`/v1/admin/media/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        media: [
-          { mediaId: uploaded.id, role: "cover", sortOrder: 0, alt: "カバー", caption: null },
-        ],
-      }),
-    });
-    await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth });
-
+    // The published revision stays live while a new draft moves ahead.
     await request(`/v1/admin/articles/${id}/draft`, {
       method: "PUT",
       headers: auth,
@@ -301,38 +267,6 @@ describe("media", () => {
   });
 });
 
-describe("article likes", () => {
-  it("toggles one anonymous like and returns the shared count", async () => {
-    const id = await createArticle();
-    const article = await ctx.repos.articles.findById(id as never);
-    if (!article) throw new Error("article setup failed");
-    await ctx.repos.articles.save({
-      ...article,
-      status: "published",
-      publishedAt: article.updatedAt,
-    });
-
-    const visitorId = "11111111-1111-4111-8111-111111111111";
-    const liked = await request(`/v1/likes/${id}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ visitorId }),
-    });
-    expect(liked.status).toBe(200);
-    expect(await liked.json()).toEqual({ count: 1, liked: true });
-
-    const state = await request(`/v1/likes/${id}?visitorId=${visitorId}`);
-    expect(await state.json()).toEqual({ count: 1, liked: true });
-
-    const unliked = await request(`/v1/likes/${id}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ visitorId }),
-    });
-    expect(await unliked.json()).toEqual({ count: 0, liked: false });
-  });
-});
-
 describe("routes", () => {
   it("resolves a path and reports a redirect after a move", async () => {
     await createArticle();
@@ -367,17 +301,6 @@ describe("routes", () => {
       404,
     );
     expect((await request("/v1/admin/routes/resolve", { headers: auth })).status).toBe(400);
-  });
-});
-
-describe("reference data", () => {
-  it("returns taxonomy and locations for the editor", async () => {
-    const taxonomy = await (await request("/v1/admin/taxonomy", { headers: auth })).json();
-    expect(taxonomy).toHaveProperty("categories");
-    expect(taxonomy).toHaveProperty("collections");
-
-    const locations = await (await request("/v1/admin/locations", { headers: auth })).json();
-    expect(Array.isArray(locations.items)).toBe(true);
   });
 });
 

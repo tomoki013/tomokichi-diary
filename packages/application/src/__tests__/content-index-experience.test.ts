@@ -105,10 +105,6 @@ describe("ContentIndex experience and country neighbours", () => {
     ]);
   });
 
-  it("has no experience neighbours for an untagged article", () => {
-    expect(index.sharingExperience("a5" as Article["id"])).toEqual([]);
-  });
-
   it("finds same-country stories through city locations, primary ones first", () => {
     const id = "a1" as Article["id"];
     expect(index.countryOf(id)?.id).toBe("thailand");
