@@ -162,18 +162,15 @@ describe("POST /v1/contact", () => {
     expect(filed).toHaveLength(0);
   });
 
-  it("tells the sender to try again when the platform refuses", async () => {
+  it("tells the sender to try again when the platform refuses or is not bound", async () => {
     const app = appWith(async () => true);
     accepts = false;
-    const response = await app.request("/v1/contact", form(valid), configured());
-    expect(response.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
-  });
+    const refused = await app.request("/v1/contact", form(valid), configured());
+    expect(refused.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
 
-  it("refuses rather than claims success when the platform is not bound", async () => {
-    const app = appWith(async () => true);
     ctx = { ...ctx, inquiry: undefined };
-    const response = await app.request("/v1/contact", form(valid), configured());
-    expect(response.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
+    const unbound = await app.request("/v1/contact", form(valid), configured());
+    expect(unbound.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
   });
 });
 
