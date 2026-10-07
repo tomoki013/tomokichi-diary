@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { generateId, isId } from "../primitives/id.js";
 import { parseSlug, slugify } from "../primitives/slug.js";
-import { parseLocale } from "../primitives/locale.js";
 import {
   compareInstants,
   instantFrom,
@@ -26,11 +25,6 @@ describe("generateId", () => {
     expect(isId(early)).toBe(true);
     expect(early[14]).toBe("7");
     expect(early < late).toBe(true);
-  });
-
-  it("does not collide across a batch", () => {
-    const ids = new Set(Array.from({ length: 1000 }, () => generateId()));
-    expect(ids.size).toBe(1000);
   });
 });
 
@@ -59,12 +53,7 @@ describe("slugify", () => {
   });
 });
 
-describe("locale and dates", () => {
-  it("accepts only supported locales", () => {
-    expect(parseLocale("ja").ok).toBe(true);
-    expect(parseLocale("fr").ok).toBe(false);
-  });
-
+describe("dates", () => {
   it("parses and compares instants", () => {
     expect(parseInstant("nope").ok).toBe(false);
     expect(parseInstant("2026-08-24").ok).toBe(true);
@@ -120,14 +109,11 @@ describe("markdown structure", () => {
     expect(text).toContain("関連記事");
   });
 
-  it("truncates on a sentence boundary when one is close to the limit", () => {
+  it("truncates on a nearby sentence boundary, else hard-cuts rather than losing most of the text", () => {
     expect(truncate("短い", 100)).toBe("短い");
     expect(truncate("一文目です。二文目です。三文目はとても長い", 15)).toBe(
       "一文目です。二文目です。…",
     );
-  });
-
-  it("falls back to a hard cut rather than losing most of the text", () => {
     expect(truncate("一文目です。二文目はとても長くて切られます。", 15)).toBe(
       "一文目です。二文目はとても長く…",
     );

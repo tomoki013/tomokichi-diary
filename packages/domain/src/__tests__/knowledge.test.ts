@@ -55,17 +55,9 @@ describe("travel knowledge", () => {
   });
 
   it("detects a missing evidence source", () => {
-    const issues = validateKnowledgeGraph({
-      sources: [],
-      travelRoutes: [],
-      travelFacts: [candidate],
-      articleKnowledge: [],
-      articleIds: new Set(["article-1"]),
-      revisionIds: new Set(),
-      placeIds: new Set(),
-      today: "2026-09-04",
-    });
-    expect(issues.map((issue) => issue.code)).toContain("BROKEN_KNOWLEDGE_REFERENCE");
+    expect(validateOneFact(candidate).map((issue) => issue.code)).toContain(
+      "BROKEN_KNOWLEDGE_REFERENCE",
+    );
   });
 
   it("keeps incomplete official suggestions as candidates, but rejects them as verified", () => {
@@ -99,16 +91,6 @@ describe("travel knowledge", () => {
       volatility: "high",
       sourceIds: [],
     };
-    const issues = validateKnowledgeGraph({
-      sources: [],
-      travelRoutes: [],
-      travelFacts: [fact],
-      articleKnowledge: [],
-      articleIds: new Set(["article-1"]),
-      revisionIds: new Set(),
-      placeIds: new Set(),
-      today: "2026-09-04",
-    });
-    expect(issues.map((issue) => issue.code)).toContain("STALE_CURRENT_FACT");
+    expect(validateOneFact(fact).map((issue) => issue.code)).toContain("STALE_CURRENT_FACT");
   });
 });

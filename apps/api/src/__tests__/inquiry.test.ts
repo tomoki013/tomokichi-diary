@@ -167,7 +167,7 @@ describe("/v1/admin/inquiry", () => {
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
   });
 
-  it("changes status without touching fields that were not sent, and says who acted", async () => {
+  it("passes exactly the fields that were sent, and says who acted", async () => {
     const response = await request("/tickets/t1", {
       method: "PATCH",
       body: JSON.stringify({ revision: 3, status: "ACKNOWLEDGED" }),
@@ -179,9 +179,8 @@ describe("/v1/admin/inquiry", () => {
       { revision: 3, status: "ACKNOWLEDGED" },
       { id: "admin-token" },
     ]);
-  });
 
-  it("clears the next action only when asked to", async () => {
+    // An explicit null clears; it is not dropped like an absent field.
     await request("/tickets/t1", {
       method: "PATCH",
       body: JSON.stringify({ revision: 3, nextAction: null, nextActionAt: null }),

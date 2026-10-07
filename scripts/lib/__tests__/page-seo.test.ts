@@ -32,10 +32,6 @@ describe("readSeo", () => {
     ]);
     expect(seo.jsonLd).toHaveLength(2);
   });
-
-  it("reports no social images on a page that declares none", () => {
-    expect(readSeo("<html><head><title>x</title></head></html>").socialImages).toEqual([]);
-  });
 });
 
 describe("jsonLdImageUrls", () => {

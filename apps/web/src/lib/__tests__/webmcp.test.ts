@@ -63,7 +63,7 @@ describe("WebMCP adapter", () => {
     ).toBe(true);
   });
 
-  it("finds and scrolls to an article heading", async () => {
+  it("scrolls to a matching heading and reports a miss without scrolling", async () => {
     const scrollIntoView = vi.fn();
     const headings = [
       { textContent: "アクセス方法", scrollIntoView },
@@ -80,7 +80,14 @@ describe("WebMCP adapter", () => {
       found: true,
       heading: "アクセス方法",
     });
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
+
+    expect((await tool.execute({ heading: "存在しない見出し" })).structuredContent).toEqual({
+      found: false,
+      heading: null,
+    });
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
   it("registers every tool with one lifecycle signal and aborts it on cleanup", () => {
@@ -152,21 +159,5 @@ describe("WebMCP adapter", () => {
     }
     // A miss is an empty list, not an error the page would have to explain.
     expect((await search.execute({ query: "存在しない検索語" })).structuredContent).toEqual([]);
-  });
-
-  it("reports a heading that does not exist rather than scrolling somewhere", async () => {
-    const scrollIntoView = vi.fn();
-    Object.defineProperty(globalThis, "document", {
-      configurable: true,
-      value: { querySelectorAll: () => [{ textContent: "料金", scrollIntoView }] },
-    });
-    const tool = createWebMcpTools(catalog, "a1").find(
-      (candidate) => candidate.name === "show_article_section",
-    )!;
-    expect((await tool.execute({ heading: "存在しない見出し" })).structuredContent).toEqual({
-      found: false,
-      heading: null,
-    });
-    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

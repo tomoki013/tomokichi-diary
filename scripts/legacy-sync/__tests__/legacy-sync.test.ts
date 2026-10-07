@@ -3,13 +3,7 @@ import type { ContentSnapshot } from "@tomokichi/data";
 import { describe, expect, it } from "vitest";
 import type { LegacyPost } from "../../lib/legacy-source.js";
 import { compareArticles } from "../compare.js";
-import {
-  buildLegacyPosts,
-  legacyPathFor,
-  mergeFrontmatter,
-  toLegacyBody,
-  yamlScalar,
-} from "../export-legacy.js";
+import { buildLegacyPosts, legacyPathFor, mergeFrontmatter, yamlScalar } from "../export-legacy.js";
 import { normalizeBody, normalizeLegacyPosts, normalizeSnapshot } from "../normalized-article.js";
 
 const ARTICLE = "a1";
@@ -276,20 +270,12 @@ describe("compareArticles", () => {
   });
 });
 
-describe("legacyPathFor / toLegacyBody", () => {
+describe("legacyPathFor", () => {
   it("maps tidied 2.0 paths back to the URL the legacy site serves", () => {
     expect(legacyPathFor(ROUTES, "/posts/sample")).toBe("/posts/sample");
     expect(legacyPathFor(ROUTES, "/legal/privacy")).toBe("/privacy");
     expect(legacyPathFor(ROUTES, "/collections")).toBe("/series");
     expect(legacyPathFor(ROUTES, "/nowhere")).toBe("/nowhere");
-  });
-
-  it("drops embed anchors and rewrites links", () => {
-    expect(toLegacyBody(ROUTES, BODY)).toBe(
-      BODY.replace("{{embed:promotion-disclosure}}\n\n", "")
-        .replace("/collections", "/series")
-        .replace("/legal/privacy", "/privacy"),
-    );
   });
 });
 

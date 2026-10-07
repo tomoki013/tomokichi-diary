@@ -69,7 +69,7 @@ describe("titles and descriptions", () => {
     expect(buildTitle(config, config.siteName)).toBe(config.homeTitle);
   });
 
-  it("derives a description from the summary, falling back to the body", () => {
+  it("derives a description from the override, then the summary, then the body", () => {
     expect(
       buildArticleMetadata(config, {
         article,
@@ -89,9 +89,7 @@ describe("titles and descriptions", () => {
         authorName: null,
       }).description,
     ).toBe("見出し 本文です。");
-  });
 
-  it("prefers an explicit SEO description override", () => {
     const overridden = {
       ...revision,
       seoDescriptionOverride: "上書きされた説明",
@@ -237,18 +235,12 @@ describe("sitemap, rss and robots", () => {
       lastmod: null,
       indexable: true,
     },
+    {
+      route: { ...route, path: "/destination/thin", noindex: true } as Route,
+      lastmod: null,
+      indexable: true,
+    },
   ];
-
-  it("drops routes the table itself marks noindex", () => {
-    const entries = buildSitemap(config, [
-      {
-        route: { ...route, path: "/destination/thin", noindex: true } as Route,
-        lastmod: null,
-        indexable: true,
-      },
-    ]);
-    expect(entries).toEqual([]);
-  });
 
   it("includes only indexable canonical non-redirect routes", () => {
     const entries = buildSitemap(config, inputs);

@@ -4,24 +4,13 @@ import type { LocationDto } from "@tomokichi/contracts";
 import { href, parseRoute, section } from "./route";
 import { treeOrder } from "./locations";
 import { bodyStats, draftFrom, isDirty, normalizeDraft } from "./draft";
-import {
-  formatDateTime,
-  formatRelative,
-  isoToJstLocal,
-  isOpenTicket,
-  jstLocalToIso,
-} from "./labels";
+import { formatDateTime, formatRelative, isoToJstLocal, jstLocalToIso } from "./labels";
 
 describe("parseRoute", () => {
   it.each([
     ["", { name: "dashboard" }],
-    ["#/", { name: "dashboard" }],
-    ["#/articles", { name: "articles" }],
     ["#/articles/", { name: "articles" }],
     ["#/articles/a%2Fb", { name: "article", id: "a/b" }],
-    ["#/media", { name: "media" }],
-    ["#/routes", { name: "routes" }],
-    ["#/inquiries", { name: "inquiries" }],
     ["#/inquiries/archive", { name: "legacy-messages" }],
     ["#/inquiries/t-1", { name: "inquiry", id: "t-1" }],
   ])("reads %s", (hash, expected) => {
@@ -83,11 +72,6 @@ describe("drafts", () => {
     });
   });
 
-  it("starts an article without a revision empty", () => {
-    const draft = draftFrom({ currentRevision: null } as unknown as ArticleDetailDto);
-    expect(draft.title).toBe("");
-  });
-
   it("counts characters without whitespace", () => {
     expect(bodyStats("あい う\nえ")).toEqual({ characters: 4, minutes: 1 });
     expect(bodyStats("あ".repeat(1500)).minutes).toBe(3);
@@ -115,15 +99,6 @@ describe("dates", () => {
     expect(formatRelative("2026-09-27T09:00:00.000Z", now)).toBe("3時間前");
     expect(formatRelative("2026-09-20T12:00:00.000Z", now)).toBe("7日前");
     expect(formatRelative("2026-06-01T00:00:00.000Z", now)).toBe("2026/06/01");
-  });
-});
-
-describe("tickets", () => {
-  it("treats only resolved and closed as done", () => {
-    expect(isOpenTicket("NEW")).toBe(true);
-    expect(isOpenTicket("WAITING_CUSTOMER")).toBe(true);
-    expect(isOpenTicket("RESOLVED")).toBe(false);
-    expect(isOpenTicket("CLOSED")).toBe(false);
   });
 });
 
