@@ -20,7 +20,7 @@
 ## Secret handling
 
 - リポジトリに秘密は無い。`.env.example` は公開値のみ。
-- API の secrets は `wrangler secret put`（`ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`）。`IP_HASH_SALT` を変えるとレート制限の履歴が切れる（害は無い）。
+- API の secrets は `wrangler secret put --name tomokichi-diary-api`（`ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`）。`IP_HASH_SALT` を変えるとレート制限の履歴が切れる（害は無い）。
 - `ACCESS_AUD` / `ACCESS_TEAM_DOMAIN` は vars（トークンの claim なので秘密ではない）。
 - `ADMIN_TOKEN` は Access 導入後は **削除してよい**（`OPERATIONS.md` API_UNAUTHORIZED）。残っている間は 2 つの入口がある。
 - Admin SPA は token を `localStorage`（remember）か `sessionStorage` に置く。同一 origin に第三者スクリプトが無いことが前提（`api.ts` コメント）。

@@ -292,10 +292,11 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("is bound to the platform's ProjectOperator for this project only", () => {
-    const toml = readFileSync(new URL("../../wrangler.toml", import.meta.url), "utf8");
-    const block = toml.slice(toml.indexOf('binding = "INQUIRY_OPERATOR"'));
-    expect(block).toMatch(/entrypoint = "ProjectOperator"/);
-    expect(block).toContain(`projects = ["${INQUIRY_PROJECT_SLUG}"]`);
-    expect(toml).not.toContain("INQUIRY_API_ORIGIN");
+    const config = readFileSync(new URL("../../cloudflare.config.ts", import.meta.url), "utf8");
+    const block = config.slice(config.indexOf("INQUIRY_OPERATOR: bindings.worker("));
+    const binding = block.slice(0, block.indexOf("}),"));
+    expect(binding).toMatch(/exportName: "ProjectOperator"/);
+    expect(binding).toContain(`projects: ["${INQUIRY_PROJECT_SLUG}"]`);
+    expect(config).not.toContain("INQUIRY_API_ORIGIN");
   });
 });

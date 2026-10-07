@@ -110,6 +110,11 @@ function upsert(table: SeedTable, rows: readonly Row[]): string[] {
 }
 
 export function buildSeedSql(snapshot: ContentSnapshot): string {
+  return buildSeedStatements(snapshot).join("\n");
+}
+
+/** The same statements one by one, for `cf d1 raw --batch`. */
+export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
   // Ordered so foreign keys always resolve.
   return [
     "PRAGMA defer_foreign_keys = true;",
@@ -135,5 +140,5 @@ export function buildSeedSql(snapshot: ContentSnapshot): string {
     ...upsert("travel_routes", snapshot.travelRoutes.map(travelRouteRow.from)),
     ...upsert("travel_facts", snapshot.travelFacts.map(travelFactRow.from)),
     ...upsert("article_knowledge", snapshot.articleKnowledge.map(articleKnowledgeRow.from)),
-  ].join("\n");
+  ];
 }

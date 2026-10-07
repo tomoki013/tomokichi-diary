@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "deploy": "cf-wrangler build && cf deploy --prebuilt",
     "test": "vitest run"
   },
   "dependencies": {
@@ -20,7 +21,8 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.1.1",
+    "cf": "1.0.0-beta.12",
     "vite": "^8.3.1",
-    "wrangler": "^4.45.0"
+    "wrangler": "^4.148.0"
   }
 }

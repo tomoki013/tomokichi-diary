@@ -20,3 +20,6 @@ ui-dist/
 
 # Lighthouse CI writes here by default; the run we keep goes to .artifacts/.
 .lighthouseci/
+
+# cf build output
+.cloudflare/

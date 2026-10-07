@@ -6,8 +6,8 @@
   "scripts": {
     "build:ui": "vite build && tsx scripts/verify-ui.ts",
     "build": "pnpm build:ui && tsc --noEmit -p tsconfig.json",
-    "dev": "pnpm build:ui && wrangler dev",
-    "deploy": "pnpm build:ui && wrangler deploy",
+    "dev": "pnpm build:ui && cf-wrangler dev",
+    "deploy": "pnpm build:ui && cf-wrangler build && cf deploy --prebuilt",
     "test": "vitest run"
   },
   "dependencies": {
@@ -19,10 +19,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260925.1",
+    "cf": "1.0.0-beta.12",
     "tsx": "^4.20.6",
     "vite": "^8.3.1",
     "vite-plugin-singlefile": "^2.3.0",
     "vitest": "^5.0.2",
-    "wrangler": "^4.45.0"
+    "wrangler": "^4.148.0"
   }
 }
