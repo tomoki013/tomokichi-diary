@@ -213,11 +213,11 @@ describe("createInquiryInbox", () => {
     expect(await createInquiryInbox(binding(thrown)).file(filing)).toBe(false);
   });
 
-  it("is granted exactly this site's project in wrangler.toml", () => {
-    const toml = readFileSync(new URL("../../wrangler.toml", import.meta.url), "utf8");
-    const service = toml.slice(toml.indexOf("[[services]]"));
-    expect(service).toMatch(/binding = "INQUIRY"/);
-    expect(service).toMatch(/entrypoint = "Intake"/);
-    expect(service).toContain(`projects = ["${INQUIRY_PROJECT_SLUG}"]`);
+  it("is granted exactly this site's project in cloudflare.config.ts", () => {
+    const config = readFileSync(new URL("../../cloudflare.config.ts", import.meta.url), "utf8");
+    const block = config.slice(config.indexOf("INQUIRY: bindings.worker("));
+    const intake = block.slice(0, block.indexOf("}),"));
+    expect(intake).toMatch(/exportName: "Intake"/);
+    expect(intake).toContain(`projects: ["${INQUIRY_PROJECT_SLUG}"]`);
   });
 });

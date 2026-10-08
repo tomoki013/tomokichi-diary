@@ -10,7 +10,7 @@ import type { IntakeBinding, ProjectOperatorApi } from "@inquiry-platform/sdk";
 export interface Env {
   DB: D1Like;
   MEDIA: R2Like;
-  /** Shared secret for the admin API. Set with `wrangler secret put ADMIN_TOKEN`. */
+  /** Shared secret for the admin API. Set with `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`. */
   ADMIN_TOKEN?: string;
   PUBLIC_MEDIA_URL?: string;
   PUBLIC_SITE_URL?: string;

@@ -8,7 +8,8 @@ import { CACHE_DIR, MEDIA_DIR } from "./media-build.js";
  *
  * Uploads are tracked in a local manifest keyed by object key and size, so a
  * re-run only sends what changed. Nothing here holds a credential: it drives
- * the already-authenticated wrangler CLI.
+ * the already-authenticated wrangler CLI. This stays on wrangler while the rest
+ * of the tooling uses cf: `cf r2 objects put` cannot set Cache-Control yet.
  *
  * The manifest is written as uploads complete and again on SIGINT/SIGTERM, so
  * a failed or cancelled run keeps its progress. It only records what this

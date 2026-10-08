@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "typecheck": "astro check",
+    "deploy": "cf-wrangler build && cf deploy --prebuilt",
     "test": "vitest run"
   },
   "dependencies": {
@@ -31,7 +32,8 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "@types/topojson-client": "^3.1.5",
+    "cf": "1.0.0-beta.12",
     "sharp": "^0.35.4",
-    "wrangler": "^4.45.0"
+    "wrangler": "^4.148.0"
   }
 }

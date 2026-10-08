@@ -51,7 +51,7 @@ migration は旧 API が動いている間に当たる。だから expand/contra
 
 | 対象                     | 方法                                                                                                 |
 | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Web / Admin / MCP Worker | `wrangler rollback`（前の version）か、前のコミットで `deploy:*`                                     |
+| Web / Admin / MCP Worker | `wrangler rollback --name <Worker 名>`（前の version）か、前のコミットで `deploy:*`                  |
 | API                      | 同上。ただし **migration が contract 済みなら旧 API は動かない** — contract は次のリリースで、を守る |
 | D1                       | Time Travel（30 日）。expand のみの migration なら戻す必要は無い                                     |
 | コンテンツ               | `export/` の前のコミットを `pnpm db:seed` で D1 に戻す（`restore.test` が seed 復元を保証）          |

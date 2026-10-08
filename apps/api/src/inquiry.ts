@@ -3,7 +3,7 @@ import type { ContactInbox } from "@tomokichi/application";
 
 /**
  * The slug this site is registered under on the inquiry platform. It must also
- * appear in the `INQUIRY` binding's `props.projects` in `wrangler.toml`, or the
+ * appear in the `INQUIRY` binding's `props.projects` in `cloudflare.config.ts`, or the
  * platform refuses every submission.
  */
 export const INQUIRY_PROJECT_SLUG = "tomokichi-diary";

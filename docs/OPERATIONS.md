@@ -38,7 +38,8 @@ read them), attached only to the steps that talk to Cloudflare.
   deploy. Locally: `MEDIA_SYNC_FULL=1 pnpm media:sync`, or delete the file.
 
 The same sequence can still be run by hand from a developer machine where
-wrangler is authenticated. Start from a clean `main` with a green
+both cf (`cf auth login`) and wrangler (`wrangler login`, for `media:sync`) are
+authenticated. Start from a clean `main` with a green
 `pnpm run ci`. The order matters and is
 the same one the site has always shipped in:
 
@@ -78,7 +79,7 @@ Before changing DNS:
 - keep the current Netlify domain attached for the rollback window;
 - lower DNS TTL ahead of the change and switch apex and `www` together;
 - confirm the Cloudflare custom domain/redirect rules are ready, because the
-  web Worker's `wrangler.toml` deliberately does not contain a guessed zone
+  web Worker's `cloudflare.config.ts` deliberately does not contain a guessed zone
   ID or an automatic domain binding;
 - deploy API and web in the documented order, then point `VERIFY_URL` at the
   custom domain;
@@ -370,7 +371,7 @@ live on the platform; this API keeps no copy and emails nobody.
 
 The hand-off goes through the `INQUIRY` service binding to the platform's
 `Intake` entrypoint (`tomokichi-admin-core`), declared in
-`apps/api/wrangler.toml` with `props.projects = ["tomokichi-diary"]`. The
+`apps/api/cloudflare.config.ts` with `props.projects = ["tomokichi-diary"]`. The
 project slug `tomokichi-diary` must be registered on the platform; an
 unregistered slug, a missing binding or a platform error redirects the reader
 to `?error=unavailable` rather than claiming success.
@@ -378,11 +379,11 @@ to `?error=unavailable` rather than claiming success.
 Two secrets and the limiter gate it, and a missing one closes the form rather
 than opening it:
 
-| Setting                | Purpose                                      |
-| ---------------------- | -------------------------------------------- |
-| `TURNSTILE_SECRET_KEY` | Verifies the challenge token                 |
-| `IP_HASH_SALT`         | Salts the sender hash used for rate limiting |
-| `CONTACT_RATE_LIMITER` | Rate Limiting binding in `wrangler.toml`     |
+| Setting                | Purpose                                         |
+| ---------------------- | ----------------------------------------------- |
+| `TURNSTILE_SECRET_KEY` | Verifies the challenge token                    |
+| `IP_HASH_SALT`         | Salts the sender hash used for rate limiting    |
+| `CONTACT_RATE_LIMITER` | Rate Limiting binding in `cloudflare.config.ts` |
 
 The public site key (widget `tomokichi-diary-contact`) is built in from
 `apps/web/src/lib/site.ts`; `PUBLIC_TURNSTILE_SITE_KEY` overrides it, and an
@@ -431,7 +432,7 @@ Admin access is granted two ways, and either is enough:
 2. **Bearer token** — `ADMIN_TOKEN`, compared in constant time.
 
 Configuring Access does not disable the token. Delete `ADMIN_TOKEN`
-(`wrangler secret delete ADMIN_TOKEN`) to make Access the only way in.
+(`wrangler secret delete ADMIN_TOKEN --name tomokichi-diary-api`) to make Access the only way in.
 
 A missing secret closes the admin API — it never opens it.
 

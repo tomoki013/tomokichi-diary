@@ -24,6 +24,7 @@ const FRAMEWORKS = [
   /^hono(\/|$)/,
   /^@cloudflare\//,
   /^wrangler(\/|$)/,
+  /^cf(\/|$)/,
   /^vite(\/|$)/,
 ];
 
