@@ -75,3 +75,5 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 詳細は [testing/test-gap-analysis.md](testing/test-gap-analysis.md)。
 
 2026-10-10 管理画面修正: Accessの認証と本文を保つAPIプロキシ、写真のMarkdown挿入、固定ページの公開、予約日時の実行、下書きmetadataの分離、公開連携の失敗・再試行・競合を自動テスト。Chromeで実際のログイン後の通信エラーを確認し、ローカルの実API/SQLite/R2代替ストレージで写真選択・本文挿入・全体保存・公開を操作する。
+
+2026-10-10 本番データ確認: D1の122記事・253 routesを取得し、移行0012の旧collections URL転送をローカルで適用した公開版でbuild/routes/SEO/links/knowledgeが成功（194 URL、SEO189、sitemap166、links5823、images13799）。移行の旧URL維持・未対応URL不変更と、D1 REST単体/一括クエリの外部契約も自動テストで確認。
