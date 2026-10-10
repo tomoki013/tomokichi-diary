@@ -5,6 +5,7 @@ import type { AppContext, ContactFiling } from "@tomokichi/application";
 import type { IntakeBinding } from "@inquiry-platform/sdk";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
+import { createContactMailer } from "../contact-mail.js";
 import { createInquiryInbox, INQUIRY_PROJECT_SLUG } from "../inquiry.js";
 
 /*
@@ -20,6 +21,8 @@ const SITE = "https://tomokichidiary.com";
 let ctx: AppContext;
 let filed: ContactFiling[];
 let accepts: boolean;
+let mailed: ContactFiling[];
+let mails: boolean;
 let limiterKeys: string[];
 let limiterAllows: boolean;
 
@@ -67,6 +70,8 @@ function appWith(verifyChallenge: (secret: string, token: string) => Promise<boo
 beforeEach(async () => {
   filed = [];
   accepts = true;
+  mailed = [];
+  mails = true;
   limiterKeys = [];
   limiterAllows = true;
   ctx = {
@@ -77,17 +82,25 @@ beforeEach(async () => {
         return accepts;
       },
     },
+    contactMail: {
+      send: async (filing) => {
+        mailed.push(filing);
+        return mails;
+      },
+    },
   };
 });
 
 describe("POST /v1/contact", () => {
-  it("files a valid submission on the platform and redirects back with ?sent=1", async () => {
+  it("mails a valid submission, files a copy and redirects back with ?sent=1", async () => {
     const app = appWith(async (secret, token) => secret === "secret" && token === "token-ok");
     const response = await app.request("/v1/contact", form(valid), configured());
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
 
+    expect(mailed).toHaveLength(1);
     expect(filed).toHaveLength(1);
+    expect(mailed[0]).toEqual(filed[0]);
     expect(filed[0]).toMatchObject({ email: "reader@example.com", subject: "記事について" });
     expect(filed[0]?.idempotencyKey).toMatch(/^[0-9a-f-]{36}$/);
     // The address reaches the limiter only as a salted hash, and the platform not at all.
@@ -162,13 +175,26 @@ describe("POST /v1/contact", () => {
     expect(filed).toHaveLength(0);
   });
 
-  it("tells the sender to try again when the platform refuses or is not bound", async () => {
+  it("accepts when either the mail or the copy went through", async () => {
     const app = appWith(async () => true);
     accepts = false;
+    const mailOnly = await app.request("/v1/contact", form(valid), configured());
+    expect(mailOnly.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
+
+    accepts = true;
+    mails = false;
+    const copyOnly = await app.request("/v1/contact", form(valid), configured());
+    expect(copyOnly.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
+  });
+
+  it("tells the sender to try again when neither the mail nor the copy went through", async () => {
+    const app = appWith(async () => true);
+    accepts = false;
+    mails = false;
     const refused = await app.request("/v1/contact", form(valid), configured());
     expect(refused.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
 
-    ctx = { ...ctx, inquiry: undefined };
+    ctx = { ...ctx, inquiry: undefined, contactMail: undefined };
     const unbound = await app.request("/v1/contact", form(valid), configured());
     expect(unbound.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
   });
@@ -219,5 +245,40 @@ describe("createInquiryInbox", () => {
     const intake = block.slice(0, block.indexOf("}),"));
     expect(intake).toMatch(/exportName: "Intake"/);
     expect(intake).toContain(`projects: ["${INQUIRY_PROJECT_SLUG}"]`);
+  });
+});
+
+describe("createContactMailer", () => {
+  const filing: ContactFiling = {
+    idempotencyKey: "test-filing-1",
+    name: "ともきち",
+    email: "reader@example.com",
+    subject: "記事について",
+    body: "アブシンベルへのバスの時刻について教えてください。",
+  };
+  const addresses = { from: "noreply@example.com", to: "inbox@example.com" };
+
+  it("mails the whole message to the inbox, with the reader as Reply-To", async () => {
+    const send = vi.fn().mockResolvedValue({ messageId: "m1" });
+    expect(await createContactMailer({ send }, addresses).send(filing)).toBe(true);
+    const [message] = send.mock.calls[0] as [Record<string, unknown>];
+    expect(message).toMatchObject({
+      to: "inbox@example.com",
+      from: { email: "noreply@example.com" },
+      replyTo: { name: "ともきち", email: "reader@example.com" },
+      subject: "[ともきちの旅行日記] 記事について",
+    });
+    expect(message.text).toContain(filing.body);
+  });
+
+  it("reports a failed send as false instead of throwing", async () => {
+    const send = vi.fn().mockRejectedValue(new Error("destination not verified"));
+    expect(await createContactMailer({ send }, addresses).send(filing)).toBe(false);
+  });
+
+  it("is pinned to the blog's inbox in cloudflare.config.ts", () => {
+    const config = readFileSync(new URL("../../cloudflare.config.ts", import.meta.url), "utf8");
+    expect(config).toContain('destinationAddress: "tomokichidiary@gmail.com"');
+    expect(config).toContain('CONTACT_MAIL_TO: bindings.text("tomokichidiary@gmail.com")');
   });
 });

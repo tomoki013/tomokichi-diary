@@ -214,22 +214,20 @@ describe("/v1/admin/inquiry", () => {
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
-  it("sends a reply as a body and a key only", async () => {
-    const response = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "ご連絡ありがとうございます。", idempotencyKey: "reply-key-1" }),
-    });
-    expect(response.status).toBe(200);
-    expect(last("reply")?.args).toEqual([
-      "tomokichi-diary",
-      "t1",
-      {
-        body: "ご連絡ありがとうございます。",
-        idempotencyKey: "reply-key-1",
-        reopenIfResolved: false,
-      },
-      { id: "admin-token" },
-    ]);
+  it("has no way to mail a reader or change the reply signature", async () => {
+    for (const [path, method] of [
+      ["/tickets/t1/reply", "POST"],
+      ["/signature", "GET"],
+      ["/signature", "PUT"],
+    ] as const) {
+      const response = await request(path, {
+        method,
+        ...(method === "GET" ? {} : { body: JSON.stringify({ body: "x", signature: "x" }) }),
+      });
+      expect(response.status, `${method} ${path}`).toBe(404);
+    }
+    expect(last("reply")).toBeUndefined();
+    expect(last("setSignature")).toBeUndefined();
   });
 
   it("adds an internal note with its idempotency key", async () => {
@@ -253,41 +251,6 @@ describe("/v1/admin/inquiry", () => {
     const response = await request("/tickets");
     expect(response.status).toBe(502);
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
-  });
-
-  describe("signature", () => {
-    it("reports the deployment's signature in use when the site has none", async () => {
-      expect(await (await request("/signature")).json()).toEqual({
-        signature: "",
-        usesDefault: true,
-      });
-    });
-
-    it("saves this site's signature", async () => {
-      answer.setSignature = {
-        ok: true,
-        value: { ...project, mailConfigured: true, signature: "ともきち" },
-      };
-      const response = await request("/signature", {
-        method: "PUT",
-        body: JSON.stringify({ signature: "ともきち", appId: "app-remeet" }),
-      });
-      expect(await response.json()).toEqual({ signature: "ともきち", usesDefault: false });
-      expect(last("setSignature")?.args).toEqual([
-        "tomokichi-diary",
-        "ともきち",
-        { id: "admin-token" },
-      ]);
-    });
-
-    it("refuses an over-long signature before calling the platform", async () => {
-      const response = await request("/signature", {
-        method: "PUT",
-        body: JSON.stringify({ signature: "あ".repeat(2001) }),
-      });
-      expect(response.status).toBe(400);
-      expect(last("setSignature")).toBeUndefined();
-    });
   });
 
   it("is bound to the platform's ProjectOperator for this project only", () => {

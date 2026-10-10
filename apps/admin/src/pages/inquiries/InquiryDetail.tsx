@@ -17,7 +17,6 @@ import { useToast } from "../../ui/toast";
 
 export function InquiryDetail({ id }: { id: string }) {
   const ticket = useResource(() => api.getTicket(id), `ticket:${id}`);
-  const status = useResource(() => api.inquiryStatus(), "inquiry-status");
 
   if (ticket.error && !ticket.data) {
     return (
@@ -38,24 +37,15 @@ export function InquiryDetail({ id }: { id: string }) {
       </>
     );
   }
-  return (
-    <Ticket
-      ticket={ticket.data}
-      mailConfigured={status.data?.mailConfigured ?? false}
-      reload={ticket.reload}
-      reloading={ticket.loading}
-    />
-  );
+  return <Ticket ticket={ticket.data} reload={ticket.reload} reloading={ticket.loading} />;
 }
 
 function Ticket({
   ticket,
-  mailConfigured,
   reload,
   reloading,
 }: {
   ticket: InquiryTicketDetailDto;
-  mailConfigured: boolean;
   reload: () => Promise<void>;
   reloading: boolean;
 }) {
@@ -109,7 +99,7 @@ function Ticket({
       <div className="ticket">
         <div className="ticket__main">
           <Timeline ticket={ticket} reloading={reloading} />
-          <Composer ticket={ticket} mailConfigured={mailConfigured} busy={busy} act={act} />
+          <Composer ticket={ticket} busy={busy} act={act} />
         </div>
 
         <aside className="ticket__side">
@@ -200,110 +190,57 @@ function Timeline({ ticket, reloading }: { ticket: InquiryTicketDetailDto; reloa
   );
 }
 
+/**
+ * Internal notes only. Readers are answered from the blog's Gmail inbox, where
+ * every contact arrives with the reader as Reply-To; the platform keeps the
+ * copy this screen shows and never mails a reader on this site's behalf.
+ */
 function Composer({
   ticket,
-  mailConfigured,
   busy,
   act,
 }: {
   ticket: InquiryTicketDetailDto;
-  mailConfigured: boolean;
   busy: boolean;
   act: Act;
 }) {
-  const [mode, setMode] = useState<"reply" | "note">(ticket.canReply ? "reply" : "note");
   const [body, setBody] = useState("");
-  // One key per composed message, so a retried send never mails twice.
+  // One key per composed note, so a retried save never adds it twice.
   const [key, setKey] = useState(newIdempotencyKey);
   useUnsavedWarning(body.trim() !== "");
 
-  const canReply = ticket.canReply && mailConfigured;
-  const closed = !isOpenTicket(ticket.status);
-
-  async function send(): Promise<void> {
+  async function save(): Promise<void> {
     const text = body.trim();
     if (text === "") return;
-    let sent: boolean;
-    if (mode === "reply") {
-      if (
-        closed &&
-        !globalThis.confirm(
-          "解決済みのお問い合わせです。返信すると対応中に戻ります。送信しますか？",
-        )
-      ) {
-        return;
-      }
-      if (
-        !closed &&
-        !globalThis.confirm(`${ticket.requesterEmail} にメールを送信します。よろしいですか？`)
-      ) {
-        return;
-      }
-      sent = await act(() => api.replyToTicket(ticket.id, text, key, closed), "返信を送信しました");
-    } else {
-      sent = await act(() => api.addTicketNote(ticket.id, text, key), "メモを追加しました");
-    }
-    if (sent) {
+    if (await act(() => api.addTicketNote(ticket.id, text, key), "メモを追加しました")) {
       setBody("");
       setKey(newIdempotencyKey());
     }
   }
 
   return (
-    <Panel
-      title={
-        <span className="tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "reply"}
-            disabled={!canReply}
-            onClick={() => setMode("reply")}
-          >
-            返信
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "note"}
-            onClick={() => setMode("note")}
-          >
-            内部メモ
-          </button>
-        </span>
-      }
-    >
-      {mode === "reply" && !canReply ? (
-        <p className="muted">
-          {!ticket.canReply ? "返信先のアドレスがありません。" : "基盤のメール送信が未設定です。"}
-        </p>
-      ) : (
-        <>
-          <textarea
-            className="composer"
-            rows={8}
-            aria-label={mode === "reply" ? "返信本文" : "メモ"}
-            placeholder={
-              mode === "reply"
-                ? "返信本文（署名は基盤側で付きます）"
-                : "内部メモ（差出人には送られません）"
-            }
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-          />
-          <div className="panel__foot">
-            {mode === "reply" && <span className="muted small">宛先: {ticket.requesterEmail}</span>}
-            <button
-              type="button"
-              className="primary"
-              disabled={busy || body.trim() === ""}
-              onClick={() => void send()}
-            >
-              {mode === "reply" ? "送信" : "メモを追加"}
-            </button>
-          </div>
-        </>
-      )}
+    <Panel title="内部メモ">
+      <p className="muted small">
+        返信は Gmail（tomokichidiary@gmail.com）に届いたメールから行います。
+      </p>
+      <textarea
+        className="composer"
+        rows={6}
+        aria-label="メモ"
+        placeholder="内部メモ（差出人には送られません）"
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+      />
+      <div className="panel__foot">
+        <button
+          type="button"
+          className="primary"
+          disabled={busy || body.trim() === ""}
+          onClick={() => void save()}
+        >
+          メモを追加
+        </button>
+      </div>
     </Panel>
   );
 }

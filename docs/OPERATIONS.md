@@ -363,18 +363,27 @@ No ad script is loaded.
 
 The form posts to the versioned `POST /v1/contact` API, which checks the
 honeypot, verifies a Turnstile token, validates the fields, rate-limits the
-sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`) and hands
-the message to the shared inquiry platform
-([tomoki013/inquiry-platform](https://github.com/tomoki013/inquiry-platform),
-SDK pinned at `v0.2.0` in `apps/api/package.json`). Replies, status and history
-live on the platform; this API keeps no copy and emails nobody.
+sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`), then does
+two things at once:
 
-The hand-off goes through the `INQUIRY` service binding to the platform's
+1. **Mails the message to `tomokichidiary@gmail.com`**, where it is read and
+   answered. The reader is the Reply-To, so answering is an ordinary Gmail
+   reply. `CONTACT_MAIL` is a `send_email` binding pinned to that one address
+   (it must be a verified destination in Cloudflare Email Routing), sent from
+   `noreply@tmkch.io` (a domain with Email Routing enabled).
+2. **Files a copy on the shared inquiry platform**
+   ([tomoki013/inquiry-platform](https://github.com/tomoki013/inquiry-platform),
+   SDK pinned in `apps/api/package.json`), which the admin's お問い合わせ screen
+   shows.
+
+The reader sees success when either went through, and `?error=unavailable` only
+when neither did; whichever failed is logged (`contact.not_mailed` /
+`contact.not_filed`).
+
+The copy goes through the `INQUIRY` service binding to the platform's
 `Intake` entrypoint (`tomokichi-admin-core`), declared in
 `apps/api/cloudflare.config.ts` with `props.projects = ["tomokichi-diary"]`. The
-project slug `tomokichi-diary` must be registered on the platform; an
-unregistered slug, a missing binding or a platform error redirects the reader
-to `?error=unavailable` rather than claiming success.
+project slug `tomokichi-diary` must be registered on the platform.
 
 Two secrets and the limiter gate it, and a missing one closes the form rather
 than opening it:
@@ -399,8 +408,10 @@ there.
 
 ### Admin inquiries
 
-The admin's お問い合わせ screen lists, answers and closes this site's tickets
-on the inquiry platform, and everything happens from `admin.tomokichidiary.com`.
+The admin's お問い合わせ screen lists, annotates and closes the copies of this
+site's contacts on the inquiry platform, from `admin.tomokichidiary.com`.
+Readers are answered from Gmail; the screen has internal notes only, and the
+diary API has no route that makes the platform mail a reader.
 The diary API reaches the platform through the `INQUIRY_OPERATOR` service
 binding to the core Worker's `ProjectOperator` entrypoint (inquiry-platform
 v0.3.1+), after this site's own admin gate has let the operator in. The
@@ -414,13 +425,9 @@ Each change is audited on the platform as `tomokichi-diary-api:<who>`, where
 push links open `https://admin.tomokichidiary.com/#/inquiries/<ticket number>`
 (the studio seed's `mailSettings[].ticketUrlTemplate`).
 
-Replies are sent by the platform. The sender name (「ともきちの旅行日記」) and the
-notification inbox come from the studio's `deploy/inquiry-platform/seed.ts`
-(`mailSettings`, inquiry-platform v0.2.1+); the sending address stays on
-tmkch.io until tomokichidiary.com has a verified sending domain and an inbound
-route. The signature is set in the admin (お問い合わせ → 返信の署名); until it
-is, replies carry the deployment's Tomokichi Studio signature, and the screen
-says so.
+The platform's own "new ticket" notification (number and link only) also goes
+to the inbox set in the studio's `deploy/inquiry-platform/seed.ts`
+(`mailSettings`).
 
 ### `API_UNAUTHORIZED`
 

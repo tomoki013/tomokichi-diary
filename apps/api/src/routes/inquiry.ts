@@ -1,7 +1,6 @@
 import { Hono, type Context } from "hono";
 import { validate, v } from "@tomokichi/contracts";
 import type {
-  InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
   InquiryTicketStatus,
@@ -10,7 +9,6 @@ import type {
 } from "@tomokichi/contracts";
 import type {
   IntakeResult,
-  OperatorProject,
   OperatorTicketDetail,
   OperatorTicketSummary,
   ProjectOperatorClient,
@@ -19,7 +17,10 @@ import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
 
 /**
- * The admin's window onto this site's tickets on the shared inquiry platform.
+ * The admin's window onto the copies of this site's contacts kept on the
+ * shared inquiry platform. Readers are answered from the blog's Gmail inbox,
+ * so there is deliberately no reply route here: the platform never mails a
+ * reader on this site's behalf.
  *
  * Mounted under `/v1/admin`, so this site's admin gate has already decided who
  * may be here. The platform's `ProjectOperator` binding does the rest: it
@@ -62,13 +63,6 @@ const noteSchema = v.object({
   body: v.string({ min: 1, max: 100_000 }),
   idempotencyKey: v.string({ min: 8, max: 200 }),
 });
-const replySchema = v.object({
-  body: v.string({ min: 1, max: 100_000 }),
-  idempotencyKey: v.string({ min: 8, max: 200 }),
-  reopenIfResolved: v.optional(v.boolean(), false),
-});
-/** Empty is allowed: it hands the project back to the deployment's signature. */
-const signatureSchema = v.object({ signature: v.string({ max: 2000 }) });
 
 type Ctx = Context<AppEnv>;
 type Failure = Extract<IntakeResult<unknown>, { ok: false }>;
@@ -129,11 +123,6 @@ function toDetail(ticket: OperatorTicketDetail): InquiryTicketDetailDto {
 /** The person who passed this site's admin gate, as the platform audits them. */
 const who = (c: Ctx) => ({ id: c.get("adminActor") ?? "admin" });
 
-const toSignature = (project: OperatorProject): InquirySignatureDto => ({
-  signature: project.signature,
-  usesDefault: project.signature.trim() === "",
-});
-
 export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | null) {
   const routes = new Hono<AppEnv>();
 
@@ -158,27 +147,6 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
       registered: project.ok,
       mailConfigured: project.ok && project.value.mailConfigured,
     } satisfies InquiryStatusDto);
-  });
-
-  /**
-   * The signature under this site's replies. Without one of its own the
-   * platform signs with the deployment's, which is why the admin shows it.
-   */
-  routes.get("/signature", async (c) => {
-    const operator = client(c);
-    if (operator instanceof Response) return operator;
-    const project = await operator.project();
-    return project.ok ? c.json(toSignature(project.value)) : failure(c, project);
-  });
-
-  routes.put("/signature", async (c) => {
-    const parsed = validate(signatureSchema, await c.req.json().catch(() => null));
-    if (!parsed.ok)
-      return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const operator = client(c);
-    if (operator instanceof Response) return operator;
-    const saved = await operator.setSignature(parsed.value.signature, who(c));
-    return saved.ok ? c.json(toSignature(saved.value)) : failure(c, saved);
   });
 
   routes.get("/tickets", async (c) => {
@@ -249,19 +217,6 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     if (operator instanceof Response) return operator;
     const result = await operator.addNote(c.req.param("id"), parsed.value, who(c));
     return result.ok ? c.json({ ok: true }) : failure(c, result);
-  });
-
-  /** Mails the person who wrote in. Recipient, sender and subject are the platform's. */
-  routes.post("/tickets/:id/reply", async (c) => {
-    const parsed = validate(replySchema, await c.req.json().catch(() => null));
-    if (!parsed.ok)
-      return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
-    const operator = client(c);
-    if (operator instanceof Response) return operator;
-    const result = await operator.reply(c.req.param("id"), parsed.value, who(c));
-    if (!result.ok) return failure(c, result);
-    c.get("ctx").logger.info("inquiry.replied", { ticketId: result.value.id });
-    return c.json({ ok: true });
   });
 
   return routes;
