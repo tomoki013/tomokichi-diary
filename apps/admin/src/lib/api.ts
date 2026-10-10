@@ -25,7 +25,9 @@ import type { Resolution } from "./labels";
 // An empty `VITE_API_URL` is a value; pointing the client at "" would call
 // paths the SPA fallback answers with 200 HTML.
 const configured = (import.meta.env["VITE_API_URL"] ?? "").trim();
-const ORIGIN = configured === "" ? "/api" : configured.replace(/\/+$/, "");
+// A production bundle must use the Access-protected service binding, even if
+// the build runner happens to carry a development VITE_API_URL.
+const ORIGIN = import.meta.env.PROD || configured === "" ? "/api" : configured.replace(/\/+$/, "");
 const BASE = `${ORIGIN}/v1`;
 
 const TOKEN_KEY = "tomokichi.admin.token";
@@ -81,8 +83,10 @@ export function describeError(error: unknown): string {
     if (error.code === "API_NOT_FOUND" || error.code.endsWith("_NOT_FOUND")) {
       return "見つかりませんでした";
     }
-    if (error.status === 502) return "共通お問い合わせ基盤に接続できませんでした";
-    if (error.status === 503) return "共通お問い合わせ基盤への接続が未設定です";
+    if (error.code.startsWith("INQUIRY_") && error.status === 502)
+      return "共通お問い合わせ基盤に接続できませんでした";
+    if (error.code.startsWith("INQUIRY_") && error.status === 503)
+      return "共通お問い合わせ基盤への接続が未設定です";
     if (error.status >= 500)
       return `サーバーでエラーが起きました（${error.requestId || error.code}）`;
     const fields = error.issues.map((issue) => issue.path).filter(Boolean);
@@ -101,6 +105,7 @@ async function request<T>(path: string, init: RequestInit = {}, base = BASE): Pr
   }
 
   const response = await fetch(`${base}${path}`, { ...init, headers, credentials: "same-origin" });
+  if (response.status === 401) globalThis.dispatchEvent?.(new Event("admin-session-expired"));
   if (response.status === 204) return undefined as T;
 
   // A JSON API answering with HTML has been misrouted, usually to the SPA
@@ -180,7 +185,18 @@ export interface TicketChange {
 
 const id = encodeURIComponent;
 
+export interface PublicationStatus {
+  state: "deployed" | "queued" | "building" | "failed" | "unconfigured";
+  configured: boolean;
+  requestedAt: string | null;
+  deployedAt: string | null;
+  buildUrl: string | null;
+  error: string | null;
+}
+
 export const api = {
+  publicationStatus: () => request<PublicationStatus>("/admin/publication"),
+  retryPublication: () => request<PublicationStatus>("/admin/publication/retry", json("POST")),
   health: () => request<{ status: string }>("/health", {}, ORIGIN),
 
   // Articles

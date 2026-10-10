@@ -27,6 +27,7 @@ import {
 } from "@tomokichi/domain";
 import type { AppContext } from "@tomokichi/application";
 import type { AppEnv } from "../app.js";
+import type { Env } from "../env.js";
 import { domainErrorResponse, errorResponse } from "../http.js";
 import { toArticleMediaDto, toArticleSummaryDto, toRevisionDto } from "../mappers.js";
 import {
@@ -47,7 +48,7 @@ async function siteAuthor(ctx: AppContext): Promise<AuthorId | null> {
   return author?.id ?? null;
 }
 
-export function articleRoutes() {
+export function articleRoutes(publishSite: (env: Env) => Promise<unknown>) {
   const routes = new Hono<AppEnv>();
 
   routes.get("/", async (c) => {
@@ -186,21 +187,21 @@ export function articleRoutes() {
   routes.post("/:id/publish", async (c) => {
     const result = await publishArticle(c.get("ctx"), c.req.param("id") as ArticleId);
     return result.ok
-      ? c.json({ status: result.value.status })
+      ? c.json({ status: result.value.status, publication: await publishSite(c.env) })
       : domainErrorResponse(c, result.errors);
   });
 
   routes.post("/:id/unpublish", async (c) => {
     const result = await unpublishArticle(c.get("ctx"), c.req.param("id") as ArticleId);
     return result.ok
-      ? c.json({ status: result.value.status })
+      ? c.json({ status: result.value.status, publication: await publishSite(c.env) })
       : domainErrorResponse(c, result.errors);
   });
 
   routes.post("/:id/archive", async (c) => {
     const result = await archiveArticle(c.get("ctx"), c.req.param("id") as ArticleId);
     return result.ok
-      ? c.json({ status: result.value.status })
+      ? c.json({ status: result.value.status, publication: await publishSite(c.env) })
       : domainErrorResponse(c, result.errors);
   });
 

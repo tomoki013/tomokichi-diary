@@ -52,3 +52,5 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 3. `ADMIN_TOKEN` を Access 導入後に削除するか。
 4. お問い合わせの保持期限。
 5. AI クローラ（GPTBot 等）の robots 方針（今は全許可）。
+
+2026-10-10: 管理画面は本番では同一originの `/api` を使う。D1を記事の正本として、公開操作から既存のGitHub ActionsでAstro/MCPを生成・反映する。ビルド用exportのGitコミットを公開手順から外す。本文・写真・関連付けをまとめて保存し、公開時点のmetadataを記録して下書きの混入を防ぐ。手順と初回設定は [ADMIN.md](ADMIN.md)。

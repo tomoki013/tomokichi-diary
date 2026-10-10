@@ -27,6 +27,17 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
     }
   }
 
+  if (import.meta.env.PROD && !["localhost", "127.0.0.1"].includes(globalThis.location.hostname)) {
+    return (
+      <main className="signin">
+        <h1>ログインを確認してください</h1>
+        <p>管理画面の認証が切れたか、アクセスが認められていません。</p>
+        <a className="button primary" href="/cdn-cgi/access/login">
+          Cloudflareでログインし直す
+        </a>
+      </main>
+    );
+  }
   return (
     <main className="signin">
       <h1>Tomokichi Diary Admin</h1>

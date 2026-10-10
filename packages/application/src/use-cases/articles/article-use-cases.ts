@@ -98,7 +98,7 @@ export async function createArticle(
     id: ctx.ids.next<RouteId>(),
     path: path.value,
     locale: input.locale,
-    targetType: "article",
+    targetType: article.kind === "page" ? "static" : "article",
     targetId: id,
     isCanonical: true,
     redirectTo: null,
@@ -141,6 +141,11 @@ export async function updateArticleDraft(
   const updated: Article = { ...article, currentRevisionId: revision.id, updatedAt: now };
 
   await ctx.repos.revisions.save(revision);
+  const knowledge = (await ctx.repos.knowledge.listArticleKnowledge()).find(
+    (entry) => entry.articleId === articleId && entry.revisionId === article.currentRevisionId,
+  );
+  if (knowledge)
+    await ctx.repos.knowledge.saveArticleKnowledge({ ...knowledge, revisionId: revision.id });
   await ctx.repos.articles.save(updated);
   return ok({ article: updated, revision });
 }
@@ -153,7 +158,10 @@ async function publishInputFor(ctx: AppContext, articleId: ArticleId) {
   if (!revision) return null;
   const routes = await ctx.repos.routes.listAll();
   const canonicalRoute = routes.find(
-    (r) => r.isCanonical && r.targetType === "article" && r.targetId === articleId,
+    (r) =>
+      r.isCanonical &&
+      r.targetType === (article.kind === "page" ? "static" : "article") &&
+      r.targetId === articleId,
   );
   const media = await ctx.repos.media.listForArticle(articleId);
   return { article, revision, canonicalRoute, media, now: ctx.clock.now() };
@@ -172,6 +180,23 @@ export async function publishArticle(
     ctx.logger.warn("article.publish_rejected", { articleId, code: "ARTICLE_NOT_PUBLISHABLE" });
     return result;
   }
+  const [media, locations, places, categories, tags, collections] = await Promise.all([
+    ctx.repos.media.listForArticle(articleId),
+    ctx.repos.relations.listArticleLocations(),
+    ctx.repos.relations.listArticlePlaces(),
+    ctx.repos.relations.listArticleCategories(),
+    ctx.repos.relations.listArticleTags(),
+    ctx.repos.collections.listMemberships(),
+  ]);
+  await ctx.repos.publicationMetadata.save(input.revision.id, {
+    media,
+    locations: locations.filter((r) => r.articleId === articleId),
+    places: places.filter((r) => r.articleId === articleId),
+    categories: categories.filter((r) => r.articleId === articleId),
+    tags: tags.filter((r) => r.articleId === articleId),
+    collections: collections.filter((r) => r.articleId === articleId),
+    experienceTags: input.article.experienceTags,
+  });
   await ctx.repos.articles.save(result.value);
   ctx.logger.info("article.published", { articleId });
   await ctx.analytics?.track({ name: "article_published", articleId });
@@ -183,7 +208,13 @@ export async function checkPublishable(ctx: AppContext, articleId: ArticleId) {
   const input = await publishInputFor(ctx, articleId);
   if (!input)
     return [{ code: "ARTICLE_NOT_FOUND" as const, message: `no publishable article ${articleId}` }];
-  return validatePublishable(input);
+  return validatePublishable({
+    ...input,
+    now:
+      input.article.scheduledAt && input.article.scheduledAt > input.now
+        ? input.article.scheduledAt
+        : input.now,
+  });
 }
 
 export async function unpublishArticle(
@@ -215,6 +246,8 @@ export async function scheduleArticle(
 ): Promise<Result<Article>> {
   const article = await ctx.repos.articles.findById(articleId);
   if (!article) return err({ code: "ARTICLE_NOT_FOUND", message: `no article ${articleId}` });
+  const problems = await checkPublishable(ctx, articleId);
+  if (problems.length) return err(...problems);
   const result = schedule(article, at, ctx.clock.now());
   if (result.ok) await ctx.repos.articles.save(result.value);
   return result;

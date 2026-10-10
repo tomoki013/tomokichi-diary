@@ -18,7 +18,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     await Promise.all(articles.map((a) => repos.media.listForArticle(a.id)))
   ).flat();
 
-  return {
+  const snapshot: ContentSnapshot = {
     generatedAt: ctx.clock.now(),
     articles,
     revisions,
@@ -45,5 +45,37 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleKnowledge: (await repos.knowledge.listArticleKnowledge()).filter((knowledge) =>
       revisionIds.includes(knowledge.revisionId),
     ),
+  };
+  const published = new Map(
+    (await repos.publicationMetadata.listAll()).map((entry) => [entry.revisionId, entry.metadata]),
+  );
+  const metadataByArticle = new Map(
+    articles.flatMap((article) => {
+      const metadata = article.publishedRevisionId
+        ? published.get(article.publishedRevisionId)
+        : null;
+      return metadata ? [[article.id, metadata] as const] : [];
+    }),
+  );
+  const frozen = new Set(metadataByArticle.keys());
+  const replace = <T extends { articleId: string }>(
+    current: readonly T[],
+    saved: (m: import("../../ports/repositories.js").PublishedArticleMetadata) => readonly T[],
+  ): readonly T[] => [
+    ...current.filter((row) => !frozen.has(row.articleId as import("@tomokichi/domain").ArticleId)),
+    ...[...metadataByArticle.values()].flatMap((m) => saved(m)),
+  ];
+  return {
+    ...snapshot,
+    articles: articles.map((a) => ({
+      ...a,
+      experienceTags: metadataByArticle.get(a.id)?.experienceTags ?? a.experienceTags,
+    })),
+    articleMedia: replace(snapshot.articleMedia, (m) => m.media),
+    articleLocations: replace(snapshot.articleLocations, (m) => m.locations),
+    articlePlaces: replace(snapshot.articlePlaces, (m) => m.places),
+    articleCategories: replace(snapshot.articleCategories, (m) => m.categories),
+    articleTags: replace(snapshot.articleTags, (m) => m.tags),
+    articleCollections: replace(snapshot.articleCollections, (m) => m.collections),
   };
 }

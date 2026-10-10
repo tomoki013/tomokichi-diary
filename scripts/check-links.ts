@@ -35,7 +35,9 @@ const mediaExists = (url: string): boolean => {
   }
   const key = decodeURIComponent(path.replace(/^\/+/, ""));
   if (key.startsWith("_img/")) return existsSync(join(DERIVATIVE_DIR, key.slice("_img/".length)));
-  return key.startsWith("images/") && existsSync(join(MEDIA_DIR, key));
+  return (
+    (key.startsWith("images/") || key.startsWith("originals/")) && existsSync(join(MEDIA_DIR, key))
+  );
 };
 
 let checkedLinks = 0;
