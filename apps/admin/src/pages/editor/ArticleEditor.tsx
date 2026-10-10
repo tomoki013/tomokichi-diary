@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
+import { insertMarkdownImage } from "../../lib/markdown-image";
+import { useEditorSections } from "./section-save";
 import { api } from "../../lib/api";
 import { bodyStats, draftFrom, isDirty, normalizeDraft, type DraftInput } from "../../lib/draft";
 import { articleStatusLabels, formatRelative } from "../../lib/labels";
@@ -49,19 +51,28 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const [saved, setSaved] = useState<DraftInput>(() => draftFrom(article));
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
-  const dirty = isDirty(draft, saved);
+  const sections = useEditorSections();
+  const bodyDirty = isDirty(draft, saved);
+  const dirty = bodyDirty || sections.dirty;
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const selection = useRef({ start: draft.bodyMarkdown.length, end: draft.bodyMarkdown.length });
+  const [publishing, setPublishing] = useState(false);
+  const working = saving || publishing || sections.busy;
   useUnsavedWarning(dirty);
   useTitle(draft.title || article.slug);
 
   const check = useResource(() => api.publishCheck(article.id), `check:${article.id}`);
 
   const save = useCallback(async (): Promise<boolean> => {
+    if (!dirty) return true;
     const payload = normalizeDraft(draft);
     setSaving(true);
     try {
+      sections.validate();
       await api.saveDraft(article.id, payload);
+      if (!(await sections.save())) return false;
       setSaved({ ...payload, changeSummary: null });
-      setDraft((current) => ({ ...current, changeSummary: null }));
+      setDraft({ ...payload, changeSummary: null });
       toast.info("下書きを保存しました");
       await Promise.all([reload(), check.reload()]);
       return true;
@@ -71,7 +82,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
     } finally {
       setSaving(false);
     }
-  }, [article.id, check, draft, reload, toast]);
+  }, [article.id, check, dirty, draft, reload, sections, toast]);
 
   // ⌘S / Ctrl+S saves, as every editor does.
   const saveRef = useRef(save);
@@ -135,18 +146,18 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             <button
               type="button"
               className="primary"
-              disabled={saving || !dirty}
+              disabled={working || !dirty}
               onClick={() => void save()}
               title="⌘S / Ctrl+S"
             >
-              下書きを保存
+              すべて保存
             </button>
           </>
         }
       />
 
       <div className="editor">
-        <div className="editor__main">
+        <fieldset className="editor__main editor__fields" disabled={working}>
           <Panel title="本文">
             <label className="field">
               <span>タイトル</span>
@@ -174,6 +185,19 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 </em>
               </span>
               <textarea
+                ref={bodyRef}
+                onBlur={(event) => {
+                  selection.current = {
+                    start: event.currentTarget.selectionStart,
+                    end: event.currentTarget.selectionEnd,
+                  };
+                }}
+                onSelect={(event) => {
+                  selection.current = {
+                    start: event.currentTarget.selectionStart,
+                    end: event.currentTarget.selectionEnd,
+                  };
+                }}
                 className="editor__body"
                 rows={28}
                 value={draft.bodyMarkdown}
@@ -218,16 +242,48 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             </label>
           </Panel>
 
-          <MediaSection article={article} onSaved={afterChange} />
-          <RelationsSection article={article} onSaved={afterChange} />
+          <MediaSection
+            article={article}
+            onSaved={afterChange}
+            register={sections.register}
+            onSaveAll={save}
+            onInsert={(url, alt) => {
+              const inserted = insertMarkdownImage(
+                draft.bodyMarkdown,
+                selection.current.start,
+                selection.current.end,
+                url,
+                alt,
+              );
+              update("bodyMarkdown", inserted.body);
+              selection.current = { start: inserted.cursor, end: inserted.cursor };
+              requestAnimationFrame(() => {
+                bodyRef.current?.focus();
+                bodyRef.current?.setSelectionRange(inserted.cursor, inserted.cursor);
+              });
+            }}
+          />
+          <RelationsSection
+            article={article}
+            onSaved={afterChange}
+            register={sections.register}
+            onSaveAll={save}
+          />
           {article.kind === "article" && (
-            <ExperienceSection article={article} onSaved={afterChange} />
+            <ExperienceSection
+              article={article}
+              onSaved={afterChange}
+              register={sections.register}
+              onSaveAll={save}
+            />
           )}
           <KnowledgeSection
             articleId={article.id}
+            register={sections.register}
+            onSaveAll={save}
             revisionId={article.currentRevision?.id ?? null}
           />
-        </div>
+        </fieldset>
 
         <aside className="editor__side">
           <PublishSection
@@ -236,6 +292,8 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             dirty={dirty}
             save={save}
             onChanged={afterChange}
+            working={working}
+            onBusy={setPublishing}
           />
           <Panel
             title="プレビュー（下書き）"

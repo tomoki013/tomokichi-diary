@@ -73,3 +73,5 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 7. `migrations.test` — 追記のみ、expand/contract。
 
 詳細は [testing/test-gap-analysis.md](testing/test-gap-analysis.md)。
+
+2026-10-10 管理画面修正: Accessの認証と本文を保つAPIプロキシ、写真のMarkdown挿入、固定ページの公開、予約日時の実行、下書きmetadataの分離、公開連携の失敗・再試行・競合を自動テスト。Chromeで実際のログイン後の通信エラーを確認し、ローカルの実API/SQLite/R2代替ストレージで写真選択・本文挿入・全体保存・公開を操作する。

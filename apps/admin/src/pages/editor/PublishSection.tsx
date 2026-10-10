@@ -1,9 +1,21 @@
-import { useState } from "react";
+const publishMessages: Record<string, string> = {
+  "body must be at least 200 characters": "本文を200文字以上入力してください",
+  "a cover image is required": "カバー画像を選んでください",
+  "cover image requires alt text": "カバー画像の代替テキストを入力してください",
+  "title is required": "タイトルを入力してください",
+  "summary is required": "要約を入力してください",
+  "a canonical route is required": "記事のURLを設定してください",
+  "scheduled publication time has not been reached": "予約日時になると公開されます",
+  "archived articles cannot be published": "アーカイブした記事は公開できません",
+};
+const publishProblem = (message: string) => publishMessages[message] ?? message;
+
+import { useEffect, useState } from "react";
 import type { ArticleDetailDto, PublishCheckDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
 import { formatDateTime, isoToJstLocal, jstLocalToIso } from "../../lib/labels";
-import type { Resource } from "../../ui/hooks";
-import { Panel, SkeletonRows } from "../../ui/parts";
+import { useResource, type Resource } from "../../ui/hooks";
+import { ErrorState, Panel, SkeletonRows } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 
 /**
@@ -16,29 +28,51 @@ export function PublishSection({
   dirty,
   save,
   onChanged,
+  working,
+  onBusy,
 }: {
   article: ArticleDetailDto;
   check: Resource<PublishCheckDto>;
   dirty: boolean;
   save: () => Promise<boolean>;
   onChanged: () => Promise<void>;
+  working: boolean;
+  onBusy: (busy: boolean) => void;
 }) {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [when, setWhen] = useState("");
+  const publication = useResource(() => api.publicationStatus(), "publication");
+  const reloadPublication = publication.reload;
+  useEffect(() => {
+    const timer = setInterval(() => void reloadPublication(), 10000);
+    return () => clearInterval(timer);
+  }, [reloadPublication]);
 
-  const run = async (action: () => Promise<unknown>, done: string): Promise<void> => {
+  const run = async (
+    action: () => Promise<unknown>,
+    done: string,
+    validate = false,
+  ): Promise<void> => {
     setBusy(true);
+    onBusy(true);
     try {
       if (dirty && !(await save())) return;
+      const fresh = validate ? await api.publishCheck(article.id) : null;
+      if (fresh && !fresh.publishable) {
+        await check.reload();
+        throw new Error(fresh.problems.map((p) => publishProblem(p.message)).join("\n"));
+      }
       await action();
       toast.info(done);
       await onChanged();
+      await publication.reload();
     } catch (error) {
       toast.error(error);
     } finally {
       setBusy(false);
+      onBusy(false);
     }
   };
 
@@ -50,33 +84,87 @@ export function PublishSection({
 
   return (
     <Panel title="公開">
-      {check.loading && !check.data ? (
+      {dirty && (
+        <p className="muted">未保存の本文・写真・関連付けをすべて保存してから確認します。</p>
+      )}
+      {check.error ? (
+        <ErrorState error={check.error} onRetry={() => void check.reload()} />
+      ) : check.loading && !check.data ? (
         <SkeletonRows rows={2} />
-      ) : check.data && !check.data.publishable ? (
+      ) : check.data && !check.data.publishable && !dirty ? (
         <ul className="problems">
           {check.data.problems.map((problem) => (
             <li key={`${problem.code}-${problem.field ?? ""}`}>
-              {problem.field ? <code>{problem.field}</code> : null} {problem.message}
+              {problem.field ? <code>{problem.field}</code> : null}{" "}
+              {publishProblem(problem.message)}
             </li>
           ))}
         </ul>
       ) : (
         <p className="ok-line">
           {nothingToPublish
-            ? "公開中の内容は最新です"
+            ? "DBの公開版は最新です"
             : `公開できます${dirty ? "（保存してから公開します）" : ""}`}
         </p>
       )}
 
+      <div className="publication-status" aria-live="polite">
+        {publication.error ? (
+          <ErrorState error={publication.error} onRetry={() => void publication.reload()} />
+        ) : (
+          publication.data && (
+            <>
+              <p>
+                {
+                  {
+                    deployed: "サイトに反映済み",
+                    queued: "サイトへの反映待ち",
+                    building: "サイトを生成・反映中…",
+                    failed: "サイトへの反映に失敗",
+                    unconfigured: "自動反映の設定が必要です",
+                  }[publication.data.state]
+                }
+              </p>
+              {publication.data.state === "unconfigured" && (
+                <p className="form-error">
+                  DBには保存されています。公開連携用のGitHubトークンを設定するまでサイトには反映されません。
+                </p>
+              )}
+              {publication.data.error && <p className="form-error">{publication.data.error}</p>}
+              {publication.data.buildUrl && (
+                <a href={publication.data.buildUrl} target="_blank" rel="noopener noreferrer">
+                  反映処理のログ ↗
+                </a>
+              )}
+              {publication.data.configured && publication.data.state === "failed" && (
+                <button
+                  type="button"
+                  disabled={busy || working}
+                  onClick={() => void run(() => api.retryPublication(), "反映を再試行します")}
+                >
+                  サイトへの反映を再試行
+                </button>
+              )}
+            </>
+          )
+        )}
+      </div>
       <div className="stack">
         <button
           type="button"
           className="primary"
-          disabled={busy || !publishable || nothingToPublish}
+          disabled={
+            busy ||
+            working ||
+            article.status === "scheduled" ||
+            (!publishable && !dirty) ||
+            nothingToPublish
+          }
           onClick={() =>
             void run(
               () => api.publish(article.id),
-              article.isLive ? "変更を公開しました" : "公開しました",
+              article.isLive ? "変更の公開を受け付けました" : "公開を受け付けました",
+              true,
             )
           }
         >
@@ -94,6 +182,7 @@ export function PublishSection({
                 void run(
                   () => api.schedule(article.id, at),
                   `${formatDateTime(at)} に予約しました`,
+                  true,
                 );
                 setScheduling(false);
               }}
@@ -109,7 +198,10 @@ export function PublishSection({
                 />
               </label>
               <div className="row">
-                <button type="submit" disabled={busy || !publishable || when === ""}>
+                <button
+                  type="submit"
+                  disabled={busy || working || (!publishable && !dirty) || when === ""}
+                >
                   予約する
                 </button>
                 <button type="button" className="link" onClick={() => setScheduling(false)}>
@@ -120,7 +212,7 @@ export function PublishSection({
           ) : (
             <button
               type="button"
-              disabled={busy || !publishable}
+              disabled={busy || working || (!publishable && !dirty)}
               onClick={() => {
                 setWhen(isoToJstLocal(article.scheduledAt));
                 setScheduling(true);

@@ -1,9 +1,10 @@
+import { useSectionSave, type RegisterSection } from "./section-save";
 import { useState, type ChangeEvent } from "react";
 import type { ArticleDetailDto, MediaAssetDto } from "@tomokichi/contracts";
 import { api, type MediaRole, type MediaUsageInput } from "../../lib/api";
 import { mediaRoleLabels } from "../../lib/labels";
 import { useResource } from "../../ui/hooks";
-import { Panel } from "../../ui/parts";
+import { ErrorState, Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 
 function usagesFrom(article: ArticleDetailDto): MediaUsageInput[] {
@@ -34,13 +35,21 @@ export async function measure(file: File): Promise<{ width: number; height: numb
 export function MediaSection({
   article,
   onSaved,
+  register,
+  onSaveAll,
+  onInsert,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
+  onInsert: (url: string, alt: string) => void;
 }) {
   const toast = useToast();
   const [usages, setUsages] = useState<MediaUsageInput[]>(() => usagesFrom(article));
   const [baseline, setBaseline] = useState(() => JSON.stringify(usagesFrom(article)));
+  const [query, setQuery] = useState("");
+  const [limit, setLimit] = useState(60);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
   // URLs of images added in this session, before the article is reloaded.
@@ -111,19 +120,28 @@ export function MediaSection({
     }
   }
 
-  async function save(): Promise<void> {
+  async function save(): Promise<boolean> {
     setBusy(true);
     try {
       await api.saveArticleMedia(article.id, normalized);
       setBaseline(JSON.stringify(normalized));
       toast.info("画像を保存しました");
       await onSaved();
+      return true;
     } catch (error) {
       toast.error(error);
+      return false;
     } finally {
       setBusy(false);
     }
   }
+
+  useSectionSave(register, "media", {
+    dirty,
+    busy,
+    save,
+    problem: missingAlt ? "写真の代替テキストを入力してください" : undefined,
+  });
 
   return (
     <Panel
@@ -147,6 +165,9 @@ export function MediaSection({
         </>
       }
     >
+      <p className="muted">
+        写真を選び、代替テキストを入力して「本文に挿入」。カバーは一覧の見出し画像です。
+      </p>
       {usages.length === 0 && <p className="muted">画像はまだありません。</p>}
       <ol className="media-usages">
         {usages.map((usage, index) => (
@@ -189,6 +210,13 @@ export function MediaSection({
                   外す
                 </button>
               </div>
+              <button
+                type="button"
+                disabled={!usage.alt.trim() || !urlOf(usage.mediaId)}
+                onClick={() => onInsert(urlOf(usage.mediaId), usage.alt)}
+              >
+                本文に挿入
+              </button>
               <input
                 aria-label="代替テキスト"
                 placeholder="代替テキスト（必須）"
@@ -208,26 +236,51 @@ export function MediaSection({
       </ol>
 
       {picking && (
-        <div className="media-grid">
-          {library.loading && !library.data
-            ? Array.from({ length: 12 }, (_, index) => <div key={index} className="skeleton" />)
-            : (library.data ?? []).slice(0, 120).map((asset) => {
-                const chosen = usages.some((usage) => usage.mediaId === asset.id);
-                return (
-                  <button
-                    key={asset.id}
-                    type="button"
-                    aria-pressed={chosen}
-                    aria-label={`画像を追加（${asset.width ?? "?"}×${asset.height ?? "?"}）`}
-                    onClick={() => {
-                      setKnown((current) => ({ ...current, [asset.id]: asset.url }));
-                      add(asset.id);
-                    }}
-                  >
-                    <img src={asset.url} alt="" loading="lazy" />
-                  </button>
-                );
-              })}
+        <div>
+          <input
+            type="search"
+            aria-label="写真を検索"
+            placeholder="ファイル名・URLで検索"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setLimit(60);
+            }}
+          />
+          {Boolean(library.error) && (
+            <ErrorState error={library.error} onRetry={() => void library.reload()} />
+          )}
+          <div className="media-grid">
+            {library.loading && !library.data
+              ? Array.from({ length: 12 }, (_, index) => <div key={index} className="skeleton" />)
+              : (library.data ?? [])
+                  .filter((asset) => asset.url.toLowerCase().includes(query.toLowerCase()))
+                  .slice(0, limit)
+                  .map((asset) => {
+                    const chosen = usages.some((usage) => usage.mediaId === asset.id);
+                    return (
+                      <button
+                        key={asset.id}
+                        type="button"
+                        aria-pressed={chosen}
+                        aria-label={`画像を追加（${asset.width ?? "?"}×${asset.height ?? "?"}）`}
+                        onClick={() => {
+                          setKnown((current) => ({ ...current, [asset.id]: asset.url }));
+                          add(asset.id);
+                        }}
+                      >
+                        <img src={asset.url} alt="" loading="lazy" />
+                      </button>
+                    );
+                  })}
+          </div>
+          {(library.data ?? []).filter((asset) =>
+            asset.url.toLowerCase().includes(query.toLowerCase()),
+          ).length > limit && (
+            <button type="button" onClick={() => setLimit((n) => n + 60)}>
+              さらに表示
+            </button>
+          )}
         </div>
       )}
 
@@ -237,7 +290,7 @@ export function MediaSection({
           type="button"
           className="primary"
           disabled={busy || !dirty || missingAlt}
-          onClick={() => void save()}
+          onClick={() => void onSaveAll()}
         >
           画像を保存
         </button>

@@ -1,4 +1,4 @@
-import { bindings, defineConfig } from "cf/config";
+import { bindings, defineConfig, triggers } from "cf/config";
 
 export default defineConfig({
   worker: {
@@ -13,6 +13,7 @@ export default defineConfig({
     // The public face of the API. Admin traffic arrives instead through the admin
     // Worker's service binding, behind Cloudflare Access.
     domains: ["api.tomokichidiary.com"],
+    triggers: [triggers.scheduled({ schedule: "* * * * *" })],
     // ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`.
     // It is never committed, and a missing value closes the admin API.
     env: {

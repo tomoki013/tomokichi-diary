@@ -5,6 +5,7 @@ import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
 import { articleRoutes } from "./routes/articles.js";
+import { publicationRoutes, requestPublication } from "./publication.js";
 import { mediaRoutes } from "./routes/media.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
@@ -54,6 +55,7 @@ export interface AppOptions {
   verifyAccess?: AccessVerifier;
   /** Overridden by tests so the inquiry screen runs against a stand-in platform. */
   inquiryOperator?: (env: Env) => ProjectOperatorClient | null;
+  publishSite?: (env: Env) => Promise<unknown>;
 }
 
 /**
@@ -83,6 +85,7 @@ export function createApp(options: AppOptions = {}) {
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
   const verifyAccess = options.verifyAccess ?? verifyAccessJwt;
   const inquiryOperator = options.inquiryOperator ?? ((env: Env) => createInquiryOperator(env));
+  const publishSite = options.publishSite ?? requestPublication;
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
@@ -175,7 +178,8 @@ export function createApp(options: AppOptions = {}) {
     await next();
   });
 
-  v1.route("/admin/articles", articleRoutes());
+  v1.route("/admin/articles", articleRoutes(publishSite));
+  v1.route("/admin/publication", publicationRoutes());
   v1.route("/admin/media", mediaRoutes());
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());

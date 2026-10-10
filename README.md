@@ -42,3 +42,5 @@ docs/         architecture, data model, runbook, ADRs
 - [AI instructions](docs/AI_INSTRUCTIONS.md) — rules for coding agents
 - [Audit (2026-09)](docs/audit/diary-2.0-full-audit.md) — current-site vs 2.0, SEO, clusters, LLMO, WebMCP, migration plan
 - [Test gap analysis](docs/testing/test-gap-analysis.md) — risk map and coverage
+
+管理画面の保存・写真挿入・自動公開は [docs/ADMIN.md](docs/ADMIN.md) を参照。
