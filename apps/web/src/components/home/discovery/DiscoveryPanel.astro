@@ -1,12 +1,13 @@
 ---
 import type { ExperienceTag } from "@tomokichi/domain";
-import VisualTemplate from "./VisualTemplate.astro";
-import AlbumTemplate from "./AlbumTemplate.astro";
-import StoryTemplate from "./StoryTemplate.astro";
-import CasefileTemplate from "./CasefileTemplate.astro";
-import MangaTemplate from "./MangaTemplate.astro";
-import TicketTemplate from "./TicketTemplate.astro";
-import ExplorerTemplate from "./ExplorerTemplate.astro";
+import BoardScene from "./BoardScene.astro";
+import CinemaScene from "./CinemaScene.astro";
+import PulseScene from "./PulseScene.astro";
+import CollapseScene from "./CollapseScene.astro";
+import GachaScene from "./GachaScene.astro";
+import LensScene from "./LensScene.astro";
+import LettersScene from "./LettersScene.astro";
+import DevelopScene from "./DevelopScene.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
 import {
   templateFor,
@@ -21,23 +22,27 @@ interface Props {
   total: number;
 }
 
-/** One feeling's stories in the layout that feeling calls for. */
+/**
+ * One feeling on stage: a slim header, then the scene that feeling calls for.
+ * The panel carries the scene id so the scene's styles and script can find it.
+ */
 const { tag, items, total } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
 const template = templateFor(tag);
 const summary =
   items.length > 0 ? `${total}本のうち${items.length}本` : "まだこの気分の旅の話はありません";
 
-const RENDERERS: Record<DiscoveryTemplateId, typeof VisualTemplate> = {
-  visual: VisualTemplate,
-  album: AlbumTemplate,
-  story: StoryTemplate,
-  casefile: CasefileTemplate,
-  manga: MangaTemplate,
-  ticket: TicketTemplate,
-  explorer: ExplorerTemplate,
+const SCENES: Record<DiscoveryTemplateId, typeof BoardScene> = {
+  board: BoardScene,
+  cinema: CinemaScene,
+  pulse: PulseScene,
+  collapse: CollapseScene,
+  gacha: GachaScene,
+  lens: LensScene,
+  letters: LettersScene,
+  develop: DevelopScene,
 };
-const Template = RENDERERS[template.id];
+const Scene = SCENES[template.id];
 ---
 
 <div
@@ -45,19 +50,16 @@ const Template = RENDERERS[template.id];
   style={`--exp-hue: ${copy.hue}`}
   data-experience={tag}
   data-template={template.id}
-  data-announce={`${copy.label}：${summary}を「${template.label}」で表示しています`}
+  data-announce={`${copy.label}：${template.label}。${summary}`}
 >
   <header class="home-discovery__head">
-    <span class="home-discovery__stamp" aria-hidden="true">
-      {copy.mark}
-    </span>
-    <div class="home-discovery__titles">
-      <h3>{copy.label}の旅</h3>
-      <p class="home-discovery__lead">{copy.lead}</p>
-    </div>
+    <h3>
+      <span aria-hidden="true">{copy.mark}</span>
+      {copy.label}の旅
+    </h3>
     <p class="home-discovery__meta">
-      <span class="home-discovery__template">見せ方：{template.label}</span>
-      <span class="home-discovery__count">{summary}</span>
+      <span>{template.label}</span>
+      <span>{summary}</span>
     </p>
   </header>
 
@@ -67,7 +69,7 @@ const Template = RENDERERS[template.id];
     </p>
   ) : (
     <>
-      <Template items={items} />
+      <Scene items={items} />
       <a class="home-discovery__more" href={experienceHref(tag)}>
         「{copy.label}」の記事をもっと読む（{total}本）&nbsp;→
       </a>

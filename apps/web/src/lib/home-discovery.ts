@@ -16,45 +16,50 @@ import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi
  */
 
 export type DiscoveryTemplateId =
-  "visual" | "album" | "story" | "casefile" | "manga" | "ticket" | "explorer";
+  "board" | "cinema" | "pulse" | "collapse" | "gacha" | "lens" | "letters" | "develop";
 
+/**
+ * A scene, not a skin: each feeling gets its own small piece of play, so the
+ * reader *feels* the mood before reading a word. The data shown is always
+ * the article's own; the play is in how it is revealed.
+ */
 export interface DiscoveryTemplate {
   readonly id: DiscoveryTemplateId;
   /** Shown above the stories so the reader can tell the layout changed on purpose. */
   readonly label: string;
-  /** One word on the mood tiles, so the reader sees each feeling has its own look. */
+  /** One word on the mood tiles, so the reader sees each feeling has its own scene. */
   readonly short: string;
-  /** Whether the layout leans on photos; articles with a cover are ranked first. */
+  /** Whether the scene leans on photos; articles with a cover are ranked first. */
   readonly needsPhoto: boolean;
+  /** How many stories the scene holds. */
+  readonly limit: number;
 }
 
 export const TEMPLATES: Record<DiscoveryTemplateId, DiscoveryTemplate> = {
-  visual: { id: "visual", label: "写真で浸る", short: "写真", needsPhoto: true },
-  album: { id: "album", label: "アルバムをめくる", short: "アルバム", needsPhoto: true },
-  story: { id: "story", label: "物語をたどる", short: "物語", needsPhoto: false },
-  casefile: { id: "casefile", label: "事件簿をひらく", short: "事件簿", needsPhoto: false },
-  manga: { id: "manga", label: "コマで読む", short: "マンガ", needsPhoto: true },
-  ticket: { id: "ticket", label: "チケットを選ぶ", short: "チケット", needsPhoto: false },
-  explorer: { id: "explorer", label: "見比べて探す", short: "比較", needsPhoto: false },
+  board: { id: "board", label: "出発案内板", short: "出発便", needsPhoto: false, limit: 6 },
+  cinema: { id: "cinema", label: "シネマ", short: "映画", needsPhoto: true, limit: 4 },
+  pulse: { id: "pulse", label: "心拍モニター", short: "心拍", needsPhoto: true, limit: 4 },
+  collapse: { id: "collapse", label: "崩れ落ちた旅", short: "崩壊", needsPhoto: true, limit: 4 },
+  gacha: { id: "gacha", label: "笑い話ガチャ", short: "ガチャ", needsPhoto: true, limit: 8 },
+  lens: { id: "lens", label: "虫眼鏡で探す", short: "虫眼鏡", needsPhoto: true, limit: 4 },
+  letters: { id: "letters", label: "挑戦状", short: "挑戦状", needsPhoto: false, limit: 4 },
+  develop: { id: "develop", label: "記憶を現像する", short: "現像", needsPhoto: true, limit: 4 },
 };
 
-/** Which layout each feeling gets. The only place the mapping lives. */
+/** Which scene each feeling gets. The only place the mapping lives. */
 export const DISCOVERY_TEMPLATES: Record<ExperienceTag, DiscoveryTemplateId> = {
-  moving: "visual",
-  unforgettable: "album",
-  thrilling: "story",
-  challenge: "story",
-  disaster: "casefile",
-  funny: "manga",
-  exciting: "ticket",
-  discovery: "explorer",
+  exciting: "board",
+  moving: "cinema",
+  thrilling: "pulse",
+  disaster: "collapse",
+  funny: "gacha",
+  discovery: "lens",
+  challenge: "letters",
+  unforgettable: "develop",
 };
 
 /** The URL query that carries the selection. Home stays canonical to `/`. */
 export const HOME_EXPERIENCE_PARAM = "homeExperience";
-
-/** Stories per feeling. */
-export const DISCOVERY_LIMIT = 4;
 
 /**
  * Shown before the reader picks anything (and without JavaScript): a photo
@@ -103,7 +108,7 @@ export interface RecommendOptions {
  * returns them) for one feeling. Rules, in order:
  *
  * 1. must carry the tag (duplicates by id are dropped)
- * 2. photo layouts: articles with a cover first
+ * 2. photo scenes: articles with a cover first
  * 3. articles not already shown elsewhere on the page first
  * 4. the incoming order (newest first)
  * 5. slug, so the result never depends on sort stability
@@ -113,7 +118,7 @@ export interface RecommendOptions {
 export function recommend<T extends DiscoveryCandidate>(
   candidates: readonly T[],
   tag: ExperienceTag,
-  { limit = DISCOVERY_LIMIT, shownElsewhere = new Set() }: RecommendOptions = {},
+  { limit = templateFor(tag).limit, shownElsewhere = new Set() }: RecommendOptions = {},
 ): T[] {
   const needsPhoto = templateFor(tag).needsPhoto;
   const seen = new Set<string>();
@@ -138,18 +143,18 @@ export function recommend<T extends DiscoveryCandidate>(
 
 const rank = (late: boolean) => (late ? 1 : 0);
 
-/** One labelled fact on an explorer card. */
+/** One labelled fact on a story card. */
 export interface DiscoveryFact {
   readonly label: string;
   readonly value: string;
 }
 
 /**
- * The comparable rows of an explorer card. A row exists only when the data
- * does: nothing is estimated. Practical rows (fares, durations) belong here
- * once articles carry them.
+ * The labelled rows a scene may print under a story. A row exists only when
+ * the data does: nothing is estimated. Practical rows (fares, durations)
+ * belong here once articles carry them.
  */
-export function explorerFacts(item: {
+export function storyFacts(item: {
   readonly place: string | null;
   readonly travelMonth: string | null;
   readonly categories: readonly string[];

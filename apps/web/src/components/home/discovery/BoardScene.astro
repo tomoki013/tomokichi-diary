@@ -1,0 +1,120 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * ワクワク: an airport departure board. Destinations clatter into place on
+ * split-flap tiles; pointing at a row shows its photo in the window beside
+ * the board. Every cell is the article's own data — month of travel,
+ * destination, title — and nothing is invented to fill the columns (no
+ * flight numbers, gates or statuses).
+ */
+const { items } = Astro.props;
+---
+
+<div class="scene-board" data-board>
+  <div class="scene-board__panel">
+    <p class="scene-board__top" aria-hidden="true">
+      <span>✈ DEPARTURES</span>
+      <span>出発案内</span>
+    </p>
+    <p class="scene-board__cols" aria-hidden="true">
+      <span>時期</span>
+      <span>行き先</span>
+      <span>便（旅の話）</span>
+    </p>
+    <ol class="scene-board__rows">
+      {items.map((item, index) => (
+        <li class="scene-board__row" data-board-row={index}>
+          <span class="scene-board__time">{item.travelMonth ?? "----.--"}</span>
+          <span class="scene-board__dest" data-flap>
+            {item.place ?? "どこかへ"}
+          </span>
+          <a class="scene-board__flight" href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="scene-board__window" aria-hidden="true">
+    {items.map((item, index) =>
+      item.cover ? (
+        <span class:list={["scene-board__view", index === 0 && "is-on"]} data-board-view={index}>
+          <Picture storageKey={item.cover.storageKey} alt="" sizes="22rem" />
+        </span>
+      ) : null,
+    )}
+    <span class="scene-board__sky">窓の外</span>
+  </div>
+</div>
+
+<script>
+  import { registerScene } from "../../../lib/discovery-scenes";
+
+  const GLYPHS =
+    "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワ";
+
+  registerScene("board", (panel, motion, signal) => {
+    const timers: number[] = [];
+
+    // Split-flap: every character spins through random kana before landing.
+    // The real text stays in a visually hidden copy, so a screen reader
+    // never hears the spin.
+    panel.querySelectorAll<HTMLElement>("[data-flap]").forEach((cell, row) => {
+      const text = cell.dataset.text ?? cell.textContent?.trim() ?? "";
+      cell.dataset.text = text;
+      const spoken = document.createElement("span");
+      spoken.className = "sr-only";
+      spoken.textContent = text;
+      const tiles = [...text].map((char) => {
+        const tile = document.createElement("span");
+        tile.className = "scene-board__flap";
+        tile.setAttribute("aria-hidden", "true");
+        tile.textContent = char;
+        return tile;
+      });
+      cell.replaceChildren(spoken, ...tiles);
+      if (!motion) return;
+      tiles.forEach((tile, column) => {
+        const final = tile.textContent ?? "";
+        if (final.trim() === "" || final === "/") return;
+        let spins = 6 + row * 2 + column;
+        const id = window.setInterval(() => {
+          spins -= 1;
+          tile.textContent =
+            spins > 0 ? (GLYPHS[Math.floor(Math.random() * GLYPHS.length)] ?? final) : final;
+          tile.classList.toggle("is-flipping", spins > 0);
+          if (spins <= 0) window.clearInterval(id);
+        }, 55);
+        timers.push(id);
+      });
+    });
+
+    // The window shows whichever row the reader is pointing at or focused on.
+    const views = panel.querySelectorAll<HTMLElement>("[data-board-view]");
+    const rows = panel.querySelectorAll<HTMLElement>("[data-board-row]");
+    const look = (index: string) => {
+      rows.forEach((row) => row.classList.toggle("is-on", row.dataset.boardRow === index));
+      let found = false;
+      views.forEach((view) => {
+        const on = view.dataset.boardView === index;
+        view.classList.toggle("is-on", on);
+        found ||= on;
+      });
+      panel.querySelector(".scene-board__window")?.classList.toggle("is-empty", !found);
+    };
+    rows.forEach((row) => {
+      const index = row.dataset.boardRow ?? "0";
+      row.addEventListener("pointerenter", () => look(index), { signal });
+      row.addEventListener("focusin", () => look(index), { signal });
+    });
+    look("0");
+
+    return () => timers.forEach((id) => window.clearInterval(id));
+  });
+</script>

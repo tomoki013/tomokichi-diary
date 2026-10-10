@@ -1,0 +1,115 @@
+---
+import Picture from "../../Picture.astro";
+import { storyFacts, type DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 発見: photos left out of focus, and a magnifying glass. Wherever the reader
+ * moves it, that patch comes sharp and enlarged; a photo looked at long
+ * enough is stamped 発見!, and the counter keeps score. Focus (keyboard) and
+ * no-JavaScript readers get the photo sharp straight away.
+ */
+const { items } = Astro.props;
+---
+
+<div class="scene-lens" data-lens>
+  <p class="scene-lens__score" aria-hidden="true" data-lens-score hidden>
+    🔍 写真をなぞって探そう　<b data-lens-found>0</b> / {items.length} 発見
+  </p>
+  <ul class="scene-lens__finds">
+    {items.map((item) => (
+      <li class="scene-lens__find" data-lens-find>
+        {item.cover && (
+          <span class="scene-lens__photo" data-lens-photo>
+            <span class="scene-lens__layer scene-lens__layer--blur">
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt={item.cover.alt}
+                sizes="(max-width: 46rem) 92vw, 28rem"
+              />
+            </span>
+            <span class="scene-lens__layer scene-lens__layer--sharp" aria-hidden="true">
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt=""
+                sizes="(max-width: 46rem) 92vw, 28rem"
+              />
+            </span>
+            <span class="scene-lens__glass" aria-hidden="true"></span>
+            <span class="scene-lens__stamp" aria-hidden="true">
+              発見!
+            </span>
+          </span>
+        )}
+        <div class="scene-lens__body">
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <dl class="scene-lens__facts">
+            {storyFacts(item).map((fact) => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  import { registerScene } from "../../../lib/discovery-scenes";
+
+  /** How long the lens must rest on a photo before it counts as found. */
+  const LOOK_MS = 700;
+
+  registerScene("lens", (panel, motion, signal) => {
+    const root = panel.querySelector<HTMLElement>("[data-lens]");
+    if (!root) return;
+    const score = root.querySelector<HTMLElement>("[data-lens-score]");
+    const found = root.querySelector<HTMLElement>("[data-lens-found]");
+    root.classList.add("is-live");
+    if (score) score.hidden = false;
+
+    const count = () => {
+      if (found) found.textContent = String(root.querySelectorAll(".is-found").length);
+    };
+    count();
+
+    root.querySelectorAll<HTMLElement>("[data-lens-photo]").forEach((photo) => {
+      const find = photo.closest<HTMLElement>("[data-lens-find]");
+      let since = 0;
+      const move = (event: PointerEvent) => {
+        const box = photo.getBoundingClientRect();
+        photo.style.setProperty("--x", `${event.clientX - box.left}px`);
+        photo.style.setProperty("--y", `${event.clientY - box.top}px`);
+        photo.classList.add("is-looking");
+        since ||= event.timeStamp;
+        if (event.timeStamp - since > LOOK_MS && find && !find.classList.contains("is-found")) {
+          find.classList.add("is-found");
+          count();
+        }
+      };
+      photo.addEventListener("pointermove", move, { signal });
+      photo.addEventListener("pointerdown", move, { signal });
+      photo.addEventListener(
+        "pointerleave",
+        () => {
+          photo.classList.remove("is-looking");
+          since = 0;
+        },
+        { signal },
+      );
+    });
+
+    // Without motion the lens would only be a chore: show everything sharp.
+    if (!motion) root.classList.add("is-clear");
+  });
+</script>

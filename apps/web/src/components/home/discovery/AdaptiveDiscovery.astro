@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * The stories under the experience chips, laid out to match the feeling.
+ * The stories under the mood tiles, staged as a scene that matches the feeling.
  *
  * Only the default feeling is rendered live. The others sit in inert
  * `<template>`s: their links never reach the crawlable DOM and their images
@@ -82,6 +82,7 @@ const live = panels.find((panel) => panel.tag === initial);
 
 <script>
   import { trackSemanticEvent } from "../../../lib/analytics";
+  import { enterScene } from "../../../lib/discovery-scenes";
 
   const root = document.querySelector<HTMLElement>("[data-discovery]");
   const stage = root?.querySelector<HTMLElement>("[data-discovery-stage]");
@@ -126,6 +127,7 @@ const live = panels.find((panel) => panel.tag === initial);
       if (panel !== current) {
         stage.replaceChildren(panel);
         current = panel;
+        enterScene(panel);
         // A short settle so the change registers; nothing moves far.
         if (!reducedMotion.matches) {
           panel.animate(
@@ -161,6 +163,8 @@ const live = panels.find((panel) => panel.tag === initial);
       hint.removeAttribute("hidden");
     }
     syncFromUrl(false);
+    // Nothing was swapped in: start the scene that was rendered on the server.
+    if (current === first) enterScene(first);
 
     for (const chip of chips) {
       chip.addEventListener("click", (event) => {

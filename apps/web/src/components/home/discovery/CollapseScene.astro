@@ -1,0 +1,58 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * これは終わった…: it is raining, and the stories fall onto the page one
+ * after another and land askew, prints cracked at the corner. Point at one
+ * and it picks itself back up — which is how each of these trips ended.
+ */
+const { items } = Astro.props;
+---
+
+<div class="scene-collapse" data-collapse>
+  <span class="scene-collapse__rain" aria-hidden="true"></span>
+  <ul class="scene-collapse__pile">
+    {items.map((item) => (
+      <li class="scene-collapse__card">
+        {item.cover && (
+          <span class="scene-collapse__photo">
+            <Picture
+              storageKey={item.cover.storageKey}
+              alt={item.cover.alt}
+              sizes="(max-width: 46rem) 92vw, 28rem"
+            />
+            <svg class="scene-collapse__crack" viewBox="0 0 100 100" aria-hidden="true">
+              <path d="M100 0 L78 22 L84 30 L64 46 L70 52 L52 70"></path>
+              <path d="M78 22 L92 34"></path>
+            </svg>
+          </span>
+        )}
+        <div class="scene-collapse__body">
+          {item.place && <p class="scene-collapse__place">{item.place}</p>}
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <p class="scene-collapse__summary">{item.summary}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  import { registerScene, replay } from "../../../lib/discovery-scenes";
+
+  // The fall is a CSS animation; replaying it each time the scene comes back
+  // is the whole script.
+  registerScene("collapse", (panel, motion) => {
+    const root = panel.querySelector<HTMLElement>("[data-collapse]");
+    if (root && motion) replay(root, "is-falling");
+  });
+</script>

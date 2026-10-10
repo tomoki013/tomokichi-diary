@@ -1,0 +1,97 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * ハラハラ: a heart monitor over the stories. The trace ticks along calmly;
+ * point at a story and it races, the reading climbs and the card trembles.
+ * The number is the *reader's* make-believe pulse — a toy, not a statistic
+ * about the trip, and labelled as such for assistive tech by staying hidden.
+ */
+const { items } = Astro.props;
+---
+
+<div class="scene-pulse" data-pulse>
+  <div class="scene-pulse__monitor" aria-hidden="true">
+    <svg class="scene-pulse__trace" viewBox="0 0 400 60" preserveAspectRatio="none">
+      <path d="M0 30 H60 L70 30 L76 12 L84 50 L92 4 L100 44 L106 30 H200 H260 L270 30 L276 12 L284 50 L292 4 L300 44 L306 30 H400"></path>
+    </svg>
+    <p class="scene-pulse__reading">
+      <span>♥</span>
+      <b data-pulse-bpm>72</b>
+      <small>BPM</small>
+    </p>
+  </div>
+  <ul class="scene-pulse__cards">
+    {items.map((item) => (
+      <li class="scene-pulse__card" data-pulse-card>
+        {item.cover && (
+          <span class="scene-pulse__photo">
+            <Picture
+              storageKey={item.cover.storageKey}
+              alt={item.cover.alt}
+              sizes="(max-width: 46rem) 92vw, 28rem"
+            />
+          </span>
+        )}
+        <div class="scene-pulse__body">
+          {item.place && <p class="scene-pulse__place">{item.place}</p>}
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <p class="scene-pulse__summary">{item.summary}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  import { registerScene } from "../../../lib/discovery-scenes";
+
+  const CALM = 72;
+  const RACING = 148;
+
+  registerScene("pulse", (panel, motion, signal) => {
+    const root = panel.querySelector<HTMLElement>("[data-pulse]");
+    const reading = panel.querySelector<HTMLElement>("[data-pulse-bpm]");
+    if (!root || !reading) return;
+
+    let bpm = CALM;
+    let target = CALM;
+    let frame = 0;
+
+    // The reading eases toward its target instead of jumping, like a real monitor.
+    const tick = () => {
+      bpm += (target - bpm) * 0.08;
+      reading.textContent = String(Math.round(bpm));
+      root.style.setProperty("--beat", `${(60 / bpm).toFixed(2)}s`);
+      frame = Math.abs(target - bpm) > 0.5 ? requestAnimationFrame(tick) : 0;
+    };
+    const race = (on: boolean) => () => {
+      target = on ? RACING : CALM;
+      root.classList.toggle("is-racing", on);
+      if (!motion) {
+        bpm = target;
+        reading.textContent = String(target);
+        return;
+      }
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    root.querySelectorAll<HTMLElement>("[data-pulse-card]").forEach((card) => {
+      card.addEventListener("pointerenter", race(true), { signal });
+      card.addEventListener("pointerleave", race(false), { signal });
+      card.addEventListener("focusin", race(true), { signal });
+      card.addEventListener("focusout", race(false), { signal });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  });
+</script>

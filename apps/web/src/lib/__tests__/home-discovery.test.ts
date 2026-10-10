@@ -4,7 +4,7 @@ import {
   DISCOVERY_TEMPLATES,
   TEMPLATES,
   defaultExperience,
-  explorerFacts,
+  storyFacts,
   parseHomeExperience,
   placeLabel,
   recommend,
@@ -27,21 +27,23 @@ describe("template resolution", () => {
     }
   });
 
-  it("follows the agreed grouping", () => {
-    expect(templateFor("moving").id).toBe("visual");
-    expect(templateFor("unforgettable").id).toBe("album");
-    expect(templateFor("thrilling").id).toBe("story");
-    expect(templateFor("challenge").id).toBe("story");
-    expect(templateFor("disaster").id).toBe("casefile");
-    expect(templateFor("funny").id).toBe("manga");
-    expect(templateFor("exciting").id).toBe("ticket");
-    expect(templateFor("discovery").id).toBe("explorer");
+  it("gives every feeling a scene of its own", () => {
+    expect(templateFor("exciting").id).toBe("board");
+    expect(templateFor("moving").id).toBe("cinema");
+    expect(templateFor("thrilling").id).toBe("pulse");
+    expect(templateFor("disaster").id).toBe("collapse");
+    expect(templateFor("funny").id).toBe("gacha");
+    expect(templateFor("discovery").id).toBe("lens");
+    expect(templateFor("challenge").id).toBe("letters");
+    expect(templateFor("unforgettable").id).toBe("develop");
+    expect(new Set(EXPERIENCE_TAGS.map((tag) => templateFor(tag).id)).size).toBe(8);
   });
 
   it("gives every template a short label for the mood tiles", () => {
     for (const template of Object.values(TEMPLATES)) {
       expect(template.short.length).toBeGreaterThan(0);
       expect(template.short.length).toBeLessThanOrEqual(4);
+      expect(template.limit).toBeGreaterThan(0);
     }
   });
 });
@@ -83,9 +85,9 @@ describe("recommend", () => {
     article("sixth", ["moving"]),
   ];
 
-  it("keeps only articles carrying the tag, newest first, up to four", () => {
+  it("keeps only articles carrying the tag, newest first, up to the scene limit", () => {
     expect(slugs(recommend(views, "thrilling"))).toEqual(["newest"]);
-    expect(recommend(views, "moving")).toHaveLength(4);
+    expect(recommend(views, "moving")).toHaveLength(templateFor("moving").limit);
   });
 
   it("puts covers first for photo layouts and keeps a photo-less one as a fallback", () => {
@@ -94,8 +96,8 @@ describe("recommend", () => {
   });
 
   it("ignores covers for text-led layouts", () => {
-    const story = [article("a", ["thrilling"], false), article("b", ["thrilling"])];
-    expect(slugs(recommend(story, "thrilling"))).toEqual(["a", "b"]);
+    const story = [article("a", ["challenge"], false), article("b", ["challenge"])];
+    expect(slugs(recommend(story, "challenge"))).toEqual(["a", "b"]);
   });
 
   it("moves articles already featured on the page to the end", () => {
@@ -124,16 +126,16 @@ describe("recommend", () => {
   });
 });
 
-describe("explorerFacts", () => {
+describe("storyFacts", () => {
   it("lists only the rows the data supports, in a fixed order", () => {
     expect(
-      explorerFacts({ place: "カイロ / エジプト", travelMonth: "2024.03", categories: ["旅行記"] }),
+      storyFacts({ place: "カイロ / エジプト", travelMonth: "2024.03", categories: ["旅行記"] }),
     ).toEqual([
       { label: "地域", value: "カイロ / エジプト" },
       { label: "旅の時期", value: "2024.03" },
       { label: "テーマ", value: "旅行記" },
     ]);
-    expect(explorerFacts({ place: null, travelMonth: null, categories: [] })).toEqual([]);
+    expect(storyFacts({ place: null, travelMonth: null, categories: [] })).toEqual([]);
   });
 });
 
