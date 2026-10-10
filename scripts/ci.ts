@@ -149,6 +149,14 @@ const STEPS: Step[] = [
     },
   },
   {
+    // Deploy jobs use a fresh checkout, unlike the preceding typecheck here.
+    name: "clean-build",
+    code: "BUILD_FAILED",
+    command: "pnpm",
+    args: ["exec", "tsc", "--build", "--clean"],
+    rerun: "pnpm exec tsc --build --clean && pnpm build",
+  },
+  {
     name: "build",
     code: "BUILD_FAILED",
     command: "pnpm",
