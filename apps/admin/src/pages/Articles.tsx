@@ -63,7 +63,7 @@ export function Articles() {
     <>
       <PageHeader
         title="記事"
-        meta={articles.data && `${articles.data.length}件`}
+        meta={articles.data && `${visible.length}件`}
         actions={
           <button type="button" className="primary" onClick={() => setCreating((open) => !open)}>
             {creating ? "閉じる" : "新規作成"}

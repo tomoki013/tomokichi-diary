@@ -50,6 +50,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const [draft, setDraft] = useState<DraftInput>(() => draftFrom(article));
   const [saved, setSaved] = useState<DraftInput>(() => draftFrom(article));
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
   const [showPreview, setShowPreview] = useState(true);
   const sections = useEditorSections();
   const bodyDirty = isDirty(draft, saved);
@@ -65,6 +66,8 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
 
   const save = useCallback(async (): Promise<boolean> => {
     if (!dirty) return true;
+    if (saveInFlight.current || sections.busy) return false;
+    saveInFlight.current = true;
     const payload = normalizeDraft(draft);
     setSaving(true);
     try {
@@ -80,20 +83,23 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
       toast.error(error);
       return false;
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
   }, [article.id, check, dirty, draft, reload, sections, toast]);
 
   // ⌘S / Ctrl+S saves, as every editor does.
   const saveRef = useRef(save);
+  const workingRef = useRef(working);
   useLayoutEffect(() => {
     saveRef.current = save;
+    workingRef.current = working;
   });
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
-        void saveRef.current();
+        if (!workingRef.current) void saveRef.current();
       }
     };
     globalThis.addEventListener("keydown", onKeyDown);
