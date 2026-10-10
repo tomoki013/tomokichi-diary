@@ -1,0 +1,44 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * Template: an album page. Equal prints stuck down at odd angles with a pen
+ * caption under each, the way a memory gets kept rather than presented.
+ */
+const { items } = Astro.props;
+---
+
+<ul class="discovery-album">
+  {items.map((item) => (
+    <li class="discovery-album__print">
+      <span class="discovery-album__photo">
+        {item.cover ? (
+          <Picture
+            storageKey={item.cover.storageKey}
+            alt={item.cover.alt}
+            sizes="(max-width: 46rem) 44vw, 13rem"
+          />
+        ) : (
+          <span class="discovery-album__blank" aria-hidden="true">
+            ★
+          </span>
+        )}
+      </span>
+      <h4>
+        <a href={item.path} data-discovery-article={item.slug}>
+          {item.title}
+        </a>
+      </h4>
+      {(item.place || item.travelMonth) && (
+        <p class="discovery-album__note">
+          {[item.place, item.travelMonth].filter(Boolean).join("　")}
+        </p>
+      )}
+    </li>
+  ))}
+</ul>

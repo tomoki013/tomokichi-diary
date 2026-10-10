@@ -1,10 +1,18 @@
 ---
 import type { ExperienceTag } from "@tomokichi/domain";
 import VisualTemplate from "./VisualTemplate.astro";
+import AlbumTemplate from "./AlbumTemplate.astro";
 import StoryTemplate from "./StoryTemplate.astro";
+import CasefileTemplate from "./CasefileTemplate.astro";
+import MangaTemplate from "./MangaTemplate.astro";
+import TicketTemplate from "./TicketTemplate.astro";
 import ExplorerTemplate from "./ExplorerTemplate.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
-import { templateFor, type DiscoveryItem } from "../../../lib/home-discovery";
+import {
+  templateFor,
+  type DiscoveryItem,
+  type DiscoveryTemplateId,
+} from "../../../lib/home-discovery";
 
 interface Props {
   tag: ExperienceTag;
@@ -19,6 +27,17 @@ const copy = EXPERIENCE_COPY[tag];
 const template = templateFor(tag);
 const summary =
   items.length > 0 ? `${total}本のうち${items.length}本` : "まだこの気分の旅の話はありません";
+
+const RENDERERS: Record<DiscoveryTemplateId, typeof VisualTemplate> = {
+  visual: VisualTemplate,
+  album: AlbumTemplate,
+  story: StoryTemplate,
+  casefile: CasefileTemplate,
+  manga: MangaTemplate,
+  ticket: TicketTemplate,
+  explorer: ExplorerTemplate,
+};
+const Template = RENDERERS[template.id];
 ---
 
 <div
@@ -29,13 +48,17 @@ const summary =
   data-announce={`${copy.label}：${summary}を「${template.label}」で表示しています`}
 >
   <header class="home-discovery__head">
-    <p class="home-discovery__template">{template.label}</p>
-    <h3>
-      <span aria-hidden="true">{copy.mark}</span>
-      {copy.label}の旅
-    </h3>
-    <p class="home-discovery__lead">{copy.lead}</p>
-    <p class="home-discovery__count">{summary}</p>
+    <span class="home-discovery__stamp" aria-hidden="true">
+      {copy.mark}
+    </span>
+    <div class="home-discovery__titles">
+      <h3>{copy.label}の旅</h3>
+      <p class="home-discovery__lead">{copy.lead}</p>
+    </div>
+    <p class="home-discovery__meta">
+      <span class="home-discovery__template">見せ方：{template.label}</span>
+      <span class="home-discovery__count">{summary}</span>
+    </p>
   </header>
 
   {items.length === 0 ? (
@@ -44,9 +67,7 @@ const summary =
     </p>
   ) : (
     <>
-      {template.id === "visual" && <VisualTemplate items={items} />}
-      {template.id === "story" && <StoryTemplate items={items} />}
-      {template.id === "explorer" && <ExplorerTemplate items={items} />}
+      <Template items={items} />
       <a class="home-discovery__more" href={experienceHref(tag)}>
         「{copy.label}」の記事をもっと読む（{total}本）&nbsp;→
       </a>

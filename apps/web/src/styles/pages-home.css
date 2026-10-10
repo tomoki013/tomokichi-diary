@@ -408,80 +408,151 @@
     background: var(--ink);
   }
 
-  /* Hand-cut stickers: a solid ink border and a hard shadow, each one set at
-     its own slight angle. */
-  .home-picker__chips {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.6rem 0.55rem;
-    max-width: 52rem;
+  /* Mood tiles: hand-cut stickers big enough to read as a choice, each with
+     the look it brings ("写真", "事件簿"…) so the reader can tell picking one
+     changes more than a filter would. Four across on a phone, eight on a
+     wide screen; nothing scrolls sideways. */
+  .home-picker__moods {
+    display: grid;
+    gap: var(--space-xs);
+    justify-self: stretch;
+    width: min(100%, 60rem);
+    margin-inline: auto;
+  }
+
+  .home-picker__ask {
+    display: grid;
+    gap: 0.1rem;
     margin: 0;
-    padding: 0;
+    font-family: var(--font-hand);
+  }
+
+  .home-picker__ask > span {
+    font-size: var(--step-body);
+  }
+
+  .home-picker__ask > small {
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .home-picker__tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem 0.5rem;
+    margin: 0;
+    padding: 0.3rem 0.2rem 0;
     list-style: none;
   }
 
-  .home-picker__chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.8rem;
+  .home-picker__tiles > li {
+    display: grid;
+  }
+
+  .home-picker__tile {
+    position: relative;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.15rem;
+    padding: 0.5rem 0.15rem 0.45rem;
     border: 1.5px solid var(--ink);
     border-radius: 0.55rem 0.7rem 0.5rem 0.75rem;
-    background: hsl(var(--exp-hue) 75% 94%);
+    background: hsl(var(--exp-hue) 75% 95%);
     box-shadow: 2px 2px 0 var(--ink);
     color: var(--ink);
-    font-size: var(--step-small);
+    text-align: center;
     text-decoration: none;
-    transform: rotate(calc(var(--tilt) * 1.2deg));
+    transform: rotate(calc(var(--tilt) * 0.8deg));
     transition:
       transform var(--speed) var(--ease),
-      box-shadow var(--speed) var(--ease);
+      box-shadow var(--speed) var(--ease),
+      background-color var(--speed) var(--ease);
   }
 
-  .home-picker__chip > span {
+  .home-picker__tile-mark {
     color: hsl(var(--exp-hue) 55% 38%);
+    font-size: 1.3rem;
+    line-height: 1.1;
   }
 
-  .home-picker__chip small {
+  .home-picker__tile-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* Which look the tile brings, as a tiny label of its own. */
+  .home-picker__tile-view {
+    margin-top: 0.1rem;
+    padding: 0 0.35rem;
+    border-radius: var(--radius-sm);
+    background: rgb(255 255 255 / 70%);
+    color: hsl(var(--exp-hue) 50% 28%);
+    font-size: 0.6rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .home-picker__tile small {
     color: var(--ink-soft);
     font-family: var(--font-label);
-    font-size: 0.7rem;
+    font-size: 0.66rem;
+    line-height: 1.3;
   }
 
-  .home-picker__chip:hover,
-  .home-picker__chip:focus-visible {
+  .home-picker__tile:hover,
+  .home-picker__tile:focus-visible {
     box-shadow: 3px 4px 0 var(--ink);
     transform: rotate(0) translateY(-2px);
   }
 
-  /* The chip whose stories are showing below: pressed into the page. */
-  .home-picker__chip[aria-current="true"] {
-    background: hsl(var(--exp-hue) 70% 82%);
+  /* The feeling on show below: pressed into the page and flagged, so the
+     choice reads without relying on colour alone. */
+  .home-picker__tile[aria-current="true"] {
+    background: hsl(var(--exp-hue) 70% 80%);
     box-shadow: 0 0 0 var(--ink);
-    font-weight: 700;
     transform: translate(2px, 2px);
   }
 
+  .home-picker__tile[aria-current="true"]::after {
+    position: absolute;
+    top: -0.65rem;
+    right: -0.35rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--on-dark);
+    content: "表示中";
+    font-size: 0.6rem;
+    font-weight: 700;
+    transform: rotate(4deg);
+  }
+
+  @media (min-width: 54rem) {
+    .home-picker__tiles {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+
+    .home-picker__tile-label {
+      font-size: var(--step-small);
+    }
+
+    .home-picker__tile-view {
+      font-size: 0.66rem;
+    }
+  }
+
   /* 2b. Adaptive discovery ------------------------------------------- */
-  /* The stories under the chips, in a layout that matches the feeling:
-     photos to fall into, a trail to follow, or cards to compare. The
-     mapping lives in lib/home-discovery.ts. */
+  /* The stories under the tiles, in a layout that matches the feeling. The
+     mapping lives in lib/home-discovery.ts; each template's look is below. */
   .home-discovery {
     display: grid;
     gap: var(--space-xs);
     justify-self: stretch;
     width: min(100%, 60rem);
-    margin: var(--space-sm) auto 0;
+    margin: var(--space-xs) auto 0;
     text-align: start;
-  }
-
-  .home-discovery__hint {
-    margin: 0;
-    color: var(--ink-faint);
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    text-align: center;
   }
 
   .home-discovery__stage {
@@ -493,7 +564,7 @@
     gap: var(--space-md);
     padding: clamp(1rem, 3vw, 1.8rem);
     border: 1px solid var(--line);
-    border-top: 3px solid hsl(var(--exp-hue) 55% 52%);
+    border-top: 4px solid hsl(var(--exp-hue) 55% 52%);
     border-radius: var(--radius-sm) var(--radius-sm) var(--radius-lg) var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-sm);
@@ -501,21 +572,34 @@
 
   .home-discovery__head {
     display: grid;
-    gap: 0.2rem 1rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-xs) var(--space-sm);
   }
 
-  .home-discovery__head > * {
+  .home-discovery__head p,
+  .home-discovery__head h3 {
     margin: 0;
   }
 
-  .home-discovery__template {
-    justify-self: start;
-    padding: 0.1rem 0.55rem;
-    border-radius: var(--radius-sm);
-    background: hsl(var(--exp-hue) 75% 94%);
-    color: hsl(var(--exp-hue) 55% 30%);
-    font-family: var(--font-hand);
-    font-size: var(--step-tiny);
+  .home-discovery__stamp {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: hsl(var(--exp-hue) 75% 92%);
+    box-shadow: 2px 2px 0 var(--ink);
+    color: hsl(var(--exp-hue) 55% 36%);
+    font-size: 1.4rem;
+    transform: rotate(-6deg);
+  }
+
+  .home-discovery__titles {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
   }
 
   .home-discovery__head h3 {
@@ -523,14 +607,26 @@
     font-size: var(--step-h3);
   }
 
-  .home-discovery__head h3 > span {
-    margin-right: 0.3em;
-    color: hsl(var(--exp-hue) 55% 40%);
-  }
-
   .home-discovery__lead {
     color: var(--ink-soft);
     font-size: var(--step-small);
+  }
+
+  .home-discovery__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    grid-column: 1 / -1;
+  }
+
+  .home-discovery__template {
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: hsl(var(--exp-hue) 75% 93%);
+    color: hsl(var(--exp-hue) 55% 28%);
+    font-size: var(--step-tiny);
+    font-weight: 600;
   }
 
   .home-discovery__count {
@@ -542,17 +638,13 @@
 
   @media (min-width: 46rem) {
     .home-discovery__head {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
     }
 
-    .home-discovery__head > :not(.home-discovery__count) {
-      grid-column: 1;
-    }
-
-    .home-discovery__count {
-      grid-column: 2;
-      grid-row: 2;
-      align-self: end;
+    .home-discovery__meta {
+      flex-direction: column;
+      align-items: flex-end;
+      grid-column: 3;
     }
   }
 
@@ -580,7 +672,11 @@
   .discovery-visual__tile,
   .discovery-story__stop,
   .discovery-explorer__featured,
-  .discovery-explorer__card {
+  .discovery-explorer__card,
+  .discovery-album__print,
+  .discovery-case__file,
+  .discovery-manga__panel,
+  .discovery-ticket {
     position: relative;
     min-width: 0;
   }
@@ -618,7 +714,11 @@
   .discovery-visual__tile:has(h4 a:focus-visible),
   .discovery-story__stop:has(h4 a:focus-visible),
   .discovery-explorer__featured:has(h4 a:focus-visible),
-  .discovery-explorer__card:has(h4 a:focus-visible) {
+  .discovery-explorer__card:has(h4 a:focus-visible),
+  .discovery-album__print:has(h4 a:focus-visible),
+  .discovery-case__file:has(h4 a:focus-visible),
+  .discovery-manga__panel:has(h4 a:focus-visible),
+  .discovery-ticket:has(h4 a:focus-visible) {
     outline: 2px solid var(--accent);
     outline-offset: 4px;
     border-radius: var(--radius-sm);
@@ -1038,6 +1138,500 @@
     .discovery-explorer__card .discovery-explorer__photo img {
       position: static;
       aspect-ratio: 3 / 2;
+    }
+  }
+
+  /* D. Album: prints stuck down on a kraft page ------------------------ */
+  .home-discovery__panel--album {
+    background:
+      radial-gradient(circle at 1px 1px, rgb(120 90 50 / 9%) 1px, transparent 0) 0 0 / 14px 14px,
+      #f6efe3;
+  }
+
+  .discovery-album {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg) var(--space-md);
+    margin: 0;
+    padding: var(--space-xs) var(--space-2xs) 0;
+    list-style: none;
+  }
+
+  .discovery-album__print {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    padding: 0.5rem 0.5rem 0.8rem;
+    background: #fff;
+    box-shadow: var(--shadow);
+    transform: rotate(var(--turn, -2deg));
+    transition: transform 300ms var(--ease);
+  }
+
+  .discovery-album__print:nth-child(4n + 2) {
+    --turn: 2.2deg;
+  }
+
+  .discovery-album__print:nth-child(4n + 3) {
+    --turn: 1deg;
+  }
+
+  .discovery-album__print:nth-child(4n) {
+    --turn: -1.2deg;
+  }
+
+  .discovery-album__print:hover {
+    transform: rotate(0) scale(1.02);
+  }
+
+  /* Photo corners, like the old albums that hold prints without glue. */
+  .discovery-album__photo {
+    position: relative;
+    display: block;
+  }
+
+  .discovery-album__photo::before,
+  .discovery-album__photo::after {
+    position: absolute;
+    z-index: 1;
+    width: 1.2rem;
+    height: 1.2rem;
+    background: linear-gradient(135deg, #3b332a 50%, transparent 50%);
+    content: "";
+  }
+
+  .discovery-album__photo::before {
+    top: -0.2rem;
+    left: -0.2rem;
+  }
+
+  .discovery-album__photo::after {
+    right: -0.2rem;
+    bottom: -0.2rem;
+    transform: rotate(180deg);
+  }
+
+  .discovery-album__photo img,
+  .discovery-album__blank {
+    display: grid;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .discovery-album__blank {
+    place-items: center;
+    background: hsl(var(--exp-hue) 60% 94%);
+    color: hsl(var(--exp-hue) 45% 60%);
+    font-size: 2rem;
+  }
+
+  .discovery-album__print h4 {
+    font-family: var(--font-hand);
+    font-size: var(--step-small);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .discovery-album__note {
+    margin: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: var(--step-tiny);
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-album {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* E. Case files: manila folders with a tab and a clipped photo --------- */
+  .discovery-case {
+    display: grid;
+    gap: var(--space-lg) var(--space-md);
+    margin: 0;
+    padding: var(--space-xs) 0 0;
+    list-style: none;
+  }
+
+  .discovery-case__tab {
+    position: relative;
+    z-index: 1;
+    justify-self: start;
+    max-width: 75%;
+    margin: 0 0 -1px 0.8rem;
+    overflow: hidden;
+    padding: 0.2rem 0.9rem 0.25rem;
+    border: 1px solid #c9b48a;
+    border-bottom: 0;
+    border-radius: 0.5rem 0.5rem 0 0;
+    background: #ecdcb8;
+    color: #5c4a28;
+    font-size: var(--step-tiny);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .discovery-case__file {
+    display: grid;
+  }
+
+  .discovery-case__sheet {
+    position: relative;
+    display: grid;
+    gap: 0.4rem;
+    min-height: 100%;
+    padding: var(--space-sm) var(--space-sm) var(--space-md);
+    border: 1px solid #c9b48a;
+    border-radius: 0.2rem var(--radius) var(--radius) var(--radius);
+    background:
+      linear-gradient(
+        to bottom,
+        transparent 2.6rem,
+        rgb(92 74 40 / 12%) 2.6rem 2.65rem,
+        transparent 0
+      ),
+      #f3e7cb;
+    box-shadow: 2px 3px 0 rgb(92 74 40 / 18%);
+  }
+
+  .discovery-case__label {
+    margin: 0;
+    color: #8c3a1c;
+    font-family: var(--font-label);
+    font-size: var(--step-tiny);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+  }
+
+  .discovery-case__label > span {
+    margin-left: 0.6em;
+    color: #5c4a28;
+    letter-spacing: 0.05em;
+  }
+
+  .discovery-case__sheet h4 {
+    padding-right: 5.6rem;
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.12rem);
+  }
+
+  .discovery-case__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: #4b4130;
+    font-size: var(--step-small);
+    line-height: 1.85;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* A photo paper-clipped to the corner of the sheet. */
+  .discovery-case__clip {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    display: block;
+    width: 4.6rem;
+    padding: 0.2rem 0.2rem 0.5rem;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(4deg);
+  }
+
+  .discovery-case__clip::before {
+    position: absolute;
+    top: -0.55rem;
+    left: 0.9rem;
+    width: 0.7rem;
+    height: 1.6rem;
+    border: 2px solid #8a8f94;
+    border-radius: 0.4rem;
+    content: "";
+  }
+
+  .discovery-case__clip img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-case {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* F. Manga: panels with a speech bubble and a narration box ----------- */
+  .discovery-manga {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.5rem;
+    border: 2.5px solid var(--ink);
+    background: var(--ink);
+    list-style: none;
+  }
+
+  .discovery-manga__panel {
+    overflow: hidden;
+    min-height: 12rem;
+    border: 2px solid var(--ink);
+    background: #fff;
+  }
+
+  /* The first panel is the splash: it takes the whole tier. */
+  .discovery-manga__panel:first-child {
+    grid-column: 1 / -1;
+    min-height: 14rem;
+  }
+
+  .discovery-manga__panel:nth-child(even) {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 94%);
+  }
+
+  .discovery-manga__panel.is-tone {
+    background:
+      radial-gradient(circle, rgb(0 0 0 / 22%) 1.2px, transparent 1.4px) 0 0 / 7px 7px,
+      #fff;
+  }
+
+  .discovery-manga__art,
+  .discovery-manga__art picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .discovery-manga__art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: contrast(1.05) saturate(0.9);
+  }
+
+  .discovery-manga__narration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    max-width: 70%;
+    margin: 0;
+    padding: 0.2rem 0.5rem;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    background: #fff;
+    font-size: 0.68rem;
+    line-height: 1.4;
+  }
+
+  .discovery-manga__bubble {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.9rem;
+    left: 0.6rem;
+    z-index: 1;
+    padding: 0.55rem 0.8rem;
+    border: 2px solid var(--ink);
+    border-radius: 1.2rem;
+    background: #fff;
+  }
+
+  .home-discovery__panel .discovery-manga__bubble {
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .discovery-manga__panel:first-child .discovery-manga__bubble {
+    right: auto;
+    max-width: min(30rem, 85%);
+    font-size: clamp(0.88rem, 0.82rem + 0.3vw, 1rem);
+  }
+
+  /* The bubble is positioned for its tail, so the usual card-wide link
+     overlay would stop at the bubble. Oversize it instead: the panel's
+     overflow clip trims it back to exactly the panel. */
+  .home-discovery__panel .discovery-manga__bubble a::after {
+    inset: -100vmax;
+  }
+
+  /* The bubble's tail, pointing up at the scene. */
+  .discovery-manga__bubble::before {
+    position: absolute;
+    top: -0.75rem;
+    left: 1.4rem;
+    width: 1.1rem;
+    height: 0.8rem;
+    background: var(--ink);
+    clip-path: polygon(0 100%, 40% 0, 100% 100%);
+    content: "";
+  }
+
+  .discovery-manga__bubble::after {
+    position: absolute;
+    top: -0.45rem;
+    left: 1.6rem;
+    width: 0.7rem;
+    height: 0.55rem;
+    background: #fff;
+    clip-path: polygon(0 100%, 40% 0, 100% 100%);
+    content: "";
+  }
+
+  .discovery-manga__panel.is-tone .discovery-manga__bubble {
+    top: 2.2rem;
+    bottom: auto;
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-manga {
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    }
+
+    .discovery-manga__panel:first-child {
+      grid-column: 1 / -1;
+      min-height: 17rem;
+    }
+  }
+
+  /* G. Tickets: one stub per trip, torn along the perforation ----------- */
+  .discovery-tickets {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .discovery-ticket {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 6.2rem;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(90deg, hsl(var(--exp-hue) 70% 55%) 0 0.4rem, transparent 0.4rem),
+      hsl(var(--exp-hue) 80% 97%);
+    box-shadow: 2px 3px 0 var(--ink);
+    transition: transform var(--speed) var(--ease);
+  }
+
+  .discovery-ticket:nth-child(even) {
+    transform: rotate(0.5deg);
+  }
+
+  .discovery-ticket:hover {
+    transform: translateY(-2px);
+  }
+
+  .discovery-ticket__main {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.8rem 0.9rem 0.9rem 1.2rem;
+  }
+
+  .discovery-ticket__kicker {
+    margin: 0;
+    color: hsl(var(--exp-hue) 55% 32%);
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+  }
+
+  .discovery-ticket__kicker > span {
+    margin-left: 0.5em;
+    color: var(--ink-faint);
+  }
+
+  .discovery-ticket__field {
+    display: grid;
+    margin: 0;
+  }
+
+  .discovery-ticket__field small {
+    color: var(--ink-faint);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+  }
+
+  .discovery-ticket__field strong {
+    font-family: var(--font-label);
+    font-size: var(--step-small);
+    overflow-wrap: anywhere;
+  }
+
+  .discovery-ticket__main h4 {
+    font-size: var(--step-small);
+  }
+
+  /* The stub: a dashed tear line with half-circle notches cut top and bottom. */
+  .discovery-ticket__stub {
+    position: relative;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.45rem;
+    padding: 0.7rem 0.5rem;
+    border-left: 2px dashed hsl(var(--exp-hue) 30% 70%);
+    text-align: center;
+  }
+
+  .discovery-ticket__stub::before,
+  .discovery-ticket__stub::after {
+    position: absolute;
+    left: -0.6rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: var(--surface);
+    content: "";
+  }
+
+  .discovery-ticket__stub::before {
+    top: -0.6rem;
+    clip-path: inset(50% 0 0 0);
+  }
+
+  .discovery-ticket__stub::after {
+    bottom: -0.6rem;
+    clip-path: inset(0 0 50% 0);
+  }
+
+  .discovery-ticket__photo {
+    display: block;
+    width: 4.4rem;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .discovery-ticket__photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-tickets {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .discovery-ticket {
+      grid-template-columns: minmax(0, 1fr) 7.5rem;
+    }
+
+    .discovery-ticket__photo {
+      width: 5.5rem;
     }
   }
 
@@ -1686,22 +2280,6 @@
   }
 
   @media (max-width: 34rem) {
-    /* One sideways row of stickers instead of three wrapped lines. */
-    .home-picker__chips {
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      width: calc(100% + var(--gutter) * 2);
-      margin-inline: calc(var(--gutter) * -1);
-      padding: 0.3rem var(--gutter) 0.5rem;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .home-picker__chips::-webkit-scrollbar {
-      display: none;
-    }
-    .home-picker__chips > li {
-      flex: none;
-    }
     .home-map__trips li:nth-child(n + 4) {
       display: none;
     }

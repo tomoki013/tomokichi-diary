@@ -66,9 +66,6 @@ const live = panels.find((panel) => panel.tag === initial);
     data-param={HOME_EXPERIENCE_PARAM}
     data-default={live.tag}
   >
-    <p class="home-discovery__hint" data-discovery-hint hidden>
-      気分を選ぶと、旅の話の並び方が変わります
-    </p>
     <p class="sr-only" aria-live="polite" data-discovery-status></p>
     <div class="home-discovery__stage" id="home-discovery-stage" data-discovery-stage>
       <DiscoveryPanel {...live} />
@@ -104,6 +101,7 @@ const live = panels.find((panel) => panel.tag === initial);
     // already-loaded images instead of cloning them again.
     const built = new Map<string, HTMLElement>([[fallback, first]]);
     let current = first;
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
     const panelFor = (tag: string): HTMLElement | null => {
       const cached = built.get(tag);
@@ -128,6 +126,16 @@ const live = panels.find((panel) => panel.tag === initial);
       if (panel !== current) {
         stage.replaceChildren(panel);
         current = panel;
+        // A short settle so the change registers; nothing moves far.
+        if (!reducedMotion.matches) {
+          panel.animate(
+            [
+              { opacity: 0, transform: "translateY(6px)" },
+              { opacity: 1, transform: "none" },
+            ],
+            { duration: 220, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)" },
+          );
+        }
       }
       markChips(tag);
       if (announce && status) status.textContent = panel.dataset.announce ?? "";
@@ -149,7 +157,9 @@ const live = panels.find((panel) => panel.tag === initial);
     };
 
     for (const chip of chips) chip.setAttribute("aria-controls", stage.id);
-    root.querySelector("[data-discovery-hint]")?.removeAttribute("hidden");
+    for (const hint of document.querySelectorAll("[data-discovery-hint]")) {
+      hint.removeAttribute("hidden");
+    }
     syncFromUrl(false);
 
     for (const chip of chips) {
@@ -177,8 +187,10 @@ const live = panels.find((panel) => panel.tag === initial);
         }
         // On a phone the panel can start below the fold; bring its top in.
         if (stage.getBoundingClientRect().top > innerHeight * 0.75) {
-          const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-          stage.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+          stage.scrollIntoView({
+            block: "start",
+            behavior: reducedMotion.matches ? "auto" : "smooth",
+          });
         }
       });
     }

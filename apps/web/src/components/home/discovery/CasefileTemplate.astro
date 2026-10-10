@@ -1,0 +1,39 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * Template: a drawer of case files for the trips that went wrong. The folder
+ * tab names the place, the file label the month of the trip — both straight
+ * from the article; nothing on the sheet is invented for effect.
+ */
+const { items } = Astro.props;
+---
+
+<ul class="discovery-case">
+  {items.map((item) => (
+    <li class="discovery-case__file">
+      <p class="discovery-case__tab">{item.place ?? "旅の記録"}</p>
+      <div class="discovery-case__sheet">
+        <p class="discovery-case__label">
+          FILE{item.travelMonth && <span>{item.travelMonth}</span>}
+        </p>
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+        <p class="discovery-case__summary">{item.summary}</p>
+        {item.cover && (
+          <span class="discovery-case__clip">
+            <Picture storageKey={item.cover.storageKey} alt="" sizes="6rem" />
+          </span>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>

@@ -29,12 +29,20 @@ describe("template resolution", () => {
 
   it("follows the agreed grouping", () => {
     expect(templateFor("moving").id).toBe("visual");
-    expect(templateFor("unforgettable").id).toBe("visual");
-    for (const tag of ["thrilling", "disaster", "challenge", "funny"] as const) {
-      expect(templateFor(tag).id).toBe("story");
-    }
-    expect(templateFor("exciting").id).toBe("explorer");
+    expect(templateFor("unforgettable").id).toBe("album");
+    expect(templateFor("thrilling").id).toBe("story");
+    expect(templateFor("challenge").id).toBe("story");
+    expect(templateFor("disaster").id).toBe("casefile");
+    expect(templateFor("funny").id).toBe("manga");
+    expect(templateFor("exciting").id).toBe("ticket");
     expect(templateFor("discovery").id).toBe("explorer");
+  });
+
+  it("gives every template a short label for the mood tiles", () => {
+    for (const template of Object.values(TEMPLATES)) {
+      expect(template.short.length).toBeGreaterThan(0);
+      expect(template.short.length).toBeLessThanOrEqual(4);
+    }
   });
 });
 
@@ -86,8 +94,8 @@ describe("recommend", () => {
   });
 
   it("ignores covers for text-led layouts", () => {
-    const story = [article("a", ["funny"], false), article("b", ["funny"])];
-    expect(slugs(recommend(story, "funny"))).toEqual(["a", "b"]);
+    const story = [article("a", ["thrilling"], false), article("b", ["thrilling"])];
+    expect(slugs(recommend(story, "thrilling"))).toEqual(["a", "b"]);
   });
 
   it("moves articles already featured on the page to the end", () => {

@@ -15,31 +15,38 @@ import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi
  * without the content export.
  */
 
-export type DiscoveryTemplateId = "visual" | "story" | "explorer";
+export type DiscoveryTemplateId =
+  "visual" | "album" | "story" | "casefile" | "manga" | "ticket" | "explorer";
 
 export interface DiscoveryTemplate {
   readonly id: DiscoveryTemplateId;
   /** Shown above the stories so the reader can tell the layout changed on purpose. */
   readonly label: string;
+  /** One word on the mood tiles, so the reader sees each feeling has its own look. */
+  readonly short: string;
   /** Whether the layout leans on photos; articles with a cover are ranked first. */
   readonly needsPhoto: boolean;
 }
 
 export const TEMPLATES: Record<DiscoveryTemplateId, DiscoveryTemplate> = {
-  visual: { id: "visual", label: "写真で浸る", needsPhoto: true },
-  story: { id: "story", label: "物語をたどる", needsPhoto: false },
-  explorer: { id: "explorer", label: "見比べて探す", needsPhoto: false },
+  visual: { id: "visual", label: "写真で浸る", short: "写真", needsPhoto: true },
+  album: { id: "album", label: "アルバムをめくる", short: "アルバム", needsPhoto: true },
+  story: { id: "story", label: "物語をたどる", short: "物語", needsPhoto: false },
+  casefile: { id: "casefile", label: "事件簿をひらく", short: "事件簿", needsPhoto: false },
+  manga: { id: "manga", label: "コマで読む", short: "マンガ", needsPhoto: true },
+  ticket: { id: "ticket", label: "チケットを選ぶ", short: "チケット", needsPhoto: false },
+  explorer: { id: "explorer", label: "見比べて探す", short: "比較", needsPhoto: false },
 };
 
 /** Which layout each feeling gets. The only place the mapping lives. */
 export const DISCOVERY_TEMPLATES: Record<ExperienceTag, DiscoveryTemplateId> = {
   moving: "visual",
-  unforgettable: "visual",
+  unforgettable: "album",
   thrilling: "story",
-  disaster: "story",
   challenge: "story",
-  funny: "story",
-  exciting: "explorer",
+  disaster: "casefile",
+  funny: "manga",
+  exciting: "ticket",
   discovery: "explorer",
 };
 

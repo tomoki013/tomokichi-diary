@@ -1,0 +1,51 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * Template: a fan of tickets for the trips that started with a thrill. Only
+ * the fields the article has are printed — destination and month of travel;
+ * no flight numbers, gates or seats are made up to fill the stub.
+ */
+const { items } = Astro.props;
+---
+
+<ul class="discovery-tickets">
+  {items.map((item, index) => (
+    <li class="discovery-ticket">
+      <div class="discovery-ticket__main">
+        <p class="discovery-ticket__kicker">
+          TRAVEL STORY <span>No.{String(index + 1).padStart(2, "0")}</span>
+        </p>
+        {item.place && (
+          <p class="discovery-ticket__field">
+            <small>行き先</small>
+            <strong>{item.place}</strong>
+          </p>
+        )}
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+      </div>
+      <div class="discovery-ticket__stub">
+        {item.cover && (
+          <span class="discovery-ticket__photo">
+            <Picture storageKey={item.cover.storageKey} alt="" sizes="7rem" />
+          </span>
+        )}
+        {item.travelMonth && (
+          <p class="discovery-ticket__field">
+            <small>旅の時期</small>
+            <strong>{item.travelMonth}</strong>
+          </p>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
