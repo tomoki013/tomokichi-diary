@@ -495,12 +495,6 @@
       background-color var(--speed) var(--ease);
   }
 
-  .home-picker__tile-mark {
-    color: hsl(var(--exp-hue) 55% 38%);
-    font-size: 1.1rem;
-    line-height: 1;
-  }
-
   .home-picker__tile small {
     color: var(--ink-soft);
     font-family: var(--font-label);
@@ -524,10 +518,6 @@
     background: var(--ink);
     box-shadow: 2px 2px 0 hsl(var(--exp-hue) 60% 55%);
     color: var(--on-dark);
-  }
-
-  .home-picker__tile[aria-current="true"] .home-picker__tile-mark {
-    color: hsl(var(--exp-hue) 80% 72%);
   }
 
   .home-picker__tile[aria-current="true"] small {

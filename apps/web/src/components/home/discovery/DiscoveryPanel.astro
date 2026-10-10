@@ -30,9 +30,6 @@ const meta = (item: DiscoveryItem) => [item.place, item.travelMonth].filter(Bool
   data-announce={`${copy.label}の旅：${copy.lead}。${total}本`}
 >
   <header class="mood-hero">
-    <span class="mood-hero__mark" aria-hidden="true">
-      {copy.mark}
-    </span>
     <div class="mood-hero__text">
       <h3>{copy.label}の旅</h3>
       <p class="mood-hero__lead">{copy.lead}</p>
@@ -90,7 +87,7 @@ const meta = (item: DiscoveryItem) => [item.place, item.travelMonth].filter(Bool
         )}
       </div>
       <a class="home-discovery__more" href={experienceHref(tag)}>
-        {copy.label}の旅をもっと読む（{total}本）&nbsp;→
+        {copy.label}の旅をもっと読む（{total}本）
       </a>
     </>
   )}

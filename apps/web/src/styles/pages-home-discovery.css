@@ -29,27 +29,12 @@
   /* The feeling, said plainly and big ---------------------------------- */
   .mood-hero {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.4rem var(--space-sm);
     padding: var(--space-md) var(--space-md) var(--space-sm);
     border-bottom: 1px solid hsl(var(--exp-hue) 45% 85%);
+    border-left: 6px solid hsl(var(--exp-hue) 60% 50%);
     background: hsl(var(--exp-hue) 80% 95%);
-  }
-
-  .mood-hero__mark {
-    display: grid;
-    place-items: center;
-    width: 3.4rem;
-    aspect-ratio: 1;
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: hsl(var(--exp-hue) 75% 85%);
-    box-shadow: 2px 2px 0 var(--ink);
-    color: hsl(var(--exp-hue) 60% 28%);
-    font-family: var(--font-sans);
-    font-size: 1.6rem;
-    line-height: 1;
   }
 
   .mood-hero__text {
@@ -74,7 +59,6 @@
   }
 
   .mood-hero__count {
-    grid-column: 2;
     margin: 0;
     color: var(--ink-faint);
     font-size: var(--step-small);
@@ -248,12 +232,9 @@
 
   @media (min-width: 46rem) {
     .mood-hero {
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
       padding: var(--space-md) var(--space-lg);
-    }
-
-    .mood-hero__count {
-      grid-column: auto;
     }
 
     .mood-stories {
