@@ -102,23 +102,11 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
   <WebMcpTools catalog={knowledgeCatalog} articleId={article.id} />
   <article class="article-page">
     <Breadcrumbs trail={trail} />
-    <header class:list={["article-hero", !cover && "article-hero--plain"]}>
-      {cover && (
-        <div class="article-hero__media">
-          <Picture
-            storageKey={cover.asset.storageKey}
-            alt={cover.usage.alt}
-            sizes="(max-width: 760px) 100vw, 1100px"
-            loading="eager"
-            fetchpriority="high"
-          />
-          <div class="article-hero__shade" />
-        </div>
-      )}
+    <header class="article-hero">
       <div class="article-hero__content">
         {view.categories.length > 0 && <p class="eyebrow">{view.categories[0]?.name}</p>}
         <h1>{revision.title}</h1>
-        <ExperienceChips tags={article.experienceTags} tone={cover ? "light" : "default"} />
+        <ExperienceChips tags={article.experienceTags} />
         <p class="article-hero__summary">{revision.summary}</p>
         <div class="article-hero__meta">
           {published && (
@@ -134,6 +122,17 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           <span>読了 約{readingMinutes}分</span>
         </div>
       </div>
+      {cover && (
+        <div class="article-hero__media">
+          <Picture
+            storageKey={cover.asset.storageKey}
+            alt={cover.usage.alt}
+            sizes="(max-width: 46rem) 92vw, (max-width: 1184px) calc(100vw - 64px), 1120px"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      )}
     </header>
 
     <div class="article-intro">
