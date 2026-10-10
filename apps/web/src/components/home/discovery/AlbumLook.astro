@@ -1,0 +1,38 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 忘れられない: instant prints in an album. The photos come up slowly from a
+ * pale, faded blank, the way a memory surfaces; captions are handwritten.
+ */
+const { items } = Astro.props;
+---
+
+<ul class="look-album">
+  {items.map((item) => (
+    <li class="look-album__print">
+      <span class="look-album__photo">
+        {item.cover && (
+          <Picture
+            storageKey={item.cover.storageKey}
+            alt={item.cover.alt}
+            sizes="(max-width: 46rem) 44vw, 13rem"
+          />
+        )}
+      </span>
+      <h4>
+        <a href={item.path} data-discovery-article={item.slug}>
+          {item.title}
+        </a>
+      </h4>
+      {(item.place || item.travelMonth) && (
+        <p class="look-album__note">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
+      )}
+    </li>
+  ))}
+</ul>

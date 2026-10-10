@@ -1,7 +1,10 @@
 /* Home discovery: the stories under the mood bar (components/home/discovery).
-   Built for a phone first. Every feeling shares one plain layout; what tells
-   them apart is the feeling itself — its colour, its name in large type and
-   one line on what kind of trip it was. */
+   Built for a phone first. Every feeling opens with the same plain header —
+   its name in large type and one line on what kind of trip it was — and
+   then has a look of its own that carries the mood by sight alone. Nothing
+   here needs a tap or a hover to make sense; the little movement there is
+   (flaps settling, a trace running, prints developing) stops under
+   `prefers-reduced-motion`. */
 @layer pages {
   .home-discovery {
     display: grid;
@@ -29,8 +32,7 @@
   /* The feeling, said plainly and big ---------------------------------- */
   .mood-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.4rem var(--space-sm);
+    gap: 0.3rem var(--space-sm);
     padding: var(--space-md) var(--space-md) var(--space-sm);
     border-bottom: 1px solid hsl(var(--exp-hue) 45% 85%);
     border-left: 6px solid hsl(var(--exp-hue) 60% 50%);
@@ -70,28 +72,25 @@
     font-size: 0.95rem;
   }
 
-  /* The stories ----------------------------------------------------- */
-  .mood-stories {
-    display: grid;
-    gap: var(--space-md);
+  .home-discovery__look {
     padding-inline: var(--space-md);
   }
 
-  .mood-stories__rows {
-    display: grid;
-    gap: 0;
+  .home-discovery__look ul,
+  .home-discovery__look ol {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* The title link covers its whole card: one tab stop, one big target. */
-  .mood-story {
-    position: relative;
-    min-width: 0;
+  .home-discovery__look img {
+    display: block;
   }
 
-  .mood-story h4 {
+  /* Shared bits of a story --------------------------------------------- */
+  /* The title link covers its whole card: one tab stop, one big target.
+     Each look makes its card the positioned box the overlay fills. */
+  .home-discovery__look h4 {
     margin: 0;
     font-family: var(--font-serif);
     font-size: 1.05rem;
@@ -99,40 +98,38 @@
     overflow-wrap: anywhere;
   }
 
-  .mood-story h4 a {
-    color: var(--ink);
+  .home-discovery__look h4 a {
+    color: inherit;
     text-decoration: none;
   }
 
-  .mood-story h4 a::after {
+  .home-discovery__look h4 a::after {
     position: absolute;
     inset: 0;
     content: "";
   }
 
-  .mood-story h4 a:hover {
+  .home-discovery__look h4 a:hover {
     text-decoration: underline;
-    text-decoration-color: hsl(var(--exp-hue) 55% 50%);
     text-underline-offset: 0.2em;
   }
 
-  .mood-story h4 a:focus-visible {
+  .home-discovery__look h4 a:focus-visible {
     outline: none;
   }
 
-  .mood-story:has(h4 a:focus-visible) {
+  .home-discovery__look li:has(h4 a:focus-visible) {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
-    border-radius: var(--radius-sm);
   }
 
-  .mood-story__body {
-    display: grid;
-    gap: 0.3rem;
-    min-width: 0;
+  .look-meta {
+    margin: 0;
+    color: var(--ink-faint);
+    font-size: var(--step-small);
   }
 
-  .mood-story__summary {
+  .look-summary {
     display: -webkit-box;
     overflow: hidden;
     margin: 0;
@@ -140,69 +137,7 @@
     font-size: 0.92rem;
     line-height: 1.8;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-
-  .mood-story__meta {
-    margin: 0;
-    color: var(--ink-faint);
-    font-size: var(--step-small);
-  }
-
-  /* First story: the photo full width, then its title and lead-in. */
-  .mood-story--lead {
-    display: grid;
-    gap: 0.7rem;
-  }
-
-  .mood-story__photo {
-    display: block;
-    overflow: hidden;
-    border-radius: var(--radius);
-  }
-
-  .mood-story__photo img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
-  }
-
-  .mood-story--lead h4 {
-    font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
-  }
-
-  /* The rest: a thumbnail and the title, one row each. */
-  .mood-story--row {
-    display: grid;
-    grid-template-columns: 5.2rem minmax(0, 1fr);
-    align-items: center;
-    gap: var(--space-sm);
-    padding-block: 0.8rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .mood-story--row > .mood-story__body:only-child {
-    grid-column: 1 / -1;
-  }
-
-  .mood-story__thumb {
-    display: block;
-    overflow: hidden;
-    border-radius: var(--radius-sm);
-  }
-
-  .mood-story__thumb img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-
-  .mood-story--row h4 {
-    font-size: 0.98rem;
+    -webkit-line-clamp: 2;
   }
 
   /* A full-width button at the bottom: easy to hit with a thumb. */
@@ -230,6 +165,747 @@
     outline-offset: 2px;
   }
 
+  /* ワクワク — departure board ------------------------------------------ */
+  .look-board {
+    padding: 0.8rem 0.7rem 0.4rem;
+    border-radius: var(--radius);
+    background: #151614;
+    box-shadow:
+      inset 0 0 0 3px #2c2e29,
+      var(--shadow);
+    color: #ece6d4;
+  }
+
+  .look-board__top {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    padding: 0 0.3rem 0.45rem;
+    border-bottom: 1px solid #3a3c36;
+    color: #ffc940;
+    font-family: var(--font-label);
+    font-size: var(--step-small);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .look-board__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
+    grid-template-areas:
+      "time thumb"
+      "dest thumb"
+      "title title";
+    gap: 0.35rem 0.7rem;
+    padding: 0.75rem 0.3rem;
+    border-bottom: 1px dashed #34362f;
+  }
+
+  .look-board__row:last-child {
+    border-bottom: 0;
+  }
+
+  .look-board__time {
+    grid-area: time;
+    color: #ffc940;
+    font-family: var(--font-label);
+    font-size: var(--step-small);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  .look-board__dest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+    grid-area: dest;
+  }
+
+  .look-board__dest small {
+    color: #b9b39f;
+    font-size: 0.75rem;
+  }
+
+  .look-board__city {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+  }
+
+  /* One split-flap tile per character, with the hinge line across it. */
+  .look-board__flap {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.3em;
+    height: 1.7em;
+    padding: 0 0.05em;
+    border-radius: 3px;
+    background: linear-gradient(#2c2e2a 50%, #232521 50%);
+    box-shadow: inset 0 -1px 0 #000;
+    color: #ffe9a3;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .look-board__flap::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: #0b0c0a;
+    content: "";
+  }
+
+  .look-board h4 {
+    grid-area: title;
+    color: #f4f1e8;
+    font-family: var(--font-sans);
+    font-size: 0.98rem;
+    font-weight: 500;
+  }
+
+  .look-board__thumb {
+    display: block;
+    grid-area: thumb;
+    align-self: start;
+    overflow: hidden;
+    border: 2px solid #3a3c36;
+    border-radius: 0.4rem;
+  }
+
+  .look-board__thumb img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  @media (min-width: 46rem) {
+    .look-board__row {
+      grid-template-columns: 4.6rem minmax(9rem, 13rem) minmax(0, 1fr) 4.5rem;
+      grid-template-areas: "time dest title thumb";
+      align-items: center;
+    }
+  }
+
+  /* 感動 — film stills ------------------------------------------------- */
+  .home-discovery__panel--cinema {
+    border-color: #111;
+    background: #111;
+  }
+
+  .home-discovery__panel--cinema .mood-hero {
+    border-bottom-color: #2a2a28;
+    background: #1b1b1a;
+  }
+
+  .home-discovery__panel--cinema .mood-hero h3 {
+    color: #f6e6e8;
+  }
+
+  .home-discovery__panel--cinema .mood-hero__lead,
+  .home-discovery__panel--cinema .mood-hero__count {
+    color: #c9c3b6;
+  }
+
+  .look-cinema {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  /* Picture and subtitle share one grid cell. The subtitle is lifted above
+     the picture (whose drift makes it a painted layer of its own), so its
+     link is stretched past it and clipped back to the frame. */
+  .look-cinema__frame {
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    border-block: 0.7rem solid #000;
+    background: #000;
+  }
+
+  .look-cinema__screen,
+  .look-cinema__subtitle {
+    grid-area: 1 / 1;
+  }
+
+  .look-cinema__screen img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .look-cinema__frame:first-child .look-cinema__screen img {
+    aspect-ratio: 4 / 3;
+  }
+
+  .look-cinema__subtitle {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-self: end;
+    gap: 0.15rem;
+    padding: 2.5rem 1rem 0.9rem;
+    background: linear-gradient(transparent, rgb(0 0 0 / 78%));
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 90%);
+  }
+
+  .look-cinema__subtitle p {
+    margin: 0;
+    color: #eadbb8;
+    font-size: var(--step-small);
+    letter-spacing: 0.15em;
+  }
+
+  .look-cinema h4 {
+    font-size: 1.05rem;
+  }
+
+  .look-cinema h4 a::after {
+    inset: -100vmax;
+  }
+
+  .look-cinema__frame:first-child h4 {
+    font-size: clamp(1.15rem, 1.05rem + 0.6vw, 1.45rem);
+  }
+
+  .home-discovery__panel--cinema .home-discovery__more {
+    border-color: #f4ecdc;
+    box-shadow: 2px 2px 0 #f4ecdc;
+  }
+
+  @media (min-width: 46rem) {
+    .look-cinema {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .look-cinema__frame:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .look-cinema__frame:first-child .look-cinema__screen img {
+      aspect-ratio: 21 / 9;
+    }
+  }
+
+  /* ハラハラ — heart monitor and hazard tape ---------------------------- */
+  .look-pulse {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .look-pulse__monitor {
+    padding: 0.4rem 0.8rem;
+    border: 2px solid #1d3326;
+    border-radius: var(--radius);
+    background:
+      linear-gradient(rgb(70 255 140 / 8%) 1px, transparent 1px) 0 0 / 100% 12px,
+      linear-gradient(90deg, rgb(70 255 140 / 8%) 1px, transparent 1px) 0 0 / 12px 100%,
+      #07140d;
+  }
+
+  .look-pulse__monitor svg {
+    display: block;
+    width: 100%;
+    height: 2.6rem;
+  }
+
+  .look-pulse__monitor path {
+    fill: none;
+    stroke: #ff6b6b;
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 3px #ff6b6b);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .look-pulse__cards {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .look-pulse__card {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .look-pulse__card::before {
+    display: block;
+    height: 0.65rem;
+    background: repeating-linear-gradient(-45deg, #ffcf2e 0 10px, #1b1b1b 10px 20px);
+    content: "";
+  }
+
+  .look-pulse__photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .look-pulse__body {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.8rem 0.9rem 1rem;
+  }
+
+  @media (min-width: 46rem) {
+    .look-pulse__cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* これは終わった… — rain and prints that fell askew ------------------- */
+  .home-discovery__panel--rain {
+    background: linear-gradient(#d3dbe4, #eef1f4 55%);
+  }
+
+  .look-rain {
+    position: relative;
+    padding-block: var(--space-xs) var(--space-sm);
+  }
+
+  /* Rain over the stories only, never across the header text. */
+  .look-rain__drops {
+    position: absolute;
+    inset: 0 -10%;
+    background: repeating-linear-gradient(
+      100deg,
+      transparent 0 22px,
+      rgb(70 90 120 / 18%) 22px 23px,
+      transparent 23px 46px
+    );
+    background-size: 120px 90px;
+    pointer-events: none;
+  }
+
+  .look-rain__pile {
+    position: relative;
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .look-rain__print {
+    --r: -2.5deg;
+    position: relative;
+    padding: 0.5rem 0.5rem 0.9rem;
+    background: #fff;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(var(--r));
+    transition: transform 300ms var(--ease);
+  }
+
+  .look-rain__print:nth-child(even) {
+    --r: 2.5deg;
+  }
+
+  .look-rain__print:hover {
+    transform: rotate(0);
+  }
+
+  .look-rain__photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: grayscale(0.7) contrast(0.95);
+    transition: filter 300ms var(--ease);
+  }
+
+  .look-rain__print:hover img {
+    filter: none;
+  }
+
+  .look-rain__body {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.6rem 0.3rem 0;
+  }
+
+  @media (min-width: 46rem) {
+    .look-rain__pile {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-inline: var(--space-sm);
+    }
+  }
+
+  /* 笑える — manga panels ---------------------------------------------- */
+  .look-manga {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.5rem !important;
+    border: 2.5px solid var(--ink);
+    background: var(--ink);
+  }
+
+  .look-manga__panel {
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    min-height: 11rem;
+    border: 2px solid var(--ink);
+    background: #fff;
+  }
+
+  .look-manga__panel.is-tone {
+    background:
+      radial-gradient(circle, rgb(0 0 0 / 22%) 1.2px, transparent 1.4px) 0 0 / 7px 7px,
+      #fff;
+  }
+
+  .look-manga__art,
+  .look-manga__narration,
+  .look-manga__bubble {
+    grid-area: 1 / 1;
+  }
+
+  .look-manga__art img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .look-manga__narration {
+    z-index: 1;
+    align-self: start;
+    justify-self: start;
+    max-width: 75%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0.2rem 0.55rem;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    background: #fff;
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .look-manga__bubble {
+    position: relative;
+    z-index: 1;
+    align-self: end;
+    margin: 0 0.6rem 0.9rem !important;
+    padding: 0.6rem 0.85rem;
+    border: 2px solid var(--ink);
+    border-radius: 1.2rem;
+    background: #fff;
+    font-family: var(--font-sans) !important;
+    font-size: 0.92rem !important;
+    font-weight: 700;
+    line-height: 1.5 !important;
+  }
+
+  /* The bubble is positioned for its tail, so stretch its link past it;
+     the panel's overflow clip trims it back to exactly the panel. */
+  .look-manga h4 a::after {
+    inset: -100vmax;
+  }
+
+  .look-manga__bubble::before,
+  .look-manga__bubble::after {
+    position: absolute;
+    left: 1.4rem;
+    clip-path: polygon(0 100%, 40% 0, 100% 100%);
+    content: "";
+  }
+
+  .look-manga__bubble::before {
+    top: -0.75rem;
+    width: 1.1rem;
+    height: 0.8rem;
+    background: var(--ink);
+  }
+
+  .look-manga__bubble::after {
+    top: -0.45rem;
+    left: 1.6rem;
+    width: 0.7rem;
+    height: 0.55rem;
+    background: #fff;
+  }
+
+  @media (min-width: 46rem) {
+    .look-manga {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .look-manga__panel:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .look-manga__panel:first-child .look-manga__art img {
+      aspect-ratio: 21 / 9;
+    }
+  }
+
+  /* 発見 — field notebook on graph paper -------------------------------- */
+  .home-discovery__panel--notebook {
+    background:
+      linear-gradient(rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
+      linear-gradient(90deg, rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
+      #fbfaf4;
+  }
+
+  .look-notebook {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .look-notebook__entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    grid-template-areas:
+      "no no"
+      "title title"
+      "photo facts";
+    gap: 0.55rem 0.9rem;
+    padding: 0.8rem 0.9rem 0.9rem;
+    border: 1px solid #d9d4bf;
+    border-left: 4px solid hsl(var(--exp-hue) 50% 50%);
+    background: rgb(255 255 255 / 85%);
+  }
+
+  .look-notebook__no {
+    grid-area: no;
+    margin: 0;
+    color: hsl(var(--exp-hue) 50% 35%);
+    font-family: var(--font-hand);
+    font-size: var(--step-small);
+    font-weight: 700;
+  }
+
+  .look-notebook__photo {
+    position: relative;
+    display: block;
+    grid-area: photo;
+    align-self: start;
+    padding: 0.25rem;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(-2deg);
+  }
+
+  /* A strip of tape holding the photo in. */
+  .look-notebook__photo::before {
+    position: absolute;
+    top: -0.45rem;
+    left: 50%;
+    width: 3rem;
+    height: 0.9rem;
+    background: rgb(240 225 190 / 85%);
+    content: "";
+    transform: translateX(-50%) rotate(-4deg);
+  }
+
+  .look-notebook__photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .look-notebook h4 {
+    grid-area: title;
+  }
+
+  .look-notebook dl {
+    display: grid;
+    grid-area: facts;
+    align-content: start;
+    margin: 0;
+    font-size: var(--step-small);
+  }
+
+  .look-notebook__entry:not(:has(.look-notebook__photo)) dl {
+    grid-column: 1 / -1;
+  }
+
+  .look-notebook dl > div {
+    display: grid;
+    grid-template-columns: 3em minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-block: 0.25rem;
+    border-top: 1px dotted #c9c3a8;
+  }
+
+  .look-notebook dt {
+    color: var(--ink-faint);
+  }
+
+  .look-notebook dd {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  @media (min-width: 46rem) {
+    .look-notebook {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* 挑戦 — opened letters of challenge on a desk ------------------------ */
+  .home-discovery__panel--letters {
+    background: #2e3828;
+  }
+
+  .look-letters {
+    display: grid;
+    gap: var(--space-xl) var(--space-md);
+    padding-top: var(--space-md) !important;
+  }
+
+  /* The envelope, with the letter pulled half out of it. */
+  .look-letters__envelope {
+    position: relative;
+    padding: 0 0.6rem 0.9rem;
+    border-radius: 0.35rem;
+    background:
+      linear-gradient(to top right, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) left
+        bottom / 50% 55% no-repeat,
+      linear-gradient(to top left, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) right
+        bottom / 50% 55% no-repeat,
+      #efe2c4;
+    box-shadow: 0 10px 22px rgb(0 0 0 / 35%);
+  }
+
+  .look-letters__paper {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: -1.2rem;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px solid #e3d8bd;
+    background:
+      repeating-linear-gradient(transparent 0 1.6rem, rgb(120 100 60 / 12%) 1.6rem 1.65rem), #fffdf6;
+    color: var(--ink);
+  }
+
+  .look-letters__to {
+    margin: 0;
+    color: #a3301e;
+    font-family: var(--font-serif);
+    font-size: var(--step-small);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .look-letters__seal {
+    position: absolute;
+    top: -1.1rem;
+    right: 0.9rem;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    aspect-ratio: 1;
+    border-radius: 46% 54% 50% 50%;
+    background: radial-gradient(circle at 35% 35%, #d65040, #8a1b12 70%);
+    box-shadow: 0 3px 6px rgb(0 0 0 / 35%);
+    color: #f8d9c9;
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    transform: rotate(-10deg);
+  }
+
+  .home-discovery__panel--letters .home-discovery__more {
+    border-color: #f1e6cc;
+    background: #f1e6cc;
+    box-shadow: 2px 2px 0 #11160f;
+  }
+
+  @media (min-width: 46rem) {
+    .look-letters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* 忘れられない — instant prints in an album --------------------------- */
+  .home-discovery__panel--album {
+    background:
+      radial-gradient(circle at 1px 1px, rgb(120 90 50 / 9%) 1px, transparent 0) 0 0 / 14px 14px,
+      #f3ebdd;
+  }
+
+  .look-album {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg) var(--space-md);
+    padding: var(--space-2xs) var(--space-2xs) 0 !important;
+  }
+
+  .look-album__print {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    padding: 0.45rem 0.45rem 0.8rem;
+    background: #fff;
+    box-shadow: var(--shadow);
+    transform: rotate(-2deg);
+  }
+
+  .look-album__print:nth-child(4n + 2) {
+    transform: rotate(2deg);
+  }
+
+  .look-album__print:nth-child(4n + 3) {
+    transform: rotate(1deg);
+  }
+
+  .look-album__photo {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: #ddd7c7;
+  }
+
+  /* The frame is square, so the picture inside must fill it — here only;
+     a percentage height elsewhere would push text out of its card. */
+  .look-album__photo picture {
+    display: block;
+    height: 100%;
+  }
+
+  .look-album__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .look-album h4 {
+    font-family: var(--font-hand);
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .look-album__note {
+    margin: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 46rem) {
+    .look-album {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* Wider screens ---------------------------------------------------- */
   @media (min-width: 46rem) {
     .mood-hero {
       grid-template-columns: minmax(0, 1fr) auto;
@@ -237,21 +913,113 @@
       padding: var(--space-md) var(--space-lg);
     }
 
-    .mood-stories {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-      align-items: start;
-      gap: var(--space-lg);
+    .home-discovery__look {
       padding-inline: var(--space-lg);
-    }
-
-    .mood-stories__rows > li:first-child {
-      padding-top: 0;
-      border-top: 0;
     }
 
     .home-discovery__more {
       justify-self: end;
       margin: 0 var(--space-lg) var(--space-lg);
+    }
+  }
+
+  /* A little movement as a feeling comes on screen. Panels are re-inserted
+     on every switch, which replays these without any script. */
+  @media (prefers-reduced-motion: no-preference) {
+    .look-board__flap {
+      animation: board-flap 0.5s steps(4) var(--d, 0ms) backwards;
+    }
+
+    .look-pulse__monitor path {
+      stroke-dasharray: 260 740;
+      animation: pulse-sweep 1.8s linear infinite;
+    }
+
+    .look-rain__drops {
+      animation: rain-fall 0.8s linear infinite;
+    }
+
+    .look-rain__print {
+      animation: rain-land 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) backwards;
+    }
+
+    .look-rain__print:nth-child(2) {
+      animation-delay: 0.12s;
+    }
+
+    .look-rain__print:nth-child(3) {
+      animation-delay: 0.24s;
+    }
+
+    .look-rain__print:nth-child(4) {
+      animation-delay: 0.36s;
+    }
+
+    .look-cinema__screen img {
+      animation: cinema-drift 8s ease-out both;
+    }
+
+    .look-album__photo img {
+      animation: album-develop 2.6s ease-out backwards;
+    }
+
+    .look-album__print:nth-child(2) img {
+      animation-delay: 0.3s;
+    }
+
+    .look-album__print:nth-child(3) img {
+      animation-delay: 0.6s;
+    }
+
+    .look-album__print:nth-child(4) img {
+      animation-delay: 0.9s;
+    }
+  }
+
+  @keyframes board-flap {
+    from {
+      color: transparent;
+      transform: scaleY(0.2);
+    }
+  }
+
+  @keyframes pulse-sweep {
+    from {
+      stroke-dashoffset: 1000;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes rain-fall {
+    to {
+      background-position: -30px 90px;
+    }
+  }
+
+  @keyframes rain-land {
+    from {
+      opacity: 0;
+      transform: translateY(-2rem) rotate(0);
+    }
+  }
+
+  @keyframes cinema-drift {
+    from {
+      transform: scale(1.06);
+    }
+
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes album-develop {
+    from {
+      opacity: 0.15;
+      filter: sepia(1) blur(5px) brightness(1.6);
     }
   }
 }

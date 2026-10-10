@@ -8,15 +8,37 @@ import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi
  *
  * 1. Selection       `parseHomeExperience`  query value → tag (or nothing)
  * 2. Recommendation  `recommend`            tag → ranked public articles
- * 3. Rendering       `components/home/discovery/*`
+ * 3. Look           `lookFor`              tag → design, from `DISCOVERY_LOOKS`
+ * 4. Rendering       `components/home/discovery/*Look.astro`
  *
- * Every feeling shares one plain, readable layout; what tells them apart at
- * a glance is the feeling itself — its face, colour and one-line lead (see
- * `lib/experiences.ts`). Everything here is a pure function over plain data
- * so it can be unit-tested without the content export.
+ * Every feeling opens with the same plain header — its name in large type
+ * and its one-line lead — so it is never unclear which one is showing. Below
+ * that, each feeling has a look of its own that carries the mood by sight
+ * alone: nothing needs a tap or a hover to make sense, and no emoji or
+ * symbols are used. Everything here is a pure function over plain data so it
+ * can be unit-tested without the content export.
  */
 
-/** Stories per feeling: one large, the rest as rows. */
+export type DiscoveryLookId =
+  "board" | "cinema" | "pulse" | "rain" | "manga" | "notebook" | "letters" | "album";
+
+/** Which look each feeling gets. The only place the mapping lives. */
+export const DISCOVERY_LOOKS: Record<ExperienceTag, DiscoveryLookId> = {
+  exciting: "board",
+  moving: "cinema",
+  thrilling: "pulse",
+  disaster: "rain",
+  funny: "manga",
+  discovery: "notebook",
+  challenge: "letters",
+  unforgettable: "album",
+};
+
+export function lookFor(tag: ExperienceTag): DiscoveryLookId {
+  return DISCOVERY_LOOKS[tag];
+}
+
+/** Stories per feeling. */
 export const DISCOVERY_LIMIT = 4;
 
 /** The URL query that carries the selection. Home stays canonical to `/`. */

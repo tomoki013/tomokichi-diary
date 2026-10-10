@@ -1,8 +1,15 @@
 ---
 import type { ExperienceTag } from "@tomokichi/domain";
-import Picture from "../../Picture.astro";
+import BoardLook from "./BoardLook.astro";
+import CinemaLook from "./CinemaLook.astro";
+import PulseLook from "./PulseLook.astro";
+import RainLook from "./RainLook.astro";
+import MangaLook from "./MangaLook.astro";
+import NotebookLook from "./NotebookLook.astro";
+import LettersLook from "./LettersLook.astro";
+import AlbumLook from "./AlbumLook.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import { lookFor, type DiscoveryItem, type DiscoveryLookId } from "../../../lib/home-discovery";
 
 interface Props {
   tag: ExperienceTag;
@@ -12,19 +19,29 @@ interface Props {
 }
 
 /**
- * One feeling and its stories. The feeling has to read at a glance — its
- * colour, its name in large type and one line on what kind of trip it was — and
- * the stories underneath share one plain layout built for a phone: the first
- * large with its photo, the rest as rows with a thumbnail.
+ * One feeling and its stories. The header is the same for every feeling so
+ * it is always clear which one is showing — its name in large type and one
+ * line on what kind of trip it was. Below it, the feeling's own look.
  */
 const { tag, items, total } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
-const [lead, ...rest] = items;
-const meta = (item: DiscoveryItem) => [item.place, item.travelMonth].filter(Boolean).join("　");
+const look = lookFor(tag);
+
+const LOOKS: Record<DiscoveryLookId, typeof BoardLook> = {
+  board: BoardLook,
+  cinema: CinemaLook,
+  pulse: PulseLook,
+  rain: RainLook,
+  manga: MangaLook,
+  notebook: NotebookLook,
+  letters: LettersLook,
+  album: AlbumLook,
+};
+const Look = LOOKS[look];
 ---
 
 <div
-  class="home-discovery__panel"
+  class:list={["home-discovery__panel", `home-discovery__panel--${look}`]}
   style={`--exp-hue: ${copy.hue}`}
   data-experience={tag}
   data-announce={`${copy.label}の旅：${copy.lead}。${total}本`}
@@ -37,54 +54,14 @@ const meta = (item: DiscoveryItem) => [item.place, item.travelMonth].filter(Bool
     <p class="mood-hero__count">{total}本</p>
   </header>
 
-  {!lead ? (
+  {items.length === 0 ? (
     <p class="home-discovery__empty">
       まだこの気分の旅の話はありません。<a href="/posts">すべての旅の話</a>から探してみてください。
     </p>
   ) : (
     <>
-      <div class="mood-stories">
-        <article class="mood-story mood-story--lead">
-          {lead.cover && (
-            <span class="mood-story__photo">
-              <Picture
-                storageKey={lead.cover.storageKey}
-                alt={lead.cover.alt}
-                sizes="(max-width: 46rem) 92vw, 30rem"
-              />
-            </span>
-          )}
-          <div class="mood-story__body">
-            <h4>
-              <a href={lead.path} data-discovery-article={lead.slug}>
-                {lead.title}
-              </a>
-            </h4>
-            <p class="mood-story__summary">{lead.summary}</p>
-            {meta(lead) && <p class="mood-story__meta">{meta(lead)}</p>}
-          </div>
-        </article>
-        {rest.length > 0 && (
-          <ul class="mood-stories__rows">
-            {rest.map((item) => (
-              <li class="mood-story mood-story--row">
-                {item.cover && (
-                  <span class="mood-story__thumb">
-                    <Picture storageKey={item.cover.storageKey} alt="" sizes="6rem" />
-                  </span>
-                )}
-                <div class="mood-story__body">
-                  <h4>
-                    <a href={item.path} data-discovery-article={item.slug}>
-                      {item.title}
-                    </a>
-                  </h4>
-                  {meta(item) && <p class="mood-story__meta">{meta(item)}</p>}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div class="home-discovery__look">
+        <Look items={items} />
       </div>
       <a class="home-discovery__more" href={experienceHref(tag)}>
         {copy.label}の旅をもっと読む（{total}本）

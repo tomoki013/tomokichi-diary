@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { ExperienceTag } from "@tomokichi/domain";
+import { EXPERIENCE_TAGS, type ExperienceTag } from "@tomokichi/domain";
 import {
   DISCOVERY_LIMIT,
+  DISCOVERY_LOOKS,
+  lookFor,
   defaultExperience,
   parseHomeExperience,
   placeLabel,
@@ -15,6 +17,13 @@ const article = (slug: string, experienceTags: ExperienceTag[], cover = true) =>
 });
 
 const slugs = (list: { article: { slug: string } }[]) => list.map((view) => view.article.slug);
+
+describe("looks", () => {
+  it("gives every feeling a look of its own", () => {
+    for (const tag of EXPERIENCE_TAGS) expect(lookFor(tag)).toBe(DISCOVERY_LOOKS[tag]);
+    expect(new Set(EXPERIENCE_TAGS.map(lookFor)).size).toBe(EXPERIENCE_TAGS.length);
+  });
+});
 
 describe("parseHomeExperience", () => {
   it("accepts a tag verbatim", () => {

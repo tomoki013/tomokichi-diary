@@ -1,0 +1,37 @@
+---
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 挑戦: letters of challenge, already opened — a sheet of writing paper
+ * pulled half out of its envelope, the red wax seal broken on the flap. The
+ * numbering only tells the letters apart.
+ */
+const { items } = Astro.props;
+const NUMERALS = ["一", "二", "三", "四", "五", "六", "七", "八"];
+---
+
+<ul class="look-letters">
+  {items.map((item, index) => (
+    <li class="look-letters__envelope">
+      <span class="look-letters__seal" aria-hidden="true">
+        挑
+      </span>
+      <div class="look-letters__paper">
+        <p class="look-letters__to">挑戦状 其の{NUMERALS[index] ?? index + 1}</p>
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+        <p class="look-summary">{item.summary}</p>
+        {(item.place || item.travelMonth) && (
+          <p class="look-meta">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
