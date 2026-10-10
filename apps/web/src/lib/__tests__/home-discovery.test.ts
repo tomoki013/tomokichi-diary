@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { EXPERIENCE_TAGS, type ExperienceTag } from "@tomokichi/domain";
+import type { ExperienceTag } from "@tomokichi/domain";
 import {
-  DISCOVERY_TEMPLATES,
-  TEMPLATES,
+  DISCOVERY_LIMIT,
   defaultExperience,
-  storyFacts,
   parseHomeExperience,
   placeLabel,
   recommend,
-  templateFor,
   travelMonthOf,
 } from "../home-discovery";
 
@@ -18,35 +15,6 @@ const article = (slug: string, experienceTags: ExperienceTag[], cover = true) =>
 });
 
 const slugs = (list: { article: { slug: string } }[]) => list.map((view) => view.article.slug);
-
-describe("template resolution", () => {
-  it("maps every experience tag to one of the three templates", () => {
-    for (const tag of EXPERIENCE_TAGS) {
-      expect(Object.keys(TEMPLATES)).toContain(DISCOVERY_TEMPLATES[tag]);
-      expect(templateFor(tag).id).toBe(DISCOVERY_TEMPLATES[tag]);
-    }
-  });
-
-  it("gives every feeling a scene of its own", () => {
-    expect(templateFor("exciting").id).toBe("board");
-    expect(templateFor("moving").id).toBe("cinema");
-    expect(templateFor("thrilling").id).toBe("pulse");
-    expect(templateFor("disaster").id).toBe("collapse");
-    expect(templateFor("funny").id).toBe("gacha");
-    expect(templateFor("discovery").id).toBe("lens");
-    expect(templateFor("challenge").id).toBe("letters");
-    expect(templateFor("unforgettable").id).toBe("develop");
-    expect(new Set(EXPERIENCE_TAGS.map((tag) => templateFor(tag).id)).size).toBe(8);
-  });
-
-  it("tells the reader what to do in one short line, for every scene", () => {
-    for (const template of Object.values(TEMPLATES)) {
-      expect(template.cue.length).toBeGreaterThan(0);
-      expect(template.cue.length).toBeLessThanOrEqual(24);
-      expect(template.limit).toBeGreaterThan(0);
-    }
-  });
-});
 
 describe("parseHomeExperience", () => {
   it("accepts a tag verbatim", () => {
@@ -87,17 +55,12 @@ describe("recommend", () => {
 
   it("keeps only articles carrying the tag, newest first, up to the scene limit", () => {
     expect(slugs(recommend(views, "thrilling"))).toEqual(["newest"]);
-    expect(recommend(views, "moving")).toHaveLength(templateFor("moving").limit);
+    expect(recommend(views, "moving")).toHaveLength(DISCOVERY_LIMIT);
   });
 
-  it("puts covers first for photo layouts and keeps a photo-less one as a fallback", () => {
+  it("puts covers first and keeps a photo-less story as a fallback", () => {
     expect(slugs(recommend(views, "moving"))).toEqual(["second", "fourth", "fifth", "sixth"]);
     expect(slugs(recommend(views, "moving", { limit: 10 })).at(-1)).toBe("newest");
-  });
-
-  it("ignores covers for text-led layouts", () => {
-    const story = [article("a", ["challenge"], false), article("b", ["challenge"])];
-    expect(slugs(recommend(story, "challenge"))).toEqual(["a", "b"]);
   });
 
   it("moves articles already featured on the page to the end", () => {
@@ -123,19 +86,6 @@ describe("recommend", () => {
     expect(recommend(views, "disaster")).toEqual([]);
     expect(recommend([], "moving")).toEqual([]);
     expect(recommend(views, "moving", { limit: 0 })).toEqual([]);
-  });
-});
-
-describe("storyFacts", () => {
-  it("lists only the rows the data supports, in a fixed order", () => {
-    expect(
-      storyFacts({ place: "カイロ / エジプト", travelMonth: "2024.03", categories: ["旅行記"] }),
-    ).toEqual([
-      { label: "地域", value: "カイロ / エジプト" },
-      { label: "旅の時期", value: "2024.03" },
-      { label: "テーマ", value: "旅行記" },
-    ]);
-    expect(storyFacts({ place: null, travelMonth: null, categories: [] })).toEqual([]);
   });
 });
 

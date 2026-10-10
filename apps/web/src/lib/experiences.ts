@@ -9,21 +9,25 @@ export interface ExperienceCopy {
   readonly label: string;
   /** One line that invites the reader in, used on the home tiles. */
   readonly lead: string;
-  /** A doodle glyph drawn next to the label — decoration, hidden from screen readers. */
+  /**
+   * A doodle glyph drawn next to the label — decoration, hidden from screen
+   * readers. Each ends in U+FE0E so symbols like ⚡ stay plain text and never
+   * turn into colour emoji on a phone.
+   */
   readonly mark: string;
   /** Hue for the chip and tile accents; saturation and lightness come from CSS. */
   readonly hue: number;
 }
 
 export const EXPERIENCE_COPY: Record<ExperienceTag, ExperienceCopy> = {
-  exciting: { label: "ワクワク", lead: "着いた瞬間から、胸が高鳴った旅", mark: "☀", hue: 24 },
-  moving: { label: "感動", lead: "景色や人に、心が動いた旅", mark: "♡", hue: 350 },
-  thrilling: { label: "ハラハラ", lead: "トラブルに冷や汗をかいた旅", mark: "⚡", hue: 45 },
-  disaster: { label: "これは終わった…", lead: "もうダメだと思った旅", mark: "☂", hue: 220 },
-  funny: { label: "笑える", lead: "思い出すと、つい笑ってしまう旅", mark: "☺", hue: 160 },
-  discovery: { label: "発見", lead: "行ってみて、初めて分かった旅", mark: "✦", hue: 200 },
-  challenge: { label: "挑戦", lead: "ちょっと無理して、踏み込んだ旅", mark: "▲", hue: 100 },
-  unforgettable: { label: "忘れられない", lead: "今でもふと思い出す旅", mark: "★", hue: 265 },
+  exciting: { label: "ワクワク", lead: "着いた瞬間から、胸が高鳴った旅", mark: "☀\uFE0E", hue: 24 },
+  moving: { label: "感動", lead: "景色や人に、心が動いた旅", mark: "♡\uFE0E", hue: 350 },
+  thrilling: { label: "ハラハラ", lead: "トラブルに冷や汗をかいた旅", mark: "⚡\uFE0E", hue: 45 },
+  disaster: { label: "これは終わった…", lead: "もうダメだと思った旅", mark: "☂\uFE0E", hue: 220 },
+  funny: { label: "笑える", lead: "思い出すと、つい笑ってしまう旅", mark: "☺\uFE0E", hue: 160 },
+  discovery: { label: "発見", lead: "行ってみて、初めて分かった旅", mark: "✦\uFE0E", hue: 200 },
+  challenge: { label: "挑戦", lead: "ちょっと無理して、踏み込んだ旅", mark: "▲\uFE0E", hue: 100 },
+  unforgettable: { label: "忘れられない", lead: "今でもふと思い出す旅", mark: "★\uFE0E", hue: 265 },
 };
 
 /** In vocabulary order, which is also the order the filters and tiles use. */

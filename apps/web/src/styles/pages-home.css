@@ -545,6 +545,11 @@
       overflow: visible;
       padding-inline: 0;
     }
+
+    .home-picker__tile {
+      padding-inline: 0.65rem;
+      font-size: 0.86rem;
+    }
   }
 
   /* 3. Best episodes: one big photo at a time --------------------------- */

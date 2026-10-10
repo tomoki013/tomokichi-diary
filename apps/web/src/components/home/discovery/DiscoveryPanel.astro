@@ -1,19 +1,8 @@
 ---
 import type { ExperienceTag } from "@tomokichi/domain";
-import BoardScene from "./BoardScene.astro";
-import CinemaScene from "./CinemaScene.astro";
-import PulseScene from "./PulseScene.astro";
-import CollapseScene from "./CollapseScene.astro";
-import GachaScene from "./GachaScene.astro";
-import LensScene from "./LensScene.astro";
-import LettersScene from "./LettersScene.astro";
-import DevelopScene from "./DevelopScene.astro";
+import Picture from "../../Picture.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
-import {
-  templateFor,
-  type DiscoveryItem,
-  type DiscoveryTemplateId,
-} from "../../../lib/home-discovery";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
 
 interface Props {
   tag: ExperienceTag;
@@ -23,57 +12,85 @@ interface Props {
 }
 
 /**
- * One feeling on stage: a slim header, then the scene that feeling calls for.
- * The panel carries the scene id so the scene's styles and script can find it.
+ * One feeling and its stories. The feeling has to read at a glance — its
+ * colour, its name in large type and one line on what kind of trip it was — and
+ * the stories underneath share one plain layout built for a phone: the first
+ * large with its photo, the rest as rows with a thumbnail.
  */
 const { tag, items, total } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
-const template = templateFor(tag);
-const summary =
-  items.length > 0 ? `${total}本のうち${items.length}本` : "まだこの気分の旅の話はありません";
-
-const SCENES: Record<DiscoveryTemplateId, typeof BoardScene> = {
-  board: BoardScene,
-  cinema: CinemaScene,
-  pulse: PulseScene,
-  collapse: CollapseScene,
-  gacha: GachaScene,
-  lens: LensScene,
-  letters: LettersScene,
-  develop: DevelopScene,
-};
-const Scene = SCENES[template.id];
+const [lead, ...rest] = items;
+const meta = (item: DiscoveryItem) => [item.place, item.travelMonth].filter(Boolean).join("　");
 ---
 
 <div
-  class:list={["home-discovery__panel", `home-discovery__panel--${template.id}`]}
+  class="home-discovery__panel"
   style={`--exp-hue: ${copy.hue}`}
   data-experience={tag}
-  data-template={template.id}
-  data-announce={`${copy.label}：${template.label}。${summary}`}
+  data-announce={`${copy.label}の旅：${copy.lead}。${total}本`}
 >
-  <header class="home-discovery__head">
-    <h3>
-      <span aria-hidden="true">{copy.mark}</span>
-      {copy.label}の旅
-    </h3>
-    <p class="home-discovery__meta">
-      <span>{summary}</span>
-    </p>
-    <p class="home-discovery__cue" data-discovery-hint hidden>
-      👆 {template.cue}
-    </p>
+  <header class="mood-hero">
+    <span class="mood-hero__mark" aria-hidden="true">
+      {copy.mark}
+    </span>
+    <div class="mood-hero__text">
+      <h3>{copy.label}の旅</h3>
+      <p class="mood-hero__lead">{copy.lead}</p>
+    </div>
+    <p class="mood-hero__count">{total}本</p>
   </header>
 
-  {items.length === 0 ? (
+  {!lead ? (
     <p class="home-discovery__empty">
-      別の気分を選ぶか、<a href="/posts">すべての旅の話</a>から探してみてください。
+      まだこの気分の旅の話はありません。<a href="/posts">すべての旅の話</a>から探してみてください。
     </p>
   ) : (
     <>
-      <Scene items={items} />
+      <div class="mood-stories">
+        <article class="mood-story mood-story--lead">
+          {lead.cover && (
+            <span class="mood-story__photo">
+              <Picture
+                storageKey={lead.cover.storageKey}
+                alt={lead.cover.alt}
+                sizes="(max-width: 46rem) 92vw, 30rem"
+              />
+            </span>
+          )}
+          <div class="mood-story__body">
+            <h4>
+              <a href={lead.path} data-discovery-article={lead.slug}>
+                {lead.title}
+              </a>
+            </h4>
+            <p class="mood-story__summary">{lead.summary}</p>
+            {meta(lead) && <p class="mood-story__meta">{meta(lead)}</p>}
+          </div>
+        </article>
+        {rest.length > 0 && (
+          <ul class="mood-stories__rows">
+            {rest.map((item) => (
+              <li class="mood-story mood-story--row">
+                {item.cover && (
+                  <span class="mood-story__thumb">
+                    <Picture storageKey={item.cover.storageKey} alt="" sizes="6rem" />
+                  </span>
+                )}
+                <div class="mood-story__body">
+                  <h4>
+                    <a href={item.path} data-discovery-article={item.slug}>
+                      {item.title}
+                    </a>
+                  </h4>
+                  {meta(item) && <p class="mood-story__meta">{meta(item)}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       <a class="home-discovery__more" href={experienceHref(tag)}>
-        「{copy.label}」の記事をもっと読む（{total}本）&nbsp;→
+        {copy.label}の旅をもっと読む（{total}本）&nbsp;→
       </a>
     </>
   )}

@@ -1,95 +1,113 @@
-/* Home discovery scenes. Each feeling gets a small stage of its own (see
-   lib/home-discovery.ts for the mapping and components/home/discovery/* for
-   the markup). Every scene reads as a plain list without JavaScript; the
-   `.is-live` class a scene's script adds is what turns the play on, and
-   every movement here is dropped under `prefers-reduced-motion`. */
+/* Home discovery: the stories under the mood bar (components/home/discovery).
+   Built for a phone first. Every feeling shares one plain layout; what tells
+   them apart is the feeling itself — its colour, its name in large type and
+   one line on what kind of trip it was. */
 @layer pages {
-  /* Stage --------------------------------------------------------------- */
   .home-discovery {
-    /* Where content can pin itself without hiding under the masthead and
-       the mood bar (see .home-picker__bar). */
-    --below-bar: calc(var(--header-h) + 4.4rem);
     display: grid;
-    justify-self: stretch;
     width: 100%;
     margin-top: var(--space-2xs);
     text-align: start;
   }
 
+  /* Leaves room for the masthead and the pinned mood bar, so a panel lined
+     up under them never has its heading hidden. */
   .home-discovery__stage {
-    scroll-margin-top: var(--below-bar);
+    scroll-margin-top: calc(var(--header-h) + 4.6rem);
   }
 
   .home-discovery__panel {
-    position: relative;
     display: grid;
     gap: var(--space-md);
-    /* `clip`, not `hidden`: a hidden overflow would turn the panel into a
-       scroll box and stop the scenes' pinned parts from sticking. */
     overflow: clip;
-    padding: clamp(1rem, 3vw, 1.8rem);
     border: 1px solid var(--line);
-    border-top: 4px solid hsl(var(--exp-hue) 55% 52%);
-    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-lg) var(--radius-lg);
+    border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-sm);
-    color: var(--ink);
   }
 
-  .home-discovery__head {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.2rem 1rem;
+  /* The feeling, said plainly and big ---------------------------------- */
+  .mood-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.4rem var(--space-sm);
+    padding: var(--space-md) var(--space-md) var(--space-sm);
+    border-bottom: 1px solid hsl(var(--exp-hue) 45% 85%);
+    background: hsl(var(--exp-hue) 80% 95%);
   }
 
-  .home-discovery__head h3 {
+  .mood-hero__mark {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    aspect-ratio: 1;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: hsl(var(--exp-hue) 75% 85%);
+    box-shadow: 2px 2px 0 var(--ink);
+    color: hsl(var(--exp-hue) 60% 28%);
+    font-family: var(--font-sans);
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .mood-hero__text {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .mood-hero h3 {
     margin: 0;
+    color: hsl(var(--exp-hue) 55% 24%);
     font-family: var(--font-serif);
-    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+    line-height: 1.3;
   }
 
-  .home-discovery__head h3 > span {
-    margin-right: 0.3em;
-    color: hsl(var(--exp-hue) 55% 45%);
-  }
-
-  .home-discovery__meta {
-    display: flex;
-    gap: 0.8rem;
+  .mood-hero__lead {
     margin: 0;
-    font-family: var(--font-label);
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .mood-hero__count {
+    grid-column: 2;
+    margin: 0;
+    color: var(--ink-faint);
     font-size: var(--step-small);
-    letter-spacing: 0.05em;
-    opacity: 0.75;
   }
 
   .home-discovery__empty {
     margin: 0;
-    font-size: var(--step-small);
+    padding: 0 var(--space-md) var(--space-md);
+    font-size: 0.95rem;
   }
 
-  .home-discovery__more {
+  /* The stories ----------------------------------------------------- */
+  .mood-stories {
+    display: grid;
+    gap: var(--space-md);
+    padding-inline: var(--space-md);
+  }
+
+  .mood-stories__rows {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The title link covers its whole card: one tab stop, one big target. */
+  .mood-story {
     position: relative;
-    z-index: 1;
-    justify-self: end;
-    color: var(--accent);
-    font-size: var(--step-small);
-    font-weight: 500;
-    text-decoration: none;
+    min-width: 0;
   }
 
-  .home-discovery__more:hover {
-    text-decoration: underline;
-  }
-
-  /* Story links: the title link covers its whole card, so each story is one
-     tab stop and one large target. Each scene makes its card the
-     positioned box the overlay fills. */
-  .home-discovery__panel h4 {
+  .mood-story h4 {
     margin: 0;
     font-family: var(--font-serif);
     font-size: 1.05rem;
@@ -97,653 +115,40 @@
     overflow-wrap: anywhere;
   }
 
-  .home-discovery__panel h4 a,
-  .scene-board__flight {
-    color: inherit;
+  .mood-story h4 a {
+    color: var(--ink);
     text-decoration: none;
   }
 
-  .home-discovery__panel h4 a::after,
-  .scene-board__flight::after {
+  .mood-story h4 a::after {
     position: absolute;
     inset: 0;
-    z-index: 2;
     content: "";
   }
 
-  .home-discovery__panel h4 a:hover,
-  .scene-board__flight:hover {
+  .mood-story h4 a:hover {
     text-decoration: underline;
+    text-decoration-color: hsl(var(--exp-hue) 55% 50%);
     text-underline-offset: 0.2em;
   }
 
-  .home-discovery__panel h4 a:focus-visible,
-  .scene-board__flight:focus-visible {
+  .mood-story h4 a:focus-visible {
     outline: none;
   }
 
-  .scene-board__row:has(a:focus-visible),
-  .scene-cinema__shot:has(a:focus-visible),
-  .scene-pulse__card:has(a:focus-visible),
-  .scene-collapse__card:has(a:focus-visible),
-  .scene-gacha__prize:has(a:focus-visible),
-  .scene-lens__find:has(a:focus-visible),
-  .scene-letter__paper:has(a:focus-visible),
-  .scene-develop__print:has(a:focus-visible) {
+  .mood-story:has(h4 a:focus-visible) {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
+    border-radius: var(--radius-sm);
   }
 
-  .scene-cinema__shot,
-  .scene-pulse__card,
-  .scene-collapse__card,
-  .scene-gacha__prize,
-  .scene-lens__find,
-  .scene-letter__paper,
-  .scene-develop__print,
-  .scene-board__row {
-    position: relative;
+  .mood-story__body {
+    display: grid;
+    gap: 0.3rem;
     min-width: 0;
   }
 
-  .home-discovery__panel ul,
-  .home-discovery__panel ol {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .home-discovery__panel picture,
-  .home-discovery__panel img {
-    display: block;
-  }
-
-  /* In a fixed-size frame the picture must fill it, or a strip shows under
-     the photo. Only there: elsewhere a percentage height would resolve
-     against the card and push the text out of it. */
-  .scene-develop__photo picture,
-  .scene-board__view picture {
-    height: 100%;
-  }
-
-  /* ワクワク — departure board --------------------------------------- */
-  .scene-board {
-    display: grid;
-    gap: var(--space-md);
-    align-items: center;
-  }
-
-  .scene-board__panel {
-    padding: 0.9rem 0.8rem 0.6rem;
-    border-radius: var(--radius);
-    background: #151614;
-    box-shadow:
-      inset 0 0 0 3px #2c2e29,
-      var(--shadow-lg);
-    color: #efe9d8;
-    font-family: var(--font-label);
-  }
-
-  .scene-board__top {
-    display: flex;
-    justify-content: space-between;
-    margin: 0 0 0.7rem;
-    color: #ffc940;
-    font-size: var(--step-tiny);
-    font-weight: 700;
-    letter-spacing: 0.22em;
-  }
-
-  .scene-board__cols,
-  .scene-board__row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 3.6rem;
-    gap: 0.3rem 0.7rem;
-  }
-
-  .scene-board__cols {
-    margin: 0;
-    padding: 0 0.4rem 0.35rem;
-    border-bottom: 1px solid #3a3c36;
-    color: #8f9087;
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-  }
-
-  /* On a phone the columns stack inside each row, so only the board's own
-     heading is needed. */
-  .scene-board__cols {
-    display: none;
-  }
-
-  .scene-board__row {
-    grid-template-areas:
-      "time thumb"
-      "dest thumb"
-      "flight flight";
-    align-items: center;
-    padding: 0.6rem 0.4rem;
-    border-bottom: 1px dashed #30322d;
-    transition: background-color var(--speed) var(--ease);
-  }
-
-  .scene-board__row.is-on {
-    background: #23251f;
-    box-shadow: inset 3px 0 0 #ffc940;
-  }
-
-  .scene-board__thumb {
-    display: block;
-    grid-area: thumb;
-    align-self: start;
-    overflow: hidden;
-    border: 2px solid #3a3c36;
-    border-radius: 0.4rem;
-  }
-
-  .scene-board__thumb img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-
-  .scene-board__time {
-    grid-area: time;
-    align-self: start;
-    color: #ffc940;
-    font-size: var(--step-small);
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-  }
-
-  .scene-board__dest {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.2rem 0.5rem;
-    grid-area: dest;
-    color: #ffe9a3;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .scene-board__city {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-  }
-
-  .scene-board__country {
-    color: #b9b39f;
-    font-size: 0.72rem;
-    font-weight: 400;
-  }
-
-  /* One split-flap tile per character, with the hinge line across it. */
-  .scene-board__flap {
-    position: relative;
-    display: inline-grid;
-    place-items: center;
-    min-width: 1.3em;
-    height: 1.65em;
-    padding: 0 0.1em;
-    border-radius: 3px;
-    background: linear-gradient(#2c2e2a 50%, #232521 50%);
-    box-shadow: inset 0 -1px 0 #000;
-  }
-
-  .scene-board__flap::after {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    left: 0;
-    height: 1px;
-    background: #0b0c0a;
-    content: "";
-  }
-
-  .scene-board__flap.is-flipping {
-    color: #b9a86b;
-  }
-
-  .scene-board__flight {
-    grid-area: flight;
-    color: #e6e2d6;
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  .scene-board__row.is-on .scene-board__flight {
-    color: #fff;
-  }
-
-  /* An aircraft window: what you would see on arrival. */
-  .scene-board__window {
-    position: relative;
-    display: none;
-    overflow: hidden;
-    aspect-ratio: 3 / 4;
-    border: 0.8rem solid #ebe7dc;
-    border-radius: 42% / 30%;
-    background: linear-gradient(#8fc3ea, #d8ecf8);
-    box-shadow:
-      inset 0 0 0 2px #cfc9ba,
-      inset 0 6px 16px rgb(0 0 0 / 25%),
-      var(--shadow);
-  }
-
-  .scene-board__view {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 450ms var(--ease);
-  }
-
-  .scene-board__view.is-on {
-    opacity: 1;
-  }
-
-  .scene-board__view img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .scene-board__sky {
-    position: absolute;
-    inset: auto 0 1rem;
-    color: #fff;
-    font-family: var(--font-hand);
-    font-size: var(--step-tiny);
-    text-align: center;
-    opacity: 0;
-  }
-
-  .scene-board__window.is-empty .scene-board__sky {
-    opacity: 1;
-  }
-
-  @media (min-width: 46rem) {
-    .scene-board {
-      grid-template-columns: minmax(0, 1fr) 13rem;
-    }
-
-    .scene-board__window {
-      display: block;
-    }
-
-    .scene-board__cols,
-    .scene-board__row {
-      grid-template-columns: 4.4rem minmax(8rem, 12rem) minmax(0, 1fr);
-      grid-template-areas: "time dest flight";
-    }
-
-    .scene-board__cols {
-      display: grid;
-    }
-
-    .scene-board__thumb {
-      display: none;
-    }
-  }
-
-  /* 感動 — cinema ------------------------------------------------------- */
-  .home-discovery__panel--cinema {
-    border-color: #0d0d0c;
-    background: #0d0d0c;
-    color: var(--on-dark);
-  }
-
-  .home-discovery__panel--cinema .home-discovery__more {
-    color: var(--accent-on-dark);
-  }
-
-  .scene-cinema {
-    display: grid;
-    gap: var(--space-sm);
-  }
-
-  .scene-cinema__screen {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-cinema__shot {
-    margin: 0;
-  }
-
-  .scene-cinema__frame img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  .scene-cinema__subtitle {
-    display: grid;
-    gap: 0.2rem;
-    padding-top: 0.6rem;
-    text-align: center;
-  }
-
-  .scene-cinema__place {
-    color: #e3d3ad;
-    font-family: var(--font-label);
-    font-size: var(--step-tiny);
-    letter-spacing: 0.2em;
-  }
-
-  .scene-cinema h4 {
-    font-size: clamp(1.05rem, 0.9rem + 1vw, 1.6rem);
-    line-height: 1.6;
-  }
-
-  /* The theatre: one shot at a time, letterboxed. */
-  .scene-cinema.is-live .scene-cinema__screen {
-    position: relative;
-    display: block;
-    /* Vertical drags still scroll the page; sideways ones are the swipe. */
-    touch-action: pan-y;
-    overflow: hidden;
-    aspect-ratio: 4 / 3;
-    border-block: clamp(0.7rem, 2.4vw, 1.5rem) solid #000;
-    background: #000;
-  }
-
-  .scene-cinema.is-live .scene-cinema__shot {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: opacity 1.1s ease;
-  }
-
-  .scene-cinema.is-live .scene-cinema__shot.is-on {
-    opacity: 1;
-  }
-
-  .scene-cinema.is-live .scene-cinema__frame,
-  .scene-cinema.is-live .scene-cinema__frame picture {
-    position: absolute;
-    inset: 0;
-  }
-
-  .scene-cinema.is-live .scene-cinema__frame img {
-    height: 100%;
-    aspect-ratio: auto;
-  }
-
-  .scene-cinema.is-live .scene-cinema__shot::after {
-    position: absolute;
-    inset: 40% 0 0;
-    background: linear-gradient(transparent, rgb(0 0 0 / 70%));
-    content: "";
-  }
-
-  .scene-cinema.is-live .scene-cinema__subtitle {
-    position: absolute;
-    right: 1rem;
-    bottom: clamp(0.9rem, 3vw, 1.8rem);
-    left: 1rem;
-    z-index: 1;
-    padding: 0;
-    color: #fff;
-    text-shadow:
-      0 1px 3px rgb(0 0 0 / 90%),
-      0 0 18px rgb(0 0 0 / 60%);
-    opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 0.9s ease 0.5s,
-      transform 0.9s ease 0.5s;
-  }
-
-  .scene-cinema.is-live .scene-cinema__shot.is-on .scene-cinema__subtitle {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* The outgoing subtitle leaves at once, so two never overlap mid-cut. */
-  .scene-cinema.is-live .scene-cinema__shot:not(.is-on) .scene-cinema__subtitle {
-    transition-delay: 0s;
-    transition-duration: 0.2s;
-  }
-
-  /* The subtitle is positioned, so stretch its link past it; the shot's
-     overflow clip trims the overlay back to the screen. */
-  .scene-cinema.is-live h4 a::after {
-    inset: -100vmax;
-  }
-
-  .scene-cinema__controls {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-  }
-
-  .scene-cinema__reel {
-    position: relative;
-    display: grid;
-    flex: 1;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
-    gap: 0.35rem;
-    padding: 0.55rem 0.35rem !important;
-    background: #1c1c1a;
-  }
-
-  /* Sprocket holes along both edges of the film. */
-  .scene-cinema__reel::before,
-  .scene-cinema__reel::after {
-    position: absolute;
-    right: 0.3rem;
-    left: 0.3rem;
-    height: 0.22rem;
-    background: repeating-linear-gradient(90deg, #555 0 0.35rem, transparent 0.35rem 0.8rem);
-    content: "";
-  }
-
-  .scene-cinema__reel::before {
-    top: 0.15rem;
-  }
-
-  .scene-cinema__reel::after {
-    bottom: 0.15rem;
-  }
-
-  .scene-cinema__cut {
-    display: grid;
-    gap: 0.2rem;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: #a9a598;
-    opacity: 0.5;
-    transition: opacity var(--speed) var(--ease);
-  }
-
-  .scene-cinema__cut:hover,
-  .scene-cinema__cut[aria-pressed="true"] {
-    opacity: 1;
-  }
-
-  .scene-cinema__cut[aria-pressed="true"] .scene-cinema__thumb {
-    outline: 2px solid #ffc940;
-  }
-
-  .scene-cinema__thumb img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
-  }
-
-  .scene-cinema__no {
-    font-family: var(--font-label);
-    font-size: 0.58rem;
-    letter-spacing: 0.15em;
-  }
-
-  .scene-cinema__pause {
-    flex: none;
-    padding: 0.35rem 0.7rem;
-    border: 1px solid #5d5b55;
-    border-radius: var(--radius-sm);
-    background: none;
-    color: var(--on-dark);
-    font-size: var(--step-tiny);
-  }
-
-  @media (min-width: 46rem) {
-    .scene-cinema.is-live .scene-cinema__screen {
-      aspect-ratio: 21 / 9;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-cinema.is-live .scene-cinema__shot.is-on img {
-      animation: cinema-drift 9s ease-out both;
-    }
-  }
-
-  @keyframes cinema-drift {
-    from {
-      transform: scale(1);
-    }
-
-    to {
-      transform: scale(1.09) translate(-1%, -1%);
-    }
-  }
-
-  /* ハラハラ — heart monitor ------------------------------------------ */
-  .scene-pulse {
-    --beat: 0.83s;
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-pulse__monitor {
-    position: sticky;
-    top: calc(var(--below-bar) + 0.3rem);
-    z-index: 3;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: 0.5rem 0.9rem;
-    border: 2px solid #1d3326;
-    border-radius: var(--radius);
-    background:
-      linear-gradient(rgb(70 255 140 / 7%) 1px, transparent 1px) 0 0 / 100% 12px,
-      linear-gradient(90deg, rgb(70 255 140 / 7%) 1px, transparent 1px) 0 0 / 12px 100%,
-      #07140d;
-    box-shadow: inset 0 0 22px rgb(0 255 120 / 12%);
-    transition: border-color 300ms ease;
-  }
-
-  .scene-pulse.is-racing .scene-pulse__monitor {
-    border-color: #ff4d6a;
-  }
-
-  .scene-pulse__trace {
-    width: 100%;
-    height: 2.4rem;
-    overflow: visible;
-  }
-
-  .scene-pulse__trace path {
-    fill: none;
-    stroke: #4dff9a;
-    stroke-width: 2.2;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 3px #4dff9a);
-    vector-effect: non-scaling-stroke;
-  }
-
-  .scene-pulse.is-racing .scene-pulse__trace path {
-    stroke: #ff6b6b;
-    filter: drop-shadow(0 0 4px #ff6b6b);
-  }
-
-  .scene-pulse__reading {
-    display: flex;
-    align-items: baseline;
-    gap: 0.3rem;
-    margin: 0;
-    color: #4dff9a;
-    font-family: var(--font-label);
-  }
-
-  .scene-pulse.is-racing .scene-pulse__reading {
-    color: #ff6b6b;
-  }
-
-  .scene-pulse__reading > span {
-    color: #ff4d6a;
-  }
-
-  .scene-pulse__reading b {
-    min-width: 2ch;
-    font-size: 1.7rem;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .scene-pulse__reading small {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-  }
-
-  .scene-pulse__cards {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-pulse__card {
-    overflow: hidden;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  /* Hazard tape across the top of every card. */
-  .scene-pulse__card::before {
-    display: block;
-    height: 0.6rem;
-    background: repeating-linear-gradient(-45deg, #ffcf2e 0 10px, #1b1b1b 10px 20px);
-    content: "";
-  }
-
-  .scene-pulse__photo img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  .scene-pulse__body {
-    display: grid;
-    gap: 0.3rem;
-    padding: 0.8rem 0.9rem 1rem;
-  }
-
-  .scene-pulse__place,
-  .scene-collapse__place,
-  .scene-gacha__place {
-    margin: 0;
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .scene-pulse__summary,
-  .scene-collapse__summary,
-  .scene-gacha__summary,
-  .scene-letter__summary {
+  .mood-story__summary {
     display: -webkit-box;
     overflow: hidden;
     margin: 0;
@@ -751,1177 +156,121 @@
     font-size: 0.92rem;
     line-height: 1.8;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
   }
 
-  @media (min-width: 46rem) {
-    .scene-pulse__cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .mood-story__meta {
+    margin: 0;
+    color: var(--ink-faint);
+    font-size: var(--step-small);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-pulse__trace path {
-      stroke-dasharray: 260 740;
-      animation: pulse-sweep calc(var(--beat) * 2) linear infinite;
-    }
-
-    .scene-pulse__reading > span {
-      display: inline-block;
-      animation: pulse-heart var(--beat) ease-in-out infinite;
-    }
-
-    .scene-pulse__card:hover,
-    .scene-pulse__card:focus-within,
-    .scene-pulse__card.is-centred {
-      /* A shiver when the story arrives, not a constant shake to read through. */
-      animation: pulse-tremble 0.14s linear 6;
-    }
-  }
-
-  @keyframes pulse-sweep {
-    from {
-      stroke-dashoffset: 1000;
-    }
-
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  @keyframes pulse-heart {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-
-    15% {
-      transform: scale(1.35);
-    }
-
-    30% {
-      transform: scale(0.95);
-    }
-  }
-
-  @keyframes pulse-tremble {
-    0%,
-    100% {
-      transform: translate(0, 0) rotate(0);
-    }
-
-    25% {
-      transform: translate(-1px, 1px) rotate(-0.3deg);
-    }
-
-    75% {
-      transform: translate(1px, -1px) rotate(0.3deg);
-    }
-  }
-
-  /* これは終わった… — rain and a collapsed pile ------------------------- */
-  .home-discovery__panel--collapse {
-    background: linear-gradient(#cdd6e0, #eef1f4 60%);
-  }
-
-  .scene-collapse {
-    position: relative;
-    padding: var(--space-sm) var(--space-2xs) var(--space-md);
-  }
-
-  .scene-collapse__rain {
-    position: absolute;
-    inset: -40% -10% 0;
-    background:
-      repeating-linear-gradient(
-        100deg,
-        transparent 0 22px,
-        rgb(70 90 120 / 22%) 22px 23px,
-        transparent 23px 46px
-      ),
-      repeating-linear-gradient(
-        100deg,
-        transparent 0 37px,
-        rgb(70 90 120 / 14%) 37px 38px,
-        transparent 38px 61px
-      );
-    background-size:
-      120px 90px,
-      160px 140px;
-    pointer-events: none;
-  }
-
-  .scene-collapse__pile {
-    position: relative;
+  /* First story: the photo full width, then its title and lead-in. */
+  .mood-story--lead {
     display: grid;
-    gap: var(--space-lg) var(--space-md);
+    gap: 0.7rem;
   }
 
-  .scene-collapse__card {
-    --r: -3deg;
-    padding: 0.5rem 0.5rem 0.9rem;
-    background: #fff;
-    box-shadow: var(--shadow-lg);
-    transform: rotate(var(--r));
-    transition:
-      transform 350ms var(--ease),
-      box-shadow 350ms var(--ease);
-  }
-
-  .scene-collapse__card:nth-child(4n + 2) {
-    --r: 4deg;
-  }
-
-  .scene-collapse__card:nth-child(4n + 3) {
-    --r: -1.5deg;
-  }
-
-  .scene-collapse__card:nth-child(4n) {
-    --r: 6deg;
-  }
-
-  /* Picking itself back up: straight, lifted, back in colour. */
-  .scene-collapse__card:hover,
-  .scene-collapse__card:focus-within,
-  .scene-collapse__card.is-steady {
-    box-shadow: 0 18px 40px rgb(30 40 60 / 22%);
-    transform: rotate(0) translateY(-4px);
-  }
-
-  .scene-collapse__photo {
-    position: relative;
+  .mood-story__photo {
     display: block;
-  }
-
-  .scene-collapse__photo img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    filter: grayscale(0.55) contrast(0.95);
-    transition: filter 350ms var(--ease);
-  }
-
-  .scene-collapse__card:hover img,
-  .scene-collapse__card:focus-within img,
-  .scene-collapse__card.is-steady img {
-    filter: none;
-  }
-
-  .scene-collapse__crack {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 45%;
-    height: 45%;
-  }
-
-  .scene-collapse__crack path {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 1.4;
-    filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%));
-    vector-effect: non-scaling-stroke;
-  }
-
-  .scene-collapse__body {
-    display: grid;
-    gap: 0.25rem;
-    padding: 0.6rem 0.3rem 0;
-  }
-
-  @media (min-width: 46rem) {
-    .scene-collapse__pile {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding-inline: var(--space-md);
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-collapse__rain {
-      animation: collapse-rain 0.7s linear infinite;
-    }
-
-    .scene-collapse.is-falling .scene-collapse__card {
-      animation: collapse-fall 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) backwards;
-    }
-
-    .scene-collapse.is-falling .scene-collapse__card:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-
-    .scene-collapse.is-falling .scene-collapse__card:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .scene-collapse.is-falling .scene-collapse__card:nth-child(4) {
-      animation-delay: 0.45s;
-    }
-  }
-
-  @keyframes collapse-rain {
-    to {
-      background-position:
-        -30px 90px,
-        -40px 140px;
-    }
-  }
-
-  @keyframes collapse-fall {
-    from {
-      opacity: 0;
-      transform: translateY(-120%) rotate(0);
-    }
-
-    50% {
-      opacity: 1;
-    }
-
-    to {
-      transform: rotate(var(--r));
-    }
-  }
-
-  /* 笑える — capsule machine ------------------------------------------ */
-  .home-discovery__panel--gacha {
-    background:
-      radial-gradient(circle at 1px 1px, rgb(182 75 28 / 14%) 1.5px, transparent 0) 0 0 / 18px 18px,
-      #fff8ef;
-  }
-
-  .scene-gacha {
-    display: grid;
-    gap: var(--space-md);
-    align-items: start;
-  }
-
-  .scene-gacha__prizes {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-gacha__prize {
     overflow: hidden;
-    border: 2.5px solid var(--ink);
-    border-radius: 1rem;
-    background: #fff;
-    box-shadow: 5px 5px 0 var(--accent);
-  }
-
-  .scene-gacha__photo img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 21 / 9;
-    object-fit: cover;
-  }
-
-  .scene-gacha__card {
-    display: grid;
-    gap: 0.3rem;
-    padding: 0.8rem 1rem 1rem;
-  }
-
-  .scene-gacha__no {
-    margin: 0;
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: var(--step-tiny);
-    font-weight: 700;
-    letter-spacing: 0.15em;
-  }
-
-  .scene-gacha__card h4 {
-    font-size: clamp(1rem, 0.95rem + 0.4vw, 1.2rem);
-  }
-
-  .scene-gacha.is-live .scene-gacha__prize {
-    display: none;
-  }
-
-  .scene-gacha.is-live .scene-gacha__prize.is-won {
-    display: block;
-    transform: rotate(-1deg);
-  }
-
-  .scene-gacha__wait {
-    margin: 0;
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    text-align: center;
-  }
-
-  .scene-gacha__machine {
-    position: relative;
-    display: grid;
-    justify-items: center;
-    justify-self: center;
-    padding-bottom: 1.6rem;
-  }
-
-  .scene-gacha__dome {
-    position: relative;
-    z-index: 1;
-    width: 12rem;
-    overflow: hidden;
-    aspect-ratio: 1;
-    border: 3px solid var(--ink);
-    border-radius: 50%;
-    background: radial-gradient(
-      circle at 35% 30%,
-      rgb(255 255 255 / 95%),
-      rgb(255 255 255 / 40%) 40%,
-      rgb(205 228 240 / 60%)
-    );
-    box-shadow: inset -8px -10px 0 rgb(0 0 0 / 6%);
-  }
-
-  .scene-gacha__ball {
-    position: absolute;
-    width: 3rem;
-    aspect-ratio: 1;
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: linear-gradient(hsl(var(--hue) 80% 62%) 50%, #fff 50%);
-    transform: rotate(calc(var(--i) * 41deg));
-  }
-
-  .scene-gacha__ball:nth-child(1) {
-    bottom: 4%;
-    left: 14%;
-  }
-
-  .scene-gacha__ball:nth-child(2) {
-    bottom: 3%;
-    left: 40%;
-  }
-
-  .scene-gacha__ball:nth-child(3) {
-    bottom: 8%;
-    left: 64%;
-  }
-
-  .scene-gacha__ball:nth-child(4) {
-    bottom: 26%;
-    left: 6%;
-  }
-
-  .scene-gacha__ball:nth-child(5) {
-    bottom: 24%;
-    left: 30%;
-  }
-
-  .scene-gacha__ball:nth-child(6) {
-    bottom: 27%;
-    left: 55%;
-  }
-
-  .scene-gacha__ball:nth-child(7) {
-    bottom: 45%;
-    left: 20%;
-  }
-
-  .scene-gacha__ball:nth-child(8) {
-    bottom: 46%;
-    left: 46%;
-  }
-
-  .scene-gacha__body {
-    display: grid;
-    justify-items: center;
-    gap: 0.45rem;
-    width: 10.5rem;
-    margin-top: -0.9rem;
-    padding: 1.4rem 0.8rem 0.9rem;
-    border: 3px solid var(--ink);
-    border-radius: 0 0 1rem 1rem;
-    background: var(--accent);
-    color: #fff;
-  }
-
-  .scene-gacha__sign {
-    margin: 0;
-    padding: 0.2rem 0.6rem;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius-sm);
-    background: #fff;
-    color: var(--accent-strong);
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    font-weight: 700;
-    line-height: 1.25;
-    text-align: center;
-    transform: rotate(-3deg);
-  }
-
-  .scene-gacha__handle {
-    display: grid;
-    place-items: center;
-    gap: 0.1rem;
-    width: 4.4rem;
-    aspect-ratio: 1;
-    border: 3px solid var(--ink);
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 3px 3px 0 var(--ink);
-    color: var(--ink);
-    cursor: pointer;
-  }
-
-  .scene-gacha__handle:active {
-    box-shadow: 1px 1px 0 var(--ink);
-    transform: translate(2px, 2px);
-  }
-
-  .scene-gacha__handle:disabled {
-    cursor: progress;
-  }
-
-  .scene-gacha__knob {
-    width: 2.8rem;
-    height: 0.6rem;
-    border-radius: 0.3rem;
-    background: var(--ink);
-    transition: transform 200ms var(--ease);
-  }
-
-  .scene-gacha__handle:hover .scene-gacha__knob {
-    transform: rotate(25deg);
-  }
-
-  .scene-gacha__label {
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-
-  .scene-gacha__stock {
-    margin: 0;
-    font-size: var(--step-tiny);
-  }
-
-  /* The capsule that drops out of the outlet and pops open. */
-  .scene-gacha__capsule {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    display: grid;
-    width: 3rem;
-    opacity: 0;
-    transform: translateX(-50%);
-  }
-
-  .scene-gacha__capsule > span {
-    height: 1.5rem;
-    border: 2px solid var(--ink);
-  }
-
-  .scene-gacha__capsule > span:first-child {
-    border-radius: 1.5rem 1.5rem 0 0;
-    background: hsl(var(--hue, 24) 80% 62%);
-  }
-
-  .scene-gacha__capsule > span:last-child {
-    border-top: 0;
-    border-radius: 0 0 1.5rem 1.5rem;
-    background: #fff;
-  }
-
-  @media (min-width: 46rem) {
-    .scene-gacha {
-      grid-template-columns: 14rem minmax(0, 1fr);
-    }
-
-    .scene-gacha:not(.is-live) {
-      grid-template-columns: none;
-    }
-
-    .scene-gacha:not(.is-live) .scene-gacha__prizes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .scene-gacha__wait {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .scene-gacha__prizes {
-      grid-column: 2;
-      grid-row: 1;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-gacha__machine.is-turning .scene-gacha__dome {
-      animation: gacha-rattle 0.6s ease-in-out;
-    }
-
-    .scene-gacha__machine.is-turning .scene-gacha__knob {
-      animation: gacha-turn 0.6s ease-in-out;
-    }
-
-    .scene-gacha__machine.is-turning .scene-gacha__capsule {
-      animation: gacha-drop 1.3s ease-out;
-    }
-
-    .scene-gacha__machine.is-turning .scene-gacha__capsule > span:first-child {
-      animation: gacha-pop-top 1.3s ease-out;
-    }
-
-    .scene-gacha__machine.is-turning .scene-gacha__capsule > span:last-child {
-      animation: gacha-pop-bottom 1.3s ease-out;
-    }
-
-    .scene-gacha.is-live .scene-gacha__prize.is-won {
-      animation: gacha-prize 0.5s cubic-bezier(0.3, 1.5, 0.5, 1);
-    }
-  }
-
-  @keyframes gacha-rattle {
-    20% {
-      transform: rotate(-6deg);
-    }
-
-    40% {
-      transform: rotate(5deg);
-    }
-
-    60% {
-      transform: rotate(-4deg);
-    }
-
-    80% {
-      transform: rotate(2deg);
-    }
-  }
-
-  @keyframes gacha-turn {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes gacha-drop {
-    0%,
-    40% {
-      opacity: 0;
-      transform: translate(-50%, -2rem) scale(0.6);
-    }
-
-    55% {
-      opacity: 1;
-      transform: translate(-50%, 0) scale(1);
-    }
-
-    65% {
-      transform: translate(-50%, -0.5rem);
-    }
-
-    75% {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    100% {
-      opacity: 0;
-      transform: translate(-50%, 0);
-    }
-  }
-
-  @keyframes gacha-pop-top {
-    0%,
-    75% {
-      transform: none;
-    }
-
-    100% {
-      transform: translate(-1rem, -1rem) rotate(-40deg);
-    }
-  }
-
-  @keyframes gacha-pop-bottom {
-    0%,
-    75% {
-      transform: none;
-    }
-
-    100% {
-      transform: translate(1rem, 0.6rem) rotate(30deg);
-    }
-  }
-
-  @keyframes gacha-prize {
-    from {
-      opacity: 0;
-      transform: scale(0.7) rotate(-6deg);
-    }
-
-    to {
-      opacity: 1;
-      transform: rotate(-1deg);
-    }
-  }
-
-  /* 発見 — magnifying glass ------------------------------------------- */
-  .home-discovery__panel--lens {
-    background:
-      linear-gradient(rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
-      linear-gradient(90deg, rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
-      #fbfaf4;
-  }
-
-  .scene-lens {
-    display: grid;
-    gap: var(--space-sm);
-  }
-
-  .scene-lens__score {
-    margin: 0;
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    text-align: center;
-  }
-
-  .scene-lens__score b {
-    color: var(--accent);
-    font-size: 1.2em;
-  }
-
-  .scene-lens__finds {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-lens__find {
-    overflow: hidden;
-    border: 1px solid var(--line-strong);
     border-radius: var(--radius);
-    background: var(--surface);
   }
 
-  /* The lens needs the pointer on the photo, so only the title is a link here. */
-  .scene-lens h4 a::after {
-    content: none;
-  }
-
-  .scene-lens__photo {
-    position: relative;
+  .mood-story__photo img {
     display: block;
-    overflow: hidden;
-    aspect-ratio: 4 / 3;
-  }
-
-  .scene-lens__layer,
-  .scene-lens__layer picture {
-    position: absolute;
-    inset: 0;
-  }
-
-  .scene-lens__layer img {
     width: 100%;
-    height: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
     object-fit: cover;
   }
 
-  .scene-lens__layer--sharp {
-    display: none;
+  .mood-story--lead h4 {
+    font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
   }
 
-  .scene-lens.is-live .scene-lens__photo {
-    cursor: zoom-in;
-  }
-
-  .scene-lens.is-live .scene-lens__layer--blur img {
-    filter: blur(8px) saturate(0.6) brightness(1.05);
-    transform: scale(1.08);
-    transition: filter 600ms var(--ease);
-  }
-
-  .scene-lens.is-live .scene-lens__layer--sharp {
-    display: block;
-    clip-path: circle(0 at var(--x, 50%) var(--y, 50%));
-  }
-
-  .scene-lens.is-live .scene-lens__layer--sharp img {
-    transform: scale(1.7);
-    transform-origin: var(--x, 50%) var(--y, 50%);
-  }
-
-  .scene-lens.is-live .is-looking .scene-lens__layer--sharp {
-    clip-path: circle(4.2rem at var(--x, 50%) var(--y, 50%));
-  }
-
-  /* Found, focused, or no motion: the photo stays sharp. */
-  .scene-lens.is-live.is-clear .scene-lens__layer--blur img,
-  .scene-lens.is-live .is-found .scene-lens__layer--blur img,
-  .scene-lens.is-live .scene-lens__find:focus-within .scene-lens__layer--blur img {
-    filter: none;
-    transform: none;
-  }
-
-  .scene-lens__glass {
-    position: absolute;
-    top: var(--y, 50%);
-    left: var(--x, 50%);
-    width: 8.4rem;
-    aspect-ratio: 1;
-    border: 5px solid #2b2b2b;
-    border-radius: 50%;
-    box-shadow:
-      inset 0 0 0 2px #c9a24a,
-      0 6px 16px rgb(0 0 0 / 35%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-  }
-
-  .scene-lens__glass::after {
-    position: absolute;
-    top: 100%;
-    left: 85%;
-    width: 0.9rem;
-    height: 3.6rem;
-    border-radius: 0.45rem;
-    background: #6a4423;
-    content: "";
-    transform: rotate(-45deg);
-    transform-origin: top center;
-  }
-
-  .scene-lens.is-live .is-looking .scene-lens__glass {
-    opacity: 1;
-  }
-
-  /* A visible "tap here" on every photo still to find. */
-  .scene-lens.is-live:not(.is-clear) .scene-lens__find:not(.is-found) .scene-lens__photo::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    padding: 0.35rem 0.8rem;
-    border-radius: 999px;
-    background: rgb(23 26 22 / 72%);
-    color: #fff;
-    content: "🔍 タップ";
-    font-size: var(--step-small);
-    font-weight: 700;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    transition: opacity var(--speed) var(--ease);
-  }
-
-  .scene-lens.is-live .scene-lens__photo.is-looking::after {
-    opacity: 0;
-  }
-
-  .scene-lens__stamp {
-    position: absolute;
-    top: 0.7rem;
-    left: 0.7rem;
-    display: none;
-    padding: 0.3rem 0.6rem;
-    border: 3px solid #c0392b;
-    border-radius: 0.4rem;
-    background: rgb(255 255 255 / 80%);
-    color: #c0392b;
-    font-family: var(--font-hand);
-    font-weight: 700;
-    transform: rotate(-12deg);
-  }
-
-  .scene-lens .is-found .scene-lens__stamp {
-    display: block;
-  }
-
-  .scene-lens__body {
+  /* The rest: a thumbnail and the title, one row each. */
+  .mood-story--row {
     display: grid;
-    gap: 0.45rem;
-    padding: 0.8rem 0.9rem 1rem;
-  }
-
-  .scene-lens__facts {
-    display: grid;
-    margin: 0;
-    font-size: var(--step-tiny);
-  }
-
-  .scene-lens__facts > div {
-    display: grid;
-    grid-template-columns: 4.5em minmax(0, 1fr);
-    gap: 0.6rem;
-    padding-block: 0.3rem;
-    border-top: 1px dotted var(--line-strong);
-  }
-
-  .scene-lens__facts dt {
-    color: var(--ink-faint);
-  }
-
-  .scene-lens__facts dd {
-    margin: 0;
-    color: var(--ink-soft);
-  }
-
-  @media (min-width: 46rem) {
-    .scene-lens__finds {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-lens .is-found .scene-lens__stamp {
-      animation: lens-stamp 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
-    }
-  }
-
-  @keyframes lens-stamp {
-    from {
-      opacity: 0;
-      transform: scale(2) rotate(-12deg);
-    }
-  }
-
-  /* 挑戦 — sealed letters on a desk ------------------------------------ */
-  .home-discovery__panel--letters {
-    border-color: #2a3324;
-    background: radial-gradient(ellipse at 30% 0, rgb(255 255 255 / 8%), transparent 60%), #2e3828;
-    color: var(--on-dark);
-  }
-
-  .home-discovery__panel--letters .home-discovery__more {
-    color: var(--accent-on-dark);
-  }
-
-  .scene-letters {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .scene-letters__intro {
-    display: flex;
-    flex-wrap: wrap;
+    grid-template-columns: 5.2rem minmax(0, 1fr);
     align-items: center;
-    justify-content: center;
-    gap: 0.4rem 0.8rem;
-    margin: 0;
-    color: #ece5cf;
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-  }
-
-  .scene-letters__all {
-    padding: 0.25rem 0.7rem;
-    border: 1px solid #8b9277;
-    border-radius: var(--radius-sm);
-    background: none;
-    color: var(--on-dark);
-    font-size: var(--step-tiny);
-  }
-
-  .scene-letters__stack {
-    display: grid;
-    gap: var(--space-xl) var(--space-md);
-    padding-top: var(--space-sm) !important;
-  }
-
-  .scene-letter {
-    position: relative;
-    display: grid;
-    min-height: 12rem;
-    border-radius: 0.35rem;
-    background:
-      linear-gradient(to top right, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) left
-        bottom / 50% 62% no-repeat,
-      linear-gradient(to top left, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) right
-        bottom / 50% 62% no-repeat,
-      #f1e6cc;
-    box-shadow: 0 12px 24px rgb(0 0 0 / 35%);
-    color: var(--ink);
-    perspective: 900px;
-  }
-
-  .scene-letter:nth-child(odd) {
-    transform: rotate(-1.2deg);
-  }
-
-  .scene-letter:nth-child(even) {
-    transform: rotate(1deg);
-  }
-
-  .scene-letter__paper {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    align-content: start;
-    gap: 0.35rem;
-    margin: 0.6rem;
-    padding: 0.9rem 1rem 1rem;
-    border: 1px solid #e3d8bd;
-    background:
-      repeating-linear-gradient(transparent 0 1.6rem, rgb(120 100 60 / 12%) 1.6rem 1.65rem), #fffdf6;
-    transition:
-      opacity 400ms var(--ease) 150ms,
-      transform 500ms var(--ease) 150ms;
-  }
-
-  .scene-letter__to {
-    margin: 0;
-    color: #a3301e;
-    font-family: var(--font-serif);
-    font-size: var(--step-tiny);
-    font-weight: 700;
-    letter-spacing: 0.2em;
-  }
-
-  .scene-letter__where {
-    margin: 0;
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .scene-letter__flap,
-  .scene-letter__seal {
-    display: none;
-  }
-
-  /* Sealed: the flap is down and the letter tucked away. */
-  .scene-letters.is-live .scene-letter__flap {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    z-index: 2;
-    display: block;
-    height: 58%;
-    background: #e5d4ac;
-    filter: drop-shadow(0 2px 2px rgb(0 0 0 / 15%));
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
-    transform-origin: top;
-    transition:
-      transform 500ms var(--ease),
-      z-index 0s 250ms;
-  }
-
-  .scene-letters.is-live .scene-letter__seal:not([hidden]) {
-    position: absolute;
-    top: 58%;
-    left: 50%;
-    z-index: 3;
-    display: grid;
-    justify-items: center;
-    gap: 0.5rem;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-  }
-
-  .scene-letter__wax {
-    display: grid;
-    place-items: center;
-    width: 3.6rem;
-    aspect-ratio: 1;
-    border-radius: 46% 54% 50% 50%;
-    background: radial-gradient(circle at 35% 35%, #d65040, #8a1b12 70%);
-    box-shadow:
-      0 3px 6px rgb(0 0 0 / 35%),
-      inset 0 0 0 4px rgb(0 0 0 / 12%);
-    color: #f8d9c9;
-    font-family: var(--font-serif);
-    font-size: 1.4rem;
-    font-weight: 700;
-    transition: transform 200ms var(--ease);
-  }
-
-  .scene-letter__seal:hover .scene-letter__wax,
-  .scene-letter__seal:focus-visible .scene-letter__wax {
-    transform: scale(1.08) rotate(-8deg);
-  }
-
-  .scene-letter__seal:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 4px;
-  }
-
-  .scene-letter__open-label {
-    padding: 0.1rem 0.5rem;
-    border-radius: var(--radius-sm);
-    background: rgb(255 255 255 / 70%);
-    font-family: var(--font-serif);
-    font-size: var(--step-tiny);
-    font-weight: 700;
-  }
-
-  .scene-letters.is-live .scene-letter:not(.is-open) .scene-letter__paper {
-    opacity: 0;
-    transform: translateY(1.2rem) scale(0.96);
-    transition-delay: 0s;
-  }
-
-  /* Folded back and foreshortened, so the open flap peeks over the top
-     instead of covering the row above. */
-  .scene-letters.is-live .scene-letter.is-open .scene-letter__flap {
-    z-index: 0;
-    transform: rotateX(180deg) scaleY(0.45);
-  }
-
-  .scene-letters.is-live .scene-letter.is-open .scene-letter__seal {
-    display: none;
-  }
-
-  .scene-letters.is-live .scene-letter.is-open .scene-letter__paper {
-    transform: translateY(-1.4rem);
-  }
-
-  @media (min-width: 46rem) {
-    .scene-letters__stack {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  /* 忘れられない — darkroom ------------------------------------------- */
-  /* `--room` runs 0 → 1 as the prints develop: red safelight to daylight. */
-  .home-discovery__panel--develop {
-    background: color-mix(in srgb, var(--surface) calc(var(--room, 1) * 100%), #2a0c0a);
-    color: color-mix(in srgb, var(--ink) calc(var(--room, 1) * 100%), #f3cbc0);
-  }
-
-  .scene-develop {
-    position: relative;
-    display: grid;
     gap: var(--space-sm);
+    padding-block: 0.8rem;
+    border-top: 1px solid var(--line);
   }
 
-  .scene-develop::before {
-    position: absolute;
-    inset: -40% -20% auto;
-    height: 80%;
-    background: radial-gradient(
-      ellipse at 50% 0,
-      rgb(255 40 20 / calc((1 - var(--room, 1)) * 40%)),
-      transparent 65%
-    );
-    content: "";
-    pointer-events: none;
+  .mood-story--row > .mood-story__body:only-child {
+    grid-column: 1 / -1;
   }
 
-  .scene-develop__hint {
-    position: relative;
-    margin: 0;
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    text-align: center;
-  }
-
-  .scene-develop__prints {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-lg) var(--space-md);
-    padding: var(--space-2xs) !important;
-  }
-
-  .scene-develop__print {
-    --dev: 1;
-    display: grid;
-    align-content: start;
-    gap: 0.35rem;
-    padding: 0.5rem 0.5rem 0.9rem;
-    background: #fbfbf6;
-    box-shadow: 0 8px 20px rgb(0 0 0 / 25%);
-    color: var(--ink);
-    transform: rotate(-2deg);
-  }
-
-  .scene-develop__print:nth-child(even) {
-    transform: rotate(2.2deg);
-  }
-
-  .scene-develop__photo {
+  .mood-story__thumb {
     display: block;
     overflow: hidden;
-    aspect-ratio: 1;
-    background: #cfcab9;
+    border-radius: var(--radius-sm);
   }
 
-  .scene-develop__photo img,
-  .scene-develop__blank {
+  .mood-story__thumb img {
+    display: block;
     width: 100%;
-    height: 100%;
+    height: auto;
+    aspect-ratio: 1;
     object-fit: cover;
   }
 
-  .scene-develop__photo img {
-    filter: sepia(calc(1 - var(--dev))) saturate(calc(0.2 + 0.8 * var(--dev)))
-      blur(calc((1 - var(--dev)) * 6px)) brightness(calc(1.7 - 0.7 * var(--dev)));
-    opacity: calc(0.05 + 0.95 * var(--dev));
+  .mood-story--row h4 {
+    font-size: 0.98rem;
   }
 
-  .scene-develop__blank {
-    display: grid;
-    place-items: center;
-    color: #9c968a;
-    font-size: 2rem;
+  /* A full-width button at the bottom: easy to hit with a thumb. */
+  .home-discovery__more {
+    display: block;
+    margin: 0 var(--space-md) var(--space-md);
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    background: hsl(var(--exp-hue) 80% 95%);
+    box-shadow: 2px 2px 0 var(--ink);
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
   }
 
-  /* The photo is for shaking, so only the caption opens the story. */
-  .scene-develop h4 a::after {
-    content: none;
+  .home-discovery__more:hover {
+    background: hsl(var(--exp-hue) 75% 88%);
   }
 
-  .scene-develop__photo {
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-
-  .scene-develop__print h4 {
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    font-weight: 500;
-    line-height: 1.5;
-  }
-
-  .scene-develop__note {
-    margin: 0;
-    color: var(--ink-faint);
-    font-family: var(--font-hand);
-    font-size: var(--step-tiny);
+  .home-discovery__more:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
   }
 
   @media (min-width: 46rem) {
-    .scene-develop__prints {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .scene-develop__print.is-shaking {
-      animation: develop-shake 0.18s linear infinite;
-    }
-  }
-
-  @keyframes develop-shake {
-    0%,
-    100% {
-      transform: rotate(-2deg);
+    .mood-hero {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      padding: var(--space-md) var(--space-lg);
     }
 
-    50% {
-      transform: rotate(3deg) translateX(2px);
+    .mood-hero__count {
+      grid-column: auto;
     }
-  }
-}
 
-@layer pages {
-  /* The one-line "what to do" above every scene. */
-  .home-discovery__cue {
-    flex-basis: 100%;
-    margin: 0;
-    padding: 0.55rem 0.8rem;
-    line-height: 1.5;
-    border-radius: var(--radius-sm);
-    background: hsl(var(--exp-hue) 75% 93%);
-    color: hsl(var(--exp-hue) 55% 25%);
-    font-size: var(--step-small);
-    font-weight: 700;
+    .mood-stories {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      align-items: start;
+      gap: var(--space-lg);
+      padding-inline: var(--space-lg);
+    }
+
+    .mood-stories__rows > li:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .home-discovery__more {
+      justify-self: end;
+      margin: 0 var(--space-lg) var(--space-lg);
+    }
   }
 }

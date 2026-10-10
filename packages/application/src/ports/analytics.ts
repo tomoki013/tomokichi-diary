@@ -15,13 +15,11 @@ export type SemanticEvent =
   | {
       readonly name: "discovery_category_selected";
       readonly experience: string;
-      readonly template: string;
       readonly placement: "home";
     }
   | {
       readonly name: "discovery_article_clicked";
       readonly experience: string;
-      readonly template: string;
       readonly articleSlug: string;
       readonly placement: "home";
     };

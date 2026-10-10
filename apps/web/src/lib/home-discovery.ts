@@ -1,127 +1,32 @@
 import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi/domain";
 
 /**
- * Adaptive discovery on the home page: pick a feeling and the stories under
- * the picker change *shape*, not just membership. Rule-based on purpose — no
- * model, no popularity numbers — and split into the four steps the component
- * walks through, so choosing articles never mixes with drawing them:
+ * Discovery on the home page: pick a feeling and the stories right under the
+ * picker change to match it, without leaving the page. Rule-based on purpose
+ * — no model, no popularity numbers — and split into steps so choosing
+ * articles never mixes with drawing them:
  *
- * 1. Selection    `parseHomeExperience`  query value → tag (or nothing)
- * 2. Recommendation `recommend`          tag → ranked public articles
- * 3. Template     `templateFor`          tag → layout, from `DISCOVERY_TEMPLATES`
- * 4. Rendering    `components/home/discovery/*`
+ * 1. Selection       `parseHomeExperience`  query value → tag (or nothing)
+ * 2. Recommendation  `recommend`            tag → ranked public articles
+ * 3. Rendering       `components/home/discovery/*`
  *
- * Everything here is a pure function over plain data so it can be unit-tested
- * without the content export.
+ * Every feeling shares one plain, readable layout; what tells them apart at
+ * a glance is the feeling itself — its face, colour and one-line lead (see
+ * `lib/experiences.ts`). Everything here is a pure function over plain data
+ * so it can be unit-tested without the content export.
  */
 
-export type DiscoveryTemplateId =
-  "board" | "cinema" | "pulse" | "collapse" | "gacha" | "lens" | "letters" | "develop";
-
-/**
- * A scene, not a skin: each feeling gets its own small piece of play, so the
- * reader *feels* the mood before reading a word. The data shown is always
- * the article's own; the play is in how it is revealed.
- */
-export interface DiscoveryTemplate {
-  readonly id: DiscoveryTemplateId;
-  /** The scene's name, for the screen-reader announcement. */
-  readonly label: string;
-  /**
-   * What to do, in one line, shown above the scene. Written for a thumb:
-   * every scene works with taps and scrolling alone, since most readers are
-   * on a phone. Shown only with JavaScript, when the play is actually on.
-   */
-  readonly cue: string;
-  /** Whether the scene leans on photos; articles with a cover are ranked first. */
-  readonly needsPhoto: boolean;
-  /** How many stories the scene holds. */
-  readonly limit: number;
-}
-
-export const TEMPLATES: Record<DiscoveryTemplateId, DiscoveryTemplate> = {
-  board: {
-    id: "board",
-    label: "出発案内板",
-    cue: "行き先が決まったら、乗りたい便をタップ",
-    needsPhoto: false,
-    limit: 5,
-  },
-  cinema: {
-    id: "cinema",
-    label: "シネマ",
-    cue: "上映中。左右にスワイプで次のシーンへ",
-    needsPhoto: true,
-    limit: 4,
-  },
-  pulse: {
-    id: "pulse",
-    label: "心拍モニター",
-    cue: "スクロールするほど、心拍が上がっていく…",
-    needsPhoto: true,
-    limit: 4,
-  },
-  collapse: {
-    id: "collapse",
-    label: "崩れ落ちた旅",
-    cue: "スクロールすると、崩れた旅が立ち直る",
-    needsPhoto: true,
-    limit: 4,
-  },
-  gacha: {
-    id: "gacha",
-    label: "笑い話ガチャ",
-    cue: "ハンドルをタップして、1話引いてみて",
-    needsPhoto: true,
-    limit: 8,
-  },
-  lens: {
-    id: "lens",
-    label: "虫眼鏡で探す",
-    cue: "ぼやけた写真をタップして、虫眼鏡でのぞく",
-    needsPhoto: true,
-    limit: 4,
-  },
-  letters: {
-    id: "letters",
-    label: "挑戦状",
-    cue: "封蝋をタップして、挑戦状を開ける",
-    needsPhoto: false,
-    limit: 4,
-  },
-  develop: {
-    id: "develop",
-    label: "記憶の現像",
-    cue: "写真をタップすると、早く現像される",
-    needsPhoto: true,
-    limit: 4,
-  },
-};
-
-/** Which scene each feeling gets. The only place the mapping lives. */
-export const DISCOVERY_TEMPLATES: Record<ExperienceTag, DiscoveryTemplateId> = {
-  exciting: "board",
-  moving: "cinema",
-  thrilling: "pulse",
-  disaster: "collapse",
-  funny: "gacha",
-  discovery: "lens",
-  challenge: "letters",
-  unforgettable: "develop",
-};
+/** Stories per feeling: one large, the rest as rows. */
+export const DISCOVERY_LIMIT = 4;
 
 /** The URL query that carries the selection. Home stays canonical to `/`. */
 export const HOME_EXPERIENCE_PARAM = "homeExperience";
 
 /**
- * Shown before the reader picks anything (and without JavaScript): a photo
- * layout first, then the rest in vocabulary order.
+ * Shown before the reader picks anything (and without JavaScript): a
+ * feeling with plenty of photos first, then the rest in vocabulary order.
  */
 const DEFAULT_PREFERENCE: readonly ExperienceTag[] = ["moving", ...EXPERIENCE_TAGS];
-
-export function templateFor(tag: ExperienceTag): DiscoveryTemplate {
-  return TEMPLATES[DISCOVERY_TEMPLATES[tag]];
-}
 
 /** A query value is trusted only if it is one of the eight tags, verbatim. */
 export function parseHomeExperience(value: string | null | undefined): ExperienceTag | null {
@@ -160,7 +65,7 @@ export interface RecommendOptions {
  * returns them) for one feeling. Rules, in order:
  *
  * 1. must carry the tag (duplicates by id are dropped)
- * 2. photo scenes: articles with a cover first
+ * 2. articles with a cover photo first (the layout leads with a photo)
  * 3. articles not already shown elsewhere on the page first
  * 4. the incoming order (newest first)
  * 5. slug, so the result never depends on sort stability
@@ -170,9 +75,8 @@ export interface RecommendOptions {
 export function recommend<T extends DiscoveryCandidate>(
   candidates: readonly T[],
   tag: ExperienceTag,
-  { limit = templateFor(tag).limit, shownElsewhere = new Set() }: RecommendOptions = {},
+  { limit = DISCOVERY_LIMIT, shownElsewhere = new Set() }: RecommendOptions = {},
 ): T[] {
-  const needsPhoto = templateFor(tag).needsPhoto;
   const seen = new Set<string>();
   return candidates
     .flatMap((candidate, order) => {
@@ -183,7 +87,7 @@ export function recommend<T extends DiscoveryCandidate>(
     })
     .toSorted(
       (a, b) =>
-        (needsPhoto ? rank(!a.candidate.cover) - rank(!b.candidate.cover) : 0) ||
+        rank(!a.candidate.cover) - rank(!b.candidate.cover) ||
         rank(shownElsewhere.has(a.candidate.article.id)) -
           rank(shownElsewhere.has(b.candidate.article.id)) ||
         a.order - b.order ||
@@ -194,30 +98,6 @@ export function recommend<T extends DiscoveryCandidate>(
 }
 
 const rank = (late: boolean) => (late ? 1 : 0);
-
-/** One labelled fact on a story card. */
-export interface DiscoveryFact {
-  readonly label: string;
-  readonly value: string;
-}
-
-/**
- * The labelled rows a scene may print under a story. A row exists only when
- * the data does: nothing is estimated. Practical rows (fares, durations)
- * belong here once articles carry them.
- */
-export function storyFacts(item: {
-  readonly place: string | null;
-  readonly travelMonth: string | null;
-  readonly categories: readonly string[];
-}): DiscoveryFact[] {
-  const facts: (DiscoveryFact | null)[] = [
-    item.place ? { label: "地域", value: item.place } : null,
-    item.travelMonth ? { label: "旅の時期", value: item.travelMonth } : null,
-    item.categories.length > 0 ? { label: "テーマ", value: item.categories.join("・") } : null,
-  ];
-  return facts.filter((fact): fact is DiscoveryFact => fact !== null);
-}
 
 /** `2024-03-08` → `2024.03`; anything malformed reads as unknown. */
 export function travelMonthOf(date: string | null | undefined): string | null {
@@ -240,5 +120,4 @@ export interface DiscoveryItem {
   readonly cover: { readonly storageKey: string; readonly alt: string } | null;
   readonly place: string | null;
   readonly travelMonth: string | null;
-  readonly categories: readonly string[];
 }

@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * The stories under the mood tiles, staged as a scene that matches the feeling.
+ * The stories under the mood bar, for whichever feeling is chosen.
  *
  * Only the default feeling is rendered live. The others sit in inert
  * `<template>`s: their links never reach the crawlable DOM and their images
@@ -43,7 +43,6 @@ const toItem = (view: ArticleView): DiscoveryItem => {
       : null,
     place: placeLabel(primary ? nameOf(primary.id) : null, country ? nameOf(country.id) : null),
     travelMonth: travelMonthOf(view.article.travelStartDate),
-    categories: view.categories.map((category) => category.name),
   };
 };
 
@@ -82,7 +81,6 @@ const live = panels.find((panel) => panel.tag === initial);
 
 <script>
   import { trackSemanticEvent } from "../../../lib/analytics";
-  import { enterScene } from "../../../lib/discovery-scenes";
 
   const root = document.querySelector<HTMLElement>("[data-discovery]");
   const stage = root?.querySelector<HTMLElement>("[data-discovery-stage]");
@@ -145,7 +143,6 @@ const live = panels.find((panel) => panel.tag === initial);
       if (panel !== current) {
         stage.replaceChildren(panel);
         current = panel;
-        enterScene(panel);
         // A short settle so the change registers; nothing moves far.
         if (!reducedMotion.matches) {
           panel.animate(
@@ -181,8 +178,6 @@ const live = panels.find((panel) => panel.tag === initial);
       hint.removeAttribute("hidden");
     }
     syncFromUrl(false);
-    // Nothing was swapped in: start the scene that was rendered on the server.
-    if (current === first) enterScene(first);
 
     for (const chip of chips) {
       chip.addEventListener("click", (event) => {
@@ -203,7 +198,6 @@ const live = panels.find((panel) => panel.tag === initial);
           trackSemanticEvent({
             name: "discovery_category_selected",
             experience: tag,
-            template: current.dataset.template ?? "",
             placement: "home",
           });
         }
@@ -227,7 +221,6 @@ const live = panels.find((panel) => panel.tag === initial);
       trackSemanticEvent({
         name: "discovery_article_clicked",
         experience: current.dataset.experience ?? "",
-        template: current.dataset.template ?? "",
         articleSlug: link.dataset.discoveryArticle ?? "",
         placement: "home",
       });
