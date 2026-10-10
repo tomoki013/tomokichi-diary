@@ -13,7 +13,7 @@
     "lint": "oxlint . && eslint apps/web",
     "typecheck": "tsc --build --pretty false && tsc -p scripts --pretty false && tsc -p apps/admin --pretty false",
     "test": "vitest run",
-    "build": "pnpm -r --filter \"./apps/*\" build",
+    "build": "tsc --build --pretty false && pnpm -r --filter \"./apps/*\" build",
     "ci": "tsx scripts/ci.ts",
     "diagnostics": "tsx scripts/diagnostics.ts",
     "check:routes": "tsx scripts/check-routes.ts",

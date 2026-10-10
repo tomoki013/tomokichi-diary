@@ -79,3 +79,5 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 2026-10-10 本番データ確認: D1の122記事・253 routesを取得し、移行0012の旧collections URL転送をローカルで適用した公開版でbuild/routes/SEO/links/knowledgeが成功（194 URL、SEO189、sitemap166、links5823、images13799）。移行の旧URL維持・未対応URL不変更と、D1 REST単体/一括クエリの外部契約も自動テストで確認。
 
 2026-10-10 訂正: 0012は転送方向が最新実装と逆だったため、0013の追記移行で `/collections/*` を正本、`/trips/*` を301転送に修復する回帰テストを追加。0012適用済みのD1を再現し、転送ループ・別言語への誤転送・連載の変更を防ぐ。既存の予約公開テストはActionsと共通のapplication use caseを検証する。
+
+2026-10-11: 配信環境の初回ビルドを `pnpm exec tsc --build --clean && pnpm build` で再現する。共通の型定義を先に生成し、APIとMCPの並行処理によるsrc/distのブランド型混在を防ぐ。
