@@ -113,6 +113,12 @@ export function enhanceBodyImages(html: string): string {
       image.width === null ? "" : ` width="${image.width}"`,
       image.height === null ? "" : ` height="${image.height}"`,
     ].join("");
+    // Give lazy images a definite width before their pixels arrive. Using only
+    // width:auto collapses unloaded pictures even when dimensions are present.
+    const displaySize =
+      image.width !== null && image.height !== null && image.width > 0 && image.height > 0
+        ? ` style="--body-image-size:min(100%, ${image.width}px, calc(min(40rem, 80svh) * ${image.width / image.height}))"`
+        : "";
     const sources = image.sources
       .map(
         (source) =>
@@ -120,6 +126,6 @@ export function enhanceBodyImages(html: string): string {
       )
       .join("");
 
-    return `<picture>${sources}<img src="${image.src}" alt="${alt}"${dimensions} loading="lazy" decoding="async"></picture>`;
+    return `<picture>${sources}<img src="${image.src}" alt="${alt}"${dimensions}${displaySize} loading="lazy" decoding="async"></picture>`;
   });
 }

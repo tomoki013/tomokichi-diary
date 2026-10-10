@@ -81,8 +81,21 @@
     margin-inline: 0;
   }
 
-  .prose :is(picture, figure) img {
-    width: 100%;
+  .prose picture + picture {
+    margin-top: 1.5rem;
+  }
+
+  /* Keep portraits within one screen and small originals at their own size.
+     Plain Markdown images (including uploaded media URLs) need the same rule
+     as the responsive pictures generated for legacy /images/ paths. */
+  .prose :is(picture, figure) img,
+  .prose p > img,
+  .prose p > a > img {
+    width: var(--body-image-size, auto);
+    height: auto;
+    max-width: 100%;
+    max-height: min(40rem, 80svh);
+    margin-inline: auto;
     border-radius: var(--radius);
     background: var(--surface-alt);
   }
