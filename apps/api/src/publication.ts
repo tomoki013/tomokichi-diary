@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
-import { publishArticle, type AppContext } from "@tomokichi/application";
 import type { AppEnv } from "./app.js";
 import type { Env } from "./env.js";
 
@@ -34,7 +33,7 @@ export async function publicationStatus(db: SqlDatabase, configured: boolean) {
     requestedAt: row?.requested_at ?? null,
     deployedAt: row?.deployed_at ?? null,
     buildUrl: row?.build_url ?? null,
-    error: row?.error ?? null,
+    error: row?.failed_id === row?.requested_id ? (row?.error ?? null) : null,
   };
 }
 
@@ -87,19 +86,4 @@ export function publicationRoutes() {
   );
   routes.post("/retry", (c) => requestPublication(c.env).then((status) => c.json(status, 202)));
   return routes;
-}
-
-/** The scheduled handler performs the same validated pointer swap as Publish. */
-export async function publishDueArticles(ctx: AppContext): Promise<number> {
-  const now = ctx.clock.now();
-  const due = (await ctx.repos.articles.listAll()).filter(
-    (a) => a.status === "scheduled" && a.scheduledAt && a.scheduledAt <= now,
-  );
-  let count = 0;
-  for (const article of due) {
-    const result = await publishArticle(ctx, article.id);
-    if (result.ok) count++;
-    else ctx.logger.warn("article.scheduled_publish_rejected", { articleId: article.id });
-  }
-  return count;
 }

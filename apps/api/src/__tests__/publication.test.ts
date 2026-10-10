@@ -1,3 +1,4 @@
+import { publishDueArticles } from "@tomokichi/application";
 import { describe, expect, it } from "vitest";
 import { createTestContext, loadMigrations } from "@tomokichi/infra-d1/testing-context";
 import { fromNodeSqlite, openInMemoryDatabase } from "@tomokichi/infra-d1/testing";
@@ -11,7 +12,7 @@ import {
 } from "@tomokichi/application";
 import { instantFrom } from "@tomokichi/domain";
 import type { Env } from "../env.js";
-import { publicationStatus, publishDueArticles, requestPublication } from "../publication.js";
+import { publicationStatus, requestPublication } from "../publication.js";
 
 async function database() {
   const db = fromNodeSqlite(openInMemoryDatabase());

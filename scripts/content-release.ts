@@ -10,6 +10,7 @@ import {
 import { dirname, join, resolve, sep } from "node:path";
 import {
   loadContentSnapshot,
+  publishDueArticles,
   silentLogger,
   systemClock,
   uuidV7Generator,
@@ -18,46 +19,38 @@ import { buildExportFiles, type ContentSnapshot } from "@tomokichi/data";
 import { createRepositories } from "@tomokichi/infra-d1";
 import { createMemoryStorage, createMediaUrlResolver } from "@tomokichi/infra-r2";
 import { remoteDatabase } from "./lib/remote-db.js";
-interface PublicationRow {
-  requested_id: string | null;
-  deployed_id: string | null;
-}
-
+import { beginPublicationBuild } from "./lib/publication-build.js";
 const db = remoteDatabase();
 const releaseFile = join(process.cwd(), ".artifacts/content-release.json");
 const command = process.argv[2];
-if (command === "pull") {
-  const row = await db
-    .prepare("SELECT * FROM site_publication WHERE id = 'site'")
-    .first<PublicationRow>();
-  const force = process.argv.includes("--force");
-  const changed = force || Boolean(row?.requested_id && row.requested_id !== row.deployed_id);
-  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
-  if (!changed) {
+if (command === "due") {
+  const count = await publishDueArticles(context());
+  if (count > 0)
+    await db
+      .prepare(
+        "UPDATE site_publication SET requested_id = ?, requested_at = ?, failed_id = NULL, error = NULL WHERE id = 'site'",
+      )
+      .bind(crypto.randomUUID(), new Date().toISOString())
+      .run();
+  process.stdout.write(`Published ${count} due articles\n`);
+} else if (command === "pull") {
+  const requestId = await beginPublicationBuild(db, {
+    force: process.argv.includes("--force"),
+    requestId: crypto.randomUUID(),
+    now: new Date().toISOString(),
+    buildUrl: process.env.GITHUB_RUN_ID
+      ? `https://github.com/tomoki013/tomokichi-diary/actions/runs/${process.env.GITHUB_RUN_ID}`
+      : null,
+  });
+  if (process.env.GITHUB_OUTPUT)
+    appendFileSync(process.env.GITHUB_OUTPUT, `changed=${Boolean(requestId)}\n`);
+  if (!requestId) {
     process.stdout.write("Content is already deployed\n");
     process.exit(0);
   }
-  const requestId = row?.requested_id ?? crypto.randomUUID();
-  const buildUrl = process.env.GITHUB_RUN_ID
-    ? `https://github.com/tomoki013/tomokichi-diary/actions/runs/${process.env.GITHUB_RUN_ID}`
-    : null;
-  await db
-    .prepare(
-      "UPDATE site_publication SET building_id = ?, build_url = ?, failed_id = NULL, error = NULL WHERE id = 'site'",
-    )
-    .bind(requestId, buildUrl)
-    .run();
   mkdirSync(dirname(releaseFile), { recursive: true });
   writeFileSync(releaseFile, JSON.stringify({ requestId }));
-  const snapshot = await loadContentSnapshot({
-    repos: createRepositories(db),
-    clock: systemClock,
-    ids: uuidV7Generator,
-    logger: silentLogger,
-    storage: createMemoryStorage(),
-    mediaUrls: createMediaUrlResolver("https://media.tomokichidiary.com"),
-    ai: null,
-  });
+  const snapshot = await loadContentSnapshot(context());
   const files = buildExportFiles(snapshot);
   const exportDir = join(process.cwd(), "export");
   rmSync(exportDir, { recursive: true, force: true });
@@ -94,7 +87,19 @@ if (command === "pull") {
       )
       .run();
   process.stdout.write(`Publication ${command} recorded\n`);
-} else throw new Error("Usage: content-release.ts pull [--force] | complete | fail");
+} else throw new Error("Usage: content-release.ts due | pull [--force] | complete | fail");
+
+function context() {
+  return {
+    repos: createRepositories(db),
+    clock: systemClock,
+    ids: uuidV7Generator,
+    logger: silentLogger,
+    storage: createMemoryStorage(),
+    mediaUrls: createMediaUrlResolver("https://media.tomokichidiary.com"),
+    ai: null,
+  };
+}
 
 async function downloadOriginals(snapshot: ContentSnapshot) {
   const root = resolve("media");

@@ -23,3 +23,4 @@ export * from "./use-cases/contact/contact-use-cases.js";
 export * from "./use-cases/knowledge/verify-firsthand.js";
 export * from "./use-cases/knowledge/manage-knowledge.js";
 export * from "./use-cases/knowledge/suggest-facts.js";
+export * from "./use-cases/articles/publish-due-articles.js";
