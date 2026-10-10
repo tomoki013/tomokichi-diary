@@ -5,7 +5,7 @@ import type { MediaUrlResolver, ObjectStorage } from "./ports/storage.js";
 import type { Repositories } from "./ports/repositories.js";
 import type { AIProvider } from "./ports/ai.js";
 import type { AnalyticsPort } from "./ports/analytics.js";
-import type { ContactInbox } from "./ports/inquiry.js";
+import type { ContactInbox, ContactMailer } from "./ports/inquiry.js";
 
 /** Assembled once per request (API) or per build (site generation). */
 export interface AppContext {
@@ -19,6 +19,8 @@ export interface AppContext {
   readonly ai: AIProvider | null;
   /** Optional so the domain flow never depends on a tracking vendor being available. */
   readonly analytics?: AnalyticsPort;
-  /** Absent where the inquiry platform is not bound; the contact form then refuses. */
+  /** Absent where the inquiry platform is not bound: no copy is kept. */
   readonly inquiry?: ContactInbox;
+  /** Absent where mail is not bound: the message reaches the inbox only as the copy. */
+  readonly contactMail?: ContactMailer;
 }

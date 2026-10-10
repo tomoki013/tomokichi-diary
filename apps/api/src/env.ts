@@ -1,6 +1,7 @@
 import type { D1Like } from "@tomokichi/infra-d1";
 import type { R2Like } from "@tomokichi/infra-r2";
 import type { IntakeBinding, ProjectOperatorApi } from "@inquiry-platform/sdk";
+import type { ContactMailBinding } from "./contact-mail.js";
 
 /**
  * The Worker's bindings and configuration. This is the only place in the API
@@ -21,8 +22,17 @@ export interface Env {
   TURNSTILE_EXPECTED_HOSTNAME?: string;
   /** Salt for the sender-address hash used to rate-limit the contact form. */
   IP_HASH_SALT?: string;
-  /** The inquiry platform's `Intake` entrypoint. Unset means the form refuses. */
+  /** The inquiry platform's `Intake` entrypoint: where a copy of each contact is kept. */
   INQUIRY?: IntakeBinding;
+  /**
+   * `send_email`, pinned to the blog's inbox: where each contact is read and
+   * answered. The form refuses only when neither this nor `INQUIRY` works.
+   */
+  CONTACT_MAIL?: ContactMailBinding;
+  /** Sender address, on a domain with Email Routing enabled. */
+  CONTACT_MAIL_FROM?: string;
+  /** The blog's inbox; must equal the binding's verified destination. */
+  CONTACT_MAIL_TO?: string;
   /** One contact submission per sender per minute. Unset means the form refuses. */
   CONTACT_RATE_LIMITER?: RateLimit;
   /**

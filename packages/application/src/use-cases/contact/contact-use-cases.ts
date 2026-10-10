@@ -11,9 +11,12 @@ import type { AppContext } from "../../context.js";
 import type { ContactFiling } from "../../ports/inquiry.js";
 
 /**
- * New messages go to the shared inquiry platform, where replies, status and
- * history live alongside every other project's. Nothing is written to D1: the
- * `contact_messages` table only holds what arrived before the switch.
+ * A new message is mailed to the blog's inbox, where it is read and answered,
+ * and a copy is filed on the shared inquiry platform. Nothing is written to D1:
+ * the `contact_messages` table only holds what arrived before the switch.
+ *
+ * Accepted when either arrived, so the message always exists somewhere the
+ * owner looks; whichever failed is logged. Refused only when neither did.
  */
 export async function submitContactMessage(
   ctx: AppContext,
@@ -22,23 +25,26 @@ export async function submitContactMessage(
   const errors = validateContactSubmission(input);
   if (errors.length > 0) return err<null>(...errors);
 
-  // An unbound platform refuses rather than pretending: a success here would
-  // mean a message that exists nowhere.
-  const filed =
-    ctx.inquiry !== undefined &&
-    (await ctx.inquiry.file({
-      idempotencyKey: input.idempotencyKey,
-      name: input.name.trim(),
-      email: input.email.trim(),
-      subject: input.subject.trim(),
-      body: input.body.trim(),
-    }));
-  if (!filed) {
-    ctx.logger.error("contact.not_filed", { code: "API_INTERNAL" });
+  const filing: ContactFiling = {
+    idempotencyKey: input.idempotencyKey,
+    name: input.name.trim(),
+    email: input.email.trim(),
+    subject: input.subject.trim(),
+    body: input.body.trim(),
+  };
+  // Neither may throw; an unbound one counts as failed.
+  const [mailed, filed] = await Promise.all([
+    ctx.contactMail ? ctx.contactMail.send(filing) : Promise.resolve(false),
+    ctx.inquiry ? ctx.inquiry.file(filing) : Promise.resolve(false),
+  ]);
+  if (!mailed) ctx.logger.error("contact.not_mailed", { code: "API_INTERNAL" });
+  if (!filed) ctx.logger.error("contact.not_filed", { code: "API_INTERNAL" });
+  // A success with neither would mean a message that exists nowhere.
+  if (!mailed && !filed) {
     return err<null>({ code: "API_INTERNAL", message: "お問い合わせを受け付けられませんでした" });
   }
 
-  ctx.logger.info("contact.filed", {});
+  ctx.logger.info("contact.accepted", { mailed, filed });
   return ok(null);
 }
 

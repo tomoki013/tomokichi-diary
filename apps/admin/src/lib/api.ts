@@ -3,7 +3,6 @@ import type {
   ArticleKnowledgeBundleDto,
   ArticleSummaryDto,
   ErrorBody,
-  InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
   InquiryTicketStatus,
@@ -269,9 +268,6 @@ export const api = {
 
   // Inquiries (the shared platform, through the diary API)
   inquiryStatus: () => request<InquiryStatusDto>("/admin/inquiry/status"),
-  getSignature: () => request<InquirySignatureDto>("/admin/inquiry/signature"),
-  saveSignature: (signature: string) =>
-    request<InquirySignatureDto>("/admin/inquiry/signature", json("PUT", { signature })),
   listTickets: (filter: { status?: string; query?: string; offset?: number }) => {
     const query = new URLSearchParams();
     if (filter.status) query.set("status", filter.status);
@@ -287,16 +283,6 @@ export const api = {
     request<{ ok: boolean }>(
       `/admin/inquiry/tickets/${id(ticketId)}/notes`,
       json("POST", { body, idempotencyKey }),
-    ),
-  replyToTicket: (
-    ticketId: string,
-    body: string,
-    idempotencyKey: string,
-    reopenIfResolved: boolean,
-  ) =>
-    request<{ ok: boolean }>(
-      `/admin/inquiry/tickets/${id(ticketId)}/reply`,
-      json("POST", { body, idempotencyKey, reopenIfResolved }),
     ),
 
   // Messages received before the switch to the platform
