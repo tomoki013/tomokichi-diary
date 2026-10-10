@@ -455,6 +455,592 @@
     transform: rotate(0) translateY(-2px);
   }
 
+  /* The chip whose stories are showing below: pressed into the page. */
+  .home-picker__chip[aria-current="true"] {
+    background: hsl(var(--exp-hue) 70% 82%);
+    box-shadow: 0 0 0 var(--ink);
+    font-weight: 700;
+    transform: translate(2px, 2px);
+  }
+
+  /* 2b. Adaptive discovery ------------------------------------------- */
+  /* The stories under the chips, in a layout that matches the feeling:
+     photos to fall into, a trail to follow, or cards to compare. The
+     mapping lives in lib/home-discovery.ts. */
+  .home-discovery {
+    display: grid;
+    gap: var(--space-xs);
+    justify-self: stretch;
+    width: min(100%, 60rem);
+    margin: var(--space-sm) auto 0;
+    text-align: start;
+  }
+
+  .home-discovery__hint {
+    margin: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: var(--step-small);
+    text-align: center;
+  }
+
+  .home-discovery__stage {
+    scroll-margin-top: calc(var(--header-h) + var(--space-sm));
+  }
+
+  .home-discovery__panel {
+    display: grid;
+    gap: var(--space-md);
+    padding: clamp(1rem, 3vw, 1.8rem);
+    border: 1px solid var(--line);
+    border-top: 3px solid hsl(var(--exp-hue) 55% 52%);
+    border-radius: var(--radius-sm) var(--radius-sm) var(--radius-lg) var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .home-discovery__head {
+    display: grid;
+    gap: 0.2rem 1rem;
+  }
+
+  .home-discovery__head > * {
+    margin: 0;
+  }
+
+  .home-discovery__template {
+    justify-self: start;
+    padding: 0.1rem 0.55rem;
+    border-radius: var(--radius-sm);
+    background: hsl(var(--exp-hue) 75% 94%);
+    color: hsl(var(--exp-hue) 55% 30%);
+    font-family: var(--font-hand);
+    font-size: var(--step-tiny);
+  }
+
+  .home-discovery__head h3 {
+    font-family: var(--font-serif);
+    font-size: var(--step-h3);
+  }
+
+  .home-discovery__head h3 > span {
+    margin-right: 0.3em;
+    color: hsl(var(--exp-hue) 55% 40%);
+  }
+
+  .home-discovery__lead {
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+  }
+
+  .home-discovery__count {
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: var(--step-tiny);
+    letter-spacing: 0.05em;
+  }
+
+  @media (min-width: 46rem) {
+    .home-discovery__head {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .home-discovery__head > :not(.home-discovery__count) {
+      grid-column: 1;
+    }
+
+    .home-discovery__count {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: end;
+    }
+  }
+
+  .home-discovery__empty {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+  }
+
+  .home-discovery__more {
+    justify-self: end;
+    color: var(--accent);
+    font-size: var(--step-small);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .home-discovery__more:hover {
+    text-decoration: underline;
+  }
+
+  /* Shared by all three layouts: the title link covers its whole card, so
+     each story is one tab stop and one large target. */
+  .discovery-visual__lead,
+  .discovery-visual__tile,
+  .discovery-story__stop,
+  .discovery-explorer__featured,
+  .discovery-explorer__card {
+    position: relative;
+    min-width: 0;
+  }
+
+  .home-discovery__panel h4 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .home-discovery__panel h4 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .home-discovery__panel h4 a::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+  }
+
+  .home-discovery__panel h4 a:hover {
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--exp-hue) 55% 52%);
+    text-underline-offset: 0.2em;
+  }
+
+  .home-discovery__panel h4 a:focus-visible {
+    outline: none;
+  }
+
+  .discovery-visual__lead:has(h4 a:focus-visible),
+  .discovery-visual__tile:has(h4 a:focus-visible),
+  .discovery-story__stop:has(h4 a:focus-visible),
+  .discovery-explorer__featured:has(h4 a:focus-visible),
+  .discovery-explorer__card:has(h4 a:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .discovery-place {
+    margin: 0;
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .discovery-place::before {
+    display: inline-block;
+    width: 0.45em;
+    height: 0.45em;
+    margin-right: 0.4em;
+    border-radius: 50%;
+    background: hsl(var(--exp-hue) 55% 48%);
+    content: "";
+    vertical-align: 0.1em;
+  }
+
+  /* A. Visual immersion: prints on the page ---------------------------- */
+  .discovery-visual {
+    display: grid;
+    gap: var(--space-lg) var(--space-md);
+  }
+
+  .discovery-visual__print {
+    display: block;
+    padding: 0.45rem 0.45rem 1.2rem;
+    background: #fff;
+    box-shadow: var(--shadow);
+    transform: rotate(-0.6deg);
+    transition: transform 300ms var(--ease);
+  }
+
+  .discovery-visual__print img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .discovery-visual__lead:hover .discovery-visual__print,
+  .discovery-visual__tile:hover .discovery-visual__print {
+    transform: rotate(0);
+  }
+
+  .discovery-visual__caption {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.7rem;
+  }
+
+  .discovery-visual__lead h4 {
+    font-size: clamp(1.15rem, 1rem + 0.7vw, 1.5rem);
+    line-height: 1.5;
+  }
+
+  .discovery-visual__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.85;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .discovery-visual__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md) var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .discovery-visual__tile:nth-child(even) .discovery-visual__print {
+    transform: rotate(0.8deg);
+  }
+
+  .discovery-visual__tile .discovery-visual__print img {
+    aspect-ratio: 1;
+  }
+
+  /* An odd one out spans the row as a wide print instead of leaving a hole. */
+  .discovery-visual__tile:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .discovery-visual__tile:last-child:nth-child(odd) .discovery-visual__print img {
+    aspect-ratio: 2 / 1;
+  }
+
+  .discovery-visual__tile h4 {
+    font-size: var(--step-small);
+  }
+
+  /* No cover: a written card with the same footprint, so the grid holds. */
+  .discovery-visual .is-text {
+    padding: var(--space-sm);
+    border: 1.5px dashed hsl(var(--exp-hue) 40% 70%);
+    border-radius: var(--radius);
+    background: hsl(var(--exp-hue) 70% 97%);
+  }
+
+  .discovery-visual .is-text .discovery-visual__caption {
+    margin-top: 0;
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-visual {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  /* B. Story trail: stops along a dashed line in a notebook -------------- */
+  .home-discovery__panel--story {
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0 1.95rem,
+        color-mix(in srgb, var(--line) 30%, transparent) 1.95rem 2rem
+      ),
+      var(--surface);
+  }
+
+  .discovery-story {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .discovery-story__note {
+    margin: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: var(--step-tiny);
+  }
+
+  .discovery-story__trail {
+    position: relative;
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .discovery-story__trail::before {
+    position: absolute;
+    top: 1.2rem;
+    bottom: 1.2rem;
+    left: calc(1.25rem - 1px);
+    border-left: 2px dashed hsl(var(--exp-hue) 45% 62%);
+    content: "";
+  }
+
+  .discovery-story__stop {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-xs) var(--space-xs) 0;
+    border-radius: var(--radius);
+  }
+
+  .discovery-story__stop:hover {
+    background: color-mix(in srgb, hsl(var(--exp-hue) 70% 94%) 60%, transparent);
+  }
+
+  .discovery-story__num {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: hsl(var(--exp-hue) 75% 94%);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-family: var(--font-label);
+    font-size: var(--step-small);
+    font-weight: 700;
+  }
+
+  .discovery-story__stop:nth-child(even) .discovery-story__num {
+    transform: rotate(-6deg);
+  }
+
+  .discovery-story__body {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .discovery-story__body h4 {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
+  }
+
+  .discovery-story__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.85;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .discovery-story__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.9rem;
+    margin: 0;
+    color: var(--ink-faint);
+    font-size: var(--step-tiny);
+  }
+
+  .discovery-story__thumb {
+    display: block;
+    width: 3.6rem;
+    padding: 0.25rem 0.25rem 0.6rem;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(2deg);
+  }
+
+  .discovery-story__thumb img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-story__stop {
+      grid-template-columns: 2.5rem minmax(0, 1fr) 7rem;
+      gap: var(--space-md);
+    }
+
+    .discovery-story__thumb {
+      width: 7rem;
+    }
+  }
+
+  /* C. Discovery explorer: cards that line up for comparison ------------ */
+  .discovery-explorer {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .discovery-explorer__featured {
+    display: grid;
+    overflow: hidden;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .discovery-explorer__photo {
+    display: block;
+    background: var(--bg-sunk);
+  }
+
+  .discovery-explorer__photo img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .discovery-explorer__body {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    min-width: 0;
+    padding: var(--space-sm);
+  }
+
+  .discovery-explorer__featured h4 {
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+  }
+
+  .discovery-explorer__badge {
+    justify-self: start;
+    margin: 0;
+    padding: 0.05rem 0.5rem;
+    border: 1px solid hsl(var(--exp-hue) 55% 45%);
+    border-radius: var(--radius-sm);
+    color: hsl(var(--exp-hue) 55% 32%);
+    font-size: var(--step-tiny);
+  }
+
+  .discovery-explorer__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.85;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .discovery-facts {
+    display: grid;
+    margin: 0;
+    font-size: var(--step-tiny);
+  }
+
+  .discovery-facts > div {
+    display: grid;
+    grid-template-columns: 4.5em minmax(0, 1fr);
+    gap: 0.6rem;
+    padding-block: 0.3rem;
+    border-top: 1px dotted var(--line-strong);
+  }
+
+  .discovery-facts dt {
+    color: var(--ink-faint);
+  }
+
+  .discovery-facts dd {
+    margin: 0;
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .discovery-explorer__cards {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .discovery-explorer__card {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: border-color var(--speed) var(--ease);
+  }
+
+  .discovery-explorer__card:hover {
+    border-color: var(--ink);
+  }
+
+  /* Without a photo the details take the whole card. */
+  .discovery-explorer__card > .discovery-explorer__body:only-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Phone: a thumbnail strip down the card's left edge, as tall as the card. */
+  .discovery-explorer__card .discovery-explorer__photo {
+    position: relative;
+    min-height: 6rem;
+  }
+
+  .discovery-explorer__card .discovery-explorer__photo img {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+
+  .discovery-explorer__card .discovery-explorer__body {
+    padding: 0.7rem;
+  }
+
+  .discovery-explorer__card h4 {
+    font-size: var(--step-small);
+  }
+
+  @media (min-width: 46rem) {
+    .discovery-explorer__featured {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+
+    .discovery-explorer__featured > .discovery-explorer__body:only-child {
+      grid-column: 1 / -1;
+    }
+
+    /* Side by side, the photo fills the card's height whatever the copy's length. */
+    .discovery-explorer__featured .discovery-explorer__photo {
+      position: relative;
+      min-height: 15rem;
+    }
+
+    .discovery-explorer__featured .discovery-explorer__photo img {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+    }
+
+    .discovery-explorer__cards {
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    }
+
+    .discovery-explorer__card {
+      grid-template-columns: none;
+      grid-template-rows: auto 1fr;
+    }
+
+    .discovery-explorer__card .discovery-explorer__photo {
+      position: static;
+      min-height: 0;
+    }
+
+    .discovery-explorer__card .discovery-explorer__photo img {
+      position: static;
+      aspect-ratio: 3 / 2;
+    }
+  }
+
   /* 3. Best episodes: one big photo at a time --------------------------- */
   .home-best__counter {
     margin: 0;

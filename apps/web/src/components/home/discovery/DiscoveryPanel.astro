@@ -1,0 +1,55 @@
+---
+import type { ExperienceTag } from "@tomokichi/domain";
+import VisualTemplate from "./VisualTemplate.astro";
+import StoryTemplate from "./StoryTemplate.astro";
+import ExplorerTemplate from "./ExplorerTemplate.astro";
+import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
+import { templateFor, type DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  tag: ExperienceTag;
+  items: readonly DiscoveryItem[];
+  /** Every story with this feeling, not just the ones shown. */
+  total: number;
+}
+
+/** One feeling's stories in the layout that feeling calls for. */
+const { tag, items, total } = Astro.props;
+const copy = EXPERIENCE_COPY[tag];
+const template = templateFor(tag);
+const summary =
+  items.length > 0 ? `${total}本のうち${items.length}本` : "まだこの気分の旅の話はありません";
+---
+
+<div
+  class:list={["home-discovery__panel", `home-discovery__panel--${template.id}`]}
+  style={`--exp-hue: ${copy.hue}`}
+  data-experience={tag}
+  data-template={template.id}
+  data-announce={`${copy.label}：${summary}を「${template.label}」で表示しています`}
+>
+  <header class="home-discovery__head">
+    <p class="home-discovery__template">{template.label}</p>
+    <h3>
+      <span aria-hidden="true">{copy.mark}</span>
+      {copy.label}の旅
+    </h3>
+    <p class="home-discovery__lead">{copy.lead}</p>
+    <p class="home-discovery__count">{summary}</p>
+  </header>
+
+  {items.length === 0 ? (
+    <p class="home-discovery__empty">
+      別の気分を選ぶか、<a href="/posts">すべての旅の話</a>から探してみてください。
+    </p>
+  ) : (
+    <>
+      {template.id === "visual" && <VisualTemplate items={items} />}
+      {template.id === "story" && <StoryTemplate items={items} />}
+      {template.id === "explorer" && <ExplorerTemplate items={items} />}
+      <a class="home-discovery__more" href={experienceHref(tag)}>
+        「{copy.label}」の記事をもっと読む（{total}本）&nbsp;→
+      </a>
+    </>
+  )}
+</div>

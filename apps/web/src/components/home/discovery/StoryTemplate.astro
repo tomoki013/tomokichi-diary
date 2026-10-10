@@ -1,0 +1,49 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * Template B: a trail through a notebook, one stop per story. The numbers are
+ * a suggested reading order across separate trips — the note says so, and the
+ * only dates shown are each trip's own, straight from the article.
+ */
+const { items } = Astro.props;
+---
+
+<div class="discovery-story">
+  <p class="discovery-story__note">
+    番号は読みはじめる順のおすすめです。旅の時系列ではありません。
+  </p>
+  <ol class="discovery-story__trail">
+    {items.map((item, index) => (
+      <li class="discovery-story__stop">
+        <span class="discovery-story__num" aria-hidden="true">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <div class="discovery-story__body">
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <p class="discovery-story__summary">{item.summary}</p>
+          {(item.place || item.travelMonth) && (
+            <p class="discovery-story__meta">
+              {item.place && <span class="discovery-place">{item.place}</span>}
+              {item.travelMonth && <span>{item.travelMonth} の旅</span>}
+            </p>
+          )}
+        </div>
+        {item.cover && (
+          <span class="discovery-story__thumb">
+            <Picture storageKey={item.cover.storageKey} alt="" sizes="7rem" />
+          </span>
+        )}
+      </li>
+    ))}
+  </ol>
+</div>

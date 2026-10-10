@@ -1,0 +1,202 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import DiscoveryPanel from "./DiscoveryPanel.astro";
+import { content } from "../../../lib/content";
+import { EXPERIENCES } from "../../../lib/experiences";
+import {
+  HOME_EXPERIENCE_PARAM,
+  defaultExperience,
+  placeLabel,
+  recommend,
+  travelMonthOf,
+  type DiscoveryItem,
+} from "../../../lib/home-discovery";
+
+interface Props {
+  /** Article ids already featured further down the page; recommended last. */
+  shownElsewhere: ReadonlySet<string>;
+}
+
+/**
+ * The stories under the experience chips, laid out to match the feeling.
+ *
+ * Only the default feeling is rendered live. The others sit in inert
+ * `<template>`s: their links never reach the crawlable DOM and their images
+ * are not requested until the reader picks that feeling. Without JavaScript
+ * the chips stay plain links to the filtered archive.
+ */
+const { shownElsewhere } = Astro.props;
+
+const nameOf = (id: Parameters<typeof content.locations.nameOf>[0]) =>
+  content.locations.nameOf(id, "ja");
+
+const toItem = (view: ArticleView): DiscoveryItem => {
+  const primary = content.primaryLocationOf(view.article.id);
+  const country = content.countryOf(view.article.id);
+  return {
+    slug: view.article.slug,
+    path: view.route.path,
+    title: view.revision.title,
+    summary: view.revision.summary,
+    cover: view.cover
+      ? { storageKey: view.cover.asset.storageKey, alt: view.cover.usage.alt }
+      : null,
+    place: placeLabel(primary ? nameOf(primary.id) : null, country ? nameOf(country.id) : null),
+    travelMonth: travelMonthOf(view.article.travelStartDate),
+    categories: view.categories.map((category) => category.name),
+  };
+};
+
+const views = content.articleViews();
+const panels = EXPERIENCES.map(({ tag }) => ({
+  tag,
+  total: content.withExperience(tag).length,
+  items: recommend(views, tag, { shownElsewhere }).map(toItem),
+}));
+const initial = defaultExperience(
+  Object.fromEntries(panels.map((panel) => [panel.tag, panel.total])),
+);
+const live = panels.find((panel) => panel.tag === initial);
+---
+
+{live && (
+  <div
+    class="home-discovery"
+    data-discovery
+    data-param={HOME_EXPERIENCE_PARAM}
+    data-default={live.tag}
+  >
+    <p class="home-discovery__hint" data-discovery-hint hidden>
+      気分を選ぶと、旅の話の並び方が変わります
+    </p>
+    <p class="sr-only" aria-live="polite" data-discovery-status></p>
+    <div class="home-discovery__stage" id="home-discovery-stage" data-discovery-stage>
+      <DiscoveryPanel {...live} />
+    </div>
+    {panels
+      .filter((panel) => panel !== live)
+      .map((panel) => (
+        <template data-discovery-panel={panel.tag}>
+          <DiscoveryPanel {...panel} />
+        </template>
+      ))}
+  </div>
+)}
+
+<script>
+  import { trackSemanticEvent } from "../../../lib/analytics";
+
+  const root = document.querySelector<HTMLElement>("[data-discovery]");
+  const stage = root?.querySelector<HTMLElement>("[data-discovery-stage]");
+  const first = stage?.firstElementChild;
+
+  if (root && stage && first instanceof HTMLElement) {
+    const param = root.dataset.param ?? "homeExperience";
+    const fallback = root.dataset.default ?? "";
+    const status = root.querySelector<HTMLElement>("[data-discovery-status]");
+    const chips = [...document.querySelectorAll<HTMLAnchorElement>("a[data-discovery-chip]")];
+    const templates = new Map(
+      [...root.querySelectorAll<HTMLTemplateElement>("template[data-discovery-panel]")].map(
+        (template) => [template.dataset.discoveryPanel ?? "", template],
+      ),
+    );
+    // Panels built once are kept, so going back to a feeling reuses its
+    // already-loaded images instead of cloning them again.
+    const built = new Map<string, HTMLElement>([[fallback, first]]);
+    let current = first;
+
+    const panelFor = (tag: string): HTMLElement | null => {
+      const cached = built.get(tag);
+      if (cached) return cached;
+      const panel = templates.get(tag)?.content.firstElementChild?.cloneNode(true);
+      if (!(panel instanceof HTMLElement)) return null;
+      built.set(tag, panel);
+      return panel;
+    };
+
+    const markChips = (tag: string) => {
+      for (const chip of chips) {
+        if (chip.dataset.discoveryChip === tag) chip.setAttribute("aria-current", "true");
+        else chip.removeAttribute("aria-current");
+      }
+    };
+
+    /** Swaps the panel in place. Synchronous, so rapid clicks cannot race. */
+    const show = (tag: string, announce: boolean): boolean => {
+      const panel = panelFor(tag);
+      if (!panel) return false;
+      if (panel !== current) {
+        stage.replaceChildren(panel);
+        current = panel;
+      }
+      markChips(tag);
+      if (announce && status) status.textContent = panel.dataset.announce ?? "";
+      return true;
+    };
+
+    const fromUrl = () => new URL(location.href).searchParams.get(param);
+
+    const syncFromUrl = (announce: boolean) => {
+      const requested = fromUrl();
+      if (requested && show(requested, announce)) return;
+      show(fallback, announce);
+      if (requested !== null) {
+        // Unknown value: drop it so the address bar never shares a dead link.
+        const url = new URL(location.href);
+        url.searchParams.delete(param);
+        history.replaceState(history.state, "", url);
+      }
+    };
+
+    for (const chip of chips) chip.setAttribute("aria-controls", stage.id);
+    root.querySelector("[data-discovery-hint]")?.removeAttribute("hidden");
+    syncFromUrl(false);
+
+    for (const chip of chips) {
+      chip.addEventListener("click", (event) => {
+        // Modified clicks keep the link's own meaning: the filtered archive.
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+          return;
+        const tag = chip.dataset.discoveryChip ?? "";
+        const before = current;
+        if (!show(tag, true)) return;
+        event.preventDefault();
+        if (fromUrl() !== tag) {
+          const url = new URL(location.href);
+          url.searchParams.set(param, tag);
+          url.hash = "";
+          history.pushState(null, "", url);
+        }
+        if (current !== before) {
+          trackSemanticEvent({
+            name: "discovery_category_selected",
+            experience: tag,
+            template: current.dataset.template ?? "",
+            placement: "home",
+          });
+        }
+        // On a phone the panel can start below the fold; bring its top in.
+        if (stage.getBoundingClientRect().top > innerHeight * 0.75) {
+          const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+          stage.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+        }
+      });
+    }
+
+    addEventListener("popstate", () => syncFromUrl(true));
+
+    stage.addEventListener("click", (event) => {
+      const link = (event.target as Element | null)?.closest<HTMLAnchorElement>(
+        "a[data-discovery-article]",
+      );
+      if (!link) return;
+      trackSemanticEvent({
+        name: "discovery_article_clicked",
+        experience: current.dataset.experience ?? "",
+        template: current.dataset.template ?? "",
+        articleSlug: link.dataset.discoveryArticle ?? "",
+        placement: "home",
+      });
+    });
+  }
+</script>

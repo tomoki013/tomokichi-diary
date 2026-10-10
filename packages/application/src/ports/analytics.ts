@@ -11,6 +11,19 @@ export type SemanticEvent =
       readonly name: "travel_knowledge_searched";
       readonly query: string;
       readonly resultCount: number;
+    }
+  | {
+      readonly name: "discovery_category_selected";
+      readonly experience: string;
+      readonly template: string;
+      readonly placement: "home";
+    }
+  | {
+      readonly name: "discovery_article_clicked";
+      readonly experience: string;
+      readonly template: string;
+      readonly articleSlug: string;
+      readonly placement: "home";
     };
 
 /** Vendor-neutral semantic events. Adapters may forward, log, or deliberately discard them. */
