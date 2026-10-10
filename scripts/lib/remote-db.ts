@@ -16,7 +16,7 @@ export function remoteDatabase(): SqlDatabase {
       {
         method: "POST",
         headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify(Array.isArray(input) ? { batch: input } : input),
         signal: AbortSignal.timeout(30000),
       },
     );
