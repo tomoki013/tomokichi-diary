@@ -7,9 +7,10 @@ interface Props {
 }
 
 /**
- * 発見: photos left out of focus, and a magnifying glass. Wherever the reader
- * moves it, that patch comes sharp and enlarged; a photo looked at long
- * enough is stamped 発見!, and the counter keeps score. Focus (keyboard) and
+ * 発見: photos left out of focus, and a magnifying glass. Tap a photo and the
+ * lens drops where the finger landed, then the photo comes sharp and is
+ * stamped 発見!; with a mouse the lens follows the pointer instead. The
+ * counter keeps score. Focus (keyboard) and
  * no-JavaScript readers get the photo sharp straight away.
  */
 const { items } = Astro.props;
@@ -17,7 +18,7 @@ const { items } = Astro.props;
 
 <div class="scene-lens" data-lens>
   <p class="scene-lens__score" aria-hidden="true" data-lens-score hidden>
-    🔍 写真をなぞって探そう　<b data-lens-found>0</b> / {items.length} 発見
+    🔍 <b data-lens-found>0</b> / {items.length} 発見
   </p>
   <ul class="scene-lens__finds">
     {items.map((item) => (
@@ -83,30 +84,60 @@ const { items } = Astro.props;
     };
     count();
 
+    const markFound = (find: HTMLElement | null) => {
+      if (!find || find.classList.contains("is-found")) return;
+      find.classList.add("is-found");
+      count();
+    };
+
     root.querySelectorAll<HTMLElement>("[data-lens-photo]").forEach((photo) => {
       const find = photo.closest<HTMLElement>("[data-lens-find]");
       let since = 0;
-      const move = (event: PointerEvent) => {
+      let timer = 0;
+      const aimAt = (event: PointerEvent) => {
         const box = photo.getBoundingClientRect();
         photo.style.setProperty("--x", `${event.clientX - box.left}px`);
         photo.style.setProperty("--y", `${event.clientY - box.top}px`);
         photo.classList.add("is-looking");
-        since ||= event.timeStamp;
-        if (event.timeStamp - since > LOOK_MS && find && !find.classList.contains("is-found")) {
-          find.classList.add("is-found");
-          count();
-        }
       };
-      photo.addEventListener("pointermove", move, { signal });
-      photo.addEventListener("pointerdown", move, { signal });
+
+      // Mouse: the lens follows the pointer; resting on a photo finds it.
+      photo.addEventListener(
+        "pointermove",
+        (event) => {
+          if (event.pointerType !== "mouse") return;
+          aimAt(event);
+          since ||= event.timeStamp;
+          if (event.timeStamp - since > LOOK_MS) markFound(find);
+        },
+        { signal },
+      );
       photo.addEventListener(
         "pointerleave",
-        () => {
+        (event) => {
+          if (event.pointerType !== "mouse") return;
           photo.classList.remove("is-looking");
           since = 0;
         },
         { signal },
       );
+
+      // Touch: a tap drops the lens where the finger landed, holds it there a
+      // moment, then the whole photo comes into focus — found.
+      photo.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (event.pointerType === "mouse") return;
+          aimAt(event);
+          window.clearTimeout(timer);
+          timer = window.setTimeout(() => {
+            markFound(find);
+            photo.classList.remove("is-looking");
+          }, LOOK_MS + 300);
+        },
+        { signal },
+      );
+      signal.addEventListener("abort", () => window.clearTimeout(timer));
     });
 
     // Without motion the lens would only be a chore: show everything sharp.

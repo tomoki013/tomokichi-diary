@@ -39,10 +39,10 @@ describe("template resolution", () => {
     expect(new Set(EXPERIENCE_TAGS.map((tag) => templateFor(tag).id)).size).toBe(8);
   });
 
-  it("gives every template a short label for the mood tiles", () => {
+  it("tells the reader what to do in one short line, for every scene", () => {
     for (const template of Object.values(TEMPLATES)) {
-      expect(template.short.length).toBeGreaterThan(0);
-      expect(template.short.length).toBeLessThanOrEqual(4);
+      expect(template.cue.length).toBeGreaterThan(0);
+      expect(template.cue.length).toBeLessThanOrEqual(24);
       expect(template.limit).toBeGreaterThan(0);
     }
   });

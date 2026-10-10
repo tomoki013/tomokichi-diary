@@ -8,8 +8,9 @@ interface Props {
 
 /**
  * 忘れられない: a darkroom. Instant prints come out blank and slowly develop
- * under the red safelight; shake one (move over it, or tap) and it comes up
- * faster. As the last print finishes, the lights come up. Captions are
+ * under the red safelight; tap one to shake it and it comes up faster (a
+ * mouse can wiggle over it). The caption is the link, so tapping the photo
+ * never leaves the page. As the last print finishes, the lights come up. Captions are
  * written from the start — only the pictures develop.
  */
 const { items } = Astro.props;
@@ -74,12 +75,18 @@ const { items } = Astro.props;
     const shaking = prints.map(() => 0);
     prints.forEach((print, i) => {
       print.style.setProperty("--dev", "0");
-      const shake = () => {
-        shaking[i] = 600;
+      const shake = (ms: number) => () => {
+        shaking[i] = Math.max(shaking[i] ?? 0, ms);
         print.classList.add("is-shaking");
       };
-      print.addEventListener("pointermove", shake, { signal });
-      print.addEventListener("pointerdown", shake, { signal });
+      const photo = print.querySelector(".scene-develop__photo") ?? print;
+      // A tap is one good shake; a mouse wiggling over the print keeps it going.
+      photo.addEventListener("pointerdown", shake(900), { signal });
+      print.addEventListener(
+        "pointermove",
+        (event) => event.pointerType === "mouse" && shake(500)(),
+        { signal },
+      );
     });
     panel.style.setProperty("--room", "0");
     if (hint) hint.hidden = false;

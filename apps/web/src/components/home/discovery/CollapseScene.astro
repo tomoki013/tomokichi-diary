@@ -8,8 +8,9 @@ interface Props {
 
 /**
  * これは終わった…: it is raining, and the stories fall onto the page one
- * after another and land askew, prints cracked at the corner. Point at one
- * and it picks itself back up — which is how each of these trips ended.
+ * after another and land askew, prints cracked at the corner. Scroll one to
+ * the middle of the screen (or point at it) and it picks itself back up —
+ * which is how each of these trips ended.
  */
 const { items } = Astro.props;
 ---
@@ -47,12 +48,19 @@ const { items } = Astro.props;
 </div>
 
 <script>
-  import { registerScene, replay } from "../../../lib/discovery-scenes";
+  import { registerScene, replay, watchCentre } from "../../../lib/discovery-scenes";
 
-  // The fall is a CSS animation; replaying it each time the scene comes back
-  // is the whole script.
-  registerScene("collapse", (panel, motion) => {
+  // The fall is a CSS animation, replayed each time the scene comes back.
+  // Scrolling a card to the middle of the screen picks it back up — the
+  // phone's stand-in for pointing at it.
+  registerScene("collapse", (panel, motion, signal) => {
     const root = panel.querySelector<HTMLElement>("[data-collapse]");
-    if (root && motion) replay(root, "is-falling");
+    if (!root) return;
+    if (motion) replay(root, "is-falling");
+    watchCentre(
+      [...root.querySelectorAll(".scene-collapse__card")],
+      (card, centred) => card.classList.toggle("is-steady", centred),
+      signal,
+    );
   });
 </script>

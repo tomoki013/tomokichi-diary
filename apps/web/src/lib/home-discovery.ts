@@ -25,10 +25,14 @@ export type DiscoveryTemplateId =
  */
 export interface DiscoveryTemplate {
   readonly id: DiscoveryTemplateId;
-  /** Shown above the stories so the reader can tell the layout changed on purpose. */
+  /** The scene's name, for the screen-reader announcement. */
   readonly label: string;
-  /** One word on the mood tiles, so the reader sees each feeling has its own scene. */
-  readonly short: string;
+  /**
+   * What to do, in one line, shown above the scene. Written for a thumb:
+   * every scene works with taps and scrolling alone, since most readers are
+   * on a phone. Shown only with JavaScript, when the play is actually on.
+   */
+  readonly cue: string;
   /** Whether the scene leans on photos; articles with a cover are ranked first. */
   readonly needsPhoto: boolean;
   /** How many stories the scene holds. */
@@ -36,14 +40,62 @@ export interface DiscoveryTemplate {
 }
 
 export const TEMPLATES: Record<DiscoveryTemplateId, DiscoveryTemplate> = {
-  board: { id: "board", label: "出発案内板", short: "出発便", needsPhoto: false, limit: 6 },
-  cinema: { id: "cinema", label: "シネマ", short: "映画", needsPhoto: true, limit: 4 },
-  pulse: { id: "pulse", label: "心拍モニター", short: "心拍", needsPhoto: true, limit: 4 },
-  collapse: { id: "collapse", label: "崩れ落ちた旅", short: "崩壊", needsPhoto: true, limit: 4 },
-  gacha: { id: "gacha", label: "笑い話ガチャ", short: "ガチャ", needsPhoto: true, limit: 8 },
-  lens: { id: "lens", label: "虫眼鏡で探す", short: "虫眼鏡", needsPhoto: true, limit: 4 },
-  letters: { id: "letters", label: "挑戦状", short: "挑戦状", needsPhoto: false, limit: 4 },
-  develop: { id: "develop", label: "記憶を現像する", short: "現像", needsPhoto: true, limit: 4 },
+  board: {
+    id: "board",
+    label: "出発案内板",
+    cue: "行き先が決まったら、乗りたい便をタップ",
+    needsPhoto: false,
+    limit: 5,
+  },
+  cinema: {
+    id: "cinema",
+    label: "シネマ",
+    cue: "上映中。左右にスワイプで次のシーンへ",
+    needsPhoto: true,
+    limit: 4,
+  },
+  pulse: {
+    id: "pulse",
+    label: "心拍モニター",
+    cue: "スクロールするほど、心拍が上がっていく…",
+    needsPhoto: true,
+    limit: 4,
+  },
+  collapse: {
+    id: "collapse",
+    label: "崩れ落ちた旅",
+    cue: "スクロールすると、崩れた旅が立ち直る",
+    needsPhoto: true,
+    limit: 4,
+  },
+  gacha: {
+    id: "gacha",
+    label: "笑い話ガチャ",
+    cue: "ハンドルをタップして、1話引いてみて",
+    needsPhoto: true,
+    limit: 8,
+  },
+  lens: {
+    id: "lens",
+    label: "虫眼鏡で探す",
+    cue: "ぼやけた写真をタップして、虫眼鏡でのぞく",
+    needsPhoto: true,
+    limit: 4,
+  },
+  letters: {
+    id: "letters",
+    label: "挑戦状",
+    cue: "封蝋をタップして、挑戦状を開ける",
+    needsPhoto: false,
+    limit: 4,
+  },
+  develop: {
+    id: "develop",
+    label: "記憶の現像",
+    cue: "写真をタップすると、早く現像される",
+    needsPhoto: true,
+    limit: 4,
+  },
 };
 
 /** Which scene each feeling gets. The only place the mapping lives. */

@@ -58,8 +58,10 @@ const Scene = SCENES[template.id];
       {copy.label}の旅
     </h3>
     <p class="home-discovery__meta">
-      <span>{template.label}</span>
       <span>{summary}</span>
+    </p>
+    <p class="home-discovery__cue" data-discovery-hint hidden>
+      👆 {template.cue}
     </p>
   </header>
 

@@ -109,14 +109,32 @@ const live = panels.find((panel) => panel.tag === initial);
       if (cached) return cached;
       const panel = templates.get(tag)?.content.firstElementChild?.cloneNode(true);
       if (!(panel instanceof HTMLElement)) return null;
+      // The template copy still carries the no-JavaScript state.
+      panel.querySelectorAll("[data-discovery-hint]").forEach((hint) => {
+        hint.removeAttribute("hidden");
+      });
       built.set(tag, panel);
       return panel;
     };
 
+    const behavior = (): ScrollBehavior => (reducedMotion.matches ? "auto" : "smooth");
+
     const markChips = (tag: string) => {
       for (const chip of chips) {
-        if (chip.dataset.discoveryChip === tag) chip.setAttribute("aria-current", "true");
-        else chip.removeAttribute("aria-current");
+        if (chip.dataset.discoveryChip !== tag) {
+          chip.removeAttribute("aria-current");
+          continue;
+        }
+        chip.setAttribute("aria-current", "true");
+        // Keep the chosen feeling in the middle of the swipeable bar.
+        const row = chip.closest("ul");
+        if (row && row.scrollWidth > row.clientWidth) {
+          const item = chip.parentElement ?? chip;
+          row.scrollTo({
+            left: item.offsetLeft - (row.clientWidth - item.offsetWidth) / 2,
+            behavior: behavior(),
+          });
+        }
       }
     };
 
@@ -189,12 +207,12 @@ const live = panels.find((panel) => panel.tag === initial);
             placement: "home",
           });
         }
-        // On a phone the panel can start below the fold; bring its top in.
-        if (stage.getBoundingClientRect().top > innerHeight * 0.75) {
-          stage.scrollIntoView({
-            block: "start",
-            behavior: reducedMotion.matches ? "auto" : "smooth",
-          });
+        // Line the scene up right under the pinned bar, wherever the reader
+        // was: below the fold on a phone, or halfway through the last scene.
+        const bar = document.querySelector(".home-picker__bar")?.getBoundingClientRect();
+        const offset = stage.getBoundingClientRect().top - (bar?.bottom ?? 0) - 8;
+        if (Math.abs(offset) > 24) {
+          window.scrollTo({ top: window.scrollY + offset, behavior: behavior() });
         }
       });
     }

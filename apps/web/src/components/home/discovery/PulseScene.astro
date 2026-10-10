@@ -7,8 +7,9 @@ interface Props {
 }
 
 /**
- * ハラハラ: a heart monitor over the stories. The trace ticks along calmly;
- * point at a story and it races, the reading climbs and the card trembles.
+ * ハラハラ: a heart monitor pinned over the stories. Scroll down through them
+ * (or point at one) and the trace races, the reading climbs toward the last
+ * story and the card in view trembles.
  * The number is the *reader's* make-believe pulse — a toy, not a statistic
  * about the trip, and labelled as such for assistive tech by staying hidden.
  */
@@ -53,15 +54,16 @@ const { items } = Astro.props;
 </div>
 
 <script>
-  import { registerScene } from "../../../lib/discovery-scenes";
+  import { registerScene, watchCentre } from "../../../lib/discovery-scenes";
 
   const CALM = 72;
-  const RACING = 148;
+  const PEAK = 156;
 
   registerScene("pulse", (panel, motion, signal) => {
     const root = panel.querySelector<HTMLElement>("[data-pulse]");
     const reading = panel.querySelector<HTMLElement>("[data-pulse-bpm]");
     if (!root || !reading) return;
+    const cards = [...root.querySelectorAll<HTMLElement>("[data-pulse-card]")];
 
     let bpm = CALM;
     let target = CALM;
@@ -74,22 +76,44 @@ const { items } = Astro.props;
       root.style.setProperty("--beat", `${(60 / bpm).toFixed(2)}s`);
       frame = Math.abs(target - bpm) > 0.5 ? requestAnimationFrame(tick) : 0;
     };
-    const race = (on: boolean) => () => {
-      target = on ? RACING : CALM;
-      root.classList.toggle("is-racing", on);
+    const aim = (value: number) => {
+      target = value;
+      root.classList.toggle("is-racing", value > CALM);
       if (!motion) {
-        bpm = target;
-        reading.textContent = String(target);
+        bpm = value;
+        reading.textContent = String(value);
         return;
       }
       if (!frame) frame = requestAnimationFrame(tick);
     };
+    // The further down the stories, the faster the heart: the last card peaks.
+    const pulseFor = (card: HTMLElement) =>
+      Math.round(CALM + ((cards.indexOf(card) + 1) / cards.length) * (PEAK - CALM));
 
-    root.querySelectorAll<HTMLElement>("[data-pulse-card]").forEach((card) => {
-      card.addEventListener("pointerenter", race(true), { signal });
-      card.addEventListener("pointerleave", race(false), { signal });
-      card.addEventListener("focusin", race(true), { signal });
-      card.addEventListener("focusout", race(false), { signal });
+    // Phone: whichever card sits in the middle of the screen sets the pulse.
+    watchCentre(
+      cards,
+      (card, centred) => {
+        if (!(card instanceof HTMLElement)) return;
+        card.classList.toggle("is-centred", centred);
+        if (centred) aim(pulseFor(card));
+        else if (!cards.some((other) => other.classList.contains("is-centred"))) aim(CALM);
+      },
+      signal,
+    );
+
+    // Pointer and keyboard: the card being pointed at or focused.
+    cards.forEach((card) => {
+      const on = () => aim(pulseFor(card));
+      const off = () => aim(CALM);
+      card.addEventListener("pointerenter", (event) => event.pointerType === "mouse" && on(), {
+        signal,
+      });
+      card.addEventListener("pointerleave", (event) => event.pointerType === "mouse" && off(), {
+        signal,
+      });
+      card.addEventListener("focusin", on, { signal });
+      card.addEventListener("focusout", off, { signal });
     });
 
     return () => cancelAnimationFrame(frame);

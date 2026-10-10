@@ -8,12 +8,17 @@ interface Props {
 
 /**
  * ワクワク: an airport departure board. Destinations clatter into place on
- * split-flap tiles; pointing at a row shows its photo in the window beside
- * the board. Every cell is the article's own data — month of travel,
+ * split-flap tiles. On a phone each row carries its own small photo; on a
+ * wide screen pointing at a row shows it in the window beside the board. Every cell is the article's own data — month of travel,
  * destination, title — and nothing is invented to fill the columns (no
  * flight numbers, gates or statuses).
  */
 const { items } = Astro.props;
+
+// `placeLabel` gives "city / country"; the flaps spell the city, the
+// country sits beside it in small type.
+const cityOf = (place: string | null) => place?.split(" / ")[0] ?? "どこかへ";
+const countryOf = (place: string | null) => place?.split(" / ")[1] ?? null;
 ---
 
 <div class="scene-board" data-board>
@@ -31,9 +36,19 @@ const { items } = Astro.props;
       {items.map((item, index) => (
         <li class="scene-board__row" data-board-row={index}>
           <span class="scene-board__time">{item.travelMonth ?? "----.--"}</span>
-          <span class="scene-board__dest" data-flap>
-            {item.place ?? "どこかへ"}
+          <span class="scene-board__dest">
+            <span class="scene-board__city" data-flap>
+              {cityOf(item.place)}
+            </span>
+            {countryOf(item.place) && (
+              <small class="scene-board__country">{countryOf(item.place)}</small>
+            )}
           </span>
+          {item.cover && (
+            <span class="scene-board__thumb" aria-hidden="true">
+              <Picture storageKey={item.cover.storageKey} alt="" sizes="3.6rem" />
+            </span>
+          )}
           <a class="scene-board__flight" href={item.path} data-discovery-article={item.slug}>
             {item.title}
           </a>
