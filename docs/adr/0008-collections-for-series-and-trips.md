@@ -14,4 +14,4 @@ Both are ordered groups of articles with their own URL space, which is more than
 
 ## Consequences
 
-Trips moved from `/journey/j-2024-02-26` to `/trips/hokkaido-2024-02`, with 301s from the old paths.
+Since 2026-08-30, both series and journeys use `/collections/*`. For example, the canonical journey URL is `/collections/hokkaido-2024-02`; `/trips/hokkaido-2024-02` and `/journey/j-2024-02-26` redirect directly to it. Migration 0013 restores this direction after 0012 mistakenly reversed it.

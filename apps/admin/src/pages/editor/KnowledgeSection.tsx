@@ -1,3 +1,4 @@
+import { useSectionSave, type RegisterSection } from "./section-save";
 import { useState } from "react";
 import type { ArticleKnowledgeBundleDto, ArticleKnowledgeDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
@@ -19,21 +20,34 @@ const provenanceLabels: Record<string, string> = {
 export function KnowledgeSection({
   articleId,
   revisionId,
+  register,
+  onSaveAll,
 }: {
   articleId: string;
   revisionId: string | null;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <details
       className="panel panel--details"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
+      onToggle={(event) => {
+        if (event.currentTarget.open) setOpen(true);
+      }}
     >
       <summary>
         <h2>Travel Knowledge</h2>
         <span className="muted small">検索・WebMCP・MCP 用の構造化データ</span>
       </summary>
-      {open && <KnowledgeEditor articleId={articleId} revisionId={revisionId} />}
+      {open && (
+        <KnowledgeEditor
+          articleId={articleId}
+          revisionId={revisionId}
+          register={register}
+          onSaveAll={onSaveAll}
+        />
+      )}
     </details>
   );
 }
@@ -58,28 +72,52 @@ const pretty = (value: unknown): string => JSON.stringify(value, null, 2);
 function KnowledgeEditor({
   articleId,
   revisionId,
+  register,
+  onSaveAll,
 }: {
   articleId: string;
   revisionId: string | null;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
 }) {
   const loaded = useResource(() => api.getKnowledge(articleId), `knowledge:${articleId}`);
   if (loaded.error) return <ErrorState error={loaded.error} onRetry={() => void loaded.reload()} />;
   if (!loaded.data) return <SkeletonRows rows={4} />;
   if (!revisionId) return <p className="muted">下書きを保存すると編集できます。</p>;
-  return <KnowledgeForm articleId={articleId} revisionId={revisionId} initial={loaded.data} />;
+  return (
+    <KnowledgeForm
+      articleId={articleId}
+      revisionId={revisionId}
+      initial={loaded.data}
+      register={register}
+      onSaveAll={onSaveAll}
+    />
+  );
 }
 
 function KnowledgeForm({
   articleId,
   revisionId,
+  register,
+  onSaveAll,
   initial,
 }: {
   articleId: string;
   revisionId: string;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
   initial: ArticleKnowledgeBundleDto;
 }) {
   const toast = useToast();
   const [bundle, setBundle] = useState(initial);
+  const [baseline, setBaseline] = useState(() =>
+    pretty({
+      article: initial.article,
+      facts: initial.facts,
+      sources: initial.sources,
+      routes: initial.routes,
+    }),
+  );
   const [json, setJson] = useState(() => ({
     facts: pretty(initial.facts),
     sources: pretty(initial.sources),
@@ -89,6 +127,14 @@ function KnowledgeForm({
 
   const adopt = (next: ArticleKnowledgeBundleDto): void => {
     setBundle(next);
+    setBaseline(
+      pretty({
+        article: next.article,
+        facts: next.facts,
+        sources: next.sources,
+        routes: next.routes,
+      }),
+    );
     setJson({
       facts: pretty(next.facts),
       sources: pretty(next.sources),
@@ -132,6 +178,48 @@ function KnowledgeForm({
       setBusy(false);
     }
   };
+
+  const dirty =
+    pretty({
+      article: bundle.article,
+      facts: parsed?.facts,
+      sources: parsed?.sources,
+      routes: parsed?.routes,
+    }) !== baseline;
+  const save = async (): Promise<boolean> => {
+    if (!parsed) return false;
+    setBusy(true);
+    try {
+      const latest = await api.getArticle(articleId);
+      adopt(
+        await api.saveKnowledge(articleId, {
+          article: {
+            ...knowledge,
+            revisionId: latest.currentRevision?.id ?? revisionId,
+            quickAnswer,
+          },
+          ...parsed,
+        }),
+      );
+      toast.info("構造化データを保存しました");
+      return true;
+    } catch (error) {
+      toast.error(error);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+  useSectionSave(register, "knowledge", {
+    dirty,
+    busy,
+    save,
+    problem: !parsed
+      ? "構造化データのJSONを修正してください"
+      : dirty && !quickAnswer.summary.trim()
+        ? "Quick Answerを入力してください"
+        : undefined,
+  });
 
   const candidates = bundle.facts.filter(
     (fact) => fact.provenance === "firsthand" && fact.status === "candidate",
@@ -246,18 +334,7 @@ function KnowledgeForm({
           type="button"
           className="primary"
           disabled={busy || !parsed || quickAnswer.summary.trim() === ""}
-          onClick={() =>
-            void act(async () => {
-              if (!parsed) return;
-              adopt(
-                await api.saveKnowledge(articleId, {
-                  article: { ...knowledge, quickAnswer },
-                  ...parsed,
-                }),
-              );
-              toast.info("構造化データを保存しました");
-            })
-          }
+          onClick={() => void onSaveAll()}
         >
           構造化データを保存
         </button>

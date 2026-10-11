@@ -44,7 +44,7 @@ async function createArticle(overrides: Record<string, unknown> = {}): Promise<s
 
 beforeEach(async () => {
   ctx = await createTestContext();
-  app = createApp({ contextFactory: () => ctx });
+  app = createApp({ contextFactory: () => ctx, publishSite: async () => ({ state: "queued" }) });
 });
 
 describe("authentication", () => {

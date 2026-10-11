@@ -13,6 +13,8 @@ export interface Env {
   MEDIA: R2Like;
   /** Shared secret for the admin API. Set with `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`. */
   ADMIN_TOKEN?: string;
+  /** Fine-grained GitHub token: this repository's Actions write permission only. */
+  GITHUB_PUBLISH_TOKEN?: string;
   PUBLIC_MEDIA_URL?: string;
   PUBLIC_SITE_URL?: string;
   ALLOWED_ORIGINS?: string;

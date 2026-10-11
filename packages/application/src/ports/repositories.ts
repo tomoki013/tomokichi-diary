@@ -167,9 +167,24 @@ export interface KnowledgeRepository {
   saveArticleKnowledge(knowledge: ArticleKnowledge): Promise<void>;
 }
 
+export interface PublishedArticleMetadata {
+  media: readonly ArticleMedia[];
+  locations: readonly ArticleLocation[];
+  places: readonly ArticlePlace[];
+  categories: readonly ArticleCategory[];
+  tags: readonly ArticleTag[];
+  collections: readonly ArticleCollection[];
+  experienceTags: Article["experienceTags"];
+}
+export interface PublicationMetadataRepository {
+  listAll(): Promise<readonly { revisionId: RevisionId; metadata: PublishedArticleMetadata }[]>;
+  save(revisionId: RevisionId, metadata: PublishedArticleMetadata): Promise<void>;
+}
+
 /** Everything a use case may reach for, assembled at the composition root. */
 export interface Repositories {
   readonly articles: ArticleRepository;
+  readonly publicationMetadata: PublicationMetadataRepository;
   readonly articleLikes: ArticleLikeRepository;
   readonly revisions: RevisionRepository;
   readonly embeds: EmbedRepository;

@@ -40,7 +40,12 @@ export function articleMarkdownFiles(snapshot: ContentSnapshot): ExportFile[] {
   const revisionById = new Map(snapshot.revisions.map((r) => [r.id, r]));
   const canonicalPath = new Map(
     snapshot.routes
-      .filter((r) => r.isCanonical && r.targetType === "article" && r.targetId !== null)
+      .filter(
+        (r) =>
+          r.isCanonical &&
+          (r.targetType === "article" || r.targetType === "static") &&
+          r.targetId !== null,
+      )
       .map((r) => [r.targetId!, r.path]),
   );
 

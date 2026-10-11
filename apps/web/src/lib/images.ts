@@ -102,9 +102,11 @@ const IMG_TAG = /<img\b([^>]*)>/gi;
 export function enhanceBodyImages(html: string): string {
   return html.replace(IMG_TAG, (tag, attrs: string) => {
     const src = /\ssrc="([^"]*)"/i.exec(attrs)?.[1];
-    if (src === undefined || !src.startsWith("/images/")) return tag;
+    if (src === undefined) return tag;
+    const local = src.startsWith(`${mediaBaseUrl}/`) ? src.slice(mediaBaseUrl.length) : src;
+    if (!local.startsWith("/images/") && !local.startsWith("/originals/")) return tag;
 
-    const storageKey = src.replace(/^\/+/, "");
+    const storageKey = local.replace(/^\/+/, "");
     const image = imageSources(storageKey);
     if (image.sources.length === 0) return tag.replace(src, image.src);
 

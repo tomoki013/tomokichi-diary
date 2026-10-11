@@ -12,6 +12,8 @@ pnpm diagnostics
 
 ## Releasing
 
+Content publishing now uses D1 as the source of truth. Both code releases and the `Publish content` workflow pull its published versions before building. Admin setup, publication status, retries and schedules are documented in [ADMIN.md](ADMIN.md). The committed export remains the offline recovery and code CI snapshot.
+
 A push to `main` deploys itself: the `Deploy` job in `.github/workflows/ci.yml`
 starts only after the `Check` job is green and runs the sequence below. Its
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are secrets of the GitHub

@@ -1,10 +1,11 @@
+import { useSectionSave, type RegisterSection } from "./section-save";
 import { useMemo, useState } from "react";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { api, type PlaceDto, type Relation, type RelationsInput } from "../../lib/api";
 import { relationLabels } from "../../lib/labels";
 import { treeOrder } from "../../lib/locations";
 import { useResource } from "../../ui/hooks";
-import { Panel, SkeletonRows } from "../../ui/parts";
+import { ErrorState, Panel, SkeletonRows } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 
 function relationsFrom(article: ArticleDetailDto): RelationsInput {
@@ -30,9 +31,13 @@ function relationsFrom(article: ArticleDetailDto): RelationsInput {
 export function RelationsSection({
   article,
   onSaved,
+  register,
+  onSaveAll,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
 }) {
   const toast = useToast();
   const reference = useResource(
@@ -70,24 +75,32 @@ export function RelationsSection({
         : [...current[key], id],
     }));
 
-  async function save(): Promise<void> {
+  async function save(): Promise<boolean> {
     setBusy(true);
     try {
       await api.saveRelations(article.id, value);
       setBaseline(JSON.stringify(value));
       toast.info("関連付けを保存しました");
       await onSaved();
+      return true;
     } catch (error) {
       toast.error(error);
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
+  useSectionSave(register, "relations", { dirty, busy, save });
+
   if (!reference.data) {
     return (
       <Panel title="関連付け">
-        <SkeletonRows rows={4} />
+        {reference.error ? (
+          <ErrorState error={reference.error} onRetry={() => void reference.reload()} />
+        ) : (
+          <SkeletonRows rows={4} />
+        )}
       </Panel>
     );
   }
@@ -269,7 +282,7 @@ export function RelationsSection({
           type="button"
           className="primary"
           disabled={busy || !dirty}
-          onClick={() => void save()}
+          onClick={() => void onSaveAll()}
         >
           関連付けを保存
         </button>

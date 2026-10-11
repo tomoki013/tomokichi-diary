@@ -1,5 +1,7 @@
 import type {
   AIArtifactRepository,
+  PublicationMetadataRepository,
+  PublishedArticleMetadata,
   ArticleRepository,
   AuthorRepository,
   EmbedRepository,
@@ -96,6 +98,22 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
     delete: async (id) => {
       await db.prepare("DELETE FROM articles WHERE id = ?").bind(id).run();
+    },
+  };
+
+  const publicationMetadata: PublicationMetadataRepository = {
+    listAll: async () =>
+      (await all("SELECT revision_id, metadata FROM publication_metadata")).map((row) => ({
+        revisionId: row["revision_id"] as import("@tomokichi/domain").RevisionId,
+        metadata: JSON.parse(String(row["metadata"])) as PublishedArticleMetadata,
+      })),
+    save: async (revisionId, metadata) => {
+      await db
+        .prepare(
+          "INSERT INTO publication_metadata (revision_id, metadata) VALUES (?, ?) ON CONFLICT(revision_id) DO UPDATE SET metadata = excluded.metadata",
+        )
+        .bind(revisionId, JSON.stringify(metadata))
+        .run();
     },
   };
 
@@ -403,6 +421,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
 
   return {
     articles,
+    publicationMetadata,
     articleLikes,
     revisions,
     embeds,

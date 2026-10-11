@@ -1108,3 +1108,18 @@ fieldset {
     opacity: 0;
   }
 }
+
+.editor__fields {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.preview img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(40rem, 80svh);
+  margin-inline: auto;
+}

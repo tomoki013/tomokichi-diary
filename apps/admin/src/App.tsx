@@ -11,7 +11,7 @@ import { Inquiries } from "./pages/inquiries/Inquiries";
 import { InquiryDetail } from "./pages/inquiries/InquiryDetail";
 import { LegacyMessages } from "./pages/inquiries/LegacyMessages";
 import { SignIn } from "./pages/SignIn";
-import { EmptyState, PageHeader } from "./ui/parts";
+import { EmptyState, ErrorState, PageHeader } from "./ui/parts";
 
 const NAV = [
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
@@ -21,19 +21,34 @@ const NAV = [
   { key: "inquiries", label: "お問い合わせ", href: href.inquiries() },
 ] as const;
 
-type Auth = "checking" | "in" | "out";
+type Auth = "checking" | "in" | "out" | "error";
 
 export function App() {
   const route = useHashRoute();
   const [auth, setAuth] = useState<Auth>("checking");
 
-  useEffect(() => {
+  const [connectionError, setConnectionError] = useState<unknown>();
+  const checkAuth = useCallback(() => {
+    setAuth("checking");
     // With Access in front, an authorised browser is already signed in and
     // there is nothing to type. Probing beats asking.
     api.taxonomy().then(
       () => setAuth("in"),
-      (error: unknown) => setAuth(error instanceof ApiError && error.status === 401 ? "out" : "in"),
+      (error: unknown) => {
+        setConnectionError(error);
+        setAuth(error instanceof ApiError && error.status === 401 ? "out" : "error");
+      },
     );
+  }, []);
+  useEffect(() => {
+    // API authentication is an external synchronisation.
+    // oxlint-disable-next-line react/set-state-in-effect
+    checkAuth();
+  }, [checkAuth]);
+  useEffect(() => {
+    const expired = () => setAuth("out");
+    globalThis.addEventListener("admin-session-expired", expired);
+    return () => globalThis.removeEventListener("admin-session-expired", expired);
   }, []);
 
   const signOut = useCallback(() => {
@@ -42,6 +57,13 @@ export function App() {
   }, []);
 
   if (auth === "checking") return <div className="boot" aria-busy="true" />;
+  if (auth === "error")
+    return (
+      <main className="signin">
+        <h1>管理画面に接続できません</h1>
+        <ErrorState error={connectionError} onRetry={checkAuth} />
+      </main>
+    );
   if (auth === "out") return <SignIn onSignedIn={() => setAuth("in")} />;
 
   const current = section(route);

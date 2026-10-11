@@ -1,3 +1,4 @@
 import { createApp } from "./app.js";
 
-export default createApp();
+const app = createApp();
+export default { fetch: app.fetch };

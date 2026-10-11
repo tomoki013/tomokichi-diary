@@ -1,3 +1,4 @@
+import { useSectionSave, type RegisterSection } from "./section-save";
 import { useState } from "react";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
@@ -9,9 +10,13 @@ import { useToast } from "../../ui/toast";
 export function ExperienceSection({
   article,
   onSaved,
+  register,
+  onSaveAll,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
+  register: RegisterSection;
+  onSaveAll: () => Promise<boolean>;
 }) {
   const toast = useToast();
   const [chosen, setChosen] = useState<string[]>(() => [...article.experienceTags]);
@@ -19,7 +24,7 @@ export function ExperienceSection({
   const [busy, setBusy] = useState(false);
   const dirty = chosen.toSorted().join() !== baseline;
 
-  async function save(): Promise<void> {
+  async function save(): Promise<boolean> {
     setBusy(true);
     try {
       const saved = await api.saveExperienceTags(article.id, chosen);
@@ -27,12 +32,16 @@ export function ExperienceSection({
       setBaseline(saved.experienceTags.toSorted().join());
       toast.info("体験タグを保存しました");
       await onSaved();
+      return true;
     } catch (error) {
       toast.error(error);
+      return false;
     } finally {
       setBusy(false);
     }
   }
+
+  useSectionSave(register, "experiences", { dirty, busy, save });
 
   return (
     <Panel title="体験タグ">
@@ -59,7 +68,7 @@ export function ExperienceSection({
           type="button"
           className="primary"
           disabled={busy || !dirty}
-          onClick={() => void save()}
+          onClick={() => void onSaveAll()}
         >
           体験タグを保存
         </button>

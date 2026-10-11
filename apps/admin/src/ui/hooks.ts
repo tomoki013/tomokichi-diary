@@ -69,10 +69,23 @@ export function useResource<T>(load: () => Promise<T>, key: string): Resource<T>
   };
 }
 
+let navigationDirty = false;
+
 export function useHashRoute(): Route {
   const [hash, setHash] = useState(() => globalThis.location.hash);
   useEffect(() => {
-    const onChange = (): void => setHash(globalThis.location.hash);
+    let accepted = globalThis.location.hash;
+    const onChange = (): void => {
+      if (
+        navigationDirty &&
+        !globalThis.confirm("未保存の変更があります。保存せずに移動しますか？")
+      ) {
+        globalThis.history.replaceState(null, "", accepted || "#/");
+        return;
+      }
+      accepted = globalThis.location.hash;
+      setHash(accepted);
+    };
     globalThis.addEventListener("hashchange", onChange);
     return () => globalThis.removeEventListener("hashchange", onChange);
   }, []);
@@ -82,10 +95,14 @@ export function useHashRoute(): Route {
 /** Warns before leaving the page while there is unsaved work. */
 export function useUnsavedWarning(dirty: boolean): void {
   useEffect(() => {
+    navigationDirty = dirty;
     if (!dirty) return;
     const onBeforeUnload = (event: BeforeUnloadEvent): void => event.preventDefault();
     globalThis.addEventListener("beforeunload", onBeforeUnload);
-    return () => globalThis.removeEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      navigationDirty = false;
+      globalThis.removeEventListener("beforeunload", onBeforeUnload);
+    };
   }, [dirty]);
 }
 
