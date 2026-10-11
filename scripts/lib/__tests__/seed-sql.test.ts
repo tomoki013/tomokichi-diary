@@ -70,4 +70,35 @@ describe("seed SQL", () => {
 
     expect(db.prepare("SELECT updated_at FROM articles WHERE id = ?").get(id)).toEqual(original);
   });
+  it("restores historical image Slugs and hashes, and preserves them when reseeding an older export", () => {
+    const db = migratedDatabase();
+    const snapshot = loadSnapshot();
+    const first = snapshot.media[0]!;
+    const updated = {
+      ...snapshot,
+      media: snapshot.media.map((asset) =>
+        asset.id === first.id
+          ? { ...asset, slug: "current-photo", contentSha256: asset.sha256 }
+          : asset,
+      ),
+      mediaHashes: [{ sha256: first.sha256, mediaId: first.id }],
+      mediaSlugAliases: [
+        { slug: "old-photo", mediaId: first.id },
+        { slug: "current-photo", mediaId: first.id },
+      ],
+    };
+    db.exec(buildSeedSql(updated));
+    expect(
+      db.prepare("SELECT media_id FROM media_slug_aliases WHERE slug = 'old-photo'").get(),
+    ).toEqual({ media_id: first.id });
+    expect(
+      db.prepare("SELECT media_id FROM media_hashes WHERE sha256 = ?").get(first.sha256),
+    ).toEqual({ media_id: first.id });
+    db.exec(buildSeedSql(snapshot));
+    expect(
+      db.prepare("SELECT slug, content_sha256 FROM media_assets WHERE id = ?").get(first.id),
+    ).toEqual({ slug: "current-photo", content_sha256: first.sha256 });
+    expect(db.prepare("SELECT COUNT(*) AS n FROM media_slug_aliases").get()).toEqual({ n: 2 });
+    expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+  });
 });

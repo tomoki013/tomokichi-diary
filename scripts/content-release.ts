@@ -115,7 +115,7 @@ async function downloadOriginals(snapshot: ContentSnapshot) {
       });
       if (!response.ok) throw new Error(`Missing media: ${asset.storageKey}`);
       const body = Buffer.from(await response.arrayBuffer());
-      if (createHash("sha256").update(body).digest("hex") !== asset.sha256)
+      if (createHash("sha256").update(body).digest("hex") !== (asset.contentSha256 ?? asset.sha256))
         throw new Error(`Media checksum mismatch: ${asset.storageKey}`);
       mkdirSync(dirname(path), { recursive: true });
       writeFileSync(path, body);

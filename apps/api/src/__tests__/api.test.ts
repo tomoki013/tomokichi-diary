@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import sharp from "sharp";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
 import type { ContactMessage } from "@tomokichi/domain";
@@ -201,7 +202,17 @@ describe("article lifecycle", () => {
     const upload = new FormData();
     upload.append(
       "file",
-      new File([new Uint8Array([1, 2, 3])], "cover.jpg", { type: "image/jpeg" }),
+      new File(
+        [
+          Uint8Array.from(
+            await sharp({ create: { width: 2, height: 2, channels: 3, background: "red" } })
+              .jpeg()
+              .toBuffer(),
+          ).buffer,
+        ],
+        "cover.jpg",
+        { type: "image/jpeg" },
+      ),
     );
     const uploaded = await (
       await request("/v1/admin/media", {

@@ -42,6 +42,8 @@ import {
 export const SEED_KEYS = {
   authors: ["id"],
   media_assets: ["id"],
+  media_slug_aliases: ["slug"],
+  media_hashes: ["sha256"],
   locations: ["id"],
   location_names: ["location_id", "locale"],
   places: ["id"],
@@ -79,7 +81,10 @@ function upsert(table: SeedTable, rows: readonly Row[]): string[] {
   if (rows.length === 0) return [];
   const columns = Object.keys(rows[0]!);
   const keys: readonly string[] = SEED_KEYS[table];
-  const updates = columns.filter((column) => !keys.includes(column));
+  const updates =
+    table === "media_slug_aliases" || table === "media_hashes"
+      ? []
+      : columns.filter((column) => !keys.includes(column));
   const prefix = `INSERT INTO ${table} (${columns.join(", ")}) VALUES`;
   const suffix =
     updates.length === 0
@@ -115,11 +120,38 @@ export function buildSeedSql(snapshot: ContentSnapshot): string {
 
 /** The same statements one by one, for `cf d1 raw --batch`. */
 export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
+  // Old exports omit the added metadata: group shapes so omission cannot clear
+  // a Slug or verified hash that was entered in the admin after the export.
+  const mediaGroups = new Map<string, Row[]>();
+  for (const row of snapshot.media.map(mediaRow.from)) {
+    const key = Object.keys(row).join(",");
+    const group = mediaGroups.get(key) ?? [];
+    group.push(row);
+    mediaGroups.set(key, group);
+  }
   // Ordered so foreign keys always resolve.
   return [
     "PRAGMA defer_foreign_keys = true;",
     ...upsert("authors", snapshot.authors.map(authorRow.from)),
-    ...upsert("media_assets", snapshot.media.map(mediaRow.from)),
+    ...[...mediaGroups.values()].flatMap((rows) => upsert("media_assets", rows)),
+    ...upsert(
+      "media_slug_aliases",
+      (
+        snapshot.mediaSlugAliases ??
+        snapshot.media
+          .filter((asset) => asset.slug)
+          .map((asset) => ({ slug: asset.slug!, mediaId: asset.id }))
+      ).map((alias) => ({ slug: alias.slug, media_id: alias.mediaId })),
+    ),
+    ...upsert(
+      "media_hashes",
+      (
+        snapshot.mediaHashes ??
+        snapshot.media
+          .filter((asset) => asset.contentSha256)
+          .map((asset) => ({ sha256: asset.contentSha256!, mediaId: asset.id }))
+      ).map((hash) => ({ sha256: hash.sha256, media_id: hash.mediaId })),
+    ),
     ...upsert("locations", snapshot.locations.map(locationRow.from)),
     ...upsert("location_names", snapshot.locationNames.map(locationNameRow.from)),
     ...upsert("places", snapshot.places.map(placeRow.from)),

@@ -46,6 +46,8 @@ export interface ContentSnapshot {
   readonly collections: readonly Collection[];
   readonly authors: readonly Author[];
   readonly media: readonly MediaAsset[];
+  readonly mediaSlugAliases?: readonly { slug: string; mediaId: string }[];
+  readonly mediaHashes?: readonly { sha256: string; mediaId: string }[];
   readonly articleMedia: readonly ArticleMedia[];
   readonly articleLocations: readonly ArticleLocation[];
   readonly articlePlaces: readonly ArticlePlace[];

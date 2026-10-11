@@ -24,6 +24,8 @@ export default defineConfig({
       ACCESS_TEAM_DOMAIN: bindings.text("tomoki-ttttt.cloudflareaccess.com"),
       ACCESS_AUD: bindings.text("edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"),
       PUBLIC_MEDIA_URL: bindings.text("https://media.tomokichidiary.com"),
+      PUBLIC_IMAGE_URL: bindings.text("https://api.tomokichidiary.com/v1/images"),
+      MEDIA_UPLOADS_PAUSED: bindings.text(process.env.MEDIA_UPLOADS_PAUSED ?? "0"),
       TURNSTILE_EXPECTED_HOSTNAME: bindings.text("tomokichidiary.com,www.tomokichidiary.com"),
       // Admin calls are same-origin through the admin Worker, so CORS is only for
       // local development against a deployed API.

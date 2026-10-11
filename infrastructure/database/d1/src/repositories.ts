@@ -17,6 +17,7 @@ import type {
   TaxonomyRepository,
   KnowledgeRepository,
 } from "@tomokichi/application";
+import type { MediaAsset } from "@tomokichi/domain";
 import {
   aiArtifactRow,
   articleCategoryRow,
@@ -232,8 +233,122 @@ export function createRepositories(db: SqlDatabase): Repositories {
       return row ? mediaRow.to(row) : null;
     },
     findBySha256: async (sha256) => {
-      const row = await first("SELECT * FROM media_assets WHERE sha256 = ?", sha256);
+      const row = await first(
+        `SELECT a.* FROM media_assets a WHERE a.id =
+          (SELECT media_id FROM media_hashes WHERE sha256 = ?)
+        OR (a.sha256 = ? AND a.content_sha256 IS NULL)
+        ORDER BY CASE WHEN a.content_sha256 IS NOT NULL THEN 0 ELSE 1 END, a.created_at, a.id LIMIT 1`,
+        sha256,
+        sha256,
+      );
       return row ? mediaRow.to(row) : null;
+    },
+    findBySlug: async (slug) => {
+      const row = await first(
+        "SELECT a.* FROM media_assets a JOIN media_slug_aliases s ON s.media_id = a.id WHERE s.slug = ?",
+        slug,
+      );
+      return row ? mediaRow.to(row) : null;
+    },
+    updateSlug: async (id, slug) => {
+      await db.batch([
+        ...(slug
+          ? [
+              db
+                .prepare(
+                  `INSERT INTO media_slug_aliases (slug, media_id)
+          SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM media_slug_aliases WHERE slug = ? AND media_id = ?)`,
+                )
+                .bind(slug, id, slug, id),
+            ]
+          : []),
+        db.prepare("UPDATE media_assets SET slug = ? WHERE id = ?").bind(slug, id),
+      ]);
+    },
+    reserveUpload: async (asset) =>
+      Boolean(
+        await db
+          .prepare(
+            `INSERT INTO media_uploads (sha256, media_id, asset_json, started_at)
+       VALUES (?, ?, ?, ?) ON CONFLICT(sha256) DO NOTHING RETURNING media_id`,
+          )
+          .bind(asset.sha256, asset.id, JSON.stringify(asset), asset.createdAt)
+          .first(),
+      ),
+    completeUpload: async (asset) => {
+      await db.batch([
+        upsert(db, "media_assets", mediaRow.from(asset), ["id"]),
+        ...(asset.slug
+          ? [
+              db
+                .prepare("INSERT INTO media_slug_aliases (slug, media_id) VALUES (?, ?)")
+                .bind(asset.slug, asset.id),
+            ]
+          : []),
+        db
+          .prepare(
+            "INSERT INTO media_hashes (sha256, media_id) VALUES (?, ?) ON CONFLICT(sha256) DO NOTHING",
+          )
+          .bind(asset.sha256, asset.id),
+        db
+          .prepare("DELETE FROM media_uploads WHERE sha256 = ? AND media_id = ?")
+          .bind(asset.sha256, asset.id),
+      ]);
+    },
+    releaseUpload: async (sha256, id) => {
+      await db
+        .prepare("DELETE FROM media_uploads WHERE sha256 = ? AND media_id = ?")
+        .bind(sha256, id)
+        .run();
+    },
+    listPendingUploads: async () =>
+      (await all("SELECT asset_json FROM media_uploads ORDER BY started_at")).map(
+        (row) => JSON.parse(String(row["asset_json"])) as MediaAsset,
+      ),
+    listSlugAliases: async () =>
+      (await all("SELECT slug, media_id FROM media_slug_aliases ORDER BY slug")).map((row) => ({
+        slug: String(row["slug"]),
+        mediaId: String(row["media_id"]),
+      })),
+    listHashes: async () =>
+      (await all("SELECT sha256, media_id FROM media_hashes ORDER BY sha256")).map((row) => ({
+        sha256: String(row["sha256"]),
+        mediaId: String(row["media_id"]),
+      })),
+    registerHash: async (id, sha256) => {
+      await db.batch([
+        db.prepare("DELETE FROM media_hashes WHERE media_id = ? AND sha256 <> ?").bind(id, sha256),
+        db.prepare("UPDATE media_assets SET content_sha256 = ? WHERE id = ?").bind(sha256, id),
+        db
+          .prepare(
+            `INSERT INTO media_hashes (sha256, media_id) VALUES (?, ?)
+          ON CONFLICT(sha256) DO NOTHING`,
+          )
+          .bind(sha256, id),
+        db.prepare(`INSERT INTO media_hashes (sha256, media_id)
+          SELECT a.content_sha256, a.id FROM media_assets a
+          WHERE a.content_sha256 IS NOT NULL AND NOT EXISTS
+            (SELECT 1 FROM media_hashes h WHERE h.sha256 = a.content_sha256)
+          ORDER BY a.created_at, a.id ON CONFLICT(sha256) DO NOTHING`),
+      ]);
+      const canonical = await first(
+        `SELECT a.* FROM media_assets a JOIN media_hashes h ON h.media_id = a.id WHERE h.sha256 = ?`,
+        sha256,
+      );
+      if (!canonical) throw new Error("hash registration failed");
+      return mediaRow.to(canonical);
+    },
+    hashStatus: async () => {
+      const counts = await first(`SELECT COUNT(*) AS total, COUNT(content_sha256) AS verified,
+        (SELECT COUNT(*) FROM media_uploads) AS uploads FROM media_assets`);
+      const total = Number(counts?.["total"] ?? 0);
+      const verified = Number(counts?.["verified"] ?? 0);
+      return {
+        total,
+        verified,
+        pending: total - verified,
+        uploads: Number(counts?.["uploads"] ?? 0),
+      };
     },
     listAll: async () =>
       (await all("SELECT * FROM media_assets ORDER BY created_at DESC")).map(mediaRow.to),

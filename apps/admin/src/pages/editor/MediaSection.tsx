@@ -1,11 +1,13 @@
 import { useSectionSave, type RegisterSection } from "./section-save";
-import { useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import type { ArticleDetailDto, MediaAssetDto } from "@tomokichi/contracts";
 import { api, type MediaRole, type MediaUsageInput } from "../../lib/api";
 import { mediaRoleLabels } from "../../lib/labels";
 import { useResource } from "../../ui/hooks";
 import { ErrorState, Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
+import { matchesMedia } from "../../lib/media-upload";
+import { MediaUpload } from "../../ui/MediaUpload";
 
 function usagesFrom(article: ArticleDetailDto): MediaUsageInput[] {
   return article.media
@@ -17,15 +19,6 @@ function usagesFrom(article: ArticleDetailDto): MediaUsageInput[] {
       alt: item.alt,
       caption: item.caption,
     }));
-}
-
-/** Measured in the browser so the page can reserve space; the Worker never decodes images. */
-export async function measure(file: File): Promise<{ width: number; height: number } | undefined> {
-  const bitmap = await createImageBitmap(file).catch(() => null);
-  if (!bitmap) return undefined;
-  const size = { width: bitmap.width, height: bitmap.height };
-  bitmap.close();
-  return size;
 }
 
 /**
@@ -99,26 +92,13 @@ export function MediaSection({
       return next;
     });
 
-  async function upload(event: ChangeEvent<HTMLInputElement>): Promise<void> {
-    const files = [...(event.target.files ?? [])];
-    event.target.value = "";
-    setBusy(true);
-    try {
-      for (const file of files) {
-        const asset = await api.uploadMedia(file, await measure(file));
-        library.setData((current) =>
-          current?.some((item) => item.id === asset.id) ? current : [asset, ...(current ?? [])],
-        );
-        setKnown((current) => ({ ...current, [asset.id]: asset.url }));
-        add(asset.id);
-      }
-      toast.info(`${files.length}枚アップロードしました`);
-    } catch (error) {
-      toast.error(error);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const acceptAsset = (asset: MediaAssetDto): void => {
+    library.setData((current) =>
+      current?.some((item) => item.id === asset.id) ? current : [asset, ...(current ?? [])],
+    );
+    setKnown((current) => ({ ...current, [asset.id]: asset.slugUrl ?? asset.url }));
+    add(asset.id);
+  };
 
   async function save(): Promise<boolean> {
     setBusy(true);
@@ -148,23 +128,13 @@ export function MediaSection({
       title={`画像（${usages.length}）`}
       actions={
         <>
-          <label className="button">
-            アップロード
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              disabled={busy}
-              onChange={(event) => void upload(event)}
-            />
-          </label>
           <button type="button" onClick={() => setPicking((open) => !open)}>
             {picking ? "ライブラリを閉じる" : "ライブラリから選ぶ"}
           </button>
         </>
       }
     >
+      <MediaUpload onAsset={acceptAsset} disabled={busy} />
       <p className="muted">
         写真を選び、代替テキストを入力して「本文に挿入」。カバーは一覧の見出し画像です。
       </p>
@@ -240,7 +210,7 @@ export function MediaSection({
           <input
             type="search"
             aria-label="写真を検索"
-            placeholder="ファイル名・URLで検索"
+            placeholder="Slug・ファイル名・URLで検索"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -254,7 +224,7 @@ export function MediaSection({
             {library.loading && !library.data
               ? Array.from({ length: 12 }, (_, index) => <div key={index} className="skeleton" />)
               : (library.data ?? [])
-                  .filter((asset) => asset.url.toLowerCase().includes(query.toLowerCase()))
+                  .filter((asset) => matchesMedia(asset, query))
                   .slice(0, limit)
                   .map((asset) => {
                     const chosen = usages.some((usage) => usage.mediaId === asset.id);
@@ -263,20 +233,16 @@ export function MediaSection({
                         key={asset.id}
                         type="button"
                         aria-pressed={chosen}
-                        aria-label={`画像を追加（${asset.width ?? "?"}×${asset.height ?? "?"}）`}
-                        onClick={() => {
-                          setKnown((current) => ({ ...current, [asset.id]: asset.url }));
-                          add(asset.id);
-                        }}
+                        aria-label={`画像を追加：${asset.slug ?? asset.originalName ?? asset.id}`}
+                        title={asset.slug ?? asset.originalName ?? asset.id}
+                        onClick={() => acceptAsset(asset)}
                       >
                         <img src={asset.url} alt="" loading="lazy" />
                       </button>
                     );
                   })}
           </div>
-          {(library.data ?? []).filter((asset) =>
-            asset.url.toLowerCase().includes(query.toLowerCase()),
-          ).length > limit && (
+          {(library.data ?? []).filter((asset) => matchesMedia(asset, query)).length > limit && (
             <button type="button" onClick={() => setLimit((n) => n + 60)}>
               さらに表示
             </button>

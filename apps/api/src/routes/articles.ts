@@ -138,6 +138,7 @@ export function articleRoutes(publishSite: (env: Env) => Promise<unknown>) {
           usage,
           assets[index] ?? null,
           ctx.mediaUrls.resolve(assets[index]?.storageKey ?? ""),
+          c.env.PUBLIC_IMAGE_URL,
         ),
       ),
       relations: {

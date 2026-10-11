@@ -61,10 +61,11 @@ export function toArticleMediaDto(
   usage: ArticleMedia,
   asset: MediaAsset | null,
   url: string,
+  imageBase?: string,
 ): ArticleMediaDto {
   return {
     mediaId: usage.mediaId,
-    url,
+    url: asset ? (publicImageUrl(asset, imageBase) ?? url) : url,
     role: usage.role,
     sortOrder: usage.sortOrder,
     alt: usage.alt,
@@ -74,7 +75,23 @@ export function toArticleMediaDto(
   };
 }
 
-export function toMediaAssetDto(asset: MediaAsset, url: string): MediaAssetDto {
+function publicImageUrl(
+  asset: MediaAsset,
+  imageBase = "https://api.tomokichidiary.com/v1/images",
+): string | null {
+  const extension = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/avif": "avif",
+    "image/gif": "gif",
+  }[asset.mimeType];
+  return asset.slug && extension
+    ? `${imageBase.replace(/\/+$/, "")}/${asset.slug}.${extension}`
+    : null;
+}
+
+export function toMediaAssetDto(asset: MediaAsset, url: string, imageBase?: string): MediaAssetDto {
   return {
     id: asset.id,
     url,
@@ -82,6 +99,10 @@ export function toMediaAssetDto(asset: MediaAsset, url: string): MediaAssetDto {
     width: asset.width,
     height: asset.height,
     size: asset.size,
+    originalName: asset.originalName ?? asset.storageKey.split("/").at(-1) ?? null,
+    slug: asset.slug ?? null,
+    hashVerified: Boolean(asset.contentSha256),
+    slugUrl: publicImageUrl(asset, imageBase),
   };
 }
 

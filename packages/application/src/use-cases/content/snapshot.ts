@@ -32,6 +32,8 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     collections: await repos.collections.listAll(),
     authors: await repos.authors.listAll(),
     media: await repos.media.listAll(),
+    mediaSlugAliases: await repos.media.listSlugAliases(),
+    mediaHashes: await repos.media.listHashes(),
     articleMedia,
     articleLocations: await repos.relations.listArticleLocations(),
     articlePlaces: await repos.relations.listArticlePlaces(),

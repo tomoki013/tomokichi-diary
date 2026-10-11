@@ -86,6 +86,22 @@ export interface MediaAssetDto {
   readonly width: number | null;
   readonly height: number | null;
   readonly size: number;
+  readonly originalName: string | null;
+  readonly slug: string | null;
+  readonly hashVerified: boolean;
+  readonly slugUrl: string | null;
+}
+
+/** Keeps the existing upload response fields for older admin clients. */
+export interface MediaUploadDto extends MediaAssetDto {
+  readonly duplicate: boolean;
+}
+
+export interface MediaHashStatusDto {
+  readonly total: number;
+  readonly verified: number;
+  readonly pending: number;
+  readonly uploads: number;
 }
 
 export interface RouteDto {

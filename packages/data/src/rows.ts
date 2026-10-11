@@ -382,6 +382,9 @@ export const mediaRow = {
     height: nullableNum(row, "height"),
     size: num(row, "size"),
     sha256: str(row, "sha256"),
+    contentSha256: nullableStr(row, "content_sha256"),
+    originalName: nullableStr(row, "original_name"),
+    slug: nullableStr(row, "slug"),
     createdAt: str(row, "created_at"),
   }),
   from: (asset: MediaAsset): Row => ({
@@ -392,6 +395,9 @@ export const mediaRow = {
     height: asset.height,
     size: asset.size,
     sha256: asset.sha256,
+    ...(asset.contentSha256 !== undefined ? { content_sha256: asset.contentSha256 } : {}),
+    ...(asset.originalName !== undefined ? { original_name: asset.originalName } : {}),
+    ...(asset.slug !== undefined ? { slug: asset.slug } : {}),
     created_at: asset.createdAt,
   }),
 };

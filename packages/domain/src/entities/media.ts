@@ -12,6 +12,9 @@ export interface MediaAsset {
   readonly height: number | null;
   readonly size: number;
   readonly sha256: string;
+  readonly contentSha256?: string | null;
+  readonly originalName?: string | null;
+  readonly slug?: string | null;
   readonly createdAt: string;
 }
 

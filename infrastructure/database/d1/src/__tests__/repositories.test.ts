@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import sharp from "sharp";
 import {
   createArticle,
   loadContentSnapshot,
@@ -29,7 +30,11 @@ describe("D1 repositories", () => {
   });
 
   it("deduplicates identical uploads by content hash", async () => {
-    const bytes = new TextEncoder().encode("fake-image-bytes").buffer as ArrayBuffer;
+    const bytes = Uint8Array.from(
+      await sharp({ create: { width: 2, height: 2, channels: 3, background: "red" } })
+        .jpeg()
+        .toBuffer(),
+    ).buffer;
     const first = await uploadMedia(ctx, {
       body: bytes,
       mimeType: "image/jpeg",
@@ -72,7 +77,11 @@ describe("D1 repositories", () => {
 });
 
 async function attachCover(ctx: AppContext, articleId: ArticleId): Promise<void> {
-  const bytes = new TextEncoder().encode(`cover-${articleId}`).buffer as ArrayBuffer;
+  const bytes = Uint8Array.from(
+    await sharp({ create: { width: 2, height: 2, channels: 3, background: "blue" } })
+      .jpeg()
+      .toBuffer(),
+  ).buffer;
   const upload = await uploadMedia(ctx, {
     body: bytes,
     mimeType: "image/jpeg",

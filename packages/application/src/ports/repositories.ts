@@ -97,6 +97,16 @@ export interface MediaRepository {
   findBySha256(sha256: string): Promise<MediaAsset | null>;
   listAll(): Promise<readonly MediaAsset[]>;
   save(asset: MediaAsset): Promise<void>;
+  findBySlug(slug: string): Promise<MediaAsset | null>;
+  updateSlug(id: MediaId, slug: string | null): Promise<void>;
+  reserveUpload(asset: MediaAsset): Promise<boolean>;
+  completeUpload(asset: MediaAsset): Promise<void>;
+  releaseUpload(sha256: string, id: MediaId): Promise<void>;
+  listPendingUploads(): Promise<readonly MediaAsset[]>;
+  listSlugAliases(): Promise<readonly { slug: string; mediaId: string }[]>;
+  listHashes(): Promise<readonly { sha256: string; mediaId: string }[]>;
+  registerHash(id: MediaId, sha256: string): Promise<MediaAsset>;
+  hashStatus(): Promise<{ total: number; verified: number; pending: number; uploads: number }>;
   listForArticle(articleId: ArticleId): Promise<readonly ArticleMedia[]>;
   replaceForArticle(articleId: ArticleId, media: readonly ArticleMedia[]): Promise<void>;
 }

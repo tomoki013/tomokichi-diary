@@ -7,6 +7,7 @@ import { createContext } from "./context.js";
 import { articleRoutes } from "./routes/articles.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
 import { mediaRoutes } from "./routes/media.js";
+import { imageRoutes } from "./routes/images.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
@@ -134,6 +135,7 @@ export function createApp(options: AppOptions = {}) {
   // The only unauthenticated write: a challenge-protected contact form.
   v1.route("/contact", contactRoutes());
   v1.route("/likes", likeRoutes());
+  v1.route("/images", imageRoutes());
 
   // Everything below /admin requires the shared secret. A missing secret means
   // the admin API is closed, never open.

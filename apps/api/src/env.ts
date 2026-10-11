@@ -16,6 +16,9 @@ export interface Env {
   /** Fine-grained GitHub token: this repository's Actions write permission only. */
   GITHUB_PUBLISH_TOKEN?: string;
   PUBLIC_MEDIA_URL?: string;
+  PUBLIC_IMAGE_URL?: string;
+  /** Temporarily close new uploads while verifying legacy originals. */
+  MEDIA_UPLOADS_PAUSED?: string;
   PUBLIC_SITE_URL?: string;
   ALLOWED_ORIGINS?: string;
   /** Turnstile secret for the public contact form. Unset means the form is closed. */

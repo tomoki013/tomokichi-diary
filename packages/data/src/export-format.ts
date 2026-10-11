@@ -92,6 +92,8 @@ const JSON_PARTS = [
   "collections",
   "authors",
   "media",
+  "mediaSlugAliases",
+  "mediaHashes",
   "articleMedia",
   "articleLocations",
   "articlePlaces",
@@ -117,6 +119,8 @@ const FILE_NAMES: Record<(typeof JSON_PARTS)[number], string> = {
   collections: "collections.json",
   authors: "authors.json",
   media: "media.json",
+  mediaSlugAliases: "media-slug-aliases.json",
+  mediaHashes: "media-hashes.json",
   articleMedia: "relations/article-media.json",
   articleLocations: "relations/article-locations.json",
   articlePlaces: "relations/article-places.json",
@@ -137,7 +141,7 @@ export function buildExportFiles(snapshot: ContentSnapshot): ExportFile[] {
         {
           version: EXPORT_MANIFEST_VERSION,
           generatedAt: snapshot.generatedAt,
-          counts: Object.fromEntries(JSON_PARTS.map((part) => [part, snapshot[part].length])),
+          counts: Object.fromEntries(JSON_PARTS.map((part) => [part, snapshot[part]?.length ?? 0])),
         },
         null,
         2,
@@ -147,7 +151,7 @@ export function buildExportFiles(snapshot: ContentSnapshot): ExportFile[] {
   for (const part of JSON_PARTS) {
     files.push({
       path: FILE_NAMES[part],
-      contents: `${JSON.stringify(snapshot[part], null, 2)}\n`,
+      contents: `${JSON.stringify(snapshot[part] ?? [], null, 2)}\n`,
     });
   }
   files.push(...articleMarkdownFiles(snapshot));

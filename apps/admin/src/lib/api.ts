@@ -9,6 +9,8 @@ import type {
   InquiryTicketSummaryDto,
   LocationDto,
   MediaAssetDto,
+  MediaUploadDto,
+  MediaHashStatusDto,
   PageDto,
   PublishCheckDto,
   RouteDto,
@@ -234,14 +236,41 @@ export const api = {
 
   // Media
   listMedia: () => request<{ items: MediaAssetDto[] }>("/admin/media"),
-  uploadMedia: (file: File, size?: { width: number; height: number }) => {
+  mediaHashStatus: () => request<MediaHashStatusDto>("/admin/media/hash-status"),
+  lookupMedia: (sha256: string) =>
+    request<{ asset: MediaAssetDto | null }>("/admin/media/lookup", {
+      method: "POST",
+      body: JSON.stringify({ sha256 }),
+    }),
+  updateMediaSlug: (mediaId: string, slug: string | null) =>
+    request<MediaAssetDto>(`/admin/media/${encodeURIComponent(mediaId)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ slug }),
+    }),
+  mediaFile: async (mediaId: string) => {
+    const headers = new Headers();
+    const token = getToken();
+    if (token) headers.set("authorization", `Bearer ${token}`);
+    const response = await fetch(`${BASE}/admin/media/${encodeURIComponent(mediaId)}/file`, {
+      headers,
+      credentials: "same-origin",
+    });
+    if (response.status === 401) globalThis.dispatchEvent?.(new Event("admin-session-expired"));
+    if (!response.ok)
+      throw new ApiError("API_INTERNAL", "元画像を取得できませんでした", response.status);
+    if (!(response.headers.get("content-type") ?? "").startsWith("image/"))
+      throw new ApiError("API_INTERNAL", "元画像を取得できませんでした", response.status);
+    return response.blob();
+  },
+  uploadMedia: (file: File, size?: { width: number; height: number }, slug?: string) => {
     const form = new FormData();
     form.append("file", file);
     if (size) {
       form.append("width", String(size.width));
       form.append("height", String(size.height));
     }
-    return request<MediaAssetDto>("/admin/media", { method: "POST", body: form });
+    if (slug) form.append("slug", slug);
+    return request<MediaUploadDto>("/admin/media", { method: "POST", body: form });
   },
   saveArticleMedia: (articleId: string, media: MediaUsageInput[]) =>
     request<{ ok: boolean }>(`/admin/media/article/${id(articleId)}`, json("PUT", { media })),

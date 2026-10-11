@@ -43,7 +43,10 @@
     "verify:live": "tsx scripts/verify-live.ts",
     "verify:mcp": "tsx scripts/verify-mcp.ts",
     "media:build": "tsx scripts/media-build.ts",
-    "media:sync": "tsx scripts/media-sync.ts"
+    "media:sync": "tsx scripts/media-sync.ts",
+    "media:backfill": "tsx scripts/media-backfill.ts",
+    "media:preview": "tsx scripts/media-ui-preview.ts",
+    "media:verify-ui": "tsx scripts/verify-media-ui.ts"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

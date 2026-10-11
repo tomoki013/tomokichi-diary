@@ -938,6 +938,116 @@ fieldset {
 
 /* Inquiries ------------------------------------------------------------ */
 
+.library__name {
+  padding: 0 0.5rem 0.35rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.library__details {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+.media-upload {
+  margin-bottom: 1rem;
+}
+.media-upload > .button {
+  margin-right: 0.5rem;
+}
+.upload-results {
+  list-style: none;
+  margin: 0.6rem 0;
+  padding: 0;
+}
+.upload-results li {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.upload-results img {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;
+  flex: 0 0 auto;
+  background: var(--surface-alt);
+}
+.upload-results__body {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.upload-results__body > button {
+  justify-self: start;
+}
+.upload-results .field {
+  max-width: 24rem;
+  margin: 0;
+}
+.media-notice {
+  display: block;
+  padding: 0.6rem 0;
+  color: var(--warn);
+  border-block: 1px solid var(--line);
+}
+.media-details {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100svh - 2rem);
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.media-details::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.media-details h2 {
+  font-size: 1rem;
+  margin-right: auto;
+}
+.media-details > img {
+  display: block;
+  width: 100%;
+  height: 12rem;
+  object-fit: contain;
+  background: var(--surface-alt);
+  margin-top: 1rem;
+}
+.media-details__url {
+  display: block;
+  margin-top: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.media-export {
+  border-top: 1px solid var(--line);
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}
+.media-export legend {
+  padding-top: 1rem;
+  font-weight: 600;
+}
+.media-export .form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+}
+@media (max-width: 460px) {
+  .media-usages li {
+    grid-template-columns: 4rem minmax(0, 1fr);
+  }
+  .media-usages img {
+    width: 4rem;
+  }
+  .toolbar input[type="search"] {
+    width: 100%;
+  }
+}
+
 .timeline {
   list-style: none;
   margin: 0 0 0.6rem;
