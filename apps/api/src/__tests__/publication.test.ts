@@ -21,6 +21,25 @@ async function database() {
 }
 
 describe("publication dispatch and status", () => {
+  it("records a deferred request without dispatch and allows the final build to recover it", async () => {
+    const db = await database();
+    let dispatches = 0;
+    const dispatch: typeof fetch = async () => {
+      dispatches++;
+      return new Response(null, { status: 204 });
+    };
+    const env = { GITHUB_PUBLISH_TOKEN: "test" } as Env;
+    const deferred = await requestPublication(env, db, dispatch, true);
+    expect(deferred.state).toBe("queued");
+    expect(deferred.requestedAt).not.toBeNull();
+    expect(dispatches).toBe(0);
+    const pending = await db
+      .prepare("SELECT requested_id FROM site_publication WHERE id = 'site'")
+      .first<{ requested_id: string }>();
+    expect(pending?.requested_id).toBeTruthy();
+    expect((await requestPublication(env, db, dispatch)).state).toBe("queued");
+    expect(dispatches).toBe(1);
+  });
   it("shows missing configuration instead of claiming a site deployment", async () => {
     const db = await database();
     const status = await requestPublication({} as Env, db);

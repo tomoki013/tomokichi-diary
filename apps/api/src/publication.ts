@@ -38,7 +38,12 @@ export async function publicationStatus(db: SqlDatabase, configured: boolean) {
 }
 
 /** Dispatches the existing repository's content workflow; no Cloudflare deployment credential lives in this Worker. */
-export async function requestPublication(env: Env, db = fromD1(env.DB), dispatch = fetch) {
+export async function requestPublication(
+  env: Env,
+  db = fromD1(env.DB),
+  dispatch = fetch,
+  deferBuild = false,
+) {
   const requestId = crypto.randomUUID();
   await db
     .prepare(
@@ -47,6 +52,9 @@ export async function requestPublication(env: Env, db = fromD1(env.DB), dispatch
     .bind(requestId, new Date().toISOString())
     .run();
   if (!env.GITHUB_PUBLISH_TOKEN?.trim()) return publicationStatus(db, false);
+  // Bulk publishing records every successful change before dispatching once.
+  // The scheduled workflow can recover the pending request if the tab closes.
+  if (deferBuild) return publicationStatus(db, true);
   try {
     const response = await dispatch(
       "https://api.github.com/repos/tomoki013/tomokichi-diary/actions/workflows/publish.yml/dispatches",
@@ -77,13 +85,15 @@ export async function requestPublication(env: Env, db = fromD1(env.DB), dispatch
   return publicationStatus(db, true);
 }
 
-export function publicationRoutes() {
+export function publicationRoutes(
+  publishSite: (env: Env) => Promise<unknown> = requestPublication,
+) {
   const routes = new Hono<AppEnv>();
   routes.get("/", (c) =>
     publicationStatus(fromD1(c.env.DB), Boolean(c.env.GITHUB_PUBLISH_TOKEN)).then((status) =>
       c.json(status),
     ),
   );
-  routes.post("/retry", (c) => requestPublication(c.env).then((status) => c.json(status, 202)));
+  routes.post("/retry", (c) => publishSite(c.env).then((status) => c.json(status, 202)));
   return routes;
 }
