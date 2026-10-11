@@ -50,7 +50,7 @@ const latest: ArticleView[] = content.articleViews().slice(0, 8);
 >
   <div class="home">
     <HomeHero stories={heroStories} />
-    <HomeExperiencePicker />
+    <HomeExperiencePicker shownElsewhere={new Set(episodes.map(({ view }) => view.article.id))} />
     <HomeBestEpisodes episodes={episodes} />
 
     <section class="home-latest" aria-labelledby="home-latest-title">

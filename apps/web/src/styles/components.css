@@ -1053,10 +1053,6 @@
     background: hsl(var(--exp-hue) 70% 92%);
   }
 
-  .exp-chip__mark {
-    font-size: 0.8em;
-  }
-
   .exp-chips--light .exp-chip {
     border-color: rgb(255 255 255 / 35%);
     background: rgb(255 255 255 / 14%);

@@ -18,14 +18,7 @@ const { tags, link = true, tone = "default", label = "この旅の体験" } = As
   <ul class:list={["exp-chips", tone === "light" && "exp-chips--light"]} aria-label={label}>
     {tags.map((tag) => {
       const copy = EXPERIENCE_COPY[tag];
-      const inner = (
-        <>
-          <span class="exp-chip__mark" aria-hidden="true">
-            {copy.mark}
-          </span>
-          {copy.label}
-        </>
-      );
+      const inner = copy.label;
       return (
         <li>
           {link ? (

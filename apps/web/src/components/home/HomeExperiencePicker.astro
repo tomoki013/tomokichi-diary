@@ -2,11 +2,20 @@
 import { SearchIcon } from "../TravelIcons";
 import { content } from "../../lib/content";
 import { EXPERIENCES, experienceHref } from "../../lib/experiences";
+import AdaptiveDiscovery from "./discovery/AdaptiveDiscovery.astro";
+
+interface Props {
+  /** Article ids featured elsewhere on the home page, passed on to the discovery area. */
+  shownElsewhere?: ReadonlySet<string>;
+}
 
 /**
- * Search for a story, or pick one by how it felt. The chips are the way in
- * for a reader who does not yet know where they want to go.
+ * Search for a story, or pick one by how it felt. The mood tiles are the way
+ * in for a reader who does not yet know where they want to go: with
+ * JavaScript they reshape the stories right below them (each tile says which
+ * look it brings), without it they open the filtered archive.
  */
+const { shownElsewhere = new Set<string>() } = Astro.props;
 const chips = EXPERIENCES.map((experience) => ({
   ...experience,
   count: content.withExperience(experience.tag).length,
@@ -27,17 +36,31 @@ const chips = EXPERIENCES.map((experience) => ({
     <button type="submit">検索</button>
   </form>
 
-  <ul class="home-picker__chips" aria-label="気分から選ぶ">
-    {chips.map((chip, index) => (
-      <li
-        style={`--exp-hue: ${chip.hue}; --tilt: ${index % 3 === 0 ? -1 : index % 3 === 1 ? 1 : 0}`}
-      >
-        <a class="home-picker__chip" href={experienceHref(chip.tag)}>
-          <span aria-hidden="true">{chip.mark}</span>
-          {chip.label}
-          <small>{chip.count}</small>
-        </a>
-      </li>
-    ))}
-  </ul>
+  <div class="home-picker__moods">
+    <p class="home-picker__ask" id="home-picker-moods">
+      <span>いまの気分は？</span>
+      <small data-discovery-hint hidden>
+        タップすると、すぐ下が気分に合わせて変わります
+      </small>
+    </p>
+    <div class="home-picker__bar">
+      <ul class="home-picker__tiles" aria-labelledby="home-picker-moods">
+        {chips.map((chip) => (
+          <li style={`--exp-hue: ${chip.hue}`}>
+            <a
+              class="home-picker__tile"
+              href={experienceHref(chip.tag)}
+              data-discovery-chip={chip.tag}
+            >
+              <span class="home-picker__tile-label">{chip.label}</span>
+              <small>{chip.count}本</small>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Inside the same box as the bar, so the bar stays pinned over the scene. -->
+    <AdaptiveDiscovery shownElsewhere={shownElsewhere} />
+  </div>
 </section>

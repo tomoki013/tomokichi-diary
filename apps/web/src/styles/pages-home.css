@@ -347,6 +347,9 @@
      of its own the reader has to scroll through. */
   .home > .home-picker {
     display: grid;
+    /* One column the width of the page: the mood bar inside scrolls sideways
+       and must not stretch the column to the length of its row. */
+    grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     gap: var(--space-sm);
     padding-block: var(--space-lg) var(--space-md);
@@ -408,51 +411,135 @@
     background: var(--ink);
   }
 
-  /* Hand-cut stickers: a solid ink border and a hard shadow, each one set at
-     its own slight angle. */
-  .home-picker__chips {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.6rem 0.55rem;
-    max-width: 52rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  /* Mood bar. Built for a thumb first: one row of stickers that swipes
+     sideways, pinned under the masthead while the scene below is on screen,
+     so the reader always sees which feeling is showing and can switch
+     without scrolling back up. On a wide screen the row simply fits. */
+  .home-picker__moods {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    gap: 0.35rem;
+    justify-self: stretch;
+    width: min(100%, 60rem);
+    margin-inline: auto;
   }
 
-  .home-picker__chip {
+  .home-picker__ask {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0;
+    font-family: var(--font-hand);
+  }
+
+  .home-picker__ask > span {
+    font-size: var(--step-body);
+    font-weight: 700;
+  }
+
+  .home-picker__ask > small {
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+  }
+
+  .home-picker__bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.5rem 0;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 10px -8px rgb(56 42 27 / 25%);
+  }
+
+  .home-picker__tiles {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    margin: 0;
+    padding: 0.2rem var(--gutter) 0.35rem;
+    list-style: none;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .home-picker__tiles::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-picker__tiles > li {
+    flex: none;
+  }
+
+  /* 44px tall at least: a comfortable thumb target. */
+  .home-picker__tile {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.35rem 0.8rem;
+    min-height: 2.75rem;
+    padding: 0.3rem 0.85rem;
     border: 1.5px solid var(--ink);
-    border-radius: 0.55rem 0.7rem 0.5rem 0.75rem;
+    border-radius: 0.6rem 0.75rem 0.55rem 0.8rem;
     background: hsl(var(--exp-hue) 75% 94%);
     box-shadow: 2px 2px 0 var(--ink);
     color: var(--ink);
-    font-size: var(--step-small);
+    font-size: 0.92rem;
+    font-weight: 700;
     text-decoration: none;
-    transform: rotate(calc(var(--tilt) * 1.2deg));
+    white-space: nowrap;
     transition:
       transform var(--speed) var(--ease),
-      box-shadow var(--speed) var(--ease);
+      box-shadow var(--speed) var(--ease),
+      background-color var(--speed) var(--ease);
   }
 
-  .home-picker__chip > span {
-    color: hsl(var(--exp-hue) 55% 38%);
-  }
-
-  .home-picker__chip small {
+  .home-picker__tile small {
     color: var(--ink-soft);
     font-family: var(--font-label);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 400;
   }
 
-  .home-picker__chip:hover,
-  .home-picker__chip:focus-visible {
-    box-shadow: 3px 4px 0 var(--ink);
-    transform: rotate(0) translateY(-2px);
+  .home-picker__tile:hover {
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translateY(-1px);
+  }
+
+  .home-picker__tile:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* The feeling on show: inked in solid, so it reads at a glance and not by
+     colour alone. */
+  .home-picker__tile[aria-current="true"] {
+    background: var(--ink);
+    box-shadow: 2px 2px 0 hsl(var(--exp-hue) 60% 55%);
+    color: var(--on-dark);
+  }
+
+  .home-picker__tile[aria-current="true"] small {
+    color: var(--on-dark-soft);
+  }
+
+  @media (min-width: 60rem) {
+    .home-picker__bar {
+      margin-inline: 0;
+    }
+
+    .home-picker__tiles {
+      flex-wrap: wrap;
+      justify-content: center;
+      overflow: visible;
+      padding-inline: 0;
+    }
+
+    .home-picker__tile {
+      padding-inline: 0.65rem;
+      font-size: 0.86rem;
+    }
   }
 
   /* 3. Best episodes: one big photo at a time --------------------------- */
@@ -1100,22 +1187,6 @@
   }
 
   @media (max-width: 34rem) {
-    /* One sideways row of stickers instead of three wrapped lines. */
-    .home-picker__chips {
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      width: calc(100% + var(--gutter) * 2);
-      margin-inline: calc(var(--gutter) * -1);
-      padding: 0.3rem var(--gutter) 0.5rem;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .home-picker__chips::-webkit-scrollbar {
-      display: none;
-    }
-    .home-picker__chips > li {
-      flex: none;
-    }
     .home-map__trips li:nth-child(n + 4) {
       display: none;
     }

@@ -1,0 +1,43 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * これは終わった…: grey rain over prints that landed askew, drained of
+ * colour. Pointing at one (where there is a pointer) brings it back upright
+ * and in colour, but nothing depends on it.
+ */
+const { items } = Astro.props;
+---
+
+<div class="look-rain">
+  <span class="look-rain__drops" aria-hidden="true"></span>
+  <ul class="look-rain__pile">
+    {items.map((item) => (
+      <li class="look-rain__print">
+        {item.cover && (
+          <span class="look-rain__photo">
+            <Picture
+              storageKey={item.cover.storageKey}
+              alt={item.cover.alt}
+              sizes="(max-width: 46rem) 92vw, 28rem"
+            />
+          </span>
+        )}
+        <div class="look-rain__body">
+          {item.place && <p class="look-meta">{item.place}</p>}
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <p class="look-summary">{item.summary}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>

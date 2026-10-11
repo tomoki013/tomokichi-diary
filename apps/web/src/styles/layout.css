@@ -285,6 +285,14 @@
     }
   }
 
+  /* On a phone the English half of the name pushed the Japanese one into an
+     ellipsis; the Japanese name alone fits. */
+  @media (max-width: 34rem) {
+    .site-header__brand em {
+      display: none;
+    }
+  }
+
   /* Overlays -------------------------------------------------------- */
   .mobile-menu,
   .header-search-modal,

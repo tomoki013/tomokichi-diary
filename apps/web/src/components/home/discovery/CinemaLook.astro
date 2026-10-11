@@ -1,0 +1,39 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 感動: a reel of film stills. Each story is a letterboxed frame with its
+ * title set like a subtitle across the bottom of the picture; the first
+ * frame is the large one. The photo drifts in slightly as it appears.
+ */
+const { items } = Astro.props;
+---
+
+<ol class="look-cinema">
+  {items.map((item) => (
+    <li class="look-cinema__frame">
+      <span class="look-cinema__screen">
+        {item.cover && (
+          <Picture
+            storageKey={item.cover.storageKey}
+            alt={item.cover.alt}
+            sizes="(max-width: 46rem) 92vw, 40rem"
+          />
+        )}
+      </span>
+      <div class="look-cinema__subtitle">
+        {item.place && <p>{item.place}</p>}
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+      </div>
+    </li>
+  ))}
+</ol>
