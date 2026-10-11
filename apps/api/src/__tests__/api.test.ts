@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
 import type { ContactMessage } from "@tomokichi/domain";
@@ -80,6 +80,66 @@ describe("validation", () => {
     expect(body.error.code).toBe("API_VALIDATION_FAILED");
     expect(body.error.issues.map((issue: { path: string }) => issue.path)).toContain("slug");
     expect(body.error.requestId).toBeTruthy();
+  });
+});
+
+describe("bulk publication through the authenticated article API", () => {
+  it("publishes saved pages separately, rejects an incomplete article and dispatches only once", async () => {
+    const publishSite = vi.fn(async (_env: Env, _deferBuild = false) => ({ state: "queued" }));
+    app = createApp({ contextFactory: () => ctx, publishSite });
+    const first = await createArticle({ slug: "first", kind: "page", path: "/first" });
+    const second = await createArticle({ slug: "second", kind: "page", path: "/second" });
+    const blocked = await createArticle({ slug: "blocked", path: "/posts/blocked" });
+    const untouched = await createArticle({ slug: "untouched", kind: "page", path: "/untouched" });
+    for (const id of [first, second, blocked]) {
+      const response = await request(`/v1/admin/articles/${id}/publish`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({ deferBuild: true }),
+      });
+      expect(response.status).toBe(id === blocked ? 409 : 200);
+    }
+    expect(publishSite.mock.calls.map((call) => call[1])).toEqual([true, true]);
+    const final = await request("/v1/admin/publication/retry", { method: "POST", headers: auth });
+    expect(final.status).toBe(202);
+    expect(publishSite.mock.calls.filter((call) => !call[1])).toHaveLength(1);
+    const list = await (await request("/v1/admin/articles", { headers: auth })).json();
+    expect(
+      list.items
+        .filter((item: { isLive: boolean }) => item.isLive)
+        .map((item: { id: string }) => item.id)
+        .toSorted(),
+    ).toEqual([first, second].toSorted());
+    for (const id of [blocked, untouched]) {
+      const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+      expect(detail.publishedRevisionId).toBeNull();
+    }
+  });
+
+  it("keeps the no-body publish API compatible and rejects malformed options before changing data", async () => {
+    const publishSite = vi.fn(async () => ({ state: "queued" }));
+    app = createApp({ contextFactory: () => ctx, publishSite });
+    const id = await createArticle({ kind: "page", path: "/page" });
+    for (const body of ['{"deferBuild":"yes"}', "{"]) {
+      expect(
+        (await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth, body }))
+          .status,
+      ).toBe(400);
+    }
+    expect(publishSite).not.toHaveBeenCalled();
+    expect(
+      (await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth })).status,
+    ).toBe(200);
+    expect(publishSite).toHaveBeenCalledWith(env, false);
+  });
+
+  it("requires authentication for deferred publication and the final dispatch", async () => {
+    for (const path of ["/v1/admin/articles/unknown/publish", "/v1/admin/publication/retry"]) {
+      expect(
+        (await request(path, { method: "POST", body: JSON.stringify({ deferBuild: true }) }))
+          .status,
+      ).toBe(401);
+    }
   });
 });
 
