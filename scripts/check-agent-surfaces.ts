@@ -6,6 +6,14 @@ const root = process.cwd();
 const snapshot = loadSnapshot();
 const pages = new Map(listBuiltPages().map((page) => [page.path, page]));
 const findings: { code: string; target: string; message: string }[] = [];
+
+/** Contents of the same-site module scripts a built page loads from `/_astro/`. */
+function bundledScripts(html: string): string[] {
+  return [...html.matchAll(/<script[^>]+src="\/(_astro\/[^"]+\.js)"/g)].flatMap(([, path]) => {
+    const file = join(root, "apps", "web", "dist", path ?? "");
+    return existsSync(file) ? [readFileSync(file, "utf8")] : [];
+  });
+}
 const tools = [
   "get_current_page_context",
   "search_travel_content",
@@ -37,8 +45,12 @@ for (const knowledge of snapshot.articleKnowledge) {
       message: "page does not embed its WebMCP context",
     });
   }
+  // The tools may be registered by an inline script or by a module the page
+  // loads (Vite moves the script out once it shares code with another page),
+  // so search the page together with its own bundled scripts.
+  const surface = [html, ...bundledScripts(html)].join("\n");
   for (const tool of tools) {
-    if (!html.includes(tool))
+    if (!surface.includes(tool))
       findings.push({
         code: "AGENT_SURFACE_FAILED",
         target: route.path,
