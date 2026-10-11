@@ -650,108 +650,224 @@
     }
   }
 
-  /* 発見 — field notebook on graph paper -------------------------------- */
-  .home-discovery__panel--notebook {
+  /* 発見 — magnifying glass over photos out of focus ------------------- */
+  .home-discovery__panel--lens {
     background:
       linear-gradient(rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
       linear-gradient(90deg, rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
       #fbfaf4;
   }
 
-  .look-notebook {
+  .look-lens {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  /* Cue and score only mean something while the lens is on. */
+  .look-lens__cue,
+  .look-lens__score {
+    display: none;
+    margin: 0;
+  }
+
+  .lens-ready .look-lens__cue {
+    display: block;
+    padding: 0.55rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: hsl(var(--exp-hue) 75% 92%);
+    color: hsl(var(--exp-hue) 55% 25%);
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .lens-ready .look-lens__score {
+    display: block;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    text-align: center;
+  }
+
+  .look-lens__score b {
+    color: var(--accent);
+    font-size: 1.25em;
+  }
+
+  .look-lens__finds {
     display: grid;
     gap: var(--space-md);
   }
 
-  .look-notebook__entry {
+  .look-lens__find {
     position: relative;
-    display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    grid-template-areas:
-      "no no"
-      "title title"
-      "photo facts";
-    gap: 0.55rem 0.9rem;
-    padding: 0.8rem 0.9rem 0.9rem;
-    border: 1px solid #d9d4bf;
-    border-left: 4px solid hsl(var(--exp-hue) 50% 50%);
-    background: rgb(255 255 255 / 85%);
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
   }
 
-  .look-notebook__no {
-    grid-area: no;
-    margin: 0;
-    color: hsl(var(--exp-hue) 50% 35%);
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    font-weight: 700;
+  /* The lens needs the photo to itself, so only the title is the link. */
+  .look-lens h4 a::after {
+    content: none;
   }
 
-  .look-notebook__photo {
+  .look-lens__photo {
     position: relative;
     display: block;
-    grid-area: photo;
-    align-self: start;
-    padding: 0.25rem;
-    background: #fff;
-    box-shadow: var(--shadow-sm);
-    transform: rotate(-2deg);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
   }
 
-  /* A strip of tape holding the photo in. */
-  .look-notebook__photo::before {
+  .look-lens__layer,
+  .look-lens__layer picture {
     position: absolute;
-    top: -0.45rem;
-    left: 50%;
-    width: 3rem;
-    height: 0.9rem;
-    background: rgb(240 225 190 / 85%);
-    content: "";
-    transform: translateX(-50%) rotate(-4deg);
+    inset: 0;
   }
 
-  .look-notebook__photo img {
+  .look-lens__layer img {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1;
+    height: 100%;
     object-fit: cover;
   }
 
-  .look-notebook h4 {
-    grid-area: title;
+  .look-lens__layer--sharp,
+  .look-lens__glass,
+  .look-lens__stamp {
+    display: none;
   }
 
-  .look-notebook dl {
+  .lens-ready .look-lens__photo {
+    cursor: zoom-in;
+  }
+
+  .lens-ready .look-lens__layer--blur img {
+    filter: blur(8px) saturate(0.6) brightness(1.05);
+    transform: scale(1.08);
+    transition: filter 600ms var(--ease);
+  }
+
+  .lens-ready .look-lens__layer--sharp {
+    display: block;
+    clip-path: circle(0 at var(--x, 50%) var(--y, 50%));
+  }
+
+  .lens-ready .look-lens__layer--sharp img {
+    transform: scale(1.7);
+    transform-origin: var(--x, 50%) var(--y, 50%);
+  }
+
+  .lens-ready .is-looking .look-lens__layer--sharp {
+    clip-path: circle(4.2rem at var(--x, 50%) var(--y, 50%));
+  }
+
+  /* Found, or reached by keyboard: the photo stays sharp. */
+  .lens-ready .is-found .look-lens__layer--blur img,
+  .lens-ready .look-lens__find:focus-within .look-lens__layer--blur img {
+    filter: none;
+    transform: none;
+  }
+
+  .lens-ready .look-lens__glass {
+    position: absolute;
+    top: var(--y, 50%);
+    left: var(--x, 50%);
+    display: block;
+    width: 8.4rem;
+    aspect-ratio: 1;
+    border: 5px solid #2b2b2b;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 2px #c9a24a,
+      0 6px 16px rgb(0 0 0 / 35%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .look-lens__glass::after {
+    position: absolute;
+    top: 100%;
+    left: 85%;
+    width: 0.9rem;
+    height: 3.6rem;
+    border-radius: 0.45rem;
+    background: #6a4423;
+    content: "";
+    transform: rotate(-45deg);
+    transform-origin: top center;
+  }
+
+  .lens-ready .is-looking .look-lens__glass {
+    opacity: 1;
+  }
+
+  /* A visible "tap here" on every photo still to find. */
+  .lens-ready .look-lens__find:not(.is-found) .look-lens__photo::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: rgb(23 26 22 / 72%);
+    color: #fff;
+    content: "タップして探す";
+    font-size: var(--step-small);
+    font-weight: 700;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity var(--speed) var(--ease);
+  }
+
+  .lens-ready .look-lens__photo.is-looking::after {
+    opacity: 0;
+  }
+
+  .lens-ready .is-found .look-lens__stamp {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    display: block;
+    padding: 0.3rem 0.7rem;
+    border: 3px solid #c0392b;
+    border-radius: 0.4rem;
+    background: rgb(255 255 255 / 85%);
+    color: #c0392b;
+    font-family: var(--font-hand);
+    font-weight: 700;
+    transform: rotate(-12deg);
+  }
+
+  .look-lens__body {
     display: grid;
-    grid-area: facts;
-    align-content: start;
+    gap: 0.45rem;
+    padding: 0.8rem 0.9rem 1rem;
+  }
+
+  .look-lens dl {
+    display: grid;
     margin: 0;
     font-size: var(--step-small);
   }
 
-  .look-notebook__entry:not(:has(.look-notebook__photo)) dl {
-    grid-column: 1 / -1;
-  }
-
-  .look-notebook dl > div {
+  .look-lens dl > div {
     display: grid;
     grid-template-columns: 3em minmax(0, 1fr);
     gap: 0.5rem;
     padding-block: 0.25rem;
-    border-top: 1px dotted #c9c3a8;
+    border-top: 1px dotted var(--line-strong);
   }
 
-  .look-notebook dt {
+  .look-lens dt {
     color: var(--ink-faint);
   }
 
-  .look-notebook dd {
+  .look-lens dd {
     margin: 0;
     color: var(--ink-soft);
   }
 
   @media (min-width: 46rem) {
-    .look-notebook {
+    .look-lens__finds {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -973,6 +1089,17 @@
 
     .look-album__print:nth-child(4) img {
       animation-delay: 0.9s;
+    }
+
+    .lens-ready .is-found .look-lens__stamp {
+      animation: lens-stamp 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+    }
+  }
+
+  @keyframes lens-stamp {
+    from {
+      opacity: 0;
+      transform: scale(2) rotate(-12deg);
     }
   }
 

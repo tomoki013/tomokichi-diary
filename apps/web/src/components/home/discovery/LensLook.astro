@@ -1,0 +1,135 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 発見: photos left out of focus, and a magnifying glass. Tap a photo and the
+ * lens drops where the finger landed, then the photo comes sharp and is
+ * stamped 発見; with a mouse the lens follows the pointer. A counter keeps
+ * score. Without JavaScript, or with reduced motion, the photos are simply
+ * sharp — the titles and rows below never depend on the lens.
+ */
+const { items } = Astro.props;
+---
+
+<div class="look-lens" data-lens>
+  <p class="look-lens__cue">ぼやけた写真をタップして、虫眼鏡でのぞいてみてください</p>
+  <p class="look-lens__score" aria-hidden="true">
+    発見 <b data-lens-found>0</b> / {items.length}
+  </p>
+  <ul class="look-lens__finds">
+    {items.map((item) => (
+      <li class="look-lens__find" data-lens-find>
+        {item.cover && (
+          <span class="look-lens__photo" data-lens-photo>
+            <span class="look-lens__layer look-lens__layer--blur">
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt={item.cover.alt}
+                sizes="(max-width: 46rem) 92vw, 28rem"
+              />
+            </span>
+            <span class="look-lens__layer look-lens__layer--sharp" aria-hidden="true">
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt=""
+                sizes="(max-width: 46rem) 92vw, 28rem"
+              />
+            </span>
+            <span class="look-lens__glass" aria-hidden="true"></span>
+            <span class="look-lens__stamp" aria-hidden="true">
+              発見
+            </span>
+          </span>
+        )}
+        <div class="look-lens__body">
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+          <dl>
+            {item.place && (
+              <div>
+                <dt>地域</dt>
+                <dd>{item.place}</dd>
+              </div>
+            )}
+            {item.travelMonth && (
+              <div>
+                <dt>時期</dt>
+                <dd>{item.travelMonth}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  /**
+   * One set of listeners on the document, so panels cloned in later (the
+   * discovery area swaps them in from <template>s) work without setup. The
+   * lens only switches on when motion is welcome; otherwise the photos stay
+   * sharp and the cue and counter stay hidden (see the CSS).
+   */
+  const LOOK_MS = 700;
+
+  const photoOf = (target: EventTarget | null) =>
+    target instanceof Element ? target.closest<HTMLElement>("[data-lens-photo]") : null;
+
+  const aimAt = (photo: HTMLElement, event: PointerEvent) => {
+    const box = photo.getBoundingClientRect();
+    photo.style.setProperty("--x", `${event.clientX - box.left}px`);
+    photo.style.setProperty("--y", `${event.clientY - box.top}px`);
+    photo.classList.add("is-looking");
+  };
+
+  const markFound = (photo: HTMLElement) => {
+    const find = photo.closest("[data-lens-find]");
+    if (!find || find.classList.contains("is-found")) return;
+    find.classList.add("is-found");
+    const root = photo.closest("[data-lens]");
+    const score = root?.querySelector("[data-lens-found]");
+    if (root && score) score.textContent = String(root.querySelectorAll(".is-found").length);
+  };
+
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.documentElement.classList.add("lens-ready");
+
+    // Mouse: the lens follows the pointer; resting on a photo finds it.
+    let current: HTMLElement | null = null;
+    let since = 0;
+    document.addEventListener("pointermove", (event) => {
+      if (event.pointerType !== "mouse") return;
+      const photo = photoOf(event.target);
+      if (photo !== current) {
+        current?.classList.remove("is-looking");
+        current = photo;
+        since = event.timeStamp;
+      }
+      if (!photo) return;
+      aimAt(photo, event);
+      if (event.timeStamp - since > LOOK_MS) markFound(photo);
+    });
+
+    // Touch: a tap drops the lens where the finger landed, holds it there a
+    // moment, then the whole photo comes into focus — found.
+    document.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse") return;
+      const photo = photoOf(event.target);
+      if (!photo) return;
+      aimAt(photo, event);
+      window.setTimeout(() => {
+        markFound(photo);
+        photo.classList.remove("is-looking");
+      }, LOOK_MS + 300);
+    });
+  }
+</script>

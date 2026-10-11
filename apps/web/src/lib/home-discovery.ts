@@ -20,7 +20,7 @@ import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi
  */
 
 export type DiscoveryLookId =
-  "board" | "cinema" | "pulse" | "rain" | "manga" | "notebook" | "letters" | "album";
+  "board" | "cinema" | "pulse" | "rain" | "manga" | "lens" | "letters" | "album";
 
 /** Which look each feeling gets. The only place the mapping lives. */
 export const DISCOVERY_LOOKS: Record<ExperienceTag, DiscoveryLookId> = {
@@ -29,7 +29,7 @@ export const DISCOVERY_LOOKS: Record<ExperienceTag, DiscoveryLookId> = {
   thrilling: "pulse",
   disaster: "rain",
   funny: "manga",
-  discovery: "notebook",
+  discovery: "lens",
   challenge: "letters",
   unforgettable: "album",
 };
