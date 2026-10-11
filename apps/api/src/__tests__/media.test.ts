@@ -76,11 +76,15 @@ describe("media upload API", () => {
   it("pauses uploads without changing storage or closing authenticated reads", async () => {
     const put = vi.spyOn(ctx.storage, "put");
     const paused = { ...env, MEDIA_UPLOADS_PAUSED: "1" };
-    const response = await app.request("/v1/admin/media", {
-      method: "POST",
-      headers: { authorization: auth.authorization },
-      body: "not parsed during maintenance",
-    }, paused);
+    const response = await app.request(
+      "/v1/admin/media",
+      {
+        method: "POST",
+        headers: { authorization: auth.authorization },
+        body: "not parsed during maintenance",
+      },
+      paused,
+    );
     expect(response.status).toBe(503);
     expect(response.headers.get("Retry-After")).toBe("60");
     expect(put).not.toHaveBeenCalled();
@@ -502,10 +506,21 @@ describe("legacy hash migration", () => {
       },
     ]);
     const before = await ctx.repos.media.listForArticle(a.id);
-    const dry = await backfillMediaHashes(ctx, { apply: false });
+    const get = ctx.storage.get.bind(ctx.storage);
+    const readOrder: string[] = [];
+    const reads = vi.spyOn(ctx.storage, "get").mockImplementation(async (key) => {
+      if (key === "images/one.png") await new Promise((resolve) => setTimeout(resolve, 20));
+      readOrder.push(key);
+      return get(key);
+    });
+    const progress = vi.fn();
+    const dry = await backfillMediaHashes(ctx, { apply: false, onProgress: progress });
+    expect(readOrder[0]).not.toBe("images/one.png");
+    expect(progress).toHaveBeenLastCalledWith(3, 3);
     expect(dry.map((item) => item.state)).toEqual(["verified", "duplicate", "skipped"]);
     expect((await ctx.repos.media.hashStatus()).verified).toBe(0);
     const report = await backfillMediaHashes(ctx, { apply: true });
+    reads.mockRestore();
     expect(report[1]).toMatchObject({ state: "duplicate", canonicalId: "legacy-1" });
     const duplicate = await uploadMediaWithResult(ctx, input());
     expect(duplicate.ok && duplicate.value.asset.id).toBe("legacy-1");

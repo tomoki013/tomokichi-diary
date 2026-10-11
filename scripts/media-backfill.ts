@@ -85,15 +85,30 @@ const ctx: AppContext = {
 try {
   const report = args.has("--recover")
     ? await recoverMediaUploads(ctx, apply)
-    : await backfillMediaHashes(ctx, { apply, verifyAll: args.has("--verify-all") });
+    : await backfillMediaHashes(ctx, {
+        apply,
+        verifyAll: args.has("--verify-all"),
+        onProgress: (processed, total) => {
+          if (processed % 20 === 0 || processed === total)
+            process.stdout.write(`Processed originals: ${processed}/${total}\n`);
+        },
+      });
   await mkdir(".artifacts", { recursive: true });
   const file = resolve(
     ".artifacts",
     `media-${args.has("--recover") ? "recovery" : "backfill"}-${remote ? "remote" : "local"}-${Date.now()}.json`,
   );
+  let status;
+  let statusError: string | undefined;
+  try {
+    status = await ctx.repos.media.hashStatus();
+  } catch (error) {
+    statusError = error instanceof Error ? error.message : "status unavailable";
+    process.exitCode = 1;
+  }
   await writeFile(
     file,
-    `${JSON.stringify({ apply, remote, report, status: await ctx.repos.media.hashStatus() }, null, 2)}\n`,
+    `${JSON.stringify({ apply, remote, report, status, statusError }, null, 2)}\n`,
   );
   process.stdout.write(
     `${apply ? "Applied" : "Dry run"}: ${report.length} images; report ${basename(file)}\n`,

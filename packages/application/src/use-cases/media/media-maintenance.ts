@@ -14,7 +14,11 @@ export interface MediaHashReport {
 /** Registers original-byte hashes without modifying legacy identities or URLs. */
 export async function backfillMediaHashes(
   ctx: AppContext,
-  options: { apply: boolean; verifyAll?: boolean },
+  options: {
+    apply: boolean;
+    verifyAll?: boolean;
+    onProgress?: (processed: number, total: number) => void;
+  },
 ): Promise<MediaHashReport[]> {
   const assets = (await ctx.repos.media.listAll()).toSorted(
     (a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id),
@@ -23,37 +27,49 @@ export async function backfillMediaHashes(
   const canonical = new Map(
     (await ctx.repos.media.listHashes()).map((entry) => [entry.sha256, entry.mediaId]),
   );
-  for (const asset of assets) {
-    if (asset.contentSha256 && !options.verifyAll) {
-      canonical.set(asset.contentSha256, canonical.get(asset.contentSha256) ?? asset.id);
-      continue;
-    }
-    const base = { mediaId: asset.id, storageKey: asset.storageKey };
-    try {
-      const original = await ctx.storage.get(asset.storageKey);
-      if (!original) {
-        report.push({ ...base, state: "skipped", reason: "original missing" });
-        continue;
+  if (!options.verifyAll) {
+    for (const asset of assets)
+      if (asset.contentSha256)
+        canonical.set(asset.contentSha256, canonical.get(asset.contentSha256) ?? asset.id);
+  }
+  const pending = assets.filter((asset) => !asset.contentSha256 || options.verifyAll);
+  // Bound memory and R2 reads, then register in stable order to preserve representatives.
+  for (let offset = 0; offset < pending.length; offset += 4) {
+    const group = pending.slice(offset, offset + 4);
+    const originals = await Promise.allSettled(
+      group.map((asset) => ctx.storage.get(asset.storageKey)),
+    );
+    for (const [index, asset] of group.entries()) {
+      const base = { mediaId: asset.id, storageKey: asset.storageKey };
+      try {
+        const read = originals[index]!;
+        if (read.status === "rejected") throw read.reason;
+        const original = read.value;
+        if (!original) {
+          report.push({ ...base, state: "skipped", reason: "original missing" });
+          continue;
+        }
+        const sha256 = await sha256Hex(original.body);
+        const representative = options.apply
+          ? (await ctx.repos.media.registerHash(asset.id, sha256)).id
+          : (canonical.get(sha256) ?? asset.id);
+        canonical.set(sha256, representative);
+        report.push({
+          ...base,
+          state: representative === asset.id ? "verified" : "duplicate",
+          sha256,
+          canonicalId: representative,
+          legacyHashMismatch: sha256 !== asset.sha256,
+        });
+      } catch (error) {
+        report.push({
+          ...base,
+          state: "skipped",
+          reason: error instanceof Error ? error.message : "read or registration failed",
+        });
       }
-      const sha256 = await sha256Hex(original.body);
-      const representative = options.apply
-        ? (await ctx.repos.media.registerHash(asset.id, sha256)).id
-        : (canonical.get(sha256) ?? asset.id);
-      canonical.set(sha256, representative);
-      report.push({
-        ...base,
-        state: representative === asset.id ? "verified" : "duplicate",
-        sha256,
-        canonicalId: representative,
-        legacyHashMismatch: sha256 !== asset.sha256,
-      });
-    } catch (error) {
-      report.push({
-        ...base,
-        state: "skipped",
-        reason: error instanceof Error ? error.message : "read or registration failed",
-      });
     }
+    options.onProgress?.(offset + group.length, pending.length);
   }
   return report;
 }
