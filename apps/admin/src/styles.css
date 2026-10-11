@@ -691,6 +691,15 @@ fieldset {
   width: 100%;
   border-collapse: collapse;
 }
+.bulk-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.table .table__select {
+  width: 2.5rem;
+  vertical-align: middle;
+}
 .table th,
 .table td {
   padding: 0.5rem 0.75rem;

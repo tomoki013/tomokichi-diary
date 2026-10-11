@@ -218,8 +218,11 @@ export const api = {
     ),
   publishCheck: (articleId: string) =>
     request<PublishCheckDto>(`/admin/articles/${id(articleId)}/publish-check`),
-  publish: (articleId: string) =>
-    request<{ status: string }>(`/admin/articles/${id(articleId)}/publish`, json("POST")),
+  publish: (articleId: string, deferBuild = false) =>
+    request<{ status: string; publication: PublicationStatus }>(
+      `/admin/articles/${id(articleId)}/publish`,
+      json("POST", { deferBuild }),
+    ),
   schedule: (articleId: string, at: string) =>
     request<{ status: string }>(`/admin/articles/${id(articleId)}/schedule`, json("POST", { at })),
   unpublish: (articleId: string) =>

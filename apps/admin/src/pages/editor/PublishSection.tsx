@@ -1,18 +1,8 @@
-const publishMessages: Record<string, string> = {
-  "body must be at least 200 characters": "本文を200文字以上入力してください",
-  "a cover image is required": "カバー画像を選んでください",
-  "cover image requires alt text": "カバー画像の代替テキストを入力してください",
-  "title is required": "タイトルを入力してください",
-  "summary is required": "要約を入力してください",
-  "a canonical route is required": "記事のURLを設定してください",
-  "scheduled publication time has not been reached": "予約日時になると公開されます",
-  "archived articles cannot be published": "アーカイブした記事は公開できません",
-};
-const publishProblem = (message: string) => publishMessages[message] ?? message;
-
 import { useEffect, useState } from "react";
 import type { ArticleDetailDto, PublishCheckDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
+import { publishProblem } from "../../lib/publish-messages";
+import { SitePublication } from "../../ui/SitePublication";
 import { formatDateTime, isoToJstLocal, jstLocalToIso } from "../../lib/labels";
 import { useResource, type Resource } from "../../ui/hooks";
 import { ErrorState, Panel, SkeletonRows } from "../../ui/parts";
@@ -108,47 +98,11 @@ export function PublishSection({
         </p>
       )}
 
-      <div className="publication-status" aria-live="polite">
-        {publication.error ? (
-          <ErrorState error={publication.error} onRetry={() => void publication.reload()} />
-        ) : (
-          publication.data && (
-            <>
-              <p>
-                {
-                  {
-                    deployed: "サイトに反映済み",
-                    queued: "サイトへの反映待ち",
-                    building: "サイトを生成・反映中…",
-                    failed: "サイトへの反映に失敗",
-                    unconfigured: "自動反映の設定が必要です",
-                  }[publication.data.state]
-                }
-              </p>
-              {publication.data.state === "unconfigured" && (
-                <p className="form-error">
-                  DBには保存されています。公開連携用のGitHubトークンを設定するまでサイトには反映されません。
-                </p>
-              )}
-              {publication.data.error && <p className="form-error">{publication.data.error}</p>}
-              {publication.data.buildUrl && (
-                <a href={publication.data.buildUrl} target="_blank" rel="noopener noreferrer">
-                  反映処理のログ ↗
-                </a>
-              )}
-              {publication.data.configured && publication.data.state === "failed" && (
-                <button
-                  type="button"
-                  disabled={busy || working}
-                  onClick={() => void run(() => api.retryPublication(), "反映を再試行します")}
-                >
-                  サイトへの反映を再試行
-                </button>
-              )}
-            </>
-          )
-        )}
-      </div>
+      <SitePublication
+        publication={publication}
+        disabled={busy || working}
+        onRetry={() => void run(() => api.retryPublication(), "反映を再試行します")}
+      />
       <div className="stack">
         <button
           type="button"

@@ -35,6 +35,7 @@ import {
   draftSchema,
   experienceTagsSchema,
   relationsSchema,
+  publishSchema,
   scheduleSchema,
 } from "../schemas.js";
 
@@ -48,7 +49,7 @@ async function siteAuthor(ctx: AppContext): Promise<AuthorId | null> {
   return author?.id ?? null;
 }
 
-export function articleRoutes(publishSite: (env: Env) => Promise<unknown>) {
+export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => Promise<unknown>) {
   const routes = new Hono<AppEnv>();
 
   routes.get("/", async (c) => {
@@ -186,9 +187,26 @@ export function articleRoutes(publishSite: (env: Env) => Promise<unknown>) {
   });
 
   routes.post("/:id/publish", async (c) => {
+    // Existing clients publish without a body. Bulk clients defer the build,
+    // but use the very same per-article validation and published snapshot.
+    const input = (await c.req.text()).trim();
+    let body: unknown = {};
+    if (input !== "") {
+      try {
+        body = JSON.parse(input);
+      } catch {
+        body = null;
+      }
+    }
+    const parsed = validate(publishSchema, body);
+    if (!parsed.ok)
+      return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
     const result = await publishArticle(c.get("ctx"), c.req.param("id") as ArticleId);
     return result.ok
-      ? c.json({ status: result.value.status, publication: await publishSite(c.env) })
+      ? c.json({
+          status: result.value.status,
+          publication: await publishSite(c.env, parsed.value.deferBuild),
+        })
       : domainErrorResponse(c, result.errors);
   });
 

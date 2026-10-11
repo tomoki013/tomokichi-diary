@@ -21,6 +21,8 @@ export const createArticleSchema = v.object({
 
 export const scheduleSchema = v.object({ at: v.string({ min: 20, max: 40 }) });
 
+export const publishSchema = v.object({ deferBuild: v.optional(v.boolean(), false) });
+
 export const moveRouteSchema = v.object({
   from: v.string({ min: 1, max: 255 }),
   to: v.string({ min: 1, max: 255 }),

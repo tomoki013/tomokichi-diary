@@ -56,7 +56,7 @@ export interface AppOptions {
   verifyAccess?: AccessVerifier;
   /** Overridden by tests so the inquiry screen runs against a stand-in platform. */
   inquiryOperator?: (env: Env) => ProjectOperatorClient | null;
-  publishSite?: (env: Env) => Promise<unknown>;
+  publishSite?: (env: Env, deferBuild?: boolean) => Promise<unknown>;
 }
 
 /**
@@ -86,7 +86,9 @@ export function createApp(options: AppOptions = {}) {
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
   const verifyAccess = options.verifyAccess ?? verifyAccessJwt;
   const inquiryOperator = options.inquiryOperator ?? ((env: Env) => createInquiryOperator(env));
-  const publishSite = options.publishSite ?? requestPublication;
+  const publishSite =
+    options.publishSite ??
+    ((env: Env, deferBuild = false) => requestPublication(env, undefined, undefined, deferBuild));
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
@@ -181,7 +183,7 @@ export function createApp(options: AppOptions = {}) {
   });
 
   v1.route("/admin/articles", articleRoutes(publishSite));
-  v1.route("/admin/publication", publicationRoutes());
+  v1.route("/admin/publication", publicationRoutes(publishSite));
   v1.route("/admin/media", mediaRoutes());
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());
