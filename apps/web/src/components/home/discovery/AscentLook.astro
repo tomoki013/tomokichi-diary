@@ -1,0 +1,40 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 挑戦: a trail climbing up the page, one step per story. The step names
+ * only count the stories; they make no claim about how hard each trip was.
+ */
+const { items } = Astro.props;
+const STEPS = ["一歩目", "二歩目", "三歩目", "四歩目", "五歩目", "六歩目"];
+---
+
+<ol class="look-ascent">
+  {items.map((item, index) => (
+    <li class="look-ascent__step">
+      <span class="look-ascent__mark" aria-hidden="true">
+        {STEPS[index] ?? `${index + 1}歩目`}
+      </span>
+      <div class="look-ascent__body">
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+        {(item.place || item.travelMonth) && (
+          <p class="look-meta">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
+        )}
+      </div>
+      <span class="look-ascent__thumb">
+        {item.cover && (
+          <Picture storageKey={item.cover.storageKey} alt={item.cover.alt} sizes="5.5rem" />
+        )}
+      </span>
+    </li>
+  ))}
+</ol>

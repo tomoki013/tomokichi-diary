@@ -7,27 +7,26 @@ interface Props {
 }
 
 /**
- * 感動: a reel of film stills. Each story is a letterboxed frame with its
- * title set like a subtitle across the bottom of the picture; the first
- * frame is the large one. The photo drifts in slightly as it appears.
+ * ワクワク: a row of postcards to swipe through, like flicking past places
+ * you could go next. Snaps one card at a time on a phone.
  */
 const { items } = Astro.props;
 ---
 
-<ol class="look-cinema">
+<ul class="look-carousel">
   {items.map((item) => (
-    <li class="look-cinema__frame">
-      <span class="look-cinema__screen">
+    <li class="look-carousel__card">
+      <span class="look-carousel__photo">
         {item.cover && (
           <Picture
             storageKey={item.cover.storageKey}
             alt={item.cover.alt}
-            sizes="(max-width: 46rem) 92vw, 40rem"
+            sizes="(max-width: 46rem) 62vw, 15rem"
           />
         )}
       </span>
-      <div class="look-cinema__subtitle">
-        {item.place && <p>{item.place}</p>}
+      <div class="look-carousel__body">
+        {item.place && <p class="look-meta">{item.place}</p>}
         <h4>
           <a href={item.path} data-discovery-article={item.slug}>
             {item.title}
@@ -36,4 +35,4 @@ const { items } = Astro.props;
       </div>
     </li>
   ))}
-</ol>
+</ul>

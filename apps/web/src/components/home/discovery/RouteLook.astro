@@ -1,0 +1,41 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * ハラハラ: the trip drawn as a dotted route on a map, every story a stop
+ * along it, and hazard tape around the first — the one where it went
+ * wrong first. The order is just the reading order, not a real itinerary.
+ */
+const { items } = Astro.props;
+---
+
+<ol class="look-route">
+  {items.map((item, index) => (
+    <li class:list={["look-route__stop", index === 0 && "is-hazard"]}>
+      <span class="look-route__thumb">
+        {item.cover && (
+          <Picture
+            storageKey={item.cover.storageKey}
+            alt={item.cover.alt}
+            sizes="(max-width: 46rem) 30vw, 9rem"
+          />
+        )}
+      </span>
+      <div class="look-route__body">
+        {item.place && <p class="look-pill">{item.place.split(" / ").at(-1)}</p>}
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+        <p class="look-summary">{item.summary}</p>
+      </div>
+      <span class="look-arrow" aria-hidden="true"></span>
+    </li>
+  ))}
+</ol>

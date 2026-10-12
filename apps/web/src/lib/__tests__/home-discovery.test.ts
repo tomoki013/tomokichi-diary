@@ -68,7 +68,13 @@ describe("recommend", () => {
   });
 
   it("puts covers first and keeps a photo-less story as a fallback", () => {
-    expect(slugs(recommend(views, "moving"))).toEqual(["second", "fourth", "fifth", "sixth"]);
+    expect(slugs(recommend(views, "moving"))).toEqual([
+      "second",
+      "fourth",
+      "fifth",
+      "sixth",
+      "newest",
+    ]);
     expect(slugs(recommend(views, "moving", { limit: 10 })).at(-1)).toBe("newest");
   });
 

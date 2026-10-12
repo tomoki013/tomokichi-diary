@@ -1,15 +1,21 @@
 ---
 import type { ExperienceTag } from "@tomokichi/domain";
-import BoardLook from "./BoardLook.astro";
-import CinemaLook from "./CinemaLook.astro";
-import PulseLook from "./PulseLook.astro";
-import RainLook from "./RainLook.astro";
-import MangaLook from "./MangaLook.astro";
-import LensLook from "./LensLook.astro";
-import LettersLook from "./LettersLook.astro";
-import AlbumLook from "./AlbumLook.astro";
+import Picture from "../../Picture.astro";
+import CarouselLook from "./CarouselLook.astro";
+import SpotlightLook from "./SpotlightLook.astro";
+import RouteLook from "./RouteLook.astro";
+import StormLook from "./StormLook.astro";
+import SnapsLook from "./SnapsLook.astro";
+import AtlasLook from "./AtlasLook.astro";
+import AscentLook from "./AscentLook.astro";
+import GlowLook from "./GlowLook.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
-import { lookFor, type DiscoveryItem, type DiscoveryLookId } from "../../../lib/home-discovery";
+import {
+  DISCOVERY_SCENES,
+  lookFor,
+  type DiscoveryItem,
+  type DiscoveryLookId,
+} from "../../../lib/home-discovery";
 
 interface Props {
   tag: ExperienceTag;
@@ -19,39 +25,60 @@ interface Props {
 }
 
 /**
- * One feeling and its stories. The header is the same for every feeling so
- * it is always clear which one is showing — its name in large type and one
- * line on what kind of trip it was. Below it, the feeling's own look.
+ * One feeling and its stories. Every feeling opens with a scene: a photo
+ * from one of its own stories behind a large catch line, and — always in
+ * the same place — the feeling's name, its English name in script and how
+ * many stories it has. Below it, the feeling's own look.
  */
 const { tag, items, total } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
+const scene = DISCOVERY_SCENES[tag];
 const look = lookFor(tag);
+// The backdrop comes from the end of the list so it does not repeat the
+// photo the look leads with — except in "glow", whose lead has no photo.
+const backdrop =
+  (look === "glow" ? items : items.toReversed()).find((item) => item.cover)?.cover ?? null;
 
-const LOOKS: Record<DiscoveryLookId, typeof BoardLook> = {
-  board: BoardLook,
-  cinema: CinemaLook,
-  pulse: PulseLook,
-  rain: RainLook,
-  manga: MangaLook,
-  lens: LensLook,
-  letters: LettersLook,
-  album: AlbumLook,
+const LOOKS: Record<DiscoveryLookId, typeof CarouselLook> = {
+  carousel: CarouselLook,
+  spotlight: SpotlightLook,
+  route: RouteLook,
+  storm: StormLook,
+  snaps: SnapsLook,
+  atlas: AtlasLook,
+  ascent: AscentLook,
+  glow: GlowLook,
 };
 const Look = LOOKS[look];
 ---
 
 <div
-  class:list={["home-discovery__panel", `home-discovery__panel--${look}`]}
+  class:list={["home-discovery__panel", `scene--${look}`]}
   style={`--exp-hue: ${copy.hue}`}
   data-experience={tag}
   data-announce={`${copy.label}の旅：${copy.lead}。${total}本`}
 >
-  <header class="mood-hero">
-    <div class="mood-hero__text">
-      <h3>{copy.label}の旅</h3>
-      <p class="mood-hero__lead">{copy.lead}</p>
+  <header class:list={["scene-hero", backdrop && "has-photo"]}>
+    {backdrop && (
+      <span class="scene-hero__photo" aria-hidden="true">
+        <Picture storageKey={backdrop.storageKey} alt="" sizes="(max-width: 46rem) 100vw, 46rem" />
+      </span>
+    )}
+    <div class="scene-hero__name">
+      <h3>
+        <span>{copy.label}</span>の旅
+      </h3>
+      <span class="scene-hero__english" aria-hidden="true">
+        {scene.english}
+      </span>
+      <p class="scene-hero__count">{total}本</p>
     </div>
-    <p class="mood-hero__count">{total}本</p>
+    <p class="scene-hero__catch">
+      {scene.catchLines.map((line) => (
+        <span>{line}</span>
+      ))}
+    </p>
+    <p class="scene-hero__sub">{scene.sub}</p>
   </header>
 
   {items.length === 0 ? (
@@ -59,13 +86,14 @@ const Look = LOOKS[look];
       まだこの気分の旅の話はありません。<a href="/posts">すべての旅の話</a>から探してみてください。
     </p>
   ) : (
-    <>
+    <div class="home-discovery__body">
+      <p class="scene-section">{scene.section}</p>
       <div class="home-discovery__look">
         <Look items={items} />
       </div>
       <a class="home-discovery__more" href={experienceHref(tag)}>
-        {copy.label}の旅をもっと読む（{total}本）
+        <span>{copy.label}の旅をもっと見る</span>
       </a>
-    </>
+    </div>
   )}
 </div>

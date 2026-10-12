@@ -1,0 +1,53 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 忘れられない: instant prints strung along a gentle wave, lit like a
+ * lantern festival, and the first story set apart as a remembered line.
+ */
+const { items } = Astro.props;
+const [lead, ...rest] = items;
+---
+
+<div class="look-glow">
+  {lead && (
+    <div class="look-glow__quote">
+      <h4>
+        <a href={lead.path} data-discovery-article={lead.slug}>
+          {lead.title}
+        </a>
+      </h4>
+      {(lead.place || lead.travelMonth) && (
+        <p class="look-meta">{[lead.place, lead.travelMonth].filter(Boolean).join("　")}</p>
+      )}
+      <span class="look-arrow" aria-hidden="true"></span>
+    </div>
+  )}
+  {rest.length > 0 && (
+    <ul class="look-glow__strip">
+      {rest.map((item) => (
+        <li class="look-glow__print">
+          <span class="look-glow__photo">
+            {item.cover && (
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt={item.cover.alt}
+                sizes="(max-width: 46rem) 42vw, 11rem"
+              />
+            )}
+          </span>
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
