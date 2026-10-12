@@ -1,0 +1,64 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 感動: one story in the spotlight on a dark stage — a large frame with the
+ * title over its lower edge — and the rest as smaller moments beside it.
+ */
+const { items } = Astro.props;
+const [lead, ...rest] = items;
+---
+
+<div class="look-spotlight">
+  {lead && (
+    <article class="look-spotlight__lead">
+      <span class="look-spotlight__photo">
+        {lead.cover && (
+          <Picture
+            storageKey={lead.cover.storageKey}
+            alt={lead.cover.alt}
+            sizes="(max-width: 46rem) 92vw, 42rem"
+          />
+        )}
+      </span>
+      <div class="look-spotlight__caption">
+        {lead.place && <p class="look-pill">{lead.place}</p>}
+        <h4>
+          <a href={lead.path} data-discovery-article={lead.slug}>
+            {lead.title}
+          </a>
+        </h4>
+        <p class="look-summary">{lead.summary}</p>
+        <span class="look-arrow" aria-hidden="true"></span>
+      </div>
+    </article>
+  )}
+  {rest.length > 0 && (
+    <ul class="look-spotlight__rest">
+      {rest.map((item) => (
+        <li>
+          <span class="look-spotlight__thumb">
+            {item.cover && (
+              <Picture
+                storageKey={item.cover.storageKey}
+                alt={item.cover.alt}
+                sizes="(max-width: 46rem) 44vw, 10rem"
+              />
+            )}
+          </span>
+          {item.place && <p class="look-meta">{item.place}</p>}
+          <h4>
+            <a href={item.path} data-discovery-article={item.slug}>
+              {item.title}
+            </a>
+          </h4>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>

@@ -1,13 +1,15 @@
 /* Home discovery: the stories under the mood bar (components/home/discovery).
-   Built for a phone first. Every feeling opens with the same plain header —
-   its name in large type and one line on what kind of trip it was — and
-   then has a look of its own that carries the mood by sight alone. Nothing
-   here needs a tap or a hover to make sense; the little movement there is
-   (flaps settling, a trace running, prints developing) stops under
-   `prefers-reduced-motion`. */
+   Built for a phone first. Every feeling opens with a scene — a photo from
+   one of its stories behind a large catch line, with the feeling's name and
+   count always in the same corner — and then lays its stories out in a look
+   of its own. Each look sets a small palette (`--scene-*`) that the shared
+   parts read, so the whole panel changes colour with the mood. Nothing here
+   needs a tap or a hover to make sense; the little movement there is stops
+   under `prefers-reduced-motion`. */
 @layer pages {
   .home-discovery {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
     margin-top: var(--space-2xs);
     text-align: start;
@@ -20,50 +22,175 @@
   }
 
   .home-discovery__panel {
+    /* Light scenes by default; dark ones override the lot. */
+    --scene-bg: hsl(var(--exp-hue) 70% 97%);
+    --scene-ink: var(--ink);
+    --scene-soft: var(--ink-soft);
+    --scene-faint: var(--ink-faint);
+    --scene-card: var(--surface);
+    --scene-line: hsl(var(--exp-hue) 35% 86%);
+    --scene-accent: hsl(var(--exp-hue) 70% 44%);
+    --scene-tint: hsl(var(--exp-hue) 85% 92%);
+    --scene-shadow: 0 2px 4px rgb(56 42 27 / 6%), 0 10px 22px rgb(56 42 27 / 9%);
+
     display: grid;
-    gap: var(--space-md);
+    grid-template-columns: minmax(0, 1fr);
     overflow: clip;
-    border: 1px solid var(--line);
+    border: 1px solid var(--scene-line);
     border-radius: var(--radius-lg);
-    background: var(--surface);
-    box-shadow: var(--shadow-sm);
+    background: var(--scene-bg);
+    box-shadow: var(--shadow);
+    color: var(--scene-ink);
   }
 
-  /* The feeling, said plainly and big ---------------------------------- */
-  .mood-hero {
+  /* The scene: photo, name, catch line --------------------------------- */
+  .scene-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
     display: grid;
-    gap: 0.3rem var(--space-sm);
-    padding: var(--space-md) var(--space-md) var(--space-sm);
-    border-bottom: 1px solid hsl(var(--exp-hue) 45% 85%);
-    border-left: 6px solid hsl(var(--exp-hue) 60% 50%);
-    background: hsl(var(--exp-hue) 80% 95%);
+    align-content: start;
+    gap: 0.55rem;
+    min-height: 15rem;
+    padding: var(--space-md) var(--space-md) var(--space-lg);
   }
 
-  .mood-hero__text {
-    display: grid;
-    gap: 0.15rem;
-    min-width: 0;
+  .scene-hero.has-photo {
+    min-height: 21rem;
   }
 
-  .mood-hero h3 {
+  .scene-hero__photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .scene-hero__photo picture,
+  .home-discovery__look picture {
+    display: contents;
+  }
+
+  .scene-hero__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The text sits on a wash of the scene colour at the top; the photo shows
+     through the middle and melts into the stories at the bottom. */
+  .scene-hero::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--scene-bg) 94%, transparent) 0%,
+      color-mix(in srgb, var(--scene-bg) 84%, transparent) 44%,
+      transparent 68%,
+      color-mix(in srgb, var(--scene-bg) 40%, transparent) 86%,
+      var(--scene-bg) 100%
+    );
+    content: "";
+  }
+
+  .scene-hero__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+  }
+
+  .scene-hero__name h3 {
     margin: 0;
-    color: hsl(var(--exp-hue) 55% 24%);
+    color: var(--scene-ink);
     font-family: var(--font-serif);
-    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+    font-size: 1.05rem;
+    font-weight: 700;
     line-height: 1.3;
   }
 
-  .mood-hero__lead {
-    margin: 0;
-    color: var(--ink-soft);
+  .scene-hero__name h3 span {
+    color: var(--scene-accent);
+    font-size: 1.35em;
+  }
+
+  .scene-hero__english {
+    color: var(--scene-accent);
+    font-family: var(--font-label);
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .scene-hero__count {
+    margin: 0 0 0 auto;
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+    background: var(--scene-card);
+    box-shadow: var(--scene-shadow);
+    color: var(--scene-ink);
+    font-family: var(--font-label);
     font-size: 0.95rem;
+    font-weight: 700;
+    align-self: center;
+  }
+
+  .scene-hero__catch {
+    display: grid;
+    margin: 0.2rem 0 0;
+    color: var(--scene-ink);
+    font-family: var(--font-serif);
+    font-size: clamp(1.65rem, 1.2rem + 2.2vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+  }
+
+  .scene-hero__catch span {
+    white-space: nowrap;
+  }
+
+  /* A soft halo of the scene colour keeps the small line readable over any
+     part of any photo. */
+  .scene-hero__sub {
+    margin: 0;
+    color: var(--scene-soft);
+    font-weight: 700;
+    text-shadow:
+      0 0 4px var(--scene-bg),
+      0 0 10px var(--scene-bg),
+      0 0 18px var(--scene-bg);
+    font-size: 0.9rem;
     line-height: 1.6;
   }
 
-  .mood-hero__count {
+  /* The stories -------------------------------------------------------- */
+  .home-discovery__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-sm);
+    padding-bottom: var(--space-md);
+  }
+
+  .scene-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin: 0;
-    color: var(--ink-faint);
-    font-size: var(--step-small);
+    padding-inline: var(--space-md);
+    color: var(--scene-ink);
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .scene-section::before {
+    width: 0.3rem;
+    height: 1.1em;
+    border-radius: 2px;
+    background: var(--scene-accent);
+    content: "";
   }
 
   .home-discovery__empty {
@@ -83,17 +210,27 @@
     list-style: none;
   }
 
+  /* Every photo box sets its own shape; the picture just fills it. */
   .home-discovery__look img {
     display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .home-discovery__look li,
+  .home-discovery__look article,
+  .look-glow__quote {
+    position: relative;
   }
 
   /* Shared bits of a story --------------------------------------------- */
-  /* The title link covers its whole card: one tab stop, one big target.
-     Each look makes its card the positioned box the overlay fills. */
+  /* The title link covers its whole card: one tab stop, one big target. */
   .home-discovery__look h4 {
     margin: 0;
+    color: var(--scene-ink);
     font-family: var(--font-serif);
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.55;
     overflow-wrap: anywhere;
   }
@@ -106,6 +243,7 @@
   .home-discovery__look h4 a::after {
     position: absolute;
     inset: 0;
+    z-index: 2;
     content: "";
   }
 
@@ -118,14 +256,14 @@
     outline: none;
   }
 
-  .home-discovery__look li:has(h4 a:focus-visible) {
+  .home-discovery__look :is(li, article, .look-glow__quote):has(h4 a:focus-visible) {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
   }
 
   .look-meta {
     margin: 0;
-    color: var(--ink-faint);
+    color: var(--scene-faint);
     font-size: var(--step-small);
   }
 
@@ -133,31 +271,66 @@
     display: -webkit-box;
     overflow: hidden;
     margin: 0;
-    color: var(--ink-soft);
-    font-size: 0.92rem;
-    line-height: 1.8;
+    color: var(--scene-soft);
+    font-size: 0.88rem;
+    line-height: 1.75;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
 
-  /* A full-width button at the bottom: easy to hit with a thumb. */
+  .look-pill {
+    justify-self: start;
+    width: fit-content;
+    margin: 0;
+    padding: 0.1rem 0.6rem;
+    border: 1px solid currentcolor;
+    border-radius: 999px;
+    color: var(--scene-accent);
+    font-size: var(--step-tiny);
+    font-weight: 700;
+  }
+
+  /* A round "go" mark in the corner of a card. */
+  .look-arrow {
+    position: absolute;
+    right: 0.7rem;
+    bottom: 0.7rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    border: 1.5px solid var(--scene-accent);
+    border-radius: 50%;
+    background:
+      linear-gradient(45deg, transparent 46%, var(--scene-accent) 47% 55%, transparent 56%) 42%
+        30% / 0.45rem 0.45rem no-repeat,
+      linear-gradient(-45deg, transparent 46%, var(--scene-accent) 47% 55%, transparent 56%) 42%
+        70% / 0.45rem 0.45rem no-repeat;
+  }
+
+  /* A wide button at the bottom: easy to hit with a thumb. */
   .home-discovery__more {
-    display: block;
-    margin: 0 var(--space-md) var(--space-md);
-    padding: 0.8rem 1rem;
-    border: 1.5px solid var(--ink);
-    border-radius: var(--radius);
-    background: hsl(var(--exp-hue) 80% 95%);
-    box-shadow: 2px 2px 0 var(--ink);
-    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: var(--space-xs) var(--space-md) 0;
+    padding: 0.8rem 1.2rem;
+    border-radius: 999px;
+    background: var(--scene-ink);
+    box-shadow: var(--scene-shadow);
+    color: var(--scene-bg);
     font-size: 0.95rem;
     font-weight: 700;
     text-align: center;
     text-decoration: none;
   }
 
+  .home-discovery__more::after {
+    content: "→";
+  }
+
   .home-discovery__more:hover {
-    background: hsl(var(--exp-hue) 75% 88%);
+    background: var(--scene-accent);
+    color: #fff;
   }
 
   .home-discovery__more:focus-visible {
@@ -165,988 +338,942 @@
     outline-offset: 2px;
   }
 
-  /* ワクワク — departure board ------------------------------------------ */
-  .look-board {
-    padding: 0.8rem 0.7rem 0.4rem;
-    border-radius: var(--radius);
-    background: #151614;
-    box-shadow:
-      inset 0 0 0 3px #2c2e29,
-      var(--shadow);
-    color: #ece6d4;
+  /* ワクワク — sunrise, postcards to swipe ------------------------------ */
+  .scene--carousel {
+    --scene-bg: #fff4e8;
+    --scene-accent: #d8611c;
+    --scene-tint: #ffe2c4;
   }
 
-  .look-board__top {
-    display: flex;
-    justify-content: space-between;
-    margin: 0 0 0.5rem;
-    padding: 0 0.3rem 0.45rem;
-    border-bottom: 1px solid #3a3c36;
-    color: #ffc940;
-    font-family: var(--font-label);
-    font-size: var(--step-small);
-    font-weight: 700;
-    letter-spacing: 0.2em;
-  }
-
-  .look-board__row {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 4.5rem;
-    grid-template-areas:
-      "time thumb"
-      "dest thumb"
-      "title title";
-    gap: 0.35rem 0.7rem;
-    padding: 0.75rem 0.3rem;
-    border-bottom: 1px dashed #34362f;
-  }
-
-  .look-board__row:last-child {
-    border-bottom: 0;
-  }
-
-  .look-board__time {
-    grid-area: time;
-    color: #ffc940;
-    font-family: var(--font-label);
-    font-size: var(--step-small);
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-  }
-
-  .look-board__dest {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.5rem;
-    grid-area: dest;
-  }
-
-  .look-board__dest small {
-    color: #b9b39f;
-    font-size: 0.75rem;
-  }
-
-  .look-board__city {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1px;
-  }
-
-  /* One split-flap tile per character, with the hinge line across it. */
-  .look-board__flap {
-    position: relative;
-    display: inline-grid;
-    place-items: center;
-    min-width: 1.3em;
-    height: 1.7em;
-    padding: 0 0.05em;
-    border-radius: 3px;
-    background: linear-gradient(#2c2e2a 50%, #232521 50%);
-    box-shadow: inset 0 -1px 0 #000;
-    color: #ffe9a3;
-    font-size: 0.82rem;
-    font-weight: 700;
-  }
-
-  .look-board__flap::after {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    left: 0;
-    height: 1px;
-    background: #0b0c0a;
-    content: "";
-  }
-
-  .look-board h4 {
-    grid-area: title;
-    color: #f4f1e8;
-    font-family: var(--font-sans);
-    font-size: 0.98rem;
-    font-weight: 500;
-  }
-
-  .look-board__thumb {
-    display: block;
-    grid-area: thumb;
-    align-self: start;
-    overflow: hidden;
-    border: 2px solid #3a3c36;
-    border-radius: 0.4rem;
-  }
-
-  .look-board__thumb img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-
-  @media (min-width: 46rem) {
-    .look-board__row {
-      grid-template-columns: 4.6rem minmax(9rem, 13rem) minmax(0, 1fr) 4.5rem;
-      grid-template-areas: "time dest title thumb";
-      align-items: center;
-    }
-  }
-
-  /* 感動 — film stills ------------------------------------------------- */
-  .home-discovery__panel--cinema {
-    border-color: #111;
-    background: #111;
-  }
-
-  .home-discovery__panel--cinema .mood-hero {
-    border-bottom-color: #2a2a28;
-    background: #1b1b1a;
-  }
-
-  .home-discovery__panel--cinema .mood-hero h3 {
-    color: #f6e6e8;
-  }
-
-  .home-discovery__panel--cinema .mood-hero__lead,
-  .home-discovery__panel--cinema .mood-hero__count {
-    color: #c9c3b6;
-  }
-
-  .look-cinema {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  /* Picture and subtitle share one grid cell. The subtitle is lifted above
-     the picture (whose drift makes it a painted layer of its own), so its
-     link is stretched past it and clipped back to the frame. */
-  .look-cinema__frame {
-    position: relative;
-    display: grid;
-    overflow: hidden;
-    border-block: 0.7rem solid #000;
-    background: #000;
-  }
-
-  .look-cinema__screen,
-  .look-cinema__subtitle {
-    grid-area: 1 / 1;
-  }
-
-  .look-cinema__screen img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  .look-cinema__frame:first-child .look-cinema__screen img {
-    aspect-ratio: 4 / 3;
-  }
-
-  .look-cinema__subtitle {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    align-self: end;
-    gap: 0.15rem;
-    padding: 2.5rem 1rem 0.9rem;
-    background: linear-gradient(transparent, rgb(0 0 0 / 78%));
-    color: #fff;
-    text-align: center;
-    text-shadow: 0 1px 3px rgb(0 0 0 / 90%);
-  }
-
-  .look-cinema__subtitle p {
-    margin: 0;
-    color: #eadbb8;
-    font-size: var(--step-small);
-    letter-spacing: 0.15em;
-  }
-
-  .look-cinema h4 {
-    font-size: 1.05rem;
-  }
-
-  .look-cinema h4 a::after {
-    inset: -100vmax;
-  }
-
-  .look-cinema__frame:first-child h4 {
-    font-size: clamp(1.15rem, 1.05rem + 0.6vw, 1.45rem);
-  }
-
-  .home-discovery__panel--cinema .home-discovery__more {
-    border-color: #f4ecdc;
-    box-shadow: 2px 2px 0 #f4ecdc;
-  }
-
-  @media (min-width: 46rem) {
-    .look-cinema {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .look-cinema__frame:first-child {
-      grid-column: 1 / -1;
-    }
-
-    .look-cinema__frame:first-child .look-cinema__screen img {
-      aspect-ratio: 21 / 9;
-    }
-  }
-
-  /* ハラハラ — heart monitor and hazard tape ---------------------------- */
-  .look-pulse {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .look-pulse__monitor {
-    padding: 0.4rem 0.8rem;
-    border: 2px solid #1d3326;
-    border-radius: var(--radius);
-    background:
-      linear-gradient(rgb(70 255 140 / 8%) 1px, transparent 1px) 0 0 / 100% 12px,
-      linear-gradient(90deg, rgb(70 255 140 / 8%) 1px, transparent 1px) 0 0 / 12px 100%,
-      #07140d;
-  }
-
-  .look-pulse__monitor svg {
-    display: block;
-    width: 100%;
-    height: 2.6rem;
-  }
-
-  .look-pulse__monitor path {
-    fill: none;
-    stroke: #ff6b6b;
-    stroke-width: 2.2;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 3px #ff6b6b);
-    vector-effect: non-scaling-stroke;
-  }
-
-  .look-pulse__cards {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .look-pulse__card {
-    position: relative;
-    overflow: hidden;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .look-pulse__card::before {
-    display: block;
-    height: 0.65rem;
-    background: repeating-linear-gradient(-45deg, #ffcf2e 0 10px, #1b1b1b 10px 20px);
-    content: "";
-  }
-
-  .look-pulse__photo img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  .look-pulse__body {
-    display: grid;
-    gap: 0.3rem;
-    padding: 0.8rem 0.9rem 1rem;
-  }
-
-  @media (min-width: 46rem) {
-    .look-pulse__cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  /* これは終わった… — rain and prints that fell askew ------------------- */
-  .home-discovery__panel--rain {
-    background: linear-gradient(#d3dbe4, #eef1f4 55%);
-  }
-
-  .look-rain {
-    position: relative;
-    padding-block: var(--space-xs) var(--space-sm);
-  }
-
-  /* Rain over the stories only, never across the header text. */
-  .look-rain__drops {
-    position: absolute;
-    inset: 0 -10%;
-    background: repeating-linear-gradient(
-      100deg,
-      transparent 0 22px,
-      rgb(70 90 120 / 18%) 22px 23px,
-      transparent 23px 46px
+  .scene--carousel .scene-hero::after {
+    background: linear-gradient(
+      180deg,
+      rgb(255 244 232 / 94%) 0%,
+      rgb(255 236 214 / 84%) 44%,
+      rgb(255 200 140 / 12%) 68%,
+      rgb(255 244 232 / 40%) 86%,
+      #fff4e8 100%
     );
-    background-size: 120px 90px;
-    pointer-events: none;
   }
 
-  .look-rain__pile {
-    position: relative;
+  .look-carousel {
+    display: flex;
+    gap: 0.8rem;
+    margin-inline: calc(var(--space-md) * -1) !important;
+    padding: 0.2rem var(--space-md) 0.6rem !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-md);
+    scrollbar-width: none;
+  }
+
+  .look-carousel__card {
     display: grid;
-    gap: var(--space-lg);
+    flex: 0 0 62%;
+    overflow: clip;
+    border-radius: var(--radius);
+    background: var(--scene-card);
+    box-shadow: var(--scene-shadow);
+    scroll-snap-align: start;
   }
 
-  .look-rain__print {
-    --r: -2.5deg;
-    position: relative;
-    padding: 0.5rem 0.5rem 0.9rem;
-    background: #fff;
-    box-shadow: var(--shadow-lg);
-    transform: rotate(var(--r));
-    transition: transform 300ms var(--ease);
-  }
-
-  .look-rain__print:nth-child(even) {
-    --r: 2.5deg;
-  }
-
-  .look-rain__print:hover {
-    transform: rotate(0);
-  }
-
-  .look-rain__photo img {
-    width: 100%;
-    height: auto;
+  .look-carousel__photo {
     aspect-ratio: 4 / 3;
-    object-fit: cover;
-    filter: grayscale(0.7) contrast(0.95);
-    transition: filter 300ms var(--ease);
+    background: var(--scene-tint);
   }
 
-  .look-rain__print:hover img {
-    filter: none;
-  }
-
-  .look-rain__body {
+  .look-carousel__body {
     display: grid;
     gap: 0.25rem;
-    padding: 0.6rem 0.3rem 0;
+    padding: 0.7rem 0.8rem 0.9rem;
   }
 
-  @media (min-width: 46rem) {
-    .look-rain__pile {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding-inline: var(--space-sm);
+  .look-carousel__body h4 {
+    font-size: 0.95rem;
+  }
+
+  /* 感動 — a dark stage, one story in the spotlight --------------------- */
+  .scene--spotlight {
+    --scene-bg: #121318;
+    --scene-ink: #f3efe6;
+    --scene-soft: #c9c4b8;
+    --scene-faint: #9b978d;
+    --scene-card: #1f2128;
+    --scene-line: #2c2e36;
+    --scene-accent: #f0b46a;
+    --scene-tint: #262832;
+    --scene-shadow: 0 10px 28px rgb(0 0 0 / 40%);
+  }
+
+  .scene--spotlight .scene-hero::after {
+    background: linear-gradient(
+      180deg,
+      rgb(18 19 24 / 85%) 0%,
+      rgb(18 19 24 / 66%) 44%,
+      rgb(18 19 24 / 5%) 64%,
+      rgb(18 19 24 / 55%) 86%,
+      #121318 100%
+    );
+  }
+
+  .scene--spotlight .scene-hero__catch {
+    text-shadow: 0 2px 16px rgb(0 0 0 / 55%);
+  }
+
+  .scene--spotlight .scene-hero__count {
+    background: rgb(255 255 255 / 12%);
+    backdrop-filter: blur(6px);
+  }
+
+  .look-spotlight {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .look-spotlight__lead {
+    display: grid;
+    overflow: clip;
+    border: 1px solid rgb(255 255 255 / 14%);
+    border-radius: var(--radius);
+    background: var(--scene-card);
+  }
+
+  .look-spotlight__photo {
+    aspect-ratio: 16 / 9;
+    background: var(--scene-tint);
+  }
+
+  .look-spotlight__caption {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.9rem 3rem 1rem 0.9rem;
+  }
+
+  .look-spotlight__caption h4 {
+    font-size: 1.15rem;
+  }
+
+  .look-spotlight__rest {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 0.7rem;
+  }
+
+  .look-spotlight__rest li {
+    display: grid;
+    align-content: start;
+    gap: 0.3rem;
+  }
+
+  .look-spotlight__thumb {
+    overflow: clip;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-sm);
+    background: var(--scene-tint);
+  }
+
+  .look-spotlight__rest h4 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.9rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .scene--spotlight .home-discovery__more {
+    background: var(--scene-accent);
+    color: #1a1208;
+  }
+
+  /* ハラハラ — paper, a speech bubble, a dotted route ------------------- */
+  .scene--route {
+    --scene-bg: #fbf5e4;
+    --scene-accent: #c7461f;
+    --scene-tint: #f3e6c2;
+    --scene-line: #eadbb0;
+  }
+
+  /* No wash over a photo here: the photo is a snapshot pinned to the paper
+     and the catch line is shouted from a bubble. */
+  .scene--route .scene-hero {
+    min-height: 0;
+    padding-bottom: var(--space-md);
+    background:
+      radial-gradient(circle at 1px 1px, rgb(120 90 30 / 14%) 1px, transparent 1.5px) 0 0 / 14px
+        14px,
+      var(--scene-bg);
+  }
+
+  .scene--route .scene-hero::after {
+    display: none;
+  }
+
+  .scene--route .scene-hero__photo {
+    position: absolute;
+    inset: auto 0.9rem 1rem auto;
+    width: 34%;
+    aspect-ratio: 4 / 3;
+    border: 5px solid #fff;
+    box-shadow: var(--scene-shadow);
+    transform: rotate(4deg);
+  }
+
+  .scene--route .scene-hero__catch {
+    position: relative;
+    justify-self: start;
+    margin: 0.4rem 0 0.6rem;
+    padding: 0.8rem 1rem;
+    border: 2.5px solid var(--scene-ink);
+    border-radius: 1.4rem;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--scene-ink);
+    font-size: clamp(1.2rem, 1rem + 1.6vw, 2rem);
+    transform: rotate(-2deg);
+  }
+
+  .scene--route .scene-hero__catch::after {
+    position: absolute;
+    bottom: -0.85rem;
+    left: 2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-right: 2.5px solid var(--scene-ink);
+    border-bottom: 2.5px solid var(--scene-ink);
+    background: #fff;
+    content: "";
+    transform: skewX(30deg) rotate(45deg);
+  }
+
+  .scene--route .scene-hero__sub {
+    max-width: 58%;
+    font-weight: 700;
+  }
+
+  .look-route {
+    position: relative;
+    display: grid;
+    gap: 0.8rem;
+    padding-left: 1.4rem !important;
+  }
+
+  /* The route: a dashed line down the left with a stop at every story. */
+  .look-route::before {
+    position: absolute;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    left: 0.45rem;
+    border-left: 3px dashed color-mix(in srgb, var(--scene-accent) 55%, transparent);
+    content: "";
+  }
+
+  .look-route__stop {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    gap: 0.65rem;
+    padding: 0.6rem 0.7rem 0.7rem 0.6rem;
+    border: 1px solid var(--scene-line);
+    border-radius: var(--radius);
+    background: var(--scene-card);
+    box-shadow: var(--scene-shadow);
+  }
+
+  .look-route__stop::before {
+    position: absolute;
+    top: 50%;
+    left: -1.32rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 3px solid var(--scene-bg);
+    border-radius: 50%;
+    background: var(--scene-accent);
+    content: "";
+    translate: 0 -50%;
+  }
+
+  /* The first stop is where it went wrong first: hazard tape all round. */
+  .look-route__stop.is-hazard {
+    border: 5px solid transparent;
+    background:
+      linear-gradient(var(--scene-card), var(--scene-card)) padding-box,
+      repeating-linear-gradient(-45deg, #f5c400 0 10px, #1d1d1b 10px 20px) border-box;
+  }
+
+  .look-route__thumb {
+    overflow: clip;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: var(--scene-tint);
+  }
+
+  .look-route__body {
+    display: grid;
+    align-content: start;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .look-route__body h4 {
+    font-size: 0.95rem;
+  }
+
+  .look-route .look-summary {
+    margin-right: 2rem;
+    font-size: 0.82rem;
+  }
+
+  /* これは終わった… — a storm, a sticky note, prints askew --------------- */
+  .scene--storm {
+    --scene-bg: #e6e9ee;
+    --scene-ink: #1e2633;
+    --scene-soft: #445063;
+    --scene-faint: #657186;
+    --scene-accent: #3d5a8a;
+    --scene-tint: #cfd5de;
+    --scene-line: #cdd3dc;
+  }
+
+  .scene--storm .scene-hero__photo img {
+    filter: grayscale(0.85) contrast(1.05) brightness(0.9);
+  }
+
+  /* Rain across the scene, never across the text box behind it. */
+  .scene--storm .scene-hero::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: repeating-linear-gradient(
+      104deg,
+      transparent 0 14px,
+      rgb(255 255 255 / 30%) 14px 15px,
+      transparent 15px 31px
+    );
+    background-size: 100% 60px;
+    content: "";
+  }
+
+  .scene--storm .scene-hero::after {
+    background: linear-gradient(
+      180deg,
+      rgb(230 233 238 / 94%) 0%,
+      rgb(225 229 236 / 86%) 50%,
+      rgb(60 70 90 / 18%) 72%,
+      rgb(230 233 238 / 45%) 86%,
+      #e6e9ee 100%
+    );
+  }
+
+  .look-storm {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .look-storm__note {
+    justify-self: end;
+    display: grid;
+    gap: 0.2rem;
+    width: fit-content;
+    position: relative;
+    z-index: 3;
+    margin: -6.4rem 0.2rem -1.6rem 0 !important;
+    padding: 0.7rem 1rem 0.8rem !important;
+    background: #fff3a6;
+    box-shadow: 0 6px 14px rgb(40 40 20 / 20%);
+    color: #3b3420;
+    font-family: var(--font-hand);
+    font-size: 0.85rem;
+    transform: rotate(3deg);
+  }
+
+  .look-storm__note li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .look-storm__note li:not(.look-storm__etc)::before {
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 1.5px solid currentcolor;
+    border-radius: 2px;
+    background:
+      linear-gradient(45deg, transparent 40%, #c7461f 41% 52%, transparent 53%),
+      linear-gradient(-45deg, transparent 44%, #c7461f 45% 56%, transparent 57%) 0.15rem 0 / 0.6rem
+        0.6rem no-repeat;
+    content: "";
+  }
+
+  .look-storm__etc {
+    padding-left: 1.2rem;
+    color: #7a7055;
+  }
+
+  .look-storm__pile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem 0.8rem;
+  }
+
+  .look-storm__print {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    padding: 0.45rem 0.45rem 0.7rem;
+    background: #fff;
+    box-shadow: 0 4px 12px rgb(30 38 51 / 18%);
+    rotate: -3deg;
+    transition:
+      rotate 0.25s,
+      filter 0.25s;
+  }
+
+  .look-storm__print:nth-child(even) {
+    rotate: 2.5deg;
+  }
+
+  /* In two columns, an odd one out sits in the middle of the last row. */
+  @media (max-width: 45.99rem) {
+    :is(.look-storm__print, .look-snaps__snap):last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc(50% - 0.4rem);
     }
   }
 
-  /* 笑える — manga panels ---------------------------------------------- */
-  .look-manga {
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.5rem !important;
-    border: 2.5px solid var(--ink);
-    background: var(--ink);
+  .look-storm__print:nth-child(3n) {
+    rotate: -1.5deg;
   }
 
-  .look-manga__panel {
-    position: relative;
-    display: grid;
-    overflow: hidden;
-    min-height: 11rem;
-    border: 2px solid var(--ink);
-    background: #fff;
-  }
-
-  .look-manga__panel.is-tone {
-    background:
-      radial-gradient(circle, rgb(0 0 0 / 22%) 1.2px, transparent 1.4px) 0 0 / 7px 7px,
-      #fff;
-  }
-
-  .look-manga__art,
-  .look-manga__narration,
-  .look-manga__bubble {
-    grid-area: 1 / 1;
-  }
-
-  .look-manga__art img {
-    width: 100%;
-    height: 100%;
+  .look-storm__photo {
     aspect-ratio: 1;
-    object-fit: cover;
+    background: var(--scene-tint);
   }
 
-  .look-manga__narration {
+  .look-storm__photo img {
+    filter: grayscale(0.9);
+    transition: filter 0.25s;
+  }
+
+  .look-storm__print h4 {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  @media (hover: hover) {
+    .look-storm__print:hover {
+      rotate: 0deg;
+    }
+
+    .look-storm__print:hover img {
+      filter: none;
+    }
+  }
+
+  /* 笑える — bright sky, snapshots with speech bubbles ------------------ */
+  .scene--snaps {
+    --scene-bg: #eef8ff;
+    --scene-accent: #1f8a5b;
+    --scene-tint: #d7eefc;
+    --scene-line: #cfe6f5;
+  }
+
+  .scene--snaps .scene-hero__catch {
+    font-family: var(--font-hand);
+    transform: rotate(-2deg);
+    transform-origin: left;
+  }
+
+  .look-snaps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0.8rem;
+  }
+
+  .look-snaps__snap {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    padding: 0.4rem 0.4rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--scene-card);
+    box-shadow: var(--scene-shadow);
+    rotate: -1.5deg;
+  }
+
+  .look-snaps__snap:nth-child(even) {
+    rotate: 1.8deg;
+  }
+
+  /* A strip of tape holding the snapshot up. */
+  .look-snaps__snap::before {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
     z-index: 1;
-    align-self: start;
-    justify-self: start;
-    max-width: 75%;
-    overflow: hidden;
-    margin: 0;
-    padding: 0.2rem 0.55rem;
-    border-right: 2px solid var(--ink);
-    border-bottom: 2px solid var(--ink);
+    width: 3.2rem;
+    height: 1rem;
+    background: rgb(255 214 102 / 75%);
+    content: "";
+    translate: -50% 0;
+    rotate: -4deg;
+  }
+
+  .look-snaps__photo {
+    overflow: clip;
+    aspect-ratio: 1;
+    border-radius: 0.25rem;
+    background: var(--scene-tint);
+  }
+
+  .look-snaps__bubble {
+    position: relative;
+    margin-top: 0.15rem !important;
+    padding: 0.45rem 0.6rem;
+    border: 2px solid var(--scene-ink);
+    border-radius: 0.9rem;
     background: #fff;
-    font-size: 0.75rem;
+    font-family: var(--font-hand) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .look-snaps__bubble::before {
+    position: absolute;
+    top: -0.55rem;
+    left: 1rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-top: 2px solid var(--scene-ink);
+    border-left: 2px solid var(--scene-ink);
+    background: #fff;
+    content: "";
+    transform: rotate(45deg) skew(8deg, 8deg);
+  }
+
+  .look-snaps__snap.is-plain .look-snaps__bubble::before {
+    display: none;
+  }
+
+  .look-snaps .look-meta {
+    padding-inline: 0.2rem;
+    font-size: var(--step-tiny);
+  }
+
+  /* 発見 — sand and sky, finds with map pins ---------------------------- */
+  .scene--atlas {
+    --scene-bg: #f7f1e6;
+    --scene-accent: #1f6fa8;
+    --scene-tint: #e8ddc8;
+    --scene-line: #e6dac4;
+  }
+
+  .look-atlas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .look-atlas__find {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: clip;
+    border-radius: var(--radius);
+    background: var(--scene-card);
+    box-shadow: var(--scene-shadow);
+  }
+
+  /* The first find gets the whole row, photo beside its words. */
+  .look-atlas__find:first-child {
+    grid-column: 1 / -1;
+    grid-template-columns: 44% minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .look-atlas__photo {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--scene-tint);
+  }
+
+  .look-atlas__find:first-child .look-atlas__photo {
+    aspect-ratio: auto;
+    min-height: 9rem;
+  }
+
+  .look-atlas__pin {
+    position: absolute;
+    bottom: 0.4rem;
+    left: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: calc(100% - 0.8rem);
+    padding: 0.1rem 0.5rem 0.1rem 0.35rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 92%);
+    color: var(--scene-accent);
+    font-size: var(--step-tiny);
+    font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .look-manga__bubble {
-    position: relative;
-    z-index: 1;
-    align-self: end;
-    margin: 0 0.6rem 0.9rem !important;
-    padding: 0.6rem 0.85rem;
-    border: 2px solid var(--ink);
-    border-radius: 1.2rem;
-    background: #fff;
-    font-family: var(--font-sans) !important;
-    font-size: 0.92rem !important;
-    font-weight: 700;
-    line-height: 1.5 !important;
-  }
-
-  /* The bubble is positioned for its tail, so stretch its link past it;
-     the panel's overflow clip trims it back to exactly the panel. */
-  .look-manga h4 a::after {
-    inset: -100vmax;
-  }
-
-  .look-manga__bubble::before,
-  .look-manga__bubble::after {
-    position: absolute;
-    left: 1.4rem;
-    clip-path: polygon(0 100%, 40% 0, 100% 100%);
-    content: "";
-  }
-
-  .look-manga__bubble::before {
-    top: -0.75rem;
-    width: 1.1rem;
-    height: 0.8rem;
-    background: var(--ink);
-  }
-
-  .look-manga__bubble::after {
-    top: -0.45rem;
-    left: 1.6rem;
-    width: 0.7rem;
+  .look-atlas__pin::before {
+    flex: none;
+    width: 0.55rem;
     height: 0.55rem;
-    background: #fff;
-  }
-
-  @media (min-width: 46rem) {
-    .look-manga {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .look-manga__panel:first-child {
-      grid-column: 1 / -1;
-    }
-
-    .look-manga__panel:first-child .look-manga__art img {
-      aspect-ratio: 21 / 9;
-    }
-  }
-
-  /* 発見 — magnifying glass over photos out of focus ------------------- */
-  .home-discovery__panel--lens {
-    background:
-      linear-gradient(rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
-      linear-gradient(90deg, rgb(70 81 46 / 8%) 1px, transparent 1px) 0 0 / 22px 22px,
-      #fbfaf4;
-  }
-
-  .look-lens {
-    display: grid;
-    gap: var(--space-sm);
-  }
-
-  /* Cue and score only mean something while the lens is on. */
-  .look-lens__cue,
-  .look-lens__score {
-    display: none;
-    margin: 0;
-  }
-
-  .lens-ready .look-lens__cue {
-    display: block;
-    padding: 0.55rem 0.8rem;
-    border-radius: var(--radius-sm);
-    background: hsl(var(--exp-hue) 75% 92%);
-    color: hsl(var(--exp-hue) 55% 25%);
-    font-size: 0.92rem;
-    font-weight: 700;
-    line-height: 1.5;
-  }
-
-  .lens-ready .look-lens__score {
-    display: block;
-    color: var(--ink-soft);
-    font-size: var(--step-small);
-    text-align: center;
-  }
-
-  .look-lens__score b {
-    color: var(--accent);
-    font-size: 1.25em;
-  }
-
-  .look-lens__finds {
-    display: grid;
-    gap: var(--space-md);
-  }
-
-  .look-lens__find {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  /* The lens needs the photo to itself, so only the title is the link. */
-  .look-lens h4 a::after {
-    content: none;
-  }
-
-  .look-lens__photo {
-    position: relative;
-    display: block;
-    overflow: hidden;
-    aspect-ratio: 4 / 3;
-  }
-
-  .look-lens__layer,
-  .look-lens__layer picture {
-    position: absolute;
-    inset: 0;
-  }
-
-  .look-lens__layer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .look-lens__layer--sharp,
-  .look-lens__glass,
-  .look-lens__stamp {
-    display: none;
-  }
-
-  .lens-ready .look-lens__photo {
-    cursor: zoom-in;
-  }
-
-  .lens-ready .look-lens__layer--blur img {
-    filter: blur(8px) saturate(0.6) brightness(1.05);
-    transform: scale(1.08);
-    transition: filter 600ms var(--ease);
-  }
-
-  .lens-ready .look-lens__layer--sharp {
-    display: block;
-    clip-path: circle(0 at var(--x, 50%) var(--y, 50%));
-  }
-
-  .lens-ready .look-lens__layer--sharp img {
-    transform: scale(1.7);
-    transform-origin: var(--x, 50%) var(--y, 50%);
-  }
-
-  .lens-ready .is-looking .look-lens__layer--sharp {
-    clip-path: circle(4.2rem at var(--x, 50%) var(--y, 50%));
-  }
-
-  /* Found, or reached by keyboard: the photo stays sharp. */
-  .lens-ready .is-found .look-lens__layer--blur img,
-  .lens-ready .look-lens__find:focus-within .look-lens__layer--blur img {
-    filter: none;
-    transform: none;
-  }
-
-  .lens-ready .look-lens__glass {
-    position: absolute;
-    top: var(--y, 50%);
-    left: var(--x, 50%);
-    display: block;
-    width: 8.4rem;
-    aspect-ratio: 1;
-    border: 5px solid #2b2b2b;
-    border-radius: 50%;
-    box-shadow:
-      inset 0 0 0 2px #c9a24a,
-      0 6px 16px rgb(0 0 0 / 35%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-  }
-
-  .look-lens__glass::after {
-    position: absolute;
-    top: 100%;
-    left: 85%;
-    width: 0.9rem;
-    height: 3.6rem;
-    border-radius: 0.45rem;
-    background: #6a4423;
+    border-radius: 50% 50% 50% 0;
+    background: currentcolor;
     content: "";
-    transform: rotate(-45deg);
-    transform-origin: top center;
+    rotate: -45deg;
   }
 
-  .lens-ready .is-looking .look-lens__glass {
-    opacity: 1;
-  }
-
-  /* A visible "tap here" on every photo still to find. */
-  .lens-ready .look-lens__find:not(.is-found) .look-lens__photo::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
-    background: rgb(23 26 22 / 72%);
-    color: #fff;
-    content: "タップして探す";
-    font-size: var(--step-small);
-    font-weight: 700;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    transition: opacity var(--speed) var(--ease);
-  }
-
-  .lens-ready .look-lens__photo.is-looking::after {
-    opacity: 0;
-  }
-
-  .lens-ready .is-found .look-lens__stamp {
-    position: absolute;
-    top: 0.7rem;
-    left: 0.7rem;
-    display: block;
-    padding: 0.3rem 0.7rem;
-    border: 3px solid #c0392b;
-    border-radius: 0.4rem;
-    background: rgb(255 255 255 / 85%);
-    color: #c0392b;
-    font-family: var(--font-hand);
-    font-weight: 700;
-    transform: rotate(-12deg);
-  }
-
-  .look-lens__body {
-    display: grid;
-    gap: 0.45rem;
-    padding: 0.8rem 0.9rem 1rem;
-  }
-
-  .look-lens dl {
-    display: grid;
-    margin: 0;
-    font-size: var(--step-small);
-  }
-
-  .look-lens dl > div {
-    display: grid;
-    grid-template-columns: 3em minmax(0, 1fr);
-    gap: 0.5rem;
-    padding-block: 0.25rem;
-    border-top: 1px dotted var(--line-strong);
-  }
-
-  .look-lens dt {
-    color: var(--ink-faint);
-  }
-
-  .look-lens dd {
-    margin: 0;
-    color: var(--ink-soft);
-  }
-
-  @media (min-width: 46rem) {
-    .look-lens__finds {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  /* 挑戦 — opened letters of challenge on a desk ------------------------ */
-  .home-discovery__panel--letters {
-    background: #2e3828;
-  }
-
-  .look-letters {
-    display: grid;
-    gap: var(--space-xl) var(--space-md);
-    padding-top: var(--space-md) !important;
-  }
-
-  /* The envelope, with the letter pulled half out of it. */
-  .look-letters__envelope {
-    position: relative;
-    padding: 0 0.6rem 0.9rem;
-    border-radius: 0.35rem;
-    background:
-      linear-gradient(to top right, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) left
-        bottom / 50% 55% no-repeat,
-      linear-gradient(to top left, transparent 49.6%, rgb(0 0 0 / 9%) 50%, transparent 50.4%) right
-        bottom / 50% 55% no-repeat,
-      #efe2c4;
-    box-shadow: 0 10px 22px rgb(0 0 0 / 35%);
-  }
-
-  .look-letters__paper {
-    display: grid;
-    gap: 0.35rem;
-    margin-top: -1.2rem;
-    padding: 0.9rem 1rem 1rem;
-    border: 1px solid #e3d8bd;
-    background:
-      repeating-linear-gradient(transparent 0 1.6rem, rgb(120 100 60 / 12%) 1.6rem 1.65rem), #fffdf6;
-    color: var(--ink);
-  }
-
-  .look-letters__to {
-    margin: 0;
-    color: #a3301e;
-    font-family: var(--font-serif);
-    font-size: var(--step-small);
-    font-weight: 700;
-    letter-spacing: 0.2em;
-  }
-
-  .look-letters__seal {
-    position: absolute;
-    top: -1.1rem;
-    right: 0.9rem;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 2.8rem;
-    aspect-ratio: 1;
-    border-radius: 46% 54% 50% 50%;
-    background: radial-gradient(circle at 35% 35%, #d65040, #8a1b12 70%);
-    box-shadow: 0 3px 6px rgb(0 0 0 / 35%);
-    color: #f8d9c9;
-    font-family: var(--font-serif);
-    font-size: 1.1rem;
-    font-weight: 700;
-    transform: rotate(-10deg);
-  }
-
-  .home-discovery__panel--letters .home-discovery__more {
-    border-color: #f1e6cc;
-    background: #f1e6cc;
-    box-shadow: 2px 2px 0 #11160f;
-  }
-
-  @media (min-width: 46rem) {
-    .look-letters {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  /* 忘れられない — instant prints in an album --------------------------- */
-  .home-discovery__panel--album {
-    background:
-      radial-gradient(circle at 1px 1px, rgb(120 90 50 / 9%) 1px, transparent 0) 0 0 / 14px 14px,
-      #f3ebdd;
-  }
-
-  .look-album {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-lg) var(--space-md);
-    padding: var(--space-2xs) var(--space-2xs) 0 !important;
-  }
-
-  .look-album__print {
-    position: relative;
+  .look-atlas__body {
     display: grid;
     align-content: start;
-    gap: 0.35rem;
-    padding: 0.45rem 0.45rem 0.8rem;
-    background: #fff;
-    box-shadow: var(--shadow);
-    transform: rotate(-2deg);
+    gap: 0.3rem;
+    padding: 0.6rem 0.7rem 0.8rem;
   }
 
-  .look-album__print:nth-child(4n + 2) {
-    transform: rotate(2deg);
+  .look-atlas__body h4 {
+    font-size: 0.9rem;
   }
 
-  .look-album__print:nth-child(4n + 3) {
-    transform: rotate(1deg);
+  .look-atlas__find:not(:first-child) :is(.look-summary, .look-meta) {
+    display: none;
   }
 
-  .look-album__photo {
-    display: block;
-    overflow: hidden;
+  /* 挑戦 — mountain air, a trail of steps ------------------------------- */
+  .scene--ascent {
+    --scene-bg: #eef5ec;
+    --scene-accent: #2f7d32;
+    --scene-tint: #d8e8d3;
+    --scene-line: #d3e3cf;
+  }
+
+  .scene--ascent .home-discovery__more {
+    background: #1d2b1e;
+    color: #fff;
+  }
+
+  .look-ascent {
+    position: relative;
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  /* The trail: a solid line up the left, climbing past every step. */
+  .look-ascent::before {
+    position: absolute;
+    top: 1.2rem;
+    bottom: 1.2rem;
+    left: 1.55rem;
+    border-left: 2px solid var(--scene-accent);
+    content: "";
+  }
+
+  .look-ascent__step {
+    display: grid;
+    grid-template-columns: 3.1rem minmax(0, 1fr) 4.6rem;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0.5rem 0.5rem 0;
+  }
+
+  .look-ascent__mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.1rem;
+    height: 3.1rem;
+    border: 2px solid var(--scene-accent);
+    border-radius: 50%;
+    background: var(--scene-bg);
+    color: var(--scene-accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .look-ascent__step:last-child .look-ascent__mark {
+    background: var(--scene-accent);
+    color: #fff;
+  }
+
+  .look-ascent__body {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .look-ascent__body h4 {
+    font-size: 0.95rem;
+  }
+
+  .look-ascent__thumb {
+    overflow: clip;
     aspect-ratio: 1;
-    background: #ddd7c7;
+    border-radius: var(--radius-sm);
+    background: var(--scene-tint);
   }
 
-  /* The frame is square, so the picture inside must fill it — here only;
-     a percentage height elsewhere would push text out of its card. */
-  .look-album__photo picture {
-    display: block;
-    height: 100%;
+  /* 忘れられない — night, lanterns, prints on a wave --------------------- */
+  .scene--glow {
+    --scene-bg: #1e1733;
+    --scene-ink: #f6f0ff;
+    --scene-soft: #d5cbea;
+    --scene-faint: #a99cc6;
+    --scene-card: #2a2145;
+    --scene-line: #352a55;
+    --scene-accent: #ffc56b;
+    --scene-tint: #342a52;
+    --scene-shadow: 0 10px 26px rgb(0 0 0 / 40%);
   }
 
-  .look-album__photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .scene--glow .scene-hero::after {
+    background:
+      radial-gradient(circle at 78% 22%, rgb(255 197 107 / 55%) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 40%, rgb(255 197 107 / 45%) 0 2px, transparent 3px),
+      radial-gradient(circle at 66% 12%, rgb(255 197 107 / 40%) 0 1.5px, transparent 2.5px),
+      radial-gradient(circle at 92% 14%, rgb(255 197 107 / 50%) 0 1.5px, transparent 2.5px),
+      linear-gradient(
+        180deg,
+        rgb(30 23 51 / 88%) 0%,
+        rgb(30 23 51 / 72%) 44%,
+        rgb(60 30 80 / 10%) 64%,
+        rgb(30 23 51 / 55%) 86%,
+        #1e1733 100%
+      );
   }
 
-  .look-album h4 {
-    font-family: var(--font-hand);
-    font-size: 0.92rem;
-    font-weight: 500;
-    line-height: 1.5;
+  .scene--glow .scene-hero__catch {
+    text-shadow:
+      0 0 18px rgb(255 197 107 / 35%),
+      0 2px 12px rgb(0 0 0 / 50%);
   }
 
-  .look-album__note {
+  .scene--glow .scene-hero__count {
+    background: rgb(255 255 255 / 12%);
+    backdrop-filter: blur(6px);
+  }
+
+  .scene--glow .home-discovery__more {
+    background: var(--scene-accent);
+    color: #2a1a05;
+  }
+
+  .look-glow {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .look-glow__quote {
+    display: grid;
+    gap: 0.35rem;
     margin: 0;
-    color: var(--ink-faint);
-    font-family: var(--font-hand);
-    font-size: 0.75rem;
+    padding: 1.4rem 3rem 1rem 1.1rem;
+    border: 1px solid rgb(255 255 255 / 14%);
+    border-radius: var(--radius);
+    background: rgb(255 255 255 / 6%);
   }
 
-  @media (min-width: 46rem) {
-    .look-album {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  .look-glow__quote::before {
+    position: absolute;
+    top: -0.35rem;
+    left: 0.8rem;
+    color: var(--scene-accent);
+    font-family: var(--font-label);
+    font-size: 2.8rem;
+    line-height: 1;
+    content: "“";
+  }
+
+  .look-glow__quote h4 {
+    font-size: 1.1rem;
+  }
+
+  .look-glow__strip {
+    display: flex;
+    gap: 0.7rem;
+    margin-inline: calc(var(--space-md) * -1) !important;
+    padding: 0.6rem var(--space-md) 1rem !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .look-glow__print {
+    display: grid;
+    flex: 0 0 42%;
+    align-content: start;
+    gap: 0.4rem;
+    padding: 0.4rem 0.4rem 0.6rem;
+    background: #fbf7ef;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 40%);
+    scroll-snap-align: start;
+    rotate: -3deg;
+    translate: 0 0.4rem;
+  }
+
+  .look-glow__print:nth-child(even) {
+    rotate: 2.5deg;
+    translate: 0 -0.3rem;
+  }
+
+  .look-glow__photo {
+    aspect-ratio: 1;
+    background: #ddd3c4;
+  }
+
+  .look-glow__print h4 {
+    color: #2a2238;
+    font-family: var(--font-hand);
+    font-size: 0.8rem;
+    line-height: 1.45;
   }
 
   /* Wider screens ---------------------------------------------------- */
   @media (min-width: 46rem) {
-    .mood-hero {
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: end;
-      padding: var(--space-md) var(--space-lg);
+    .scene-hero {
+      padding: var(--space-lg) var(--space-lg) var(--space-xl);
     }
 
+    .scene-hero.has-photo {
+      min-height: 24rem;
+    }
+
+    .scene-section,
     .home-discovery__look {
       padding-inline: var(--space-lg);
     }
 
+    .home-discovery__body {
+      padding-bottom: var(--space-lg);
+    }
+
     .home-discovery__more {
       justify-self: end;
-      margin: 0 var(--space-lg) var(--space-lg);
+      margin: var(--space-xs) var(--space-lg) 0;
+    }
+
+    .look-carousel,
+    .look-glow__strip {
+      margin-inline: 0 !important;
+      padding-inline: 0 !important;
+    }
+
+    .look-carousel__card {
+      flex-basis: calc((100% - 1.6rem) / 3);
+    }
+
+    .look-spotlight {
+      grid-template-columns: 1.4fr 1fr;
+      align-items: start;
+    }
+
+    .look-spotlight__rest {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .look-spotlight__rest li {
+      grid-template-columns: 7rem minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 0.7rem;
+    }
+
+    .look-spotlight__thumb {
+      grid-row: 1 / 3;
+    }
+
+    .look-route__stop {
+      grid-template-columns: 8rem minmax(0, 1fr);
+    }
+
+    .look-storm__pile,
+    .look-snaps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .look-atlas {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .look-glow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      align-items: center;
+    }
+
+    .look-glow__print {
+      flex-basis: calc((100% - 1.4rem) / 3);
     }
   }
 
   /* A little movement as a feeling comes on screen. Panels are re-inserted
      on every switch, which replays these without any script. */
   @media (prefers-reduced-motion: no-preference) {
-    .look-board__flap {
-      animation: board-flap 0.5s steps(4) var(--d, 0ms) backwards;
+    .scene-hero__photo img {
+      animation: scene-drift 9s ease-out both;
     }
 
-    .look-pulse__monitor path {
-      stroke-dasharray: 260 740;
-      animation: pulse-sweep 1.8s linear infinite;
+    .scene-hero__catch {
+      animation: scene-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.05s backwards;
     }
 
-    .look-rain__drops {
-      animation: rain-fall 0.8s linear infinite;
+    .scene--storm .scene-hero::before {
+      animation: storm-rain 0.7s linear infinite;
     }
 
-    .look-rain__print {
-      animation: rain-land 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) backwards;
+    .look-route::before {
+      mask: linear-gradient(#000 0 0) top / 100% 0% no-repeat;
+      animation: route-draw 1.2s ease-out 0.2s forwards;
     }
 
-    .look-rain__print:nth-child(2) {
-      animation-delay: 0.12s;
+    .look-storm__print,
+    .look-glow__print,
+    .look-snaps__snap {
+      animation: print-land 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) backwards;
     }
 
-    .look-rain__print:nth-child(3) {
-      animation-delay: 0.24s;
+    :is(.look-storm__print, .look-glow__print, .look-snaps__snap):nth-child(2) {
+      animation-delay: 0.1s;
     }
 
-    .look-rain__print:nth-child(4) {
-      animation-delay: 0.36s;
+    :is(.look-storm__print, .look-glow__print, .look-snaps__snap):nth-child(3) {
+      animation-delay: 0.2s;
     }
 
-    .look-cinema__screen img {
-      animation: cinema-drift 8s ease-out both;
-    }
-
-    .look-album__photo img {
-      animation: album-develop 2.6s ease-out backwards;
-    }
-
-    .look-album__print:nth-child(2) img {
+    :is(.look-storm__print, .look-glow__print, .look-snaps__snap):nth-child(n + 4) {
       animation-delay: 0.3s;
     }
+  }
 
-    .look-album__print:nth-child(3) img {
-      animation-delay: 0.6s;
-    }
-
-    .look-album__print:nth-child(4) img {
-      animation-delay: 0.9s;
-    }
-
-    .lens-ready .is-found .look-lens__stamp {
-      animation: lens-stamp 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+  @keyframes scene-drift {
+    from {
+      transform: scale(1.08);
     }
   }
 
-  @keyframes lens-stamp {
+  @keyframes scene-rise {
     from {
       opacity: 0;
-      transform: scale(2) rotate(-12deg);
+      translate: 0 0.6rem;
     }
   }
 
-  @keyframes board-flap {
-    from {
-      color: transparent;
-      transform: scaleY(0.2);
-    }
-  }
-
-  @keyframes pulse-sweep {
-    from {
-      stroke-dashoffset: 1000;
-    }
-
+  @keyframes storm-rain {
     to {
-      stroke-dashoffset: 0;
+      background-position: -16px 60px;
     }
   }
 
-  @keyframes rain-fall {
+  @keyframes route-draw {
     to {
-      background-position: -30px 90px;
+      mask-size: 100% 100%;
     }
   }
 
-  @keyframes rain-land {
+  @keyframes print-land {
     from {
       opacity: 0;
-      transform: translateY(-2rem) rotate(0);
-    }
-  }
-
-  @keyframes cinema-drift {
-    from {
-      transform: scale(1.06);
-    }
-
-    to {
-      transform: scale(1);
-    }
-  }
-
-  @keyframes album-develop {
-    from {
-      opacity: 0.15;
-      filter: sepia(1) blur(5px) brightness(1.6);
+      translate: 0 -0.8rem;
     }
   }
 }

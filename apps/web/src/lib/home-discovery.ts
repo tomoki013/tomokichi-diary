@@ -11,35 +11,99 @@ import { EXPERIENCE_TAGS, isExperienceTag, type ExperienceTag } from "@tomokichi
  * 3. Look           `lookFor`              tag → design, from `DISCOVERY_LOOKS`
  * 4. Rendering       `components/home/discovery/*Look.astro`
  *
- * Every feeling opens with the same plain header — its name in large type
- * and its one-line lead — so it is never unclear which one is showing. Below
- * that, each feeling has a look of its own that carries the mood by sight
- * alone: nothing needs a tap or a hover to make sense, and no emoji or
- * symbols are used. Everything here is a pure function over plain data so it
+ * Every feeling opens the same way — a photo scene with its catch line and,
+ * always visible, the feeling's name and how many stories it has — so it is
+ * never unclear which one is showing. Below that, each feeling lays its
+ * stories out in a look of its own that carries the mood by sight alone:
+ * nothing needs a tap or a hover to make sense, and no emoji are used. Everything here is a pure function over plain data so it
  * can be unit-tested without the content export.
  */
 
 export type DiscoveryLookId =
-  "board" | "cinema" | "pulse" | "rain" | "manga" | "lens" | "letters" | "album";
+  "carousel" | "spotlight" | "route" | "storm" | "snaps" | "atlas" | "ascent" | "glow";
 
 /** Which look each feeling gets. The only place the mapping lives. */
 export const DISCOVERY_LOOKS: Record<ExperienceTag, DiscoveryLookId> = {
-  exciting: "board",
-  moving: "cinema",
-  thrilling: "pulse",
-  disaster: "rain",
-  funny: "manga",
-  discovery: "lens",
-  challenge: "letters",
-  unforgettable: "album",
+  exciting: "carousel",
+  moving: "spotlight",
+  thrilling: "route",
+  disaster: "storm",
+  funny: "snaps",
+  discovery: "atlas",
+  challenge: "ascent",
+  unforgettable: "glow",
 };
 
 export function lookFor(tag: ExperienceTag): DiscoveryLookId {
   return DISCOVERY_LOOKS[tag];
 }
 
+/**
+ * The words each scene opens with: a catch line set large over the photo
+ * (one array entry per line, so a phrase never breaks mid-word), its
+ * English name in script, a quieter second line, and the heading over the
+ * stories. Copy only — nothing here claims anything about the articles.
+ */
+export interface DiscoveryScene {
+  readonly catchLines: readonly string[];
+  readonly english: string;
+  readonly sub: string;
+  readonly section: string;
+}
+
+export const DISCOVERY_SCENES: Record<ExperienceTag, DiscoveryScene> = {
+  exciting: {
+    catchLines: ["次、どこへ", "ワクワクしに行く？"],
+    english: "Exciting",
+    sub: "見たことのない景色と、はじめての体験へ。",
+    section: "おすすめのワクワク旅",
+  },
+  moving: {
+    catchLines: ["こんな景色を", "また見たい。"],
+    english: "Heart Moving",
+    sub: "旅で、心が動いた瞬間を。",
+    section: "心が動いた、あの瞬間たち",
+  },
+  thrilling: {
+    catchLines: ["旅はいつも", "うまくいかない!?"],
+    english: "Thrilling",
+    sub: "失敗・トラブル・冷や汗エピソード集",
+    section: "こんなハプニングがありました",
+  },
+  disaster: {
+    catchLines: ["これは終わった…", "でも、なんとかなった。"],
+    english: "Oops...",
+    sub: "絶望からのリカバリー記録",
+    section: "もうダメだと思った旅",
+  },
+  funny: {
+    catchLines: ["旅って、", "こんなに笑えるんだ。"],
+    english: "Funny",
+    sub: "ハプニングも、全部いい思い出。",
+    section: "思い出すと笑ってしまう話",
+  },
+  discovery: {
+    catchLines: ["まだ知らない世界が、", "こんなにあった。"],
+    english: "Discovery",
+    sub: "行ってみて分かった、その土地のリアル。",
+    section: "行ってみて分かったこと",
+  },
+  challenge: {
+    catchLines: ["やってみたら、", "世界が変わった。"],
+    english: "Challenge",
+    sub: "少しの勇気で、見える景色がある。",
+    section: "一歩ずつ、踏み込んだ旅",
+  },
+  unforgettable: {
+    catchLines: ["あの旅は、", "今も心の中で輝いてる。"],
+    english: "Unforgettable",
+    sub: "時間が経っても、色褪せない旅の記憶。",
+    section: "今でもふと思い出す旅",
+  },
+};
+
 /** Stories per feeling. */
-export const DISCOVERY_LIMIT = 4;
+export const DISCOVERY_LIMIT = 5;
 
 /** The URL query that carries the selection. Home stays canonical to `/`. */
 export const HOME_EXPERIENCE_PARAM = "homeExperience";

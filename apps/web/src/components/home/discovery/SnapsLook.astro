@@ -7,32 +7,30 @@ interface Props {
 }
 
 /**
- * 忘れられない: instant prints in an album. The photos come up slowly from a
- * pale, faded blank, the way a memory surfaces; captions are handwritten.
+ * 笑える: snapshots stuck on a fridge, each a little crooked, with the
+ * title in a speech bubble pointing at the photo.
  */
 const { items } = Astro.props;
 ---
 
-<ul class="look-album">
+<ul class="look-snaps">
   {items.map((item) => (
-    <li class="look-album__print">
-      <span class="look-album__photo">
-        {item.cover && (
+    <li class:list={["look-snaps__snap", !item.cover && "is-plain"]}>
+      {item.cover && (
+        <span class="look-snaps__photo">
           <Picture
             storageKey={item.cover.storageKey}
             alt={item.cover.alt}
             sizes="(max-width: 46rem) 44vw, 13rem"
           />
-        )}
-      </span>
-      <h4>
+        </span>
+      )}
+      <h4 class="look-snaps__bubble">
         <a href={item.path} data-discovery-article={item.slug}>
           {item.title}
         </a>
       </h4>
-      {(item.place || item.travelMonth) && (
-        <p class="look-album__note">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
-      )}
+      {item.place && <p class="look-meta">{item.place}</p>}
     </li>
   ))}
 </ul>

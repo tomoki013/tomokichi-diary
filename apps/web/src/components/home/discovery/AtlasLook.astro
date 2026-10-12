@@ -1,0 +1,42 @@
+---
+import Picture from "../../Picture.astro";
+import type { DiscoveryItem } from "../../../lib/home-discovery";
+
+interface Props {
+  items: readonly DiscoveryItem[];
+}
+
+/**
+ * 発見: field notes from places. Each photo carries a map-pin tag with where
+ * it was; the first find gets a wide card of its own.
+ */
+const { items } = Astro.props;
+---
+
+<ul class="look-atlas">
+  {items.map((item) => (
+    <li class="look-atlas__find">
+      <span class="look-atlas__photo">
+        {item.cover && (
+          <Picture
+            storageKey={item.cover.storageKey}
+            alt={item.cover.alt}
+            sizes="(max-width: 46rem) 92vw, 22rem"
+          />
+        )}
+        {item.place && <span class="look-atlas__pin">{item.place.split(" / ")[0]}</span>}
+      </span>
+      <div class="look-atlas__body">
+        <h4>
+          <a href={item.path} data-discovery-article={item.slug}>
+            {item.title}
+          </a>
+        </h4>
+        <p class="look-summary">{item.summary}</p>
+        {(item.place || item.travelMonth) && (
+          <p class="look-meta">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
