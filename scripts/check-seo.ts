@@ -109,9 +109,16 @@ for (const article of snapshot.articles) {
 }
 
 // A page the previous site allowed into the index must not become noindex.
-// Preview builds turn indexing off deliberately, so the comparison only makes
-// sense against a build that is meant to be indexed.
-const indexableBuild = process.env.PUBLIC_INDEXABLE !== "false";
+// Preview builds turn indexing off deliberately (any build without
+// PUBLIC_INDEXABLE=true, see apps/web/src/lib/site.ts), so the comparison only
+// makes sense against a build that is meant to be indexed. Which kind of build
+// this is comes from the build output itself, so the check cannot disagree
+// with the build about the default. A build that was asked to be indexable
+// but came out closed site-wide is still compared, and fails.
+const robotsFile = join(DIST_DIR, "robots.txt");
+const closedSiteWide =
+  existsSync(robotsFile) && /^Disallow:\s*\/\s*$/m.test(readFileSync(robotsFile, "utf8"));
+const indexableBuild = !closedSiteWide || process.env.PUBLIC_INDEXABLE === "true";
 const builtByPath = new Map(pages.map((page) => [page.path, page]));
 for (const legacy of indexableBuild
   ? loadLegacyBaseline<{ path: string; indexable: boolean }>("legacy-seo.json")
@@ -149,6 +156,7 @@ report(
   {
     SEO: `${pages.length - new Set(findings.map((f) => f.target)).size}/${pages.length}`,
     sitemap: sitemapPaths.length,
+    ...(indexableBuild ? {} : { index: "off (preview build, regression check skipped)" }),
   },
   "seo",
 );

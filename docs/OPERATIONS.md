@@ -182,8 +182,14 @@ was rendered outside the route-driven path.
 ### `SEO_NOINDEX_REGRESSION`
 
 A page the previous site allowed into the index is now noindex. Either the
-route carries `noindex`, the article does, or `PUBLIC_INDEXABLE=false` leaked
-into a production build.
+route carries `noindex`, the article does, or a build meant for production
+came out without `PUBLIC_INDEXABLE=true` (every page noindex).
+
+The comparison is skipped for preview builds: when `dist/robots.txt` is
+`Disallow: /` and `PUBLIC_INDEXABLE` is not `true`, the success line ends with
+`index off (preview build, regression check skipped)`. A plain local
+`pnpm build` is such a build. To check indexing locally, build and check with
+`PUBLIC_INDEXABLE=true`.
 
 ### `SEO_SITEMAP_MISMATCH`
 
