@@ -1,0 +1,53 @@
+[
+  {
+    "slug": "japan-launch-status-2026-10",
+    "title": "CHAGEEは日本に上陸する？ 2026年10月時点の状況まとめ",
+    "summary": "2026年10月13日時点で、CHAGEEの日本出店に関する公式発表は確認できていません。SNSやブログで「日本に来る」という話題はありますが、いずれも確定情報ではありません。",
+    "body": "## 結論：公式発表はまだ確認できていない\n\n2026年10月13日時点で、CHAGEE（霸王茶姬）が日本に出店するという**公式発表は確認できていません**。\n\nSNSやブログでは「日本に来るらしい」という話題を見かけますが、確認できた範囲ではいずれも疑問形や期待を込めた書き方で、出店時期や場所を示す一次情報はありませんでした。\n\n## 海外展開の流れ\n\nCHAGEEの海外展開は東南アジアから始まり、マレーシア・シンガポール・タイなどに店舗があります。2025年には米国ナスダックへの上場や、ロサンゼルスでの米国1号店の計画も報じられました。\n\n## このサイトでの扱い\n\n- 日本上陸に関する情報は、公式発表があった時点で「公式発表」ラベルで掲載します\n- 噂レベルの情報は「噂・未確認」ラベルを付けて区別します\n- 誤りに気づいた場合は[お問い合わせ](/contact)から教えてください\n\n日本上陸までは、旅行先で飲むのがいちばんの近道です。国ごとの注文方法は[注文ガイド](/order)にまとめています。",
+    "category": "japan",
+    "verificationStatus": "unverified",
+    "sources": [],
+    "publishedAt": "2026-10-13",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "nasdaq-listing-2025",
+    "title": "CHAGEE、米ナスダックに上場（ティッカー：CHA）",
+    "summary": "CHAGEEの運営会社 CHAGEE Holdings が2025年4月に米ナスダック市場へ上場したと報じられました。中国の新興ティーブランドとして米国上場は初めてと紹介されています。",
+    "body": "## 何があった？\n\nCHAGEEの運営会社 **CHAGEE Holdings** が、2025年4月に米国のナスダック市場へ上場したと複数のメディアが報じました。ティッカーシンボルは **CHA** です。\n\n報道によると、米国預託株式（ADS）を1株28ドルで売り出し、上場初日の終値は公開価格を約16%上回りました。\n\n## なぜ注目？\n\n中国発の新しいスタイルのティーブランド（新式茶飲）として、米国市場への上場は注目を集めました。上場をきっかけに、海外展開をさらに進める方針も伝えられています。\n\n## このサイトとして\n\n株価や投資に関する判断材料を提供するものではありません。ブランドの動向として記録しています。",
+    "category": "overseas",
+    "verificationStatus": "reported",
+    "sources": [
+      {
+        "name": "NBC News",
+        "url": "https://www.nbcnews.com/business/business-news/chinese-tea-chain-chagee-files-us-initial-public-offering-rcna198210"
+      },
+      {
+        "name": "Yicai Global",
+        "url": "https://www2.yicaiglobal.com/news/chinese-tea-chain-chagee-soars-16-on-nasdaq-debut-after-raising-usd411-million"
+      }
+    ],
+    "publishedAt": "2025-04-17",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "us-first-store-los-angeles",
+    "title": "CHAGEE、米国1号店をロサンゼルスに出店へ",
+    "summary": "CHAGEEが北米初の店舗をロサンゼルスに出店すると報じられました。場所は Westfield Century City と伝えられています。",
+    "body": "## 北米初の店舗はロサンゼルス\n\n2025年3月、CHAGEEが北米初となる店舗をロサンゼルスに出店すると報じられました。報道では、場所は **Westfield Century City** のショッピングモールとされています。\n\n## アジアの外へ\n\nこれまでのCHAGEEの海外店舗は、マレーシア・シンガポール・タイなど東南アジアが中心でした。米国への出店は、アジア圏の外へ広がる動きとして注目されています。\n\n※ 出店日や営業状況は変わる可能性があります。最新の情報はCHAGEEの公式発表を確認してください。",
+    "category": "store",
+    "verificationStatus": "reported",
+    "sources": [
+      {
+        "name": "NBC News",
+        "url": "https://www.nbcnews.com/business/business-news/chinese-tea-chain-chagee-files-us-initial-public-offering-rcna198210"
+      },
+      {
+        "name": "US China Today",
+        "url": "https://uschinatoday.org/trending/2025/03/28/chagee-debuts-in-u-s-with-first-store-announced-in-los-angeles/"
+      }
+    ],
+    "publishedAt": "2025-03-28",
+    "updatedAt": "2026-10-13"
+  }
+]

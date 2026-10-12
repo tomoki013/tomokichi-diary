@@ -1,0 +1,178 @@
+[
+  {
+    "slug": "boya-jasmine-green-milk-tea",
+    "nameJa": "伯牙絶弦",
+    "nameZh": "伯牙绝弦",
+    "nameEn": "BO·YA Jasmine Green Milk Tea",
+    "shortDescription": "ジャスミン緑茶×フレッシュミルク。迷ったらまずこれ、の看板メニュー。",
+    "description": "CHAGEEを代表する看板メニュー。公式の商品説明では、ジャスミンの花で香りを移した緑茶とフレッシュミルクを組み合わせたミルクティーとして紹介されています。「ジャスミン風味を足したミルクティー」というより、ジャスミン茶そのものをベースにしたミルクティーと考えると分かりやすい一杯です。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "jasmine",
+    "teaDetail": "ジャスミンで香り付けした緑茶",
+    "milkType": "fresh-milk",
+    "sweetness": "normal",
+    "lightness": 4,
+    "popularity": 5,
+    "temperatures": ["iced", "hot"],
+    "aromaTags": ["ジャスミン", "花の香り"],
+    "flavorTags": ["後味すっきり", "華やか"],
+    "beginnerFriendly": true,
+    "availability": [
+      { "country": "cn", "note": "上海で実飲" },
+      { "country": "my", "note": "公式アプリで商品を確認" },
+      { "country": "sg", "note": "公式の商品説明あり" }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [
+      "CHAGEEが初めての人",
+      "ジャスミン茶が好きな人",
+      "甘さはほしいけど後味は軽いほうがいい人"
+    ],
+    "notRecommendedFor": ["焙煎感のある濃いお茶を飲みたい人"],
+    "tasted": true,
+    "editorRating": 5,
+    "editorComment": "上海の南京東路で初めて飲んで、CHAGEEにハマるきっかけになった一杯。一口目でジャスミンの香りが抜けて、甘さはあるのに後味は意外とすっきり。中華料理のあとや街歩きの休憩にちょうどいい。何を頼むか迷ったら、まずこれで間違いないです。",
+    "blogLinks": [
+      {
+        "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-menu"
+      },
+      {
+        "title": "CHAGEEのメニューを日本語で解説",
+        "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
+      }
+    ],
+    "sources": [{ "name": "CHAGEE Singapore 公式の商品説明" }],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "da-hong-pao-milk-tea",
+    "nameJa": "白霧紅塵",
+    "nameZh": "白雾红尘",
+    "nameEn": "Da Hong Pao Milk Tea",
+    "shortDescription": "武夷山の大紅袍を使った、焙煎香の濃厚ウーロンミルクティー。",
+    "description": "中国を代表する烏龍茶「大紅袍（だいこうほう）」を使ったミルクティー。公式では武夷山の大紅袍を使い、しっかりした焙煎の香りを持つ烏龍茶として紹介されています。花の香りが主役の伯牙絶弦とは方向がまったく違い、深みとロースト感が中心です。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "oolong",
+    "teaDetail": "大紅袍（武夷岩茶の烏龍茶）",
+    "milkType": "fresh-milk",
+    "sweetness": "normal",
+    "lightness": 1,
+    "popularity": 4,
+    "temperatures": ["iced"],
+    "aromaTags": ["焙煎香", "ロースト"],
+    "flavorTags": ["濃厚", "コクがある", "お茶感が強い"],
+    "beginnerFriendly": false,
+    "availability": [{ "country": "cn", "note": "上海（豫園・浦東空港）で実飲" }],
+    "priceNotes": [],
+    "recommendedFor": [
+      "ミルクティーでもお茶の存在感をしっかり感じたい人",
+      "ほうじ茶ラテや焙煎系が好きな人",
+      "伯牙絶弦の次に何を飲むか迷っている人"
+    ],
+    "notRecommendedFor": ["軽くてさっぱりした一杯を探している人"],
+    "tasted": true,
+    "editorRating": 5,
+    "editorComment": "個人的にいちばん好きなメニュー。ジャスミン系よりお茶の焙煎香とコクがはっきりしていて、かなり濃厚でリッチ。上海旅行の最後、浦東空港でもこの大紅袍系を頼みました。「しっかりお茶を感じたい」人に強くおすすめです。",
+    "blogLinks": [
+      {
+        "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-menu"
+      },
+      {
+        "title": "CHAGEEのメニューを日本語で解説",
+        "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
+      }
+    ],
+    "sources": [{ "name": "CHAGEE 公式の商品説明" }],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "osmanthus-oolong-milk-tea",
+    "nameJa": "桂馥蘭香",
+    "nameZh": "桂馥兰香",
+    "nameEn": "Osmanthus Oolong Milk Tea",
+    "shortDescription": "焙煎ウーロンに金木犀。やわらかく落ち着いた花の香りのミルクティー。",
+    "description": "焙煎した烏龍茶に金木犀の花を合わせたミルクティー。公式では、なめらかでまろやかな味わいと、自然な甘さを感じる花の余韻が特徴とされています。「金木犀味のドリンク」ではなく、烏龍茶をベースに金木犀の香りを重ねたお茶です。名前の似た OSMANTHUS LONG JING MILK TEA（金桂龙井、龍井茶×金木犀）は別商品なので注意。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "oolong",
+    "teaDetail": "焙煎した烏龍茶＋金木犀",
+    "milkType": "fresh-milk",
+    "sweetness": "normal",
+    "lightness": 3,
+    "popularity": 3,
+    "temperatures": ["iced"],
+    "aromaTags": ["金木犀", "花の香り", "焙煎香"],
+    "flavorTags": ["まろやか", "やわらかい甘さ"],
+    "beginnerFriendly": true,
+    "availability": [],
+    "priceNotes": [],
+    "recommendedFor": ["金木犀の香りが好きな人", "定番とは少し違う華やかなお茶を飲みたい人"],
+    "notRecommendedFor": ["花の香りが苦手な人"],
+    "tasted": true,
+    "editorRating": 4,
+    "editorComment": "伯牙絶弦のジャスミンよりも、柔らかく落ち着いた花の香りが印象に残る一杯。香りはしっかりあるけど強すぎず、ミルクと合わさってまろやかにまとまっています。",
+    "blogLinks": [
+      {
+        "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-menu"
+      },
+      {
+        "title": "CHAGEEのメニューを日本語で解説",
+        "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
+      }
+    ],
+    "sources": [{ "name": "CHAGEE 公式の商品説明" }],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "white-peach-oolong-milk-tea",
+    "nameJa": "花田烏龍",
+    "nameZh": "花田乌龙",
+    "nameEn": "White Peach Oolong Milk Tea",
+    "shortDescription": "金観音ウーロンに白桃の香り。フルーティーで軽やかなミルクティー。",
+    "description": "白桃の香りを合わせた烏龍ミルクティー。CHAGEE Malaysia 公式では、ベースに福建省南部の金観音（Jin Guan Yin）烏龍茶を使い、桃の香りを組み合わせた商品として紹介されています。桃のジュースのような味ではなく、あくまで烏龍茶とミルクが中心で、そこに白桃の香りが重なるバランスです。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "oolong",
+    "teaDetail": "金観音（烏龍茶）＋白桃",
+    "milkType": "fresh-milk",
+    "sweetness": "normal",
+    "lightness": 4,
+    "popularity": 3,
+    "temperatures": ["iced"],
+    "aromaTags": ["白桃", "フルーティー"],
+    "flavorTags": ["軽やか", "爽やか"],
+    "beginnerFriendly": true,
+    "availability": [{ "country": "my", "note": "CHAGEE Malaysia 公式の商品説明あり" }],
+    "priceNotes": [],
+    "recommendedFor": [
+      "濃厚すぎない一杯がいい人",
+      "フルーツティーよりは落ち着いた味が好きな人",
+      "桃の香りが好きな人"
+    ],
+    "notRecommendedFor": ["果汁感の強いフルーツティーを期待している人"],
+    "tasted": true,
+    "editorRating": 4,
+    "editorComment": "フルーティーで飲みやすかった一杯。烏龍茶のコクの中に桃の甘く爽やかな香り。一般的なフルーツティーよりも落ち着いていて、普通のミルクティーよりも軽やかです。",
+    "blogLinks": [
+      {
+        "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-menu"
+      },
+      {
+        "title": "CHAGEEのメニューを日本語で解説",
+        "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
+      }
+    ],
+    "sources": [{ "name": "CHAGEE Malaysia 公式の商品説明" }],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  }
+]

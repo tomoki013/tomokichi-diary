@@ -1,0 +1,288 @@
+[
+  {
+    "slug": "shanghai-henderson-metropolitan",
+    "name": "霸王茶姬（上海恒基名人店）",
+    "nameLocal": "霸王茶姬（上海恒基名人店）",
+    "country": "cn",
+    "city": "上海",
+    "area": "南京東路",
+    "address": null,
+    "openingHours": null,
+    "access": "南京東路周辺。外灘方面への街歩きの途中に寄りやすい",
+    "mapUrl": "https://map.baidu.com/poi/%E9%9C%B8%E7%8E%8B%E8%8C%B6%E5%A7%AC(%E4%B8%8A%E6%B5%B7%E6%81%92%E5%9F%BA%E5%90%8D%E4%BA%BA%E5%BA%97)/@13524448.43,3642089.39,15.2z?uid=bb8df319b140d61c7ab55c40",
+    "mapLabel": "Baidu Maps",
+    "features": ["観光ついでに寄りやすい"],
+    "cautions": [],
+    "goodFor": ["南京東路・外灘観光の途中"],
+    "ordering": "店頭QRをAlipayで読み取ってモバイルオーダー",
+    "editorComment": "初めてCHAGEEを飲んだ思い出の店舗。ここでジャスミン系のミルクティーを飲んでかなり気に入り、その後の上海滞在中も何度もCHAGEEへ通うことになりました。",
+    "visited": true,
+    "editorPick": true,
+    "blogLinks": [
+      {
+        "title": "上海のCHAGEE（霸王茶姬）実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "shanghai-yuyuan",
+    "name": "霸王茶姬（上海豫園店）",
+    "nameLocal": "霸王茶姬（上海豫园店）",
+    "country": "cn",
+    "city": "上海",
+    "area": "豫園",
+    "address": null,
+    "openingHours": null,
+    "access": "豫園観光と一緒に立ち寄れる",
+    "mapUrl": "https://map.baidu.com/poi/%E9%9C%B8%E7%8E%8B%E8%8C%B6%E5%A7%AC(%E4%B8%8A%E6%B5%B7%E8%B1%AB%E5%9B%AD%E5%BA%97)/@13525220.18,3640684.12,17.54z?uid=818d935f195be490882fb531",
+    "mapLabel": "Baidu Maps",
+    "features": ["観光ついでに寄りやすい"],
+    "cautions": [
+      "訪問時はほかの店舗よりメニューが少なめ（ジャスミン系・大紅袍系が中心）",
+      "地図アプリで「CHAGEE」では出てこず、「霸王茶姬」で検索して見つけた"
+    ],
+    "goodFor": ["豫園観光と一緒に"],
+    "ordering": "店頭QRをAlipayで読み取ってモバイルオーダー",
+    "editorComment": "豫園へ行く日に利用。CHAGEEのために別エリアへ移動しなくていいのが便利でした。特定のメニュー目当てなら選択肢が限られるかも。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "上海のCHAGEE（霸王茶姬）実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "shanghai-pudong-airport-s2",
+    "name": "霸王茶姬（浦東空港S2国際店）",
+    "nameLocal": "霸王茶姬（浦东机场S2国际店）",
+    "country": "cn",
+    "city": "上海",
+    "area": "上海浦東国際空港",
+    "address": null,
+    "openingHours": null,
+    "access": "国際線の出発ゲートへ向かう流れで利用できた",
+    "mapUrl": null,
+    "mapLabel": null,
+    "features": ["空港内"],
+    "cautions": [
+      "空港内に複数店舗あり。「CHAGEE」検索で出た店舗はS2国際店ではなかった",
+      "「霸王茶姬」で検索して位置を確認するのがおすすめ"
+    ],
+    "goodFor": ["国際線で帰国する前の最後の一杯"],
+    "ordering": "店頭QRをAlipayで読み取ってモバイルオーダー",
+    "editorComment": "上海旅行の最後に、ここで大紅袍系を注文。帰国直前までCHAGEEを飲めるのはかなり便利でした。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "上海のCHAGEE（霸王茶姬）実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/shanghai-chagee-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "kl-nu-sentral",
+    "name": "CHAGEE NU Sentral",
+    "nameLocal": null,
+    "country": "my",
+    "city": "クアラルンプール",
+    "area": "KL Sentral",
+    "address": null,
+    "openingHours": null,
+    "access": "KL Sentral駅直結のショッピングモール NU Sentral 内",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20NU%20Sentral",
+    "mapLabel": "Google Maps で検索",
+    "features": ["駅直結"],
+    "cautions": ["訪問時はほかの店舗よりメニューが少なめ"],
+    "goodFor": ["KL Sentral・バトゥ洞窟への移動前後"],
+    "ordering": "CHAGEE公式アプリ",
+    "editorComment": "NU Sentralで朝食とCHAGEEを買い、そのまま電車でバトゥ洞窟へ。観光へ出発する前にCHAGEEを買う使い方がしやすい店舗でした。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "クアラルンプールのCHAGEE実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-kuala-lumpur-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "kl-pavilion-6f",
+    "name": "CHAGEE Pavilion Kuala Lumpur 6F",
+    "nameLocal": null,
+    "country": "my",
+    "city": "クアラルンプール",
+    "area": "Bukit Bintang（Pavilion）",
+    "address": null,
+    "openingHours": null,
+    "access": "Pavilion Kuala Lumpur の6階",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20Pavilion%20Kuala%20Lumpur",
+    "mapLabel": "Google Maps で検索",
+    "features": ["ショッピングモール内"],
+    "cautions": [],
+    "goodFor": ["Pavilionで買い物・食事をする日"],
+    "ordering": "店頭QRから公式アプリをインストールして注文",
+    "editorComment": "マレーシアで初めてCHAGEEアプリを使った店舗。NU Sentral店よりしっかりした店舗という印象でした。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "クアラルンプールのCHAGEE実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-kuala-lumpur-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "kl-wolo",
+    "name": "CHAGEE • WOLO KL",
+    "nameLocal": null,
+    "country": "my",
+    "city": "クアラルンプール",
+    "area": "Bukit Bintang（Jalan Alor 近く）",
+    "address": null,
+    "openingHours": null,
+    "access": "Bukit Bintang の中心部。Jalan Alor からも近い",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20WOLO%20Kuala%20Lumpur",
+    "mapLabel": "Google Maps で検索",
+    "features": ["大型店", "グッズが多い"],
+    "cautions": ["訪問時は注文から受け取りまで約30分待った"],
+    "goodFor": ["Jalan Alor・Bukit Bintang の街歩き", "店舗そのものやグッズを見たい人"],
+    "ordering": "CHAGEE公式アプリ",
+    "editorComment": "3店舗の中でもかなり大きな店舗で、オリジナル商品やグッズも多数。CHAGEEそのものを楽しみたい人に向いています。混む時間帯は時間に余裕を持って。",
+    "visited": true,
+    "editorPick": true,
+    "blogLinks": [
+      {
+        "title": "クアラルンプールのCHAGEE実際に行った3店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-kuala-lumpur-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "sg-raffles-specialist-centre",
+    "name": "CHAGEE Raffles Specialist Centre",
+    "nameLocal": null,
+    "country": "sg",
+    "city": "シンガポール",
+    "area": "Bugis・Arab Street",
+    "address": null,
+    "openingHours": null,
+    "access": "Bugis・Arab Street 側。One Raffles Place とは別の場所",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20Raffles%20Specialist%20Centre",
+    "mapLabel": "Google Maps で検索",
+    "features": ["観光ついでに寄りやすい"],
+    "cautions": ["訪問時はモバイルオーダーのみ（カウンター注文不可）"],
+    "goodFor": ["Arab Street・Bugis 観光"],
+    "ordering": "Mobile Web（ブラウザ）またはアプリのみ",
+    "editorComment": "Arab Street 周辺を観光したときに利用。着いてから戸惑わないよう、スマホで注文する前提で行くのがおすすめです。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "シンガポールのCHAGEE実際に行った4店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-singapore-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "sg-resorts-world-sentosa",
+    "name": "CHAGEE Resorts World Sentosa（WEAVE）",
+    "nameLocal": null,
+    "country": "sg",
+    "city": "シンガポール",
+    "area": "Sentosa",
+    "address": null,
+    "openingHours": null,
+    "access": "Resorts World Sentosa 内。Universal Studios Singapore 周辺",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20Resorts%20World%20Sentosa",
+    "mapLabel": "Google Maps で検索",
+    "features": ["観光ついでに寄りやすい"],
+    "cautions": ["座って飲めるスペースはなし"],
+    "goodFor": ["Sentosa・Universal Studios で遊ぶ日"],
+    "ordering": "アプリまたは Mobile Web",
+    "editorComment": "Sentosa 観光の途中で利用。カフェ休憩というより、受け取ってそのまま観光に戻る使い方が向いています。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "シンガポールのCHAGEE実際に行った4店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-singapore-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "sg-one-raffles-place",
+    "name": "CHAGEE One Raffles Place",
+    "nameLocal": null,
+    "country": "sg",
+    "city": "シンガポール",
+    "area": "Raffles Place（CBD）",
+    "address": null,
+    "openingHours": null,
+    "access": "Raffles Place のオフィス街側。Lau Pa Sat へ歩いて向かえる",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20One%20Raffles%20Place",
+    "mapLabel": "Google Maps で検索",
+    "features": ["観光ついでに寄りやすい"],
+    "cautions": ["Raffles Specialist Centre と名前が似ているので地図検索で注意"],
+    "goodFor": ["Lau Pa Sat で食事する日", "CBD 周辺の街歩き"],
+    "ordering": "アプリまたは Mobile Web",
+    "editorComment": "ここでCHAGEEを受け取ってから Lau Pa Sat へ。「ドリンクを買う → Lau Pa Sat で食事」の流れが作りやすい店舗です。",
+    "visited": true,
+    "editorPick": false,
+    "blogLinks": [
+      {
+        "title": "シンガポールのCHAGEE実際に行った4店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-singapore-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  },
+  {
+    "slug": "sg-changi-airport-t2",
+    "name": "CHAGEE Changi Airport Terminal 2",
+    "nameLocal": null,
+    "country": "sg",
+    "city": "シンガポール",
+    "area": "チャンギ空港 T2（Departure Hall）",
+    "address": null,
+    "openingHours": null,
+    "access": "Terminal 2 の出発ロビー",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=CHAGEE%20Changi%20Airport%20Terminal%202",
+    "mapLabel": "Google Maps で検索",
+    "features": ["空港内"],
+    "cautions": ["Terminal 2 の店舗。自分の出発ターミナルを事前に確認"],
+    "goodFor": ["T2 から帰国する前の最後の一杯"],
+    "ordering": "アプリまたは Mobile Web",
+    "editorComment": "街中で最後の店舗を探さなくても、帰国前の一杯を空港で飲めるのが便利。シンガポールで気に入ったら最後にもう一度。",
+    "visited": true,
+    "editorPick": true,
+    "blogLinks": [
+      {
+        "title": "シンガポールのCHAGEE実際に行った4店舗",
+        "url": "https://tomokichidiary.com/posts/chagee-singapore-stores"
+      }
+    ],
+    "checkedAt": "2026-08-24",
+    "updatedAt": "2026-10-13"
+  }
+]

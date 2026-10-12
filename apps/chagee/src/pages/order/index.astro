@@ -1,0 +1,221 @@
+---
+import Base from "../../layouts/Base.astro";
+import CountryTabs from "../../components/CountryTabs.astro";
+import Customize from "../../components/Customize.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import { COUNTRY_LABEL } from "../../lib/labels";
+import { ORDER_FAQ, ORDER_GUIDES } from "../../lib/order-guide";
+
+const ready = ORDER_GUIDES.filter((guide) => guide.ready);
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: ORDER_FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+---
+
+<Base
+  meta={{
+    title: "CHAGEEの注文方法ガイド｜中国・マレーシア・シンガポール",
+    description:
+      "CHAGEE（霸王茶姬）の海外での注文方法を国別に解説。中国はAlipay、マレーシアは公式アプリ、シンガポールはMobile Web。サイズ・氷・甘さの選び方や注意点も実体験ベースでまとめました。",
+    path: "/order",
+  }}
+  crumbs={[{ name: "注文ガイド", href: "/order" }]}
+  jsonLd={[faqLd]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>CHAGEEの注文ガイド</h1>
+      <p class="lead">
+        3か国で実際に注文してみると、使った方法は国ごとにかなり違いました。でも共通しているのは「スマホで選ぶだけ」。話せなくても大丈夫です。
+      </p>
+    </header>
+
+    <CountryTabs current={null} />
+
+    <section class="section">
+      <SectionHeading title="国別の早見表" />
+      <div class="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">国・地域</th>
+              <th scope="col">注文方法</th>
+              <th scope="col">アプリ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ready.map((guide) => (
+              <tr>
+                <th scope="row">
+                  <a href={`/order/${guide.slug}`}>{COUNTRY_LABEL[guide.country]}</a>
+                </th>
+                <td>{guide.method}</td>
+                <td>{guide.app}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="checked">運営者が実際に注文した時点の情報です（確認日：2026年8月24日）。</p>
+    </section>
+
+    <section class="section">
+      <SectionHeading title="基本の流れは4ステップ" />
+      <ol class="flow">
+        <li class="card">
+          <span>1</span>
+          <strong>メニューを選ぶ</strong>
+          <small>写真付きの画面から</small>
+        </li>
+        <li class="card">
+          <span>2</span>
+          <strong>サイズ・氷・甘さ</strong>
+          <small>選択式でOK</small>
+        </li>
+        <li class="card">
+          <span>3</span>
+          <strong>支払い</strong>
+          <small>Alipay・カードなど</small>
+        </li>
+        <li class="card">
+          <span>4</span>
+          <strong>受け取り</strong>
+          <small>完成したら店頭で</small>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <SectionHeading title="サイズ・氷・甘さの選び方" />
+      <Customize showChinese />
+    </section>
+
+    <section class="section">
+      <SectionHeading title="よくある不安" />
+      <div class="faq">
+        {ORDER_FAQ.map((item) => (
+          <details class="card">
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="section card first">
+      <h2>初めてなら何を頼む？</h2>
+      <p>迷ったら看板の伯牙絶弦。甘さは Normal がしっかりめなので、気になるなら Less から。</p>
+      <div class="actions">
+        <a class="button" href="/menu/boya-jasmine-green-milk-tea">
+          伯牙絶弦を見る
+        </a>
+        <a class="button ghost" href="/menu?sort=beginner">
+          初心者向けの順で見る
+        </a>
+      </div>
+    </section>
+
+    <p class="notice footnote">
+      注文方法・支払い方法・カスタマイズは国・店舗・時期によって変わります。現地の案内を優先してください。
+    </p>
+  </div>
+</Base>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    min-width: 520px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--blush-soft);
+    font-size: 0.8rem;
+  }
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  .checked {
+    margin-top: 8px;
+  }
+  .flow {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .flow li {
+    padding: 14px;
+    display: grid;
+    gap: 2px;
+  }
+  .flow span {
+    font-family: Georgia, var(--serif);
+    color: var(--red);
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  .flow small {
+    color: var(--text-sub);
+  }
+  @media (min-width: 720px) {
+    .flow {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .faq {
+    display: grid;
+    gap: 8px;
+  }
+  .faq details {
+    padding: 4px 14px;
+  }
+  .faq summary {
+    cursor: pointer;
+    font-weight: 700;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .faq p {
+    padding-bottom: 12px;
+    font-size: 0.92rem;
+  }
+  .first {
+    padding: 18px;
+    border-top: 3px solid var(--red);
+  }
+  .first h2 {
+    font-size: 1.15rem;
+  }
+  .first p {
+    margin-top: 6px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .footnote {
+    margin-top: 24px;
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+/** Plain share links: no third-party scripts, no tracking. */
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const text = encodeURIComponent(title);
+const target = encodeURIComponent(url);
+---
+
+<div class="share">
+  <p>シェアする</p>
+  <ul>
+    <li>
+      <a
+        href={`https://x.com/intent/post?text=${text}&url=${target}`}
+        rel="noopener"
+        target="_blank"
+      >
+        X
+      </a>
+    </li>
+    <li>
+      <a
+        href={`https://social-plugins.line.me/lineit/share?url=${target}`}
+        rel="noopener"
+        target="_blank"
+      >
+        LINE
+      </a>
+    </li>
+    <li>
+      <a href={`https://b.hatena.ne.jp/entry/panel/?url=${target}`} rel="noopener" target="_blank">
+        はてブ
+      </a>
+    </li>
+  </ul>
+</div>
+
+<style>
+  .share {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .share p {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    font-weight: 700;
+  }
+  ul {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+</style>

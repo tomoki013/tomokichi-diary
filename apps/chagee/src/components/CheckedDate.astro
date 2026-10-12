@@ -1,0 +1,27 @@
+---
+import { formatDate } from "../lib/labels";
+
+/** "確認日" for facts: when they were last checked, or a plain "未確認". */
+interface Props {
+  checkedAt: string | null;
+  updatedAt?: string;
+}
+
+const { checkedAt, updatedAt } = Astro.props;
+---
+
+<p class="checked">
+  {checkedAt ? (
+    <>
+      情報の確認日：<time datetime={checkedAt}>{formatDate(checkedAt)}</time>
+    </>
+  ) : (
+    "情報の確認日：未確認"
+  )}
+  {updatedAt && (
+    <>
+      {" "}
+      ／ 更新日：<time datetime={updatedAt}>{formatDate(updatedAt)}</time>
+    </>
+  )}
+</p>

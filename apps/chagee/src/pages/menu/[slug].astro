@@ -1,0 +1,414 @@
+---
+import Base from "../../layouts/Base.astro";
+import TeaCup from "../../components/TeaCup.astro";
+import Rating from "../../components/Rating.astro";
+import MenuCard from "../../components/MenuCard.astro";
+import CheckedDate from "../../components/CheckedDate.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import {
+  CATEGORY_LABEL,
+  COUNTRY_LABEL,
+  MILK_LABEL,
+  SWEETNESS_LABEL,
+  TEA_LABEL,
+  TEMPERATURE_LABEL,
+} from "../../lib/labels";
+import { relatedMenus } from "../../lib/menu-filter";
+import { repo } from "../../lib/repo";
+import { absoluteUrl } from "../../lib/seo";
+
+const slug = Astro.params.slug ?? "";
+const data = repo();
+const [menu, all] = await Promise.all([data.menu(slug), data.menus()]);
+if (!menu) return Astro.rewrite("/404");
+
+const related = relatedMenus(menu, all);
+const path = `/menu/${menu.slug}`;
+const LIGHTNESS = ["", "かなり濃厚", "濃いめ", "ほどよい", "軽やか", "さっぱり"];
+---
+
+<Base
+  meta={{
+    title: `${menu.nameJa}（${menu.nameZh}）とは？味・茶葉・おすすめな人`,
+    description: `CHAGEEの「${menu.nameJa}（${menu.nameEn}）」を日本語で解説。${menu.shortDescription}`,
+    path,
+    type: "article",
+    updatedAt: menu.updatedAt,
+  }}
+  crumbs={[
+    { name: "メニュー図鑑", href: "/menu" },
+    { name: menu.nameJa, href: path },
+  ]}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "MenuItem",
+      name: `${menu.nameJa}（${menu.nameZh} / ${menu.nameEn}）`,
+      description: menu.description,
+      url: absoluteUrl(path),
+    },
+  ]}
+>
+  <article class="wrap">
+    <header class="hero card">
+      <div class="cup">
+        {menu.imageKey ? (
+          <img src={`/media/${menu.imageKey}`} alt={menu.nameJa} width="160" height="200" />
+        ) : (
+          <TeaCup tea={menu.teaBase} milk={menu.milkType} size={110} />
+        )}
+      </div>
+      <div class="names">
+        <p class="zh" lang="zh-Hans">
+          {menu.nameZh}
+        </p>
+        <h1>{menu.nameJa}</h1>
+        <p class="en" lang="en">
+          {menu.nameEn}
+        </p>
+        <p class="catch">{menu.shortDescription}</p>
+        <ul class="tags">
+          <li class="tag">{TEA_LABEL[menu.teaBase]}系</li>
+          <li class="tag">{CATEGORY_LABEL[menu.category]}</li>
+          <li class="tag">{MILK_LABEL[menu.milkType]}</li>
+          {menu.beginnerFriendly && <li class="tag">初心者向け</li>}
+          {menu.tasted && <li class="badge firsthand">運営者が実飲</li>}
+        </ul>
+      </div>
+    </header>
+
+    <section class="section">
+      <SectionHeading title="基本情報" />
+      <table class="info card">
+        <tbody>
+          <tr>
+            <th scope="row">茶葉</th>
+            <td>{menu.teaDetail}</td>
+          </tr>
+          <tr>
+            <th scope="row">ミルク</th>
+            <td>{MILK_LABEL[menu.milkType]}</td>
+          </tr>
+          <tr>
+            <th scope="row">甘さの印象</th>
+            <td>{SWEETNESS_LABEL[menu.sweetness]}（注文時に調整できます）</td>
+          </tr>
+          <tr>
+            <th scope="row">香り</th>
+            <td>{menu.aromaTags.join("・") || "—"}</td>
+          </tr>
+          <tr>
+            <th scope="row">飲みやすさ</th>
+            <td>
+              <Rating value={menu.lightness} label="さっぱり度" />{" "}
+              <span class="meter-label">{LIGHTNESS[menu.lightness]}</span>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">確認できた温度</th>
+            <td>{menu.temperatures.map((t) => TEMPERATURE_LABEL[t]).join("・") || "未確認"}</td>
+          </tr>
+          <tr>
+            <th scope="row">価格帯</th>
+            <td>
+              {menu.priceNotes.length > 0 ? (
+                <ul class="plain">
+                  {menu.priceNotes.map((p) => (
+                    <li>
+                      <span class="badge region">{COUNTRY_LABEL[p.country]}</span> {p.note}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                "未確認（国ごとに異なります。現地の注文画面で確認してください）"
+              )}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <CheckedDate checkedAt={menu.checkedAt} updatedAt={menu.updatedAt} />
+    </section>
+
+    <section class="section">
+      <SectionHeading title="どんな味？" />
+      <div class="prose">
+        <p>{menu.description}</p>
+      </div>
+      {menu.flavorTags.length > 0 && (
+        <ul class="tags flavor">
+          {menu.flavorTags.map((tag) => (
+            <li class="tag plain">{tag}</li>
+          ))}
+        </ul>
+      )}
+      {menu.sources.length > 0 && (
+        <p class="source">参考：{menu.sources.map((s) => s.name).join("、")}</p>
+      )}
+    </section>
+
+    <section class="section fit">
+      <div class="card yes">
+        <h2>こんな人におすすめ</h2>
+        <ul>
+          {menu.recommendedFor.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="card no">
+        <h2>こんな人には合わないかも</h2>
+        <ul>
+          {menu.notRecommendedFor.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    {menu.tasted && menu.editorComment && (
+      <section class="section review card" aria-labelledby="review">
+        <p class="label">体験レビュー</p>
+        <h2 id="review">実際に飲んだ感想</h2>
+        {menu.editorRating !== null && (
+          <p class="score">
+            ともきちのおすすめ度 <Rating value={menu.editorRating} label="おすすめ度" />
+          </p>
+        )}
+        <p class="comment">{menu.editorComment}</p>
+        <p class="by">— ともきち（運営者）</p>
+        {menu.blogLinks.length > 0 && (
+          <ul class="blog">
+            {menu.blogLinks.map((link) => (
+              <li>
+                <a href={link.url}>{link.title}</a>
+                <span>（ともきちの旅行日記）</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )}
+
+    <section class="section">
+      <SectionHeading title="提供地域" />
+      {menu.availability.length > 0 ? (
+        <ul class="regions">
+          {menu.availability.map((a) => (
+            <li class="card">
+              <span class="badge region">{COUNTRY_LABEL[a.country]}</span>
+              <span>{a.note}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">提供地域は未確認です。</p>
+      )}
+      <p class="notice footnote">
+        国・時期・店舗によって取り扱いが異なります。ここにない国でも提供されている場合があります。
+      </p>
+    </section>
+
+    {related.length > 0 && (
+      <section class="section">
+        <SectionHeading title="似た系統のメニュー" />
+        <div class="grid cols-2">
+          {related.map((item) => (
+            <MenuCard menu={item} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <nav class="section cta" aria-label="次に見る">
+      <a class="button" href={`/menu?tea=${menu.teaBase}`}>
+        {TEA_LABEL[menu.teaBase]}系のメニューを見る
+      </a>
+      <a class="button ghost" href="/menu?sort=beginner">
+        初めての人向けの順で見る
+      </a>
+      <a class="button ghost" href="/order">
+        注文方法を確認する
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .hero {
+    margin-top: 16px;
+    padding: 18px 16px;
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 14px;
+    background:
+      radial-gradient(circle at 0% 0%, var(--blush-soft), transparent 55%), var(--surface);
+  }
+  .cup {
+    display: grid;
+    place-items: center;
+    align-self: start;
+  }
+  .zh {
+    color: var(--text-sub);
+    font-size: 0.85rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 7vw, 2.3rem);
+    color: var(--red-ink);
+  }
+  .en {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-sub);
+  }
+  .catch {
+    margin-block: 10px;
+    font-family: var(--serif);
+  }
+  .info {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: 0.92rem;
+  }
+  .info th,
+  .info td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .info tr:last-child th,
+  .info tr:last-child td {
+    border-bottom: 0;
+  }
+  .info th {
+    width: 8.5em;
+    color: var(--text-sub);
+    font-weight: 700;
+    background: var(--blush-soft);
+  }
+  .meter-label {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    margin-left: 6px;
+  }
+  .plain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .checked {
+    margin-top: 8px;
+  }
+  .flavor {
+    margin-top: 12px;
+  }
+  .source {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--text-sub);
+  }
+  .fit {
+    display: grid;
+    gap: 12px;
+  }
+  .fit .card {
+    padding: 14px 16px;
+  }
+  .fit h2 {
+    font-size: 1.05rem;
+  }
+  .fit ul {
+    margin: 8px 0 0;
+    padding-left: 1.2em;
+    font-size: 0.92rem;
+  }
+  .fit .yes {
+    border-top: 3px solid var(--red);
+  }
+  .fit .no {
+    border-top: 3px solid var(--text-sub);
+  }
+  @media (min-width: 720px) {
+    .fit {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .review {
+    padding: 20px 18px;
+    border-left: 5px solid var(--red);
+    background:
+      radial-gradient(circle at 100% 0%, var(--blush-soft), transparent 45%), var(--surface);
+  }
+  .review .label {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: var(--red);
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .review h2 {
+    font-size: 1.2rem;
+    margin-top: 8px;
+  }
+  .review .score {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .review .comment {
+    margin-top: 10px;
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    line-height: 2;
+  }
+  .review .by {
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    margin-top: 6px;
+  }
+  .blog {
+    margin: 12px 0 0;
+    padding-left: 1.2em;
+    font-size: 0.88rem;
+  }
+  .blog span {
+    color: var(--text-sub);
+    font-size: 0.78rem;
+  }
+  .regions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .regions li {
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .muted {
+    color: var(--text-sub);
+  }
+  .footnote {
+    margin-top: 12px;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>

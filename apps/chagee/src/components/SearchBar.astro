@@ -1,0 +1,60 @@
+---
+interface Props {
+  action?: string;
+  value?: string;
+  placeholder?: string;
+  label?: string;
+  hidden?: Record<string, string>;
+  large?: boolean;
+}
+
+const {
+  action = "/search",
+  value = "",
+  placeholder = "メニュー名・お茶・都市で検索（例：ジャスミン、上海）",
+  label = "サイト内検索",
+  hidden = {},
+  large = false,
+} = Astro.props;
+---
+
+<form class:list={["search", { large }]} action={action} method="get" role="search">
+  <label class="visually-hidden" for={`q-${action}`}>
+    {label}
+  </label>
+  {Object.entries(hidden).map(([name, v]) => (
+    <input type="hidden" name={name} value={v} />
+  ))}
+  <input
+    id={`q-${action}`}
+    type="search"
+    name="q"
+    value={value}
+    placeholder={placeholder}
+    autocomplete="off"
+  />
+  <button class="button" type="submit">
+    検索
+  </button>
+</form>
+
+<style>
+  .search {
+    display: flex;
+    gap: 8px;
+  }
+  .search input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 999px;
+    padding-inline: 16px;
+  }
+  .search.large input {
+    min-height: 52px;
+    font-size: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .search.large .button {
+    min-height: 52px;
+  }
+</style>

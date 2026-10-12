@@ -38,6 +38,7 @@ flowchart LR
 | `apps/admin`      | Admin UI (Vite + React)        | SPA, talks only to the API         |
 | `apps/api`        | Admin API (Hono, Workers)      | HTTP adapter; no business rules    |
 | `apps/mcp-server` | Public MCP + MCP App (Workers) | Read-only Streamable HTTP adapter  |
+| `apps/chagee`     | CHAGEE guide (Astro, Workers)  | Separate site, own D1/R2; ADR 0010 |
 
 ## Packages
 
@@ -180,7 +181,7 @@ data. See [ADR 0002](adr/0002-route-independent-from-slug.md).
 
 ## Deployment
 
-Four Workers, no Pages:
+Four Workers for the blog, no Pages, plus the separate CHAGEE guide Worker:
 
 | Worker                  | What it serves                                                                    |
 | ----------------------- | --------------------------------------------------------------------------------- |
@@ -188,6 +189,7 @@ Four Workers, no Pages:
 | `tomokichi-diary-admin` | The admin SPA as static assets                                                    |
 | `tomokichi-diary-api`   | The Hono API, bound to D1 and R2                                                  |
 | `tomokichi-diary-mcp`   | Public read-only MCP server and evidence App                                      |
+| `chagee-guide`          | The CHAGEE guide at `chagee.tomokichidiary.com` (own D1 and R2, see ADR 0010)     |
 
 `_redirects` and `_headers` are emitted into the build output from the route
 table, so redirects stay data rather than configuration.

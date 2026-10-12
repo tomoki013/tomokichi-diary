@@ -1,0 +1,30 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // A separate Worker from the travel blog (tomokichi-diary-*). It shares no
+  // binding with them: its own D1 database and R2 bucket.
+  "name": "chagee-guide",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "workers_dev": false,
+  "routes": [{ "pattern": "chagee.tomokichidiary.com", "custom_domain": true }],
+  "assets": { "binding": "ASSETS", "directory": "./dist" },
+  "vars": {
+    "PUBLIC_SITE_URL": "https://chagee.tomokichidiary.com",
+    // The travel blog the column list links to. Links only — nothing is fetched.
+    "BLOG_URL": "https://tomokichidiary.com",
+    "TURNSTILE_SITE_KEY": "",
+    "TURNSTILE_EXPECTED_HOSTNAME": "chagee.tomokichidiary.com",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chagee-guide",
+      // Replace with the id printed by `wrangler d1 create chagee-guide`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "chagee-guide-media" }],
+}

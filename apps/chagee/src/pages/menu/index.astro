@@ -1,0 +1,178 @@
+---
+import Base from "../../layouts/Base.astro";
+import MenuCard from "../../components/MenuCard.astro";
+import FilterGroup from "../../components/FilterGroup.astro";
+import SearchBar from "../../components/SearchBar.astro";
+import EmptyState from "../../components/EmptyState.astro";
+import {
+  CATEGORY_LABEL,
+  COUNTRY_LABEL,
+  SWEETNESS_LABEL,
+  TEA_LABEL,
+  TEMPERATURE_LABEL,
+} from "../../lib/labels";
+import {
+  filterMenus,
+  isFiltered,
+  MENU_SORT_LABEL,
+  MENU_SORTS,
+  parseMenuQuery,
+} from "../../lib/menu-filter";
+import { repo } from "../../lib/repo";
+import { COUNTRIES, MENU_CATEGORIES, SWEETNESS, TEA_BASES, TEMPERATURES } from "../../lib/types";
+
+const params = Astro.url.searchParams;
+const query = parseMenuQuery(params);
+const all = await repo().menus();
+const menus = filterMenus(all, query);
+const filtered = isFiltered(query);
+const path = "/menu";
+const options = <T extends string>(values: readonly T[], labels: Record<T, string>) =>
+  values.map((value) => ({ value, label: labels[value] }));
+const hidden = Object.fromEntries([...params].filter(([key]) => key !== "q"));
+---
+
+<Base
+  meta={{
+    title: "CHAGEEメニュー図鑑",
+    description:
+      "CHAGEE（霸王茶姬）のメニューを日本語で探せる図鑑。ジャスミン・ウーロンなどの茶葉、甘さ、ミルクの有無、提供地域で絞り込めます。実際に飲んだ感想つき。",
+    path: "/menu",
+    noindex: filtered || params.has("sort"),
+  }}
+  crumbs={[{ name: "メニュー図鑑", href: "/menu" }]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>CHAGEEメニュー図鑑</h1>
+      <p class="lead">
+        商品名だけでは分かりにくいCHAGEEのメニューを、茶葉・香り・甘さで整理しました。「実飲」は運営者が実際に飲んだメニューです。
+      </p>
+    </header>
+
+    <SearchBar
+      action="/menu"
+      value={query.q}
+      placeholder="メニュー名で探す（伯牙、Jasmine、ウーロン…）"
+      label="メニューを検索"
+      hidden={hidden}
+    />
+
+    <div class="filters card">
+      <FilterGroup
+        label="並び替え"
+        param="sort"
+        options={options(MENU_SORTS, MENU_SORT_LABEL)}
+        path={path}
+        params={params}
+      />
+      <FilterGroup
+        label="茶葉"
+        param="tea"
+        options={options(TEA_BASES, TEA_LABEL)}
+        path={path}
+        params={params}
+      />
+      <details open={filtered && !query.tea ? true : undefined}>
+        <summary>さらに絞り込む</summary>
+        <div class="more">
+          <FilterGroup
+            label="カテゴリ"
+            param="category"
+            options={options(MENU_CATEGORIES, CATEGORY_LABEL)}
+            path={path}
+            params={params}
+          />
+          <FilterGroup
+            label="甘さ"
+            param="sweet"
+            options={options(SWEETNESS, SWEETNESS_LABEL)}
+            path={path}
+            params={params}
+          />
+          <FilterGroup
+            label="ミルク"
+            param="milk"
+            options={[
+              { value: "yes", label: "ミルクあり" },
+              { value: "no", label: "ミルクなし" },
+            ]}
+            path={path}
+            params={params}
+          />
+          <FilterGroup
+            label="温度"
+            param="temp"
+            options={options(TEMPERATURES, TEMPERATURE_LABEL)}
+            path={path}
+            params={params}
+          />
+          <FilterGroup
+            label="国・地域"
+            param="country"
+            options={options(
+              COUNTRIES.filter((c) => c !== "jp"),
+              COUNTRY_LABEL,
+            )}
+            path={path}
+            params={params}
+          />
+        </div>
+      </details>
+    </div>
+
+    <p class="count" aria-live="polite">
+      {menus.length}件 / 全{all.length}件{filtered && <a href="/menu">条件をクリア</a>}
+    </p>
+
+    {menus.length > 0 ? (
+      <div class="grid cols-2">
+        {menus.map((menu) => (
+          <MenuCard menu={menu} />
+        ))}
+      </div>
+    ) : (
+      <EmptyState title="条件に合うメニューが見つかりませんでした" resetHref="/menu">
+        <p>図鑑は実際に飲んだメニューから順に増やしています。条件を減らしてみてください。</p>
+      </EmptyState>
+    )}
+
+    <p class="notice soft footnote">
+      甘さ・温度は「確認できた範囲」の表示です。国・時期・店舗によって提供状況やカスタマイズは異なります。価格は国ごとに違うため、現地の公式アプリ・注文画面で確認してください。
+    </p>
+  </div>
+</Base>
+
+<style>
+  .filters {
+    margin-top: 14px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  details summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--red-ink);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .more {
+    display: grid;
+    gap: 10px;
+    padding-top: 6px;
+  }
+  .count {
+    margin-block: 16px 10px;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    display: flex;
+    gap: 12px;
+  }
+  .footnote {
+    margin-top: 24px;
+  }
+</style>

@@ -1,0 +1,96 @@
+---
+import TeaCup from "./TeaCup.astro";
+import Rating from "./Rating.astro";
+import { MILK_LABEL, TEA_LABEL } from "../lib/labels";
+import type { Menu } from "../lib/types";
+
+interface Props {
+  menu: Menu;
+}
+
+const { menu } = Astro.props;
+---
+
+<article class="card menu-card">
+  <a href={`/menu/${menu.slug}`} class="hit">
+    <div class="visual">
+      {menu.imageKey ? (
+        <img src={`/media/${menu.imageKey}`} alt="" width="96" height="120" loading="lazy" />
+      ) : (
+        <TeaCup tea={menu.teaBase} milk={menu.milkType} />
+      )}
+    </div>
+    <div class="body">
+      <p class="zh" lang="zh-Hans">
+        {menu.nameZh}
+      </p>
+      <h3>{menu.nameJa}</h3>
+      <p class="en" lang="en">
+        {menu.nameEn}
+      </p>
+      <p class="desc">{menu.shortDescription}</p>
+      <ul class="tags">
+        <li class="tag">{TEA_LABEL[menu.teaBase]}系</li>
+        <li class="tag">{MILK_LABEL[menu.milkType]}</li>
+        {menu.beginnerFriendly && <li class="tag">初心者向け</li>}
+        {menu.tasted && <li class="badge firsthand">実飲</li>}
+      </ul>
+      {menu.editorRating !== null && (
+        <p class="score">
+          <span>おすすめ度</span>
+          <Rating value={menu.editorRating} label="おすすめ度" />
+        </p>
+      )}
+    </div>
+  </a>
+</article>
+
+<style>
+  .menu-card .hit {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 12px;
+    padding: 14px;
+    color: inherit;
+    text-decoration: none;
+    height: 100%;
+  }
+  .visual {
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 40%, var(--blush-soft), transparent 70%);
+    border-radius: var(--radius-sm);
+    align-self: start;
+    padding-block: 6px;
+  }
+  .zh {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+  }
+  h3 {
+    font-size: 1.2rem;
+    color: var(--red-ink);
+  }
+  .en {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--text-sub);
+    text-transform: uppercase;
+  }
+  .desc {
+    font-size: 0.88rem;
+    margin-block: 6px 8px;
+    line-height: 1.7;
+  }
+  .score {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hit:hover h3 {
+    text-decoration: underline;
+  }
+</style>

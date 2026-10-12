@@ -1,0 +1,60 @@
+---
+import type { Country } from "../lib/types";
+
+/** A travel-stamp mark: the city code inside a dashed ring. Decorative. */
+interface Props {
+  country: Country | null;
+  label?: string;
+}
+
+const CODE: Record<Country, { code: string; city: string }> = {
+  cn: { code: "SHA", city: "SHANGHAI" },
+  my: { code: "KUL", city: "KUALA LUMPUR" },
+  sg: { code: "SIN", city: "SINGAPORE" },
+  th: { code: "BKK", city: "BANGKOK" },
+  jp: { code: "TYO", city: "TOKYO" },
+};
+
+const { country } = Astro.props;
+const stamp = country ? CODE[country] : { code: "TEA", city: "CHAGEE GUIDE" };
+---
+
+<svg class="stamp" viewBox="0 0 80 80" aria-hidden="true">
+  <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" stroke-width="2"></circle>
+  <circle
+    cx="40"
+    cy="40"
+    r="30"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+    stroke-dasharray="3 3"
+  ></circle>
+  <text
+    x="40"
+    y="45"
+    text-anchor="middle"
+    font-size="17"
+    font-weight="700"
+    fill="currentColor"
+    font-family="Georgia, serif"
+  >
+    {stamp.code}
+  </text>
+  <text x="40" y="59" text-anchor="middle" font-size="5.6" letter-spacing="0.8" fill="currentColor">
+    {stamp.city}
+  </text>
+  <text x="40" y="27" text-anchor="middle" font-size="5.6" letter-spacing="0.8" fill="currentColor">
+    TEA STOP
+  </text>
+</svg>
+
+<style>
+  .stamp {
+    width: 76px;
+    height: 76px;
+    color: var(--red);
+    opacity: 0.85;
+    transform: rotate(-8deg);
+  }
+</style>

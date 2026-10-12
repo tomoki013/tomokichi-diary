@@ -1,0 +1,43 @@
+---
+import Base from "../layouts/Base.astro";
+import SearchBar from "../components/SearchBar.astro";
+
+Astro.response.status = 404;
+---
+
+<Base
+  meta={{
+    title: "ページが見つかりません",
+    description: "お探しのページは見つかりませんでした。",
+    path: "/404",
+    noindex: true,
+  }}
+>
+  <div class="wrap nf">
+    <p class="code">404</p>
+    <h1>ページが見つかりません</h1>
+    <p>URLが変わったか、削除された可能性があります。検索するか、トップから探してみてください。</p>
+    <SearchBar />
+    <p>
+      <a class="button ghost" href="/">
+        トップへ戻る
+      </a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .nf {
+    max-width: 560px;
+    padding-top: 40px;
+    display: grid;
+    gap: 14px;
+    text-align: center;
+  }
+  .code {
+    font-family: Georgia, var(--serif);
+    font-size: 3rem;
+    color: var(--red);
+    line-height: 1;
+  }
+</style>

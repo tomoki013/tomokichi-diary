@@ -1,0 +1,69 @@
+---
+import { toggleHref } from "../lib/menu-filter";
+
+/** One row of toggle chips. Each chip is a link, so filtering works without JavaScript. */
+interface Props {
+  label: string;
+  param: string;
+  options: { value: string; label: string }[];
+  path: string;
+  params: URLSearchParams;
+}
+
+const { label, param, options, path, params } = Astro.props;
+const active = params.get(param);
+---
+
+<div class="group" role="group" aria-label={label}>
+  <span class="label">{label}</span>
+  <div class="chips scroller">
+    {options.map((option) => (
+      <a
+        class="chip"
+        href={toggleHref(path, params, param, option.value)}
+        aria-current={active === option.value ? "true" : undefined}
+        rel="nofollow"
+      >
+        {option.label}
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .group {
+    display: grid;
+    grid-template-columns: 4.6em minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-sub);
+  }
+  .chips {
+    margin-inline: 0 calc(var(--gutter) * -1);
+    padding-inline: 0 var(--gutter);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+  .chip[aria-current="true"] {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    font-weight: 700;
+  }
+</style>

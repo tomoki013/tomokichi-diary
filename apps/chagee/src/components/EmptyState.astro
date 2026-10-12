@@ -1,0 +1,34 @@
+---
+interface Props {
+  title: string;
+  resetHref?: string;
+}
+
+const { title, resetHref } = Astro.props;
+---
+
+<div class="empty card">
+  <p class="title">{title}</p>
+  <slot />
+  {resetHref && (
+    <a class="button ghost" href={resetHref}>
+      条件をリセット
+    </a>
+  )}
+</div>
+
+<style>
+  .empty {
+    padding: 28px 20px;
+    text-align: center;
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    color: var(--text-sub);
+  }
+  .title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+</style>

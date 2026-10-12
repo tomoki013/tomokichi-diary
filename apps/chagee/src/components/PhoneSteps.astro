@@ -1,0 +1,88 @@
+---
+import type { OrderStep } from "../lib/order-guide";
+
+/** The order flow drawn as a phone screen: numbered steps inside a device frame. */
+interface Props {
+  steps: OrderStep[];
+  title: string;
+}
+
+const { steps, title } = Astro.props;
+---
+
+<div class="phone" role="group" aria-label={title}>
+  <div class="screen">
+    <p class="app-bar">{title}</p>
+    <ol>
+      {steps.map((step, index) => (
+        <li>
+          <span class="n">{index + 1}</span>
+          <div>
+            <p class="t">{step.title}</p>
+            <p class="d">{step.detail}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</div>
+
+<style>
+  .phone {
+    max-width: 360px;
+    margin-inline: auto;
+    padding: 10px;
+    border-radius: 34px;
+    background: var(--text);
+    box-shadow: var(--shadow);
+  }
+  .screen {
+    background: var(--surface);
+    border-radius: 26px;
+    overflow: hidden;
+    padding-bottom: 12px;
+  }
+  .app-bar {
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 14px 16px 10px;
+    text-align: center;
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 6px 12px 0;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px dashed var(--border);
+  }
+  li:last-child {
+    border-bottom: 0;
+  }
+  .n {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--red);
+    color: var(--red);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .t {
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+  .d {
+    font-size: 0.82rem;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+</style>

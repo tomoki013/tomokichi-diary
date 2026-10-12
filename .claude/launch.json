@@ -18,7 +18,15 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@tomokichi/admin", "dev", "--port", "5173", "--strictPort"],
       "port": 5173,
-      "env": { "VITE_API_URL": "http://localhost:8795" }
+      "env": {
+        "VITE_API_URL": "http://localhost:8795"
+      }
+    },
+    {
+      "name": "chagee",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@tomokichi/chagee", "dev", "--port", "4330"],
+      "port": 4330
     }
   ]
 }

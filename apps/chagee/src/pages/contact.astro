@@ -1,0 +1,288 @@
+---
+import { createInquiryClient } from "@inquiry-platform/sdk";
+import Base from "../layouts/Base.astro";
+import {
+  CONTACT_KINDS,
+  hashIp,
+  readContactForm,
+  toSubmission,
+  validateContact,
+  verifyTurnstile,
+  type ContactInput,
+} from "../lib/contact";
+import { guideEnv } from "../lib/env";
+import { SITE } from "../lib/site";
+
+/** The slug this site is registered under on the shared inquiry platform. */
+const INQUIRY_PROJECT_SLUG = "chagee-guide";
+
+const env = guideEnv();
+const siteKey = env.TURNSTILE_SITE_KEY ?? "";
+// Fail closed: without every piece the form accepts nothing.
+const open =
+  siteKey !== "" &&
+  Boolean(env.TURNSTILE_SECRET_KEY && env.IP_HASH_SALT && env.INQUIRY && env.CONTACT_RATE_LIMITER);
+
+let input: ContactInput = {
+  name: "",
+  email: "",
+  kind: "question",
+  body: "",
+  url: "",
+};
+let errors: Partial<Record<keyof ContactInput, string>> = {};
+let failure: string | null = null;
+
+if (Astro.request.method === "POST") {
+  if (!open) return new Response("contact form is closed", { status: 503 });
+  const form = await Astro.request.formData().catch(() => null);
+  if (form === null) return Astro.redirect("/contact?error=invalid", 303);
+  // Honeypot: a field no person sees.
+  if (String(form.get("website") ?? "") !== "") return Astro.redirect("/contact?sent=1", 303);
+
+  input = readContactForm(form);
+  errors = validateContact(input);
+  if (Object.keys(errors).length === 0) {
+    const ip = Astro.request.headers.get("cf-connecting-ip") ?? undefined;
+    const token = String(form.get("cf-turnstile-response") ?? "");
+    const human =
+      token !== "" &&
+      (await verifyTurnstile(
+        env.TURNSTILE_SECRET_KEY!,
+        token,
+        ip,
+        env.TURNSTILE_EXPECTED_HOSTNAME,
+      ));
+    if (!human) {
+      failure = "ロボットでないことの確認に失敗しました。もう一度お試しください。";
+    } else {
+      const { success } = await env.CONTACT_RATE_LIMITER!.limit({
+        key: await hashIp(ip ?? "unknown", env.IP_HASH_SALT!),
+      });
+      if (!success) {
+        failure = "短時間に続けて送信されました。1分ほど待ってからお試しください。";
+      } else {
+        const result = await createInquiryClient(env.INQUIRY)
+          .createContact({
+            projectSlug: INQUIRY_PROJECT_SLUG,
+            idempotencyKey: crypto.randomUUID(),
+            name: input.name,
+            email: input.email,
+            channel: "web_form",
+            ...toSubmission(input),
+          })
+          .catch(() => null);
+        if (result?.ok === true) return Astro.redirect("/contact?sent=1", 303);
+        failure = "送信できませんでした。時間をおいてもう一度お試しください。";
+      }
+    }
+  }
+  Astro.response.status = 400;
+} else {
+  const kind = Astro.url.searchParams.get("kind");
+  if (kind && kind in CONTACT_KINDS) input.kind = kind as ContactInput["kind"];
+}
+
+const sent = Astro.url.searchParams.get("sent") === "1";
+---
+
+<Base
+  meta={{
+    title: "お問い合わせ",
+    description: `${SITE.name}（非公式）への情報修正・情報提供・お仕事のご相談はこちらから。`,
+    path: "/contact",
+  }}
+  crumbs={[{ name: "お問い合わせ", href: "/contact" }]}
+>
+  <div class="wrap contact">
+    <header class="page-head">
+      <h1>お問い合わせ</h1>
+      <p class="lead">
+        情報の誤り、新しい店舗やメニューの情報、取材・お仕事のご相談はこちらから。CHAGEE公式へのお問い合わせ（注文・返金など）にはお答えできません。
+      </p>
+    </header>
+
+    {sent ? (
+      <div class="card done" role="status">
+        <h2>送信しました</h2>
+        <p>ありがとうございます。内容を確認して、必要に応じてメールでご連絡します。</p>
+        <a class="button ghost" href="/">
+          トップへ戻る
+        </a>
+      </div>
+    ) : !open ? (
+      <div class="card done">
+        <h2>フォームは準備中です</h2>
+        <p>
+          現在このサイトのフォームは準備中です。お急ぎの場合は、運営者の旅行ブログのお問い合わせフォームからご連絡ください。
+        </p>
+        <a class="button" href={`${SITE.blogUrl}/contact`}>
+          ともきちの旅行日記のお問い合わせへ
+        </a>
+      </div>
+    ) : (
+      <form method="post" class="card form" novalidate>
+        {failure && (
+          <p class="notice" role="alert">
+            {failure}
+          </p>
+        )}
+        <div class="field">
+          <label for="kind">種別</label>
+          <select id="kind" name="kind">
+            {Object.entries(CONTACT_KINDS).map(([value, label]) => (
+              <option value={value} selected={input.kind === value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div class="field">
+          <label for="name">
+            お名前<span class="req">必須</span>
+          </label>
+          <input
+            id="name"
+            name="name"
+            autocomplete="name"
+            required
+            value={input.name}
+            aria-invalid={errors.name ? "true" : undefined}
+            aria-describedby={errors.name ? "name-error" : undefined}
+          />
+          {errors.name && (
+            <p class="error" id="name-error">
+              {errors.name}
+            </p>
+          )}
+        </div>
+        <div class="field">
+          <label for="email">
+            メールアドレス<span class="req">必須</span>
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            value={input.email}
+            aria-invalid={errors.email ? "true" : undefined}
+            aria-describedby={errors.email ? "email-error" : undefined}
+          />
+          {errors.email && (
+            <p class="error" id="email-error">
+              {errors.email}
+            </p>
+          )}
+        </div>
+        <div class="field">
+          <label for="body">
+            内容<span class="req">必須</span>
+          </label>
+          <textarea
+            id="body"
+            name="body"
+            required
+            aria-invalid={errors.body ? "true" : undefined}
+            aria-describedby={errors.body ? "body-error" : undefined}
+          >{input.body}</textarea>
+          {errors.body && (
+            <p class="error" id="body-error">
+              {errors.body}
+            </p>
+          )}
+        </div>
+        <div class="field">
+          <label for="url">関連するURL（任意）</label>
+          <input
+            id="url"
+            name="url"
+            type="url"
+            inputmode="url"
+            value={input.url}
+            placeholder="https://"
+            aria-invalid={errors.url ? "true" : undefined}
+            aria-describedby={errors.url ? "url-error" : undefined}
+          />
+          {errors.url && (
+            <p class="error" id="url-error">
+              {errors.url}
+            </p>
+          )}
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="cf-turnstile" data-sitekey={siteKey} data-action="contact" />
+        <p class="privacy">
+          送信内容の扱いは<a href="/policy">利用上の注意</a>をご覧ください。
+        </p>
+        <button class="button" type="submit">
+          送信する
+        </button>
+      </form>
+    )}
+  </div>
+  {open && !sent && (
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+      is:inline
+    ></script>
+  )}
+</Base>
+
+<style>
+  .contact {
+    max-width: 640px;
+  }
+  .form {
+    padding: 18px 16px;
+    display: grid;
+    gap: 16px;
+  }
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+  .req {
+    font-size: 0.7rem;
+    background: var(--red);
+    color: #fff;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .error {
+    color: var(--red-ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  [aria-invalid="true"] {
+    border-color: var(--red);
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .privacy {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+  }
+  .done {
+    padding: 24px 18px;
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .done h2 {
+    font-size: 1.2rem;
+  }
+</style>

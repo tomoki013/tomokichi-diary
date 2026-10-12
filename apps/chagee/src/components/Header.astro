@@ -1,0 +1,176 @@
+---
+import { NAV, SITE } from "../lib/site";
+
+interface Props {
+  current: string;
+}
+
+const { current } = Astro.props;
+const isCurrent = (href: string) => current === href || current.startsWith(`${href}/`);
+---
+
+<div class="unofficial">
+  <div class="wrap">
+    <strong>{SITE.status}</strong>
+    <span>CHAGEE公式とは関係のない個人運営サイトです</span>
+  </div>
+</div>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label={`${SITE.name}（非公式） ホーム`}>
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="#b61e24"></circle>
+        <path d="M9 12h14l-1.6 11.2a2 2 0 0 1-2 1.8h-6.8a2 2 0 0 1-2-1.8z" fill="#fffdfb"></path>
+        <path
+          d="M11 9.5c1.5-1.8 3-1.8 5 0s3.5 1.8 5 0"
+          stroke="#fffdfb"
+          stroke-width="1.6"
+          fill="none"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <span class="names">
+        <span class="name">{SITE.name}</span>
+        <span class="sub">{SITE.nameEn}</span>
+      </span>
+    </a>
+    <a class="search-link" href="/search" aria-label="サイト内検索">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <circle
+          cx="10.5"
+          cy="10.5"
+          r="6.5"
+          stroke="currentColor"
+          stroke-width="2"
+          fill="none"
+        ></circle>
+        <path
+          d="m15.5 15.5 5 5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <span class="label">検索</span>
+    </a>
+  </div>
+  <nav class="wrap" aria-label="メイン">
+    <ul class="nav scroller">
+      {NAV.map((item) => (
+        <li>
+          <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .unofficial {
+    background: var(--text);
+    color: var(--bg);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    padding-block: 6px;
+  }
+  .unofficial .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .unofficial strong {
+    color: var(--blush);
+  }
+  .site-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 10px 4px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+    min-width: 0;
+  }
+  .mark {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+  .names {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+  }
+  .name {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .sub {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    color: var(--red-ink);
+    text-transform: uppercase;
+  }
+  .search-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  .search-link .label {
+    display: none;
+  }
+  .nav {
+    /* Fades the right edge so a cut-off item reads as "scroll for more". */
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+    list-style: none;
+    margin: 0;
+    padding-block: 4px 0;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding-inline: 4px;
+    margin-right: 10px;
+    text-decoration: none;
+    color: var(--text-sub);
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+  }
+  .nav a[aria-current="page"] {
+    color: var(--red-ink);
+    border-bottom-color: var(--red);
+  }
+  @media (min-width: 720px) {
+    .search-link .label {
+      display: inline;
+    }
+    .nav {
+      mask-image: none;
+    }
+  }
+</style>

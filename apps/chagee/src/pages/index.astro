@@ -1,0 +1,384 @@
+---
+import Base from "../layouts/Base.astro";
+import SearchBar from "../components/SearchBar.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import MenuCard from "../components/MenuCard.astro";
+import NewsCard from "../components/NewsCard.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import { repo } from "../lib/repo";
+import { SITE } from "../lib/site";
+
+const data = repo();
+const [menus, news, columns, stores] = await Promise.all([
+  data.menus(),
+  data.news(3),
+  data.columns(),
+  data.stores(),
+]);
+const firstMenu = menus.find((menu) => menu.beginnerFriendly) ?? menus[0];
+const visitedCount = stores.filter((store) => store.visited).length;
+const countries = new Set(stores.map((store) => store.country)).size;
+
+const QUICK = [
+  { href: "/menu", no: "01", title: "メニュー図鑑", text: "茶葉・甘さ・ミルクで探す" },
+  { href: "/order", no: "02", title: "注文ガイド", text: "国別の注文手順と単語" },
+  { href: "/stores", no: "03", title: "店舗検索", text: `実際に行った${visitedCount}店舗` },
+  { href: "/columns", no: "04", title: "体験レポート", text: "上海から飲み歩いた記録" },
+  { href: "/news", no: "05", title: "最新情報", text: "日本上陸・新店舗・新商品" },
+];
+---
+
+<Base
+  meta={{
+    title: "",
+    description: SITE.description,
+    path: "/",
+  }}
+>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="copy">
+        <p class="kicker">Good Tea, Better Journey.</p>
+        <h1>
+          <span class="visually-hidden">{SITE.name}（非公式）</span>
+          <span class="line">CHAGEEを、</span>
+          <span class="line">もっと深く。</span>
+        </h1>
+        <p class="sub">上海で出会い、旅先で飲み歩き、日本語で届ける。</p>
+        <p class="tagline">{SITE.tagline}</p>
+        <SearchBar large />
+        <p class="hint">
+          よく探されている：
+          <a href="/search?q=ジャスミン">ジャスミン</a>
+          <a href="/search?q=上海">上海</a>
+          <a href="/order/singapore">シンガポールの注文</a>
+          <a href="/news/japan-launch-status-2026-10">日本上陸</a>
+        </p>
+      </div>
+      <figure class="photo">
+        <img
+          src="/media/photos/shanghai-first-cups-480.webp"
+          srcset="/media/photos/shanghai-first-cups-480.webp 480w, /media/photos/shanghai-first-cups-735.webp 735w"
+          sizes="(min-width: 860px) 340px, 40vw"
+          width="480"
+          height="640"
+          alt="上海で飲んだCHAGEEの赤と青のカップ"
+          fetchpriority="high"
+        />
+        <figcaption>上海で最初の2杯</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <nav class="quick" aria-label="目的から探す">
+      {QUICK.map((item) => (
+        <a class="quick-card card" href={item.href}>
+          <span class="no">{item.no}</span>
+          <span class="title">{item.title}</span>
+          <span class="text">{item.text}</span>
+        </a>
+      ))}
+    </nav>
+
+    <section class="section starter" aria-labelledby="starter">
+      <SectionHeading id="starter" eyebrow="First Cup" title="はじめてなら、まずこの3つ" />
+      <ol class="steps">
+        <li class="card">
+          <span class="step">1</span>
+          <div>
+            <h3>迷ったら、この一杯</h3>
+            {firstMenu ? (
+              <p>
+                看板メニューの
+                <a href={`/menu/${firstMenu.slug}`}>
+                  {firstMenu.nameJa}（{firstMenu.nameZh}）
+                </a>
+                。{firstMenu.shortDescription}
+              </p>
+            ) : (
+              <p>
+                <a href="/menu">メニュー図鑑</a>から選べます。
+              </p>
+            )}
+          </div>
+        </li>
+        <li class="card">
+          <span class="step">2</span>
+          <div>
+            <h3>注文はスマホで完結</h3>
+            <p>
+              中国は Alipay、マレーシアはアプリ、シンガポールはブラウザ。
+              <a href="/order">国別の注文ガイド</a>で、サイズ・氷・甘さの選び方まで。
+            </p>
+          </div>
+        </li>
+        <li class="card">
+          <span class="step">3</span>
+          <div>
+            <h3>旅のルートで店を選ぶ</h3>
+            <p>
+              CHAGEEのために移動しない。観光ルートの途中にある<a href="/stores">実際に行った店舗</a>
+              から選ぶのがいちばん楽でした。
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="popular">
+      <SectionHeading
+        id="popular"
+        eyebrow="Menu"
+        title="人気メニュー"
+        moreHref="/menu"
+        moreLabel="メニュー図鑑へ"
+      />
+      <div class="grid cols-2">
+        {menus.slice(0, 4).map((menu) => (
+          <MenuCard menu={menu} />
+        ))}
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="latest">
+      <SectionHeading id="latest" eyebrow="News" title="最新情報" moreHref="/news" />
+      <div class="grid">
+        {news.map((item) => (
+          <NewsCard item={item} />
+        ))}
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="reports">
+      <SectionHeading
+        id="reports"
+        eyebrow="Travel Reports"
+        title="旅するように、CHAGEEを味わう"
+        moreHref="/columns"
+      />
+      <p class="note">体験レポートは「ともきちの旅行日記」に掲載しています。</p>
+      <div class="grid cols-3">
+        {columns
+          .filter((c) => c.category === "report")
+          .slice(0, 3)
+          .map((column) => (
+            <ColumnCard column={column} />
+          ))}
+      </div>
+    </section>
+
+    <section class="section editor card" aria-labelledby="editor">
+      <div>
+        <h2 id="editor">この一杯が、旅をもっと好きにした。</h2>
+        <p>
+          上海の南京東路で飲んだジャスミンのミルクティーにハマって、クアラルンプールでもシンガポールでも、見つけるたびに通いました。
+          {countries}か国・{visitedCount}
+          店舗で飲み歩いた記録を、同じように気になっている人のために日本語でまとめています。
+        </p>
+        <p class="sign">— ともきち（ともきちの旅行日記）</p>
+        <a class="button ghost" href="/about">
+          このサイトについて
+        </a>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    background:
+      radial-gradient(circle at 85% 10%, rgb(182 30 36 / 12%), transparent 45%),
+      linear-gradient(180deg, var(--surface), var(--bg));
+    border-bottom: 1px solid var(--border);
+    padding-block: 28px 32px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 34%;
+    gap: 16px;
+    align-items: start;
+  }
+  .copy {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    position: relative;
+    z-index: 1;
+  }
+  .kicker {
+    font-family: Georgia, var(--serif);
+    font-style: italic;
+    color: var(--red);
+    letter-spacing: 0.04em;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 8.4vw, 3.4rem);
+    line-height: 1.2;
+    margin-top: 6px;
+    color: var(--text);
+    max-width: 62%;
+  }
+  h1 .line {
+    display: block;
+    white-space: nowrap;
+  }
+  .sub {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    margin-top: 12px;
+    max-width: 62%;
+  }
+  .tagline {
+    color: var(--text-sub);
+    font-size: 0.85rem;
+    margin-block: 10px 18px;
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .photo {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  .photo img {
+    border-radius: 120px 120px var(--radius) var(--radius);
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    box-shadow: var(--shadow);
+    border: 4px solid var(--surface);
+  }
+  .photo figcaption {
+    font-size: 0.7rem;
+    color: var(--text-sub);
+    text-align: center;
+    margin-top: 6px;
+  }
+  @media (min-width: 860px) {
+    .hero {
+      padding-block: 48px 52px;
+    }
+    .hero-grid {
+      grid-template-columns: 1fr 340px;
+      gap: 48px;
+      align-items: center;
+    }
+    .copy {
+      grid-column: 1;
+    }
+    h1,
+    .sub {
+      max-width: none;
+    }
+  }
+
+  .quick {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .quick-card {
+    display: grid;
+    gap: 2px;
+    padding: 14px;
+    text-decoration: none;
+    color: var(--text);
+    border-top: 3px solid var(--red);
+  }
+  .quick-card:first-child {
+    grid-column: 1 / -1;
+  }
+  .quick-card .no {
+    font-family: Georgia, var(--serif);
+    color: var(--red);
+    font-size: 0.85rem;
+  }
+  .quick-card .title {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .quick-card .text {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+  }
+  .quick-card:hover .title {
+    color: var(--red-ink);
+  }
+  @media (min-width: 860px) {
+    .quick {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .quick-card:first-child {
+      grid-column: auto;
+    }
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .steps li {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+  .step {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-family: Georgia, var(--serif);
+    font-weight: 700;
+  }
+  .steps h3 {
+    font-size: 1.02rem;
+  }
+  .steps p {
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  @media (min-width: 860px) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .note {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    margin: -6px 0 12px;
+  }
+  .editor {
+    padding: 22px 18px;
+    background:
+      radial-gradient(circle at 100% 0%, var(--blush-soft), transparent 50%), var(--surface);
+  }
+  .editor h2 {
+    font-size: 1.3rem;
+    color: var(--red-ink);
+  }
+  .editor p {
+    margin-top: 10px;
+    font-size: 0.95rem;
+  }
+  .editor .sign {
+    color: var(--text-sub);
+    font-size: 0.85rem;
+  }
+  .editor .button {
+    margin-top: 14px;
+  }
+</style>

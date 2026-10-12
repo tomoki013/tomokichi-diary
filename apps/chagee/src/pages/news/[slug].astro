@@ -1,0 +1,213 @@
+---
+import Base from "../../layouts/Base.astro";
+import NewsCard from "../../components/NewsCard.astro";
+import VerificationBadge from "../../components/VerificationBadge.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import ShareLinks from "../../components/ShareLinks.astro";
+import { formatDate, NEWS_CATEGORY_LABEL } from "../../lib/labels";
+import { renderMarkdown } from "../../lib/markdown";
+import { repo } from "../../lib/repo";
+import { absoluteUrl, articleLd } from "../../lib/seo";
+
+const data = repo();
+const [item, latest] = await Promise.all([data.newsItem(Astro.params.slug ?? ""), data.news(6)]);
+if (!item) return Astro.rewrite("/404");
+
+const path = `/news/${item.slug}`;
+const { html, headings } = renderMarkdown(item.body);
+const related = latest
+  .filter((other) => other.slug !== item.slug)
+  .toSorted((a, b) => Number(b.category === item.category) - Number(a.category === item.category))
+  .slice(0, 3);
+const updated = item.updatedAt.slice(0, 10) !== item.publishedAt.slice(0, 10);
+---
+
+<Base
+  meta={{
+    title: item.title,
+    description: item.summary,
+    path,
+    type: "article",
+    publishedAt: item.publishedAt,
+    updatedAt: item.updatedAt,
+  }}
+  crumbs={[
+    { name: "最新情報", href: "/news" },
+    { name: item.title, href: path },
+  ]}
+  jsonLd={[
+    articleLd({
+      title: item.title,
+      description: item.summary,
+      path,
+      publishedAt: item.publishedAt,
+      updatedAt: item.updatedAt,
+    }),
+  ]}
+>
+  <article class="wrap article">
+    <header class="page-head">
+      <div class="meta">
+        <span class="tag">{NEWS_CATEGORY_LABEL[item.category]}</span>
+        <VerificationBadge status={item.verificationStatus} />
+      </div>
+      <h1>{item.title}</h1>
+      <p class="dates">
+        投稿日：<time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+        {updated && (
+          <>
+            ／ 更新日：<time datetime={item.updatedAt}>{formatDate(item.updatedAt)}</time>
+          </>
+        )}
+      </p>
+      <p class="lead">{item.summary}</p>
+    </header>
+
+    {item.verificationStatus === "unverified" && (
+      <p class="notice">
+        この記事には、公式発表で確認できていない情報（噂・未確認情報）が含まれます。確定情報としては扱わないでください。
+      </p>
+    )}
+
+    {headings.length >= 2 && (
+      <nav class="toc card" aria-label="目次">
+        <p>目次</p>
+        <ol>
+          {headings
+            .filter((h) => h.level === 2)
+            .map((h) => (
+              <li>
+                <a href={`#${h.id}`}>{h.text}</a>
+              </li>
+            ))}
+        </ol>
+      </nav>
+    )}
+
+    <div class="prose" set:html={html} />
+
+    <section class="sources card">
+      <h2>出典</h2>
+      {item.sources.length > 0 ? (
+        <ul>
+          {item.sources.map((source) => (
+            <li>
+              {source.url ? (
+                <a href={source.url} rel="noopener" target="_blank">
+                  {source.name}
+                </a>
+              ) : (
+                source.name
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          一次情報となる出典はありません（
+          {item.verificationStatus === "unverified" ? "公式発表なし" : "編集部まとめ"}）。
+        </p>
+      )}
+      <p class="note">
+        誤りや新しい情報に気づいたら<a href="/contact?kind=correction">お問い合わせ</a>
+        から教えてください。
+      </p>
+    </section>
+
+    <ShareLinks url={absoluteUrl(path)} title={item.title} />
+
+    {related.length > 0 && (
+      <section class="section">
+        <SectionHeading title="ほかの最新情報" moreHref="/news" />
+        <div class="grid">
+          {related.map((other) => (
+            <NewsCard item={other} compact />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <nav class="section cta" aria-label="次に見る">
+      <a class="button" href="/menu">
+        メニュー図鑑へ
+      </a>
+      <a class="button ghost" href="/stores">
+        店舗を探す
+      </a>
+      <a class="button ghost" href="/order">
+        初めての注文ガイド
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .article {
+    max-width: 760px;
+  }
+  .meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .page-head h1 {
+    font-size: clamp(1.45rem, 5.6vw, 2rem);
+  }
+  .dates {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    margin-top: 8px;
+  }
+  .page-head .lead {
+    margin-top: 12px;
+    font-size: 1rem;
+    color: var(--text);
+    padding: 12px 14px;
+    border-left: 4px solid var(--red);
+    background: var(--surface);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .notice {
+    margin-block: 12px;
+  }
+  .toc {
+    margin-block: 16px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  .toc p {
+    font-weight: 700;
+    color: var(--text-sub);
+    font-size: 0.8rem;
+  }
+  .toc ol {
+    margin: 4px 0 0;
+    padding-left: 1.3em;
+  }
+  .prose {
+    margin-top: 12px;
+  }
+  .sources {
+    margin-top: 32px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+  }
+  .sources h2 {
+    font-size: 1rem;
+  }
+  .sources ul {
+    margin: 6px 0;
+    padding-left: 1.2em;
+  }
+  .sources .note {
+    margin-top: 8px;
+    color: var(--text-sub);
+    font-size: 0.8rem;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>

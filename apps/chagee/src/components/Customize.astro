@@ -1,0 +1,121 @@
+---
+import { CHINESE_WORDS, CUSTOMIZE } from "../lib/order-guide";
+
+interface Props {
+  showChinese?: boolean;
+}
+
+const { showChinese = false } = Astro.props;
+---
+
+<div class="customize">
+  {CUSTOMIZE.map((group) => (
+    <div class="card group">
+      <h3>{group.group}</h3>
+      <ul>
+        {group.phrases.map((phrase) => (
+          <li>
+            <span class="value" lang="en">
+              {phrase.value}
+            </span>
+            <span class="meaning">{phrase.meaning}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="note">{group.note}</p>
+    </div>
+  ))}
+</div>
+<p class="source">
+  ※ 運営者がマレーシアの公式アプリで伯牙絶弦（BO·YA Jasmine Green Milk
+  Tea）を確認したときの表示です。商品・国・時期で選択肢は変わります。
+</p>
+{showChinese && (
+  <div class="card words">
+    <h3>中国のお店でよく見る単語</h3>
+    <table>
+      <tbody>
+        {CHINESE_WORDS.map((word) => (
+          <tr>
+            <th scope="row">{word.label}</th>
+            <td lang="zh-Hans">{word.value}</td>
+            <td>{word.meaning}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="source">
+      ※ 中国のミルクティー店で一般的な表記です。CHAGEEの画面の表記と異なる場合があります。
+    </p>
+  </div>
+)}
+
+<style>
+  .customize {
+    display: grid;
+    gap: 10px;
+  }
+  @media (min-width: 720px) {
+    .customize {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .group {
+    padding: 14px;
+  }
+  h3 {
+    font-size: 1rem;
+  }
+  ul {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+  }
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.9rem;
+  }
+  .value {
+    font-weight: 700;
+    font-family: Georgia, var(--serif);
+  }
+  .meaning {
+    color: var(--text-sub);
+  }
+  .note {
+    font-size: 0.8rem;
+    color: var(--red-ink);
+  }
+  .source {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    margin-top: 8px;
+  }
+  .words {
+    margin-top: 14px;
+    padding: 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 6px 4px;
+    border-bottom: 1px dashed var(--border);
+  }
+  th {
+    color: var(--text-sub);
+    width: 5em;
+  }
+  td[lang] {
+    font-weight: 700;
+  }
+</style>

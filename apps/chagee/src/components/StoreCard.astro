@@ -1,0 +1,121 @@
+---
+import { COUNTRY_LABEL } from "../lib/labels";
+import type { Store } from "../lib/types";
+
+interface Props {
+  store: Store;
+}
+
+const { store } = Astro.props;
+---
+
+<article class="card store-card">
+  <div class="head">
+    <div class="meta">
+      <span class="badge region">{COUNTRY_LABEL[store.country]}</span>
+      <span class="tag plain">
+        {store.city}・{store.area}
+      </span>
+      {store.visited && <span class="badge firsthand">実際に行った</span>}
+      {store.editorPick && <span class="tag">ともきちのおすすめ</span>}
+    </div>
+    <h3>
+      <a href={`/stores/${store.slug}`}>{store.name}</a>
+    </h3>
+  </div>
+  <dl class="facts">
+    <div>
+      <dt>こんな日に</dt>
+      <dd>{store.goodFor.join(" / ") || "—"}</dd>
+    </div>
+    <div>
+      <dt>アクセス</dt>
+      <dd>{store.access ?? "未確認"}</dd>
+    </div>
+    <div>
+      <dt>注文方法</dt>
+      <dd>{store.ordering ?? "未確認"}</dd>
+    </div>
+    <div>
+      <dt>住所</dt>
+      <dd>{store.address ?? "未確認（地図アプリで確認）"}</dd>
+    </div>
+    <div>
+      <dt>営業時間</dt>
+      <dd>{store.openingHours ?? "未確認（公式アプリで確認）"}</dd>
+    </div>
+  </dl>
+  {store.cautions.length > 0 && <p class="caution">{store.cautions[0]}</p>}
+  <div class="actions">
+    <a class="button ghost" href={`/stores/${store.slug}`}>
+      詳細を見る
+    </a>
+    {store.mapUrl && (
+      <a class="button ghost" href={store.mapUrl} rel="noopener" target="_blank">
+        {store.mapLabel ?? "地図"}で開く
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .store-card {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  h3 {
+    font-size: 1.08rem;
+    margin-top: 8px;
+  }
+  h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  h3 a:hover {
+    color: var(--red-ink);
+    text-decoration: underline;
+  }
+  .facts {
+    margin: 0;
+    font-size: 0.85rem;
+    display: grid;
+    gap: 4px;
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 6.5em 1fr;
+    gap: 8px;
+  }
+  dt {
+    color: var(--text-sub);
+  }
+  dd {
+    margin: 0;
+  }
+  .caution {
+    font-size: 0.8rem;
+    background: var(--warn-bg);
+    color: #5a3d10;
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .actions .button {
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+</style>

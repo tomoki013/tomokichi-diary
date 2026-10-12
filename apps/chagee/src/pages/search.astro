@@ -1,0 +1,108 @@
+---
+import Base from "../layouts/Base.astro";
+import SearchBar from "../components/SearchBar.astro";
+import MenuCard from "../components/MenuCard.astro";
+import StoreCard from "../components/StoreCard.astro";
+import NewsCard from "../components/NewsCard.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import EmptyState from "../components/EmptyState.astro";
+import { repo } from "../lib/repo";
+import { searchAll } from "../lib/search";
+
+const q = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 50);
+const data = repo();
+const results =
+  q === ""
+    ? null
+    : searchAll(q, {
+        menus: await data.menus(),
+        stores: await data.stores(),
+        news: await data.news(),
+        columns: await data.columns(),
+      });
+const SUGGEST = ["ジャスミン", "ウーロン", "上海", "シンガポール", "空港", "日本上陸"];
+---
+
+<Base
+  meta={{
+    title: q === "" ? "サイト内検索" : `「${q}」の検索結果`,
+    description:
+      "CHAGEE日本語ガイドのメニュー・店舗・最新情報・体験レポートをまとめて検索できます。",
+    path: "/search",
+    noindex: true,
+  }}
+  crumbs={[{ name: "検索", href: "/search" }]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>{q === "" ? "サイト内検索" : `「${q}」の検索結果`}</h1>
+    </header>
+    <SearchBar value={q} large />
+    <p class="suggest">
+      {SUGGEST.map((word) => (
+        <a href={`/search?q=${encodeURIComponent(word)}`}>{word}</a>
+      ))}
+    </p>
+
+    {results && results.total === 0 && (
+      <EmptyState title={`「${q}」に一致する情報は見つかりませんでした`}>
+        <p>別の言葉（中国語名・英語名・都市名など）でも探してみてください。</p>
+      </EmptyState>
+    )}
+
+    {results && results.menus.length > 0 && (
+      <section class="section">
+        <h2 class="group">メニュー（{results.menus.length}）</h2>
+        <div class="grid cols-2">
+          {results.menus.map((menu) => (
+            <MenuCard menu={menu} />
+          ))}
+        </div>
+      </section>
+    )}
+    {results && results.stores.length > 0 && (
+      <section class="section">
+        <h2 class="group">店舗（{results.stores.length}）</h2>
+        <div class="grid cols-2">
+          {results.stores.map((store) => (
+            <StoreCard store={store} />
+          ))}
+        </div>
+      </section>
+    )}
+    {results && results.news.length > 0 && (
+      <section class="section">
+        <h2 class="group">最新情報（{results.news.length}）</h2>
+        <div class="grid">
+          {results.news.map((item) => (
+            <NewsCard item={item} />
+          ))}
+        </div>
+      </section>
+    )}
+    {results && results.columns.length > 0 && (
+      <section class="section">
+        <h2 class="group">体験レポート（{results.columns.length}）</h2>
+        <div class="grid cols-2">
+          {results.columns.map((column) => (
+            <ColumnCard column={column} />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .suggest {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  .group {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+</style>

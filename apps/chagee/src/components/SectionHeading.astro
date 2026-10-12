@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  eyebrow?: string;
+  moreHref?: string;
+  moreLabel?: string;
+  id?: string;
+}
+
+const { title, eyebrow, moreHref, moreLabel = "すべて見る", id } = Astro.props;
+---
+
+<div class="section-head">
+  <h2 id={id}>
+    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+    {title}
+  </h2>
+  {moreHref && (
+    <a class="more" href={moreHref}>
+      {moreLabel}
+    </a>
+  )}
+</div>
