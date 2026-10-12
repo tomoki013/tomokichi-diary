@@ -218,8 +218,8 @@
   }
 
   .posts-filter__search:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .posts-filter__search svg {
@@ -289,7 +289,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    min-height: 2.3rem;
+    min-height: var(--tap);
     padding: 0.3rem 0.85rem;
     border: 1.5px dashed hsl(var(--exp-hue) 35% 76%);
     border-radius: 999px;
@@ -313,6 +313,7 @@
 
   .posts-filter__mood-list button.is-active {
     border-style: solid;
+    font-weight: 700;
     border-color: hsl(var(--exp-hue) 45% 45%);
     background: hsl(var(--exp-hue) 55% 90%);
   }
@@ -326,8 +327,7 @@
   .posts-filter__mood-list small {
     color: inherit;
     font-family: var(--font-label);
-    font-size: 0.7rem;
-    opacity: 0.7;
+    font-size: 0.75rem;
   }
 
   .posts-filter__chips {
@@ -343,7 +343,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    height: 2rem;
+    min-height: var(--tap);
     padding-inline: 0.55rem;
     border: 0;
     background: none;
@@ -374,8 +374,10 @@
     transform: scaleX(1);
   }
 
+  /* Selected = underline + weight, never colour alone. */
   .posts-filter__chips button.is-active {
     color: var(--accent-strong);
+    font-weight: 700;
   }
 
   .posts-filter__chips button.is-active::after {
@@ -383,12 +385,12 @@
   }
 
   .posts-filter__chips small {
-    color: var(--line-strong);
-    font-size: 0.64rem;
+    color: var(--ink-faint);
+    font-size: 0.75rem;
   }
 
   .posts-filter__chips button:is(:hover, .is-active) small {
-    color: var(--accent-line);
+    color: currentcolor;
   }
 
   .posts-filter__footer {
@@ -447,7 +449,7 @@
   .destination-empty,
   .gallery-empty {
     padding: var(--space-lg);
-    border: 1px dashed var(--line-strong);
+    border: 1px dashed var(--line-mid);
     border-radius: var(--radius-lg);
     color: var(--ink-soft);
     font-size: var(--step-small);
@@ -618,8 +620,8 @@
   }
 
   .destination-search:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .destination-search svg {
@@ -650,7 +652,7 @@
 
   .destination-tabs button {
     position: relative;
-    min-height: 2.2rem;
+    min-height: var(--tap);
     padding: 0.35rem 0.55rem;
     border: 0;
     background: none;
@@ -681,8 +683,10 @@
     transform: scaleX(1);
   }
 
+  /* Selected = underline + weight, never colour alone. */
   .destination-tabs button.is-active {
     color: var(--accent-strong);
+    font-weight: 700;
   }
 
   .destination-tabs button.is-active::after {
@@ -758,7 +762,7 @@
   .destination-country__placeholder {
     display: block;
     aspect-ratio: 16 / 10;
-    background: linear-gradient(140deg, var(--forest-tint), var(--surface-alt));
+    background: linear-gradient(140deg, var(--accent-tint), var(--surface-alt));
   }
 
   .destination-country__media b {
@@ -833,7 +837,7 @@
 
   .destination-intro__copy h1 {
     margin: 0;
-    color: #1d1c1a;
+    color: var(--ink);
     font-family: var(--font-serif);
     font-size: clamp(2.8rem, 5vw, 4.8rem);
     font-weight: 500;
@@ -884,7 +888,7 @@
     width: 1.8rem;
     height: 1px;
     margin-top: 0.9rem;
-    background: var(--line-strong);
+    background: var(--line-mid);
   }
 
   .destination-intro__side--right i {
@@ -914,13 +918,13 @@
   }
 
   .destination-index .world-map__country {
-    fill: #e7e5e1;
+    fill: var(--map-land);
     stroke: var(--bg);
     stroke-width: 0.55;
   }
 
   .destination-index .world-map__country.is-visited {
-    fill: #8d8f8d;
+    fill: var(--map-visited);
   }
 
   .destination-index .world-map__legend {
@@ -1000,7 +1004,7 @@
   }
 
   .destination-map-note--right b {
-    color: var(--line-strong);
+    color: var(--line-mid);
     font-family: var(--font-sans);
     font-size: 2.2rem;
     font-weight: 300;
@@ -1131,7 +1135,7 @@
 
   .destination-recent__heading h2 {
     margin: 0;
-    color: #1d1c1a;
+    color: var(--ink);
     font-family: var(--font-serif);
     font-size: clamp(1.8rem, 1.4rem + 1vw, 2.45rem);
     font-weight: 500;
@@ -1648,7 +1652,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    min-height: 2.2rem;
+    min-height: var(--tap);
     padding: 0.35rem 0.55rem;
     border: 0;
     background: none;
@@ -1679,8 +1683,10 @@
     transform: scaleX(1);
   }
 
+  /* Selected = underline + weight, never colour alone. */
   .gallery-filters button.is-active {
     color: var(--accent-strong);
+    font-weight: 700;
   }
 
   .gallery-filters button.is-active::after {
@@ -1688,12 +1694,12 @@
   }
 
   .gallery-filters small {
-    color: var(--line-strong);
-    font-size: 0.66rem;
+    color: var(--ink-faint);
+    font-size: 0.75rem;
   }
 
   .gallery-filters button:is(:hover, .is-active) small {
-    color: var(--accent-line);
+    color: currentcolor;
   }
 
   .gallery-wall {

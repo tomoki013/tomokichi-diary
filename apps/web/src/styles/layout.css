@@ -74,7 +74,7 @@
   }
 
   .site-header.is-scrolled {
-    border-bottom-color: var(--line-strong);
+    border-bottom-color: var(--line-mid);
     background: color-mix(in srgb, var(--surface) 96%, transparent);
     box-shadow: 0 8px 28px rgb(56 42 27 / 8%);
   }
@@ -410,7 +410,7 @@
     display: grid;
     margin-top: 1.2rem;
     padding-top: 1.2rem;
-    border-top: 1px solid var(--line-strong);
+    border-top: 1px solid var(--line-mid);
   }
 
   .mobile-menu__sub p {
@@ -510,7 +510,8 @@
   }
 
   .header-search__input:focus-within {
-    border-color: var(--accent);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .header-search__input svg {
@@ -639,7 +640,7 @@
 
   .breadcrumbs li + li::before {
     content: "/";
-    color: var(--line-strong);
+    color: var(--line-mid);
   }
 
   .breadcrumbs a {
@@ -890,7 +891,7 @@
     display: grid;
     gap: 0.1rem;
     padding-block: 0.6rem;
-    border-bottom: 1px dashed var(--line-strong);
+    border-bottom: 1px dashed var(--line-mid);
   }
 
   .my-trips__dialog li a {
@@ -1100,7 +1101,7 @@
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-sm) var(--space-md);
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--line-mid);
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--surface) 97%, transparent);
     box-shadow: var(--shadow-lg);

@@ -235,7 +235,7 @@
   }
 
   .story-rail > ul > li + li {
-    border-top: 1px dashed var(--line-strong);
+    border-top: 1px dashed var(--line-mid);
   }
 
   .story-rail__thumb img {
@@ -602,7 +602,7 @@
     padding: 0.7rem 1.15rem;
     border: 2px solid var(--on-dark);
     border-radius: var(--radius-pill);
-    background: var(--forest);
+    background: var(--surface-dark);
     color: var(--on-dark);
     font-size: var(--step-small);
     font-weight: 700;
@@ -621,7 +621,7 @@
   }
 
   .mobile-toc-button:focus-visible {
-    outline: 3px solid var(--accent-strong);
+    outline: 3px solid var(--focus-ring);
     outline-offset: 3px;
   }
 
@@ -872,7 +872,7 @@
   }
 
   .location-area-card--plain {
-    background: linear-gradient(140deg, var(--forest), var(--surface-dark));
+    background: linear-gradient(140deg, var(--ink-soft), var(--surface-dark));
   }
 
   .location-area-card > div {
@@ -910,7 +910,7 @@
     justify-items: center;
     gap: 0.5rem;
     padding: var(--band-tight);
-    border: 1px dashed var(--line-strong);
+    border: 1px dashed var(--line-mid);
     border-radius: var(--radius-lg);
     text-align: center;
   }
