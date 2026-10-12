@@ -415,11 +415,15 @@ const labelOf = (target: Route): string => {
             </div>
           )}
           <div class="posts-filter__chips" aria-label="カテゴリで絞り込む">
-            <button class="is-active" type="button" data-archive-filter="all">
+            <button class="is-active" type="button" aria-pressed="true" data-archive-filter="all">
               すべて
             </button>
             {archiveCategories.map((category) => (
-              <button type="button" data-archive-filter={category.name.toLocaleLowerCase("ja")}>
+              <button
+                type="button"
+                aria-pressed="false"
+                data-archive-filter={category.name.toLocaleLowerCase("ja")}
+              >
                 {category.name}
                 <small>{category.count}</small>
               </button>
@@ -564,11 +568,11 @@ const labelOf = (target: Route): string => {
           <input type="search" placeholder="国・都市名で絞り込む" data-destination-search />
         </label>
         <nav class="destination-tabs" aria-label="大陸で絞り込む">
-          <button class="is-active" type="button" data-destination-filter="all">
+          <button class="is-active" type="button" aria-pressed="true" data-destination-filter="all">
             すべて
           </button>
           {continents.map((continent) => (
-            <button type="button" data-destination-filter={continent.name}>
+            <button type="button" aria-pressed="false" data-destination-filter={continent.name}>
               {continent.name}
             </button>
           ))}
@@ -798,11 +802,11 @@ const labelOf = (target: Route): string => {
           </p>
         </header>
         <div class="gallery-filters" aria-label="国で絞り込む">
-          <button class="is-active" type="button" data-gallery-filter="all">
+          <button class="is-active" type="button" aria-pressed="true" data-gallery-filter="all">
             すべて <small>{galleryImages.length}</small>
           </button>
           {galleryCountries.map((country) => (
-            <button type="button" data-gallery-filter={country.name}>
+            <button type="button" aria-pressed="false" data-gallery-filter={country.name}>
               {country.name} <small>{country.count}</small>
             </button>
           ))}
@@ -1165,7 +1169,10 @@ const labelOf = (target: Route): string => {
     archiveFilters.forEach((button) =>
       button.addEventListener("click", () => {
         activeArchiveFilter = button.dataset.archiveFilter ?? "all";
-        archiveFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+        archiveFilters.forEach((item) => {
+          item.classList.toggle("is-active", item === button);
+          item.setAttribute("aria-pressed", String(item === button));
+        });
         updateArchive();
       }),
     );
@@ -1183,9 +1190,11 @@ const labelOf = (target: Route): string => {
       activeArchiveFilter = "all";
       activeExperience = "all";
       markExperience();
-      archiveFilters.forEach((item) =>
-        item.classList.toggle("is-active", item.dataset.archiveFilter === "all"),
-      );
+      archiveFilters.forEach((item) => {
+        const active = item.dataset.archiveFilter === "all";
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
       updateArchive();
     });
 
@@ -1258,7 +1267,10 @@ const labelOf = (target: Route): string => {
     destinationFilters.forEach((button) =>
       button.addEventListener("click", () => {
         activeDestination = button.dataset.destinationFilter ?? "all";
-        destinationFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+        destinationFilters.forEach((item) => {
+          item.classList.toggle("is-active", item === button);
+          item.setAttribute("aria-pressed", String(item === button));
+        });
         updateDestinations();
       }),
     );
@@ -1313,9 +1325,11 @@ const labelOf = (target: Route): string => {
         item.hidden = !matches;
         if (matches) visible += 1;
       });
-      galleryFilters.forEach((button) =>
-        button.classList.toggle("is-active", (button.dataset.galleryFilter ?? "all") === active),
-      );
+      galleryFilters.forEach((button) => {
+        const pressed = (button.dataset.galleryFilter ?? "all") === active;
+        button.classList.toggle("is-active", pressed);
+        button.setAttribute("aria-pressed", String(pressed));
+      });
       if (galleryCount) galleryCount.textContent = String(visible);
       if (galleryEmpty) galleryEmpty.hidden = visible !== 0;
       if (mode !== "none") setUrlParams([["country", active, "all"]], mode);
