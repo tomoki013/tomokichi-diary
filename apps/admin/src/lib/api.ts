@@ -199,6 +199,8 @@ export interface PublicationStatus {
 }
 
 export const api = {
+  calculateAnalyticsCounts: (start: string, end: string) =>
+    request<{ state: string }>("/admin/analytics/counts", json("POST", { start, end })),
   analyticsReports: () => request<{ items: AnalyticsReportDto[] }>("/admin/analytics/reports"),
   analytics: (start: string, end: string, articleId = "") =>
     request<AnalyticsDashboardDto>(

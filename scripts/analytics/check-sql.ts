@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
-const query = (sql: string) => {
+const query = (sql: string, parameters: { end?: string; windows?: string } = {}) => {
   const result = execFileSync(
     "bq",
     [
@@ -13,7 +13,8 @@ const query = (sql: string) => {
       "--format=json",
       "--quiet",
       "--parameter=start:STRING:2026-10-01",
-      "--parameter=end:STRING:2026-10-01",
+      `--parameter=end:STRING:${parameters.end ?? "2026-10-01"}`,
+      ...(parameters.windows ? [`--parameter=windows:STRING:${parameters.windows}`] : []),
       "--parameter=property:STRING:https://tomokichidiary.com/",
     ],
     { input: sql, encoding: "utf8", maxBuffer: 8 * 1024 * 1024, stdio: ["pipe", "pipe", "pipe"] },
@@ -68,6 +69,31 @@ assert.equal(page["path"], "/posts/example");
 assert.equal(rows.filter((r) => r["grain"] === "query").length, 1);
 assert.equal(term["key"], "123");
 assert.equal(Number(term["positionSum"]) / Number(term["impressions"]) + 1, 10);
+
+let fixture = ga4.slice(0, ga4.indexOf("), events AS (") + 1);
+fixture = fixture
+  .replace(
+    "'20261001' AS _TABLE_SUFFIX,'20261001' AS event_date",
+    "fixture_date AS _TABLE_SUFFIX,fixture_date AS event_date",
+  )
+  .replace("  ]) r\n)", "  ]) r CROSS JOIN UNNEST(['20261001','20261002']) fixture_date\n)");
+const periodSql = read("ga4_periods")
+  .replace(
+    "WITH ranges AS (",
+    `${fixture}, fixture_tables AS (SELECT 'events_20261001' AS table_name UNION ALL SELECT 'events_20261002'), ranges AS (`,
+  )
+  .replace(
+    "`tomokichidiary-analytics.analytics_535794382.INFORMATION_SCHEMA.TABLES`",
+    "fixture_tables",
+  )
+  .replace("`tomokichidiary-analytics.analytics_535794382.events_*`", "fixture");
+const exact = query(periodSql, {
+  end: "2026-10-02",
+  windows: JSON.stringify([{ start: "2026-10-01", end: "2026-10-02" }]),
+})[0]!;
+assert.equal(Number(exact["users"]), 2);
+assert.equal(Number(exact["sessions"]), 2);
+assert.equal(Number(exact["coveredDays"]), 2);
 process.stdout.write(
-  "BigQuery synthetic SQL checks passed: session identity/missing IDs, GSC incremental keys/anonymity/URL/weighted position\n",
+  "BigQuery synthetic SQL checks passed: session identity/missing IDs/period deduplication, GSC incremental keys/anonymity/URL/weighted position\n",
 );

@@ -3,7 +3,9 @@ import {
   addMetrics,
   dates,
   previousRange,
+  shiftDate,
   type AnalyticsDay,
+  type AnalyticsPeriodCounts,
   type AnalyticsRow,
   type AnalyticsSource,
   type AnalyticsStore,
@@ -31,7 +33,12 @@ function pageRows(day: AnalyticsDay, articleId?: string): AnalyticsRow[] {
   }
   return rows;
 }
-function project(days: AnalyticsDay[], range: DateRange, articleId?: string) {
+function project(
+  days: AnalyticsDay[],
+  range: DateRange,
+  articleId?: string,
+  counts: AnalyticsPeriodCounts[] = [],
+) {
   const selected = days.filter((day) => day.date >= range.start && day.date <= range.end);
   return ANALYTICS_SOURCES.map((source) => {
     const sourceDays = selected.filter((day) => day.source === source);
@@ -43,12 +50,29 @@ function project(days: AnalyticsDay[], range: DateRange, articleId?: string) {
       metrics["meanDailySessions"] =
         rows.reduce((sum, row) => sum + (row.metrics["sessions"] ?? 0), 0) / rows.length;
     }
+    const count =
+      !articleId && source === "ga4"
+        ? counts.find((c) => c.start === range.start && c.end === range.end)
+        : undefined;
+    if (
+      count &&
+      count.coveredDays > 0 &&
+      count.coveredDays >= sourceDays.length &&
+      sourceDays.every((day) => day.retrievedAt <= count.retrievedAt)
+    )
+      Object.assign(metrics, count.metrics, {
+        uniqueCoveredDays: count.coveredDays,
+        uniqueExpectedDays: count.expectedDays,
+      });
     return {
       source,
+      periodCountsRetrievedAt: count?.retrievedAt ?? null,
       metrics,
       coveredDays: sourceDays.length,
       expectedDays: dates(range).length,
-      provisional: sourceDays.some((day) => day.provisional),
+      provisional:
+        sourceDays.some((day) => day.provisional) ||
+        Boolean(count && count.end > shiftDate(count.retrievedAt.slice(0, 10), -4)),
     };
   });
 }
@@ -58,9 +82,10 @@ export async function analyticsDashboard(
   articleId?: string,
 ) {
   const previous = previousRange(range);
-  const [days, statuses] = await Promise.all([
+  const [days, statuses, counts] = await Promise.all([
     store.read({ start: previous.start, end: range.end }),
     store.statuses(),
+    store.readCounts?.([range, previous]) ?? Promise.resolve([]),
   ]);
   const group = (grain: AnalyticsRow["grain"], source: AnalyticsSource, period = range) => {
     const grouped = new Map<string, AnalyticsRow[]>();
@@ -89,8 +114,8 @@ export async function analyticsDashboard(
   return {
     range,
     previousRange: previous,
-    current: project(days, range, articleId),
-    previous: project(days, previous, articleId),
+    current: project(days, range, articleId, counts),
+    previous: project(days, previous, articleId, counts),
     statuses,
     daily: dates(range).map((date) => ({
       date,

@@ -18,7 +18,9 @@
 | AdSense RPM/CPC/CTR     | 収益/広告PV*1000、収益/広告click、広告click/広告impression。公式定義から未丸めの合計で計算                          |
 | Affiliate               | providerが報告するpending/confirmed成果・報酬を分離。GA4クリックから成果を推測しない                                |
 
-日次distinct users/sessionsは日をまたいで合計できない。**7/28/90日・任意期間の正確なunique人数/session合計は今回未実装**。概要は日次人数/sessionの平均を明記し、日次ユーザー推移を表示する。期間uniqueが必要になれば、追加のbounded queryまたはmerge可能なsketchを別途検証する。生の識別子をD1へ持ち込まない。
+日次distinct users/sessionsは日をまたいで合計できない。概要の期間ユーザー/sessionは別のbounded queryで期間全体の組DISTINCTを計算し、analytics_period_countsへ数値だけ保存する。7/28/90日・月間・前期間・完了済み週/月を日次収集時に更新。任意93日以内は「期間人数を集計」で独立Actionsから取得できる。日次値の足し算や平均で期間uniqueを代用しない。期間cacheが日次集計より古い場合は—。export未取得日がある場合は取得済み日だけの値として人数カードに取得日数を明記する。生の識別子をD1へ持ち込まない。
+
+期間queryは90日+前90日、任意93日+前93日のため最大186日に限定。日次queryは直近7日だけ。期間のdistinctは日次結果から正確に復元できないため、この追加読取が必要。UI/APIからBQへ直接queryしない。
 
 GA4 UIはidentity、modeling、attributionなどの付加処理を行うのでBQ値と一致しない場合がある。匿名・consent・ID欠損、hostname不明イベントも差分要因。page_locationがないイベントは今回対象外。daily shardだけを読みintradayを排除する。GA4はproperty timezone、GSCはPacific日付、AdSenseはaccount timezone。表示日付をJSTへ勝手に付け替えない。取得時刻だけJST表示。
 

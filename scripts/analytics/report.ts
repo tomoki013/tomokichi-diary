@@ -3,6 +3,7 @@ import {
   dateRange,
   shiftDate,
   type AnalyticsDay,
+  type AnalyticsPeriodCounts,
   type AnalyticsStatus,
 } from "@tomokichi/application";
 import { d1 } from "./cloudflare.js";
@@ -31,6 +32,15 @@ const dashboard = await analyticsDashboard(
         ])
       )[0]!.map((stored) => JSON.parse(stored.payload) as AnalyticsDay),
     statuses: async () => [] as AnalyticsStatus[],
+    readCounts: async (ranges) =>
+      (
+        await d1<{ payload: string }>([
+          {
+            sql: `SELECT payload FROM analytics_period_counts WHERE ${ranges.map(() => "(start=? AND end=?)").join(" OR ")}`,
+            params: ranges.flatMap((r) => [r.start, r.end]),
+          },
+        ])
+      )[0]!.map((row) => JSON.parse(row.payload) as AnalyticsPeriodCounts),
   },
   range,
 );

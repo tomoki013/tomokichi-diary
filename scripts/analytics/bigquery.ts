@@ -5,10 +5,17 @@ import { dateRange, type DateRange } from "@tomokichi/application";
 import { AnalyticsHttpError, requestJson } from "./http.js";
 
 const project = "tomokichidiary-analytics";
-export const SQL_NAMES = ["ga4", "gsc_site", "gsc_url", "ga4_available", "gsc_available"] as const;
+export const SQL_NAMES = [
+  "ga4",
+  "gsc_site",
+  "gsc_url",
+  "ga4_available",
+  "gsc_available",
+  "ga4_periods",
+] as const;
 export type SqlName = (typeof SQL_NAMES)[number];
 export function queryConfig(name: SqlName, range: DateRange, extra: Record<string, string> = {}) {
-  dateRange(range.start, range.end, 31);
+  dateRange(range.start, range.end, name === "ga4_periods" ? 186 : 31);
   if (!SQL_NAMES.includes(name)) throw new Error("ANALYTICS_INVALID_QUERY");
   const maximumBytesBilled = process.env["ANALYTICS_MAX_BYTES"] ?? "1000000000";
   if (

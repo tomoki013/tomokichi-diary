@@ -1,6 +1,7 @@
 import { dateRange, shiftDate } from "@tomokichi/application";
 import type {
   AnalyticsDay,
+  AnalyticsPeriodCounts,
   AnalyticsSource,
   AnalyticsStatus,
   AnalyticsStore,
@@ -10,6 +11,15 @@ import type { SqlDatabase } from "./sql.js";
 
 export function createAnalyticsStore(db: SqlDatabase): AnalyticsStore {
   return {
+    readCounts: async (ranges) => {
+      const rows = await db
+        .prepare(
+          `SELECT payload FROM analytics_period_counts WHERE ${ranges.map(() => "(start=? AND end=?)").join(" OR ")}`,
+        )
+        .bind(...ranges.flatMap((r) => [r.start, r.end]))
+        .all<{ payload: string }>();
+      return rows.map((row) => JSON.parse(row.payload) as AnalyticsPeriodCounts);
+    },
     read: async (range) => {
       dateRange(range.start, range.end, 186);
       const days: AnalyticsDay[] = [];

@@ -202,3 +202,21 @@ describe("BigQuery job recovery", () => {
     }
   });
 });
+
+describe("exact period windows", () => {
+  it("bounds fixed, calendar and custom windows; all previous periods have equal length", async () => {
+    const { periodWindows } = await import("./periods.js");
+    const { dates, previousRange } = await import("@tomokichi/application");
+    const requested = dateRange("2026-10-01", "2026-10-12");
+    const windows = periodWindows(requested);
+    expect(windows).toContainEqual({ start: "2026-09-15", end: "2026-10-12" });
+    expect(windows).toContainEqual({ start: "2026-09-01", end: "2026-09-30" });
+    expect(windows).toContainEqual({ start: "2026-10-05", end: "2026-10-11" });
+    expect(windows).toContainEqual(previousRange(requested));
+    expect(new Set(windows.map((w) => JSON.stringify(w))).size).toBe(windows.length);
+    expect(
+      dates({ start: windows.map((w) => w.start).toSorted()[0]!, end: requested.end }).length,
+    ).toBeLessThanOrEqual(186);
+    expect(() => periodWindows({ start: "2026-01-01", end: "2026-10-12" })).toThrow();
+  });
+});

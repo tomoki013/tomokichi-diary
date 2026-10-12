@@ -50,4 +50,4 @@ APIは公開する版の本文・写真・関連付け・体験タグを記録�
 
 ## Analytics
 
-分析メニューで期間・前期間・記事別PV/検索実績・取得状況を確認できます。収益/検索語はAccess下だけで表示します。7/28/90日、月間、任意期間93日以内を選べます。再集計ボタンは最大31日の独立Actionsを起動します。ユーザー/sessionは日次人数と期間内日次平均で、期間uniqueとは異なります。—は欠損/未対応、0は確認済み0です。初回のWIF、D1集計保存、任意再集計token設定は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) を参照。AdSense/ASP/AI未設定でもGA4/GSCを利用できます。
+分析メニューで期間・前期間・記事別PV/検索実績・取得状況を確認できます。収益/検索語はAccess下だけで表示します。7/28/90日、月間、任意期間93日以内を選べます。再集計ボタンは最大31日の独立Actionsを起動します。概要のユーザー/sessionは取得済み日の期間uniqueです。任意93日以内は「期間人数を集計」で取得できます。期間cacheが日次より古い場合は—。日次人数はグラフから確認できます。—は欠損/未対応、0は確認済み0です。初回のWIF、D1集計保存、任意再集計token設定は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) を参照。AdSense/ASP/AI未設定でもGA4/GSCを利用できます。

@@ -3,7 +3,7 @@
 ## 完了
 
 - archived旧repo・現行code/CI/admin・Google metadataを監査。
-- 専用worktree（main起点）にAnalytics実装、8文書、workflow、SQL、テストを用意。
+- 専用worktree（main起点）にAnalytics実装、8文書、workflow、SQL、テストを用意。期間unique users/sessionも数値だけ非公開cacheへ保存する処理を追加。
 - 2026-10-04〜10-10のGA4/GSC読み取りを検証。source毎7/7日、GA4 367 / GSC site 301 / URL 3317集計行。分析値/検索語はGit除外.dataにだけ保持。
 - GSCの実propertyはhttps://tomokichidiary.com/。最初のdomain-property仮定を実データ確認で修正。空期間を成功0にしないguardを追加。
 
@@ -13,7 +13,6 @@
 - migration/API/admin配信、本番D1保存、main Actions初回成功。
 - 全履歴backfill、旧成功snapshotとの日別照合、本番Admin確認。
 - AdSense user OAuth/account組合せ検証、記事別PAGE_URL収益。ASP未指定。AIは正確性検証後に別途導入。
-- 任意期間のunique users/session合計（現時点のUIは日次平均を明示）。
 
 ## 比較
 

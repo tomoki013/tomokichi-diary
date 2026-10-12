@@ -137,8 +137,8 @@ export function Analytics() {
     data?.previous.find((s) => s.source === source)?.metrics ?? {};
   const cards = [
     ["PV", "ga4", "pageViews", false],
-    ["日次ユーザー数の平均", "ga4", "meanDailyUsers", false],
-    ["日次セッション数の平均", "ga4", "meanDailySessions", false],
+    ["期間ユーザー数", "ga4", "users", false],
+    ["期間セッション数", "ga4", "sessions", false],
     ["検索クリック", articleId ? "gsc_url" : "gsc_site", "clicks", false],
     ["インプレッション", articleId ? "gsc_url" : "gsc_site", "impressions", false],
     ["CTR", articleId ? "gsc_url" : "gsc_site", "ctr", true],
@@ -220,9 +220,27 @@ export function Analytics() {
           </label>
           <button type="submit">表示</button>
         </form>
-        <p className="muted">任意期間は93日以内。再集計は31日以内で実行します。</p>
+        <p className="muted">
+          任意期間・期間人数の集計は93日以内。日次データの再集計は31日以内で実行します。
+        </p>
         <button type="button" onClick={() => void recalculate()} disabled={busy}>
           {busy ? "起動中…" : "この期間を再集計"}
+        </button>{" "}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            api
+              .calculateAnalyticsCounts(range.start, range.end)
+              .then(
+                () => toast.info("期間人数の集計を起動しました。"),
+                (error) => toast.error(error),
+              )
+              .finally(() => setBusy(false));
+          }}
+        >
+          期間人数を集計
         </button>{" "}
         <a
           href="https://github.com/tomoki013/tomokichi-diary/actions/workflows/analytics-collect.yml"
@@ -230,6 +248,13 @@ export function Analytics() {
           rel="noopener noreferrer"
         >
           Actions実行履歴 ↗
+        </a>{" "}
+        <a
+          href="https://github.com/tomoki013/tomokichi-diary/actions/workflows/analytics-periods.yml"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          期間人数の実行履歴 ↗
         </a>
         {articleId && (
           <p>
@@ -247,31 +272,45 @@ export function Analytics() {
       {data && (
         <>
           <div className="analytics-cards">
-            {cards.map(([label, source, metric, percent]) => {
-              const value = metrics(source)[metric],
-                prev = previous(source)[metric];
-              const change =
-                value != null && prev != null && prev > 0 ? (value - prev) / prev : null;
-              const coverage = data.current.find((s) => s.source === source);
-              return (
-                <section className="panel" key={label}>
-                  <h2>{label}</h2>
-                  <strong>{fmt(value, percent)}</strong>
-                  <p>
-                    前期間 {fmt(prev, percent)}
-                    {change !== null && ` / ${change >= 0 ? "+" : ""}${fmt(change, true)}`}
-                  </p>
-                  <small>
-                    {coverage?.coveredDays}/{coverage?.expectedDays}日取得
-                    {coverage?.provisional ? " · 暫定値あり" : ""}
-                  </small>
-                </section>
-              );
-            })}
+            {cards
+              .filter(([, , metric]) => !articleId || !["users", "sessions"].includes(metric))
+              .map(([label, source, metric, percent]) => {
+                const value = metrics(source)[metric],
+                  prev = previous(source)[metric];
+                const change =
+                  value != null && prev != null && prev > 0 ? (value - prev) / prev : null;
+                const coverage = data.current.find((s) => s.source === source);
+                return (
+                  <section className="panel" key={label}>
+                    <h2>{label}</h2>
+                    <strong>{fmt(value, percent)}</strong>
+                    <p>
+                      前期間 {fmt(prev, percent)}
+                      {change !== null && ` / ${change >= 0 ? "+" : ""}${fmt(change, true)}`}
+                    </p>
+                    <small>
+                      {metric === "users" || metric === "sessions"
+                        ? fmt(metrics(source)["uniqueCoveredDays"])
+                        : coverage?.coveredDays}
+                      /{coverage?.expectedDays}日取得
+                      {coverage?.provisional ? " · 暫定値あり" : ""}
+                    </small>
+                    {(metric === "users" || metric === "sessions") &&
+                      coverage?.periodCountsRetrievedAt && (
+                        <small>
+                          期間集計更新{" "}
+                          {new Date(coverage.periodCountsRetrievedAt).toLocaleString("ja-JP", {
+                            timeZone: "Asia/Tokyo",
+                          })}
+                        </small>
+                      )}
+                  </section>
+                );
+              })}
           </div>
           <p className="muted">
             —
-            は未取得または算出できない値です。期間のuniqueユーザー・セッションは日次値を足せないため、全体カードは日次平均です。取得日数が異なる前期間比較は参考値です。順位は小さいほど上位です。
+            は未取得または算出できない値です。期間ユーザー・セッションは期間全体のdistinct数です。期間集計が未取得・日次値より古い場合は—を表示します。未取得日がある期間は取得済み日だけのdistinct数です。取得日数が異なる前期間比較は参考値です。順位は小さいほど上位です。
           </p>
           <Panel title="収益の指標">
             <p>

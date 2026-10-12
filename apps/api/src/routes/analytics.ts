@@ -46,21 +46,33 @@ export function analyticsRoutes() {
       })),
     });
   });
-  routes.post("/recalculate", async (c) => {
+  routes.post("/:action", async (c) => {
+    const countsOnly = c.req.param("action") === "counts";
+    if (!countsOnly && c.req.param("action") !== "recalculate")
+      return errorResponse(c, "API_NOT_FOUND", "unknown action", 404);
     const body: unknown = await c.req.json().catch(() => null);
     let range;
     try {
       if (typeof body !== "object" || !body) throw new Error();
       const data = body as Record<string, unknown>;
-      range = dateRange(String(data["start"] ?? ""), String(data["end"] ?? ""), 31);
+      range = dateRange(
+        String(data["start"] ?? ""),
+        String(data["end"] ?? ""),
+        countsOnly ? 93 : 31,
+      );
     } catch {
-      return errorResponse(c, "ANALYTICS_INVALID_RANGE", "再集計は31日以内で指定してください", 400);
+      return errorResponse(
+        c,
+        "ANALYTICS_INVALID_RANGE",
+        countsOnly ? "期間人数は93日以内で指定してください" : "再集計は31日以内で指定してください",
+        400,
+      );
     }
     if (!c.env.ANALYTICS_GITHUB_TOKEN?.trim())
       return errorResponse(c, "ANALYTICS_UNCONFIGURED", "再集計の認証設定が未完了です", 503);
     try {
       const response = await fetch(
-        "https://api.github.com/repos/tomoki013/tomokichi-diary/actions/workflows/analytics-collect.yml/dispatches",
+        `https://api.github.com/repos/tomoki013/tomokichi-diary/actions/workflows/${countsOnly ? "analytics-periods.yml" : "analytics-collect.yml"}/dispatches`,
         {
           method: "POST",
           headers: {
@@ -78,7 +90,7 @@ export function analyticsRoutes() {
         {
           state: "queued",
           ...range,
-          url: "https://github.com/tomoki013/tomokichi-diary/actions/workflows/analytics-collect.yml",
+          url: `https://github.com/tomoki013/tomokichi-diary/actions/workflows/${countsOnly ? "analytics-periods.yml" : "analytics-collect.yml"}`,
         },
         202,
       );

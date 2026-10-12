@@ -39,7 +39,14 @@ export interface DateRange {
   start: string;
   end: string;
 }
+export interface AnalyticsPeriodCounts extends DateRange {
+  retrievedAt: string;
+  coveredDays: number;
+  expectedDays: number;
+  metrics: Record<string, number>;
+}
 export interface AnalyticsStore {
+  readCounts?(ranges: DateRange[]): Promise<AnalyticsPeriodCounts[]>;
   read(range: DateRange): Promise<AnalyticsDay[]>;
   statuses(): Promise<AnalyticsStatus[]>;
 }

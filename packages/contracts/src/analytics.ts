@@ -10,6 +10,7 @@ export interface AnalyticsDashboardDto {
   previousRange: { start: string; end: string };
   current: {
     source: string;
+    periodCountsRetrievedAt?: string | null;
     metrics: Record<string, number | null>;
     coveredDays: number;
     expectedDays: number;

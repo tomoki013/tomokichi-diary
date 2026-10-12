@@ -7,6 +7,7 @@ on:
       - "**/analytics.ts"
       - ".github/workflows/analytics-*.yml"
       - "migrations/0015_analytics.sql"
+      - "migrations/0016_analytics_period_counts.sql"
 permissions:
   contents: read
 jobs:

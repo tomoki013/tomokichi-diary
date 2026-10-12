@@ -163,3 +163,45 @@ describe("metric projections", () => {
     ).toBeUndefined();
   });
 });
+
+it("reads exact non-additive period counts, marks coverage and hides stale counts", async () => {
+  const range = dateRange("2026-10-01", "2026-10-02");
+  const sample: AnalyticsDay[] = ["2026-10-01", "2026-10-02"].map((date) => ({
+    source: "ga4",
+    date,
+    retrievedAt: "2026-10-03T00:00:00Z",
+    provisional: true,
+    rows: [row({ pageViews: 10, users: 5, sessions: 3 })],
+  }));
+  const cache = {
+    ...range,
+    retrievedAt: "2026-10-03T01:00:00Z",
+    coveredDays: 2,
+    expectedDays: 2,
+    metrics: { users: 5, sessions: 3, activeUsers: 4, engagedSessions: 2 },
+  };
+  const store = {
+    read: async () => sample,
+    statuses: async () => [],
+    readCounts: async () => [cache],
+  };
+  expect(
+    (await analyticsDashboard(store, range)).current.find((s) => s.source === "ga4")?.metrics,
+  ).toMatchObject({ users: 5, sessions: 3, uniqueCoveredDays: 2, pageViews: 20 });
+  expect(
+    (
+      await analyticsDashboard(
+        { ...store, readCounts: async () => [{ ...cache, retrievedAt: "2026-10-02T00:00:00Z" }] },
+        range,
+      )
+    ).current.find((s) => s.source === "ga4")?.metrics["users"],
+  ).toBeUndefined();
+  expect(
+    (
+      await analyticsDashboard(
+        { ...store, readCounts: async () => [{ ...cache, coveredDays: 0 }] },
+        range,
+      )
+    ).current.find((s) => s.source === "ga4")?.metrics["users"],
+  ).toBeUndefined();
+});

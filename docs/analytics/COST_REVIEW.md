@@ -31,6 +31,6 @@ permission不足ならConsoleでBilling Account Viewer/BigQuery Resource Viewer�
 
 ## 新集計の制約
 
-suffix/day partitionのbounded query。通常直近7日、backfill max31日。jobごとのmaximumBytesBilled既定1GB、設定は10MB〜10GB内のみ。日次3集計+2availability query（GSC logはnamespace別に2回）、週次/月次はD1のみ。クエリ数の最低課金、Actions無料枠、D1 read/write/storage使用量も監視する。
+suffix/day partitionのbounded query。通常直近7日、backfill max31日。jobごとのmaximumBytesBilled既定1GB、設定は10MB〜10GB内のみ。日次3集計+availability（GA4 metadataとGSC logをnamespace別に2回）+期間unique用1query。期間uniqueは最大186日の必要列だけを読む（90日と前90日、または任意93日と前93日）。10/4〜10/10を終端にした期間queryはdry run 41,152,130 bytes、12windowsの実取得も成功。週次/月次レポートはD1のみ。クエリ数の最低課金、Actions無料枠、D1 read/write/storage使用量も監視する。
 
 `pnpm exec tsx scripts/analytics/run.ts --start 2026-10-04 --end 2026-10-10 --dry-run` は書き込みなし。BigQuery最大課金量は[maximumBytesBilled](https://docs.cloud.google.com/bigquery/docs/best-practices-costs)で制限し、料金自体は[公式料金](https://cloud.google.com/bigquery/pricing)とBilling明細で確認する。expiry変更・table削除・export停止はこの実装に含めない。

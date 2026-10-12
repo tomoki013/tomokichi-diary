@@ -24,6 +24,7 @@ describe("atomic private storage", () => {
   it("replaces replayed/late days without duplicates; backfill preserves later history and last watermark", async () => {
     const db = fromNodeSqlite(openInMemoryDatabase());
     await db.exec(readFileSync("migrations/0015_analytics.sql", "utf8"));
+    await db.exec(readFileSync("migrations/0016_analytics_period_counts.sql", "utf8"));
     const store = createAnalyticsStore(db);
     const save = async (days: AnalyticsDay[]) => {
       days.forEach(assertAnalyticsDay);

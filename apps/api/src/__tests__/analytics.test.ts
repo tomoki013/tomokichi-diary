@@ -7,6 +7,7 @@ import type { Env } from "../env.js";
 async function fixture() {
   const db = openInMemoryDatabase();
   db.exec(readFileSync("migrations/0015_analytics.sql", "utf8"));
+  db.exec(readFileSync("migrations/0016_analytics_period_counts.sql", "utf8"));
   const DB = {
     prepare: (sql: string) => {
       let params: never[] = [];
@@ -89,5 +90,12 @@ describe("private analytics HTTP boundary", () => {
     expect(res.status).toBe(202);
     expect(send.mock.calls[0]?.[0]).toContain("tomoki013/tomokichi-diary");
     expect(JSON.parse(send.mock.calls[0]?.[1].body).ref).toBe("main");
+    const counts = await app.request(
+      "/v1/admin/analytics/counts",
+      { method: "POST", headers, body: JSON.stringify({ start: "2026-08-01", end: "2026-10-01" }) },
+      env,
+    );
+    expect(counts.status).toBe(202);
+    expect(send.mock.calls[1]?.[0]).toContain("analytics-periods.yml");
   });
 });

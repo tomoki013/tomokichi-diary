@@ -84,4 +84,4 @@ Probability（壊れる可能性）× Impact（壊れたときの影響）。
 
 ## Analytics v2（2026-10-13）
 
-High risk: 日付/前期間/閏年、URL host・redirect・canonical、GSC加重順位/CTR/粒度、distinct非加算、欠損と0、日別payload validation、D1置換の冪等/遅延再取得/backfill/rollback、水位非後退、HTTP retry/401/403、SQL入力検証、Access認証/private cacheを自動テスト追加。AdSense disabled/空実績/通貨/truncation、Affiliate共通adapterの重複も検証。ライブBQは7日bounded queryとdry runを読取検証済み。本番WIF/Actions→D1、全履歴照合、本番Admin、AdSense OAuth/ページ別収益は手動移行ゲートとして未完了。期間unique人数は意図的に未実装、UIは日次平均を明記。
+High risk: 日付/前期間/閏年、URL host・redirect・canonical、GSC加重順位/CTR/粒度、distinct非加算、欠損と0、日別payload validation、D1置換の冪等/遅延再取得/backfill/rollback、水位非後退、HTTP retry/401/403、SQL入力検証、Access認証/private cacheを自動テスト追加。AdSense disabled/空実績/通貨/truncation、Affiliate共通adapterの重複も検証。ライブBQは7日bounded queryとdry runを読取検証済み。本番WIF/Actions→D1、全履歴照合、本番Admin、AdSense OAuth/ページ別収益は手動移行ゲートとして未完了。期間unique人数の別集計cache・日次非加算・古いcache非表示・windowの日付制限もテスト追加。
