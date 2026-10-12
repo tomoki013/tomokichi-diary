@@ -34,7 +34,7 @@
     justify-content: space-between;
     gap: var(--space-sm);
     padding-bottom: var(--space-xs);
-    border-bottom: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-mid);
   }
 
   .sitemap-group > header h2 {
@@ -496,8 +496,8 @@
 
   .faq-search input:focus-visible {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .faq-topics {
@@ -651,7 +651,7 @@
 
   .faq-empty {
     padding: var(--space-lg);
-    border: 1px dashed var(--line-strong);
+    border: 1px dashed var(--line-mid);
     border-radius: var(--radius);
     color: var(--ink-soft);
     font-size: var(--step-small);
@@ -819,8 +819,8 @@
 
   .contact-form :is(input, textarea, select):focus-visible {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .contact-form__count {
@@ -861,7 +861,8 @@
   }
 
   .contact-form button[type="submit"]:disabled {
-    background: var(--line-strong);
+    background: var(--line-mid);
+    color: var(--ink-soft);
     cursor: not-allowed;
   }
 
@@ -880,16 +881,19 @@
     font-size: var(--step-small);
   }
 
+  /* State is carried by the bar and the wording, not by a tint alone. */
   .form-message--ok {
-    border: 1px solid #b9cfa8;
-    background: #eef4e7;
-    color: #38502a;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--color-state-success);
+    background: var(--surface);
+    color: var(--ink);
   }
 
   .form-message--error {
-    border: 1px solid var(--accent-line);
-    background: var(--accent-tint);
-    color: var(--accent-strong);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--color-state-error);
+    background: var(--surface);
+    color: var(--color-state-error);
   }
 
   .contact-guide {
@@ -1037,26 +1041,6 @@
     margin-top: 0.3rem;
   }
 
-  .error-page__actions a:not(.button) {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.9rem;
-    padding: 0.6rem 1.4rem;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-pill);
-    color: var(--ink);
-    font-size: var(--step-small);
-    text-decoration: none;
-    transition:
-      border-color var(--speed) var(--ease),
-      color var(--speed) var(--ease);
-  }
-
-  .error-page__actions a:not(.button):hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
   .error-page__search {
     display: flex;
     align-items: center;
@@ -1071,8 +1055,8 @@
   }
 
   .error-page__search:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .error-page__search svg {

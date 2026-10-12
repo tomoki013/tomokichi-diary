@@ -5,36 +5,69 @@
  */
 @layer tokens {
   :root {
-    /* Paper and ink -------------------------------------------------- */
-    --bg: #fbfaf7;
-    --bg-sunk: #f3f3ee;
-    --surface: #ffffff;
-    --surface-alt: #f4f5f2;
-    /* Warm near-black. The old value carried an olive cast that turned
-       muddy against the ivory page, especially under the footer. */
-    --surface-dark: #1b1d1a;
+    /* Colour ---------------------------------------------------------
+       Design spec v1.0 (docs/design/design-system.md §4). The brand is three
+       hues: Milk Ivory (paper), Warm Slate (ink) and Soft Clay (accent).
+       Every other value below is a tint or shade of one of them, or white.
+       The per-experience hues on the mood scenes are the one deliberate
+       exception. Contrast of the pairs that matter is checked by
+       src/__tests__/design-tokens.test.ts.
 
-    --ink: #171a16;
-    --ink-soft: #464b45;
-    --ink-faint: #6d726a;
-    --on-dark: #fafcf7;
-    --on-dark-soft: #d7ddd3;
+       Semantic tokens: components should reach for these by role. */
+    --color-background-base: #faf8f4;
+    --color-surface-base: #ffffff;
+    --color-surface-warm: #ebd5ca;
+    --color-text-primary: #4c565b;
+    --color-text-secondary: #606569;
+    --color-brand-soft: #c9927d;
+    --color-brand-strong: #97594e;
+    --color-brand-strong-hover: #854b43;
+    --color-border-decorative: #e8e5e0;
+    --color-border-interactive: #8d7f79;
+    --color-focus-ring: #4c565b;
+    /* State colours sit apart from the brand so "error" never reads as
+       decoration. Both clear 4.5:1 on the ivory page and on white. */
+    --color-state-error: #a3362b;
+    --color-state-success: #3f6b4f;
 
-    --line: #d9ded7;
-    --line-strong: #bfc8bd;
+    /* Shorthand names the existing rules were written against. They alias
+       the semantic tokens above so nothing had to be renamed in one sweep. */
+    --bg: var(--color-background-base);
+    --bg-sunk: #f2eee8;
+    --surface: var(--color-surface-base);
+    --surface-alt: #f3f0eb;
+    --surface-warm: var(--color-surface-warm);
+    /* Warm Slate taken down for footers and dark panels. */
+    --surface-dark: #2f3639;
 
-    /* Accent: warm travel orange, used sparingly and deliberately. */
-    --accent: #b64b1c;
-    --accent-strong: #87330f;
-    --accent-tint: #fff0e5;
-    --accent-line: #e7c6ac;
-    /* The accent is too dark to read on the dark surfaces, so those get
-       their own value rather than a color-mix repeated at ten sites. */
-    --accent-on-dark: #ed9962;
+    --ink: var(--color-text-primary);
+    --ink-soft: var(--color-text-secondary);
+    /* Meta text used to be a third, paler grey that failed 4.5:1. It now
+       shares the secondary value; hierarchy comes from size, not fading. */
+    --ink-faint: var(--color-text-secondary);
+    --on-dark: #faf8f4;
+    --on-dark-soft: #d5d9db;
 
-    /* Secondary: deep olive for badges and quiet dark surfaces. */
-    --forest: #46512e;
-    --forest-tint: #eef2e8;
+    --line: var(--color-border-decorative);
+    /* A divider that has to show up a little more, still decorative. */
+    --line-mid: #d6cfc9;
+    /* Only for the edges of things you operate: inputs, selects, chips. */
+    --line-strong: var(--color-border-interactive);
+
+    --accent: var(--color-brand-strong);
+    --accent-strong: var(--color-brand-strong-hover);
+    --accent-soft: var(--color-brand-soft);
+    --accent-tint: #f5ebe5;
+    --accent-line: var(--color-brand-soft);
+    /* Strong clay is too dark to read on the dark surfaces. */
+    --accent-on-dark: #e4b6a4;
+
+    --focus-ring: var(--color-focus-ring);
+
+    /* Maps: visited land is a pale Soft Clay (decoration), so the Strong
+       Clay pins on top of it stay the obvious thing to tap. */
+    --map-land: #ece8e2;
+    --map-visited: #e0bfb0;
 
     /* Type ----------------------------------------------------------- */
     --font-sans:
@@ -50,22 +83,27 @@
 
     /* Display sizes stay conservative: Japanese headings need room for a
        whole phrase per line, and oversized type is what forces mid-word
-       breaks like 「心が向／いた場所」. */
-    --step-display: clamp(1.9rem, 1.15rem + 2.5vw, 3.1rem);
-    --step-h1: clamp(1.7rem, 1.1rem + 2vw, 2.6rem);
-    --step-h2: clamp(1.4rem, 1.05rem + 1.2vw, 1.95rem);
-    --step-h3: clamp(1.1rem, 0.98rem + 0.5vw, 1.32rem);
-    --step-body: 1rem;
-    --step-small: 0.86rem;
-    --step-tiny: 0.75rem;
+       breaks like 「心が向／いた場所」.
 
-    /* Space ---------------------------------------------------------- */
-    --space-2xs: 0.35rem;
-    --space-xs: 0.6rem;
-    --space-sm: 0.9rem;
-    --space-md: 1.4rem;
-    --space-lg: 2.1rem;
-    --space-xl: 3.2rem;
+       Ranges follow spec §5: hero 32–48px, H1 30–40, H2 24–30, H3 20–24,
+       body 16, small 14. --step-tiny (13px) is below the spec's 14px floor
+       on purpose: it carries dates and counts in dense rows, never prose. */
+    --step-display: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    --step-h1: clamp(1.875rem, 1.45rem + 1.6vw, 2.5rem);
+    --step-h2: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+    --step-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+    --step-body: 1rem;
+    --step-small: 0.875rem;
+    --step-tiny: 0.8125rem;
+
+    /* Space ----------------------------------------------------------
+       On the 4/8px grid (spec §6): 4 / 8 / 16 / 24 / 32 / 48. */
+    --space-2xs: 0.25rem;
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
 
     /* Section rhythm. Tighter than before on purpose: the old page ran
        5,500px tall on the home route because every band was padded like a
@@ -76,17 +114,22 @@
     /* Frame ---------------------------------------------------------- */
     --wide: 74rem;
     --narrow: 44rem;
-    --gutter: clamp(1.1rem, 4vw, 2rem);
+    --gutter: clamp(1rem, 4vw, 2rem);
 
-    --radius-sm: 0.4rem;
-    --radius: 0.7rem;
-    --radius-lg: 1.1rem;
+    /* Cards sit at 8–12px (spec §6); panels go one step rounder. */
+    --radius-sm: 0.5rem;
+    --radius: 0.75rem;
+    --radius-lg: 1rem;
     /* Kept as an alias for existing controls, but intentionally not pill-shaped. */
     --radius-pill: var(--radius-sm);
 
-    --shadow-sm: 0 1px 2px rgb(56 42 27 / 5%), 0 2px 8px rgb(56 42 27 / 4%);
-    --shadow: 0 2px 4px rgb(56 42 27 / 5%), 0 10px 26px rgb(56 42 27 / 7%);
-    --shadow-lg: 0 4px 10px rgb(56 42 27 / 7%), 0 24px 56px rgb(56 42 27 / 11%);
+    /* Shadows are Warm Slate at low strength, kept for real layering only. */
+    --shadow-sm: 0 1px 2px rgb(47 54 57 / 6%), 0 2px 8px rgb(47 54 57 / 4%);
+    --shadow: 0 2px 4px rgb(47 54 57 / 6%), 0 10px 24px rgb(47 54 57 / 7%);
+    --shadow-lg: 0 4px 10px rgb(47 54 57 / 8%), 0 24px 56px rgb(47 54 57 / 12%);
+
+    /* Minimum size of anything you tap (spec §6). */
+    --tap: 2.75rem;
 
     --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     --speed: 180ms;

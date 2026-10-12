@@ -23,3 +23,6 @@ ui-dist/
 
 # cf build output
 .cloudflare/
+
+# Local before/after captures from scripts/design/screenshots.mjs
+docs/design/screenshots/

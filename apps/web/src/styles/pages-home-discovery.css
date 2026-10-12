@@ -257,7 +257,7 @@
   }
 
   .home-discovery__look :is(li, article, .look-glow__quote):has(h4 a:focus-visible) {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--scene-ink);
     outline-offset: 3px;
   }
 
@@ -334,7 +334,7 @@
   }
 
   .home-discovery__more:focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--scene-ink);
     outline-offset: 2px;
   }
 

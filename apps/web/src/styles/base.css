@@ -110,10 +110,25 @@
     cursor: pointer;
   }
 
+  /* One focus ring for the whole site (spec §4.2 focus.ring). Dark panels
+     and photo heroes flip --focus-ring to a light value locally. */
   :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+  }
+
+  /* Dark panels and photo heroes: the slate ring would vanish there. */
+  :is(
+    .site-footer,
+    .home-hero,
+    .location-hero,
+    .collection-detail__hero,
+    .gallery-lightbox,
+    .about-scene,
+    .error-page__visual
+  ) {
+    --focus-ring: var(--on-dark);
   }
 
   ::selection {
