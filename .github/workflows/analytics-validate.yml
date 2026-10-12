@@ -1,0 +1,20 @@
+name: Analytics validate
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "**/analytics/**"
+      - "**/analytics.ts"
+      - ".github/workflows/analytics-*.yml"
+      - "migrations/0015_analytics.sql"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --build
+      - run: pnpm exec vitest run scripts/analytics packages/application/src/analytics apps/api/src/__tests__/analytics.test.ts infrastructure/database/d1/src/__tests__/analytics.test.ts

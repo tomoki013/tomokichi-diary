@@ -1,4 +1,6 @@
 import type {
+  AnalyticsDashboardDto,
+  AnalyticsReportDto,
   ArticleDetailDto,
   ArticleKnowledgeBundleDto,
   ArticleSummaryDto,
@@ -197,6 +199,13 @@ export interface PublicationStatus {
 }
 
 export const api = {
+  analyticsReports: () => request<{ items: AnalyticsReportDto[] }>("/admin/analytics/reports"),
+  analytics: (start: string, end: string, articleId = "") =>
+    request<AnalyticsDashboardDto>(
+      `/admin/analytics?${new URLSearchParams({ start, end, ...(articleId ? { articleId } : {}) })}`,
+    ),
+  recalculateAnalytics: (start: string, end: string) =>
+    request<{ state: string }>("/admin/analytics/recalculate", json("POST", { start, end })),
   publicationStatus: () => request<PublicationStatus>("/admin/publication"),
   retryPublication: () => request<PublicationStatus>("/admin/publication/retry", json("POST")),
   health: () => request<{ status: string }>("/health", {}, ORIGIN),

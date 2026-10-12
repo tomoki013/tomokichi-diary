@@ -209,3 +209,9 @@ media:sync → db:migrate → deploy:api → deploy:mcp → deploy:web → deplo
 Migrations therefore land while the previous API is still serving traffic.
 **Every migration must be expand/contract** — see the rule in
 [OPERATIONS.md](OPERATIONS.md#db_migration_failed).
+
+## Analytics（2026-10-13）
+
+非公開の分析基盤は [analytics/ARCHITECTURE.md](analytics/ARCHITECTURE.md)。GA4/GSCの既存BQ exportをbounded queryで読み、既存D1へ集計だけ保存する。Admin/APIのAccess下から読む。公開content export、記事公開CI、R2メディア、CHAGEEサイトとは独立。
+
+現状の訂正: GA4はBaseLayoutから本番hostnameでgtagを遅延ロードしている。配信ビルドはcontent-releaseでD1の公開版を一時exportへpullする（Astro自身はD1を読まない）。この文書冒頭の「JSなし」「Git exportだけ」「切替前」は古い説明であり、現行手順はADMIN.mdとOPERATIONS.mdを参照。

@@ -6,6 +6,11 @@
  * change freely; codes may not. Adding is fine, renaming is a breaking change.
  */
 export const ERROR_CODES = [
+  "ANALYTICS_INVALID_RANGE",
+  "ANALYTICS_UNCONFIGURED",
+  "ANALYTICS_DISPATCH_FAILED",
+  "ANALYTICS_INVALID_DATA",
+  "ANALYTICS_COLLECTION_FAILED",
   // --- Pipeline ---
   "FORMAT_CHECK_FAILED",
   "LINT_FAILED",

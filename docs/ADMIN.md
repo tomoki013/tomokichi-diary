@@ -47,3 +47,7 @@ APIは公開する版の本文・写真・関連付け・体験タグを記録�
 コードのmainへのマージ時も、同じD1の公開版から配信します。コード配信と記事配信は同じconcurrencyグループで直列化します。古い処理が後から完了しても、新しい公開要求を反映済みと扱いません。公開記録は `site_publication`、公開時点の写真・関連付けは `publication_metadata` に保存します。
 
 `pnpm export:data` は引き続きローカルDBの書き出しです。本番D1の取得ではありません。本番配信用の取得処理は `scripts/content-release.ts pull` です。明示的なseedを除いて本番D1をGitのexportで上書きしません。
+
+## Analytics
+
+分析メニューで期間・前期間・記事別PV/検索実績・取得状況を確認できます。収益/検索語はAccess下だけで表示します。7/28/90日、月間、任意期間93日以内を選べます。再集計ボタンは最大31日の独立Actionsを起動します。ユーザー/sessionは日次人数と期間内日次平均で、期間uniqueとは異なります。—は欠損/未対応、0は確認済み0です。初回のWIF、D1集計保存、任意再集計token設定は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) を参照。AdSense/ASP/AI未設定でもGA4/GSCを利用できます。
