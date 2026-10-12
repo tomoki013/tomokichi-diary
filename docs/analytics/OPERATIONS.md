@@ -2,7 +2,7 @@
 
 ## 初回設定・本番有効化
 
-1. SECURITYのWIF/IAM/environment手順を管理者が実施。AdSense/ASP/AIは不要。
+1. WIF/IAM/environment/接続Variablesは2026-10-13の利用者承認で設定済み。再設定はSECURITY参照。AdSense/ASP/AIは不要。
 2. 既存CI green後、通常のreleaseで0015/0016 migration → API → Adminを配信。既存CI/publish workflowは変更していない。
 3. analytics environment Secrets/Variables、APIの任意再集計用secretを設定。`ANALYTICS_ENABLED`はまだ無効。
 4. ローカルまたは同一WIF contextでdry runし、両dataset、実際のGSC property（https://tomokichidiary.com/）、US locationを確認。
@@ -10,7 +10,7 @@
 6. 31日以内に区切ってbackfill。GA4/GSCは独立した最古日から取得する。旧JSONをそのまま非公開DBへコピーしない。
 7. MIGRATIONのゲートを全部満たしてから旧集計だけの撤去を別途実施。
 
-本番WIF・D1書込・Admin配信はこの作業時点で未実施。ローカル7日分のBQ読取検証と自動テストは実施済み。IAM変更/認証設定/データ削除を独断で実行しない。
+本番WIF/IAMとGitHub environmentは設定済み。main workflowの実トークン認証、D1書込、Admin配信は未実施。ローカル7日分のBQ読取検証と自動テストは実施済み。IAM変更/認証設定/データ削除を独断で実行しない。
 
 ## 実行
 
@@ -54,3 +54,9 @@ AdSenseはrepository variable ADSENSE_ENABLED=1のときだけ別workflowで読�
 429/5xx/ネットワーク失敗は最大4回、0.5/1/2秒のbackoff。BQ jobs.insertは同じjobIdで再試行、409時は同じjobを取得。D1 batchはsource単位の置換なので再送可能。sourceの一部失敗でも他sourceを試し、最後にworkflowをfailにする。GitHub標準実行履歴とAdminのattempt/error/successで検知。Discordなし。
 
 停止はrepository variable ANALYTICS_ENABLEDを0へ戻すだけ（exportは継続）。不具合修正→再集計で復旧。0015/0016追加tablesを即dropせず、旧成功日データ・BQ元データを保持。既存公開/CIワークフローを止めない。
+
+## 残るSecretsの登録
+
+GitHub Settings → Environments → analyticsのEnvironment Secretsに、`ANALYTICS_CLOUDFLARE_API_TOKEN`（Tomokichi Diary accountのD1編集だけ）と `CLOUDFLARE_ACCOUNT_ID` を登録する。productionの広いデプロイtokenを流用しない。GitHubは既存Secretの値を取り出せないため、この作業ではproductionから複製していない。秘密値をチャットや公開Gitへ貼らない。任意再集計ボタンは別途API Worker secret `ANALYTICS_GITHUB_TOKEN` が必要。
+
+Secretsとmain配信の準備が整うまでANALYTICS_ENABLED=0のままにする。旧週次集計・GA4/GSC native exportsは継続。

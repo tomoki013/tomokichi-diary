@@ -7,9 +7,11 @@
 - 2026-10-04〜10-10のGA4/GSC読み取りを検証。source毎7/7日、GA4 367 / GSC site 301 / URL 3317集計行。分析値/検索語はGit除外.dataにだけ保持。
 - GSCの実propertyはhttps://tomokichidiary.com/。最初のdomain-property仮定を実データ確認で修正。空期間を成功0にしないguardを追加。
 
+- 2026-10-13利用者承認: 専用WIF/IAM、対象2datasetのReader、main限定GitHub analytics environmentと接続Variablesを設定・読み直し確認済み。長期SA鍵なし。ANALYTICS_ENABLED=0で停止を維持。
+
 ## 未完了（本番移行済みと扱わない）
 
-- WIF専用principal/IAM、analytics GitHub environment/secrets、任意再集計token。
+- analytics environmentのCloudflare Secrets、任意再集計用GitHub token、main workflowからの実WIF認証検証。
 - migration/API/admin配信、本番D1保存、main Actions初回成功。
 - 全履歴backfill、旧成功snapshotとの日別照合、本番Admin確認。
 - AdSense user OAuth/account組合せ検証、記事別PAGE_URL収益。ASP未指定。AIは正確性検証後に別途導入。
