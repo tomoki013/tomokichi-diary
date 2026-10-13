@@ -1,14 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
+vi.mock("../lib/readerMeasurement", () => ({ measureReader: vi.fn() }));
+import { measureReader } from "../lib/readerMeasurement";
 import { mountArticleAd } from "../lib/ads";
 
 function fixture(host = "tomokichidiary.com", width = 600, readyState = "complete") {
   const scriptEvents = new Map<string, () => void>();
   const pageEvents = new Map<string, () => void>();
-  const ad = { dataset: { adClient: "ca-pub-8687520805381056", adSlot: "7152502134" } };
+  const ad = {
+    dataset: { adClient: "ca-pub-8687520805381056", adSlot: "7152502134", adStatus: "" },
+  };
   const script = { addEventListener: (name: string, fn: () => void) => scriptEvents.set(name, fn) };
   const append = vi.fn();
   const observe = vi.fn();
   const disconnect = vi.fn();
+  let viewIntersect: (entries: { isIntersecting: boolean; intersectionRatio: number }[]) => void =
+    vi.fn();
+  let mutation: () => void = vi.fn();
   let intersect: (entries: { isIntersecting: boolean }[]) => void = vi.fn();
   const slot = {
     dataset: {} as Record<string, string>,
@@ -16,6 +23,7 @@ function fixture(host = "tomokichidiary.com", width = 600, readyState = "complet
     getBoundingClientRect: () => ({ width }),
   } as unknown as HTMLElement;
   const doc = {
+    addEventListener: (name: string, fn: () => void) => pageEvents.set(name, fn),
     readyState,
     visibilityState: "visible",
     createElement: () => script,
@@ -23,9 +31,19 @@ function fixture(host = "tomokichidiary.com", width = 600, readyState = "complet
   } as unknown as Document;
   const browser = {
     location: { hostname: host },
+    setTimeout,
+    clearTimeout,
+    MutationObserver: class {
+      constructor(callback: () => void) {
+        mutation = callback;
+      }
+      observe = vi.fn();
+      disconnect = vi.fn();
+    },
     IntersectionObserver: class {
-      constructor(callback: typeof intersect) {
-        intersect = callback;
+      constructor(callback: typeof intersect, options: { threshold: number | number[] }) {
+        if (Array.isArray(options.threshold)) viewIntersect = callback as typeof viewIntersect;
+        else intersect = callback;
       }
       observe = observe;
       disconnect = disconnect;
@@ -34,6 +52,10 @@ function fixture(host = "tomokichidiary.com", width = 600, readyState = "complet
   } as unknown as typeof globalThis;
   return {
     slot,
+    ad,
+    mutation: () => mutation(),
+    viewIntersect: (visible: boolean) =>
+      viewIntersect([{ isIntersecting: visible, intersectionRatio: visible ? 0.6 : 0 }]),
     doc,
     browser,
     append,
@@ -62,9 +84,9 @@ describe("article ad requests", () => {
     const f = fixture("tomokichidiary.com", 600, "loading");
     mountArticleAd(f.slot, f.doc, f.browser);
     mountArticleAd(f.slot, f.doc, f.browser);
-    expect(f.observe).not.toHaveBeenCalled();
-    f.pageEvents.get("load")!();
     expect(f.observe).toHaveBeenCalledOnce();
+    f.pageEvents.get("load")!();
+    expect(f.observe).toHaveBeenCalledTimes(2);
     f.intersect(false);
     expect(f.append).not.toHaveBeenCalled();
     f.intersect(true);
@@ -88,6 +110,32 @@ describe("article ad requests", () => {
     f.intersect(true);
     expect(f.append).toHaveBeenCalledOnce();
     expect(f.browser.adsbygoogle).toBeUndefined();
-    expect(f.scriptEvents.has("error")).toBe(false);
+    expect(f.scriptEvents.has("error")).toBe(true);
+    f.scriptEvents.get("error")!();
+    expect(measureReader).toHaveBeenCalledWith("ad_script_error", 1, "article_end");
   });
+});
+
+it("counts proxy visibility only after fill and a continuous visible second", () => {
+  vi.useFakeTimers();
+  vi.mocked(measureReader).mockClear();
+  const f = fixture();
+  mountArticleAd(f.slot, f.doc, f.browser);
+  f.viewIntersect(true);
+  vi.advanceTimersByTime(1200);
+  expect(measureReader).not.toHaveBeenCalledWith("ad_viewable_proxy", 1, "article_end");
+  f.ad.dataset.adStatus = "filled";
+  f.mutation();
+  vi.advanceTimersByTime(600);
+  f.viewIntersect(false);
+  vi.advanceTimersByTime(1200);
+  expect(measureReader).not.toHaveBeenCalledWith("ad_viewable_proxy", 1, "article_end");
+  f.viewIntersect(true);
+  vi.advanceTimersByTime(1000);
+  f.viewIntersect(true);
+  vi.advanceTimersByTime(1000);
+  expect(
+    vi.mocked(measureReader).mock.calls.filter(([name]) => name === "ad_viewable_proxy"),
+  ).toHaveLength(1);
+  vi.useRealTimers();
 });

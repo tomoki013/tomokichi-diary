@@ -1,3 +1,4 @@
+import { experienceSummary } from "./experience.js";
 import {
   ANALYTICS_SOURCES,
   addMetrics,
@@ -116,6 +117,10 @@ export async function analyticsDashboard(
     previousRange: previous,
     current: project(days, range, articleId, counts),
     previous: project(days, previous, articleId, counts),
+    experience: {
+      current: experienceSummary(days, range, articleId),
+      previous: experienceSummary(days, previous, articleId),
+    },
     statuses,
     daily: dates(range).map((date) => ({
       date,
@@ -140,6 +145,7 @@ export async function analyticsDashboard(
       sources: group("source", "ga4"),
       devices: group("device", "ga4"),
       events: group("event", "ga4"),
+      adUnits: group("ad_unit", "adsense"),
       countries: group("country", "gsc_site"),
       searchTypes: group("search_type", "gsc_site"),
     },

@@ -1,3 +1,4 @@
+import { AnalyticsExperience } from "./AnalyticsExperience";
 import { useState } from "react";
 import type { AnalyticsDashboardDto, AnalyticsMetricRowDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
@@ -436,6 +437,12 @@ export function Analytics() {
               匿名化された検索語は表示しません。表示できる検索語の合計は全体と一致しません。
             </p>
           </Panel>
+          <Panel title="広告・読書体験">
+            <AnalyticsExperience
+              cohorts={data.experience?.current ?? []}
+              previous={data.experience?.previous ?? []}
+            />
+          </Panel>
           <Panel title="内訳">
             <Breakdown
               title="初回ユーザー獲得元（セッション流入元とは異なる）"
@@ -443,6 +450,11 @@ export function Analytics() {
               metric="pageViews"
             />
             <Breakdown title="GA4デバイス" rows={data.breakdowns.devices} metric="pageViews" />
+            <Breakdown
+              title="AdSense広告ユニット（推定収益JPY）"
+              rows={data.breakdowns.adUnits ?? []}
+              metric="estimatedEarningsJPY"
+            />
             <Breakdown title="イベント" rows={data.breakdowns.events} metric="eventCount" />
             <Breakdown title="検索の国" rows={data.breakdowns.countries} metric="clicks" />
             <Breakdown title="検索タイプ" rows={data.breakdowns.searchTypes} metric="clicks" />
@@ -489,6 +501,15 @@ export function Analytics() {
                     </tbody>
                   </table>
                 </div>
+                <AnalyticsExperience
+                  cohorts={report.experience?.current ?? []}
+                  previous={report.experience?.previous ?? []}
+                />
+                <Breakdown
+                  title="AdSense広告ユニット（推定収益JPY）"
+                  rows={report.adUnits ?? []}
+                  metric="estimatedEarningsJPY"
+                />
                 <p className="muted">{report.ai.reason}</p>
               </details>
             ))}

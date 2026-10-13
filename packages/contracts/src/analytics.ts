@@ -1,3 +1,36 @@
+export interface ExperienceCohortDto {
+  layout: string;
+  device: string;
+  measuredDays: number;
+  firstDate: string;
+  lastDate: string;
+  views: number;
+  reviewReady: boolean;
+  bodyEndRate: number | null;
+  candidate35Rate: number | null;
+  candidate65Rate: number | null;
+  adEligible: number;
+  adRequests: number;
+  adFilled: number;
+  adUnfilled: number;
+  adScriptErrors: number;
+  adViewableProxy: number;
+  adRequestRate: number | null;
+  adFillRate: number | null;
+  adViewableProxyRate: number | null;
+  visibleMsPerView: number | null;
+  nextArticleRate: number | null;
+  shareActionRate: number | null;
+  likeActionRate: number | null;
+  vitals: {
+    vital: string;
+    samples: number;
+    good: number;
+    needsImprovement: number;
+    poor: number;
+    p75Band: string;
+  }[];
+}
 export interface AnalyticsMetricRowDto {
   grain: string;
   key: string;
@@ -6,6 +39,7 @@ export interface AnalyticsMetricRowDto {
   metrics: Record<string, number | null>;
 }
 export interface AnalyticsDashboardDto {
+  experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
   current: {
@@ -41,6 +75,7 @@ export interface AnalyticsDashboardDto {
     sources: AnalyticsMetricRowDto[];
     devices: AnalyticsMetricRowDto[];
     events: AnalyticsMetricRowDto[];
+    adUnits?: AnalyticsMetricRowDto[];
     countries: AnalyticsMetricRowDto[];
     searchTypes: AnalyticsMetricRowDto[];
   };
@@ -77,6 +112,8 @@ export function assertAnalyticsDay(value: unknown): void {
         "search_type",
         "event",
         "campaign",
+        "experience",
+        "ad_unit",
       ].includes(String(row["grain"])) ||
       typeof row["key"] !== "string" ||
       row["key"].length > 4096 ||
@@ -109,6 +146,11 @@ export function assertAnalyticsDay(value: unknown): void {
       "adImpressions",
       "adPageViews",
       "adClicks",
+      "adRequests",
+      "observations",
+      "vitalGood",
+      "vitalNeedsImprovement",
+      "vitalPoor",
       "linkClicks",
       "pendingConversions",
       "confirmedConversions",
@@ -127,6 +169,8 @@ export function assertAnalyticsDay(value: unknown): void {
 }
 
 export interface AnalyticsReportDto {
+  adUnits?: AnalyticsMetricRowDto[];
+  experience?: AnalyticsDashboardDto["experience"];
   period: string;
   start: string;
   end: string;
