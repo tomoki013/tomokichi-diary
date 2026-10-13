@@ -26,3 +26,6 @@ ui-dist/
 
 # Local before/after captures from scripts/design/screenshots.mjs
 docs/design/screenshots/
+
+# Google OIDC auth action's ephemeral local credential files.
+gha-creds-*.json

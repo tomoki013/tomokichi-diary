@@ -5,6 +5,7 @@
  */
 export type Route =
   | { name: "dashboard" }
+  | { name: "analytics" }
   | { name: "articles" }
   | { name: "article"; id: string }
   | { name: "media" }
@@ -24,6 +25,8 @@ export function parseRoute(hash: string): Route {
       return { name: "dashboard" };
     case "articles":
       return second ? { name: "article", id: decodeURIComponent(second) } : { name: "articles" };
+    case "analytics":
+      return second ? { name: "not-found", path } : { name: "analytics" };
     case "media":
       return second ? { name: "not-found", path } : { name: "media" };
     case "routes":
@@ -39,6 +42,7 @@ export function parseRoute(hash: string): Route {
 
 export const href = {
   dashboard: () => "#/",
+  analytics: () => "#/analytics",
   articles: () => "#/articles",
   article: (id: string) => `#/articles/${encodeURIComponent(id)}`,
   media: () => "#/media",
@@ -51,10 +55,12 @@ export const href = {
 /** Which navigation entry a route belongs under. */
 export function section(
   route: Route,
-): "dashboard" | "articles" | "media" | "routes" | "inquiries" | null {
+): "dashboard" | "analytics" | "articles" | "media" | "routes" | "inquiries" | null {
   switch (route.name) {
     case "dashboard":
       return "dashboard";
+    case "analytics":
+      return "analytics";
     case "articles":
     case "article":
       return "articles";

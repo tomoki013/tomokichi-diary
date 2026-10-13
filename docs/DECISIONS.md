@@ -64,3 +64,5 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 2026-10-11 配信環境監査: root buildは先に `tsc --build` で共通パッケージの型定義を依存順に生成し、それからアプリをビルドする。従来はAPIによる型定義生成とMCPの型検査が並行し、空の配信環境でsrc/distのブランド型が混在して失敗し得た。ローカルCIの先行typecheckだけではこの初回ビルドの競合を検出できないため、生成物のない状態からもbuildを検証する。
 
 2026-10-11: 記事一覧に選択式の一括公開を追加する。各記事の保存済み変更を既存の公開API・公開条件で検証し、成功分だけを公開版に切り替える。記事ごとの公開要求は反映待ちとしてDBに記録し、最後にGitHub Actionsを1回起動する。失敗した記事はタイトルと日本語の理由を表示し、旧公開版を維持する。予約・アーカイブ・変更のない公開版は選択対象から外す。新しいジョブ基盤やDBテーブルは追加しない。
+
+2026-10-13: Analytics v2は既存BQ native exportを維持し、WIFによるbounded readと非公開D1のsource/day集計を採用する。公開JSONや公開R2へ分析値を保存せず、記事公開workflowから独立する。GSC site/URL粒度を分離。日次distinctを期間uniqueとして足さない。AdSense/ASP/AIは独立した任意adapter。旧集計撤去は本番移行ゲート通過後。詳細は [analytics/ARCHITECTURE.md](analytics/ARCHITECTURE.md)。GA4未導入という上記記述は古く、現在は本番hostnameでgtagを遅延ロードしている。

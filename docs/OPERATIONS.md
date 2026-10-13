@@ -468,3 +468,7 @@ The response lists `issues` with a path per field.
 
 `GET /admin/articles/:id/publish-check` returns every reason at once: title,
 summary, body length, a canonical route, and a cover image with alt text.
+
+## ANALYTICS_INVALID_RANGE / ANALYTICS_UNCONFIGURED / ANALYTICS_DISPATCH_FAILED / ANALYTICS_INVALID_DATA / ANALYTICS_COLLECTION_FAILED
+
+非公開集計の認証、期間検証、sourceごとの失敗復旧は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) と [analytics/SECURITY.md](analytics/SECURITY.md)。失敗時も旧成功集計とBQ履歴を保持する。GA4/GSC exportや記事公開処理を停止しない。

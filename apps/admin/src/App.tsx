@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError, api, clearToken, getToken } from "./lib/api";
 import { href, section } from "./lib/route";
 import { useHashRoute } from "./ui/hooks";
+import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
 import { Articles } from "./pages/Articles";
 import { ArticleEditor } from "./pages/editor/ArticleEditor";
@@ -15,6 +16,7 @@ import { EmptyState, ErrorState, PageHeader } from "./ui/parts";
 
 const NAV = [
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
+  { key: "analytics", label: "Analytics", href: href.analytics() },
   { key: "articles", label: "記事", href: href.articles() },
   { key: "media", label: "画像", href: href.media() },
   { key: "routes", label: "URL", href: href.routes() },
@@ -98,6 +100,7 @@ export function App() {
       </nav>
       <main className="main">
         {route.name === "dashboard" && <Dashboard />}
+        {route.name === "analytics" && <Analytics />}
         {route.name === "articles" && <Articles />}
         {route.name === "article" && <ArticleEditor key={route.id} id={route.id} />}
         {route.name === "media" && <MediaLibrary />}

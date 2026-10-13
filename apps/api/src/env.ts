@@ -15,6 +15,8 @@ export interface Env {
   ADMIN_TOKEN?: string;
   /** Fine-grained GitHub token: this repository's Actions write permission only. */
   GITHUB_PUBLISH_TOKEN?: string;
+  /** This repository Actions write only; separate from content publication. */
+  ANALYTICS_GITHUB_TOKEN?: string;
   PUBLIC_MEDIA_URL?: string;
   PUBLIC_IMAGE_URL?: string;
   /** Temporarily close new uploads while verifying legacy originals. */
