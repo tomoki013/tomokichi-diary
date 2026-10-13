@@ -1,6 +1,6 @@
 # 認証・非公開データ
 
-2026-10-13: 利用者の承認を受け、専用サービスアカウント、WIF pool/provider、IAM、GitHub analytics environment、接続Variables、Cloudflare専用token/Secretsを設定済み。Google長期鍵は作成していない。GitHub再集計用のSecretと本番実行検証は未完了。以下は設定内容と再設定時の手順。既存GA4/GSC export連携・service accountは変更していない。
+2026-10-13: 利用者の承認を受け、専用サービスアカウント、WIF pool/provider、IAM、GitHub analytics environment、接続Variables、Cloudflare専用token/Secretsを設定済み。Google長期鍵は作成していない。利用者の本番開始依頼後、mainの実OIDC認証・BQ読取・D1保存・Access下のAdmin閲覧も確認済み。APIのGitHub再集計用Secretは未設定。以下は設定内容と再設定時の手順。既存GA4/GSC export連携・service accountは変更していない。
 
 ## GitHub OIDC → Google WIF
 
@@ -53,6 +53,6 @@ AI provider/keyは設定しない。外部への個人情報・生検索語送�
 
 ## 設定後の確認結果（2026-10-13）
 
-providerはACTIVE、issuer/mapping/conditionを再取得して一致を確認。専用SAのuser-managed key一覧は空。project権限はjobUserのみ、SAには対象repository principalSetのWorkloadIdentityUserのみ。GitHub environmentはmainのbranch policyのみ、3つの接続Variablesを確認。Cloudflare tokenのactive状態、Diary DBのID/名前とSELECT 1のbatch接続を確認。analytics environmentの2つのSecret名/更新日時を読み直し確認済み。秘密値はチャット/ログへ出さず、一時転送ファイルは登録後に削除、クリップボードも復元した。RepositoryのANALYTICS_ENABLED=0を維持し、main配信前の定期ジョブを起動しない。
+providerはACTIVE、issuer/mapping/conditionを再取得して一致を確認。専用SAのuser-managed key一覧は空。project権限はjobUserのみ、SAには対象repository principalSetのWorkloadIdentityUserのみ。GitHub environmentはmainのbranch policyのみ、3つの接続Variablesを確認。Cloudflare tokenのactive状態、Diary DBのID/名前とSELECT 1のbatch接続を確認。analytics environmentの2つのSecret名/更新日時を読み直し確認済み。秘密値はチャット/ログへ出さず、一時転送ファイルは登録後に削除、クリップボードも復元した。main配信完了後、RepositoryのANALYTICS_ENABLED=1へ切り替えた。
 
-mainに承認済みworkflowが入った後、実際のGitHub OIDC → SA → BigQuery dry runを確認する。現在PR #81はDraftで、設定の読み直しは完了したが、GitHubからの実トークン認証はまだ検証していない。認証用に人間へ追加のToken Creator権限を付けたり、SA鍵を作ったりしていない。
+PR #81をmainへmergeし、既存CI/Deployが成功。mainの[初回収集](https://github.com/tomoki013/tomokichi-diary/actions/runs/38380683051)でGitHub OIDC → SA → BigQuery dry run/集計 → D1保存を確認した。[再実行](https://github.com/tomoki013/tomokichi-diary/actions/runs/38381219984)も成功し、日別キー・取得時刻以外の集計hashは一致。未認証のadmin analytics/reportsは403、Access下の管理画面では実集計を表示できた。認証用に人間へ追加のToken Creator権限を付けたり、SA鍵を作ったりしていない。
