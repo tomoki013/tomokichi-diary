@@ -2,15 +2,17 @@
 
 ## 初回設定・本番有効化
 
+2026-10-13: 利用者の本番開始依頼を受け、PR #81をCI成功後にmerge、既存CI経路で0015/0016・API・Adminを配信した。`ANALYTICS_ENABLED=1`、main ActionsのOIDC → WIF → BQ → D1初回収集が成功。8月18日〜10月11日の55日分を3ソースで保存し、週次レポートも保存。28日rangeを2回実行し、source/day主キーと取得時刻以外の集計hashが一致、backfill後の最新日も後退しないことを確認。本番Access下のAdminで7/7日の期間人数・前期間比較を確認した。以下は再設定/停止状態からの有効化手順。
+
 1. WIF/IAM/environment/接続Variablesは2026-10-13の利用者承認で設定済み。再設定はSECURITY参照。AdSense/ASP/AIは不要。
 2. 既存CI green後、通常のreleaseで0015/0016 migration → API → Adminを配信。既存CI/publish workflowは変更していない。
-3. analytics environment Secrets/Variablesは設定済み。APIの任意再集計用secretは別途設定。`ANALYTICS_ENABLED`はまだ無効。
+3. analytics environment Secrets/Variablesは設定済み。APIの任意再集計用secretは別途設定。未設定でもActionsから手動実行できる。
 4. ローカルまたは同一WIF contextでdry runし、両dataset、実際のGSC property（https://tomokichidiary.com/）、US locationを確認。
 5. repository variable ANALYTICS_ENABLED=1を設定、mainでAnalytics collectを手動起動。D1保存・Admin閲覧・2度目の冪等性・期間比較を検証。
 6. 31日以内に区切ってbackfill。GA4/GSCは独立した最古日から取得する。旧JSONをそのまま非公開DBへコピーしない。
 7. MIGRATIONのゲートを全部満たしてから旧集計だけの撤去を別途実施。
 
-本番WIF/IAM、GitHub environment、Cloudflare接続Secretsは設定済み。専用Cloudflare tokenのactive状態、Diary DBの識別子/名前、読み取り専用のD1 batch query（SELECT 1）を確認した。main workflowの実トークン認証、D1書込、Admin配信は未実施。ローカル7日分のBQ読取検証と自動テストは実施済み。IAM変更/認証設定/データ削除を独断で実行しない。
+本番WIF/IAM、GitHub environment、Cloudflare接続Secretsは設定済み。専用Cloudflare tokenのactive状態、Diary DBの識別子/名前、読み取り専用のD1 batch query（SELECT 1）を確認した。main workflowの実認証・D1保存・Admin配信と閲覧も確認済み。未着の10月12日は0にせずINCOMPLETE_EXPORTとして保持し、workflowは取得済み日の保存を完了する。IAM変更/認証設定/データ削除を独断で実行しない。
 
 ## 実行
 
@@ -63,4 +65,4 @@ CloudflareのD1 tokenはDB単位に制限できず、対象account内のD1全体
 
 期限前に同じ権限の専用tokenを作成し、analytics environmentのSecretを更新、Diary DBでSELECT 1の接続確認後に旧tokenを失効する。秘密値をチャットや公開Gitへ貼らない。任意再集計ボタンは別途API Worker secret `ANALYTICS_GITHUB_TOKEN` が必要。
 
-main配信と実認証の検証準備が整うまでANALYTICS_ENABLED=0のままにする。旧週次集計・GA4/GSC native exportsは継続。
+2026-10-13のmain配信・実認証確認後にANALYTICS_ENABLED=1へ切替済み。日次・週次・月次の予定を有効にした。旧週次集計・GA4/GSC native exportsは継続。全履歴移行などの撤去ゲートは未達成なので旧処理は削除しない。

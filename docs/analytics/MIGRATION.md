@@ -9,12 +9,12 @@
 
 - 2026-10-13利用者承認: 専用WIF/IAM、対象2datasetのReader、main限定GitHub analytics environmentと接続Variablesを設定・読み直し確認済み。長期SA鍵なし。ANALYTICS_ENABLED=0で停止を維持。
 - 2026-10-13利用者承認: Cloudflareの専用account-owned D1 Write token（1年）を作成し、analytics environmentの2つのSecretsへ登録。token active、Diary DB ID/名前、SELECT 1の読み取りbatch接続、Secret名/更新日時を確認。DB単位に制限できない残存権限も説明・承認済み。D1のデータ書込は行っていない。
+- 2026-10-13本番開始依頼: PR #81をmainへmerge、既存CI/Deployで0015/0016・API/Admin配信完了。main OIDC/WIF認証とBQ/D1収集が成功、ANALYTICS_ENABLED=1。3ソースで8月18日〜10月11日の55日分を保存、週次レポート生成と本番Adminの期間人数/比較を確認。再取得でも日別キー・取得時刻以外の集計hashは一致、backfillでwatermarkは後退しなかった。10月12日の未着は欠損状態で保持。
 
 ## 未完了（本番移行済みと扱わない）
 
-- 任意再集計用GitHub token、main workflowからの実WIF認証検証。
-- migration/API/admin配信、本番D1保存、main Actions初回成功。
-- 全履歴backfill、旧成功snapshotとの日別照合、本番Admin確認。
+- Admin再集計ボタン用GitHub token（Actionsからの手動実行は可能）。
+- 全履歴backfillと全履歴の旧新照合。限定7日照合と55日の本番保存は完了。
 - AdSense user OAuth/account組合せ検証、記事別PAGE_URL収益。ASP未指定。AIは正確性検証後に別途導入。
 
 ## 比較

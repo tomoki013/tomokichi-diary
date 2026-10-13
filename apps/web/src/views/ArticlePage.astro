@@ -5,6 +5,7 @@ import { buildArticleJsonLd, buildArticleMetadata, buildBreadcrumbJsonLd } from 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
+import ArticleAd from "../components/ArticleAd.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Picture from "../components/Picture.astro";
 import { content } from "../lib/content";
@@ -208,6 +209,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
           </div>
         </div>
+        <ArticleAd />
         {(previousArticle || nextArticle) && (
           <nav class="post-navigation" aria-label="前後の記事">
             {previousArticle ? (

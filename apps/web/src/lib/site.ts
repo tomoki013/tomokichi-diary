@@ -46,8 +46,10 @@ export function mediaUrl(storageKey: string): string {
 export const gaMeasurementId = process.env.PUBLIC_GA_MEASUREMENT_ID ?? "G-BZJ1EDMYTZ";
 export const analyticsHostnames = ["tomokichidiary.com", "www.tomokichidiary.com"];
 
-/** AdSense publisher (the same one `public/ads.txt` authorises). No ad script is loaded. */
+/** AdSense publisher (the same one `public/ads.txt` authorises). */
 export const adsenseClient = "ca-pub-8687520805381056";
+/** Fixed 300×250 display unit, requested only near the end of a production article. */
+export const articleAdSlot = "7152502134";
 
 /** The API origin the contact form posts to. */
 export const apiUrl = (process.env.PUBLIC_API_URL ?? "https://api.tomokichidiary.com").replace(
