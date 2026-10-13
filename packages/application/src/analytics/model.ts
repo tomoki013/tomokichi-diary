@@ -11,7 +11,9 @@ export type AnalyticsGrain =
   | "country"
   | "search_type"
   | "event"
-  | "campaign";
+  | "campaign"
+  | "experience"
+  | "ad_unit";
 export interface AnalyticsRow {
   grain: AnalyticsGrain;
   key: string;

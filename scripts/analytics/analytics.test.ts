@@ -220,3 +220,30 @@ describe("exact period windows", () => {
     expect(() => periodWindows({ start: "2026-01-01", end: "2026-10-12" })).toThrow();
   });
 });
+
+it("preserves daily AdSense unit rows without multiplying site totals and rejects duplicates", async () => {
+  const { parseAdSenseUnits } = await import("./adsense.js");
+  const headers = [
+    "DATE",
+    "AD_UNIT_ID",
+    "ESTIMATED_EARNINGS",
+    "IMPRESSIONS",
+    "PAGE_VIEWS",
+    "CLICKS",
+    "AD_REQUESTS",
+  ].map((name) => ({ name, ...(name === "ESTIMATED_EARNINGS" ? { currencyCode: "JPY" } : {}) }));
+  const rows = ["7152502134", "123"].map((id) => ({
+    cells: ["2026-10-01", id, "1", "10", "10", "0", "20"].map((value) => ({ value })),
+  }));
+  const report = { headers, rows, totalMatchedRows: "2" };
+  const days = parseAdSenseUnits(report, range, now);
+  expect(days[0]?.rows).toHaveLength(2);
+  expect(days[0]?.rows.every((r) => r.grain === "ad_unit")).toBe(true);
+  expect(days[0]?.rows[0]?.metrics["adRequests"]).toBe(20);
+  expect(() => parseAdSenseUnits({ ...report, rows: [rows[0]!, rows[0]!] }, range, now)).toThrow(
+    "ANALYTICS_DUPLICATE_ROW",
+  );
+  expect(
+    new URL(adsenseUrl("accounts/pub-123", range, true)).searchParams.getAll("dimensions"),
+  ).toEqual(["DATE", "AD_UNIT_ID"]);
+});

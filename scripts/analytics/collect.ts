@@ -108,6 +108,7 @@ export async function collectSource(
     );
     if (!available.length) throw new Error("ANALYTICS_SOURCE_NOT_READY");
     const rows = await bq.query(source as SqlName, range);
+    if (source === "ga4") rows.push(...(await bq.query("ga4_experience", range)));
     if (source !== "ga4" && !rows.length) throw new Error("ANALYTICS_NO_GSC_ROWS");
     const days = buildDays(
       source,

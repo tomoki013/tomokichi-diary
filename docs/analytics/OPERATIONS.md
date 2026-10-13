@@ -66,3 +66,11 @@ CloudflareのD1 tokenはDB単位に制限できず、対象account内のD1全体
 期限前に同じ権限の専用tokenを作成し、analytics environmentのSecretを更新、Diary DBでSELECT 1の接続確認後に旧tokenを失効する。秘密値をチャットや公開Gitへ貼らない。任意再集計ボタンは別途API Worker secret `ANALYTICS_GITHUB_TOKEN` が必要。
 
 2026-10-13のmain配信・実認証確認後にANALYTICS_ENABLED=1へ切替済み。日次・週次・月次の予定を有効にした。旧週次集計・GA4/GSC native exportsは継続。全履歴移行などの撤去ゲートは未達成なので旧処理は削除しない。
+
+## 広告・読書体験の定期見直し
+
+reader-v1の導入後は既存日次収集でga4_experience.sqlも実行する。既存GA4 source/dayへexperience行を追加するため、追加migrationやIAM権限は不要。日付上限31日・課金上限1GB/jobは維持する。週次・月次レポートには現期間/前期間の端末・配置版別集計とAdSenseユニットを保持する。
+
+Adminの「広告・読書体験」で候補位置の到達、末尾広告request/fill/視認目安、本文末・可視時間・回遊操作、速度を確認する。記事フィルターで個別記事を調べる。週次は観察、28日/月次は端末別200表示・14計測日を目安に配置を再検討する。GA4 export待ち・収集未開始と、計測後に0件のイベントを区別する。位置・本数は自動変更しない。
+
+AdSense OAuthは専用アプリのadsense.readonlyだけをanalytics environmentへ登録し、Diaryドメインfilterの実読取を確認してからADSENSE_ENABLED=1にする。資格情報を公開PRやActions artifactへ出さない。GoogleのTesting状態では継続用refresh tokenの期限制約を確認する。任意再集計はDiary repositoryだけのActions read/write専用資格情報をAPI WorkerのANALYTICS_GITHUB_TOKENへ置く。既存の広い公開用tokenは流用しない。どちらも人の認証/権限承認を完了するまで設定完了扱いにしない。

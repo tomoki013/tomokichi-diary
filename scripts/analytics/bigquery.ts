@@ -7,6 +7,7 @@ import { AnalyticsHttpError, requestJson } from "./http.js";
 const project = "tomokichidiary-analytics";
 export const SQL_NAMES = [
   "ga4",
+  "ga4_experience",
   "gsc_site",
   "gsc_url",
   "ga4_available",

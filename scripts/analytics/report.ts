@@ -51,6 +51,8 @@ const payload = JSON.stringify({
   previousRange: dashboard.previousRange,
   current: dashboard.current,
   previous: dashboard.previous,
+  experience: dashboard.experience,
+  adUnits: dashboard.breakdowns.adUnits,
   ai: { enabled: false, reason: "集計の本番検証と外部AI設定が完了していません" },
 });
 await d1([

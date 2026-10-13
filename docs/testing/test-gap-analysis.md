@@ -86,3 +86,13 @@ Probability（壊れる可能性）× Impact（壊れたときの影響）。
 ## Analytics v2（2026-10-13）
 
 High risk: 日付/前期間/閏年、URL host・redirect・canonical、GSC加重順位/CTR/粒度、distinct非加算、欠損と0、日別payload validation、D1置換の冪等/遅延再取得/backfill/rollback、水位非後退、HTTP retry/401/403、SQL入力検証、Access認証/private cacheを自動テスト追加。AdSense disabled/空実績/通貨/truncation、Affiliate共通adapterの重複も検証。ライブBQは7日bounded queryとdry runを読取検証済み。本番WIF/Actions→D1、全履歴照合、本番Admin、AdSense OAuth/ページ別収益は手動移行ゲートとして未完了。期間unique人数の別集計cache・日次非加算・古いcache非表示・windowの日付制限もテスト追加。
+
+## Analytics v2 広告・読書体験の追加検証（2026-10-13）
+
+| Risk                                                   | 検証                                                                                      | 残る制約                                                          |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| High: preview/CHAGEEサブドメインへの計測、背景時間混入 | readerMeasurement.test.tsのhost除外、候補座標、重複防止、可視時間差分、送信フィールド限定 | GA4同意・block・ブラウザ送信失敗による欠測は復元しない            |
+| High: 広告視認の過大評価・広告追加                     | ads.test.tsのfilled前、可視中断、連続1秒、単発request/error、狭幅・host除外               | proxyを公式Active Viewとして扱わない。クリック/iframeは観測しない |
+| High: 日次率/p75の誤加算、端末/記事の混同              | experience.test.tsの期間累積、端末/記事/layout分離、欠測、50件未満の速度判定              | 前後比較だけでは因果効果を示さない                                |
+| High: BQ SQLの個人情報/任意文字列/別サイト混入         | check-sql.tsの合成fixture実BQ方言検証と本番bounded dry run                                | 実イベントは導入後の日次export待ち。過去を0で埋めない             |
+| Medium: AdSenseユニットの二重加算・重複・未完レポート  | analytics.test.tsのsite/unit grain分離・重複拒否・domain filter                           | OAuth完了後の実API互換性・実績は別途確認する                      |

@@ -1,4 +1,13 @@
 export type SemanticEvent =
+  | {
+      readonly name: "diary_measurement";
+      readonly measurement_version: "reader-v1";
+      readonly layout_version: "article-end-v1";
+      readonly measurement: string;
+      readonly value: number;
+      readonly placement: string;
+      readonly vital: string;
+    }
   | { readonly name: "article_published"; readonly articleId: string }
   | { readonly name: "knowledge_saved"; readonly articleId: string; readonly factCount: number }
   | {

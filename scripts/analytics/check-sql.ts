@@ -97,3 +97,43 @@ assert.equal(Number(exact["coveredDays"]), 2);
 process.stdout.write(
   "BigQuery synthetic SQL checks passed: session identity/missing IDs/period deduplication, GSC incremental keys/anonymity/URL/weighted position\n",
 );
+const experienceSql = read("ga4_experience")
+  .replace(
+    "WITH events AS (",
+    `WITH fixture AS (
+  SELECT '20261001' AS _TABLE_SUFFIX, '20261001' AS event_date, 'diary_measurement' AS event_name,
+    STRUCT('mobile' AS category) AS device,
+    [STRUCT('page_location' AS key,STRUCT(r.url AS string_value, CAST(NULL AS INT64) AS int_value, CAST(NULL AS FLOAT64) AS double_value) AS value),
+     STRUCT('measurement_version',STRUCT(r.version,CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),
+     STRUCT('layout_version',STRUCT('article-end-v1',CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),
+     STRUCT('measurement',STRUCT(r.measurement,CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),
+     STRUCT('placement',STRUCT('none',CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),
+     STRUCT('vital',STRUCT(r.vital,CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),
+     STRUCT('value',STRUCT(CAST(NULL AS STRING),CAST(NULL AS INT64),r.number))] AS event_params
+  FROM UNNEST([
+    STRUCT('https://tomokichidiary.com/posts/a?private=omit#omit' AS url,'reader-v1' AS version,'article_view' AS measurement,'none' AS vital,1.0 AS number),
+    STRUCT('https://tomokichidiary.com/posts/a','reader-v1','web_vital','LCP',2500.0),
+    STRUCT('https://tomokichidiary.com/posts/a','reader-v1','web_vital','LCP',4000.0),
+    STRUCT('https://tomokichidiary.com/posts/a','reader-v1','web_vital','LCP',4001.0),
+    STRUCT('https://guide.tomokichidiary.com/posts/a','reader-v1','article_view','none',1.0),
+    STRUCT('https://tomokichidiary.com/posts/a','unknown','article_view','none',1.0),
+    STRUCT('https://tomokichidiary.com/posts/a','reader-v1','arbitrary_text','none',1.0),
+    STRUCT('https://tomokichidiary.com/posts/a','reader-v1','visible_time','none',-1.0)
+  ]) r
+), events AS (`,
+  )
+  .replace("`tomokichidiary-analytics.analytics_535794382.events_*`", "fixture");
+const experienceRows = query(experienceSql);
+assert.equal(experienceRows.length, 2);
+assert.ok(experienceRows.every((r) => r["path"] === "/posts/a" && r["grain"] === "experience"));
+const measuredViews = experienceRows.find(
+  (r) => JSON.parse(r["key"]!).measurement === "article_view",
+)!;
+assert.equal(Number(measuredViews["observations"]), 1);
+const vital = experienceRows.find((r) => JSON.parse(r["key"]!).measurement === "web_vital")!;
+assert.equal(Number(vital["vitalGood"]), 1);
+assert.equal(Number(vital["vitalNeedsImprovement"]), 1);
+assert.equal(Number(vital["vitalPoor"]), 1);
+process.stdout.write(
+  "BigQuery synthetic experience checks passed: privacy/hostname/allowlist/vital boundaries\n",
+);
