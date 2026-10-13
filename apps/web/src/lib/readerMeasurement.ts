@@ -101,7 +101,11 @@ export function mountReaderMeasurement(): void {
   });
   document.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest(".post-navigation a, .article-related a, .story-trail a"))
+    if (
+      target?.closest(
+        ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb",
+      )
+    )
       once("next_article");
     if (target?.closest(".article-share__actions button")) once("share_action");
     if (target?.closest("[data-like-button]")) once("like_action");
