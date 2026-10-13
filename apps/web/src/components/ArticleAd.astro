@@ -1,0 +1,50 @@
+---
+import { adsenseClient, articleAdSlot } from "../lib/site";
+---
+
+<aside class="article-ad" data-article-ad aria-label="広告">
+  <small>広告</small>
+  <div class="article-ad__space">
+    <ins
+      class="adsbygoogle"
+      style="display:inline-block;width:300px;height:250px"
+      data-ad-client={adsenseClient}
+      data-ad-slot={articleAdSlot}
+    ></ins>
+  </div>
+  <a href="/legal/cookies" data-ad-privacy>
+    広告のプライバシー設定
+  </a>
+</aside>
+
+<style>
+  .article-ad {
+    margin-block: 2.5rem;
+    text-align: center;
+  }
+  .article-ad small,
+  .article-ad a {
+    display: block;
+    color: var(--ink-faint);
+    font-size: 0.75rem;
+  }
+  .article-ad small {
+    margin-bottom: 0.5rem;
+  }
+  .article-ad__space {
+    width: 300px;
+    height: 250px;
+    margin: 0 auto 0.5rem;
+  }
+  @media (max-width: 349px) {
+    .article-ad {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { mountArticleAd } from "../lib/ads";
+  const slot = document.querySelector<HTMLElement>("[data-article-ad]");
+  if (slot) mountArticleAd(slot);
+</script>

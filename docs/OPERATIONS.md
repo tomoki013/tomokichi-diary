@@ -363,7 +363,27 @@ through `trackSemanticEvent` (`apps/web/src/lib/analytics.ts`) as
 `gtag("event", …)`.
 
 AdSense: `public/ads.txt` and the `google-adsense-account` meta are shipped.
-No ad script is loaded.
+The sole display unit `7152502134` is fixed at 300×250, after article text,
+thanks and share controls. Home, indexes, galleries and legal/contact pages
+have no ad slots. `ArticleAd.astro` reserves the space before rendering;
+`lib/ads.ts` requests the script only on the production apex/www, after page
+load and when the slot is within 200px of the viewport. Narrow containers
+under 300px do not request an ad. Previews/local builds never contact AdSense.
+Blocked or failed scripts do not retry or collapse the reserved space.
+
+2026-10-13: Diary's AdSense Auto ads and Auto optimize were both switched off
+with the user's UX-first authorization; the manual unit was created in the
+existing account. Keep Auto ads/Auto optimize off: turning them on can insert
+additional ads independently of this template. No anchor/vignette/side-rail,
+offerwall or ad-block recovery prompt is used. The existing published Google
+CMP European message for this site includes consent, refusal and management
+choices. The ad privacy link uses Google's revocation flow when available and
+otherwise opens the cookie policy. Other sites' messages/settings are unchanged.
+AdSense report OAuth is a separate integration and is still disabled.
+
+To stop ads, remove `<ArticleAd />` from `ArticlePage.astro` and release through
+the usual CI path; ads.txt and the verification meta may remain. Do not add
+slots or enable automatic optimization based on revenue alone.
 
 ## API
 

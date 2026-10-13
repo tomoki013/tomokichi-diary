@@ -1,6 +1,7 @@
 # Test Gap Analysis — Tomokichi Diary 2.0
 
 作成日: 2026-09-21
+追記（2026-10-13）: 記事末尾広告は、本番hostname制限（別サブドメインも拒否）、page loadとviewport接近まで外部通信しないこと、二重初期化/二重リクエスト防止、固定幅が収まらない画面、script失敗時の非再試行を振る舞いテストで検証。Google CMPの地域判定・同意拒否後の配信/実在広告の表示は本番手動検証対象であり、ローカル/Lighthouseから広告リクエストを送らない。
 前提: `docs/audit/diary-2.0-full-audit.md` の発見を、「壊れたときの影響が大きい順」にテストへ落とす。Coverage の数字は目標にしない。
 
 ## 1. Current Test（2026-09-21 時点）
