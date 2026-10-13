@@ -1,6 +1,6 @@
 # 認証・非公開データ
 
-2026-10-13: 利用者の承認を受け、専用サービスアカウント、WIF pool/provider、IAM、GitHub analytics environmentと接続Variablesを設定済み。Google長期鍵は作成していない。Cloudflare/GitHub再集計用のSecretsと本番実行検証は未完了。以下は設定内容と再設定時の手順。既存GA4/GSC export連携・service accountは変更していない。
+2026-10-13: 利用者の承認を受け、専用サービスアカウント、WIF pool/provider、IAM、GitHub analytics environment、接続Variables、Cloudflare専用token/Secretsを設定済み。Google長期鍵は作成していない。GitHub再集計用のSecretと本番実行検証は未完了。以下は設定内容と再設定時の手順。既存GA4/GSC export連携・service accountは変更していない。
 
 ## GitHub OIDC → Google WIF
 
@@ -26,7 +26,7 @@ GitHubのOIDC設定をread-onlyで確認した結果、use_default=true / use_im
 
 GitHub Settings → Environments → analytics → deployment branchesをmainのみ許可（設定済み）。reviewerが必要ならここで設定。Secretsはこのenvironmentだけ:
 
-- ANALYTICS_CLOUDFLARE_API_TOKEN: D1編集のみ、対象Cloudflare accountへ制限。現在のtoken modelでdatabase単位の制限ができない場合は、その残存権限を管理者が確認する。デプロイ/DNS/R2権限を追加しない。
+- ANALYTICS_CLOUDFLARE_API_TOKEN: account-owned token `tomokichi-diary-analytics-d1`、D1 Writeのみ、対象Cloudflare accountへ制限、有効期限1年。現在のtoken modelではdatabase単位の制限ができず、account内の他D1にも権限が及ぶことを利用者へ説明し、作成直前に承認済み。デプロイ/DNS/R2権限なし。
 - CLOUDFLARE_ACCOUNT_ID: Tomokichi Diaryのaccount。
 
 Environment Variables:
@@ -53,6 +53,6 @@ AI provider/keyは設定しない。外部への個人情報・生検索語送�
 
 ## 設定後の確認結果（2026-10-13）
 
-providerはACTIVE、issuer/mapping/conditionを再取得して一致を確認。専用SAのuser-managed key一覧は空。project権限はjobUserのみ、SAには対象repository principalSetのWorkloadIdentityUserのみ。GitHub environmentはmainのbranch policyのみ、3つの接続Variablesを確認。RepositoryのANALYTICS_ENABLED=0を明示設定し、未設定Secretsの状態で定期ジョブを起動しない。
+providerはACTIVE、issuer/mapping/conditionを再取得して一致を確認。専用SAのuser-managed key一覧は空。project権限はjobUserのみ、SAには対象repository principalSetのWorkloadIdentityUserのみ。GitHub environmentはmainのbranch policyのみ、3つの接続Variablesを確認。Cloudflare tokenのactive状態、Diary DBのID/名前とSELECT 1のbatch接続を確認。analytics environmentの2つのSecret名/更新日時を読み直し確認済み。秘密値はチャット/ログへ出さず、一時転送ファイルは登録後に削除、クリップボードも復元した。RepositoryのANALYTICS_ENABLED=0を維持し、main配信前の定期ジョブを起動しない。
 
 mainに承認済みworkflowが入った後、実際のGitHub OIDC → SA → BigQuery dry runを確認する。現在PR #81はDraftで、設定の読み直しは完了したが、GitHubからの実トークン認証はまだ検証していない。認証用に人間へ追加のToken Creator権限を付けたり、SA鍵を作ったりしていない。
