@@ -11,9 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^1.2.3",
     "@modelcontextprotocol/ext-apps": "^2.0.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "@tomokichi/application": "workspace:*",
+    "@tomokichi/infra-d1": "workspace:*",
     "agents": "^0.24.0",
     "zod": "^4.6.5"
   },

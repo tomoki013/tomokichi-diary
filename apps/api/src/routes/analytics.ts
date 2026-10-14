@@ -30,6 +30,14 @@ export function analyticsRoutes() {
       await analyticsDashboard(createAnalyticsStore(fromD1(c.env.DB)), range, articleId),
     );
   });
+  // Used only by the private ChatGPT consent flow. A shared admin token is not
+  // a human identity and must never authorize an OAuth grant.
+  routes.get("/connection-identity", (c) => {
+    const actor = c.get("adminActor");
+    if (!actor.startsWith("access:"))
+      return errorResponse(c, "API_UNAUTHORIZED", "Access login required", 401);
+    return c.json({ subject: actor.slice("access:".length) });
+  });
   routes.get("/reports", async (c) => {
     const rows = await fromD1(c.env.DB)
       .prepare(

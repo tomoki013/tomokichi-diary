@@ -96,3 +96,7 @@ High risk: 日付/前期間/閏年、URL host・redirect・canonical、GSC加重
 | High: 日次率/p75の誤加算、端末/記事の混同              | experience.test.tsの期間累積、端末/記事/layout分離、欠測、50件未満の速度判定              | 前後比較だけでは因果効果を示さない                                |
 | High: BQ SQLの個人情報/任意文字列/別サイト混入         | check-sql.tsの合成fixture実BQ方言検証と本番bounded dry run                                | 実イベントは導入後の日次export待ち。過去を0で埋めない             |
 | Medium: AdSenseユニットの二重加算・重複・未完レポート  | analytics.test.tsのsite/unit grain分離・重複拒否・domain filter                           | OAuth完了後の実API互換性・実績は別途確認する                      |
+
+## 2026-10-14: ChatGPT private analytics
+
+Owner identity + read scope fail-closed、匿名/偽token、公開hostのconsent拒否、Access専用identity（共有admin token拒否）、跨origin POST、client表示文字列escape、OAuth metadata・PKCE code exchange・code replay拒否・refresh・resource違い拒否、認証済みMCP tools/listと未生成report読み取り、Admin binding経路を検証。公開MCPの既存ツール集合も継続確認。実ChatGPTのOAuth認証・ツール呼び出しと定期実行はproduction接続後の確認対象で、mock成功から稼働済みと判断しない。AdSenseは実Google APIでapex/www・広告client・unit grainの条件を検証、他hostの指定をテストで拒否。

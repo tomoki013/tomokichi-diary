@@ -122,7 +122,19 @@ describe("optional revenue", () => {
   });
   it("scopes AdSense reports to the blog and keeps estimated revenue separate", () => {
     const url = new URL(adsenseUrl("accounts/pub-123", range));
-    expect(url.searchParams.get("filters")).toBe("OWNED_SITE_DOMAIN_NAME==tomokichidiary.com");
+    expect(url.searchParams.get("filters")).toBe("DOMAIN_CODE==tomokichidiary.com");
+    expect(url.searchParams.getAll("filters")).toEqual([
+      "DOMAIN_CODE==tomokichidiary.com",
+      "AD_CLIENT_ID==ca-pub-123",
+    ]);
+    expect(
+      new URL(
+        adsenseUrl("accounts/pub-123", range, true, "www.tomokichidiary.com"),
+      ).searchParams.getAll("filters"),
+    ).toEqual(["DOMAIN_CODE==www.tomokichidiary.com", "AD_CLIENT_ID==ca-pub-123"]);
+    expect(() => adsenseUrl("accounts/pub-123", range, true, "unrelated.example")).toThrow(
+      "ANALYTICS_ADSENSE_HOST",
+    );
     const headers = ["DATE", "ESTIMATED_EARNINGS", "IMPRESSIONS", "PAGE_VIEWS", "CLICKS"].map(
       (name) => ({ name, ...(name === "ESTIMATED_EARNINGS" ? { currencyCode: "JPY" } : {}) }),
     );
