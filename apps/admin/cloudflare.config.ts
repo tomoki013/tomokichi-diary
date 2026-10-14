@@ -14,7 +14,11 @@ export default defineConfig({
     domains: ["admin.tomokichidiary.com"],
     // A single-page app: every unknown path renders index.html and the hash
     // router takes over. The build output directory is set in wrangler.config.ts.
-    assets: { notFoundHandling: "single-page-application" },
+    assets: {
+      notFoundHandling: "single-page-application",
+      // Access/OAuth navigations must reach the Worker, even with Accept:text/html.
+      runWorkerFirst: ["/api/*", "/analytics-connect"],
+    },
     env: {
       ASSETS: bindings.assets(),
       // The API is reached over the internal network, never over the internet.
