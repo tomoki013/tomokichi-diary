@@ -12,6 +12,7 @@ export interface AnalyticsEnv {
   OAUTH_PROVIDER: OAuthHelpers;
   API: { fetch(request: Request): Promise<Response> };
   ANALYTICS_OWNER_SUBJECT?: string;
+  OAUTH_REGISTRATION_LIMITER: { limit(options: { key: string }): Promise<{ success: boolean }> };
 }
 export function escapeHtml(text: string) {
   return text.replace(
