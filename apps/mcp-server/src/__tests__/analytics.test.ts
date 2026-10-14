@@ -105,6 +105,7 @@ describe("private analytics authorization", () => {
       describeConsent: vi.fn(async () => ({
         clientName: '<script>alert("x")</script>',
         redirectHost: "chatgpt.com",
+        redirectUri: "https://chatgpt.com/connector_platform_oauth_redirect",
       })),
       beginConsent: vi.fn(async () => ({ handle: '"bad', headers: new Headers() })),
     } as unknown as AnalyticsEnv["OAUTH_PROVIDER"];
@@ -121,6 +122,10 @@ describe("private analytics authorization", () => {
     expect(html).toContain("analytics:read");
     expect(html).toContain("90日");
     expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+    expect(response.headers.get("content-security-policy")).toContain(
+      "form-action 'self' https://chatgpt.com;",
+    );
+    expect(response.headers.get("content-security-policy")).not.toContain("form-action *");
   });
   it("advertises one read scope, PKCE and the Access-protected consent page", async () => {
     const { env } = fixture();
