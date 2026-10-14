@@ -38,6 +38,16 @@ async function fixture() {
 }
 afterEach(() => vi.unstubAllGlobals());
 describe("private analytics HTTP boundary", () => {
+  it("requires a verified Access identity rather than a shared admin token for ChatGPT consent", async () => {
+    const { app, env } = await fixture();
+    const path = "/v1/admin/analytics/connection-identity";
+    expect(
+      (await app.request(path, { headers: { authorization: "Bearer test" } }, env)).status,
+    ).toBe(401);
+    const res = await app.request(path, { headers: { "cf-access-jwt-assertion": "signed" } }, env);
+    expect(await res.json()).toEqual({ subject: "operator" });
+    expect(res.headers.get("cache-control")).toBe("private, no-store");
+  });
   it("requires authentication; no public counterpart; Access token can read empty data without exposing secrets", async () => {
     const { app, env } = await fixture();
     const path = "/v1/admin/analytics?start=2026-10-01&end=2026-10-07";

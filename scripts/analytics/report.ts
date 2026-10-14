@@ -53,7 +53,10 @@ const payload = JSON.stringify({
   previous: dashboard.previous,
   experience: dashboard.experience,
   adUnits: dashboard.breakdowns.adUnits,
-  ai: { enabled: false, reason: "集計の本番検証と外部AI設定が完了していません" },
+  ai: {
+    enabled: false,
+    reason: "この保存レポートは集計データです。AI分析は接続先のChatGPTで実行します",
+  },
 });
 await d1([
   {

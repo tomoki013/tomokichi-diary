@@ -10,15 +10,23 @@ interface AdSenseReport {
   startDate?: { year: number; month: number; day: number };
   endDate?: { year: number; month: number; day: number };
 }
-export function adsenseUrl(account: string, range: DateRange, units = false): string {
+export function adsenseUrl(
+  account: string,
+  range: DateRange,
+  units = false,
+  host = "tomokichidiary.com",
+): string {
   if (!/^accounts\/pub-\d+$/.test(account)) throw new Error("ANALYTICS_ADSENSE_ACCOUNT");
   const url = new URL(`https://adsense.googleapis.com/v2/${account}/reports:generate`);
   url.searchParams.set("dateRange", "CUSTOM");
   url.searchParams.set("currencyCode", "JPY");
   url.searchParams.append("dimensions", "DATE");
   if (units) url.searchParams.append("dimensions", "AD_UNIT_ID");
-  // Scope shared AdSense accounts to this site; never collect another site's earnings.
-  url.searchParams.append("filters", "OWNED_SITE_DOMAIN_NAME==tomokichidiary.com");
+  // DOMAIN_CODE is compatible with AD_UNIT_ID; owned-site + unit is rejected by Google.
+  if (!["tomokichidiary.com", "www.tomokichidiary.com"].includes(host))
+    throw new Error("ANALYTICS_ADSENSE_HOST");
+  url.searchParams.append("filters", `DOMAIN_CODE==${host}`);
+  url.searchParams.append("filters", `AD_CLIENT_ID==ca-${account.slice("accounts/".length)}`);
   for (const metric of ["ESTIMATED_EARNINGS", "IMPRESSIONS", "PAGE_VIEWS", "CLICKS"])
     url.searchParams.append("metrics", metric);
   url.searchParams.append("metrics", "AD_REQUESTS");
@@ -134,25 +142,40 @@ export async function fetchAdSense(range: DateRange): Promise<AnalyticsDay[] | n
   });
   if (!token.access_token) throw new Error("ANALYTICS_ADSENSE_UNCONFIGURED");
   const now = new Date().toISOString();
-  const days = parseAdSense(
-    await requestJson<AdSenseReport>(adsenseUrl(account, range), {
-      headers: { authorization: `Bearer ${token.access_token}` },
-    }),
-    range,
-    now,
-  );
-  const units = parseAdSenseUnits(
-    await requestJson<AdSenseReport>(adsenseUrl(account, range, true), {
-      headers: { authorization: `Bearer ${token.access_token}` },
-    }),
-    range,
-    now,
-  );
-  for (const unit of units) {
-    const day = days.find((d) => d.date === unit.date);
-    if (!day) throw new Error("ANALYTICS_ADSENSE_INCOMPLETE");
-    day.rows.push(...unit.rows);
-    assertAnalyticsDay(day);
+  const byDate = new Map<string, AnalyticsDay>();
+  for (const host of ["tomokichidiary.com", "www.tomokichidiary.com"]) {
+    const days = parseAdSense(
+      await requestJson<AdSenseReport>(adsenseUrl(account, range, false, host), {
+        headers: { authorization: `Bearer ${token.access_token}` },
+      }),
+      range,
+      now,
+    );
+    const units = parseAdSenseUnits(
+      await requestJson<AdSenseReport>(adsenseUrl(account, range, true, host), {
+        headers: { authorization: `Bearer ${token.access_token}` },
+      }),
+      range,
+      now,
+    );
+    for (const unit of units) {
+      const day = days.find((d) => d.date === unit.date);
+      if (!day) throw new Error("ANALYTICS_ADSENSE_INCOMPLETE");
+      day.rows.push(...unit.rows);
+    }
+    for (const day of days) {
+      const existing = byDate.get(day.date);
+      if (!existing) byDate.set(day.date, day);
+      else
+        for (const row of day.rows) {
+          const match = existing.rows.find((r) => r.grain === row.grain && r.key === row.key);
+          if (!match) existing.rows.push(row);
+          else
+            for (const [metric, value] of Object.entries(row.metrics))
+              match.metrics[metric] = (match.metrics[metric] ?? 0) + (value ?? 0);
+        }
+    }
   }
-  return days;
+  for (const day of byDate.values()) assertAnalyticsDay(day);
+  return [...byDate.values()];
 }

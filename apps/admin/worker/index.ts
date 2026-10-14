@@ -10,6 +10,7 @@
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
   API: { fetch(request: Request): Promise<Response> };
+  ANALYTICS_MCP?: { fetch(request: Request): Promise<Response> };
 }
 
 const API_PREFIX = "/api";
@@ -17,6 +18,13 @@ const API_PREFIX = "/api";
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (url.pathname === "/analytics-connect") {
+      if (!env.ANALYTICS_MCP)
+        return new Response("Analytics connection unavailable", { status: 503 });
+      // Preserve Access assertion, consent cookie, method and body. This one
+      // path is the human login/consent page; MCP transport stays off the admin.
+      return env.ANALYTICS_MCP.fetch(request);
+    }
     if (!url.pathname.startsWith(`${API_PREFIX}/`)) return env.ASSETS.fetch(request);
 
     const forwarded = new URL(request.url);

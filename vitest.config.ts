@@ -6,5 +6,6 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/dist/**"],
     reporters: process.env.CI_JSON ? ["json"] : ["dot"],
     passWithNoTests: true,
+    server: { deps: { inline: ["@cloudflare/workers-oauth-provider"] } },
   },
 });
