@@ -8,7 +8,7 @@ interface Env extends AnalyticsEnv {
 }
 
 export default {
-  fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/analytics/oauth/register" && request.method === "POST") {
       if (!env.OAUTH_REGISTRATION_LIMITER) return new Response("Unavailable", { status: 503 });
