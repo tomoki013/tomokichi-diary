@@ -63,11 +63,13 @@ export async function consent(request: Request, env: AnalyticsEnv): Promise<Resp
     const headers = new Headers(transaction.headers);
     headers.set("content-type", "text/html; charset=utf-8");
     headers.set("cache-control", "private, no-store");
-    headers.set("referrer-policy", "no-referrer");
+    // Native form POSTs need a non-null Origin for the strict CSRF check.
+    // Cross-origin callbacks still receive no Referer.
+    headers.set("referrer-policy", "same-origin");
     headers.set("x-robots-tag", "noindex, nofollow");
     headers.set(
       "content-security-policy",
-      "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+      `default-src 'none'; style-src 'unsafe-inline'; form-action 'self' ${new URL(info.redirectUri).origin}; frame-ancestors 'none'; base-uri 'none'`,
     );
     return new Response(
       `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Diary分析データの接続</title><style>body{font:17px/1.8 system-ui;max-width:640px;padding:32px 20px;margin:auto;color:#24313b;background:#fbfaf7}button{font:inherit;padding:10px 22px;margin:8px;border-radius:8px;border:1px solid #456}button[value=allow]{background:#23443b;color:white}p{overflow-wrap:anywhere}</style><h1>非公開の分析データを接続</h1><p>接続先（名称はクライアントの申告）: <strong>${escapeHtml(info.clientName)}</strong><br>認証後の戻り先: <strong>${escapeHtml(info.redirectHost)}</strong>${info.clientDomain ? `<br>クライアントのドメイン: ${escapeHtml(info.clientDomain)}` : ""}</p>${info.redirectIsLoopback ? "<p>ローカルアプリが戻り先です。他のローカルプロセスが受信する可能性があります。</p>" : ""}<p>Tomokichi Diaryの流入・検索・推定収益・広告表示・読書体験の集計と週次/月次レポートを読み取れます。記事や広告の設定は変更できません。閲覧者を特定するデータや認証情報は渡しません。</p><p>読み取り許可: analytics:read<br>接続の有効期間: 最大90日（アクセストークンは1時間）</p><form method="post" action="/analytics-connect"><input type="hidden" name="handle" value="${escapeHtml(transaction.handle)}"><button name="decision" value="allow">読み取りを許可</button><button name="decision" value="deny">キャンセル</button></form></html>`,
