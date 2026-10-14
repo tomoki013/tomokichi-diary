@@ -90,6 +90,17 @@ describe("private analytics authorization", () => {
     expect((await consent(request, env)).status).toBe(403);
     expect(
       (
+        await consent(
+          new Request("https://admin.tomokichidiary.com/analytics-connect", {
+            method: "POST",
+            headers: { "cf-access-jwt-assertion": "signed", origin: "null" },
+          }),
+          env,
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
         await consent(request, {
           ...env,
           API: { fetch: async () => Response.json({ subject: "another-user" }) },
@@ -121,6 +132,7 @@ describe("private analytics authorization", () => {
     expect(html).toContain("chatgpt.com");
     expect(html).toContain("analytics:read");
     expect(html).toContain("90日");
+    expect(response.headers.get("referrer-policy")).toBe("same-origin");
     expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
     expect(response.headers.get("content-security-policy")).toContain(
       "form-action 'self' https://chatgpt.com;",

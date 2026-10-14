@@ -63,7 +63,9 @@ export async function consent(request: Request, env: AnalyticsEnv): Promise<Resp
     const headers = new Headers(transaction.headers);
     headers.set("content-type", "text/html; charset=utf-8");
     headers.set("cache-control", "private, no-store");
-    headers.set("referrer-policy", "no-referrer");
+    // Native form POSTs need a non-null Origin for the strict CSRF check.
+    // Cross-origin callbacks still receive no Referer.
+    headers.set("referrer-policy", "same-origin");
     headers.set("x-robots-tag", "noindex, nofollow");
     headers.set(
       "content-security-policy",
