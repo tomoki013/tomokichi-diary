@@ -10,10 +10,9 @@ const CSP = [
   "default-src 'self'",
   "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  // Cloudflare Web Analytics (cookieless) is injected by the zone.
-  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
+  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
   "frame-src https://challenges.cloudflare.com",
-  "connect-src 'self' https://cloudflareinsights.com",
+  "connect-src 'self'",
   "form-action 'self'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
