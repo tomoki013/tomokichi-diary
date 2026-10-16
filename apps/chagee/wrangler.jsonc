@@ -21,8 +21,7 @@
     {
       "binding": "DB",
       "database_name": "chagee-guide",
-      // Replace with the id printed by `wrangler d1 create chagee-guide`.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "7701e919-d2a6-4a58-9fd3-281dc7f789d9",
       "migrations_dir": "migrations",
     },
   ],
