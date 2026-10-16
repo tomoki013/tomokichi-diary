@@ -27,3 +27,16 @@ export const NAV = [
   { href: "/news", label: "最新情報" },
   { href: "/columns", label: "体験レポート" },
 ] as const;
+
+/**
+ * CHAGEE's own websites, checked 2026-10-17 (each shows "©CHAGEE <region>").
+ * No Japanese or Thai official site was found.
+ */
+export const OFFICIAL_SITES = [
+  { code: "GLB", label: "グローバル（英語）", url: "https://www.chagee.com/en" },
+  { code: "CHN", label: "中国（中国語）", url: "https://www.chagee.com/zh-cn" },
+  { code: "MYS", label: "マレーシア", url: "https://chagee.com.my/" },
+  { code: "SGP", label: "シンガポール", url: "https://chagee.com.sg/en" },
+  { code: "USA", label: "アメリカ", url: "https://chagee.us/" },
+  { code: "KOR", label: "韓国", url: "https://chagee.co.kr/kr/ko" },
+] as const;

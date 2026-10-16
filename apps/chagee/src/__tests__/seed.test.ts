@@ -44,6 +44,22 @@ describe("seed rules", () => {
     await expect(menuSql([{ ...base, tasted: false }])).rejects.toBeInstanceOf(ContentError);
   });
 
+  it("requires tasting scores only for tasted menus", async () => {
+    await expect(menuSql([{ ...base, lightness: null }])).rejects.toThrow(/tasted menu needs/);
+    const official = {
+      ...base,
+      slug: "official-only",
+      tasted: false,
+      editorRating: null,
+      editorComment: null,
+      sweetness: null,
+      lightness: null,
+      popularity: null,
+      nameEn: null,
+    };
+    expect(await menuSql([official])).toHaveLength(1);
+  });
+
   it("refuses unknown enum values and duplicate slugs", async () => {
     await expect(menuSql([{ ...base, teaBase: "coffee" }])).rejects.toThrow(/teaBase/);
     await expect(menuSql([base, base])).rejects.toThrow(/duplicate/);

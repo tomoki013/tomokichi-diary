@@ -6,7 +6,7 @@ export type Country = (typeof COUNTRIES)[number];
 export const MENU_CATEGORIES = ["straight", "milk", "fruit", "seasonal"] as const;
 export type MenuCategory = (typeof MENU_CATEGORIES)[number];
 
-export const TEA_BASES = ["jasmine", "oolong", "green", "black"] as const;
+export const TEA_BASES = ["jasmine", "oolong", "green", "black", "puer"] as const;
 export type TeaBase = (typeof TEA_BASES)[number];
 
 export const MILK_TYPES = ["fresh-milk", "none"] as const;
@@ -47,7 +47,8 @@ export interface Menu {
   slug: string;
   nameJa: string;
   nameZh: string;
-  nameEn: string;
+  /** null when no official English name was found. */
+  nameEn: string | null;
   shortDescription: string;
   description: string;
   imageKey: string | null;
@@ -55,11 +56,12 @@ export interface Menu {
   teaBase: TeaBase;
   teaDetail: string;
   milkType: MilkType;
-  sweetness: Sweetness;
-  /** 1 (rich) .. 5 (refreshing). */
-  lightness: number;
-  /** 1 .. 5, editorial. */
-  popularity: number;
+  /** Editorial, from tasting; null for menus known only from the official site. */
+  sweetness: Sweetness | null;
+  /** 1 (rich) .. 5 (refreshing); null when not tasted. */
+  lightness: number | null;
+  /** 1 .. 5, editorial; null when not tasted. */
+  popularity: number | null;
   temperatures: Temperature[];
   aromaTags: string[];
   flavorTags: string[];

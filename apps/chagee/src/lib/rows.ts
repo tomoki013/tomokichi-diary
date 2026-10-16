@@ -26,6 +26,13 @@ function nullable(row: Row, key: string): string | null {
   return typeof value === "string" && value !== "" ? value : null;
 }
 
+function intOrNull(row: Row, key: string): number | null {
+  const value = row[key];
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 function int(row: Row, key: string): number {
   const value = Number(row[key]);
   return Number.isFinite(value) ? value : 0;
@@ -69,7 +76,7 @@ export function toMenu(row: Row): Menu {
     slug: text(row, "slug"),
     nameJa: text(row, "name_ja"),
     nameZh: text(row, "name_zh"),
-    nameEn: text(row, "name_en"),
+    nameEn: nullable(row, "name_en"),
     shortDescription: text(row, "short_description"),
     description: text(row, "description"),
     imageKey: nullable(row, "image_key"),
@@ -77,9 +84,9 @@ export function toMenu(row: Row): Menu {
     teaBase: text(row, "tea_base") as Menu["teaBase"],
     teaDetail: text(row, "tea_detail"),
     milkType: text(row, "milk_type") as Menu["milkType"],
-    sweetness: text(row, "sweetness") as Menu["sweetness"],
-    lightness: int(row, "lightness"),
-    popularity: int(row, "popularity"),
+    sweetness: nullable(row, "sweetness") as Menu["sweetness"],
+    lightness: intOrNull(row, "lightness"),
+    popularity: intOrNull(row, "popularity"),
     temperatures: jsonList(row.temperatures, isTemperature),
     aromaTags: jsonList(row.aroma_tags, isString),
     flavorTags: jsonList(row.flavor_tags, isString),

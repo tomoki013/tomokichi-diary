@@ -20,7 +20,7 @@ export const GET: APIRoute = async () => {
     "## メニュー",
     ...menus.map(
       (m) =>
-        `- [${m.nameJa}（${m.nameZh} / ${m.nameEn}）](${absoluteUrl(`/menu/${m.slug}`)}): ${m.shortDescription}`,
+        `- [${m.nameJa}（${[m.nameZh, m.nameEn].filter(Boolean).join(" / ")}）](${absoluteUrl(`/menu/${m.slug}`)}): ${m.shortDescription}`,
     ),
     "",
     "## 注文ガイド",

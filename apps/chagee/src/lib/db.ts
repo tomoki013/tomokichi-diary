@@ -37,7 +37,7 @@ export function createRepository(db: D1Database): GuideRepository {
       (
         await all(
           db,
-          "SELECT * FROM menus WHERE status = 'published' ORDER BY popularity DESC, name_ja",
+          "SELECT * FROM menus WHERE status = 'published' ORDER BY tasted DESC, popularity DESC, name_ja",
         )
       ).map(toMenu),
     menu: async (slug) => {

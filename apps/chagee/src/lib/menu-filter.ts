@@ -64,7 +64,7 @@ export function menuHaystack(menu: Menu): string {
     [
       menu.nameJa,
       menu.nameZh,
-      menu.nameEn,
+      menu.nameEn ?? "",
       menu.shortDescription,
       menu.teaDetail,
       ...menu.aromaTags,
@@ -76,6 +76,9 @@ export function menuHaystack(menu: Menu): string {
 const SWEET_RANK: Record<Sweetness, number> = { light: 0, normal: 1, sweet: 2 };
 
 const byName = (a: Menu, b: Menu) => a.nameJa.localeCompare(b.nameJa, "ja");
+// Menus not yet tasted have no editorial scores and sort after those that do.
+const score = (value: number | null) => value ?? -1;
+const sweet = (menu: Menu) => (menu.sweetness === null ? -1 : SWEET_RANK[menu.sweetness]);
 
 export function filterMenus(menus: Menu[], query: MenuQuery): Menu[] {
   const needle = normalize(query.q);
@@ -90,16 +93,16 @@ export function filterMenus(menus: Menu[], query: MenuQuery): Menu[] {
       (query.country === null || menu.availability.some((a) => a.country === query.country)),
   );
   const sorters: Record<MenuSort, (a: Menu, b: Menu) => number> = {
-    popular: (a, b) => b.popularity - a.popularity || byName(a, b),
+    popular: (a, b) =>
+      Number(b.tasted) - Number(a.tasted) ||
+      score(b.popularity) - score(a.popularity) ||
+      byName(a, b),
     beginner: (a, b) =>
       Number(b.beginnerFriendly) - Number(a.beginnerFriendly) ||
-      b.popularity - a.popularity ||
+      score(b.popularity) - score(a.popularity) ||
       byName(a, b),
-    light: (a, b) => b.lightness - a.lightness || byName(a, b),
-    sweet: (a, b) =>
-      SWEET_RANK[b.sweetness] - SWEET_RANK[a.sweetness] ||
-      a.lightness - b.lightness ||
-      byName(a, b),
+    light: (a, b) => score(b.lightness) - score(a.lightness) || byName(a, b),
+    sweet: (a, b) => sweet(b) - sweet(a) || score(a.lightness) - score(b.lightness) || byName(a, b),
   };
   return kept.toSorted(sorters[query.sort]);
 }
@@ -136,14 +139,14 @@ export function toggleHref(
 
 /** Menus that share a tea base or an aroma, best match first. */
 export function relatedMenus(menu: Menu, menus: Menu[], limit = 3): Menu[] {
-  const score = (other: Menu) =>
+  const affinity = (other: Menu) =>
     (other.teaBase === menu.teaBase ? 2 : 0) +
     other.aromaTags.filter((tag) => menu.aromaTags.includes(tag)).length +
     (other.category === menu.category ? 1 : 0);
   return menus
     .filter((other) => other.slug !== menu.slug)
-    .map((other) => ({ other, score: score(other) }))
-    .toSorted((a, b) => b.score - a.score || b.other.popularity - a.other.popularity)
+    .map((other) => ({ other, score: affinity(other) }))
+    .toSorted((a, b) => b.score - a.score || (b.other.popularity ?? 0) - (a.other.popularity ?? 0))
     .slice(0, limit)
     .map(({ other }) => other);
 }

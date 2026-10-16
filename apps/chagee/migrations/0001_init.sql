@@ -12,19 +12,22 @@ CREATE TABLE menus (
   status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published')),
   name_ja TEXT NOT NULL,
   name_zh TEXT NOT NULL,
-  name_en TEXT NOT NULL,
+  -- NULL when no official English name was found.
+  name_en TEXT,
   short_description TEXT NOT NULL,
   description TEXT NOT NULL,
   image_key TEXT,
   category TEXT NOT NULL CHECK (category IN ('straight', 'milk', 'fruit', 'seasonal')),
-  tea_base TEXT NOT NULL CHECK (tea_base IN ('jasmine', 'oolong', 'green', 'black')),
+  tea_base TEXT NOT NULL CHECK (tea_base IN ('jasmine', 'oolong', 'green', 'black', 'puer')),
   tea_detail TEXT NOT NULL,
   milk_type TEXT NOT NULL CHECK (milk_type IN ('fresh-milk', 'none')),
-  sweetness TEXT NOT NULL CHECK (sweetness IN ('light', 'normal', 'sweet')),
+  -- The three below are editorial judgements from tasting, so they stay NULL
+  -- for menus known only from the official site.
+  sweetness TEXT CHECK (sweetness IN ('light', 'normal', 'sweet')),
   -- 1 (rich, heavy) .. 5 (light, refreshing); drives the "さっぱり順" sort.
-  lightness INTEGER NOT NULL CHECK (lightness BETWEEN 1 AND 5),
-  -- 1 .. 5; drives the "人気順" sort. An editorial judgement, not sales data.
-  popularity INTEGER NOT NULL CHECK (popularity BETWEEN 1 AND 5),
+  lightness INTEGER CHECK (lightness BETWEEN 1 AND 5),
+  -- 1 .. 5; drives the "人気順" sort. Not sales data.
+  popularity INTEGER CHECK (popularity BETWEEN 1 AND 5),
   temperatures TEXT NOT NULL DEFAULT '["iced"]',
   aroma_tags TEXT NOT NULL DEFAULT '[]',
   flavor_tags TEXT NOT NULL DEFAULT '[]',

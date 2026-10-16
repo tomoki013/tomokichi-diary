@@ -76,6 +76,25 @@ describe("filterMenus", () => {
     expect(run("sort=sweet")[0]).toBe("peach");
   });
 
+  it("sorts menus without tasting scores after tasted ones", () => {
+    const official = menu({
+      slug: "official",
+      nameJa: "青沫観音",
+      tasted: false,
+      popularity: null,
+      lightness: null,
+      sweetness: null,
+      beginnerFriendly: false,
+    });
+    const list = [official, ...all];
+    const sorted = (search: string) =>
+      filterMenus(list, parseMenuQuery(new URLSearchParams(search))).map((m) => m.slug);
+    expect(sorted("").at(-1)).toBe("official");
+    expect(sorted("sort=light").at(-1)).toBe("official");
+    expect(sorted("sort=sweet").at(-1)).toBe("official");
+    expect(sorted("sweet=normal")).not.toContain("official");
+  });
+
   it("puts beginner-friendly drinks first for 初心者向け", () => {
     expect(run("sort=beginner").at(-1)).toBe("dhp");
   });

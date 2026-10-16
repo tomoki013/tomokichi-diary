@@ -30,6 +30,7 @@ export const TEA_LABEL: Record<TeaBase, string> = {
   oolong: "ウーロン",
   green: "緑茶",
   black: "紅茶",
+  puer: "プーアル",
 };
 
 export const MILK_LABEL: Record<MilkType, string> = {
@@ -75,6 +76,7 @@ export const TEA_TINT: Record<TeaBase, string> = {
   oolong: "#b9814f",
   green: "#a9b77a",
   black: "#8a4b33",
+  puer: "#6e3b2a",
 };
 
 const DATE = new Intl.DateTimeFormat("ja-JP", {

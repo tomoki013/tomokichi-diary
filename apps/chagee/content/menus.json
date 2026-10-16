@@ -5,11 +5,11 @@
     "nameZh": "伯牙绝弦",
     "nameEn": "BO·YA Jasmine Green Milk Tea",
     "shortDescription": "ジャスミン緑茶×フレッシュミルク。迷ったらまずこれ、の看板メニュー。",
-    "description": "CHAGEEを代表する看板メニュー。公式の商品説明では、ジャスミンの花で香りを移した緑茶とフレッシュミルクを組み合わせたミルクティーとして紹介されています。「ジャスミン風味を足したミルクティー」というより、ジャスミン茶そのものをベースにしたミルクティーと考えると分かりやすい一杯です。",
+    "description": "CHAGEEを代表する看板メニュー。公式サイトでは、茶葉を広西・横県産の八重咲きジャスミンで3〜5回香り付けした「茉莉雪芽」をベースに、フレッシュミルクを合わせたミルクティーとして紹介されています。「ジャスミン風味を足したミルクティー」というより、ジャスミン茶そのものをベースにしたミルクティーと考えると分かりやすい一杯です。",
     "imageKey": null,
     "category": "milk",
     "teaBase": "jasmine",
-    "teaDetail": "ジャスミンで香り付けした緑茶",
+    "teaDetail": "ジャスミン緑茶（茉莉雪芽）",
     "milkType": "fresh-milk",
     "sweetness": "normal",
     "lightness": 4,
@@ -19,9 +19,18 @@
     "flavorTags": ["後味すっきり", "華やか"],
     "beginnerFriendly": true,
     "availability": [
-      { "country": "cn", "note": "上海で実飲" },
-      { "country": "my", "note": "公式アプリで商品を確認" },
-      { "country": "sg", "note": "公式の商品説明あり" }
+      {
+        "country": "cn",
+        "note": "上海で実飲"
+      },
+      {
+        "country": "my",
+        "note": "公式アプリで商品を確認"
+      },
+      {
+        "country": "sg",
+        "note": "公式の商品説明あり"
+      }
     ],
     "priceNotes": [],
     "recommendedFor": [
@@ -43,9 +52,21 @@
         "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
       }
     ],
-    "sources": [{ "name": "CHAGEE Singapore 公式の商品説明" }],
-    "checkedAt": "2026-08-24",
-    "updatedAt": "2026-10-13"
+    "sources": [
+      {
+        "name": "CHAGEE Singapore 公式の商品説明"
+      },
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
   },
   {
     "slug": "da-hong-pao-milk-tea",
@@ -53,7 +74,7 @@
     "nameZh": "白雾红尘",
     "nameEn": "Da Hong Pao Milk Tea",
     "shortDescription": "武夷山の大紅袍を使った、焙煎香の濃厚ウーロンミルクティー。",
-    "description": "中国を代表する烏龍茶「大紅袍（だいこうほう）」を使ったミルクティー。公式では武夷山の大紅袍を使い、しっかりした焙煎の香りを持つ烏龍茶として紹介されています。花の香りが主役の伯牙絶弦とは方向がまったく違い、深みとロースト感が中心です。",
+    "description": "中国を代表する烏龍茶「大紅袍（だいこうほう）」を使ったミルクティー。公式サイトでは良質な大紅袍を使った商品として紹介されています（シンガポール公式の商品説明では武夷山の大紅袍、しっかりした焙煎香とされています）。花の香りが主役の伯牙絶弦とは方向がまったく違い、深みとロースト感が中心です。",
     "imageKey": null,
     "category": "milk",
     "teaBase": "oolong",
@@ -66,7 +87,12 @@
     "aromaTags": ["焙煎香", "ロースト"],
     "flavorTags": ["濃厚", "コクがある", "お茶感が強い"],
     "beginnerFriendly": false,
-    "availability": [{ "country": "cn", "note": "上海（豫園・浦東空港）で実飲" }],
+    "availability": [
+      {
+        "country": "cn",
+        "note": "上海（豫園・浦東空港）で実飲"
+      }
+    ],
     "priceNotes": [],
     "recommendedFor": [
       "ミルクティーでもお茶の存在感をしっかり感じたい人",
@@ -87,9 +113,21 @@
         "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
       }
     ],
-    "sources": [{ "name": "CHAGEE 公式の商品説明" }],
-    "checkedAt": "2026-08-24",
-    "updatedAt": "2026-10-13"
+    "sources": [
+      {
+        "name": "CHAGEE 公式の商品説明"
+      },
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
   },
   {
     "slug": "osmanthus-oolong-milk-tea",
@@ -97,11 +135,11 @@
     "nameZh": "桂馥兰香",
     "nameEn": "Osmanthus Oolong Milk Tea",
     "shortDescription": "焙煎ウーロンに金木犀。やわらかく落ち着いた花の香りのミルクティー。",
-    "description": "焙煎した烏龍茶に金木犀の花を合わせたミルクティー。公式では、なめらかでまろやかな味わいと、自然な甘さを感じる花の余韻が特徴とされています。「金木犀味のドリンク」ではなく、烏龍茶をベースに金木犀の香りを重ねたお茶です。名前の似た OSMANTHUS LONG JING MILK TEA（金桂龙井、龍井茶×金木犀）は別商品なので注意。",
+    "description": "烏龍茶に金木犀を合わせたミルクティー。公式サイトでは、閩南（福建省南部）の烏龍茶に広西の金木犀を合わせた商品として紹介されています。英語版の説明は焙煎した烏龍茶ベース。「金木犀味のドリンク」ではなく、烏龍茶をベースに金木犀の香りを重ねたお茶です。名前の似た OSMANTHUS LONG JING MILK TEA（金桂龙井、龍井茶×金木犀）は別商品なので注意。",
     "imageKey": null,
     "category": "milk",
     "teaBase": "oolong",
-    "teaDetail": "焙煎した烏龍茶＋金木犀",
+    "teaDetail": "閩南の烏龍茶＋広西の金木犀",
     "milkType": "fresh-milk",
     "sweetness": "normal",
     "lightness": 3,
@@ -127,30 +165,47 @@
         "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
       }
     ],
-    "sources": [{ "name": "CHAGEE 公式の商品説明" }],
-    "checkedAt": "2026-08-24",
-    "updatedAt": "2026-10-13"
+    "sources": [
+      {
+        "name": "CHAGEE 公式の商品説明"
+      },
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
   },
   {
     "slug": "white-peach-oolong-milk-tea",
     "nameJa": "花田烏龍",
     "nameZh": "花田乌龙",
-    "nameEn": "White Peach Oolong Milk Tea",
-    "shortDescription": "金観音ウーロンに白桃の香り。フルーティーで軽やかなミルクティー。",
-    "description": "白桃の香りを合わせた烏龍ミルクティー。CHAGEE Malaysia 公式では、ベースに福建省南部の金観音（Jin Guan Yin）烏龍茶を使い、桃の香りを組み合わせた商品として紹介されています。桃のジュースのような味ではなく、あくまで烏龍茶とミルクが中心で、そこに白桃の香りが重なるバランスです。",
+    "nameEn": "Peach Oolong Milk Tea",
+    "shortDescription": "金観音ウーロンに桃の果汁。フルーティーで軽やかなミルクティー。",
+    "description": "桃を合わせた烏龍ミルクティー。公式サイトでは、閩南（福建省南部）の金観音（Jin Guan Yin）烏龍茶に、本物の水蜜桃の果汁を合わせた商品として紹介されています。マレーシアでは「White Peach Oolong Milk Tea」の名前で見かけました。果汁は入っていますが、主役はあくまで烏龍茶とミルクです。",
     "imageKey": null,
     "category": "milk",
     "teaBase": "oolong",
-    "teaDetail": "金観音（烏龍茶）＋白桃",
+    "teaDetail": "金観音（閩南の烏龍茶）＋水蜜桃の果汁",
     "milkType": "fresh-milk",
     "sweetness": "normal",
     "lightness": 4,
     "popularity": 3,
     "temperatures": ["iced"],
-    "aromaTags": ["白桃", "フルーティー"],
+    "aromaTags": ["桃", "フルーティー"],
     "flavorTags": ["軽やか", "爽やか"],
     "beginnerFriendly": true,
-    "availability": [{ "country": "my", "note": "CHAGEE Malaysia 公式の商品説明あり" }],
+    "availability": [
+      {
+        "country": "my",
+        "note": "CHAGEE Malaysia 公式の商品説明あり"
+      }
+    ],
     "priceNotes": [],
     "recommendedFor": [
       "濃厚すぎない一杯がいい人",
@@ -171,8 +226,331 @@
         "url": "https://tomokichidiary.com/posts/chagee-menu-explained"
       }
     ],
-    "sources": [{ "name": "CHAGEE Malaysia 公式の商品説明" }],
-    "checkedAt": "2026-08-24",
-    "updatedAt": "2026-10-13"
+    "sources": [
+      {
+        "name": "CHAGEE Malaysia 公式の商品説明"
+      },
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "gardenia-green-milk-tea",
+    "nameJa": "山野梔子",
+    "nameZh": "山野栀子",
+    "nameEn": "Gardenia Green Milk Tea",
+    "shortDescription": "クチナシの花で香りを付けた緑茶のミルクティー。",
+    "description": "公式サイトでは、雲南・普洱の大葉の烘青緑茶と、四川・楽山の小葉の烘青緑茶をブレンドした茶葉を使った商品として紹介されています。英語版の説明では、たっぷりのクチナシの花と合わせるとされています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "green",
+    "teaDetail": "烘青緑茶（雲南の大葉＋四川の小葉）＋クチナシ",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["クチナシ", "花の香り"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "longjing-milk-tea",
+    "nameJa": "醒時春山",
+    "nameZh": "醒时春山",
+    "nameEn": null,
+    "shortDescription": "浙江・龍井産地の春摘み龍井茶を使ったミルクティー。",
+    "description": "公式サイト（中国語版）では、浙江の龍井産地から選んだ春の龍井茶を使った商品として紹介されています。英語版の商品一覧には載っておらず、英語名は確認できていません。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "green",
+    "teaDetail": "龍井茶（浙江・春摘み）",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["龍井", "緑茶"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "glutinous-green-milk-tea",
+    "nameJa": "青青糯山",
+    "nameZh": "青青糯山",
+    "nameEn": "Glutinous Green Milk Tea",
+    "shortDescription": "もち米のような香りの葉で香り付けした緑茶のミルクティー。",
+    "description": "公式サイトでは、雲南特産の植物「糯米香葉（もち米のような香りがする葉）」で香り付けした緑茶をベースにした商品として紹介されています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "green",
+    "teaDetail": "糯米香葉で香り付けした緑茶",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["もち米のような香り"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "ceylon-milk-black-tea",
+    "nameJa": "万里木蘭",
+    "nameZh": "万里木兰",
+    "nameEn": "Ceylon Milk Black Tea",
+    "shortDescription": "標高の違うセイロン紅茶をブレンドしたミルクティー。",
+    "description": "公式サイトでは、標高の異なる産地のセイロン紅茶をブレンドし、フレッシュミルクと合わせた商品として紹介されています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "black",
+    "teaDetail": "セイロン紅茶（ブレンド）",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["紅茶"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "rose-puer-milk-tea",
+    "nameJa": "去雲南・玫瑰普洱",
+    "nameZh": "去云南·玫瑰普洱",
+    "nameEn": "Rose Pu'er Milk Tea",
+    "shortDescription": "6年熟成のプーアル茶に雲南のバラを合わせたミルクティー。",
+    "description": "公式サイトでは、6年熟成のプーアル茶をベースに、雲南の赤いバラを合わせた商品として紹介されています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "puer",
+    "teaDetail": "プーアル茶（6年熟成）＋バラ",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["バラ", "花の香り", "熟成香"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "lapsang-souchong-black-milk-tea",
+    "nameJa": "万山紅・金絲小種",
+    "nameZh": "万山红·金丝小种",
+    "nameEn": "Lapsang Souchong Black Milk Tea",
+    "shortDescription": "雲南の滇紅と福建の正山小種、2つの紅茶を合わせたミルクティー。",
+    "description": "公式サイトでは、雲南の金絲滇紅と福建の正山小種（ラプサン・スーチョン）という2種類の代表的な紅茶をブレンドした商品として紹介されています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "black",
+    "teaDetail": "金絲滇紅＋正山小種",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["紅茶"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
+  },
+  {
+    "slug": "tie-guan-yin-milk-tea",
+    "nameJa": "青沫観音",
+    "nameZh": "青沫观音",
+    "nameEn": "Tie Guan Yin Milk Tea",
+    "shortDescription": "鉄観音をベースにしたウーロンミルクティー。",
+    "description": "公式サイトでは、良質な鉄観音（烏龍茶）を茶葉に使った商品として紹介されています。",
+    "imageKey": null,
+    "category": "milk",
+    "teaBase": "oolong",
+    "teaDetail": "鉄観音（烏龍茶）",
+    "milkType": "fresh-milk",
+    "sweetness": null,
+    "lightness": null,
+    "popularity": null,
+    "temperatures": [],
+    "aromaTags": ["鉄観音"],
+    "flavorTags": [],
+    "beginnerFriendly": false,
+    "availability": [
+      {
+        "country": "cn",
+        "note": "中国の公式サイトに掲載"
+      }
+    ],
+    "priceNotes": [],
+    "recommendedFor": [],
+    "notRecommendedFor": [],
+    "tasted": false,
+    "editorRating": null,
+    "editorComment": null,
+    "blogLinks": [],
+    "sources": [
+      {
+        "name": "CHAGEE公式サイト（原叶鲜奶茶）",
+        "url": "https://www.chagee.com/zh-cn/product/fresh-milk-tea-series"
+      },
+      {
+        "name": "CHAGEE official site (Fresh Milk Tea)",
+        "url": "https://www.chagee.com/en/product/fresh-milk-tea-series"
+      }
+    ],
+    "checkedAt": "2026-10-17",
+    "updatedAt": "2026-10-17"
   }
 ]

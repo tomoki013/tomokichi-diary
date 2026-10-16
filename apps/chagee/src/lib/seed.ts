@@ -61,6 +61,10 @@ function scale(entry: Json, where: string, key: string): number {
   return value;
 }
 
+function optScale(entry: Json, where: string, key: string): number | null {
+  return entry[key] === null || entry[key] === undefined ? null : scale(entry, where, key);
+}
+
 function list(
   entry: Json,
   where: string,
@@ -158,6 +162,15 @@ export async function menuSql(entries: Json[]): Promise<string[]> {
       const rating = e.editorRating ?? null;
       if (!tasted && (rating !== null || opt(e, where, "editorComment") !== null))
         throw new ContentError(`${where}: rating and comment are only for menus the editor tasted`);
+      // Sweetness, lightness and popularity are judgements from tasting.
+      const sweetness =
+        e.sweetness === null || e.sweetness === undefined
+          ? null
+          : oneOf(e, where, "sweetness", SWEETNESS);
+      const lightness = optScale(e, where, "lightness");
+      const popularity = optScale(e, where, "popularity");
+      if (tasted && (sweetness === null || lightness === null || popularity === null))
+        throw new ContentError(`${where}: a tasted menu needs sweetness, lightness and popularity`);
       return upsert(
         "menus",
         {
@@ -166,7 +179,7 @@ export async function menuSql(entries: Json[]): Promise<string[]> {
           status: e.status ?? "published",
           name_ja: str(e, where, "nameJa"),
           name_zh: str(e, where, "nameZh"),
-          name_en: str(e, where, "nameEn"),
+          name_en: opt(e, where, "nameEn"),
           short_description: str(e, where, "shortDescription"),
           description: str(e, where, "description"),
           image_key: opt(e, where, "imageKey"),
@@ -174,9 +187,9 @@ export async function menuSql(entries: Json[]): Promise<string[]> {
           tea_base: oneOf(e, where, "teaBase", TEA_BASES),
           tea_detail: str(e, where, "teaDetail"),
           milk_type: oneOf(e, where, "milkType", MILK_TYPES),
-          sweetness: oneOf(e, where, "sweetness", SWEETNESS),
-          lightness: scale(e, where, "lightness"),
-          popularity: scale(e, where, "popularity"),
+          sweetness,
+          lightness,
+          popularity,
           temperatures: list(e, where, "temperatures", (v) =>
             (TEMPERATURES as readonly unknown[]).includes(v),
           ),

@@ -25,15 +25,21 @@ const { menu } = Astro.props;
         {menu.nameZh}
       </p>
       <h3>{menu.nameJa}</h3>
-      <p class="en" lang="en">
-        {menu.nameEn}
-      </p>
+      {menu.nameEn && (
+        <p class="en" lang="en">
+          {menu.nameEn}
+        </p>
+      )}
       <p class="desc">{menu.shortDescription}</p>
       <ul class="tags">
         <li class="tag">{TEA_LABEL[menu.teaBase]}系</li>
         <li class="tag">{MILK_LABEL[menu.milkType]}</li>
         {menu.beginnerFriendly && <li class="tag">初心者向け</li>}
-        {menu.tasted && <li class="badge firsthand">実飲</li>}
+        {menu.tasted ? (
+          <li class="badge firsthand">実飲</li>
+        ) : (
+          <li class="badge official">公式情報</li>
+        )}
       </ul>
       {menu.editorRating !== null && (
         <p class="score">
