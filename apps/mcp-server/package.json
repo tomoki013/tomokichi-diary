@@ -16,7 +16,7 @@
     "@modelcontextprotocol/server": "^2.0.0",
     "@tomokichi/application": "workspace:*",
     "@tomokichi/infra-d1": "workspace:*",
-    "agents": "^0.24.0",
+    "agents": "^0.28.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
