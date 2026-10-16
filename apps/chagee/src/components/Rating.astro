@@ -1,0 +1,32 @@
+---
+/** A 1–5 meter drawn with bars, so it needs no symbol glyphs. */
+interface Props {
+  value: number;
+  label: string;
+}
+
+const { value, label } = Astro.props;
+---
+
+<span class="rating" role="img" aria-label={`${label} 5段階中${value}`}>
+  {[1, 2, 3, 4, 5].map((n) => (
+    <span class:list={["pip", { on: n <= value }]} />
+  ))}
+</span>
+
+<style>
+  .rating {
+    display: inline-flex;
+    gap: 3px;
+    vertical-align: middle;
+  }
+  .pip {
+    width: 12px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+  }
+  .pip.on {
+    background: var(--red);
+  }
+</style>

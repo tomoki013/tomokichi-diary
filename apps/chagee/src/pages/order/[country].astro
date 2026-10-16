@@ -1,0 +1,218 @@
+---
+import Base from "../../layouts/Base.astro";
+import CountryTabs from "../../components/CountryTabs.astro";
+import Customize from "../../components/Customize.astro";
+import PhoneSteps from "../../components/PhoneSteps.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import CheckedDate from "../../components/CheckedDate.astro";
+import StoreCard from "../../components/StoreCard.astro";
+import { COUNTRY_LABEL } from "../../lib/labels";
+import { guideBySlug } from "../../lib/order-guide";
+import { repo } from "../../lib/repo";
+
+const guide = guideBySlug(Astro.params.country ?? "");
+if (!guide) return Astro.rewrite("/404");
+
+const country = COUNTRY_LABEL[guide.country];
+const path = `/order/${guide.slug}`;
+const stores = guide.ready
+  ? (await repo().stores()).filter((store) => store.country === guide.country && store.editorPick)
+  : [];
+const howToLd = guide.ready
+  ? {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: `${country}でのCHAGEEの注文方法`,
+      step: guide.steps.map((step, index) => ({
+        "@type": "HowToStep",
+        position: index + 1,
+        name: step.title,
+        text: step.detail,
+      })),
+    }
+  : null;
+---
+
+<Base
+  meta={{
+    title: guide.ready
+      ? `${country}でのCHAGEEの注文方法｜${guide.method}`
+      : `${country}でのCHAGEEの注文方法（準備中）`,
+    description: guide.lead,
+    path,
+    noindex: !guide.ready,
+  }}
+  crumbs={[
+    { name: "注文ガイド", href: "/order" },
+    { name: country, href: path },
+  ]}
+  jsonLd={howToLd ? [howToLd] : []}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>{country}でのCHAGEEの注文方法</h1>
+      <p class="lead">{guide.lead}</p>
+    </header>
+
+    <CountryTabs current={guide.slug} />
+
+    {guide.ready ? (
+      <>
+        <section class="section split">
+          <PhoneSteps steps={guide.steps} title={`${country}：${guide.method}`} />
+          <div class="facts">
+            <dl class="card">
+              <div>
+                <dt>注文方法</dt>
+                <dd>{guide.method}</dd>
+              </div>
+              <div>
+                <dt>アプリ</dt>
+                <dd>{guide.app}</dd>
+              </div>
+              <div>
+                <dt>支払い</dt>
+                <dd>{guide.payment}</dd>
+              </div>
+              <div>
+                <dt>最初の一杯</dt>
+                <dd>{guide.firstPick}</dd>
+              </div>
+            </dl>
+            <CheckedDate checkedAt={guide.checkedAt} />
+            {guide.cautions.length > 0 && (
+              <div class="cautions card">
+                <h2>注意点</h2>
+                <ul>
+                  {guide.cautions.map((caution) => (
+                    <li>{caution}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section class="section">
+          <SectionHeading title="サイズ・氷・甘さ" />
+          <Customize showChinese={guide.country === "cn"} />
+        </section>
+
+        {stores.length > 0 && (
+          <section class="section">
+            <SectionHeading
+              title={`${country}のおすすめ店舗`}
+              moreHref={`/stores?country=${guide.country}`}
+              moreLabel="店舗一覧へ"
+            />
+            <div class="grid cols-2">
+              {stores.map((store) => (
+                <StoreCard store={store} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {guide.blogLink && (
+          <section class="section card story">
+            <p class="label">体験レポート</p>
+            <p>実際に注文したときの詳しい様子は、旅行ブログに書いています。</p>
+            <a href={guide.blogLink.url}>{guide.blogLink.title}</a>
+          </section>
+        )}
+      </>
+    ) : (
+      <section class="section card pending">
+        <h2>このガイドは準備中です</h2>
+        <p>体験していないことは書かない方針です。実際に注文したら、ここにまとめます。</p>
+        <div class="actions">
+          <a class="button" href="/order/singapore">
+            シンガポールの注文方法を見る
+          </a>
+          <a class="button ghost" href="/news">
+            最新情報を見る
+          </a>
+        </div>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .split {
+    display: grid;
+    gap: 20px;
+  }
+  @media (min-width: 860px) {
+    .split {
+      grid-template-columns: 360px 1fr;
+      align-items: start;
+    }
+  }
+  .facts {
+    display: grid;
+    gap: 10px;
+  }
+  dl {
+    margin: 0;
+    padding: 6px 16px;
+  }
+  dl div {
+    display: grid;
+    grid-template-columns: 6.5em 1fr;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  dl div:last-child {
+    border-bottom: 0;
+  }
+  dt {
+    color: var(--text-sub);
+    font-weight: 700;
+  }
+  dd {
+    margin: 0;
+  }
+  .cautions {
+    padding: 14px 16px;
+    background: var(--warn-bg);
+    border-color: #ecd9b4;
+  }
+  .cautions h2 {
+    font-size: 1rem;
+  }
+  .cautions ul {
+    margin: 6px 0 0;
+    padding-left: 1.2em;
+    font-size: 0.9rem;
+  }
+  .story {
+    padding: 16px;
+    display: grid;
+    gap: 6px;
+    border-left: 5px solid var(--red);
+  }
+  .story .label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 0.1em;
+  }
+  .pending {
+    padding: 20px;
+    text-align: center;
+    display: grid;
+    gap: 10px;
+  }
+  .pending h2 {
+    font-size: 1.15rem;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+</style>

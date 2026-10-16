@@ -1,0 +1,228 @@
+---
+import Base from "../../layouts/Base.astro";
+import StoreCard from "../../components/StoreCard.astro";
+import CheckedDate from "../../components/CheckedDate.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import { COUNTRY_LABEL, formatDate } from "../../lib/labels";
+import { ORDER_GUIDES } from "../../lib/order-guide";
+import { repo } from "../../lib/repo";
+
+const data = repo();
+const [store, all] = await Promise.all([data.store(Astro.params.slug ?? ""), data.stores()]);
+if (!store) return Astro.rewrite("/404");
+
+const path = `/stores/${store.slug}`;
+const nearby = all.filter((s) => s.city === store.city && s.slug !== store.slug);
+const guide = ORDER_GUIDES.find((g) => g.country === store.country && g.ready);
+---
+
+<Base
+  meta={{
+    title: `${store.name}｜${store.city}・${store.area}のCHAGEE`,
+    description: `${store.city}・${store.area}にあるCHAGEE「${store.name}」の立地、注文方法、実際に行って分かった注意点。${store.goodFor.join("、")}に。`,
+    path,
+    updatedAt: store.updatedAt,
+  }}
+  crumbs={[
+    { name: "店舗検索", href: "/stores" },
+    { name: store.city, href: `/stores?city=${encodeURIComponent(store.city)}` },
+    { name: store.name, href: path },
+  ]}
+>
+  <article class="wrap">
+    <header class="page-head">
+      <div class="meta">
+        <span class="badge region">{COUNTRY_LABEL[store.country]}</span>
+        <span class="tag plain">
+          {store.city}・{store.area}
+        </span>
+        {store.visited && <span class="badge firsthand">実際に行った</span>}
+        {store.editorPick && <span class="tag">ともきちのおすすめ</span>}
+      </div>
+      <h1>{store.name}</h1>
+      {store.nameLocal && store.nameLocal !== store.name && (
+        <p class="local" lang="zh-Hans">
+          現地表記：{store.nameLocal}
+        </p>
+      )}
+    </header>
+
+    <table class="info card">
+      <tbody>
+        <tr>
+          <th scope="row">エリア</th>
+          <td>
+            {store.city}・{store.area}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">アクセス</th>
+          <td>{store.access ?? "未確認"}</td>
+        </tr>
+        <tr>
+          <th scope="row">住所</th>
+          <td>{store.address ?? "未確認（地図アプリで確認してください）"}</td>
+        </tr>
+        <tr>
+          <th scope="row">営業時間</th>
+          <td>{store.openingHours ?? "未確認（公式アプリで確認してください）"}</td>
+        </tr>
+        <tr>
+          <th scope="row">注文方法</th>
+          <td>
+            {store.ordering ?? "未確認"}
+            {guide && (
+              <>
+                {" "}
+                ／ <a href={`/order/${guide.slug}`}>注文ガイドを見る</a>
+              </>
+            )}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">特徴</th>
+          <td>{store.features.join("・") || "—"}</td>
+        </tr>
+        <tr>
+          <th scope="row">こんな日に</th>
+          <td>{store.goodFor.join(" / ") || "—"}</td>
+        </tr>
+      </tbody>
+    </table>
+    <CheckedDate checkedAt={store.checkedAt} updatedAt={store.updatedAt} />
+
+    {store.mapUrl && (
+      <p class="map">
+        <a class="button" href={store.mapUrl} rel="noopener" target="_blank">
+          {store.mapLabel ?? "地図"}で開く
+        </a>
+      </p>
+    )}
+
+    {store.cautions.length > 0 && (
+      <section class="section cautions card">
+        <h2>行く前に知っておきたいこと</h2>
+        <ul>
+          {store.cautions.map((c) => (
+            <li>{c}</li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {store.editorComment && (
+      <section class="section review card">
+        <p class="label">体験レビュー</p>
+        <h2>実際に行ってみて</h2>
+        <p class="comment">{store.editorComment}</p>
+        {store.visitedOn && <p class="by">訪問日：{formatDate(store.visitedOn)}</p>}
+        {store.blogLinks.length > 0 && (
+          <ul class="blog">
+            {store.blogLinks.map((link) => (
+              <li>
+                <a href={link.url}>{link.title}</a>（ともきちの旅行日記）
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )}
+
+    {nearby.length > 0 && (
+      <section class="section">
+        <SectionHeading title={`${store.city}のほかの店舗`} />
+        <div class="grid cols-2">
+          {nearby.map((s) => (
+            <StoreCard store={s} />
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</Base>
+
+<style>
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .local {
+    color: var(--text-sub);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .info {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: 0.92rem;
+    margin-top: 12px;
+  }
+  .info th,
+  .info td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .info tr:last-child > * {
+    border-bottom: 0;
+  }
+  .info th {
+    width: 7em;
+    color: var(--text-sub);
+    background: var(--blush-soft);
+  }
+  .checked {
+    margin-top: 8px;
+  }
+  .map {
+    margin-top: 14px;
+  }
+  .cautions {
+    padding: 14px 16px;
+    background: var(--warn-bg);
+    border-color: #ecd9b4;
+  }
+  .cautions h2 {
+    font-size: 1.02rem;
+  }
+  .cautions ul {
+    margin: 6px 0 0;
+    padding-left: 1.2em;
+  }
+  .review {
+    padding: 18px;
+    border-left: 5px solid var(--red);
+  }
+  .review .label {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: var(--red);
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .review h2 {
+    font-size: 1.15rem;
+    margin-top: 8px;
+  }
+  .comment {
+    margin-top: 8px;
+    font-family: var(--serif);
+    line-height: 2;
+  }
+  .by {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+  }
+  .blog {
+    margin: 10px 0 0;
+    padding-left: 1.2em;
+    font-size: 0.88rem;
+  }
+</style>

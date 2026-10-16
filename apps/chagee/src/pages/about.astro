@@ -1,0 +1,117 @@
+---
+import Base from "../layouts/Base.astro";
+import { repo } from "../lib/repo";
+import { SITE } from "../lib/site";
+
+const stores = await repo().stores();
+const visited = stores.filter((s) => s.visited).length;
+---
+
+<Base
+  meta={{
+    title: "このサイトについて",
+    description: `${SITE.tagline}。運営者がCHAGEEにハマった背景と、非公式ガイドとしての情報の扱い方。`,
+    path: "/about",
+  }}
+  crumbs={[{ name: "このサイトについて", href: "/about" }]}
+>
+  <article class="wrap about">
+    <header class="page-head">
+      <h1>このサイトについて</h1>
+      <p class="lead">{SITE.tagline}です。</p>
+    </header>
+
+    <figure class="photo">
+      <img
+        src="/media/photos/changi-jewel-milk-tea-480.webp"
+        srcset="/media/photos/changi-jewel-milk-tea-480.webp 480w, /media/photos/changi-jewel-milk-tea-735.webp 735w"
+        sizes="(min-width: 760px) 280px, 60vw"
+        width="480"
+        height="640"
+        alt="シンガポール・チャンギ空港のJewel前で手に持ったCHAGEEのミルクティー"
+        loading="lazy"
+      />
+      <figcaption>シンガポール、チャンギ空港にて</figcaption>
+    </figure>
+
+    <div class="prose">
+      <h2>上海で出会った一杯</h2>
+      <p>
+        はじまりは上海旅行。南京東路の店舗で何気なく頼んだジャスミンのミルクティーが、驚くほど香り高くて、後味はすっきり。その日から、上海にいる間は何度もCHAGEEに通うことになりました。
+      </p>
+      <p>
+        その後もクアラルンプールやシンガポールで見つけるたびに立ち寄り、これまでに{visited}
+        店舗で飲み歩いています。国ごとに注文方法もメニューも少しずつ違って、それがまた楽しいんです。
+      </p>
+
+      <h2>このサイトを作った理由</h2>
+      <p>
+        CHAGEEが気になって調べても、日本語の情報はまだ多くありません。商品名は中国語で、何のお茶なのか分からない。注文はアプリなのかレジなのか、国によって違う。
+      </p>
+      <p>
+        自分が旅先で迷ったことを整理しておけば、同じようにCHAGEEが気になっている人の役に立てるかもしれない。そう思って、旅行ブログとは別に、CHAGEE専門の日本語ガイドを作りました。
+      </p>
+
+      <h2>非公式のファンガイドです</h2>
+      <p>
+        <strong>{SITE.disclaimer}</strong>
+      </p>
+      <p>
+        掲載している情報は、運営者の実体験と、公式に公開されている情報・報道をもとに個人でまとめたものです。CHAGEEの公式情報は、各国のCHAGEE公式サイト・公式アプリを確認してください。
+      </p>
+
+      <h2>情報の扱い方</h2>
+      <ul>
+        <li>メニュー・店舗・注文方法には「情報の確認日」を表示しています。</li>
+        <li>国・地域によって情報が違うため、地域ラベルを付けています。</li>
+        <li>最新情報は「公式発表」「報道ベース」「噂・未確認」を区別して掲載します。</li>
+        <li>運営者の感想（体験レビュー）と事実情報は、見た目で分けて表示しています。</li>
+        <li>体験していないことは、体験したように書きません。</li>
+      </ul>
+
+      <h2>運営者</h2>
+      <p>
+        ともきち。旅行ブログ「<a href={SITE.blogUrl}>ともきちの旅行日記</a>
+        」で、旅の体験談を書いています。CHAGEEの体験レポートはブログに、メニューや店舗の整理はこのサイトに、と役割を分けています。
+      </p>
+    </div>
+
+    <div class="actions">
+      <a class="button" href="/policy">
+        利用上の注意・非公式ポリシー
+      </a>
+      <a class="button ghost" href="/contact">
+        お問い合わせ
+      </a>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about {
+    max-width: 760px;
+  }
+  .photo {
+    margin: 8px auto 20px;
+    max-width: 280px;
+  }
+  .photo img {
+    border-radius: 140px 140px var(--radius) var(--radius);
+    border: 4px solid var(--surface);
+    box-shadow: var(--shadow);
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+  .photo figcaption {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    margin-top: 6px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+</style>

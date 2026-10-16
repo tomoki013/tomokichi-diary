@@ -1,0 +1,31 @@
+{
+  "name": "@tomokichi/chagee",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "test": "vitest run",
+    "db:migrate:local": "wrangler d1 migrations apply chagee-guide --local",
+    "db:migrate": "wrangler d1 migrations apply chagee-guide --remote",
+    "db:seed:local": "tsx scripts/build-seed.ts && wrangler d1 execute chagee-guide --local --file .seed/seed.sql",
+    "db:seed": "tsx scripts/build-seed.ts && wrangler d1 execute chagee-guide --remote --file .seed/seed.sql",
+    "media:sync:local": "tsx scripts/sync-media.ts --local",
+    "media:sync": "tsx scripts/sync-media.ts --remote",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.3.4",
+    "@inquiry-platform/sdk": "github:tomoki013/inquiry-platform#v0.3.1&path:/packages/sdk",
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.5",
+    "@cloudflare/workers-types": "^5.20260925.1",
+    "sharp": "^0.35.4",
+    "wrangler": "^4.149.0"
+  }
+}

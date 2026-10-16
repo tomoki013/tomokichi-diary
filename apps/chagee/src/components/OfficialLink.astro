@@ -1,0 +1,240 @@
+---
+import { OFFICIAL_SITES } from "../lib/site";
+
+/**
+ * Always-on link to CHAGEE's own sites, drawn as a travel stamp whose ring of
+ * text slowly turns. A <details> element, so it opens without JavaScript. It
+ * doubles as a reminder that this guide is not the official site.
+ */
+---
+
+<details class="official">
+  <summary aria-label="CHAGEE公式サイトを開く（外部サイト）">
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <path id="official-ring" d="M50 50m-38 0a38 38 0 1 1 76 0a38 38 0 1 1-76 0"></path>
+      </defs>
+      <text font-size="10.5" letter-spacing="2.6" font-weight="700">
+        <textPath href="#official-ring">CHAGEE OFFICIAL · 公式サイト ·</textPath>
+      </text>
+    </svg>
+    <span class="core" aria-hidden="true">
+      <svg viewBox="0 0 24 24" class="cup">
+        <path
+          class="steam"
+          d="M9 4.5c1-1.2 2-1.2 3 0s2 1.2 3 0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+        ></path>
+        <path d="M5.5 8h13l-1.4 11a2 2 0 0 1-2 1.8H8.9a2 2 0 0 1-2-1.8z" fill="currentColor"></path>
+        <path d="M6.6 12.5h10.8l-.5 4H7.1z" fill="#b61e24"></path>
+      </svg>
+      <span class="word">公式</span>
+    </span>
+  </summary>
+  <div class="panel">
+    <p class="head">
+      本家に行く<span>CHAGEE公式サイト（外部）</span>
+    </p>
+    <ul>
+      {OFFICIAL_SITES.map((site) => (
+        <li>
+          <a href={site.url} rel="noopener" target="_blank">
+            <span class="code">{site.code}</span>
+            <span class="label">{site.label}</span>
+            <span class="go" aria-hidden="true">
+              ↗
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="note">日本の公式サイトはまだありません。このガイドは非公式のファンサイトです。</p>
+  </div>
+</details>
+
+<style>
+  .official {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 40;
+  }
+  summary {
+    list-style: none;
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 35% 30%, #c7343a, var(--red-dark) 70%);
+    color: #fffdfb;
+    box-shadow:
+      0 0 0 3px var(--bg),
+      0 0 0 4.5px rgb(182 30 36 / 35%),
+      0 8px 22px rgb(143 21 27 / 32%);
+    transition: transform 0.25s ease;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover {
+    transform: rotate(-8deg) scale(1.04);
+  }
+  .ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: #f7d9d3;
+    animation: spin 18s linear infinite;
+  }
+  .core {
+    display: grid;
+    justify-items: center;
+    line-height: 1;
+    gap: 1px;
+  }
+  .cup {
+    width: 24px;
+    height: 24px;
+  }
+  .steam {
+    animation: steam 2.4s ease-in-out infinite;
+  }
+  .word {
+    font-family: var(--serif);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .official[open] summary {
+    transform: rotate(-12deg);
+  }
+  .panel {
+    position: absolute;
+    right: 0;
+    bottom: 88px;
+    width: min(300px, calc(100vw - 28px));
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 14px 40px rgb(45 33 28 / 18%);
+    padding: 14px;
+    transform-origin: bottom right;
+    animation: pop 0.22s ease-out;
+  }
+  .panel::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1.5px dashed var(--blush);
+    border-radius: calc(var(--radius) - 5px);
+    pointer-events: none;
+  }
+  .head {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--red-ink);
+    display: grid;
+    padding: 2px 6px 8px;
+  }
+  .head span {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-sub);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    position: relative;
+  }
+  a {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+  }
+  a:hover {
+    background: var(--blush-soft);
+    color: var(--red-ink);
+  }
+  .code {
+    font-family: Georgia, var(--serif);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--red);
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    text-align: center;
+    padding: 2px 0;
+    transform: rotate(-6deg);
+  }
+  .label {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .go {
+    color: var(--red);
+  }
+  .note {
+    position: relative;
+    margin-top: 10px;
+    padding: 0 6px 2px;
+    font-size: 0.72rem;
+    color: var(--text-sub);
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes steam {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(1px);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ring,
+    .steam,
+    .panel {
+      animation: none;
+    }
+    summary {
+      transition: none;
+    }
+  }
+  @media print {
+    .official {
+      display: none;
+    }
+  }
+</style>

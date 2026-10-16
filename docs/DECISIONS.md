@@ -17,6 +17,7 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 | 0007 | 埋め込みは「何であるか」を保存し、コンポーネント名を保存しない       | 維持。`EmbedBlock.astro` / `CostReport.astro`                                         |
 | 0008 | series / journey は `Collection` entity                              | 維持。`/series/*` `/journey/*` は 301                                                 |
 | 0009 | 旅行知識は記事とは別の sidecar graph                                 | 維持。3 記事のみ移行、111 記事が backlog                                              |
+| 0010 | CHAGEE ガイドは同じリポジトリの別サイト（別 Worker / D1 / R2）       | 新規（2026-10-13）。`apps/chagee`。ADR 0006 の対象外（D1 をリクエスト時に読む）       |
 
 ## ADR 化されていない判断（コード・設定・履歴から）
 

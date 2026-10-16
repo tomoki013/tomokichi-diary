@@ -1,0 +1,199 @@
+---
+import Base from "../../layouts/Base.astro";
+import StoreCard from "../../components/StoreCard.astro";
+import StoreMap from "../../components/StoreMap.astro";
+import FilterGroup from "../../components/FilterGroup.astro";
+import SearchBar from "../../components/SearchBar.astro";
+import EmptyState from "../../components/EmptyState.astro";
+import { COUNTRY_LABEL } from "../../lib/labels";
+import { repo } from "../../lib/repo";
+import { citiesOf, filterStores, groupByCity, parseStoreQuery } from "../../lib/store-filter";
+
+const params = Astro.url.searchParams;
+const query = parseStoreQuery(params);
+const all = await repo().stores();
+const stores = filterStores(all, query);
+const groups = groupByCity(stores);
+const countries = [...new Set(all.map((store) => store.country))];
+const pins = groupByCity(all).map((group) => ({
+  city: group.city,
+  country: group.country,
+  count: group.stores.length,
+}));
+const filtered = query.q !== "" || query.country !== null || query.city !== null || query.visited;
+const picks = all.filter((store) => store.editorPick);
+const hidden = Object.fromEntries([...params].filter(([key]) => key !== "q"));
+---
+
+<Base
+  meta={{
+    title: "CHAGEEの店舗を探す｜上海・クアラルンプール・シンガポール",
+    description:
+      "CHAGEE（霸王茶姬）の店舗を国・都市から探せます。上海・クアラルンプール・シンガポールで実際に行った店舗を、観光ルートとの相性や注意点つきで紹介。",
+    path: "/stores",
+    noindex: filtered,
+  }}
+  crumbs={[{ name: "店舗検索", href: "/stores" }]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>CHAGEEの店舗を探す</h1>
+      <p class="lead">
+        掲載しているのは運営者が実際に行った店舗です。CHAGEEのために移動するより、その日の観光ルートにある店舗を選ぶのがいちばん楽でした。
+      </p>
+    </header>
+
+    <SearchBar
+      action="/stores"
+      value={query.q}
+      placeholder="店名・エリア・観光地で探す（豫園、Sentosa…）"
+      label="店舗を検索"
+      hidden={hidden}
+    />
+
+    <div class="layout">
+      <div class="side">
+        <StoreMap pins={pins} active={query.city} />
+        <div class="filters card">
+          <FilterGroup
+            label="国・地域"
+            param="country"
+            options={countries.map((c) => ({ value: c, label: COUNTRY_LABEL[c] }))}
+            path="/stores"
+            params={params}
+          />
+          <FilterGroup
+            label="都市"
+            param="city"
+            options={citiesOf(all, query.country).map((city) => ({ value: city, label: city }))}
+            path="/stores"
+            params={params}
+          />
+        </div>
+      </div>
+
+      <div class="list">
+        <p class="count" aria-live="polite">
+          {stores.length}店舗
+          {filtered && <a href="/stores">条件をクリア</a>}
+        </p>
+        {groups.length > 0 ? (
+          groups.map((group) => (
+            <section class="city">
+              <h2>
+                {group.city}
+                <span>
+                  {COUNTRY_LABEL[group.country]}・{group.stores.length}店舗
+                </span>
+              </h2>
+              <div class="grid">
+                {group.stores.map((store) => (
+                  <StoreCard store={store} />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <EmptyState title="条件に合う店舗が見つかりませんでした" resetHref="/stores">
+            <p>現在は実際に行った店舗だけを掲載しています。</p>
+          </EmptyState>
+        )}
+      </div>
+    </div>
+
+    {!filtered && picks.length > 0 && (
+      <section class="section picks card">
+        <h2>ともきちのおすすめ</h2>
+        <ul>
+          {picks.map((store) => (
+            <li>
+              <a href={`/stores/${store.slug}`}>{store.name}</a>
+              <span>{store.goodFor[0]}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <p class="notice footnote">
+      住所・営業時間は変わることがあるため、出発前に地図アプリやCHAGEE公式アプリで確認してください。中国本土では
+      Baidu Maps で「霸王茶姬」と検索すると見つけやすいです。
+    </p>
+  </div>
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .side {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .filters {
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  @media (min-width: 900px) {
+    .layout {
+      grid-template-columns: 360px minmax(0, 1fr);
+      align-items: start;
+    }
+    .side {
+      position: sticky;
+      top: 110px;
+    }
+  }
+  .count {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    display: flex;
+    gap: 12px;
+  }
+  .city {
+    margin-top: 14px;
+  }
+  .city h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .city h2 span {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--text-sub);
+    font-weight: 400;
+  }
+  .picks {
+    padding: 16px 18px;
+    border-top: 3px solid var(--red);
+  }
+  .picks h2 {
+    font-size: 1.1rem;
+  }
+  .picks ul {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+  }
+  .picks li {
+    display: grid;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .picks span {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+  }
+  .footnote {
+    margin-top: 24px;
+  }
+</style>

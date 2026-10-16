@@ -1,0 +1,72 @@
+---
+import Stamp from "./Stamp.astro";
+import { COLUMN_CATEGORY_LABEL, COUNTRY_LABEL, formatDate } from "../lib/labels";
+import type { ColumnLink } from "../lib/types";
+
+/** A post on the travel blog. The card links out; nothing is copied here. */
+interface Props {
+  column: ColumnLink;
+}
+
+const { column } = Astro.props;
+---
+
+<article class="card column-card">
+  <a href={column.url} class="hit">
+    <Stamp country={column.country} label={COLUMN_CATEGORY_LABEL[column.category]} />
+    <div class="body">
+      <div class="meta">
+        <span class="tag">{COLUMN_CATEGORY_LABEL[column.category]}</span>
+        {column.country && <span class="tag plain">{COUNTRY_LABEL[column.country]}</span>}
+        <time datetime={column.publishedAt}>{formatDate(column.publishedAt)}</time>
+      </div>
+      <h3>{column.title}</h3>
+      <p class="excerpt">{column.excerpt}</p>
+      <p class="out">ともきちの旅行日記で読む</p>
+    </div>
+  </a>
+</article>
+
+<style>
+  .hit {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 12px;
+    padding: 14px;
+    color: inherit;
+    text-decoration: none;
+    height: 100%;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-sub);
+  }
+  h3 {
+    font-size: 1rem;
+    margin-top: 6px;
+    line-height: 1.55;
+  }
+  .excerpt {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    margin-top: 6px;
+    line-height: 1.7;
+  }
+  .out {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--red-ink);
+  }
+  .out::after {
+    content: " →";
+  }
+  .hit:hover h3 {
+    color: var(--red-ink);
+    text-decoration: underline;
+  }
+</style>

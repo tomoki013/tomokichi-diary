@@ -1,0 +1,72 @@
+[
+  {
+    "title": "CHAGEE（霸王茶姬）とは？おすすめメニュー・注文方法・店舗ガイドまとめ",
+    "excerpt": "上海で初めて飲んでハマったCHAGEEを、メニュー・茶葉・3か国の注文方法・実際に行った店舗まで、目的別にまとめた入口の記事。",
+    "url": "https://tomokichidiary.com/posts/shanghai-chagee",
+    "category": "travel",
+    "country": null,
+    "sortOrder": 1,
+    "publishedAt": "2025-12-05",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "CHAGEEで頼むならこれ。実際に飲んでよかったおすすめメニュー",
+    "excerpt": "中国・マレーシア・シンガポールで飲んだ中から4杯。看板の伯牙絶弦、いちばん好きな白雾红尘、金木犀の桂馥兰香、白桃の花田乌龙。",
+    "url": "https://tomokichidiary.com/posts/shanghai-chagee-menu",
+    "category": "menu",
+    "country": null,
+    "sortOrder": 2,
+    "publishedAt": "2025-12-05",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "CHAGEEのメニューを日本語で解説｜実際に飲んだ4種類の茶葉・香り・特徴",
+    "excerpt": "商品名だけでは分からない「何のお茶なのか」を、公式の商品説明をもとに日本語で整理。",
+    "url": "https://tomokichidiary.com/posts/chagee-menu-explained",
+    "category": "menu",
+    "country": null,
+    "sortOrder": 3,
+    "publishedAt": "2026-08-24",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "CHAGEEの注文方法｜中国・マレーシア・シンガポールで実際に注文して分かった違い",
+    "excerpt": "中国はAlipay、マレーシアは公式アプリ、シンガポールはMobile Web。3か国で実際に注文して分かった違いと、甘さ・氷の選び方。",
+    "url": "https://tomokichidiary.com/posts/chagee-ordering-china-malaysia-singapore",
+    "category": "compare",
+    "country": null,
+    "sortOrder": 4,
+    "publishedAt": "2026-08-24",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "上海のCHAGEE（霸王茶姬）実際に行った3店舗｜南京東路・豫園・浦東空港",
+    "excerpt": "初めてCHAGEEを飲んだ南京東路、豫園、帰国前の浦東空港。Baidu Mapsで「霸王茶姬」と検索するコツも。",
+    "url": "https://tomokichidiary.com/posts/shanghai-chagee-stores",
+    "category": "report",
+    "country": "cn",
+    "sortOrder": 5,
+    "publishedAt": "2026-08-24",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "クアラルンプールのCHAGEE実際に行った3店舗｜旅行中ならどこが行きやすい？",
+    "excerpt": "NU Sentral、Pavilion、WOLO KL。バトゥ洞窟へ向かう朝、買い物の途中、Jalan Alorの夜。観光ルート別の寄り方。",
+    "url": "https://tomokichidiary.com/posts/chagee-kuala-lumpur-stores",
+    "category": "report",
+    "country": "my",
+    "sortOrder": 6,
+    "publishedAt": "2026-08-24",
+    "updatedAt": "2026-08-24"
+  },
+  {
+    "title": "シンガポールのCHAGEE実際に行った4店舗｜観光ルート別にどこへ寄る？",
+    "excerpt": "Arab Street、Sentosa、Lau Pa Sat、Changi T2。CHAGEEのためだけに移動しない、旅の途中の4杯。",
+    "url": "https://tomokichidiary.com/posts/chagee-singapore-stores",
+    "category": "report",
+    "country": "sg",
+    "sortOrder": 7,
+    "publishedAt": "2026-08-24",
+    "updatedAt": "2026-08-24"
+  }
+]

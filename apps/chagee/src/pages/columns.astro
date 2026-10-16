@@ -1,0 +1,78 @@
+---
+import Base from "../layouts/Base.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import FilterGroup from "../components/FilterGroup.astro";
+import EmptyState from "../components/EmptyState.astro";
+import { COLUMN_CATEGORY_LABEL } from "../lib/labels";
+import { repo } from "../lib/repo";
+import { SITE } from "../lib/site";
+import { COLUMN_CATEGORIES, type ColumnCategory } from "../lib/types";
+
+const raw = Astro.url.searchParams.get("category");
+const category = (COLUMN_CATEGORIES as readonly string[]).includes(raw ?? "")
+  ? (raw as ColumnCategory)
+  : null;
+const all = await repo().columns();
+const columns = all.filter((column) => category === null || column.category === category);
+---
+
+<Base
+  meta={{
+    title: "CHAGEE体験レポート・コラム",
+    description:
+      "上海でCHAGEEにハマり、マレーシア・シンガポールでも飲み歩いた体験レポートとコラムの一覧。記事は「ともきちの旅行日記」に掲載しています。",
+    path: "/columns",
+    noindex: category !== null,
+  }}
+  crumbs={[{ name: "体験レポート", href: "/columns" }]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="kicker">旅するように、CHAGEEを味わう。</p>
+      <h1>体験レポート・コラム</h1>
+      <p class="lead">
+        上海の南京東路で最初の一杯を飲んでから、クアラルンプール、シンガポールへ。旅の途中で出会ったCHAGEEの記録です。
+      </p>
+    </header>
+
+    <p class="notice soft">
+      体験レポートやコラムの本文は、運営者の旅行ブログ「
+      <a href={SITE.blogUrl}>ともきちの旅行日記</a>
+      」に掲載しています。カードを開くとブログの記事へ移動します。
+    </p>
+
+    <div class="filters">
+      <FilterGroup
+        label="カテゴリ"
+        param="category"
+        options={COLUMN_CATEGORIES.map((value) => ({ value, label: COLUMN_CATEGORY_LABEL[value] }))}
+        path="/columns"
+        params={new URLSearchParams(category ? { category } : {})}
+      />
+    </div>
+
+    {columns.length > 0 ? (
+      <div class="grid cols-2">
+        {columns.map((column) => (
+          <ColumnCard column={column} />
+        ))}
+      </div>
+    ) : (
+      <EmptyState title="このカテゴリの記事はまだありません" resetHref="/columns" />
+    )}
+  </div>
+</Base>
+
+<style>
+  .kicker {
+    font-family: var(--serif);
+    color: var(--red);
+    font-size: 0.95rem;
+  }
+  .notice {
+    margin-top: 6px;
+  }
+  .filters {
+    margin-block: 16px;
+  }
+</style>

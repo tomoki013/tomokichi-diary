@@ -1,0 +1,113 @@
+---
+import { COUNTRY_LABEL } from "../lib/labels";
+import type { Country } from "../lib/types";
+
+/**
+ * A stylised travel map: city pins on a dotted field, not a geographic map.
+ * Each pin filters the list to that city. No map library, no tiles.
+ */
+interface Pin {
+  city: string;
+  country: Country;
+  count: number;
+}
+
+interface Props {
+  pins: Pin[];
+  active: string | null;
+}
+
+const PLACES: Record<string, { x: number; y: number; en: string }> = {
+  上海: { x: 236, y: 58, en: "SHANGHAI" },
+  バンコク: { x: 92, y: 168, en: "BANGKOK" },
+  クアラルンプール: { x: 104, y: 262, en: "KUALA LUMPUR" },
+  シンガポール: { x: 142, y: 300, en: "SINGAPORE" },
+  東京: { x: 330, y: 40, en: "TOKYO" },
+};
+
+const { pins, active } = Astro.props;
+const placed = pins.filter((pin) => PLACES[pin.city]);
+const route = placed.map((pin) => PLACES[pin.city]).filter((p) => p !== undefined);
+const path = route.map((p, i) => `${i === 0 ? "M" : "L"}${p.x} ${p.y}`).join(" ");
+---
+
+<figure class="map card">
+  <svg viewBox="0 20 380 310" role="group" aria-label="店舗のある都市">
+    <defs>
+      <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1.1" fill="#e2cfc6"></circle>
+      </pattern>
+    </defs>
+    <rect width="380" height="340" fill="url(#dots)"></rect>
+    <path
+      d={path}
+      fill="none"
+      stroke="#b61e24"
+      stroke-width="1.6"
+      stroke-dasharray="5 6"
+      opacity="0.6"
+    ></path>
+    {placed.map((pin) => {
+      const place = PLACES[pin.city]!;
+      const on = active === pin.city;
+      return (
+        <a
+          href={on ? "/stores" : `/stores?city=${encodeURIComponent(pin.city)}`}
+          aria-label={`${pin.city}（${COUNTRY_LABEL[pin.country]}）の店舗 ${pin.count}件`}
+        >
+          <circle
+            cx={place.x}
+            cy={place.y}
+            r={on ? 22 : 18}
+            fill={on ? "#8f151b" : "#b61e24"}
+            opacity="0.14"
+          />
+          <circle cx={place.x} cy={place.y} r={on ? 11 : 9} fill={on ? "#8f151b" : "#b61e24"} />
+          <text
+            x={place.x}
+            y={place.y + 4}
+            text-anchor="middle"
+            font-size="10"
+            font-weight="700"
+            fill="#fff"
+          >
+            {pin.count}
+          </text>
+          <text x={place.x + 16} y={place.y - 6} font-size="12" font-weight="700" fill="#2d211c">
+            {pin.city}
+          </text>
+          <text x={place.x + 16} y={place.y + 7} font-size="7" letter-spacing="1" fill="#6b5a52">
+            {place.en}
+          </text>
+        </a>
+      );
+    })}
+  </svg>
+  <figcaption>ピンをタップするとその都市の店舗に絞り込みます（位置はイメージです）</figcaption>
+</figure>
+
+<style>
+  .map {
+    margin: 0;
+    padding: 10px;
+    overflow: hidden;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 300px;
+  }
+  svg a:focus-visible {
+    outline: none;
+  }
+  svg a:focus-visible circle {
+    stroke: #2d211c;
+    stroke-width: 2;
+  }
+  figcaption {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    padding: 4px 4px 0;
+  }
+</style>

@@ -1,0 +1,12 @@
+---
+import { VERIFICATION_LABEL } from "../lib/labels";
+import type { Verification } from "../lib/types";
+
+interface Props {
+  status: Verification;
+}
+
+const { status } = Astro.props;
+---
+
+<span class={`badge ${status}`}>{VERIFICATION_LABEL[status]}</span>

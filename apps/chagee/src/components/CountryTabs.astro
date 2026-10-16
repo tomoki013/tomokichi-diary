@@ -1,0 +1,66 @@
+---
+import { COUNTRY_LABEL } from "../lib/labels";
+import { ORDER_GUIDES } from "../lib/order-guide";
+
+/** Country tabs as links: each country is its own page, so they work without JavaScript. */
+interface Props {
+  current: string | null;
+}
+
+const { current } = Astro.props;
+---
+
+<nav class="tabs" aria-label="国・地域を選ぶ">
+  <ul class="scroller">
+    {ORDER_GUIDES.map((guide) => (
+      <li>
+        <a
+          href={`/order/${guide.slug}`}
+          aria-current={current === guide.slug ? "page" : undefined}
+          class:list={{ pending: !guide.ready }}
+        >
+          <span class="country">{COUNTRY_LABEL[guide.country]}</span>
+          <span class="method">{guide.method}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .tabs ul {
+    list-style: none;
+    margin-block: 0;
+    padding-block: 4px;
+  }
+  .tabs a {
+    display: grid;
+    min-width: 128px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--text);
+  }
+  .country {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .method {
+    font-size: 0.72rem;
+    color: var(--text-sub);
+    white-space: nowrap;
+  }
+  .tabs a[aria-current="page"] {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .tabs a[aria-current="page"] .method {
+    color: var(--blush);
+  }
+  .tabs a.pending {
+    border-style: dashed;
+  }
+</style>

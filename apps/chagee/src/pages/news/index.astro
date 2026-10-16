@@ -1,0 +1,116 @@
+---
+import Base from "../../layouts/Base.astro";
+import NewsCard from "../../components/NewsCard.astro";
+import FilterGroup from "../../components/FilterGroup.astro";
+import EmptyState from "../../components/EmptyState.astro";
+import { NEWS_CATEGORY_LABEL, VERIFICATION_LABEL } from "../../lib/labels";
+import { repo } from "../../lib/repo";
+import { NEWS_CATEGORIES, type NewsCategory } from "../../lib/types";
+
+const PAGE_SIZE = 20;
+const params = Astro.url.searchParams;
+const rawCategory = params.get("category");
+const category = (NEWS_CATEGORIES as readonly string[]).includes(rawCategory ?? "")
+  ? (rawCategory as NewsCategory)
+  : null;
+const all = await repo().news();
+const matching = all.filter((item) => category === null || item.category === category);
+const page = Math.max(1, Number.parseInt(params.get("page") ?? "1", 10) || 1);
+const items = matching.slice(0, page * PAGE_SIZE);
+const hasMore = matching.length > items.length;
+const nextParams = new URLSearchParams(params);
+nextParams.set("page", String(page + 1));
+---
+
+<Base
+  meta={{
+    title: "CHAGEE最新情報｜日本上陸・新店舗・新商品",
+    description:
+      "CHAGEE（霸王茶姬）の日本上陸情報、新店舗、新商品、海外ニュースを日本語でまとめています。公式発表・報道・噂を区別して掲載。",
+    path: "/news",
+    noindex: category !== null || page > 1,
+  }}
+  crumbs={[{ name: "最新情報", href: "/news" }]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>CHAGEE最新情報</h1>
+      <p class="lead">日本上陸や新店舗など、CHAGEEの動きを日本語でまとめています。</p>
+    </header>
+
+    <dl class="legend card">
+      <div>
+        <dt>
+          <span class="badge official">{VERIFICATION_LABEL.official}</span>
+        </dt>
+        <dd>CHAGEEや運営会社が発表した情報</dd>
+      </div>
+      <div>
+        <dt>
+          <span class="badge reported">{VERIFICATION_LABEL.reported}</span>
+        </dt>
+        <dd>報道機関が伝えた情報（出典つき）</dd>
+      </div>
+      <div>
+        <dt>
+          <span class="badge unverified">{VERIFICATION_LABEL.unverified}</span>
+        </dt>
+        <dd>SNSなどの話題や、裏付けが取れていない情報</dd>
+      </div>
+    </dl>
+
+    <div class="filters">
+      <FilterGroup
+        label="カテゴリ"
+        param="category"
+        options={NEWS_CATEGORIES.map((value) => ({ value, label: NEWS_CATEGORY_LABEL[value] }))}
+        path="/news"
+        params={new URLSearchParams(category ? { category } : {})}
+      />
+    </div>
+
+    {items.length > 0 ? (
+      <div class="grid list">
+        {items.map((item) => (
+          <NewsCard item={item} />
+        ))}
+      </div>
+    ) : (
+      <EmptyState title="このカテゴリの情報はまだありません" resetHref="/news" />
+    )}
+    {hasMore && (
+      <p class="more-wrap">
+        <a class="button ghost" href={`/news?${nextParams}`}>
+          もっと見る
+        </a>
+      </p>
+    )}
+  </div>
+</Base>
+
+<style>
+  .legend {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    display: grid;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+  .legend div {
+    display: grid;
+    grid-template-columns: 7em 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .legend dd {
+    margin: 0;
+    color: var(--text-sub);
+  }
+  .filters {
+    margin-block: 14px;
+  }
+  .more-wrap {
+    text-align: center;
+    margin-top: 18px;
+  }
+</style>
