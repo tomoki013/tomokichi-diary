@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
 import { articleStatusLabels, formatDateTime, formatRelative } from "../lib/labels";
@@ -41,6 +41,8 @@ export function Articles() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [kind, setKind] = useState<"all" | "article" | "page">("article");
   const [query, setQuery] = useState("");
+  // Filtering re-renders every row; typing stays responsive while it catches up.
+  const deferredQuery = useDeferredValue(query);
   const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [publishing, setPublishing] = useState(false);
@@ -59,7 +61,7 @@ export function Articles() {
   }, [pending, reloadPublication]);
 
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = deferredQuery.trim().toLowerCase();
     const test = FILTERS.find((entry) => entry.key === filter)?.test ?? (() => true);
     return (articles.data ?? [])
       .filter((item) => kind === "all" || item.kind === kind)
@@ -72,7 +74,7 @@ export function Articles() {
           (item.path ?? "").includes(needle),
       )
       .toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  }, [articles.data, filter, kind, query]);
+  }, [articles.data, filter, kind, deferredQuery]);
 
   const selectable = visible.filter(canSelectForPublication);
   const chosen = selectable.filter((article) => selected.has(article.id));

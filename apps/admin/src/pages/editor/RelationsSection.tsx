@@ -5,6 +5,7 @@ import { api, type PlaceDto, type Relation, type RelationsInput } from "../../li
 import { relationLabels } from "../../lib/labels";
 import { treeOrder } from "../../lib/locations";
 import { useResource } from "../../ui/hooks";
+import { href } from "../../lib/route";
 import { ErrorState, Panel, SkeletonRows } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 
@@ -54,6 +55,8 @@ export function RelationsSection({
   const [value, setValue] = useState<RelationsInput>(() => relationsFrom(article));
   const [baseline, setBaseline] = useState(() => JSON.stringify(relationsFrom(article)));
   const [tagFilter, setTagFilter] = useState("");
+  const [newTag, setNewTag] = useState({ name: "", slug: "" });
+  const [creatingTag, setCreatingTag] = useState(false);
   const [busy, setBusy] = useState(false);
   const dirty = JSON.stringify(value) !== baseline;
 
@@ -92,6 +95,27 @@ export function RelationsSection({
   }
 
   useSectionSave(register, "relations", { dirty, busy, save });
+
+  // A new tag is created right away (it is shared data, not part of this
+  // article's draft) and ticked here, so it is saved with the relations.
+  async function addTag(): Promise<void> {
+    setCreatingTag(true);
+    try {
+      const tag = await api.createTag({ name: newTag.name.trim(), slug: newTag.slug.trim() });
+      reference.setData((current) =>
+        current
+          ? { ...current, taxonomy: { ...current.taxonomy, tags: [...current.taxonomy.tags, tag] } }
+          : current,
+      );
+      setValue((current) => ({ ...current, tagIds: [...current.tagIds, tag.id] }));
+      setNewTag({ name: "", slug: "" });
+      toast.info(`タグ「${tag.name}」を追加しました`);
+    } catch (error) {
+      toast.error(error);
+    } finally {
+      setCreatingTag(false);
+    }
+  }
 
   if (!reference.data) {
     return (
@@ -236,7 +260,9 @@ export function RelationsSection({
       </fieldset>
 
       <fieldset className="field">
-        <legend className="field__label">シリーズ・旅の記録</legend>
+        <legend className="field__label">
+          シリーズ・旅の記録 <a href={href.series()}>シリーズを管理</a>
+        </legend>
         <div className="checks">
           {taxonomy.collections.map((collection) => (
             <label key={collection.id} className="check">
@@ -274,6 +300,30 @@ export function RelationsSection({
               {tag.name}
             </label>
           ))}
+        </div>
+        <div className="row">
+          <input
+            aria-label="新しいタグ名"
+            placeholder="新しいタグ名（例：旅と音楽）"
+            value={newTag.name}
+            onChange={(event) => setNewTag((current) => ({ ...current, name: event.target.value }))}
+          />
+          <input
+            aria-label="新しいタグのslug"
+            placeholder="slug（例：travel-music）"
+            pattern="[a-z0-9]+(-[a-z0-9]+)*"
+            value={newTag.slug}
+            onChange={(event) =>
+              setNewTag((current) => ({ ...current, slug: event.target.value.toLowerCase() }))
+            }
+          />
+          <button
+            type="button"
+            disabled={creatingTag || newTag.name.trim() === "" || newTag.slug.trim() === ""}
+            onClick={() => void addTag()}
+          >
+            ＋ タグを追加
+          </button>
         </div>
       </fieldset>
 

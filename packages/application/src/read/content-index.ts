@@ -200,15 +200,39 @@ export class ContentIndex {
       });
   }
 
-  /** Members of a collection in editorial order, drafts excluded. */
+  /**
+   * Members of a collection in editorial order, drafts excluded. Ties on
+   * `sortOrder` (every membership is 0 unless an editor ordered it) fall back
+   * to the trip date, then the publication date, then the slug, so the order
+   * is the same on every build rather than whatever order the snapshot had.
+   */
   membersOf(collectionId: CollectionId): readonly ArticleView[] {
-    return this.snapshot.articleCollections
-      .filter((m) => m.collectionId === collectionId)
-      .toSorted((a, b) => a.sortOrder - b.sortOrder)
-      .flatMap((m) => {
-        const view = this.viewOf(m.articleId);
+    const order = new Map(
+      this.snapshot.articleCollections
+        .filter((m) => m.collectionId === collectionId)
+        .map((m) => [m.articleId, m.sortOrder]),
+    );
+    return [...order.keys()]
+      .flatMap((articleId) => {
+        const view = this.viewOf(articleId);
         return view ? [view] : [];
+      })
+      .toSorted((a, b) => {
+        const byOrder = (order.get(a.article.id) ?? 0) - (order.get(b.article.id) ?? 0);
+        if (byOrder !== 0) return byOrder;
+        const tripA = a.article.travelStartDate ?? "\uffff";
+        const tripB = b.article.travelStartDate ?? "\uffff";
+        if (tripA !== tripB) return tripA < tripB ? -1 : 1;
+        const pubA = a.article.publishedAt ?? "";
+        const pubB = b.article.publishedAt ?? "";
+        if (pubA !== pubB) return pubA < pubB ? -1 : 1;
+        return a.article.slug < b.article.slug ? -1 : a.article.slug > b.article.slug ? 1 : 0;
       });
+  }
+
+  /** Whether a collection has anything a reader can open; empty ones stay out of the index. */
+  hasPublicMembers(collectionId: CollectionId): boolean {
+    return this.membersOf(collectionId).length > 0;
   }
 
   collection(id: CollectionId): Collection | null {

@@ -21,10 +21,13 @@ import type {
   MediaAssetDto,
   MediaUploadDto,
   MediaHashStatusDto,
+  MediaPageDto,
   PageDto,
   PublishCheckDto,
   RouteDto,
   TaxonomyDto,
+  CollectionAdminDto,
+  TagDto,
 } from "@tomokichi/contracts";
 import type { DraftInput } from "./draft";
 import type { Resolution } from "./labels";
@@ -197,6 +200,13 @@ export interface TicketChange {
 
 const id = encodeURIComponent;
 
+export interface CollectionInput {
+  title: string;
+  description: string | null;
+  coverMediaId: string | null;
+  sortOrder: number;
+}
+
 export interface PublicationStatus {
   state: "deployed" | "queued" | "building" | "failed" | "unconfigured";
   configured: boolean;
@@ -287,6 +297,10 @@ export const api = {
 
   // Media
   listMedia: () => request<{ items: MediaAssetDto[] }>("/admin/media"),
+  searchMedia: (q: string, offset = 0, limit = 60) =>
+    request<MediaPageDto>(
+      `/admin/media?${new URLSearchParams({ q, offset: String(offset), limit: String(limit) })}`,
+    ),
   mediaHashStatus: () => request<MediaHashStatusDto>("/admin/media/hash-status"),
   lookupMedia: (sha256: string) =>
     request<{ asset: MediaAssetDto | null }>("/admin/media/lookup", {
@@ -330,6 +344,23 @@ export const api = {
   listLocations: () => request<{ items: LocationDto[] }>("/admin/locations"),
   listPlaces: () => request<{ items: PlaceDto[] }>("/admin/places"),
   taxonomy: () => request<TaxonomyDto>("/admin/taxonomy"),
+  createTag: (input: { slug: string; name: string }) =>
+    request<TagDto>("/admin/tags", json("POST", input)),
+
+  // Series and journeys
+  listCollections: (kind?: "series" | "journey") =>
+    request<{ items: CollectionAdminDto[] }>(`/admin/collections${kind ? `?kind=${kind}` : ""}`),
+  getCollection: (collectionId: string) =>
+    request<CollectionAdminDto>(`/admin/collections/${id(collectionId)}`),
+  createCollection: (
+    input: Omit<CollectionInput, "sortOrder"> & {
+      sortOrder: number | null;
+      slug: string;
+      kind: "series" | "journey";
+    },
+  ) => request<CollectionAdminDto>("/admin/collections", json("POST", input)),
+  updateCollection: (collectionId: string, input: CollectionInput) =>
+    request<CollectionAdminDto>(`/admin/collections/${id(collectionId)}`, json("PATCH", input)),
 
   // URLs
   listRoutes: () => request<{ items: RouteDto[] }>("/admin/routes"),

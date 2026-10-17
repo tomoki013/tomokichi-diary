@@ -98,6 +98,15 @@
     display: block;
   }
 
+  /* Photos come from the media origin and can arrive after first paint on a
+     phone. Mobile Safari paints the alt text into the reserved box meanwhile,
+     which reads as a broken page; a quiet placeholder tone holds the space
+     instead. The alt text stays in the accessibility tree. */
+  picture img {
+    color: transparent;
+    background-color: var(--color-border-decorative);
+  }
+
   button,
   input,
   select,

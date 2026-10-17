@@ -240,12 +240,7 @@ const featuredPin = featured
         style={`--featured-pin-x:${featuredPin.left};--featured-pin-y:${featuredPin.top}`}
       >
         {featured.cover && (
-          <Picture
-            storageKey={featured.cover.storageKey}
-            alt={featured.cover.alt}
-            sizes="220px"
-            loading="eager"
-          />
+          <Picture storageKey={featured.cover.storageKey} alt={featured.cover.alt} sizes="220px" />
         )}
         <span>
           <strong>{featured.title}</strong>

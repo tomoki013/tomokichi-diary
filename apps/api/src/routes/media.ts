@@ -7,11 +7,27 @@ import {
   updateMediaSlug,
   MAX_UPLOAD_BYTES,
 } from "@tomokichi/application";
-import type { ArticleId, MediaId } from "@tomokichi/domain";
+import type { ArticleId, MediaAsset, MediaId } from "@tomokichi/domain";
+import type { MediaPageDto } from "@tomokichi/contracts";
 import type { AppEnv } from "../app.js";
 import { domainErrorResponse, errorResponse } from "../http.js";
 import { toMediaAssetDto } from "../mappers.js";
 import { mediaUsageSchema } from "../schemas.js";
+
+/**
+ * Every word must appear in the slug, the uploaded file name, or the storage
+ * key. The full public URL is left out on purpose: every asset shares its host
+ * and extension, so a query like "jpg" used to match the whole library.
+ */
+export function matchesMediaQuery(asset: MediaAsset, query: string): boolean {
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const haystack = [asset.slug, asset.originalName, asset.storageKey]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
+  return words.every((word) => haystack.includes(word));
+}
 
 export function mediaRoutes() {
   const routes = new Hono<AppEnv>();
@@ -29,14 +45,35 @@ export function mediaRoutes() {
     }),
   );
 
+  // `?limit=` pages and searches on the server, so the library never ships
+  // every asset to the browser. Without it the full list is returned, as
+  // older admin bundles expect.
   routes.get("/", async (c) => {
     const ctx = c.get("ctx");
-    const assets = await ctx.repos.media.listAll();
-    return c.json({
-      items: assets.map((asset) =>
-        toMediaAssetDto(asset, ctx.mediaUrls.resolve(asset.storageKey), c.env.PUBLIC_IMAGE_URL),
-      ),
-    });
+    const dto = (asset: MediaAsset) =>
+      toMediaAssetDto(
+        asset,
+        ctx.mediaUrls.resolve(asset.storageKey),
+        c.env.PUBLIC_IMAGE_URL,
+        (key) => ctx.mediaUrls.resolve(key),
+      );
+    const assets = (await ctx.repos.media.listAll()).toSorted((a, b) =>
+      b.createdAt.localeCompare(a.createdAt),
+    );
+    const limitParam = c.req.query("limit");
+    if (limitParam === undefined) return c.json({ items: assets.map(dto) });
+
+    const limit = Math.min(Math.max(Number.parseInt(limitParam, 10) || 60, 1), 200);
+    const offset = Math.max(Number.parseInt(c.req.query("offset") ?? "0", 10) || 0, 0);
+    const matching = assets.filter((asset) => matchesMediaQuery(asset, c.req.query("q") ?? ""));
+    const page = matching.slice(offset, offset + limit);
+    const next = offset + page.length;
+    const body: MediaPageDto = {
+      items: page.map(dto),
+      total: matching.length,
+      nextOffset: next < matching.length ? next : null,
+    };
+    return c.json(body);
   });
 
   routes.get("/hash-status", async (c) => c.json(await c.get("ctx").repos.media.hashStatus()));
@@ -49,7 +86,12 @@ export function mediaRoutes() {
     const asset = await ctx.repos.media.findBySha256(hash);
     return c.json({
       asset: asset
-        ? toMediaAssetDto(asset, ctx.mediaUrls.resolve(asset.storageKey), c.env.PUBLIC_IMAGE_URL)
+        ? toMediaAssetDto(
+            asset,
+            ctx.mediaUrls.resolve(asset.storageKey),
+            c.env.PUBLIC_IMAGE_URL,
+            (key) => ctx.mediaUrls.resolve(key),
+          )
         : null,
     });
   });
@@ -70,6 +112,7 @@ export function mediaRoutes() {
             result.value,
             ctx.mediaUrls.resolve(result.value.storageKey),
             c.env.PUBLIC_IMAGE_URL,
+            (key) => ctx.mediaUrls.resolve(key),
           ),
         )
       : domainErrorResponse(c, result.errors);
@@ -131,6 +174,7 @@ export function mediaRoutes() {
           result.value.asset,
           ctx.mediaUrls.resolve(result.value.asset.storageKey),
           c.env.PUBLIC_IMAGE_URL,
+          (key) => ctx.mediaUrls.resolve(key),
         ),
         duplicate: result.value.duplicate,
       },

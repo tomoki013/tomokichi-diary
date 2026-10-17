@@ -1041,6 +1041,8 @@
   }
 
   .collection-detail__copy p {
+    /* Descriptions edited in the admin keep their line breaks. */
+    white-space: pre-line;
     color: var(--on-dark-soft);
     font-size: var(--step-small);
     line-height: 1.85;

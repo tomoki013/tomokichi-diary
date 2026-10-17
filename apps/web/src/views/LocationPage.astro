@@ -146,7 +146,7 @@ const metadata = buildPageMetadata(seoConfig, {
                   storageKey={child.cover.asset.storageKey}
                   alt={`${child.name}の旅`}
                   sizes="(max-width: 760px) 50vw, 360px"
-                  loading={index < 3 ? "eager" : "lazy"}
+                  loading={index < 2 ? "eager" : "lazy"}
                 />
               )}
               <span />
@@ -174,7 +174,12 @@ const metadata = buildPageMetadata(seoConfig, {
       {views.length > 0 ? (
         <ul class="card-grid location-story-grid">
           {views.map((view, index) => (
-            <ArticleCard view={view} eager={index < 3} level={3} variant="archive" />
+            <ArticleCard
+              view={view}
+              eager={index < 2 && children.length === 0}
+              level={3}
+              variant="archive"
+            />
           ))}
         </ul>
       ) : (

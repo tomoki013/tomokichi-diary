@@ -30,3 +30,4 @@ export * from "./analytics/dashboard.js";
 
 export * from "./ports/monetization.js";
 export * from "./use-cases/monetization/manage-monetization.js";
+export * from "./use-cases/taxonomy/taxonomy-use-cases.js";

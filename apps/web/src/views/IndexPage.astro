@@ -6,7 +6,8 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import { content } from "../lib/content";
 import Picture from "../components/Picture.astro";
-import { mediaUrl, seoConfig, siteDescription } from "../lib/site";
+import { seoConfig, siteDescription } from "../lib/site";
+import { largeImageUrl } from "../lib/images";
 import WorldMap from "../components/WorldMap.astro";
 import { visitedContinents } from "../lib/destinations";
 import { bestEpisodes } from "../lib/editorial";
@@ -823,7 +824,7 @@ const labelOf = (target: Route): string => {
               <button
                 type="button"
                 data-gallery-open
-                data-src={mediaUrl(item.asset.storageKey)}
+                data-src={largeImageUrl(item.asset.storageKey)}
                 data-alt={item.usage.alt}
                 data-title={item.usage.alt || item.articleTitle}
                 data-article={item.articleTitle}
@@ -835,7 +836,7 @@ const labelOf = (target: Route): string => {
                   storageKey={item.asset.storageKey}
                   alt={item.usage.alt}
                   sizes="(max-width: 760px) 50vw, 360px"
-                  loading={index < 8 ? "eager" : "lazy"}
+                  loading={index < 4 ? "eager" : "lazy"}
                 />
                 <span>
                   <small>{item.country}</small>

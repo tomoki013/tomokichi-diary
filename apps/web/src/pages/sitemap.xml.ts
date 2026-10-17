@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { buildSitemap, renderSitemapXml } from "@tomokichi/seo";
-import { isIndexable } from "@tomokichi/domain";
+import { isIndexable, type CollectionId } from "@tomokichi/domain";
 import { content, now } from "../lib/content";
 import { seoConfig } from "../lib/site";
 
@@ -17,10 +17,19 @@ export const GET: APIRoute = () => {
           ? content.snapshot.articles.find((candidate) => candidate.id === route.targetId)
           : undefined;
 
+      const collection =
+        route.targetType === "series" || route.targetType === "journey"
+          ? (route.targetId as CollectionId | null)
+          : null;
+
       return {
         route,
         lastmod: article?.updatedAt ?? content.snapshot.generatedAt,
-        indexable: article ? isIndexable(article, now) : true,
+        indexable: article
+          ? isIndexable(article, now)
+          : collection !== null
+            ? content.hasPublicMembers(collection)
+            : true,
       };
     }),
   );

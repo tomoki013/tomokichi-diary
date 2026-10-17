@@ -49,7 +49,6 @@ const published = view.article.publishedAt?.slice(0, 10);
         alt={cover.usage.alt}
         sizes={SIZES.card}
         loading={eager ? "eager" : "lazy"}
-        fetchpriority={eager ? "high" : "auto"}
       />
     </a>
   )}

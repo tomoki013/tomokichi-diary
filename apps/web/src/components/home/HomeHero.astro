@@ -108,8 +108,18 @@ const slides = stories.filter((story) => story.view.cover);
     let active = 0;
     let timer = 0;
 
+    // Slides after the first are lazy, and they sit at opacity 0, so a phone
+    // never fetched one until the moment it faded in and showed its alt text.
+    // Warm the next slide as soon as the current one is up.
+    const warm = (index: number) => {
+      const img = slides[(index + slides.length) % slides.length]?.querySelector("img");
+      if (img && img.loading === "lazy") img.loading = "eager";
+    };
+
     const show = (next: number) => {
       active = (next + slides.length) % slides.length;
+      warm(active);
+      warm(active + 1);
       slides.forEach((slide, index) => {
         const current = index === active;
         slide.classList.toggle("is-active", current);
@@ -162,5 +172,7 @@ const slides = stories.filter((story) => story.view.cover);
     hero?.addEventListener("focusin", stop);
     hero?.addEventListener("focusout", start);
     start();
+    if (document.readyState === "complete") warm(1);
+    else window.addEventListener("load", () => warm(1), { once: true });
   }
 </script>
