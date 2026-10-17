@@ -217,3 +217,13 @@ Migrations therefore land while the previous API is still serving traffic.
 非公開の分析基盤は [analytics/ARCHITECTURE.md](analytics/ARCHITECTURE.md)。GA4/GSCの既存BQ exportをbounded queryで読み、既存D1へ集計だけ保存する。Admin/APIのAccess下から読む。公開content export、記事公開CI、R2メディア、CHAGEEサイトとは独立。
 
 現状の訂正: GA4はBaseLayoutから本番hostnameでgtagを遅延ロードしている。配信ビルドはcontent-releaseでD1の公開版を一時exportへpullする（Astro自身はD1を読まない）。この文書冒頭の「JSなし」「Git exportだけ」「切替前」は古い説明であり、現行手順はADMIN.mdとOPERATIONS.mdを参照。
+
+## Monetization preparation
+
+Monetization drafts, affiliate offers and experiments use the existing D1 through
+application repository ports and authenticated admin routes. Article publication
+freezes an allowlisted AdSense-only configuration in `publication_metadata`;
+public builds validate it again. Affiliate offers and planned placements never
+enter the public snapshot, MCP or WebMCP. The initial per-document A/B experiment
+is limited to one article and one ad per variant. See
+[monetization-phase2.md](monetization-phase2.md) for flags, operation and rollback.

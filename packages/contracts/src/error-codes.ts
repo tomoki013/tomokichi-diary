@@ -65,6 +65,8 @@ export const ERROR_CODES = [
   "API_CONFLICT",
   "API_INTERNAL",
 
+  "MONETIZATION_INVALID",
+
   // --- Domain ---
   "ARTICLE_NOT_FOUND",
   "ARTICLE_NOT_PUBLISHABLE",

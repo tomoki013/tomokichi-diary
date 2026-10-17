@@ -492,3 +492,7 @@ summary, body length, a canonical route, and a cover image with alt text.
 ## ANALYTICS_INVALID_RANGE / ANALYTICS_UNCONFIGURED / ANALYTICS_DISPATCH_FAILED / ANALYTICS_INVALID_DATA / ANALYTICS_COLLECTION_FAILED
 
 非公開集計の認証、期間検証、sourceごとの失敗復旧は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) と [analytics/SECURITY.md](analytics/SECURITY.md)。失敗時も旧成功集計とBQ履歴を保持する。GA4/GSC exportや記事公開処理を停止しない。
+
+## MONETIZATION_INVALID
+
+収益化設定の公開前検証・参照・状態遷移に問題があります。重複／消失マーカー、見出しと本文600字未満、画像・カード隣接、1枠上限、未登録ユニット、別記事の実験・未登録案件の参照を確認してください。実施済み実験の条件書換え・再開はできません。DBを直接修正せず、管理画面から修正・保存後、公開チェックを再実行します。切り戻しと機能フラグは [収益化Phase 2](monetization-phase2.md#切り戻し) を参照してください。0017はexpandのみで、旧版へコードを戻す際にもdropは不要です。

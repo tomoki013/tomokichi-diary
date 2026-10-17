@@ -1,3 +1,4 @@
+import { Monetization } from "./pages/Monetization";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, api, clearToken, getToken } from "./lib/api";
 import { href, section } from "./lib/route";
@@ -15,6 +16,7 @@ import { SignIn } from "./pages/SignIn";
 import { EmptyState, ErrorState, PageHeader } from "./ui/parts";
 
 const NAV = [
+  { key: "monetization", label: "収益化", href: href.monetization() },
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
   { key: "analytics", label: "Analytics", href: href.analytics() },
   { key: "articles", label: "記事", href: href.articles() },
@@ -99,6 +101,7 @@ export function App() {
         </div>
       </nav>
       <main className="main">
+        {route.name === "monetization" && <Monetization />}
         {route.name === "dashboard" && <Dashboard />}
         {route.name === "analytics" && <Analytics />}
         {route.name === "articles" && <Articles />}

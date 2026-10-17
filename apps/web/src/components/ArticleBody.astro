@@ -2,6 +2,8 @@
 import { getEntry, render } from "astro:content";
 import type { ArticleEmbed } from "@tomokichi/domain";
 import type { ArticleView } from "@tomokichi/application";
+import ArticleAd from "./ArticleAd.astro";
+import type { AdPlan } from "../lib/monetization";
 import EmbedBlock from "./EmbedBlock.astro";
 import { enhanceBodyImages } from "../lib/images";
 import { content } from "../lib/content";
@@ -9,13 +11,14 @@ import { mediaUrl } from "../lib/site";
 
 interface Props {
   slug: string;
+  adPlan?: AdPlan;
   embeds: readonly ArticleEmbed[];
   /** The article's own path, so relative links in the body resolve like a
       reader's browser resolves them rather than against the site root. */
   path: string;
 }
 
-const { slug, embeds, path } = Astro.props;
+const { slug, embeds, path, adPlan } = Astro.props;
 const entry = await getEntry("articles", slug);
 if (!entry) throw new Error(`no exported body for article ${slug}`);
 
@@ -26,8 +29,13 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
  * Splitting on them keeps the body a single rendered document while letting
  * structured blocks be real components rather than serialised HTML.
  */
-const PLACEHOLDER = /<p>\s*\{\{embed:([a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
+const PLACEHOLDER = /<p>\s*\{\{((?:embed|monetization):[a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
 const html = entry.rendered?.html ?? null;
+if (html === null && entry.body?.includes("{{monetization:")) {
+  throw new Error(
+    "MONETIZATION_INVALID: rendered HTML is required to remove private placement markers",
+  );
+}
 let headingIndex = 0;
 const escapeHtml = (value: string) =>
   value
@@ -119,11 +127,20 @@ const FallbackContent = fallback?.Content;
   ) : (
     segments.map((segment, index) =>
       index % 2 === 1 ? (
-        embedByAnchor.has(segment) ? (
-          <EmbedBlock embed={embedByAnchor.get(segment)!} />
+        segment.startsWith("monetization:") ? (
+          adPlan?.marker?.key === segment.slice(13) ? (
+            <ArticleAd
+              unit={adPlan.marker.unit}
+              placement="body_slot"
+              slotKey={adPlan.marker.key}
+              variant={adPlan.marker.variant}
+            />
+          ) : null
+        ) : embedByAnchor.has(segment.slice(6)) ? (
+          <EmbedBlock embed={embedByAnchor.get(segment.slice(6))!} />
         ) : null
       ) : (
-        <Fragment set:html={segment} />
+        <Fragment set:html={segment.replace(/\{\{monetization:[^}\n]*\}\}/g, "")} />
       ),
     )
   )}

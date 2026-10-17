@@ -85,3 +85,29 @@ it("counts actual candidate exposure once and excludes background time without c
     "vital",
   ]);
 });
+it("mounts once per document and keeps experiment assignment anonymous and distinct from the legacy layout", () => {
+  const f = fixture("tomokichidiary.com");
+  Object.assign(f.doc, {
+    documentElement: { dataset: { adVariant: "B", adExperiment: "chagee-placement-v1" } },
+    querySelector: () => ({
+      dataset: { adLayout: "article-placement-v2" },
+      getBoundingClientRect: () => ({ top: 300, height: 2000, bottom: 2300 }),
+    }),
+  });
+  mountReaderMeasurement();
+  mountReaderMeasurement();
+  f.frame();
+  expect(
+    calls().filter((e) => e.name === "diary_measurement" && e.measurement === "article_view"),
+  ).toHaveLength(1);
+  const assignment = calls().filter(
+    (e) => e.name === "diary_measurement" && e.measurement === "experiment_assignment",
+  );
+  expect(assignment).toHaveLength(1);
+  expect(assignment[0]).toMatchObject({
+    layout_version: "article-placement-v2",
+    experiment_id: "chagee-placement-v1",
+    variant_id: "B",
+  });
+  expect(JSON.stringify(assignment)).not.toContain("http");
+});

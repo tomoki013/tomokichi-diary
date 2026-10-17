@@ -33,6 +33,7 @@ import type {
  * `pnpm export:data` writes to disk.
  */
 export interface ContentSnapshot {
+  readonly monetization?: readonly import("@tomokichi/contracts").PublicMonetization[];
   readonly generatedAt: string;
   readonly articles: readonly Article[];
   readonly revisions: readonly ArticleRevision[];

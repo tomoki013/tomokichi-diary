@@ -137,3 +137,39 @@ assert.equal(Number(vital["vitalPoor"]), 1);
 process.stdout.write(
   "BigQuery synthetic experience checks passed: privacy/hostname/allowlist/vital boundaries\n",
 );
+
+// Same bounded synthetic relation, now exercising the new layout and experiment allowlist.
+const experimentSql = experienceSql
+  .replaceAll(
+    "https://tomokichidiary.com/posts/a",
+    "https://tomokichidiary.com/posts/shanghai-chagee-menu",
+  )
+  .replace(
+    "STRUCT('layout_version',STRUCT('article-end-v1'",
+    "STRUCT('layout_version',STRUCT('article-placement-v2'",
+  )
+  .replace(
+    "STRUCT('measurement',STRUCT(r.measurement",
+    "STRUCT('experiment_id',STRUCT('chagee-placement-v1',CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),\n     STRUCT('variant_id',STRUCT('B',CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),\n     STRUCT('placement_key',STRUCT('answer-end',CAST(NULL AS INT64),CAST(NULL AS FLOAT64))),\n     STRUCT('measurement',STRUCT(r.measurement",
+  );
+const experimentRows = query(experimentSql);
+assert.equal(experimentRows.length, 2);
+assert.ok(
+  experimentRows.every(
+    (r) =>
+      JSON.parse(r["key"]!).variant === "B" &&
+      JSON.parse(r["key"]!).experimentId === "chagee-placement-v1",
+  ),
+);
+assert.equal(
+  query(
+    experimentSql.replaceAll(
+      "STRUCT('experiment_id',STRUCT('chagee-placement-v1'",
+      "STRUCT('experiment_id',STRUCT('arbitrary-private-text'",
+    ),
+  ).length,
+  0,
+);
+process.stdout.write(
+  "BigQuery synthetic experiment checks passed: separate layout/variant and unknown experiment rejection\n",
+);

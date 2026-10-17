@@ -41,3 +41,7 @@ LCP/INP/CLSは公式web-vitalsライブラリの数値だけを送信し、要�
 専用SQLは日次export31日以内、1GB課金上限、文字列と数値をallowlistで検証。GA4の既存日にexperience grainを追加し、本文URLのquery/fragmentを除去、routeで記事に対応づける。独自パラメータはBigQueryのevent_paramsで読むため、GA4カスタムディメンションの作成は不要。導入前に遡って復元できず、未取得期間は空欄とする。ページ別・端末別・配置版別に保持し、全体と記事フィルターの管理画面、週次・月次の私的レポートへ保存する。
 
 配置検討は端末別200計測表示・14計測日を目安とし、週次で観察、月次/28日で再検討する。現在の広告機会・配信率・候補到達に加え、推定収益・本文末到達・回遊・速度・流入構成を併せて判断する。単純な前後差から因果効果を断定しない。本数・位置は自動変更しない。AdSense認証後はDiaryドメインで絞ったDATE×AD_UNIT_IDとAD_REQUESTSを収集し、サイト収益とユニット収益は別grainに保持して二重加算を避ける。
+
+## Phase 2 配置テスト
+
+`article-placement-v2` は `article-end-v1` と別cohort。初期experiment_idは `chagee-placement-v1`、variant_idはA/B、placement_keyは64文字以内のキー。一般の個別配置はexperiment_id/variant_id=none。既存の同一bounded experience queryで取得し、期間別・端末別に比較します。広告ブロックでも割当と広告対象を計測し、リクエスト・filled/unfilledとは分離します。GA4自体をブロック／同意で拒否した訪問の割当は観測できません。A/Bの公式収益はユニットの排他的利用と公式粒度が確認されるまで未取得で、サイト収益を按分しません。各200表示・14計測日を超えても勝者や統計的有意差を自動判定しません。手順: [収益化Phase 2](../monetization-phase2.md)。

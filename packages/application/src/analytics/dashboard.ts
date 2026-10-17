@@ -121,6 +121,10 @@ export async function analyticsDashboard(
       current: experienceSummary(days, range, articleId),
       previous: experienceSummary(days, previous, articleId),
     },
+    experiments: {
+      current: experienceSummary(days, range, articleId, true),
+      previous: experienceSummary(days, previous, articleId, true),
+    },
     statuses,
     daily: dates(range).map((date) => ({
       date,

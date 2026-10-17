@@ -27,3 +27,6 @@ export * from "./use-cases/knowledge/suggest-facts.js";
 export * from "./use-cases/articles/publish-due-articles.js";
 export * from "./analytics/model.js";
 export * from "./analytics/dashboard.js";
+
+export * from "./ports/monetization.js";
+export * from "./use-cases/monetization/manage-monetization.js";

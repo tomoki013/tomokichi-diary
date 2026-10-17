@@ -11,7 +11,12 @@ import { glob } from "astro/loaders";
  * comes from the JSON part of the same export.
  */
 const articles = defineCollection({
-  loader: glob({ pattern: "*.md", base: "../../export/articles" }),
+  loader: glob({
+    pattern: "*.md",
+    base: process.env.CONTENT_EXPORT_DIR
+      ? `${process.env.CONTENT_EXPORT_DIR}/articles`
+      : "../../export/articles",
+  }),
   schema: z.object({
     id: z.string(),
     slug: z.string(),

@@ -1,3 +1,4 @@
+import { publicMonetizationOnly } from "./public-monetization.js";
 import type { ContentSnapshot } from "./snapshot.js";
 
 /**
@@ -80,6 +81,7 @@ export function articleMarkdownFiles(snapshot: ContentSnapshot): ExportFile[] {
 }
 
 const JSON_PARTS = [
+  "monetization",
   "articles",
   "revisions",
   "embeds",
@@ -107,6 +109,7 @@ const JSON_PARTS = [
 ] as const;
 
 const FILE_NAMES: Record<(typeof JSON_PARTS)[number], string> = {
+  monetization: "monetization.json",
   articles: "articles.json",
   revisions: "revisions.json",
   embeds: "embeds.json",
@@ -151,7 +154,7 @@ export function buildExportFiles(snapshot: ContentSnapshot): ExportFile[] {
   for (const part of JSON_PARTS) {
     files.push({
       path: FILE_NAMES[part],
-      contents: `${JSON.stringify(snapshot[part] ?? [], null, 2)}\n`,
+      contents: `${JSON.stringify(part === "monetization" ? publicMonetizationOnly(snapshot.monetization ?? []) : (snapshot[part] ?? []), null, 2)}\n`,
     });
   }
   files.push(...articleMarkdownFiles(snapshot));
@@ -179,6 +182,7 @@ export function parseExportFiles(read: (path: string) => string | null): Content
     generatedAt,
     aiArtifacts: [],
     ...parts,
+    monetization: publicMonetizationOnly(parts.monetization ?? []),
     // Archives written before experience tags existed have no such field; they
     // read as "none yet" rather than as a malformed article.
     articles: parts.articles.map((article) => ({

@@ -52,6 +52,7 @@ const payload = JSON.stringify({
   current: dashboard.current,
   previous: dashboard.previous,
   experience: dashboard.experience,
+  experiments: dashboard.experiments,
   adUnits: dashboard.breakdowns.adUnits,
   ai: {
     enabled: false,

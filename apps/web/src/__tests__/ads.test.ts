@@ -139,3 +139,40 @@ it("counts proxy visibility only after fill and a continuous visible second", ()
   ).toHaveLength(1);
   vi.useRealTimers();
 });
+
+it("shares one loader across mounts and enqueues each unit only once", () => {
+  const f = fixture();
+  const second = {
+    ...f.slot,
+    dataset: {},
+    querySelector: f.slot.querySelector,
+    getBoundingClientRect: f.slot.getBoundingClientRect,
+  } as HTMLElement;
+  mountArticleAd(f.slot, f.doc, f.browser);
+  f.intersect(true);
+  f.scriptEvents.get("load")!();
+  mountArticleAd(second, f.doc, f.browser);
+  f.intersect(true);
+  f.intersect(true);
+  expect(f.append).toHaveBeenCalledOnce();
+  expect(f.browser.adsbygoogle).toHaveLength(2);
+});
+it("mounts only the selected variant before sending eligibility, including blocked ads", async () => {
+  vi.mocked(measureReader).mockClear();
+  const { mountArticleAds } = await import("../lib/ads");
+  const f = fixture();
+  f.slot.dataset["variant"] = "B";
+  const rejected = {
+    dataset: { variant: "A" },
+    querySelector: vi.fn(),
+    remove: vi.fn(),
+  } as unknown as HTMLElement;
+  Object.assign(f.doc, {
+    documentElement: { dataset: { adVariant: "B" } },
+    querySelectorAll: () => [rejected, f.slot],
+  });
+  mountArticleAds(f.doc, f.browser);
+  mountArticleAds(f.doc, f.browser);
+  expect(rejected.querySelector).not.toHaveBeenCalled();
+  expect(vi.mocked(measureReader).mock.calls.filter(([m]) => m === "ad_eligible")).toHaveLength(1);
+});

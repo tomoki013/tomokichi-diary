@@ -1,4 +1,8 @@
 import {
+  validateArticleMonetization,
+  projectArticleMonetization,
+} from "../monetization/manage-monetization.js";
+import {
   archive,
   err,
   hasUnpublishedChanges,
@@ -141,6 +145,16 @@ export async function updateArticleDraft(
   const updated: Article = { ...article, currentRevisionId: revision.id, updatedAt: now };
 
   await ctx.repos.revisions.save(revision);
+  // Saving a registered metadata section also saves the draft. Keep structured
+  // embeds with the new revision, just as their stable Markdown anchors persist.
+  if (article.currentRevisionId) {
+    const embeds = await ctx.repos.embeds.listByRevision(article.currentRevisionId);
+    if (embeds.length)
+      await ctx.repos.embeds.replaceForRevision(
+        revision.id,
+        embeds.map((embed) => ({ ...embed, id: ctx.ids.next<string>(), revisionId: revision.id })),
+      );
+  }
   const knowledge = (await ctx.repos.knowledge.listArticleKnowledge()).find(
     (entry) => entry.articleId === articleId && entry.revisionId === article.currentRevisionId,
   );
@@ -175,6 +189,8 @@ export async function publishArticle(
   if (!input)
     return err({ code: "ARTICLE_NOT_FOUND", message: `no publishable article ${articleId}` });
 
+  const monetizationErrors = await validateArticleMonetization(ctx, articleId);
+  if (monetizationErrors.length) return err(...monetizationErrors);
   const result = publish(input);
   if (!result.ok) {
     ctx.logger.warn("article.publish_rejected", { articleId, code: "ARTICLE_NOT_PUBLISHABLE" });
@@ -196,6 +212,9 @@ export async function publishArticle(
     tags: tags.filter((r) => r.articleId === articleId),
     collections: collections.filter((r) => r.articleId === articleId),
     experienceTags: input.article.experienceTags,
+    ...(input.article.kind === "article"
+      ? { monetization: await projectArticleMonetization(ctx, articleId) }
+      : {}),
   });
   await ctx.repos.articles.save(result.value);
   ctx.logger.info("article.published", { articleId });
@@ -208,13 +227,16 @@ export async function checkPublishable(ctx: AppContext, articleId: ArticleId) {
   const input = await publishInputFor(ctx, articleId);
   if (!input)
     return [{ code: "ARTICLE_NOT_FOUND" as const, message: `no publishable article ${articleId}` }];
-  return validatePublishable({
-    ...input,
-    now:
-      input.article.scheduledAt && input.article.scheduledAt > input.now
-        ? input.article.scheduledAt
-        : input.now,
-  });
+  return [
+    ...(await validateArticleMonetization(ctx, articleId)),
+    ...validatePublishable({
+      ...input,
+      now:
+        input.article.scheduledAt && input.article.scheduledAt > input.now
+          ? input.article.scheduledAt
+          : input.now,
+    }),
+  ];
 }
 
 export async function unpublishArticle(

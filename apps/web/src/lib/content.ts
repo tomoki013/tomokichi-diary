@@ -4,7 +4,7 @@ import { ContentIndex } from "@tomokichi/application";
 import { parseExportFiles } from "@tomokichi/data";
 import { instantFrom } from "@tomokichi/domain";
 
-const EXPORT_DIR = join(process.cwd(), "..", "..", "export");
+const EXPORT_DIR = process.env.CONTENT_EXPORT_DIR ?? join(process.cwd(), "..", "..", "export");
 
 /**
  * The content graph, read once per build. `PUBLIC_BUILD_TIME` pins "now" so a

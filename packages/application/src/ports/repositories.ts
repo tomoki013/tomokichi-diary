@@ -1,3 +1,4 @@
+import type { MonetizationRepository } from "./monetization.js";
 import type {
   AIArtifact,
   Article,
@@ -178,6 +179,7 @@ export interface KnowledgeRepository {
 }
 
 export interface PublishedArticleMetadata {
+  monetization?: import("@tomokichi/domain").PublicMonetization;
   media: readonly ArticleMedia[];
   locations: readonly ArticleLocation[];
   places: readonly ArticlePlace[];
@@ -193,6 +195,7 @@ export interface PublicationMetadataRepository {
 
 /** Everything a use case may reach for, assembled at the composition root. */
 export interface Repositories {
+  readonly monetization: MonetizationRepository;
   readonly articles: ArticleRepository;
   readonly publicationMetadata: PublicationMetadataRepository;
   readonly articleLikes: ArticleLikeRepository;

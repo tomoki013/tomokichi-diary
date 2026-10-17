@@ -38,7 +38,17 @@ export interface AnalyticsMetricRowDto {
   articleId: string | null;
   metrics: Record<string, number | null>;
 }
+export interface ExperimentCohortDto extends ExperienceCohortDto {
+  experimentId: string;
+  variant: string;
+  assignments: number;
+  body25Rate: number | null;
+  body50Rate: number | null;
+  body75Rate: number | null;
+  body90Rate: number | null;
+}
 export interface AnalyticsDashboardDto {
+  experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
   experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
@@ -171,6 +181,7 @@ export function assertAnalyticsDay(value: unknown): void {
 export interface AnalyticsReportDto {
   adUnits?: AnalyticsMetricRowDto[];
   experience?: AnalyticsDashboardDto["experience"];
+  experiments?: AnalyticsDashboardDto["experiments"];
   period: string;
   start: string;
   end: string;

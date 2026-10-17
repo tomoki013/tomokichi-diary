@@ -2,6 +2,7 @@ import { trackSemanticEvent } from "./analytics";
 
 export const MEASUREMENTS = [
   "article_view",
+  "experiment_assignment",
   "body_25",
   "body_50",
   "body_75",
@@ -31,10 +32,11 @@ export function measureReader(
     !["tomokichidiary.com", "www.tomokichidiary.com"].includes(globalThis.location?.hostname ?? "")
   )
     return;
+  const context = measurementContext();
   trackSemanticEvent({
     name: "diary_measurement",
     measurement_version: "reader-v1",
-    layout_version: "article-end-v1",
+    ...context,
     measurement,
     value,
     placement,
@@ -49,7 +51,11 @@ export function mountReaderMeasurement(): void {
     !["tomokichidiary.com", "www.tomokichidiary.com"].includes(globalThis.location?.hostname ?? "")
   )
     return;
+  if (mounted.has(document)) return;
+  mounted.add(document);
   measureReader("article_view");
+  if (measurementContext().experiment_id === "chagee-placement-v1")
+    measureReader("experiment_assignment");
   const sent = new Set<string>();
   const once = (name: Measurement, placement = "none") => {
     const key = `${name}:${placement}`;
@@ -122,4 +128,31 @@ export function mountReaderMeasurement(): void {
       onLCP(emit);
     })
     .catch(() => {});
+}
+
+const mounted = new WeakSet<Document>();
+function measurementContext(): {
+  layout_version: "article-end-v1" | "article-placement-v2";
+  experiment_id?: "chagee-placement-v1" | "none";
+  variant_id?: "A" | "B" | "none";
+  placement_key?: string;
+} {
+  const article = globalThis.document?.querySelector<HTMLElement>(".article-page");
+  if (article?.dataset?.["adLayout"] !== "article-placement-v2")
+    return { layout_version: "article-end-v1" };
+  const root = document.documentElement?.dataset;
+  const experiment = root?.["adExperiment"] === "chagee-placement-v1";
+  const variant = root?.["adVariant"];
+  return {
+    layout_version: "article-placement-v2",
+    experiment_id: experiment ? "chagee-placement-v1" : "none",
+    variant_id: experiment && (variant === "A" || variant === "B") ? variant : "none",
+    placement_key:
+      experiment && variant === "A"
+        ? "article-end"
+        : /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(article.dataset["adKey"] ?? "") &&
+            (article.dataset["adKey"]?.length ?? 0) <= 64
+          ? article.dataset["adKey"]!
+          : "none",
+  };
 }
