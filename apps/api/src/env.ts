@@ -54,4 +54,11 @@ export interface Env {
   ACCESS_TEAM_DOMAIN?: string;
   /** Audience tag of the Access application protecting the admin. */
   ACCESS_AUD?: string;
+  /**
+   * Bearer token for `GET /internal/status-probe`, shared only with the status
+   * platform. Unset means the route does not exist (404).
+   */
+  STATUS_PROBE_TOKEN?: string;
+  /** Six probes a minute; the status platform asks every ten minutes. */
+  STATUS_PROBE_RATE_LIMITER?: RateLimit;
 }
