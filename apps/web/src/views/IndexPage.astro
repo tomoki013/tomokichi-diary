@@ -262,15 +262,15 @@ const archiveCountryText = (view: (typeof articles)[number]) =>
   ].join("|");
 
 const sitemapGroups = [
-  { label: "記事", routes: content.routes.renderable().filter((r) => r.targetType === "article") },
-  { label: "旅先", routes: content.routes.renderable().filter((r) => r.targetType === "location") },
+  { label: "記事", routes: content.publicRoutes().filter((r) => r.targetType === "article") },
+  { label: "旅先", routes: content.publicRoutes().filter((r) => r.targetType === "location") },
   {
     label: "シリーズ・旅の記録",
-    routes: content.routes
-      .renderable()
+    routes: content
+      .publicRoutes()
       .filter((r) => r.targetType === "series" || r.targetType === "journey"),
   },
-  { label: "その他", routes: content.routes.renderable().filter((r) => r.targetType === "static") },
+  { label: "その他", routes: content.publicRoutes().filter((r) => r.targetType === "static") },
 ];
 
 const labelOf = (target: Route): string => {

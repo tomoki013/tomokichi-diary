@@ -91,6 +91,22 @@ export class ContentIndex {
     for (const r of snapshot.travelRoutes) this.travelRouteById.set(r.id, r);
   }
 
+  /** Public pages with a renderable published revision, plus built-in indexes.
+   * Routes also reserve draft URLs, so RouteTable.renderable() alone is not a
+   * publication check. Keep the full table for canonical/preview resolution.
+   */
+  publicRoutes(): readonly Route[] {
+    return this.routes.renderable().filter((route) => {
+      if (route.targetType === "article") {
+        return route.targetId !== null && this.viewOf(route.targetId as ArticleId) !== null;
+      }
+      if (route.targetType === "static" && this.articleById.has(route.targetId as ArticleId)) {
+        return this.viewOf(route.targetId as ArticleId) !== null;
+      }
+      return true;
+    });
+  }
+
   publicArticles(): readonly Article[] {
     return listPublicArticles({ articles: this.snapshot.articles, now: this.now });
   }
