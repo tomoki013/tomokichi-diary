@@ -144,7 +144,7 @@ it("keeps offer content private, archives referenced offers, and retains assignm
   );
   expect((await request("/offers/offer-one", offer)).status).toBe(400);
 });
-it("rejects unsafe URLs, unsupported statuses, flags and cross-article or missing references", async () => {
+it("rejects unsafe URLs, unsupported statuses and cross-article or missing references", async () => {
   const offer = {
     id: "offer-one",
     name: "案件",
@@ -166,7 +166,7 @@ it("rejects unsafe URLs, unsupported statuses, flags and cross-article or missin
   expect(
     (await request("/settings", { ...DEFAULT_MONETIZATION_SETTINGS, affiliateEnabled: true }))
       .status,
-  ).toBe(400);
+  ).toBe(200);
   expect(
     (
       await request(`/articles/${id}`, {
@@ -401,4 +401,64 @@ it("supports article-bound trials beyond CHAGEE and rejects another article's ex
   const stopped = (await loadContentSnapshot(ctx)).monetization?.find((m) => m.articleId === id);
   expect(stopped?.experiment).toBeNull();
   expect(stopped?.placement?.position).toBe("article_end");
+});
+it("publishes approved links through the article workflow and makes linked articles dirty on offer and policy changes", async () => {
+  const offer = {
+    id: "approved",
+    name: "PRIVATE_NAME",
+    provider: "Trip.com",
+    category: "旅行",
+    heading: "予約先を確認",
+    description: "条件を比較",
+    imageUrl: null,
+    url: "https://www.trip.com/t/FixtureLink",
+    format: "booking_card",
+    notes: "PRIVATE_NOTE",
+    status: "ready",
+    checkedAt: ctx.clock.now(),
+    publicationApproved: true,
+  };
+  for (const patch of [{ checkedAt: null }, { status: "draft" }, { url: "https://evil.test/" }])
+    expect((await request("/offers/approved", { ...offer, ...patch })).status).toBe(400);
+  expect((await request("/offers/approved", offer)).status).toBe(200);
+  expect(
+    (await request("/settings", { ...DEFAULT_MONETIZATION_SETTINGS, affiliateEnabled: true }))
+      .status,
+  ).toBe(200);
+  expect(
+    (
+      await request(`/articles/${id}`, {
+        ...defaultArticleMonetization(),
+        mode: "hybrid",
+        placements: [
+          ...defaultArticleMonetization().placements,
+          {
+            key: "answer-end",
+            kind: "affiliate",
+            position: "marker",
+            status: "ready",
+            adUnit: "7152502134",
+            offerId: "approved",
+          },
+        ],
+      })
+    ).status,
+  ).toBe(200);
+  expect((await publishArticle(ctx, id)).ok).toBe(true);
+  const published = (await loadContentSnapshot(ctx)).monetization?.[0];
+  expect(published?.affiliates?.[0]?.url).toBe(offer.url);
+  expect(JSON.stringify(published)).not.toMatch(/PRIVATE_|offerId|publicationApproved/);
+  expect((await request("/offers/approved", { ...offer, heading: "新しい予約案内" })).status).toBe(
+    200,
+  );
+  expect((await (await request(`/articles/${id}`)).json()).needsPublication).toBe(true);
+  expect((await loadContentSnapshot(ctx)).monetization?.[0]?.affiliates?.[0]?.heading).toBe(
+    offer.heading,
+  );
+  expect((await publishArticle(ctx, id)).ok).toBe(true);
+  expect((await request("/settings", DEFAULT_MONETIZATION_SETTINGS)).status).toBe(200);
+  expect((await (await request(`/articles/${id}`)).json()).needsPublication).toBe(true);
+  expect((await publishArticle(ctx, id)).ok).toBe(true);
+  expect((await loadContentSnapshot(ctx)).monetization?.[0]?.affiliates).toBeUndefined();
+  expect((await request("/offers/approved", undefined, "DELETE")).status).toBe(200);
 });

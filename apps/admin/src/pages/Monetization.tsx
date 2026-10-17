@@ -54,7 +54,10 @@ export function Monetization() {
   return (
     <>
       <PageHeader title="収益化" meta={<a href={href.analytics()}>Analyticsの詳細へ →</a>} />
-      <p>読書体験を守りながら配置を改善します。アフィリエイト報酬: 未設定・公開配信: 無効</p>
+      <p>
+        読書体験を守りながら配置を改善します。アフィリエイト報酬: 未取得・公開方針:{" "}
+        {overview?.settings.affiliateEnabled ? "有効（承認済み案件のみ・記事公開が必要）" : "無効"}
+      </p>
       <nav className="monetization-tabs" aria-label="収益化">
         {tabs.map((title, i) => (
           <button
@@ -239,6 +242,7 @@ function Settings({
           ["adsEnabled", "AdSenseを有効にする"],
           ["placementsEnabled", "個別の広告配置を有効にする"],
           ["experimentsEnabled", "配置実験を有効にする"],
+          ["affiliateEnabled", "承認済みアフィリエイトの公開を許可する"],
         ] as const
       ).map(([key, label]) => (
         <label className="field" key={key}>
@@ -252,7 +256,9 @@ function Settings({
           </span>
         </label>
       ))}
-      <p>アフィリエイト: 無効（変更不可） / 最大広告枠数: 1</p>
+      <p>
+        AdSenseは最大1枠。案件と記事の掲載設定を保存し、対象記事を公開すると反映されます。停止・リンク変更も対象記事の再公開が必要です。
+      </p>
       {value.adUnits.map((u, i) => (
         <div className="monetization-row" key={unitKeys[i]}>
           <label className="field">
@@ -342,7 +348,9 @@ function Offers({
   };
   return (
     <Panel title="アフィリエイト案件">
-      <p>管理画面の準備専用です。「掲載中」にする操作はありません。</p>
+      <p>
+        正式な提携リンクと掲載条件を確認し、案件を掲載準備済みにして公開承認します。記事の配置へ割り当て、対象記事を公開して反映します。外部ASPの審査・報酬は自動同期しません。
+      </p>
       <div className="monetization-row">
         <select
           aria-label="案件選択"
@@ -391,7 +399,7 @@ function Offers({
             setBusy(true);
             try {
               choose(await api.saveAffiliateOffer(selected));
-              toast.info("案件を保存しました（本番非表示）");
+              toast.info("案件を保存しました。使用中の記事を再公開して反映してください");
               await reload();
             } catch (error) {
               toast.error(error);
@@ -423,6 +431,9 @@ function Offers({
                 onChange={(e) => {
                   setSelected({
                     ...selected,
+                    ...(["url", "provider", "heading", "description", "imageUrl"].includes(key)
+                      ? { publicationApproved: false }
+                      : {}),
                     [key]: ["url", "imageUrl"].includes(key)
                       ? e.target.value || null
                       : e.target.value,
@@ -437,7 +448,11 @@ function Offers({
             <select
               value={selected.format}
               onChange={(e) => {
-                setSelected({ ...selected, format: e.target.value as AffiliateOffer["format"] });
+                setSelected({
+                  ...selected,
+                  publicationApproved: false,
+                  format: e.target.value as AffiliateOffer["format"],
+                });
                 onDirty(true);
               }}
             >
@@ -451,7 +466,11 @@ function Offers({
             <select
               value={selected.status}
               onChange={(e) => {
-                setSelected({ ...selected, status: e.target.value as AffiliateOffer["status"] });
+                setSelected({
+                  ...selected,
+                  publicationApproved: false,
+                  status: e.target.value as AffiliateOffer["status"],
+                });
                 onDirty(true);
               }}
             >
@@ -473,6 +492,23 @@ function Offers({
           >
             確認日時を記録
           </button>
+          <label className="field">
+            <span>
+              <input
+                type="checkbox"
+                checked={selected.publicationApproved ?? false}
+                onChange={(e) => {
+                  setSelected({ ...selected, publicationApproved: e.target.checked });
+                  onDirty(true);
+                }}
+              />{" "}
+              正式リンク・提携承認・掲載条件を確認して公開承認する
+            </span>
+          </label>
+          <p>
+            公開対象:
+            Trip.com・Agoda・Omioの正式リンク、テキスト／予約カード。管理メモ・未承認案件は公開しません。案件の更新・一時停止・アーカイブは使用中の記事を公開待ちにします。記事一覧から再公開し、サイト反映完了を確認してください。
+          </p>
           <AffiliatePreview offer={selected} />
           <button className="primary" disabled={busy} type="submit">
             案件を保存

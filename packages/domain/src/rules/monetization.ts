@@ -1,3 +1,4 @@
+import { isAffiliateUrl, type AffiliateOffer } from "@tomokichi/contracts";
 import type {
   AdExperiment,
   ArticleMonetization,
@@ -14,9 +15,9 @@ export type {
   PublicMonetization,
 } from "@tomokichi/contracts";
 
-export const AFFILIATE_ENABLED = false;
-// A future release must implement an approved public projection and renderer.
-export const AFFILIATE_RELEASE_APPROVED = false;
+export const AFFILIATE_ENABLED = true;
+// This release adds an approved projection and a labelled, script-free renderer.
+export const AFFILIATE_RELEASE_APPROVED = true;
 export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   adsEnabled: true,
   placementsEnabled: false,
@@ -70,6 +71,8 @@ export function validateMonetization(
   if (new Set(config.placements.map((p) => p.key)).size !== config.placements.length)
     reject("配置キーが重複しています");
   if (config.maxAds !== 1) reject("広告は1記事1枠までです");
+  if (config.placements.filter((p) => p.kind === "affiliate" && p.status === "ready").length > 2)
+    reject("アフィリエイト紹介は1記事2件までです");
   const ads = config.placements.filter((p) => p.kind === "adsense" && p.status === "ready");
   if (ads.length > 1) reject("有効なAdSense配置は1枠までです");
   for (const p of config.placements) {
@@ -81,7 +84,7 @@ export function validateMonetization(
       reject(`配置 ${p.key} のマーカーがありません。自動移動はしません`);
       continue;
     }
-    if (p.kind !== "adsense" || p.status !== "ready") continue;
+    if (p.status !== "ready") continue;
     const before = markdown.slice(0, marker.offset);
     const after = markdown.slice(marker.offset + `{{monetization:${p.key}}}`.length);
     if (before.replace(/\s/g, "").length < 600 || !/^## /m.test(before))
@@ -102,6 +105,7 @@ export function publicMonetization(
   config: ArticleMonetization,
   settings: MonetizationSettings,
   experiment: AdExperiment | null,
+  offers: readonly AffiliateOffer[] = [],
 ): PublicMonetization {
   const enabled =
     settings.adsEnabled && config.adsEnabled && ["ads", "hybrid"].includes(config.mode);
@@ -117,7 +121,39 @@ export function publicMonetization(
           : selected
             ? { key: selected.key, position: selected.position, adUnit: selected.adUnit }
             : null;
+  const affiliates =
+    AFFILIATE_ENABLED &&
+    AFFILIATE_RELEASE_APPROVED &&
+    settings.affiliateEnabled &&
+    ["affiliate", "hybrid"].includes(config.mode)
+      ? config.placements
+          .flatMap((p) => {
+            const o = offers.find((offer) => offer.id === p.offerId);
+            return p.kind === "affiliate" &&
+              p.status === "ready" &&
+              o?.publicationApproved === true &&
+              o.status === "ready" &&
+              o.checkedAt &&
+              o.heading.trim() &&
+              ["text", "booking_card"].includes(o.format) &&
+              isAffiliateUrl(o.provider, o.url)
+              ? [
+                  {
+                    key: p.key,
+                    position: p.position,
+                    provider: o.provider,
+                    heading: o.heading,
+                    description: o.description,
+                    url: o.url,
+                    format: o.format as "text" | "booking_card",
+                  },
+                ]
+              : [];
+          })
+          .slice(0, 2)
+      : [];
   return {
+    ...(affiliates.length ? { affiliates } : {}),
     articleId,
     enabled,
     placement,

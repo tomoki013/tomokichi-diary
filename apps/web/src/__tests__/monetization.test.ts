@@ -68,3 +68,36 @@ it("builds an article-bound experiment on a second article without changing the 
   expect(buildAdPlan({ ...expanded, articleId: config.articleId }, body).experiment).toBeNull();
   expect(buildAdPlan(config, body).experiment?.id).toBe("chagee-placement-v1");
 });
+it("renders approved affiliate positions independently of AdSense and rejects bad markers and URLs", async () => {
+  const { buildAffiliatePlan } = await import("../lib/monetization");
+  const p = {
+    key: "answer-end",
+    position: "marker" as const,
+    provider: "Trip.com",
+    heading: "予約先の確認",
+    description: "最新条件を確認",
+    url: "https://www.trip.com/t/FixtureLink",
+    format: "booking_card" as const,
+  };
+  const affiliateOnly = {
+    ...config,
+    enabled: false,
+    placement: null,
+    experiment: null,
+    affiliates: [p],
+  };
+  expect(buildAffiliatePlan(affiliateOnly, body)).toEqual([p]);
+  expect(buildAffiliatePlan(affiliateOnly, body, false)).toEqual([]);
+  expect(
+    buildAffiliatePlan(affiliateOnly, body.replace("{{monetization:answer-end}}", "")),
+  ).toEqual([]);
+  expect(buildAffiliatePlan(affiliateOnly, body + "\n\n{{monetization:answer-end}}")).toEqual([]);
+  expect(buildAffiliatePlan(affiliateOnly, "{{monetization:answer-end}}")).toEqual([]);
+  expect(buildAffiliatePlan({ ...config, affiliates: [p] }, body)).toEqual([]); // never share the AdSense marker
+  expect(
+    buildAffiliatePlan(
+      { ...affiliateOnly, affiliates: [{ ...p, url: "https://evil.test/" }] },
+      body,
+    ),
+  ).toEqual([]);
+});

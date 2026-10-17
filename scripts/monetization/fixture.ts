@@ -37,6 +37,21 @@ const fixture = {
   ),
   monetization: [
     {
+      ...(process.argv.includes("--affiliates")
+        ? {
+            affiliates: [
+              {
+                key: "private-affiliate",
+                position: "marker" as const,
+                provider: "Trip.com",
+                heading: "旅の予約先を比較する",
+                description: "料金・変更条件は予約先で確認できます。",
+                url: "https://www.trip.com/t/FixtureLink",
+                format: "booking_card" as const,
+              },
+            ],
+          }
+        : {}),
       articleId,
       enabled: true,
       placement: { key: "article-end", position: "article_end" as const, adUnit: "7152502134" },

@@ -10,7 +10,7 @@ import {
   type MonetizationSettings,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
-import { isAdExperimentForArticle } from "@tomokichi/contracts";
+import { isAffiliateUrl, isAdExperimentForArticle } from "@tomokichi/contracts";
 const invalid = (message: string) => err({ code: "MONETIZATION_INVALID" as const, message });
 export async function articleMonetization(ctx: AppContext, id: ArticleId) {
   const article = await ctx.repos.articles.findById(id);
@@ -63,7 +63,6 @@ export async function saveArticleMonetization(
 }
 export async function saveMonetizationSettings(ctx: AppContext, settings: MonetizationSettings) {
   if (
-    settings.affiliateEnabled !== false ||
     settings.maxAds !== 1 ||
     !settings.adUnits.some((unit) => unit.id === "7152502134") ||
     new Set(settings.adUnits.map((u) => u.id)).size !== settings.adUnits.length
@@ -89,16 +88,49 @@ export async function saveMonetizationSettings(ctx: AppContext, settings: Moneti
     )
   )
     return invalid("実験で使用中の広告ユニットは削除できません");
-  const saved = { ...settings, affiliateEnabled: false as const, updatedAt: ctx.clock.now() };
-  await ctx.repos.monetization.saveSettings(saved);
+  const saved = { ...settings, updatedAt: ctx.clock.now() };
+  const previous = await ctx.repos.monetization.settings();
+  const affected =
+    previous.affiliateEnabled !== saved.affiliateEnabled
+      ? configs.filter((a) => a.config.placements.some((p) => p.kind === "affiliate"))
+      : [];
+  await ctx.repos.monetization.saveSettings(
+    saved,
+    affected.map((a) => ({
+      articleId: a.articleId as ArticleId,
+      revisionId: ctx.ids.next(),
+      now: ctx.clock.now(),
+    })),
+  );
   return ok(saved);
 }
 export async function saveAffiliateOffer(ctx: AppContext, offer: AffiliateOffer) {
   const old = (await ctx.repos.monetization.offers()).find((o) => o.id === offer.id);
   if (old?.status === "archived" && offer.status !== "archived")
     return invalid("アーカイブした案件は再開できません。新しい案件を作成してください");
+  if (
+    offer.publicationApproved &&
+    (offer.status !== "ready" ||
+      !offer.checkedAt ||
+      !offer.heading.trim() ||
+      !["text", "booking_card"].includes(offer.format) ||
+      !isAffiliateUrl(offer.provider, offer.url))
+  )
+    return invalid(
+      "公開承認には掲載準備済み・確認日時・見出し・正式な提携URL・対応表示形式が必要です",
+    );
   const saved = { ...offer, updatedAt: ctx.clock.now() };
-  await ctx.repos.monetization.saveOffer(saved);
+  const affected = (await ctx.repos.monetization.listArticles()).filter((a) =>
+    a.config.placements.some((p) => p.offerId === offer.id),
+  );
+  await ctx.repos.monetization.saveOffer(
+    saved,
+    affected.map((a) => ({
+      articleId: a.articleId as ArticleId,
+      revisionId: ctx.ids.next(),
+      now: ctx.clock.now(),
+    })),
+  );
   return ok(saved);
 }
 export async function saveAdExperiment(
@@ -205,5 +237,6 @@ export async function projectArticleMonetization(ctx: AppContext, id: ArticleId)
     config,
     await ctx.repos.monetization.settings(),
     (await ctx.repos.monetization.experiments()).find((e) => e.id === config.experimentId) ?? null,
+    await ctx.repos.monetization.offers(),
   );
 }

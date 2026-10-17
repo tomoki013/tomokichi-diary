@@ -12,7 +12,10 @@ export interface MonetizationDraftChange {
 }
 export interface MonetizationRepository {
   settings(): Promise<MonetizationSettings>;
-  saveSettings(settings: MonetizationSettings): Promise<void>;
+  saveSettings(
+    settings: MonetizationSettings,
+    changes?: readonly (MonetizationDraftChange & { articleId: ArticleId })[],
+  ): Promise<void>;
   article(id: ArticleId): Promise<ArticleMonetization>;
   listArticles(): Promise<{ articleId: string; config: ArticleMonetization }[]>;
   saveArticle(
@@ -21,7 +24,10 @@ export interface MonetizationRepository {
     change: MonetizationDraftChange,
   ): Promise<void>;
   offers(): Promise<AffiliateOffer[]>;
-  saveOffer(offer: AffiliateOffer): Promise<void>;
+  saveOffer(
+    offer: AffiliateOffer,
+    changes?: readonly (MonetizationDraftChange & { articleId: ArticleId })[],
+  ): Promise<void>;
   experiments(): Promise<AdExperiment[]>;
   /** Each save atomically changes metadata and creates an unpublished revision if necessary. */
   saveExperiment(experiment: AdExperiment, change: MonetizationDraftChange): Promise<void>;

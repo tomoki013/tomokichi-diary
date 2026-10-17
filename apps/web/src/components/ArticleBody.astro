@@ -2,6 +2,8 @@
 import { getEntry, render } from "astro:content";
 import type { ArticleEmbed } from "@tomokichi/domain";
 import type { ArticleView } from "@tomokichi/application";
+import AffiliateBlock from "./AffiliateBlock.astro";
+import type { PublicAffiliatePlacement } from "@tomokichi/contracts";
 import ArticleAd from "./ArticleAd.astro";
 import type { AdPlan } from "../lib/monetization";
 import EmbedBlock from "./EmbedBlock.astro";
@@ -12,13 +14,14 @@ import { content } from "../lib/content";
 interface Props {
   slug: string;
   adPlan?: AdPlan;
+  affiliates?: PublicAffiliatePlacement[];
   embeds: readonly ArticleEmbed[];
   /** The article's own path, so relative links in the body resolve like a
       reader's browser resolves them rather than against the site root. */
   path: string;
 }
 
-const { slug, embeds, path, adPlan } = Astro.props;
+const { slug, embeds, path, adPlan, affiliates = [] } = Astro.props;
 const entry = await getEntry("articles", slug);
 if (!entry) throw new Error(`no exported body for article ${slug}`);
 
@@ -136,6 +139,12 @@ const FallbackContent = fallback?.Content;
               placement="body_slot"
               slotKey={adPlan.marker.key}
               variant={adPlan.marker.variant}
+            />
+          ) : affiliates.some((p) => p.position === "marker" && p.key === segment.slice(13)) ? (
+            <AffiliateBlock
+              placement={affiliates.find(
+                (p) => p.position === "marker" && p.key === segment.slice(13),
+              )!}
             />
           ) : null
         ) : embedByAnchor.has(segment.slice(6)) ? (

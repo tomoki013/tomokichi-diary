@@ -218,12 +218,17 @@ Migrations therefore land while the previous API is still serving traffic.
 
 現状の訂正: GA4はBaseLayoutから本番hostnameでgtagを遅延ロードしている。配信ビルドはcontent-releaseでD1の公開版を一時exportへpullする（Astro自身はD1を読まない）。この文書冒頭の「JSなし」「Git exportだけ」「切替前」は古い説明であり、現行手順はADMIN.mdとOPERATIONS.mdを参照。
 
-## Monetization preparation
+## Monetization
 
-Monetization drafts, affiliate offers and experiments use the existing D1 through
-application repository ports and authenticated admin routes. Article publication
-freezes an allowlisted AdSense-only configuration in `publication_metadata`;
-public builds validate it again. Affiliate offers and planned placements never
-enter the public snapshot, MCP or WebMCP. The initial per-document A/B experiment
-is limited to one article and one ad per variant. See
-[monetization-phase2.md](monetization-phase2.md) for flags, operation and rollback.
+Monetization drafts, affiliate offers and article-specific placement experiments use
+existing D1 repository ports and authenticated admin routes. Article publication
+freezes an allowlisted configuration in `publication_metadata`; public export and
+Web builds validate it again. AdSense remains one ad per variant across multiple
+article experiments. Affiliate publication defaults off and requires checked,
+explicitly approved offers, site opt-in and article placement settings. Only public
+presentation fields and validated tracking links enter the published snapshot;
+private offer IDs, notes and unapproved data stay private. Referenced articles become
+unpublished drafts atomically when an offer or affiliate site policy changes.
+Static delivery still requires publishing those articles and completing deployment.
+See [monetization-phase2.md](monetization-phase2.md) and
+[affiliate-release.md](affiliate-release.md) for operation and rollback.

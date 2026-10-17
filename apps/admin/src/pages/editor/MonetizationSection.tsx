@@ -123,7 +123,7 @@ function Loaded({
   return (
     <Panel title="収益化">
       <p className="muted">
-        アフィリエイトは本番配信無効。保存後は「変更を公開」してサイト反映が必要です。
+        アフィリエイトはサイト方針と案件の公開承認が必要です。保存後は「変更を公開」してサイト反映が必要です。
       </p>
       <p>
         最終編集:{" "}
@@ -140,8 +140,8 @@ function Loaded({
         >
           <option value="none">広告なし</option>
           <option value="ads">AdSenseのみ</option>
-          <option value="affiliate">アフィリエイト用（準備）</option>
-          <option value="hybrid">両方（アフィリエイトは準備）</option>
+          <option value="affiliate">アフィリエイトのみ</option>
+          <option value="hybrid">AdSenseとアフィリエイト</option>
         </select>
       </label>
       <label>
@@ -194,7 +194,7 @@ function Loaded({
         <label className="field">
           <span>スロット種別</span>
           <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}>
-            <option value="affiliate">アフィリエイト予定枠</option>
+            <option value="affiliate">アフィリエイト紹介枠</option>
             <option value="adsense">AdSense（既存の枠を一時停止）</option>
           </select>
         </label>

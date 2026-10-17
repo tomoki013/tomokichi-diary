@@ -80,3 +80,31 @@ it("rolls back publication dirtiness if an experiment write fails", async () => 
   ).toBe("revision-one");
   expect(native.prepare("SELECT COUNT(*) AS count FROM article_revisions").get()?.count).toBe(1);
 });
+it("rolls back linked article revisions when an offer update fails its status constraint", async () => {
+  const offer = {
+    id: "offer",
+    name: "Offer",
+    provider: "Trip.com",
+    category: "travel",
+    heading: "Book",
+    description: "Compare",
+    imageUrl: null,
+    url: "https://www.trip.com/t/FixtureLink",
+    format: "booking_card" as const,
+    notes: "",
+    status: "ready" as const,
+    checkedAt: now,
+    updatedAt: now,
+  };
+  await repo.saveOffer(offer);
+  await expect(
+    repo.saveOffer({ ...offer, status: "invalid" as never }, [
+      { articleId, revisionId: "revision-two" as RevisionId, now },
+    ]),
+  ).rejects.toThrow();
+  expect(
+    native.prepare("SELECT current_revision_id FROM articles WHERE id='article'").get()
+      ?.current_revision_id,
+  ).toBe("revision-one");
+  expect((await repo.offers())[0]?.status).toBe("ready");
+});

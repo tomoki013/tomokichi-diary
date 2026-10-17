@@ -108,7 +108,11 @@ export function monetizationRoutes() {
       (o) => o.id === c.req.param("id"),
     );
     if (!offer) return errorResponse(c, "API_NOT_FOUND", "案件がありません", 404);
-    const result = await saveAffiliateOffer(c.get("ctx"), { ...offer, status: "archived" });
+    const result = await saveAffiliateOffer(c.get("ctx"), {
+      ...offer,
+      publicationApproved: false,
+      status: "archived",
+    });
     return result.ok ? c.json(result.value) : domainErrorResponse(c, result.errors);
   });
   routes.put("/experiments/:id", async (c) => {

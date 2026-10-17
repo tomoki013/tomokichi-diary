@@ -50,13 +50,15 @@ export function createMonetizationRepository(db: SqlDatabase): MonetizationRepos
     settings: async () =>
       (await read<MonetizationSettings>("monetization_settings"))[0] ??
       structuredClone(DEFAULT_MONETIZATION_SETTINGS),
-    saveSettings: async (s) => {
-      await db
-        .prepare(
-          "INSERT INTO monetization_settings(id,payload,updated_at) VALUES('site',?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at",
-        )
-        .bind(JSON.stringify(s), s.updatedAt)
-        .run();
+    saveSettings: async (s, changes = []) => {
+      await db.batch([
+        ...changes.flatMap((c) => draftStatements(c.articleId, c.revisionId, c.now)),
+        db
+          .prepare(
+            "INSERT INTO monetization_settings(id,payload,updated_at) VALUES('site',?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at",
+          )
+          .bind(JSON.stringify(s), s.updatedAt),
+      ]);
     },
     article: async (id) => {
       const row = await db
@@ -90,13 +92,15 @@ export function createMonetizationRepository(db: SqlDatabase): MonetizationRepos
       ]);
     },
     offers: () => read<AffiliateOffer>("affiliate_offers"),
-    saveOffer: async (o) => {
-      await db
-        .prepare(
-          "INSERT INTO affiliate_offers(id,status,payload,updated_at) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,payload=excluded.payload,updated_at=excluded.updated_at",
-        )
-        .bind(o.id, o.status, JSON.stringify(o), o.updatedAt)
-        .run();
+    saveOffer: async (o, changes = []) => {
+      await db.batch([
+        ...changes.flatMap((c) => draftStatements(c.articleId, c.revisionId, c.now)),
+        db
+          .prepare(
+            "INSERT INTO affiliate_offers(id,status,payload,updated_at) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,payload=excluded.payload,updated_at=excluded.updated_at",
+          )
+          .bind(o.id, o.status, JSON.stringify(o), o.updatedAt),
+      ]);
     },
     experiments: () => read<AdExperiment>("ad_experiments"),
     saveExperiment: async (e, change) => {
