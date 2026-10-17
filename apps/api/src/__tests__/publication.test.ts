@@ -95,7 +95,9 @@ describe("scheduled and draft publication", () => {
       draft,
     });
     if (!created.ok) throw new Error("fixture failed");
-    expect((await ctx.repos.routes.listAll())[0]?.targetType).toBe("static");
+    expect(
+      (await ctx.repos.routes.listAll()).find((route) => route.path === "/page-test")?.targetType,
+    ).toBe("static");
     const published = await publishArticle(ctx, created.value.article.id);
     expect(published.ok).toBe(true);
   });

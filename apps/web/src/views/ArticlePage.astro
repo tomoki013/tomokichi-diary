@@ -216,7 +216,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           </div>
         )}
         {knowledge && <ArticleKnowledge view={knowledge} />}
-        {affiliates.length > 0 && (
+        {affiliates.length > 0 && !view.embeds.some((embed) => embed.type === "notice") && (
           <p class="notice">
             この記事には広告・アフィリエイトリンクが含まれます。
             <a href="/legal/affiliates">紹介の方針</a>
