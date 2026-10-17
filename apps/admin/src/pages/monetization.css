@@ -114,3 +114,16 @@
 .ad-rollout-table th:nth-child(2) {
   width: 15rem;
 }
+
+.ad-experiment-list table {
+  min-width: 680px;
+}
+.ad-experiment-list th:first-child {
+  width: 45%;
+}
+.ad-experiment-list button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}

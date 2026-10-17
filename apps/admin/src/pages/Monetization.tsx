@@ -554,7 +554,7 @@ function Experiments({
               ))}
           </select>
         </label>
-        <div className="analytics-table">
+        <div className="analytics-table ad-experiment-list">
           <table>
             <caption>実験別の端末ごとの計測状況</caption>
             <thead>
