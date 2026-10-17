@@ -140,6 +140,7 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
           assets[index] ?? null,
           ctx.mediaUrls.resolve(assets[index]?.storageKey ?? ""),
           c.env.PUBLIC_IMAGE_URL,
+          (key) => ctx.mediaUrls.resolve(key),
         ),
       ),
       relations: {
@@ -248,6 +249,15 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
     if (!(await ctx.repos.articles.findById(articleId))) {
       return errorResponse(c, "ARTICLE_NOT_FOUND", `no article ${articleId}`, 404);
     }
+    // Checked before anything is written, so a bad id never half-saves.
+    const collections = new Set((await ctx.repos.collections.listAll()).map((item) => item.id));
+    const unknown = parsed.value.collectionIds.find(
+      (collectionId) => !collections.has(collectionId as CollectionId),
+    );
+    if (unknown)
+      return errorResponse(c, "COLLECTION_NOT_FOUND", `no collection ${unknown}`, 404, [
+        { path: "collectionIds", message: `no collection ${unknown}` },
+      ]);
 
     await ctx.repos.relations.replaceForArticle(articleId, {
       locations: parsed.value.locations.map((r) => ({
@@ -266,12 +276,21 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
       })),
       tags: parsed.value.tagIds.map((tagId) => ({ articleId, tagId: tagId as TagId })),
     });
+    // sort_order is the article's place inside each collection. Keep what is
+    // already stored; a new membership starts at 0 and the site orders ties
+    // by trip and publication date. (It used to be the index of the
+    // collection in this request, which is unrelated to the collection.)
+    const previous = new Map(
+      (await ctx.repos.collections.listMemberships())
+        .filter((m) => m.articleId === articleId)
+        .map((m) => [m.collectionId, m.sortOrder]),
+    );
     await ctx.repos.collections.replaceForArticle(
       articleId,
-      parsed.value.collectionIds.map((collectionId, index) => ({
+      [...new Set(parsed.value.collectionIds)].map((collectionId) => ({
         articleId,
         collectionId: collectionId as CollectionId,
-        sortOrder: index,
+        sortOrder: previous.get(collectionId as CollectionId) ?? 0,
       })),
     );
     return c.json({ ok: true });

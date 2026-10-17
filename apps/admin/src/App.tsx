@@ -8,6 +8,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Articles } from "./pages/Articles";
 import { ArticleEditor } from "./pages/editor/ArticleEditor";
 import { MediaLibrary } from "./pages/MediaLibrary";
+import { SeriesEditor, SeriesList } from "./pages/Series";
 import { Routes } from "./pages/Routes";
 import { Inquiries } from "./pages/inquiries/Inquiries";
 import { InquiryDetail } from "./pages/inquiries/InquiryDetail";
@@ -21,6 +22,7 @@ const NAV = [
   { key: "analytics", label: "Analytics", href: href.analytics() },
   { key: "articles", label: "記事", href: href.articles() },
   { key: "media", label: "画像", href: href.media() },
+  { key: "series", label: "シリーズ", href: href.series() },
   { key: "routes", label: "URL", href: href.routes() },
   { key: "inquiries", label: "お問い合わせ", href: href.inquiries() },
 ] as const;
@@ -107,6 +109,8 @@ export function App() {
         {route.name === "articles" && <Articles />}
         {route.name === "article" && <ArticleEditor key={route.id} id={route.id} />}
         {route.name === "media" && <MediaLibrary />}
+        {route.name === "series" && <SeriesList />}
+        {route.name === "series-edit" && <SeriesEditor key={route.id} id={route.id} />}
         {route.name === "routes" && <Routes />}
         {route.name === "inquiries" && <Inquiries />}
         {route.name === "inquiry" && <InquiryDetail key={route.id} id={route.id} />}

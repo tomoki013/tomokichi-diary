@@ -57,15 +57,30 @@ export function toArticleSummaryDto(params: {
   };
 }
 
+/**
+ * Storage key of the smallest derivative the publication build makes for an
+ * asset (`scripts/media-build.ts`): 340px wide, or the original width when it
+ * is narrower. Lists use it instead of the multi-megabyte original.
+ */
+export function thumbnailKey(asset: MediaAsset): string | null {
+  if (!asset.mimeType.startsWith("image/") || asset.mimeType === "image/svg+xml") return null;
+  if (!/^[a-f0-9]{16,}$/.test(asset.sha256)) return null;
+  const width = asset.width !== null && asset.width > 0 && asset.width <= 340 ? asset.width : 340;
+  return `_img/${asset.sha256.slice(0, 16)}-${width}.webp`;
+}
+
 export function toArticleMediaDto(
   usage: ArticleMedia,
   asset: MediaAsset | null,
   url: string,
   imageBase?: string,
+  resolve?: (storageKey: string) => string,
 ): ArticleMediaDto {
+  const thumb = asset && resolve ? thumbnailKey(asset) : null;
   return {
     mediaId: usage.mediaId,
     url: asset ? (publicImageUrl(asset, imageBase) ?? url) : url,
+    thumbnailUrl: thumb && resolve ? resolve(thumb) : null,
     role: usage.role,
     sortOrder: usage.sortOrder,
     alt: usage.alt,
@@ -91,7 +106,13 @@ function publicImageUrl(
     : null;
 }
 
-export function toMediaAssetDto(asset: MediaAsset, url: string, imageBase?: string): MediaAssetDto {
+export function toMediaAssetDto(
+  asset: MediaAsset,
+  url: string,
+  imageBase?: string,
+  resolve?: (storageKey: string) => string,
+): MediaAssetDto {
+  const thumb = resolve ? thumbnailKey(asset) : null;
   return {
     id: asset.id,
     url,
@@ -103,6 +124,7 @@ export function toMediaAssetDto(asset: MediaAsset, url: string, imageBase?: stri
     slug: asset.slug ?? null,
     hashVerified: Boolean(asset.contentSha256),
     slugUrl: publicImageUrl(asset, imageBase),
+    thumbnailUrl: thumb && resolve ? resolve(thumb) : null,
   };
 }
 

@@ -1,3 +1,4 @@
+import { invalidAppleMusicReferences } from "@tomokichi/contracts";
 import type { Article, ArticleRevision } from "../entities/article.js";
 import type { ArticleMedia } from "../entities/media.js";
 import type { Route } from "../entities/route.js";
@@ -36,6 +37,12 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
   if (revision.summary.trim() === "") fail("summary is required", "summary");
   if (revision.bodyMarkdown.trim().length < MIN_BODY_LENGTH) {
     fail(`body must be at least ${MIN_BODY_LENGTH} characters`, "bodyMarkdown");
+  }
+
+  // A pasted Apple Music link that is not a song, album or playlist would
+  // otherwise publish as a bare link where the reader expects a player.
+  for (const url of invalidAppleMusicReferences(revision.bodyMarkdown)) {
+    fail(`Apple Music URL is not a song, album or playlist: ${url}`, "bodyMarkdown");
   }
 
   const expectedTarget = article.kind === "page" ? "static" : "article";

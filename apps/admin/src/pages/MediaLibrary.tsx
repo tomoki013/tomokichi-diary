@@ -2,14 +2,12 @@ import { useState } from "react";
 import type { MediaAssetDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
 import { formatBytes } from "../lib/labels";
-import { useResource, useTitle } from "../ui/hooks";
+import { usePagedSearch, useResource, useTitle } from "../ui/hooks";
 import { EmptyState, ErrorState, PageHeader } from "../ui/parts";
 import { useToast } from "../ui/toast";
-import { matchesMedia } from "../lib/media-upload";
 import { MediaUpload } from "../ui/MediaUpload";
 import { MediaDetails } from "../ui/MediaDetails";
-
-const PAGE = 60;
+import { MediaThumb } from "../ui/MediaThumb";
 
 /**
  * Every uploaded image. Which article uses a photo, and with what alt text, is
@@ -18,18 +16,18 @@ const PAGE = 60;
 export function MediaLibrary() {
   useTitle("画像");
   const toast = useToast();
-  const media = useResource(() => api.listMedia().then((r) => r.items), "media");
-  const [shown, setShown] = useState(PAGE);
   const [query, setQuery] = useState("");
+  // Searched and paged on the server: the library is hundreds of photos, and
+  // the browser only ever holds the pages the operator has scrolled to.
+  const media = usePagedSearch((q, offset) => api.searchMedia(q, offset), query);
   const [selected, setSelected] = useState<MediaAssetDto | null>(null);
   const hashes = useResource(() => api.mediaHashStatus(), "media-hashes");
   const addAsset = (asset: MediaAssetDto): void => {
-    media.setData((current) =>
-      current?.some((item) => item.id === asset.id) ? current : [asset, ...(current ?? [])],
+    media.setItems((current) =>
+      current.some((item) => item.id === asset.id) ? current : [asset, ...current],
     );
     void hashes.reload();
   };
-  const filtered = (media.data ?? []).filter((asset) => matchesMedia(asset, query));
 
   async function copy(url: string): Promise<void> {
     try {
@@ -42,7 +40,7 @@ export function MediaLibrary() {
 
   return (
     <>
-      <PageHeader title="画像" meta={media.data && `${media.data.length}件`} />
+      <PageHeader title="画像" meta={hashes.data ? `${hashes.data.total}件` : undefined} />
       <MediaUpload onAsset={addAsset} />
       {hashes.data && (hashes.data.pending > 0 || hashes.data.uploads > 0) && (
         <output className="media-notice">
@@ -54,35 +52,36 @@ export function MediaLibrary() {
         <input
           type="search"
           aria-label="画像を検索"
-          placeholder="Slug・ファイル名・URLで検索"
+          placeholder="Slug・ファイル名で検索（スペースで絞り込み）"
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setShown(PAGE);
-          }}
+          onChange={(event) => setQuery(event.target.value)}
         />
+        {media.total !== null && query.trim() !== "" && (
+          <span className="muted">{media.total}件</span>
+        )}
       </div>
-      {media.error ? (
-        <ErrorState error={media.error} onRetry={() => void media.reload()} />
-      ) : media.loading && !media.data ? (
+      {media.error && media.items.length === 0 ? (
+        <ErrorState error={media.error} onRetry={() => media.reload()} />
+      ) : media.loading && media.items.length === 0 ? (
         <div className="library">
           {Array.from({ length: 18 }, (_, index) => (
             <div key={index} className="skeleton library__skeleton" />
           ))}
         </div>
-      ) : media.data?.length === 0 ? (
-        <EmptyState>画像はまだありません。</EmptyState>
+      ) : media.items.length === 0 ? (
+        <EmptyState>
+          {query.trim() === "" ? "画像はまだありません。" : "該当する画像はありません。"}
+        </EmptyState>
       ) : (
         <>
           <ul className="library">
-            {filtered.slice(0, shown).map((asset) => (
+            {media.items.map((asset) => (
               <li key={asset.id}>
-                <img
-                  src={asset.url}
-                  alt=""
-                  loading="lazy"
-                  width={asset.width ?? undefined}
-                  height={asset.height ?? undefined}
+                <MediaThumb
+                  url={asset.url}
+                  thumbnailUrl={asset.thumbnailUrl}
+                  width={asset.width}
+                  height={asset.height}
                 />
                 <div className="library__meta">
                   <span>
@@ -108,11 +107,13 @@ export function MediaLibrary() {
               </li>
             ))}
           </ul>
-          {filtered.length === 0 && <EmptyState>該当する画像はありません。</EmptyState>}
-          {filtered.length > shown && (
+          {media.error && <ErrorState error={media.error} onRetry={() => media.more()} />}
+          {media.hasMore && (
             <div className="more">
-              <button type="button" onClick={() => setShown((count) => count + PAGE)}>
-                さらに表示（残り {filtered.length - shown}）
+              <button type="button" disabled={media.loading} onClick={() => media.more()}>
+                {media.loading
+                  ? "読み込み中…"
+                  : `さらに表示（残り ${(media.total ?? 0) - media.items.length}）`}
               </button>
             </div>
           )}
@@ -124,8 +125,8 @@ export function MediaLibrary() {
           asset={selected}
           onClose={() => setSelected(null)}
           onSaved={(asset) => {
-            media.setData((current) =>
-              current?.map((item) => (item.id === asset.id ? asset : item)),
+            media.setItems((current) =>
+              current.map((item) => (item.id === asset.id ? asset : item)),
             );
             setSelected(asset);
             toast.info("Slugを保存しました");

@@ -117,3 +117,106 @@ export function useTitle(title: string): void {
 export function newIdempotencyKey(): string {
   return crypto.randomUUID();
 }
+
+/** The value after it has stopped changing for `delay` ms. */
+export function useDebounced<T>(value: T, delay = 250): T {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return settled;
+}
+
+export interface PagedSearch<T> {
+  items: T[];
+  total: number | null;
+  loading: boolean;
+  error: unknown;
+  hasMore: boolean;
+  more: () => void;
+  reload: () => void;
+  /** Local edits after a write, without a round trip. */
+  setItems: (update: (current: T[]) => T[]) => void;
+}
+
+/**
+ * Server-side search, one page at a time. Typing waits for a pause, and an
+ * answer to an older query is dropped, so a slow first request never paints
+ * over the results for what the operator typed last.
+ */
+export function usePagedSearch<T>(
+  load: (
+    query: string,
+    offset: number,
+  ) => Promise<{ items: readonly T[]; total: number; nextOffset: number | null }>,
+  query: string,
+  enabled = true,
+): PagedSearch<T> {
+  const debounced = useDebounced(query.trim());
+  const [state, setState] = useState<{
+    items: T[];
+    total: number | null;
+    next: number | null;
+    loading: boolean;
+    error: unknown;
+  }>({ items: [], total: null, next: 0, loading: enabled, error: undefined });
+  const latest = useRef(load);
+  useLayoutEffect(() => {
+    latest.current = load;
+  });
+  const generation = useRef(0);
+
+  const fetchPage = useCallback(
+    async (offset: number, append: boolean) => {
+      generation.current += 1;
+      const mine = generation.current;
+      setState((current) => ({
+        ...current,
+        ...(append ? {} : { items: [], total: null }),
+        loading: true,
+        error: undefined,
+      }));
+      try {
+        const page = await latest.current(debounced, offset);
+        if (mine !== generation.current) return;
+        setState((current) => ({
+          items: append ? [...current.items, ...page.items] : [...page.items],
+          total: page.total,
+          next: page.nextOffset,
+          loading: false,
+          error: undefined,
+        }));
+      } catch (error) {
+        if (mine === generation.current)
+          setState((current) => ({ ...current, loading: false, error }));
+      }
+    },
+    [debounced],
+  );
+
+  useEffect(() => {
+    if (!enabled) return;
+    // oxlint-disable-next-line react/set-state-in-effect
+    void fetchPage(0, false);
+  }, [enabled, fetchPage]);
+
+  const setItems = useCallback(
+    (update: (current: T[]) => T[]) =>
+      setState((current) => ({ ...current, items: update(current.items) })),
+    [],
+  );
+
+  return {
+    items: state.items,
+    total: state.total,
+    loading: state.loading,
+    error: state.error,
+    hasMore: state.next !== null,
+    more: () => {
+      if (state.next !== null && !state.loading) void fetchPage(state.next, true);
+    },
+    reload: () => void fetchPage(0, false),
+    setItems,
+  };
+}

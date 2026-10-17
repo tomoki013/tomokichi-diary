@@ -81,8 +81,11 @@ const footerPhoto = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {/* Media is on its own origin, so the connection is opened before the
-        first image is discovered rather than after. */}
-    <link rel="preconnect" href={mediaBaseUrl} crossorigin />
+        first image is discovered rather than after. No `crossorigin`: images
+        are fetched without CORS, and a CORS preconnect opens a socket the
+        image requests cannot reuse, so the first photo paid a second
+        handshake. */}
+    <link rel="preconnect" href={mediaBaseUrl} />
     <link rel="dns-prefetch" href={mediaBaseUrl} />
     <title>{metadata.title}</title>
     <meta name="description" content={metadata.description} />

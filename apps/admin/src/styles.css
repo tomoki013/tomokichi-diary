@@ -1242,3 +1242,75 @@ fieldset {
   max-height: min(40rem, 80svh);
   margin-inline: auto;
 }
+
+/* Series */
+.series-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.series-list li {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.series-list__cover img,
+.series-list__cover span {
+  display: block;
+  width: 4rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--line);
+}
+.series-list__body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.series-list__body small {
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+.series-list__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.series-cover {
+  max-width: 100%;
+  width: 22rem;
+  border-radius: 8px;
+}
+@media (max-width: 40rem) {
+  .series-list li {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+  .series-list__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* Apple Music player in the preview, as the public site renders it. */
+.preview .apple-music {
+  margin: 1.25rem 0;
+}
+.preview .apple-music iframe {
+  display: block;
+  width: 100%;
+  max-width: 660px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg-sunk);
+}
+.preview .apple-music figcaption {
+  font-size: 0.8125rem;
+}

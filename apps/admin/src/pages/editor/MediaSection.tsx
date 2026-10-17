@@ -3,11 +3,11 @@ import { useState } from "react";
 import type { ArticleDetailDto, MediaAssetDto } from "@tomokichi/contracts";
 import { api, type MediaRole, type MediaUsageInput } from "../../lib/api";
 import { mediaRoleLabels } from "../../lib/labels";
-import { useResource } from "../../ui/hooks";
+import { usePagedSearch } from "../../ui/hooks";
 import { ErrorState, Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
-import { matchesMedia } from "../../lib/media-upload";
 import { MediaUpload } from "../../ui/MediaUpload";
+import { MediaThumb } from "../../ui/MediaThumb";
 
 function usagesFrom(article: ArticleDetailDto): MediaUsageInput[] {
   return article.media
@@ -42,14 +42,15 @@ export function MediaSection({
   const [usages, setUsages] = useState<MediaUsageInput[]>(() => usagesFrom(article));
   const [baseline, setBaseline] = useState(() => JSON.stringify(usagesFrom(article)));
   const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState(60);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
   // URLs of images added in this session, before the article is reloaded.
   const [known, setKnown] = useState<Record<string, string>>({});
-  const library = useResource(
-    () => (picking ? api.listMedia().then((r) => r.items) : Promise.resolve([] as MediaAssetDto[])),
-    `media:${picking}`,
+  // Only fetched while the picker is open, one searched page at a time.
+  const library = usePagedSearch<MediaAssetDto>(
+    (q, offset) => api.searchMedia(q, offset, 48),
+    query,
+    picking,
   );
 
   const normalized = usages.map((usage, index) => ({ ...usage, sortOrder: index }));
@@ -59,7 +60,7 @@ export function MediaSection({
   const urlOf = (mediaId: string): string =>
     known[mediaId] ??
     article.media.find((item) => item.mediaId === mediaId)?.url ??
-    library.data?.find((item) => item.id === mediaId)?.url ??
+    library.items.find((item) => item.id === mediaId)?.url ??
     "";
 
   const add = (mediaId: string): void =>
@@ -93,8 +94,8 @@ export function MediaSection({
     });
 
   const acceptAsset = (asset: MediaAssetDto): void => {
-    library.setData((current) =>
-      current?.some((item) => item.id === asset.id) ? current : [asset, ...(current ?? [])],
+    library.setItems((current) =>
+      current.some((item) => item.id === asset.id) ? current : [asset, ...current],
     );
     setKnown((current) => ({ ...current, [asset.id]: asset.slugUrl ?? asset.url }));
     add(asset.id);
@@ -142,7 +143,12 @@ export function MediaSection({
       <ol className="media-usages">
         {usages.map((usage, index) => (
           <li key={usage.mediaId}>
-            <img src={urlOf(usage.mediaId)} alt="" loading="lazy" />
+            <MediaThumb
+              url={urlOf(usage.mediaId)}
+              thumbnailUrl={
+                article.media.find((item) => item.mediaId === usage.mediaId)?.thumbnailUrl
+              }
+            />
             <div className="media-usages__fields">
               <div className="row">
                 <select
@@ -210,41 +216,38 @@ export function MediaSection({
           <input
             type="search"
             aria-label="写真を検索"
-            placeholder="Slug・ファイル名・URLで検索"
+            placeholder="Slug・ファイル名で検索（スペースで絞り込み）"
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setLimit(60);
-            }}
+            onChange={(e) => setQuery(e.target.value)}
           />
           {Boolean(library.error) && (
-            <ErrorState error={library.error} onRetry={() => void library.reload()} />
+            <ErrorState error={library.error} onRetry={() => library.reload()} />
           )}
           <div className="media-grid">
-            {library.loading && !library.data
+            {library.loading && library.items.length === 0
               ? Array.from({ length: 12 }, (_, index) => <div key={index} className="skeleton" />)
-              : (library.data ?? [])
-                  .filter((asset) => matchesMedia(asset, query))
-                  .slice(0, limit)
-                  .map((asset) => {
-                    const chosen = usages.some((usage) => usage.mediaId === asset.id);
-                    return (
-                      <button
-                        key={asset.id}
-                        type="button"
-                        aria-pressed={chosen}
-                        aria-label={`画像を追加：${asset.slug ?? asset.originalName ?? asset.id}`}
-                        title={asset.slug ?? asset.originalName ?? asset.id}
-                        onClick={() => acceptAsset(asset)}
-                      >
-                        <img src={asset.url} alt="" loading="lazy" />
-                      </button>
-                    );
-                  })}
+              : library.items.map((asset) => {
+                  const chosen = usages.some((usage) => usage.mediaId === asset.id);
+                  return (
+                    <button
+                      key={asset.id}
+                      type="button"
+                      aria-pressed={chosen}
+                      aria-label={`画像を追加：${asset.slug ?? asset.originalName ?? asset.id}`}
+                      title={asset.slug ?? asset.originalName ?? asset.id}
+                      onClick={() => acceptAsset(asset)}
+                    >
+                      <MediaThumb url={asset.url} thumbnailUrl={asset.thumbnailUrl} />
+                    </button>
+                  );
+                })}
           </div>
-          {(library.data ?? []).filter((asset) => matchesMedia(asset, query)).length > limit && (
-            <button type="button" onClick={() => setLimit((n) => n + 60)}>
-              さらに表示
+          {!library.loading && library.items.length === 0 && (
+            <p className="muted">該当する画像はありません。</p>
+          )}
+          {library.hasMore && (
+            <button type="button" disabled={library.loading} onClick={() => library.more()}>
+              {library.loading ? "読み込み中…" : "さらに表示"}
             </button>
           )}
         </div>

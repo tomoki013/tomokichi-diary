@@ -70,6 +70,28 @@ export function imageSources(storageKey: string): ImageSources {
   };
 }
 
+/**
+ * The largest WebP derivative, for a full-screen view. The original can be a
+ * multi-megabyte camera file, far more than a phone screen can show.
+ */
+export function largeImageUrl(storageKey: string): string {
+  const asset = bySha.get(storageKey);
+  if (!asset) return mediaUrl(storageKey);
+  return derivativeUrl(asset.sha256, widthsFor(asset.width).at(-1)!, "webp");
+}
+
+/** A small WebP for link cards and thumbnails, never the camera original. */
+export function cardImageUrl(storageKey: string): string {
+  const asset = bySha.get(storageKey);
+  if (!asset) return mediaUrl(storageKey);
+  const widths = widthsFor(asset.width);
+  return derivativeUrl(
+    asset.sha256,
+    widths.find((width) => width >= 704) ?? widths.at(-1)!,
+    "webp",
+  );
+}
+
 /** Everything the build has to produce, derived from the snapshot rather than from render calls. */
 export function derivativePlans(): DerivativePlan[] {
   return snapshot.media
@@ -104,11 +126,13 @@ export function enhanceBodyImages(html: string): string {
     const src = /\ssrc="([^"]*)"/i.exec(attrs)?.[1];
     if (src === undefined) return tag;
     const local = src.startsWith(`${mediaBaseUrl}/`) ? src.slice(mediaBaseUrl.length) : src;
-    if (!local.startsWith("/images/") && !local.startsWith("/originals/")) return tag;
+    // Anything outside the media library (an external photo, a pasted API
+    // slug URL) still must not load ahead of the reader.
+    if (!local.startsWith("/images/") && !local.startsWith("/originals/")) return withLazy(tag);
 
     const storageKey = local.replace(/^\/+/, "");
     const image = imageSources(storageKey);
-    if (image.sources.length === 0) return tag.replace(src, image.src);
+    if (image.sources.length === 0) return withLazy(tag.replace(src, image.src));
 
     const alt = /\salt="([^"]*)"/i.exec(attrs)?.[1] ?? "";
     const dimensions = [
@@ -130,4 +154,11 @@ export function enhanceBodyImages(html: string): string {
 
     return `<picture>${sources}<img src="${image.src}" alt="${alt}"${dimensions}${displaySize} loading="lazy" decoding="async"></picture>`;
   });
+}
+
+function withLazy(tag: string): string {
+  let result = tag;
+  if (!/\sloading=/i.test(result)) result = result.replace(/<img\b/i, '<img loading="lazy"');
+  if (!/\sdecoding=/i.test(result)) result = result.replace(/<img\b/i, '<img decoding="async"');
+  return result;
 }

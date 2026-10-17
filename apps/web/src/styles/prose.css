@@ -259,4 +259,26 @@
       aspect-ratio: 16 / 9;
     }
   }
+
+  /* Apple Music players (packages/contracts/src/apple-music.ts). The frame is
+     Apple's; only its box is ours, so its height reserves space before it
+     loads and the page does not jump. */
+  .apple-music {
+    margin: var(--space-md) 0;
+  }
+
+  .apple-music iframe {
+    display: block;
+    width: 100%;
+    max-width: 660px;
+    border: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--color-border-decorative);
+  }
+
+  .apple-music figcaption {
+    margin-top: var(--space-2xs);
+    font-size: var(--step-small);
+  }
 }

@@ -5,9 +5,9 @@ import type { ArticleView } from "@tomokichi/application";
 import ArticleAd from "./ArticleAd.astro";
 import type { AdPlan } from "../lib/monetization";
 import EmbedBlock from "./EmbedBlock.astro";
-import { enhanceBodyImages } from "../lib/images";
+import { cardImageUrl, enhanceBodyImages } from "../lib/images";
+import { enhanceAppleMusic } from "@tomokichi/contracts";
 import { content } from "../lib/content";
-import { mediaUrl } from "../lib/site";
 
 interface Props {
   slug: string;
@@ -95,7 +95,7 @@ const internalCard = (href: string): string | null => {
     return null;
   }
   const image = cover
-    ? `<span class="internal-link-card__media"><img src="${escapeHtml(mediaUrl(cover.asset.storageKey))}" alt="${escapeHtml(cover.usage.alt)}" loading="lazy" decoding="async"></span>`
+    ? `<span class="internal-link-card__media"><img src="${escapeHtml(cardImageUrl(cover.asset.storageKey))}" alt="${escapeHtml(cover.usage.alt)}" loading="lazy" decoding="async"></span>`
     : `<span class="internal-link-card__media internal-link-card__media--empty" aria-hidden="true"><span>TRAVEL<br>NOTE</span></span>`;
   return `<aside class="internal-link-card" aria-label="関連コンテンツ"><a href="${escapeHtml(route.path)}">${image}<span class="internal-link-card__copy"><small>${label}</small><strong>${escapeHtml(title)}</strong><span>${escapeHtml(summary)}</span><b>詳しく見る <span aria-hidden="true">→</span></b></span></a></aside>`;
 };
@@ -113,7 +113,9 @@ const withHeadingIds = (value: string) =>
 const segments =
   html === null
     ? null
-    : withInternalLinkCards(withHeadingIds(enhanceBodyImages(html))).split(PLACEHOLDER);
+    : withInternalLinkCards(withHeadingIds(enhanceAppleMusic(enhanceBodyImages(html)))).split(
+        PLACEHOLDER,
+      );
 
 const fallback = html === null ? await render(entry) : null;
 const FallbackContent = fallback?.Content;

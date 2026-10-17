@@ -31,9 +31,12 @@ const period =
 
 const metadata = buildPageMetadata(seoConfig, {
   title,
-  description: collection?.description ?? `${title}に含まれる記事の一覧です。`,
+  description:
+    collection?.description?.replace(/\s+/g, " ").trim() ?? `${title}に含まれる記事の一覧です。`,
   route,
-  noindex: route.noindex,
+  // A collection with no published article yet is reachable but kept out of
+  // search until it has something to read (the sitemap applies the same rule).
+  noindex: route.noindex || members.length === 0,
 });
 const kindLabel = collection?.kind === "journey" ? "旅程コレクション" : "テーマコレクション";
 const places = [
@@ -47,7 +50,8 @@ const otherCollections = content.snapshot.collections
   .filter((item) => item.id !== collectionId && item.kind === collection?.kind)
   .flatMap((item) => {
     const itemRoute = content.routes.canonicalFor(item.kind, item.id);
-    return itemRoute ? [{ item, route: itemRoute, count: content.membersOf(item.id).length }] : [];
+    const count = content.membersOf(item.id).length;
+    return itemRoute && count > 0 ? [{ item, route: itemRoute, count }] : [];
   })
   .slice(0, 3);
 ---
@@ -148,6 +152,9 @@ const otherCollections = content.snapshot.collections
           );
         })}
       </ol>
+      {members.length === 0 && (
+        <p class="collection-members__empty">このシリーズの記事は準備中です。</p>
+      )}
     </section>
 
     {otherCollections.length > 0 && (

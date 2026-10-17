@@ -10,6 +10,8 @@ export type Route =
   | { name: "article"; id: string }
   | { name: "monetization" }
   | { name: "media" }
+  | { name: "series" }
+  | { name: "series-edit"; id: string }
   | { name: "routes" }
   | { name: "inquiries" }
   | { name: "inquiry"; id: string }
@@ -34,6 +36,8 @@ export function parseRoute(hash: string): Route {
       return second ? { name: "not-found", path } : { name: "media" };
     case "routes":
       return second ? { name: "not-found", path } : { name: "routes" };
+    case "series":
+      return second ? { name: "series-edit", id: decodeURIComponent(second) } : { name: "series" };
     case "inquiries":
       if (!second) return { name: "inquiries" };
       if (second === "archive") return { name: "legacy-messages" };
@@ -50,6 +54,8 @@ export const href = {
   article: (id: string) => `#/articles/${encodeURIComponent(id)}`,
   monetization: () => "#/monetization",
   media: () => "#/media",
+  series: () => "#/series",
+  seriesEdit: (id: string) => `#/series/${encodeURIComponent(id)}`,
   routes: () => "#/routes",
   inquiries: () => "#/inquiries",
   inquiry: (id: string) => `#/inquiries/${encodeURIComponent(id)}`,
@@ -65,6 +71,7 @@ export function section(
   | "articles"
   | "monetization"
   | "media"
+  | "series"
   | "routes"
   | "inquiries"
   | null {
@@ -80,6 +87,9 @@ export function section(
       return "articles";
     case "media":
       return "media";
+    case "series":
+    case "series-edit":
+      return "series";
     case "routes":
       return "routes";
     case "inquiries":

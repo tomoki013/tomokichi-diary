@@ -1,6 +1,8 @@
 import { MonetizationSection } from "./MonetizationSection";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
+import { enhanceAppleMusic } from "@tomokichi/contracts";
+import { insertAppleMusic } from "../../lib/apple-music";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { insertMarkdownImage } from "../../lib/markdown-image";
 import { useEditorSections } from "./section-save";
@@ -115,13 +117,15 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const previewHtml = useMemo(
     () =>
       showPreview
-        ? (marked.parse(
-            draft.bodyMarkdown.replace(
-              /\{\{monetization:([a-z0-9-]+)\}\}/g,
-              "\n\n**［収益化スロット: $1 / 管理画面のみ］**\n\n",
-            ),
-            { async: false },
-          ) as string)
+        ? enhanceAppleMusic(
+            marked.parse(
+              draft.bodyMarkdown.replace(
+                /\{\{monetization:([a-z0-9-]+)\}\}/g,
+                "\n\n**［収益化スロット: $1 / 管理画面のみ］**\n\n",
+              ),
+              { async: false },
+            ) as string,
+          )
         : "",
     [draft.bodyMarkdown, showPreview],
   );
@@ -220,6 +224,36 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 onChange={(event) => update("bodyMarkdown", event.target.value)}
               />
             </label>
+            <div className="row">
+              <button
+                type="button"
+                className="link"
+                onClick={() => {
+                  const pasted = globalThis.prompt(
+                    "Apple Music の共有URL、または「埋め込みコード」を貼り付けてください（曲・アルバム・プレイリスト）",
+                  );
+                  if (!pasted) return;
+                  const inserted = insertAppleMusic(
+                    draft.bodyMarkdown,
+                    selection.current.start,
+                    selection.current.end,
+                    pasted,
+                  );
+                  if (!inserted) {
+                    toast.error(
+                      new Error(
+                        "Apple Music の曲・アルバム・プレイリストのURLとして読み取れませんでした",
+                      ),
+                    );
+                    return;
+                  }
+                  update("bodyMarkdown", inserted.body);
+                  selection.current = { start: inserted.cursor, end: inserted.cursor };
+                }}
+              >
+                ♪ Apple Musicを挿入
+              </button>
+            </div>
             <label className="field">
               <span>変更の要約（履歴に残ります・任意）</span>
               <input

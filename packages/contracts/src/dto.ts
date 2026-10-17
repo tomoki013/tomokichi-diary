@@ -64,6 +64,7 @@ export interface ArticleDetailDto extends ArticleSummaryDto {
 export interface ArticleMediaDto {
   readonly mediaId: string;
   readonly url: string;
+  readonly thumbnailUrl?: string | null;
   readonly role: string;
   readonly sortOrder: number;
   readonly alt: string;
@@ -90,6 +91,18 @@ export interface MediaAssetDto {
   readonly slug: string | null;
   readonly hashVerified: boolean;
   readonly slugUrl: string | null;
+  /**
+   * The smallest build derivative, for lists. Exists once a publication has
+   * built it; clients fall back to `url` when it fails to load.
+   */
+  readonly thumbnailUrl?: string | null;
+}
+
+/** One page of the media library, searched on the server. */
+export interface MediaPageDto {
+  readonly items: readonly MediaAssetDto[];
+  readonly total: number;
+  readonly nextOffset: number | null;
 }
 
 /** Keeps the existing upload response fields for older admin clients. */
@@ -134,6 +147,28 @@ export interface TaxonomyDto {
     readonly kind: string;
     readonly title: string;
   }[];
+}
+
+/** A series or journey as the admin manages it. */
+export interface CollectionAdminDto {
+  readonly id: string;
+  readonly slug: string;
+  readonly kind: "series" | "journey";
+  readonly title: string;
+  readonly description: string | null;
+  readonly coverMediaId: string | null;
+  readonly coverUrl: string | null;
+  readonly sortOrder: number;
+  readonly path: string | null;
+  /** Members whose article is live on the site; zero keeps the page noindex. */
+  readonly publishedCount: number;
+  readonly memberCount: number;
+}
+
+export interface TagDto {
+  readonly id: string;
+  readonly slug: string;
+  readonly name: string;
 }
 
 export interface PublishCheckDto {

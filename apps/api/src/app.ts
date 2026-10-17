@@ -9,6 +9,7 @@ import { analyticsRoutes } from "./routes/analytics.js";
 import { articleRoutes } from "./routes/articles.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
 import { mediaRoutes } from "./routes/media.js";
+import { collectionRoutes } from "./routes/collections.js";
 import { imageRoutes } from "./routes/images.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
@@ -196,6 +197,7 @@ export function createApp(options: AppOptions = {}) {
     "/admin/inquiry",
     inquiryRoutes((c) => inquiryOperator(c.env)),
   );
+  v1.route("/admin", collectionRoutes());
   v1.route("/admin", referenceRoutes());
 
   app.route("/v1", v1);

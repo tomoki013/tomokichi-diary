@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build:ui": "vite build && tsx scripts/verify-ui.ts",
-    "build": "pnpm build:ui && tsc --noEmit -p tsconfig.json",
+    "build": "pnpm build:ui && tsc --noEmit -p tsconfig.json && tsc --noEmit -p operator",
+    "operator": "tsx operator/main.ts",
     "dev": "pnpm build:ui && cf-wrangler dev",
     "deploy": "pnpm build:ui && cf-wrangler build && cf deploy --prebuilt",
     "test": "vitest run"
