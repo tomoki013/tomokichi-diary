@@ -166,7 +166,9 @@ export function Monetization() {
           {tab === 1 && (
             <Settings initial={overview.settings} onDirty={setDirty} reload={data.reload} />
           )}
-          {tab === 2 && <Offers data={overview} onDirty={setDirty} reload={data.reload} />}
+          {tab === 2 && (
+            <Offers data={overview} dirty={dirty} onDirty={setDirty} reload={data.reload} />
+          )}
           {tab === 3 && (
             <Panel title="配置管理">
               <p>
@@ -331,11 +333,13 @@ function Settings({
   );
 }
 function Offers({
+  dirty,
   data,
   onDirty,
   reload,
 }: {
   data: MonetizationOverviewDto;
+  dirty: boolean;
   onDirty: (d: boolean) => void;
   reload: () => Promise<void>;
 }) {
@@ -357,7 +361,7 @@ function Offers({
           value={selected?.id ?? ""}
           onChange={(e) => {
             const o = data.offers.find((offer) => offer.id === e.target.value);
-            if (o && confirm("編集中の内容を閉じて案件を開きますか？")) choose(o);
+            if (o && (!dirty || confirm("編集中の内容を閉じて案件を開きますか？"))) choose(o);
           }}
         >
           <option value="">案件を選択</option>
@@ -370,7 +374,7 @@ function Offers({
         <button
           type="button"
           onClick={() => {
-            if (selected && !confirm("編集中の内容を閉じて新規作成しますか？")) return;
+            if (dirty && !confirm("編集中の内容を閉じて新規作成しますか？")) return;
             choose({
               id: "new",
               name: "新しい案件",
