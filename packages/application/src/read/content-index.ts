@@ -5,6 +5,7 @@ import {
   isIndexable,
   isPubliclyVisible,
   listPublicArticles,
+  routeHasPage,
   type Article,
   type ArticleEmbed,
   type ArticleId,
@@ -228,6 +229,13 @@ export class ContentIndex {
         if (pubA !== pubB) return pubA < pubB ? -1 : 1;
         return a.article.slug < b.article.slug ? -1 : a.article.slug > b.article.slug ? 1 : 0;
       });
+  }
+
+  /** Routes the static build turns into pages: drafts' URLs are left out. */
+  pageRoutes(): readonly Route[] {
+    return this.routes
+      .renderable()
+      .filter((route) => routeHasPage(route, this.articleById, this.now));
   }
 
   /** Whether a collection has anything a reader can open; empty ones stay out of the index. */

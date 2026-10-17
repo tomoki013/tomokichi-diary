@@ -123,6 +123,24 @@ export function isPubliclyVisible(article: Article, now: Instant): boolean {
   return true;
 }
 
+/**
+ * Whether a route produces a page in the static build. A route is created
+ * with its article, so a draft (or unpublished) article already owns its URL;
+ * that URL has no page until the article goes live. Static page keys that are
+ * not articles (the home page, index pages) always render.
+ */
+export function routeHasPage(
+  route: Route,
+  articleById: ReadonlyMap<string, Article>,
+  now: Instant,
+): boolean {
+  if (route.targetType === "redirect") return false;
+  if (route.targetType !== "article" && route.targetType !== "static") return true;
+  const article = route.targetId === null ? undefined : articleById.get(route.targetId);
+  if (!article) return route.targetType === "static";
+  return isPubliclyVisible(article, now);
+}
+
 /** Public listings and the sitemap exclude noindex articles; direct URLs still resolve. */
 export function isIndexable(article: Article, now: Instant): boolean {
   return isPubliclyVisible(article, now) && !article.noindex;

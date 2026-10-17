@@ -14,7 +14,7 @@ import IndexPage from "../views/IndexPage.astro";
 import HomePage from "../views/HomePage.astro";
 
 export function getStaticPaths() {
-  return content.routes.renderable().map((route) => ({
+  return content.pageRoutes().map((route) => ({
     // Astro's catch-all wants the path without its leading slash; the home page
     // is the empty string.
     params: { route: route.path === "/" ? undefined : route.path.slice(1) },

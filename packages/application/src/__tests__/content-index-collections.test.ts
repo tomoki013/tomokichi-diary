@@ -108,3 +108,33 @@ describe("ContentIndex collections", () => {
     expect(content.hasPublicMembers("empty" as CollectionId)).toBe(false);
   });
 });
+
+describe("ContentIndex page routes", () => {
+  it("leaves a draft's reserved URL out of the build and keeps static pages", () => {
+    const draft = article("draft-song", { status: "draft" });
+    const live = article("live-song");
+    const base = index([draft, live], []);
+    const content = new ContentIndex(
+      {
+        ...base.snapshot,
+        routes: [
+          ...base.snapshot.routes,
+          {
+            id: "route-home",
+            path: "/",
+            targetType: "static",
+            targetId: "home",
+            isCanonical: true,
+          } as unknown as Route,
+        ],
+      },
+      NOW,
+    );
+    expect(
+      content
+        .pageRoutes()
+        .map((route) => route.path)
+        .toSorted(),
+    ).toEqual(["/", "/posts/live-song"]);
+  });
+});

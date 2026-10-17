@@ -1,4 +1,10 @@
-import { RouteTable, normalizeRoutePath, validateRoutes } from "@tomokichi/domain";
+import {
+  RouteTable,
+  instantFrom,
+  normalizeRoutePath,
+  routeHasPage,
+  validateRoutes,
+} from "@tomokichi/domain";
 import type { Finding } from "./lib/report.js";
 import { listBuiltPages, loadLegacyBaseline, loadSnapshot, report } from "./lib/built-site.js";
 
@@ -45,7 +51,11 @@ for (const path of legacy) {
   }
 }
 
+// A draft's URL is reserved but has no page yet (routeHasPage).
+const articleById = new Map(snapshot.articles.map((article) => [article.id, article]));
+const now = instantFrom(process.env.PUBLIC_BUILD_TIME ?? Date.now());
 for (const route of table.renderable()) {
+  if (!routeHasPage(route, articleById, now)) continue;
   if (!built.has(route.path)) {
     findings.push({
       code: "ROUTE_TARGET_MISSING",
