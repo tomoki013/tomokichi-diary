@@ -11,7 +11,7 @@ import { seoConfig } from "../lib/site";
 export const GET: APIRoute = () => {
   const entries = buildSitemap(
     seoConfig,
-    content.routes.renderable().map((route) => {
+    content.publicRoutes().map((route) => {
       const article =
         route.targetType === "article" || route.targetType === "static"
           ? content.snapshot.articles.find((candidate) => candidate.id === route.targetId)
