@@ -1,4 +1,4 @@
-import type { PublicMonetization } from "@tomokichi/contracts";
+import { isAdExperimentForArticle, type PublicMonetization } from "@tomokichi/contracts";
 const key = (s: unknown): s is string =>
   typeof s === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s) && s.length <= 64;
 const unit = (s: unknown): s is string => typeof s === "string" && /^\d{1,20}$/.test(s);
@@ -26,8 +26,7 @@ export function publicMonetizationOnly(
         experiment:
           c.enabled &&
           e &&
-          c.articleId === "52b1cb6d-eb74-85a3-b6a1-392f83313051" &&
-          e.id === "chagee-placement-v1" &&
+          isAdExperimentForArticle(e.id, c.articleId) &&
           key(e.markerKey) &&
           unit(e.adUnitA) &&
           unit(e.adUnitB) &&

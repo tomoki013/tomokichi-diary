@@ -3,7 +3,7 @@ export type SemanticEvent =
       readonly name: "diary_measurement";
       readonly measurement_version: "reader-v1";
       readonly layout_version: "article-end-v1" | "article-placement-v2";
-      readonly experiment_id?: "chagee-placement-v1" | "none";
+      readonly experiment_id?: string;
       readonly variant_id?: "A" | "B" | "none";
       readonly placement_key?: string;
       readonly measurement: string;

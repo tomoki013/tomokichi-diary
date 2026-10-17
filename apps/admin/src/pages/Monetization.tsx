@@ -5,7 +5,10 @@ import type {
   MonetizationOverviewDto,
   MonetizationSettings,
   AnalyticsDashboardDto,
+  ArticleSummaryDto,
 } from "@tomokichi/contracts";
+import { adExperimentId } from "@tomokichi/contracts";
+import { AdRollout } from "./AdRollout";
 import { api } from "../lib/api";
 import { href } from "../lib/route";
 import { useResource, useTitle, useUnsavedWarning } from "../ui/hooks";
@@ -197,6 +200,7 @@ export function Monetization() {
           )}
           {tab === 4 && (
             <Experiments
+              articles={articles.data?.items ?? []}
               data={overview}
               analytics={analytics.data}
               onDirty={setDirty}
@@ -481,21 +485,160 @@ function Offers({
 function Experiments({
   data,
   analytics,
+  articles,
   onDirty,
   reload,
 }: {
   data: MonetizationOverviewDto;
   analytics?: AnalyticsDashboardDto;
+  articles: readonly ArticleSummaryDto[];
   onDirty: (d: boolean) => void;
   reload: () => Promise<void>;
 }) {
-  const old = data.experiments[0];
+  const [selection, setSelected] = useState(data.experiments[0]?.id ?? "");
+  const selected = selection.startsWith("new:")
+    ? (data.experiments.find((e) => e.articleId === selection.slice(4))?.id ?? selection)
+    : selection;
+  const [editingDirty, setEditingDirty] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  function selectExperiment(next: string) {
+    if (editingDirty && !confirm("未保存の変更があります。保存せずに別の実験へ移動しますか？"))
+      return;
+    setEditingDirty(false);
+    onDirty(false);
+    setSelected(next);
+  }
+  return (
+    <>
+      <AdRollout
+        articles={articles}
+        overview={data}
+        analytics={analytics}
+        blocked={editingDirty}
+        onBusy={(value) => {
+          setBulkBusy(value);
+          onDirty(value || editingDirty);
+        }}
+        reload={reload}
+      />
+      <Panel
+        title={`記事別の配置テスト（実施中${data.experiments.filter((e) => e.status === "running").length}件）`}
+      >
+        <p>
+          記事ごとに同時ランダム割当を行い、計測を分けます。異なる記事や開始日の数値を混ぜて勝者を判断しません。
+        </p>
+        <label className="field">
+          <span>確認・編集する実験</span>
+          <select
+            disabled={bulkBusy}
+            value={selected}
+            onChange={(e) => selectExperiment(e.target.value)}
+          >
+            <option value="">実験を選択</option>
+            {data.experiments.map((e) => (
+              <option key={e.id} value={e.id}>
+                {articles.find((a) => a.id === e.articleId)?.title ?? e.name}（{e.status}）
+              </option>
+            ))}
+            {articles
+              .filter(
+                (a) =>
+                  a.kind === "article" &&
+                  a.isLive &&
+                  !data.experiments.some((e) => e.articleId === a.id),
+              )
+              .map((a) => (
+                <option key={a.id} value={`new:${a.id}`}>
+                  新規: {a.title}
+                </option>
+              ))}
+          </select>
+        </label>
+        <div className="analytics-table">
+          <table>
+            <caption>実験別の端末ごとの計測状況</caption>
+            <thead>
+              <tr>
+                <th>記事</th>
+                <th>状態</th>
+                <th>mobile A / B</th>
+                <th>desktop A / B</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.experiments.map((e) => (
+                <tr key={e.id}>
+                  <td>
+                    <button
+                      type="button"
+                      disabled={bulkBusy}
+                      onClick={() => selectExperiment(e.id)}
+                    >
+                      {articles.find((a) => a.id === e.articleId)?.title ?? e.name}
+                    </button>
+                  </td>
+                  <td>{e.status}</td>
+                  {["mobile", "desktop"].map((device) => (
+                    <td key={device}>
+                      {["A", "B"]
+                        .map((v) => {
+                          const c = analytics?.experiments?.current.find(
+                            (cohort) =>
+                              cohort.experimentId === e.id &&
+                              cohort.device === device &&
+                              cohort.variant === v,
+                          );
+                          return c ? `${c.views}表示・${c.measuredDays}日` : "未取得";
+                        })
+                        .join(" / ")}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
+      {selected && (
+        <ExperimentEditor
+          key={selected}
+          selected={selected}
+          data={data}
+          articles={articles}
+          analytics={analytics}
+          onDirty={(value) => {
+            setEditingDirty(value);
+            onDirty(value || bulkBusy);
+          }}
+          reload={reload}
+        />
+      )}
+    </>
+  );
+}
+function ExperimentEditor({
+  articles,
+  selected,
+  data,
+  analytics,
+  onDirty,
+  reload,
+}: {
+  articles: readonly ArticleSummaryDto[];
+  selected: string;
+  data: MonetizationOverviewDto;
+  analytics?: AnalyticsDashboardDto;
+  onDirty: (d: boolean) => void;
+  reload: () => Promise<void>;
+}) {
+  const old = data.experiments.find((e) => e.id === selected);
+  const articleId = old?.articleId ?? selected.replace(/^new:/, "");
   const [value, setValue] = useState<AdExperiment>(
     () =>
       old ?? {
-        id: "chagee-placement-v1",
-        articleId: "52b1cb6d-eb74-85a3-b6a1-392f83313051",
-        name: "CHAGEE 末尾 / 本文内",
+        id: adExperimentId(articleId),
+        articleId,
+        name: "末尾 / 本文内",
         markerKey: "",
         adUnitA: "7152502134",
         adUnitB: "7152502134",
@@ -534,8 +677,10 @@ function Experiments({
       <fieldset disabled={busy || value.status !== "draft"}>
         <label className="field">
           <span>対象記事</span>
-          <select value={value.articleId} onChange={(e) => update({ articleId: e.target.value })}>
-            <option value="52b1cb6d-eb74-85a3-b6a1-392f83313051">CHAGEE おすすめメニュー</option>
+          <select value={value.articleId} disabled onChange={() => {}}>
+            <option value={value.articleId}>
+              {articles.find((a) => a.id === value.articleId)?.title ?? value.articleId}
+            </option>
           </select>
         </label>
         <label className="field">
@@ -607,12 +752,18 @@ function Experiments({
       <p>
         同一ユニットを使う場合、公式収益をA/Bへ分離できません。別ユニットはAdSenseで手動作成し、広告設定へ登録してください。収益差は推定しません。
       </p>
-      <ExperimentResults data={analytics} />
+      <ExperimentResults data={analytics} experimentId={value.id} />
     </Panel>
   );
 }
-function ExperimentResults({ data }: { data?: AnalyticsDashboardDto }) {
-  const cohorts = data?.experiments?.current ?? [];
+function ExperimentResults({
+  data,
+  experimentId,
+}: {
+  data?: AnalyticsDashboardDto;
+  experimentId: string;
+}) {
+  const cohorts = (data?.experiments?.current ?? []).filter((c) => c.experimentId === experimentId);
   return (
     <>
       <h3>A/B読書体験の比較</h3>

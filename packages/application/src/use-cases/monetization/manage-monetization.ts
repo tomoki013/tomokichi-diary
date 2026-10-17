@@ -10,8 +10,7 @@ import {
   type MonetizationSettings,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
-export const EXPERIMENT_ID = "chagee-placement-v1";
-export const EXPERIMENT_ARTICLE = "52b1cb6d-eb74-85a3-b6a1-392f83313051";
+import { isAdExperimentForArticle } from "@tomokichi/contracts";
 const invalid = (message: string) => err({ code: "MONETIZATION_INVALID" as const, message });
 export async function articleMonetization(ctx: AppContext, id: ArticleId) {
   const article = await ctx.repos.articles.findById(id);
@@ -107,10 +106,23 @@ export async function saveAdExperiment(
   experiment: AdExperiment,
   action?: "start" | "stop",
 ) {
-  if (experiment.id !== EXPERIMENT_ID || experiment.articleId !== EXPERIMENT_ARTICLE)
-    return invalid("Phase 2はCHAGEEメニュー記事の配置テスト1本に限定しています");
+  if (!isAdExperimentForArticle(experiment.id, experiment.articleId))
+    return invalid("実験IDと対象記事が一致しません");
+  const article = await ctx.repos.articles.findById(experiment.articleId as ArticleId);
+  if (!article || article.kind !== "article") return invalid("対象の記事がありません");
   const repo = ctx.repos.monetization;
-  const old = (await repo.experiments()).find((e) => e.id === experiment.id);
+  const experiments = await repo.experiments();
+  const old = experiments.find((e) => e.id === experiment.id);
+  if (old && old.articleId !== experiment.articleId)
+    return invalid("実験の対象記事は変更できません");
+  if (
+    action === "start" &&
+    experiments.some(
+      (e) =>
+        e.id !== experiment.id && e.articleId === experiment.articleId && e.status === "running",
+    )
+  )
+    return invalid("同じ記事で同時に複数の実験は開始できません");
   if (
     !action &&
     (experiment.status !== "draft" || old?.status === "running" || old?.status === "stopped")

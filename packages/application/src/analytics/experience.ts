@@ -1,3 +1,4 @@
+import { isAdExperimentForArticle } from "@tomokichi/contracts";
 import {
   addMetrics,
   ratio,
@@ -14,6 +15,8 @@ export function experienceSummary(
   const cohorts = new Map<
     string,
     {
+      articleId: string | null;
+      path: string | null;
       layout: string;
       device: string;
       experimentId: string;
@@ -35,7 +38,7 @@ export function experienceSummary(
       if (
         (experiments
           ? dimensions.layout !== "article-placement-v2" ||
-            dimensions.experimentId !== "chagee-placement-v1" ||
+            !isAdExperimentForArticle(dimensions.experimentId, row.articleId ?? "") ||
             !["A", "B"].includes(dimensions.variant)
           : !(
               dimensions.layout === "article-end-v1" ||
@@ -51,8 +54,15 @@ export function experienceSummary(
         dimensions.device,
         dimensions.experimentId,
         dimensions.variant,
+        ...(experiments ? [row.articleId] : []),
       ]);
-      const cohort = cohorts.get(key) ?? { ...dimensions, rows: [], dates: new Set<string>() };
+      const cohort = cohorts.get(key) ?? {
+        ...dimensions,
+        articleId: experiments ? row.articleId : null,
+        path: experiments ? row.path : null,
+        rows: [],
+        dates: new Set<string>(),
+      };
       cohort.rows.push(row);
       if (JSON.parse(row.key).measurement === "article_view") cohort.dates.add(day.date);
       cohorts.set(key, cohort);
@@ -76,6 +86,8 @@ export function experienceSummary(
       const requests = count("ad_request"),
         filled = count("ad_filled");
       return {
+        articleId: cohort.articleId,
+        path: cohort.path,
         layout: cohort.layout,
         experimentId: cohort.experimentId,
         variant: cohort.variant,

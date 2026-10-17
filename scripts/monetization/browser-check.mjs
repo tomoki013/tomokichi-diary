@@ -138,6 +138,7 @@ try {
     });
     await page.goto("http://127.0.0.1:4178/#/monetization", { waitUntil: "networkidle0" });
     await textButton(page, "配置テスト");
+    await field(page, "確認・編集する実験", "new:52b1cb6d-eb74-85a3-b6a1-392f83313051");
     await field(page, "Bの本文配置キー", marker);
     await textButton(page, "実験の下書きを保存");
     await page.waitForFunction(() => document.body.textContent.includes("実験を保存しました"));
@@ -150,7 +151,10 @@ try {
         {
           method: "PUT",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ ...d.draft, experimentId: "chagee-placement-v1" }),
+          body: JSON.stringify({
+            ...d.draft,
+            experimentId: "placement-v1-52b1cb6d-eb74-85a3-b6a1-392f83313051",
+          }),
         },
       );
       if (!r.ok) throw new Error(await r.text());

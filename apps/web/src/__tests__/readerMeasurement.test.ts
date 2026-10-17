@@ -111,3 +111,26 @@ it("mounts once per document and keeps experiment assignment anonymous and disti
   });
   expect(JSON.stringify(assignment)).not.toContain("http");
 });
+
+it("measures a broader article experiment with the same one-document assignment semantics", () => {
+  const f = fixture("tomokichidiary.com");
+  const id = "placement-v1-ea3bf3bc-ffb6-84ed-8147-188ed74d7a50";
+  Object.assign(f.doc, {
+    documentElement: { dataset: { adVariant: "A", adExperiment: id } },
+    querySelector: () => ({
+      dataset: { adLayout: "article-placement-v2" },
+      getBoundingClientRect: () => ({ top: 300, height: 2000, bottom: 2300 }),
+    }),
+  });
+  mountReaderMeasurement();
+  mountReaderMeasurement();
+  const assignments = calls().filter(
+    (e) => e.name === "diary_measurement" && e.measurement === "experiment_assignment",
+  );
+  expect(assignments).toHaveLength(1);
+  expect(assignments[0]).toMatchObject({
+    experiment_id: id,
+    variant_id: "A",
+    placement_key: "article-end",
+  });
+});
