@@ -52,6 +52,14 @@ function form(fields: Record<string, string>): RequestInit {
   };
 }
 
+/** What the contact page's fetch sends: the same form, asking for JSON back. */
+function asJson(init: RequestInit): RequestInit {
+  return {
+    ...init,
+    headers: { ...(init.headers as Record<string, string>), accept: "application/json" },
+  };
+}
+
 const valid = {
   name: "ともきち",
   email: "reader@example.com",
@@ -117,11 +125,12 @@ describe("POST /v1/contact", () => {
       { IP_HASH_SALT, CONTACT_RATE_LIMITER },
       { TURNSTILE_SECRET_KEY, CONTACT_RATE_LIMITER },
       { TURNSTILE_SECRET_KEY, IP_HASH_SALT },
-      {},
+      { PUBLIC_SITE_URL: SITE },
     ]) {
       const response = await app.request("/v1/contact", form(valid), env as unknown as Env);
-      expect(response.status).toBe(500);
-      expect((await response.json()).error.code).toBe("API_INTERNAL");
+      // Back to the form with a message, never a bare error body.
+      expect(response.status).toBe(303);
+      expect(response.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
     }
     expect(filed).toHaveLength(0);
   });
@@ -197,6 +206,43 @@ describe("POST /v1/contact", () => {
     ctx = { ...ctx, inquiry: undefined, contactMail: undefined };
     const unbound = await app.request("/v1/contact", form(valid), configured());
     expect(unbound.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
+  });
+
+  it("sends the sender back to the form when something throws", async () => {
+    const app = appWith(async () => {
+      throw new Error("siteverify timed out");
+    });
+    const response = await app.request("/v1/contact", form(valid), configured());
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
+    expect(filed).toHaveLength(0);
+  });
+
+  it("answers the page's fetch with JSON instead of a redirect", async () => {
+    const app = appWith(async (_secret, token) => token === "token-ok");
+
+    const sent = await app.request("/v1/contact", asJson(form(valid)), configured());
+    expect(sent.status).toBe(200);
+    expect(await sent.json()).toEqual({ result: "sent" });
+
+    const challenge = await app.request(
+      "/v1/contact",
+      asJson(form({ ...valid, "cf-turnstile-response": "token-bad" })),
+      configured(),
+    );
+    expect(challenge.status).toBe(400);
+    expect(await challenge.json()).toEqual({ result: "challenge" });
+
+    limiterAllows = false;
+    const tooFast = await app.request("/v1/contact", asJson(form(valid)), configured());
+    expect(tooFast.status).toBe(429);
+    expect(await tooFast.json()).toEqual({ result: "toofast" });
+
+    const unconfigured = await app.request("/v1/contact", asJson(form(valid)), {
+      PUBLIC_SITE_URL: SITE,
+    } as unknown as Env);
+    expect(unconfigured.status).toBe(503);
+    expect(await unconfigured.json()).toEqual({ result: "unavailable" });
   });
 });
 
