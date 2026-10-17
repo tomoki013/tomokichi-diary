@@ -496,13 +496,26 @@ function Experiments({
   reload: () => Promise<void>;
 }) {
   const [selected, setSelected] = useState(data.experiments[0]?.id ?? "");
+  const [editingDirty, setEditingDirty] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  function selectExperiment(next: string) {
+    if (editingDirty && !confirm("未保存の変更があります。保存せずに別の実験へ移動しますか？"))
+      return;
+    setEditingDirty(false);
+    onDirty(false);
+    setSelected(next);
+  }
   return (
     <>
       <AdRollout
         articles={articles}
         overview={data}
         analytics={analytics}
-        onBusy={onDirty}
+        blocked={editingDirty}
+        onBusy={(value) => {
+          setBulkBusy(value);
+          onDirty(value || editingDirty);
+        }}
         reload={reload}
       />
       <Panel
@@ -513,7 +526,11 @@ function Experiments({
         </p>
         <label className="field">
           <span>確認・編集する実験</span>
-          <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+          <select
+            disabled={bulkBusy}
+            value={selected}
+            onChange={(e) => selectExperiment(e.target.value)}
+          >
             <option value="">実験を選択</option>
             {data.experiments.map((e) => (
               <option key={e.id} value={e.id}>
@@ -549,7 +566,11 @@ function Experiments({
               {data.experiments.map((e) => (
                 <tr key={e.id}>
                   <td>
-                    <button type="button" onClick={() => setSelected(e.id)}>
+                    <button
+                      type="button"
+                      disabled={bulkBusy}
+                      onClick={() => selectExperiment(e.id)}
+                    >
                       {articles.find((a) => a.id === e.articleId)?.title ?? e.name}
                     </button>
                   </td>
@@ -582,7 +603,10 @@ function Experiments({
           data={data}
           articles={articles}
           analytics={analytics}
-          onDirty={onDirty}
+          onDirty={(value) => {
+            setEditingDirty(value);
+            onDirty(value || bulkBusy);
+          }}
           reload={reload}
         />
       )}

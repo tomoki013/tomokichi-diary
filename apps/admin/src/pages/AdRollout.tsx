@@ -15,12 +15,14 @@ export function AdRollout({
   overview,
   analytics,
   onBusy,
+  blocked,
   reload,
 }: {
   articles: readonly ArticleSummaryDto[];
   overview: MonetizationOverviewDto;
   analytics?: AnalyticsDashboardDto;
   onBusy: (v: boolean) => void;
+  blocked: boolean;
   reload: () => Promise<void>;
 }) {
   const [plans, setPlans] = useState<AdRolloutPlan[]>([]);
@@ -114,9 +116,10 @@ export function AdRollout({
       <p>
         Aは末尾1枠、Bは本文1枠、50:50。本文・SEOは維持し、配置マーカーだけ追加します。アフィリエイトは無効です。
       </p>
-      <button type="button" disabled={busy || !enabled} onClick={() => void preview()}>
+      <button type="button" disabled={blocked || busy || !enabled} onClick={() => void preview()}>
         対象記事と挿入位置をプレビュー
       </button>
+      {blocked && <p>個別実験の未保存の変更を先に保存してください。</p>}
       {!enabled && <p>広告設定で個別配置と実験を有効にしてください。</p>}
       <output className="ad-rollout-status" aria-live="polite">
         {message}
@@ -136,7 +139,7 @@ export function AdRollout({
           </label>
           <button
             type="button"
-            disabled={busy || !selected.size || results.length > 0}
+            disabled={blocked || busy || !selected.size || results.length > 0}
             onClick={() => void run()}
           >
             選択した{selected.size}記事の実験を開始して公開
