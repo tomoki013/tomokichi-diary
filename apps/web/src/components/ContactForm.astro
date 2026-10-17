@@ -2,37 +2,101 @@
 import { apiUrl, turnstileSiteKey } from "../lib/site";
 
 /**
- * A plain form POST to the API: submitting needs no JavaScript, and the API
- * redirects back here with a result in the query string. Turnstile is the only
- * script on the page, and without a site key the form is not rendered at all
- * rather than shipped unprotected.
- */
-/**
- * Shows the result banner after the API redirects back. Kept as a string
- * because the markup below sits inside a conditional expression, where an
- * element's children are parsed as JSX rather than as script text.
+ * Submitted with fetch so that any failure — a refused challenge, an API error,
+ * no network — is shown next to the form with what was typed still in it. The
+ * plain form POST below is only the fallback for a browser without fetch; the
+ * API redirects that back here with the result in the query string. Turnstile
+ * is the only third-party script on the page, and without a site key the form
+ * is not rendered at all rather than shipped unprotected.
+ *
+ * Kept as a string because the markup below sits inside a conditional
+ * expression, where an element's children are parsed as JSX rather than as
+ * script text.
  */
 const RESULT_SCRIPT = `
-  var params = new URLSearchParams(location.search);
-  var result = params.get("sent") ? "sent" : params.get("error");
-  var message = result && document.querySelector('[data-message="' + result + '"]');
-  if (message) {
-    message.hidden = false;
-    message.scrollIntoView({ block: "center" });
-  }
+  var form = document.querySelector('[data-contact-form]');
   var submit = document.querySelector('[data-contact-submit]');
   var count = document.querySelector('[data-contact-count]');
   var body = document.querySelector('[data-contact-body]');
+  var challengeCode = document.querySelector('[data-challenge-code]');
+  var RESULTS = ['sent', 'challenge', 'invalid', 'toofast', 'unavailable', 'network', 'widget'];
+
+  function show(result) {
+    document.querySelectorAll('[data-message]').forEach(function (message) {
+      message.hidden = message.getAttribute('data-message') !== result;
+    });
+    var message = document.querySelector('[data-message="' + result + '"]');
+    if (message) message.scrollIntoView({ block: 'center' });
+  }
+  function setReady(ready) {
+    if (submit) submit.disabled = !ready;
+  }
+
+  var params = new URLSearchParams(location.search);
+  var initial = params.get('sent') ? 'sent' : params.get('error');
+  if (initial && RESULTS.indexOf(initial) !== -1) show(initial);
+
   window.contactTurnstileReady = function () {
-    if (submit) submit.disabled = false;
+    setReady(true);
+    // A retry that went through clears the earlier failure.
+    var failed = document.querySelector('[data-message="widget"]');
+    if (failed) failed.hidden = true;
   };
   window.contactTurnstileReset = function () {
-    if (submit) submit.disabled = true;
+    setReady(false);
   };
+  // Turnstile keeps retrying by itself; the code is shown so a reader can
+  // report it and the cause can be told apart (Cloudflare docs: error codes).
+  window.contactTurnstileError = function (code) {
+    setReady(false);
+    if (challengeCode) challengeCode.textContent = String(code || 'unknown');
+    show('widget');
+  };
+
   if (body && count) {
     var updateCount = function () { count.textContent = String(body.value.length); };
     body.addEventListener('input', updateCount);
     updateCount();
+  }
+
+  if (form && submit && window.fetch && window.FormData) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (submit.disabled) return;
+      submit.disabled = true;
+      submit.setAttribute('aria-busy', 'true');
+      var controller = window.AbortController ? new AbortController() : null;
+      var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+        credentials: 'omit',
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (response) {
+          return response.json().then(
+            function (data) { return data && data.result; },
+            function () { return 'unavailable'; }
+          );
+        })
+        .catch(function () { return 'network'; })
+        .then(function (result) {
+          clearTimeout(timer);
+          submit.removeAttribute('aria-busy');
+          if (RESULTS.indexOf(result) === -1) result = 'unavailable';
+          if (result === 'sent') {
+            form.reset();
+            if (body && count) count.textContent = '0';
+          }
+          show(result);
+          // A token is spent by any submission that reached the API, so a new
+          // one is needed before the next try; the ready callback re-enables
+          // the button when it arrives.
+          setReady(false);
+          if (window.turnstile) window.turnstile.reset();
+        });
+    });
   }
 `;
 
@@ -45,6 +109,11 @@ const MESSAGES = [
     "unavailable",
     "error",
     "ただいまお問い合わせを受け付けられませんでした。時間をおいてもう一度お試しください。",
+  ],
+  [
+    "network",
+    "error",
+    "送信できませんでした。通信環境をご確認のうえ、もう一度お試しください。入力内容はそのまま残っています。",
   ],
 ] as const;
 ---
@@ -60,8 +129,12 @@ const MESSAGES = [
         {text}
       </p>
     ))}
+    <p class="form-message form-message--error" data-message="widget" hidden>
+      セキュリティ確認を完了できませんでした（コード: <span data-challenge-code></span>
+      ）。ページを再読み込みするか、時間をおいてお試しください。解決しない場合はメールでご連絡ください。
+    </p>
 
-    <form class="contact-form" method="post" action={`${apiUrl}/v1/contact`}>
+    <form class="contact-form" method="post" action={`${apiUrl}/v1/contact`} data-contact-form>
       <div class="contact-form__row">
         <label>
           <span>
@@ -142,6 +215,7 @@ const MESSAGES = [
           data-callback="contactTurnstileReady"
           data-expired-callback="contactTurnstileReset"
           data-timeout-callback="contactTurnstileReset"
+          data-error-callback="contactTurnstileError"
         />
         <p>送信ボタンを押す前に、セキュリティ確認を完了してください。</p>
       </div>
