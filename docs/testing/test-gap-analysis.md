@@ -100,3 +100,11 @@ High risk: 日付/前期間/閏年、URL host・redirect・canonical、GSC加重
 ## 2026-10-14: ChatGPT private analytics
 
 Owner identity + read scope fail-closed、匿名/偽token、公開hostのconsent拒否、Access専用identity（共有admin token拒否）、跨origin POST、client表示文字列escape、OAuth metadata・PKCE code exchange・code replay拒否・refresh・resource違い拒否、認証済みMCP tools/listと未生成report読み取り、Admin binding経路を検証。公開MCPの既存ツール集合も継続確認。実ChatGPTのOAuth認証・ツール呼び出しと定期実行はproduction接続後の確認対象で、mock成功から稼働済みと判断しない。AdSenseは実Google APIでapex/www・広告client・unit grainの条件を検証、他hostの指定をテストで拒否。
+
+## 2026-10-17 — 収益化 Phase 2 の追加リスク
+
+- High: contracts/domainで配置の重複・消失・UX制限、HTTPS、1枠制限、状態遷移、参照を検証。
+- Critical: 管理HTTP＋SQLite実migrationで保存→再取得、公開版との分離、案件の公開export排除、参照保持を検証。
+- High: Webの割当・非選択枠の未マウント、ローダー共有、リクエスト・イベントの重複防止、停止後の末尾復帰を検証。
+- High: Analyticsで旧配置とA/Bを分離、サンプル不足・未取得収益、サイト／ユニット二重計上を検証。
+- 残る手動確認: Google本番CMPの地域・同意状態ごとの配信、実機のフィールドLCP/INP/CLS、公式A/B収益の可用性。実広告は自動テストで操作しない。

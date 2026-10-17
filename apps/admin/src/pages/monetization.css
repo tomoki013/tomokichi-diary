@@ -1,0 +1,97 @@
+.monetization-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 1.5rem;
+}
+.monetization-tabs [aria-current] {
+  background: var(--ink, #263832);
+  color: var(--bg);
+}
+.monetization-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.monetization-metrics div {
+  padding: 1rem;
+  background: var(--surface-alt);
+  border-radius: 0.5rem;
+}
+.monetization-metrics dt {
+  font-size: 0.8rem;
+}
+.monetization-metrics dd {
+  font-size: 1.4rem;
+  margin: 0.5rem 0 0;
+}
+.monetization-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-block: 1rem;
+}
+.affiliate-preview {
+  padding: 1.25rem;
+  margin-block: 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.75rem;
+  background: var(--surface-alt);
+}
+.affiliate-preview small {
+  color: var(--ink-soft);
+}
+.affiliate-preview h3 {
+  margin-block: 0.75rem;
+}
+.monetization-picker {
+  max-height: 32rem;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  padding: 1rem;
+}
+.monetization-block {
+  padding: 0.75rem;
+  margin-block: 0.5rem;
+  border: 2px solid transparent;
+}
+.monetization-block.selected {
+  border-color: var(--accent);
+}
+.monetization-block .preview {
+  overflow-wrap: anywhere;
+}
+.monetization-block img {
+  max-width: 100%;
+  max-height: 15rem;
+  object-fit: contain;
+}
+.monetization-placements {
+  padding-left: 1.5rem;
+}
+.monetization-placements li {
+  margin-block: 1.5rem;
+  overflow-wrap: anywhere;
+}
+.ad-preview {
+  width: min(100%, 300px);
+  height: 250px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--line-strong);
+  margin-block: 1rem;
+  text-align: center;
+}
+
+.main:has(.monetization-tabs) {
+  min-width: 0;
+}
+.affiliate-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-block: 0.75rem;
+}

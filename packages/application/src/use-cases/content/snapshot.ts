@@ -1,3 +1,4 @@
+import { publicMonetizationOnly } from "@tomokichi/data";
 import type { AppContext } from "../../context.js";
 import type { ContentSnapshot } from "@tomokichi/data";
 
@@ -69,6 +70,9 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   ];
   return {
     ...snapshot,
+    monetization: publicMonetizationOnly(
+      [...metadataByArticle.values()].flatMap((m) => (m.monetization ? [m.monetization] : [])),
+    ),
     articles: articles.map((a) => ({
       ...a,
       experienceTags: metadataByArticle.get(a.id)?.experienceTags ?? a.experienceTags,

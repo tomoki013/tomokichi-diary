@@ -1,0 +1,33 @@
+---
+import type { AdPlan } from "../lib/monetization";
+interface Props {
+  plan: AdPlan;
+}
+const { plan } = Astro.props;
+const experiment = plan.experiment;
+---
+
+{experiment && <script
+  is:inline
+  define:vars={{ shareB: experiment.shareB, experimentId: experiment.id }}
+>
+  // Runs while parsing, before either position paints. Assignment lasts for this document only.
+  document.documentElement.dataset.adVariant = Math.random() * 100 < shareB ? "B" : "A";
+  document.documentElement.dataset.adExperiment = experimentId;
+</script>}
+<style is:global>
+  .article-ad[data-variant="B"] {
+    display: none;
+  }
+  html[data-ad-variant="B"] .article-ad[data-variant="A"] {
+    display: none;
+  }
+  html[data-ad-variant="B"] .article-ad[data-variant="B"] {
+    display: block;
+  }
+  @media (max-width: 349px) {
+    html[data-ad-variant="B"] .article-ad[data-variant="B"] {
+      display: none;
+    }
+  }
+</style>

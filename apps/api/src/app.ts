@@ -1,3 +1,4 @@
+import { monetizationRoutes } from "./routes/monetization.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
 import { generateId } from "@tomokichi/domain";
@@ -184,6 +185,7 @@ export function createApp(options: AppOptions = {}) {
   });
 
   v1.route("/admin/analytics", analyticsRoutes());
+  v1.route("/admin/monetization", monetizationRoutes());
   v1.route("/admin/articles", articleRoutes(publishSite));
   v1.route("/admin/publication", publicationRoutes(publishSite));
   v1.route("/admin/media", mediaRoutes());

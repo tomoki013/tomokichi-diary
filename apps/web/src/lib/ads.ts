@@ -20,13 +20,15 @@ export function mountArticleAd(
   slot.dataset["adMounted"] = "1";
   const ad = slot.querySelector<HTMLElement>(".adsbygoogle");
   if (!ad?.dataset["adClient"] || !ad.dataset["adSlot"]) return;
-  measureReader("ad_eligible", 1, "article_end");
+  const placement = slot.dataset["placement"] === "body_slot" ? "body_slot" : "article_end";
+  const measure = (name: Parameters<typeof measureReader>[0]) => measureReader(name, 1, placement);
+  measure("ad_eligible");
   let statusSent = false;
   const status = new browser.MutationObserver(() => {
     const value = ad.dataset["adStatus"];
     if (statusSent || !["filled", "unfilled"].includes(value ?? "")) return;
     statusSent = true;
-    measureReader(value === "filled" ? "ad_filled" : "ad_unfilled", 1, "article_end");
+    measure(value === "filled" ? "ad_filled" : "ad_unfilled");
     status.disconnect();
     updateView();
   });
@@ -48,7 +50,7 @@ export function mountArticleAd(
       return;
     timer = browser.setTimeout(() => {
       viewSent = true;
-      measureReader("ad_viewable_proxy", 1, "article_end");
+      measure("ad_viewable_proxy");
       view.disconnect();
     }, 1000);
   };
@@ -74,27 +76,35 @@ export function mountArticleAd(
         doc.visibilityState === "hidden"
       )
         return;
+      if (placement === "body_slot") {
+        const rect = slot.getBoundingClientRect();
+        // Never place an inline unit in the initial viewport or next to interactive cards/images.
+        const top = rect.top + browser.scrollY;
+        const adjacent = [slot.previousElementSibling, slot.nextElementSibling];
+        if (
+          top < browser.innerHeight * 1.5 ||
+          adjacent.some(
+            (el) =>
+              el?.matches(
+                "figure, img, .gallery, .internal-link-card, .article-share, .article-endnote",
+              ) || el?.querySelector("img, .internal-link-card"),
+          )
+        )
+          return;
+      }
       requested = true;
-      measureReader("ad_request", 1, "article_end");
+      measure("ad_request");
       observer.disconnect();
-      const script = doc.createElement("script");
-      script.addEventListener("error", () => measureReader("ad_script_error", 1, "article_end"), {
-        once: true,
-      });
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ad.dataset["adClient"]}`;
-      script.addEventListener(
-        "load",
+      loadAdSense(
+        doc,
+        browser,
+        ad.dataset["adClient"]!,
         () => {
           browser.adsbygoogle ??= [];
           browser.adsbygoogle.push({});
         },
-        { once: true },
+        () => measure("ad_script_error"),
       );
-      // Ad blockers, unavailable inventory and network failures leave the
-      // reserved space alone; nothing retries or pushes the article around.
-      doc.head.append(script);
     },
     { rootMargin: "200px 0px", threshold: 0 },
   );
@@ -109,4 +119,77 @@ export function mountArticleAd(
     fc.callbackQueue ??= [];
     fc.callbackQueue.push(() => fc.showRevocationMessage?.());
   });
+}
+
+/** Selection happens before any mount, including eligibility measurement for ad blockers. */
+export function mountArticleAds(
+  doc: Document = document,
+  browser: typeof globalThis = globalThis,
+): void {
+  const variant = doc.documentElement.dataset["adVariant"] ?? "A";
+  const slots = [...doc.querySelectorAll<HTMLElement>("[data-article-ad]")];
+  const selected = slots.find(
+    (slot) =>
+      !slot.dataset["variant"] ||
+      slot.dataset["variant"] === "static" ||
+      slot.dataset["variant"] === variant,
+  );
+  // AdSense push({}) discovers an unprocessed ins itself. Hidden alternatives
+  // must leave the DOM before the loader can inspect them.
+  for (const slot of slots) if (slot !== selected) slot.remove();
+  if (selected) mountArticleAd(selected, doc, browser);
+}
+
+const loaders = new WeakMap<
+  Document,
+  { status: "loading" | "loaded" | "failed"; ready: (() => void)[]; errors: (() => void)[] }
+>();
+function loadAdSense(
+  doc: Document,
+  _browser: typeof globalThis,
+  client: string,
+  ready: () => void,
+  error: () => void,
+): void {
+  const existing = loaders.get(doc);
+  if (existing) {
+    if (existing.status === "loaded") ready();
+    else if (existing.status === "failed") error();
+    else {
+      existing.ready.push(ready);
+      existing.errors.push(error);
+    }
+    return;
+  }
+  const state = {
+    status: "loading" as "loading" | "loaded" | "failed",
+    ready: [ready],
+    errors: [error],
+  };
+  loaders.set(doc, state);
+  const script = doc.createElement("script");
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+  script.addEventListener(
+    "load",
+    () => {
+      state.status = "loaded";
+      for (const fn of state.ready) fn();
+      state.ready = [];
+      state.errors = [];
+    },
+    { once: true },
+  );
+  script.addEventListener(
+    "error",
+    () => {
+      state.status = "failed";
+      for (const fn of state.errors) fn();
+      state.ready = [];
+      state.errors = [];
+    },
+    { once: true },
+  );
+  doc.head.append(script);
 }

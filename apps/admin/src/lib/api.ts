@@ -1,4 +1,12 @@
 import type {
+  MonetizationOverviewDto,
+  MonetizationSettings,
+  ArticleMonetizationDto,
+  ArticleMonetization,
+  AffiliateOffer,
+  AdExperiment,
+} from "@tomokichi/contracts";
+import type {
   AnalyticsDashboardDto,
   AnalyticsReportDto,
   ArticleDetailDto,
@@ -199,6 +207,35 @@ export interface PublicationStatus {
 }
 
 export const api = {
+  monetization: () => request<MonetizationOverviewDto>("/admin/monetization"),
+  saveMonetizationSettings: (settings: MonetizationSettings) =>
+    request<MonetizationSettings>("/admin/monetization/settings", json("PUT", settings)),
+  articleMonetization: (articleId: string) =>
+    request<ArticleMonetizationDto>(`/admin/monetization/articles/${id(articleId)}`),
+  saveArticleMonetization: (articleId: string, input: ArticleMonetization) =>
+    request<ArticleMonetization>(
+      `/admin/monetization/articles/${id(articleId)}`,
+      json("PUT", input),
+    ),
+  saveAffiliateOffer: (offer: AffiliateOffer) =>
+    request<AffiliateOffer>(
+      offer.id === "new"
+        ? "/admin/monetization/offers"
+        : `/admin/monetization/offers/${id(offer.id)}`,
+      json(offer.id === "new" ? "POST" : "PUT", offer),
+    ),
+  archiveAffiliateOffer: (offerId: string) =>
+    request<AffiliateOffer>(`/admin/monetization/offers/${id(offerId)}`, json("DELETE")),
+  saveAdExperiment: (experiment: AdExperiment) =>
+    request<AdExperiment>(
+      `/admin/monetization/experiments/${id(experiment.id)}`,
+      json("PUT", experiment),
+    ),
+  controlAdExperiment: (experimentId: string, action: "start" | "stop") =>
+    request<AdExperiment>(
+      `/admin/monetization/experiments/${id(experimentId)}/${action}`,
+      json("POST"),
+    ),
   calculateAnalyticsCounts: (start: string, end: string) =>
     request<{ state: string }>("/admin/analytics/counts", json("POST", { start, end })),
   analyticsReports: () => request<{ items: AnalyticsReportDto[] }>("/admin/analytics/reports"),

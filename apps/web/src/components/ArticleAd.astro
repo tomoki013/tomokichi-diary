@@ -1,15 +1,34 @@
 ---
 import { adsenseClient, articleAdSlot } from "../lib/site";
+interface Props {
+  unit?: string;
+  placement?: "article_end" | "body_slot";
+  slotKey?: string;
+  variant?: "A" | "B" | "static";
+}
+const {
+  unit = articleAdSlot,
+  placement = "article_end",
+  slotKey = "article-end",
+  variant = "static",
+} = Astro.props;
 ---
 
-<aside class="article-ad" data-article-ad aria-label="広告">
+<aside
+  class="article-ad"
+  data-article-ad
+  data-placement={placement}
+  data-slot-key={slotKey}
+  data-variant={variant}
+  aria-label="広告"
+>
   <small>広告</small>
   <div class="article-ad__space">
     <ins
       class="adsbygoogle"
       style="display:inline-block;width:300px;height:250px"
       data-ad-client={adsenseClient}
-      data-ad-slot={articleAdSlot}
+      data-ad-slot={unit}
     ></ins>
   </div>
   <a href="/legal/cookies" data-ad-privacy>
@@ -21,6 +40,9 @@ import { adsenseClient, articleAdSlot } from "../lib/site";
   .article-ad {
     margin-block: 2.5rem;
     text-align: center;
+  }
+  .article-ad[data-placement="body_slot"] {
+    margin-block: 4rem;
   }
   .article-ad small,
   .article-ad a {
@@ -37,14 +59,14 @@ import { adsenseClient, articleAdSlot } from "../lib/site";
     margin: 0 auto 0.5rem;
   }
   @media (max-width: 349px) {
-    .article-ad {
+    .article-ad,
+    html[data-ad-variant="B"] .article-ad[data-variant="B"] {
       display: none;
     }
   }
 </style>
 
 <script>
-  import { mountArticleAd } from "../lib/ads";
-  const slot = document.querySelector<HTMLElement>("[data-article-ad]");
-  if (slot) mountArticleAd(slot);
+  import { mountArticleAds } from "../lib/ads";
+  mountArticleAds();
 </script>

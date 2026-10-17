@@ -28,3 +28,4 @@ export * from "./rules/contact.js";
 export * from "./rules/markdown.js";
 export * from "./rules/location-tree.js";
 export * from "./rules/knowledge.js";
+export * from "./rules/monetization.js";

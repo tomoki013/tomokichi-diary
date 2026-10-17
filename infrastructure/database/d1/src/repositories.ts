@@ -1,3 +1,4 @@
+import { createMonetizationRepository } from "./monetization.js";
 import type {
   AIArtifactRepository,
   PublicationMetadataRepository,
@@ -536,6 +537,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
 
   return {
     articles,
+    monetization: createMonetizationRepository(db),
     publicationMetadata,
     articleLikes,
     revisions,

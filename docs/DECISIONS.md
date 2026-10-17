@@ -69,3 +69,7 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 2026-10-13: Analytics v2は既存BQ native exportを維持し、WIFによるbounded readと非公開D1のsource/day集計を採用する。公開JSONや公開R2へ分析値を保存せず、記事公開workflowから独立する。GSC site/URL粒度を分離。日次distinctを期間uniqueとして足さない。AdSense/ASP/AIは独立した任意adapter。旧集計撤去は本番移行ゲート通過後。詳細は [analytics/ARCHITECTURE.md](analytics/ARCHITECTURE.md)。GA4未導入という上記記述は古く、現在は本番hostnameでgtagを遅延ロードしている。
 
 2026-10-13: 利用者のUX優先の広告設定依頼を受け、DiaryのAdSense自動広告・自動最適化を停止。広告は記事末尾の固定300×250を1枠だけ、読了位置に近づいてから取得する。公開CMPの拒否・設定変更を維持し、初期描画、本文、写真、目次に広告を挿入しない。プレビューから広告を配信せず、収益による自動増設は行わない。[運用手順](OPERATIONS.md#analytics-and-ads)。
+
+## 2026-10-17 — 収益化 Phase 2
+
+収益化の下書きは専用D1テーブル、公開AdSense設定は既存publication_metadataに固定する。管理APIをAccess配下に置き、公開snapshot/exportの書込・読込でallowlistを再適用する。アフィリエイト案件と予定枠の管理情報は公開projectionを持たず、フラグを変更しても配信できない。広告は1枠、初期実験はCHAGEE記事1本に限定する。停止は既存の記事公開／静的再ビルドを通す。詳細: [monetization-phase2.md](monetization-phase2.md)。

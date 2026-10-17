@@ -1,3 +1,4 @@
+import { MonetizationSection } from "./MonetizationSection";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
@@ -112,7 +113,16 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   // The preview renders the draft, which the public site is not serving until
   // it is published.
   const previewHtml = useMemo(
-    () => (showPreview ? (marked.parse(draft.bodyMarkdown, { async: false }) as string) : ""),
+    () =>
+      showPreview
+        ? (marked.parse(
+            draft.bodyMarkdown.replace(
+              /\{\{monetization:([a-z0-9-]+)\}\}/g,
+              "\n\n**［収益化スロット: $1 / 管理画面のみ］**\n\n",
+            ),
+            { async: false },
+          ) as string)
+        : "",
     [draft.bodyMarkdown, showPreview],
   );
   const stats = bodyStats(draft.bodyMarkdown);
@@ -279,6 +289,16 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             <ExperienceSection
               article={article}
               onSaved={afterChange}
+              register={sections.register}
+              onSaveAll={save}
+            />
+          )}
+          {article.kind === "article" && (
+            <MonetizationSection
+              articleId={article.id}
+              needsPublication={article.hasUnpublishedChanges || article.status !== "published"}
+              body={draft.bodyMarkdown}
+              onBody={(body) => update("bodyMarkdown", body)}
               register={sections.register}
               onSaveAll={save}
             />
