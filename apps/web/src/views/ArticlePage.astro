@@ -6,7 +6,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleBody from "../components/ArticleBody.astro";
 import AdAssignment from "../components/AdAssignment.astro";
-import { buildAdPlan } from "../lib/monetization";
+import AffiliateBlock from "../components/AffiliateBlock.astro";
+import { buildAffiliatePlan, buildAdPlan } from "../lib/monetization";
 import ArticleAd from "../components/ArticleAd.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Picture from "../components/Picture.astro";
@@ -39,6 +40,12 @@ const adPlan = buildAdPlan(
     placements: process.env.MONETIZATION_PLACEMENTS_ENABLED !== "false",
     experiments: process.env.AD_EXPERIMENTS_ENABLED !== "false",
   },
+);
+
+const affiliates = buildAffiliatePlan(
+  snapshot.monetization?.find((c) => c.articleId === article.id),
+  revision.bodyMarkdown,
+  process.env.AFFILIATE_ENABLED !== "false",
 );
 
 // `mediaUrl` is already absolute (the media domain), so it must not be run
@@ -209,12 +216,24 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           </div>
         )}
         {knowledge && <ArticleKnowledge view={knowledge} />}
+        {affiliates.length > 0 && (
+          <p class="notice">
+            この記事には広告・アフィリエイトリンクが含まれます。
+            <a href="/legal/affiliates">紹介の方針</a>
+          </p>
+        )}
         <ArticleBody
           slug={article.slug}
           embeds={view.embeds}
           path={view.route.path}
           adPlan={adPlan}
+          affiliates={affiliates}
         />
+        {affiliates
+          .filter((p) => p.position === "article_end")
+          .map((p) => (
+            <AffiliateBlock placement={p} />
+          ))}
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong>

@@ -1,4 +1,8 @@
-import { isAdExperimentForArticle, type PublicMonetization } from "@tomokichi/contracts";
+import {
+  isPublicAffiliatePlacement,
+  isAdExperimentForArticle,
+  type PublicMonetization,
+} from "@tomokichi/contracts";
 const key = (s: unknown): s is string =>
   typeof s === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s) && s.length <= 64;
 const unit = (s: unknown): s is string => typeof s === "string" && /^\d{1,20}$/.test(s);
@@ -13,6 +17,23 @@ export function publicMonetizationOnly(
     const e = c.experiment;
     return [
       {
+        ...(Array.isArray(c.affiliates) &&
+        c.affiliates.length &&
+        c.affiliates.length <= 2 &&
+        c.affiliates.every(isPublicAffiliatePlacement) &&
+        new Set(c.affiliates.map((item) => item.key)).size === c.affiliates.length
+          ? {
+              affiliates: c.affiliates.map((item) => ({
+                key: item.key,
+                position: item.position,
+                provider: item.provider,
+                heading: item.heading,
+                description: item.description,
+                url: item.url,
+                format: item.format,
+              })),
+            }
+          : {}),
         articleId: c.articleId,
         enabled: c.enabled,
         placement:

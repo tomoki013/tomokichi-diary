@@ -86,8 +86,8 @@ export function mountArticleAd(
           adjacent.some(
             (el) =>
               el?.matches(
-                "figure, img, .gallery, .internal-link-card, .article-share, .article-endnote",
-              ) || el?.querySelector("img, .internal-link-card"),
+                "figure, img, .gallery, .internal-link-card, .affiliate-block, .article-share, .article-endnote",
+              ) || el?.querySelector("img, .internal-link-card, .affiliate-block"),
           )
         )
           return;

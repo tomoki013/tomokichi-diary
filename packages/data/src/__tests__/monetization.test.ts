@@ -29,3 +29,51 @@ it("repeats the public allowlist on export and import, independent of affiliate 
   expect(snapshot.monetization).toEqual(publicMonetizationOnly([raw]));
   expect(JSON.stringify(snapshot)).not.toContain("SECRET_");
 });
+it("rechecks approved presentation and strips private fields at both export boundaries", () => {
+  const affiliate = {
+    key: "booking",
+    position: "article_end",
+    provider: "Trip.com",
+    heading: "予約を比較",
+    description: "掲載する説明",
+    url: "https://www.trip.com/t/FixtureLink",
+    format: "booking_card",
+    notes: "SECRET_NOTE",
+    offerId: "SECRET_ID",
+  };
+  const raw = {
+    articleId: "article",
+    enabled: false,
+    placement: null,
+    experiment: null,
+    affiliates: [affiliate],
+  } as unknown as PublicMonetization;
+  const result = publicMonetizationOnly([raw]);
+  expect(result[0]?.affiliates).toHaveLength(1);
+  expect(JSON.stringify(result)).not.toContain("SECRET_");
+  for (const url of ["https://evil.test/", "javascript:alert(1)"])
+    expect(
+      publicMonetizationOnly([
+        { ...raw, affiliates: [{ ...affiliate, url }] } as PublicMonetization,
+      ])[0]?.affiliates,
+    ).toBeUndefined();
+  expect(
+    publicMonetizationOnly([
+      { ...raw, affiliates: [affiliate, affiliate] } as PublicMonetization,
+    ])[0]?.affiliates,
+  ).toBeUndefined();
+});
+
+it("drops malformed null affiliate records without crashing the public build", () => {
+  expect(
+    publicMonetizationOnly([
+      {
+        articleId: "article",
+        enabled: true,
+        placement: null,
+        experiment: null,
+        affiliates: [null],
+      } as unknown as PublicMonetization,
+    ])[0]?.affiliates,
+  ).toBeUndefined();
+});

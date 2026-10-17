@@ -79,8 +79,9 @@ it("rejects first-view, introduction, image adjacency, injected keys and extra a
   ).toBe(false);
   expect(validate(articleMonetizationSchema, { ...config, maxAds: 2 }).ok).toBe(false);
 });
-it("exports only AdSense even when a caller passes an enabled affiliate flag", () => {
-  expect(AFFILIATE_ENABLED || AFFILIATE_RELEASE_APPROVED).toBe(false);
+it("does not expose unapproved affiliate offers even with the global flag enabled", () => {
+  expect(AFFILIATE_ENABLED && AFFILIATE_RELEASE_APPROVED).toBe(true);
+  expect(DEFAULT_MONETIZATION_SETTINGS.affiliateEnabled).toBe(false);
   const result = publicMonetization(
     "article",
     {

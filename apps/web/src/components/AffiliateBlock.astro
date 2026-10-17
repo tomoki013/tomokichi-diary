@@ -1,0 +1,63 @@
+---
+import type { PublicAffiliatePlacement } from "@tomokichi/contracts";
+interface Props {
+  placement: PublicAffiliatePlacement;
+}
+const { placement: p } = Astro.props;
+---
+
+<aside
+  class:list={["affiliate-block", { "affiliate-block--text": p.format === "text" }]}
+  aria-label={`広告・${p.provider}の予約案内`}
+>
+  <small>広告・{p.provider}</small>
+  <h3>{p.heading}</h3>
+  {p.description && <p>{p.description}</p>}
+  <a class="affiliate-block__link" href={p.url} rel="sponsored nofollow noopener">
+    {p.provider}で予約情報を見る <span aria-hidden="true">↗</span>
+  </a>
+  <p class="affiliate-block__disclosure">
+    このリンク経由の予約で当サイトが報酬を受け取る場合があります。料金・条件は予約先でご確認ください。
+  </p>
+</aside>
+<style>
+  .affiliate-block {
+    margin: 3rem 0;
+    padding: clamp(1.1rem, 3vw, 1.75rem);
+    border: 1px solid var(--border, #a89a803d);
+    border-radius: 14px;
+    background: var(--surface, #a89a800b);
+    overflow-wrap: anywhere;
+  }
+  .affiliate-block small {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    opacity: 0.75;
+  }
+  .affiliate-block h3 {
+    margin: 0.6rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  .affiliate-block p {
+    margin: 0.6rem 0;
+  }
+  .affiliate-block__link {
+    display: inline-block;
+    padding: 0.65rem 0;
+    font-weight: 600;
+    text-underline-offset: 0.25em;
+  }
+  .affiliate-block .affiliate-block__disclosure {
+    font-size: 0.75rem;
+    line-height: 1.7;
+    opacity: 0.8;
+  }
+  .affiliate-block--text {
+    border: 0;
+    border-left: 2px solid var(--border, #a89a8060);
+    border-radius: 0;
+    background: none;
+  }
+</style>

@@ -4,7 +4,7 @@ export interface MonetizationSettings {
   adsEnabled: boolean;
   placementsEnabled: boolean;
   experimentsEnabled: boolean;
-  affiliateEnabled: false;
+  affiliateEnabled: boolean;
   maxAds: 1;
   adUnits: { id: string; name: string }[];
   updatedAt: string | null;
@@ -38,6 +38,7 @@ export interface AffiliateOffer {
   notes: string;
   status: "draft" | "ready" | "paused" | "archived";
   checkedAt: string | null;
+  publicationApproved?: boolean;
   updatedAt: string | null;
 }
 export interface AdExperiment {
@@ -53,8 +54,18 @@ export interface AdExperiment {
   stoppedAt: string | null;
   updatedAt: string | null;
 }
-/** Explicit public allowlist. No offer ids, labels, URLs, notes or affiliate placements. */
+export interface PublicAffiliatePlacement {
+  key: string;
+  position: "article_end" | "marker";
+  provider: string;
+  heading: string;
+  description: string;
+  url: string;
+  format: "text" | "booking_card";
+}
+/** Public presentation only. Never includes offer IDs, notes or unapproved offers. */
 export interface PublicMonetization {
+  affiliates?: PublicAffiliatePlacement[];
   articleId: string;
   enabled: boolean;
   placement: { key: string; position: "article_end" | "marker"; adUnit: string } | null;
@@ -111,15 +122,11 @@ export const articleMonetizationSchema: Validator<ArticleMonetization> = v.objec
   placements: v.array(placementSchema, { max: 30 }),
   updatedAt: v.optional(timestamp, null),
 }) as Validator<ArticleMonetization>;
-const falseOnly: Validator<false> = (value, path) =>
-  value === false
-    ? { value: false, issues: [] }
-    : { issues: [{ path, message: "このリリースではアフィリエイトは無効です" }] };
 export const monetizationSettingsSchema = v.object({
   adsEnabled: v.boolean(),
   placementsEnabled: v.boolean(),
   experimentsEnabled: v.boolean(),
-  affiliateEnabled: falseOnly,
+  affiliateEnabled: v.boolean(),
   maxAds: v.number({ min: 1, max: 1, integer: true }),
   adUnits: v.array(v.object({ id: unit, name: v.string({ min: 1, max: 100 }) }), { max: 10 }),
   updatedAt: v.optional(timestamp, null),
@@ -137,6 +144,7 @@ export const affiliateOfferSchema: Validator<AffiliateOffer> = v.object({
   notes: v.string({ max: 4000 }),
   status: v.literalUnion(["draft", "ready", "paused", "archived"]),
   checkedAt: timestamp,
+  publicationApproved: v.optional(v.boolean(), false),
   updatedAt: v.optional(timestamp, null),
 });
 export const adExperimentSchema: Validator<AdExperiment> = v.object({
@@ -178,4 +186,62 @@ export function isAdExperimentForArticle(value: unknown, articleId: string): val
   return value === LEGACY_AD_EXPERIMENT
     ? articleId === LEGACY_AD_ARTICLE
     : articleUuid.test(articleId) && value === adExperimentId(articleId);
+}
+
+/** Approved network hosts and their tracking-link shapes; never accepts arbitrary redirects. */
+export function isAffiliateUrl(provider: string, value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 2048) return false;
+  try {
+    const u = new URL(value);
+    if (u.protocol !== "https:" || u.username || u.password || u.port) return false;
+    if (provider === "Trip.com")
+      return (
+        (u.hostname === "www.trip.com" && /^\/t\/[A-Za-z0-9]+$/.test(u.pathname)) ||
+        (u.hostname === "jp.trip.com" &&
+          /^\d+$/.test(u.searchParams.get("Allianceid") ?? "") &&
+          /^\d+$/.test(u.searchParams.get("SID") ?? ""))
+      );
+    if (provider === "Agoda")
+      return (
+        u.hostname === "www.agoda.com" &&
+        u.pathname.toLowerCase() === "/partners/partnersearch.aspx" &&
+        /^[1-9]\d*$/.test(u.searchParams.get("cid") ?? "")
+      );
+    if (
+      provider === "Omio" &&
+      u.hostname === "omio.sjv.io" &&
+      /^\/(?:[A-Za-z0-9]+|c\/\d+\/\d+\/\d+)$/.test(u.pathname)
+    ) {
+      const target = u.searchParams.get("u");
+      if (!target) return true;
+      const destination = new URL(target);
+      return (
+        destination.protocol === "https:" &&
+        !destination.username &&
+        !destination.password &&
+        !destination.port &&
+        ["www.omio.com", "www.omio.jp", "www.omio.co.uk"].includes(destination.hostname)
+      );
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+export function isPublicAffiliatePlacement(value: unknown): value is PublicAffiliatePlacement {
+  if (!value || typeof value !== "object") return false;
+  const p = value as PublicAffiliatePlacement;
+  return (
+    typeof p.key === "string" &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) &&
+    p.key.length <= 64 &&
+    ["article_end", "marker"].includes(p.position) &&
+    ["text", "booking_card"].includes(p.format) &&
+    typeof p.heading === "string" &&
+    p.heading.trim().length > 0 &&
+    p.heading.length <= 200 &&
+    typeof p.description === "string" &&
+    p.description.length <= 2000 &&
+    isAffiliateUrl(p.provider, p.url)
+  );
 }

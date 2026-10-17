@@ -1,4 +1,9 @@
-import { isAdExperimentForArticle, type PublicMonetization } from "@tomokichi/contracts";
+import {
+  isPublicAffiliatePlacement,
+  type PublicAffiliatePlacement,
+  isAdExperimentForArticle,
+  type PublicMonetization,
+} from "@tomokichi/contracts";
 import {
   validateMonetization,
   defaultArticleMonetization,
@@ -72,4 +77,42 @@ export function buildAdPlan(
         end: { unit: p.adUnit, variant: "static" },
       }
     : { ...empty, marker: { key: p.key, unit: p.adUnit, variant: "static" } };
+}
+
+/** Build-time kill switch and independent link/marker validation. No network requests. */
+export function buildAffiliatePlan(
+  config: PublicMonetization | undefined,
+  markdown: string,
+  enabled = true,
+): PublicAffiliatePlacement[] {
+  if (!enabled || !Array.isArray(config?.affiliates) || config.affiliates.length > 2) return [];
+  if (!config.affiliates.every(isPublicAffiliatePlacement)) return [];
+  if (new Set(config.affiliates.map((p) => p.key)).size !== config.affiliates.length) return [];
+  return config.affiliates.filter((p) => {
+    if (
+      !isPublicAffiliatePlacement(p) ||
+      p.key === config.placement?.key ||
+      p.key === config.experiment?.markerKey
+    )
+      return false;
+    return (
+      validateMonetization(
+        {
+          ...defaultArticleMonetization(),
+          placements: [
+            {
+              key: p.key,
+              kind: "affiliate",
+              position: p.position,
+              status: "ready",
+              offerId: null,
+              adUnit: "7152502134",
+            },
+          ],
+        },
+        markdown,
+        DEFAULT_MONETIZATION_SETTINGS,
+      ).length === 0
+    );
+  });
 }

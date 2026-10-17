@@ -12,8 +12,8 @@ export function AffiliatePreview({ offer }: { offer?: AffiliateOffer }) {
   const image = imageUrl(offer?.imageUrl);
   const title = offer?.heading || offer?.name || "案件未割当";
   return (
-    <aside className="affiliate-preview" aria-label="アフィリエイト予定・管理画面限定プレビュー">
-      <small>広告・提携サービス紹介（プレビュー専用・本番非表示）</small>
+    <aside className="affiliate-preview" aria-label="アフィリエイト・管理画面プレビュー">
+      <small>広告・提携サービス紹介（プレビュー・リンク操作無効）</small>
       {offer?.format === "photo_card" &&
         (image ? (
           <img src={image} alt={title} loading="lazy" referrerPolicy="no-referrer" />
