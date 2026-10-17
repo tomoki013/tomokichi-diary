@@ -20,12 +20,13 @@ export const SITE = {
     "本サイトはCHAGEE（霸王茶姬）の公式サイトではなく、CHAGEEおよび関連企業とは一切関係のない個人運営のファンガイドです。",
 } as const;
 
+/** `short` is what fits five across a phone screen; `label` is used from tablet width up. */
 export const NAV = [
-  { href: "/menu", label: "メニュー図鑑" },
-  { href: "/order", label: "注文ガイド" },
-  { href: "/stores", label: "店舗" },
-  { href: "/news", label: "最新情報" },
-  { href: "/columns", label: "体験レポート" },
+  { href: "/menu", label: "メニュー図鑑", short: "メニュー" },
+  { href: "/order", label: "注文ガイド", short: "注文方法" },
+  { href: "/stores", label: "店舗", short: "店舗" },
+  { href: "/news", label: "最新情報", short: "最新情報" },
+  { href: "/columns", label: "体験レポート", short: "レポート" },
 ] as const;
 
 /**

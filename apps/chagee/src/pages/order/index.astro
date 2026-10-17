@@ -1,12 +1,12 @@
 ---
 import Base from "../../layouts/Base.astro";
-import CountryTabs from "../../components/CountryTabs.astro";
 import Customize from "../../components/Customize.astro";
 import SectionHeading from "../../components/SectionHeading.astro";
 import { COUNTRY_LABEL } from "../../lib/labels";
 import { ORDER_FAQ, ORDER_GUIDES } from "../../lib/order-guide";
 
 const ready = ORDER_GUIDES.filter((guide) => guide.ready);
+const pending = ORDER_GUIDES.filter((guide) => !guide.ready);
 const faqLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -32,41 +32,35 @@ const faqLd = {
     <header class="page-head">
       <h1>CHAGEEの注文ガイド</h1>
       <p class="lead">
-        3か国で実際に注文してみると、使った方法は国ごとにかなり違いました。でも共通しているのは「スマホで選ぶだけ」。話せなくても大丈夫です。
+        注文はどの国もスマホで選ぶだけ。ただ、使う方法は国ごとに違いました。まず頼む国を選んでください。
       </p>
     </header>
 
-    <CountryTabs current={null} />
-
     <section class="section">
-      <SectionHeading title="国別の早見表" />
-      <div class="table-wrap card">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">国・地域</th>
-              <th scope="col">注文方法</th>
-              <th scope="col">アプリ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ready.map((guide) => (
-              <tr>
-                <th scope="row">
-                  <a href={`/order/${guide.slug}`}>{COUNTRY_LABEL[guide.country]}</a>
-                </th>
-                <td>{guide.method}</td>
-                <td>{guide.app}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="checked">運営者が実際に注文した時点の情報です（確認日：2026年8月24日）。</p>
+      <SectionHeading title="どこで頼む？" />
+      <ul class="picker">
+        {ready.map((guide) => (
+          <li>
+            <a class="card" href={`/order/${guide.slug}`}>
+              <span class="country">{COUNTRY_LABEL[guide.country]}</span>
+              <span class="method">{guide.method}</span>
+              <span class="need">{guide.appNeed}</span>
+              <span class="go">
+                手順<span aria-hidden="true"> →</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="checked">
+        運営者が実際に注文した時点の情報です（確認日：2026年8月24日）。
+        {pending.map((guide) => COUNTRY_LABEL[guide.country]).join("・")}は
+        <a href={`/order/${pending[0]?.slug ?? "japan"}`}>準備中</a>です。
+      </p>
     </section>
 
     <section class="section">
-      <SectionHeading title="基本の流れは4ステップ" />
+      <SectionHeading title="どの国も流れは同じ4ステップ" />
       <ol class="flow">
         <li class="card">
           <span>1</span>
@@ -128,28 +122,68 @@ const faqLd = {
 </Base>
 
 <style>
-  .table-wrap {
-    overflow-x: auto;
+  .picker {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-    min-width: 520px;
+  .picker a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "country go"
+      "method go"
+      "need go";
+    align-items: center;
+    gap: 2px 12px;
+    padding: 14px 16px;
+    min-height: 44px;
+    color: var(--text);
+    text-decoration: none;
+    border-left: 4px solid var(--red);
   }
-  th,
-  td {
-    text-align: left;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-  thead th {
+  .picker a:hover {
     background: var(--blush-soft);
-    font-size: 0.8rem;
   }
-  tbody tr:last-child > * {
-    border-bottom: 0;
+  .picker .country {
+    grid-area: country;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--red-ink);
+  }
+  .picker .method {
+    grid-area: method;
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    font-weight: 700;
+  }
+  .picker .need {
+    grid-area: need;
+    font-size: 0.82rem;
+    color: var(--text-sub);
+  }
+  .picker .go {
+    grid-area: go;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--red-ink);
+    white-space: nowrap;
+  }
+  @media (min-width: 720px) {
+    .picker {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .picker a {
+      grid-template-columns: 1fr;
+      grid-template-areas: "country" "method" "need" "go";
+      align-content: start;
+      gap: 4px;
+    }
+    .picker .go {
+      margin-top: 8px;
+    }
   }
   .checked {
     margin-top: 8px;

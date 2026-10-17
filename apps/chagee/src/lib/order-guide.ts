@@ -24,6 +24,8 @@ export interface OrderGuide {
   ready: boolean;
   /** One line under the tab. */
   method: string;
+  /** Whether an app has to be installed, in a few words, for the country picker. */
+  appNeed: string;
   lead: string;
   app: string;
   payment: string;
@@ -45,6 +47,7 @@ export const ORDER_GUIDES: OrderGuide[] = [
     slug: "china",
     ready: true,
     method: "Alipay のモバイルオーダー",
+    appNeed: "CHAGEEのアプリは不要",
     lead: "上海では、店頭のQRコードをAlipayで読み取ってモバイルオーダーしました。注文から支払いまでスマホで完結するので、中国語でカスタマイズを伝える必要はありません。",
     app: "アプリのインストールは不要。Alipay から注文できました。",
     payment: "Alipay（私が実際に使った方法）",
@@ -68,6 +71,7 @@ export const ORDER_GUIDES: OrderGuide[] = [
     slug: "malaysia",
     ready: true,
     method: "CHAGEE 公式アプリ",
+    appNeed: "公式アプリの登録が必要",
     lead: "クアラルンプールでは CHAGEE 公式アプリで注文しました。Pavilion Kuala Lumpur の店頭QRからアプリのインストール画面に進み、登録して注文しています。",
     app: "公式アプリを使用。電話番号で登録する場合はSMS認証が必要でした（Apple・Facebook などでのログインも表示）。",
     payment: "クレジットカード（私が実際に使った方法）",
@@ -95,6 +99,7 @@ export const ORDER_GUIDES: OrderGuide[] = [
     slug: "singapore",
     ready: true,
     method: "Mobile Web（ブラウザ）",
+    appNeed: "アプリ不要",
     lead: "シンガポールでは、アプリを入れずにブラウザの Mobile Web から注文しました。CHAGEE Singapore の公式案内でも、アプリと Mobile Web は全店舗で使えるとされています。",
     app: "アプリなしでも Mobile Web で注文可能。旅行中に数回使うだけならこれで十分でした。",
     payment: "未確認（注文画面で選択）",
@@ -118,6 +123,7 @@ export const ORDER_GUIDES: OrderGuide[] = [
     slug: "thailand",
     ready: false,
     method: "準備中",
+    appNeed: "",
     lead: "タイのCHAGEEはまだ実際に注文していないため、ガイドは準備中です。実際に行ってから、体験ベースでまとめます。",
     app: "未確認",
     payment: "未確認",
@@ -132,6 +138,7 @@ export const ORDER_GUIDES: OrderGuide[] = [
     slug: "japan",
     ready: false,
     method: "日本上陸待ち",
+    appNeed: "",
     lead: "2026年10月時点で、CHAGEEの日本出店に関する公式発表は確認できていません。上陸が決まったら、ここに日本での注文方法をまとめます。",
     app: "未確認",
     payment: "未確認",
