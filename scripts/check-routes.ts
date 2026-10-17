@@ -1,13 +1,18 @@
-import { RouteTable, normalizeRoutePath, validateRoutes } from "@tomokichi/domain";
+import { ContentIndex } from "@tomokichi/application";
+import { RouteTable, instantFrom, normalizeRoutePath, validateRoutes } from "@tomokichi/domain";
 import type { Finding } from "./lib/report.js";
 import { listBuiltPages, loadLegacyBaseline, loadSnapshot, report } from "./lib/built-site.js";
 
 /**
  * The rewrite is only safe if every URL the old site served still answers, and
- * if every route in the table actually produced a page (instruction §37).
+ * if every publicly renderable route actually produced a page (instruction §37).
  */
 const snapshot = loadSnapshot();
 const table = new RouteTable(snapshot.routes);
+const content = new ContentIndex(
+  snapshot,
+  instantFrom(process.env.PUBLIC_BUILD_TIME ?? Date.now()),
+);
 const built = new Set(listBuiltPages().map((page) => page.path));
 const findings: Finding[] = [];
 
@@ -45,7 +50,7 @@ for (const path of legacy) {
   }
 }
 
-for (const route of table.renderable()) {
+for (const route of content.publicRoutes()) {
   if (!built.has(route.path)) {
     findings.push({
       code: "ROUTE_TARGET_MISSING",
