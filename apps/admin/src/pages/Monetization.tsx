@@ -495,7 +495,10 @@ function Experiments({
   onDirty: (d: boolean) => void;
   reload: () => Promise<void>;
 }) {
-  const [selected, setSelected] = useState(data.experiments[0]?.id ?? "");
+  const [selection, setSelected] = useState(data.experiments[0]?.id ?? "");
+  const selected = selection.startsWith("new:")
+    ? (data.experiments.find((e) => e.articleId === selection.slice(4))?.id ?? selection)
+    : selection;
   const [editingDirty, setEditingDirty] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   function selectExperiment(next: string) {
