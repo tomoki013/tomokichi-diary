@@ -20,6 +20,7 @@ import { knowledgeRoutes } from "./routes/knowledge.js";
 import { inquiryRoutes } from "./routes/inquiry.js";
 import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
 import { createInquiryOperator } from "./inquiry-operator.js";
+import { runStatusProbe } from "./status-probe.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -122,6 +123,32 @@ export function createApp(options: AppOptions = {}) {
   // `/health` is deliberately unversioned: it answers "is this Worker up",
   // which is not a contract that can change shape.
   app.get("/health", (c) => c.json({ status: "ok", requestId: c.get("requestId") }));
+
+  /*
+   * Read-only state of the contact pipeline for the status platform. Without
+   * the token configured, or with a wrong one, it answers exactly like a route
+   * that does not exist.
+   */
+  app.get("/internal/status-probe", async (c) => {
+    const expected = c.env.STATUS_PROBE_TOKEN?.trim();
+    const provided = c.req.header("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+    if (!expected || !secretsMatch(expected, provided)) {
+      return errorResponse(c, "API_NOT_FOUND", `no route for ${c.req.path}`, 404);
+    }
+    const limiter = c.env.STATUS_PROBE_RATE_LIMITER;
+    if (limiter && !(await limiter.limit({ key: "status-probe" })).success) {
+      return c.json({ error: "rate_limited" }, 429, {
+        "cache-control": "no-store",
+        "retry-after": "60",
+      });
+    }
+    const result = await runStatusProbe({
+      operator: inquiryOperator(c.env),
+      turnstileSecret: c.env.TURNSTILE_SECRET_KEY,
+      now: Date.now(),
+    });
+    return c.json(result, 200, { "cache-control": "no-store" });
+  });
 
   /*
    * Everything else is versioned. The public site bakes the contact endpoint

@@ -79,6 +79,11 @@ export default defineConfig({
         namespace: "3001",
         simple: { limit: 1, period: 60 },
       }),
+      // The status platform's read-only probe (/internal/status-probe).
+      STATUS_PROBE_RATE_LIMITER: bindings.rateLimit({
+        namespace: "3002",
+        simple: { limit: 6, period: 60 },
+      }),
     },
   },
 });

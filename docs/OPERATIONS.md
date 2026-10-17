@@ -489,6 +489,16 @@ The response lists `issues` with a path per field.
 `GET /admin/articles/:id/publish-check` returns every reason at once: title,
 summary, body length, a canonical route, and a cover image with alt text.
 
+## Status probe
+
+`GET https://api.tomokichidiary.com/internal/status-probe` は、共通ステータス基盤（tomokichi-status）が 10 分おきに読む、お問い合わせ経路の読み取り専用の状態。契約は tomokichi-status の `docs/adr/0001-product-status-probe.md`。
+
+- `STATUS_PROBE_TOKEN` が未設定、またはトークンが違うときは、存在しないルートと同じ 404 を返す。設定は `wrangler secret put STATUS_PROBE_TOKEN --name tomokichi-diary-api`。同じ値を tomokichi-status の Netlify 環境変数 `STATUS_PROBE_TOKEN_DIARY` に入れる。入れ替えるときは両方を同時に更新する（その間、ステータスは「確認できません」になる）。
+- 読むもの: `INQUIRY_OPERATOR` の `project()`（Core との疎通）と、`TURNSTILE_SECRET_KEY` の有無。チケット・メール・D1 には書き込まない。
+- `mail_delivery` は常に `UNKNOWN`。固定している SDK（v0.3.1）に `listDeliveryJobs()` が無いため。v0.8.0 以上に上げたら実装する。
+- レート制限は `STATUS_PROBE_RATE_LIMITER`（namespace 3002、毎分 6 回）。
+- `inquiry_core: DOWN` のときは、[Inquiry](#api) の `admin_bridge` 系のログと、inquiry-platform の運用文書を見る。
+
 ## ANALYTICS_INVALID_RANGE / ANALYTICS_UNCONFIGURED / ANALYTICS_DISPATCH_FAILED / ANALYTICS_INVALID_DATA / ANALYTICS_COLLECTION_FAILED
 
 非公開集計の認証、期間検証、sourceごとの失敗復旧は [analytics/OPERATIONS.md](analytics/OPERATIONS.md) と [analytics/SECURITY.md](analytics/SECURITY.md)。失敗時も旧成功集計とBQ履歴を保持する。GA4/GSC exportや記事公開処理を停止しない。
