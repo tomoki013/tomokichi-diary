@@ -173,3 +173,25 @@ assert.equal(
 process.stdout.write(
   "BigQuery synthetic experiment checks passed: separate layout/variant and unknown experiment rejection\n",
 );
+
+const expandedId = "placement-v1-ea3bf3bc-ffb6-84ed-8147-188ed74d7a50";
+const expandedRows = query(
+  experimentSql
+    .replaceAll(
+      "STRUCT('experiment_id',STRUCT('chagee-placement-v1'",
+      `STRUCT('experiment_id',STRUCT('${expandedId}'`,
+    )
+    .replaceAll("/posts/shanghai-chagee-menu", "/posts/second-article"),
+);
+assert.equal(expandedRows.length, 2);
+assert.ok(expandedRows.every((r) => JSON.parse(r["key"]!).experimentId === expandedId));
+assert.equal(
+  query(
+    experimentSql.replaceAll(
+      "STRUCT('experiment_id',STRUCT('chagee-placement-v1'",
+      "STRUCT('experiment_id',STRUCT('placement-v1-private-free-text'",
+    ),
+  ).length,
+  0,
+);
+process.stdout.write("BigQuery synthetic multi-article experiment identifier checks passed\n");

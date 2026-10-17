@@ -40,7 +40,10 @@ async function request(
   );
 }
 beforeEach(async () => {
-  ctx = await createTestContext();
+  ctx = {
+    ...(await createTestContext()),
+    ids: { next: <T extends string>() => crypto.randomUUID() as T },
+  };
   app = createApp({ contextFactory: () => ctx, publishSite: async () => ({ state: "queued" }) });
   const article = await createArticle(ctx, {
     slug: "monetization",
@@ -358,4 +361,44 @@ it("retains structured embeds when the editor saves body and monetization togeth
     "map-one",
   );
   expect((await ctx.repos.embeds.listByRevision(rid))[0]?.anchorKey).toBe("map-one");
+});
+it("supports article-bound trials beyond CHAGEE and rejects another article's experiment ID", async () => {
+  const e: AdExperiment = {
+    id: `placement-v1-${id}`,
+    articleId: id,
+    name: "末尾 / 本文",
+    markerKey: "answer-end",
+    adUnitA: "7152502134",
+    adUnitB: "7152502134",
+    shareB: 50,
+    status: "draft",
+    startedAt: null,
+    stoppedAt: null,
+    updatedAt: null,
+  };
+  expect((await request(`/experiments/${e.id}`, e)).status).toBe(200);
+  await saveMonetizationSettings(ctx, {
+    ...DEFAULT_MONETIZATION_SETTINGS,
+    placementsEnabled: true,
+    experimentsEnabled: true,
+  });
+  await saveArticleMonetization(ctx, id, { ...defaultArticleMonetization(), experimentId: e.id });
+  expect((await request(`/experiments/${e.id}/start`, undefined, "POST")).status).toBe(200);
+  expect((await publishArticle(ctx, id)).ok).toBe(true);
+  expect(
+    (await loadContentSnapshot(ctx)).monetization?.find((m) => m.articleId === id)?.experiment?.id,
+  ).toBe(e.id);
+  expect(
+    (
+      await request(`/experiments/${e.id}`, {
+        ...e,
+        articleId: "52b1cb6d-eb74-85a3-b6a1-392f83313051",
+      })
+    ).status,
+  ).toBe(400);
+  expect((await request(`/experiments/${e.id}/stop`, undefined, "POST")).status).toBe(200);
+  expect((await publishArticle(ctx, id)).ok).toBe(true);
+  const stopped = (await loadContentSnapshot(ctx)).monetization?.find((m) => m.articleId === id);
+  expect(stopped?.experiment).toBeNull();
+  expect(stopped?.placement?.position).toBe("article_end");
 });

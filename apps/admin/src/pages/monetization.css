@@ -95,3 +95,22 @@
   border-radius: var(--radius);
   margin-block: 0.75rem;
 }
+
+.ad-rollout-status {
+  display: block;
+  margin: 1rem 0;
+}
+.ad-rollout-table {
+  margin-top: 1rem;
+  max-height: 32rem;
+  overflow: auto;
+}
+.ad-rollout-table table {
+  min-width: 680px;
+}
+.ad-rollout-table th:first-child {
+  width: 3rem;
+}
+.ad-rollout-table th:nth-child(2) {
+  width: 15rem;
+}

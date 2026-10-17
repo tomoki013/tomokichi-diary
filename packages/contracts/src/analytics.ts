@@ -39,6 +39,8 @@ export interface AnalyticsMetricRowDto {
   metrics: Record<string, number | null>;
 }
 export interface ExperimentCohortDto extends ExperienceCohortDto {
+  articleId?: string | null;
+  path?: string | null;
   experimentId: string;
   variant: string;
   assignments: number;

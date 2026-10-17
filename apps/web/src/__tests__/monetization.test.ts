@@ -53,3 +53,18 @@ it("fails closed on missing markers, duplicates, short body and injected units",
     experiment: null,
   });
 });
+it("builds an article-bound experiment on a second article without changing the original trial", () => {
+  const articleId = "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50";
+  const expanded = {
+    ...config,
+    articleId,
+    experiment: { ...config.experiment!, id: `placement-v1-${articleId}` },
+  };
+  expect(buildAdPlan(expanded, body)).toMatchObject({
+    end: { variant: "A" },
+    marker: { variant: "B" },
+    experiment: { id: expanded.experiment.id },
+  });
+  expect(buildAdPlan({ ...expanded, articleId: config.articleId }, body).experiment).toBeNull();
+  expect(buildAdPlan(config, body).experiment?.id).toBe("chagee-placement-v1");
+});

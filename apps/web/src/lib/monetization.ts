@@ -1,4 +1,4 @@
-import type { PublicMonetization } from "@tomokichi/contracts";
+import { isAdExperimentForArticle, type PublicMonetization } from "@tomokichi/contracts";
 import {
   validateMonetization,
   defaultArticleMonetization,
@@ -32,9 +32,7 @@ export function buildAdPlan(
   if (!config.enabled) return empty;
   if (!flags.placements || (config.experiment && !flags.experiments)) return legacy();
   const experiment =
-    flags.experiments &&
-    config.experiment?.id === "chagee-placement-v1" &&
-    config.articleId === "52b1cb6d-eb74-85a3-b6a1-392f83313051"
+    flags.experiments && isAdExperimentForArticle(config.experiment?.id, config.articleId)
       ? config.experiment
       : null;
   if (

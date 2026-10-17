@@ -55,6 +55,35 @@ await ctx.repos.media.replaceForArticle(target, [
   },
 ]);
 await publishArticle(ctx, target);
+for (const [slug, suffix] of [
+  ["second-journey", "2"],
+  ["third-journey", "3"],
+]) {
+  const next = await createArticle(ctx, {
+    slug: slug!,
+    locale: "ja",
+    authorId: "author-tomokichi" as AuthorId,
+    path: `/posts/${slug}`,
+    draft: {
+      title: `配置テストの旅行記${suffix}`,
+      summary: "本文の位置候補を確認するための隔離テスト記事です。",
+      bodyMarkdown: `導入文。\n\n## 体験の回答\n\n${"旅で体験したことを説明します。".repeat(55)}\n\n${"おすすめの情報を説明する段落です。".repeat(12)}\n\n## 次に知りたいこと\n\n${"続きの体験と旅の情報を紹介します。".repeat(100)}`,
+    },
+  });
+  if (!next.ok) throw new Error("extra fixture failed");
+  await ctx.repos.media.replaceForArticle(next.value.article.id, [
+    {
+      articleId: next.value.article.id,
+      mediaId: "cover" as MediaId,
+      role: "cover",
+      sortOrder: 0,
+      alt: "旅の写真",
+      caption: null,
+    },
+  ]);
+  await publishArticle(ctx, next.value.article.id);
+}
+
 const app = createApp({
   contextFactory: () => ctx,
   publishSite: async () => ({ state: "queued", configured: false }),

@@ -1,3 +1,4 @@
+import { isAdExperimentId } from "@tomokichi/contracts";
 import { trackSemanticEvent } from "./analytics";
 
 export const MEASUREMENTS = [
@@ -54,7 +55,10 @@ export function mountReaderMeasurement(): void {
   if (mounted.has(document)) return;
   mounted.add(document);
   measureReader("article_view");
-  if (measurementContext().experiment_id === "chagee-placement-v1")
+  if (
+    measurementContext().experiment_id !== "none" &&
+    isAdExperimentId(measurementContext().experiment_id)
+  )
     measureReader("experiment_assignment");
   const sent = new Set<string>();
   const once = (name: Measurement, placement = "none") => {
@@ -133,7 +137,7 @@ export function mountReaderMeasurement(): void {
 const mounted = new WeakSet<Document>();
 function measurementContext(): {
   layout_version: "article-end-v1" | "article-placement-v2";
-  experiment_id?: "chagee-placement-v1" | "none";
+  experiment_id?: string;
   variant_id?: "A" | "B" | "none";
   placement_key?: string;
 } {
@@ -141,11 +145,12 @@ function measurementContext(): {
   if (article?.dataset?.["adLayout"] !== "article-placement-v2")
     return { layout_version: "article-end-v1" };
   const root = document.documentElement?.dataset;
-  const experiment = root?.["adExperiment"] === "chagee-placement-v1";
+  const experimentId = root?.["adExperiment"];
+  const experiment = isAdExperimentId(experimentId);
   const variant = root?.["adVariant"];
   return {
     layout_version: "article-placement-v2",
-    experiment_id: experiment ? "chagee-placement-v1" : "none",
+    experiment_id: experiment ? experimentId : "none",
     variant_id: experiment && (variant === "A" || variant === "B") ? variant : "none",
     placement_key:
       experiment && variant === "A"
