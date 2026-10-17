@@ -55,6 +55,23 @@ import { OFFICIAL_SITES } from "../lib/site";
   </div>
 </details>
 
+<script is:inline>
+  // Close the panel on a tap outside it or on Escape. Without JavaScript the
+  // stamp still opens and closes by tapping it.
+  (() => {
+    const official = document.querySelector("details.official");
+    if (!official) return;
+    document.addEventListener("pointerdown", (event) => {
+      if (official.open && !official.contains(event.target)) official.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !official.open) return;
+      official.open = false;
+      official.querySelector("summary")?.focus();
+    });
+  })();
+</script>
+
 <style>
   .official {
     position: fixed;

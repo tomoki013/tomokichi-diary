@@ -47,6 +47,20 @@ const guide = ORDER_GUIDES.find((g) => g.country === store.country && g.ready);
       )}
     </header>
 
+    {store.imageKeys.length > 0 && (
+      <div class="photos">
+        {store.imageKeys.map((key) => (
+          <img
+            src={`/media/${key}`}
+            alt={`${store.name}で撮った写真`}
+            width="480"
+            height="640"
+            loading="lazy"
+          />
+        ))}
+      </div>
+    )}
+
     <table class="info card">
       <tbody>
         <tr>
@@ -152,6 +166,21 @@ const guide = ORDER_GUIDES.find((g) => g.country === store.country && g.ready);
     color: var(--text-sub);
     font-size: 0.85rem;
     margin-top: 4px;
+  }
+  .photos {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  .photos img {
+    flex: none;
+    width: min(220px, 60vw);
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 4px solid var(--surface);
+    box-shadow: var(--shadow);
   }
   .info {
     width: 100%;

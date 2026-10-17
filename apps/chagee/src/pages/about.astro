@@ -43,6 +43,26 @@ const visited = stores.filter((s) => s.visited).length;
         その後もクアラルンプールやシンガポールで見つけるたびに立ち寄り、これまでに{visited}
         店舗で飲み歩いています。国ごとに注文方法もメニューも少しずつ違って、それがまた楽しいんです。
       </p>
+      <div class="trip-photos">
+        <img
+          src="/media/photos/chagee-blue-cups-480.webp"
+          srcset="/media/photos/chagee-blue-cups-480.webp 480w, /media/photos/chagee-blue-cups-735.webp 735w"
+          sizes="(min-width: 760px) 240px, 45vw"
+          width="480"
+          height="640"
+          alt="店内のテーブルに並べたCHAGEEの青いカップ2つ"
+          loading="lazy"
+        />
+        <img
+          src="/media/photos/chagee-topped-drink-480.webp"
+          srcset="/media/photos/chagee-topped-drink-480.webp 480w, /media/photos/chagee-topped-drink-735.webp 735w"
+          sizes="(min-width: 760px) 240px, 45vw"
+          width="480"
+          height="640"
+          alt="CHAGEEの店内で手に持ったトッピング付きのドリンク"
+          loading="lazy"
+        />
+      </div>
 
       <h2>このサイトを作った理由</h2>
       <p>
@@ -107,6 +127,20 @@ const visited = stores.filter((s) => s.visited).length;
     font-size: 0.75rem;
     color: var(--text-sub);
     margin-top: 6px;
+  }
+  .trip-photos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 240px));
+    gap: 10px;
+    margin-block: 4px 8px;
+  }
+  .trip-photos img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 4px solid var(--surface);
+    box-shadow: var(--shadow);
   }
   .actions {
     display: flex;

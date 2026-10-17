@@ -12,7 +12,7 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
 <div class="unofficial">
   <div class="wrap">
     <strong>{SITE.status}</strong>
-    <span>CHAGEE公式とは関係のない個人運営サイトです</span>
+    <span>CHAGEE公式とは無関係の個人運営です</span>
   </div>
 </div>
 <header class="site-header">
@@ -55,11 +55,12 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
     </a>
   </div>
   <nav class="wrap" aria-label="メイン">
-    <ul class="nav scroller">
+    <ul class="nav">
       {NAV.map((item) => (
         <li>
           <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
-            {item.label}
+            <span class="short">{item.short}</span>
+            <span class="long">{item.label}</span>
           </a>
         </li>
       ))}
@@ -71,14 +72,19 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
   .unofficial {
     background: var(--text);
     color: var(--bg);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    padding-block: 6px;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    padding-block: 4px;
   }
   .unofficial .wrap {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .unofficial span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .unofficial strong {
     color: var(--blush);
@@ -95,34 +101,34 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding-block: 10px 4px;
+    padding-block: 6px 0;
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     text-decoration: none;
     color: var(--text);
     min-width: 0;
   }
   .mark {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     flex: none;
   }
   .names {
     display: flex;
     flex-direction: column;
-    line-height: 1.2;
+    line-height: 1.15;
     min-width: 0;
   }
   .name {
     font-family: var(--serif);
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
   .sub {
-    font-size: 0.66rem;
+    font-size: 0.6rem;
     letter-spacing: 0.12em;
     color: var(--red-ink);
     text-transform: uppercase;
@@ -134,6 +140,7 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
     min-height: 44px;
     min-width: 44px;
     justify-content: center;
+    margin-right: -10px;
     color: var(--text);
     text-decoration: none;
     font-size: 0.85rem;
@@ -141,22 +148,22 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
   .search-link .label {
     display: none;
   }
+  /* Five equal columns: every section is visible on a phone without sideways scrolling. */
   .nav {
-    /* Fades the right edge so a cut-off item reads as "scroll for more". */
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
     list-style: none;
     margin: 0;
-    padding-block: 4px 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
   }
   .nav a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    min-height: 40px;
-    padding-inline: 4px;
-    margin-right: 10px;
+    justify-content: center;
+    min-height: 44px;
     text-decoration: none;
     color: var(--text-sub);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
     white-space: nowrap;
     border-bottom: 3px solid transparent;
@@ -165,12 +172,29 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
     color: var(--red-ink);
     border-bottom-color: var(--red);
   }
+  .nav .long {
+    display: none;
+  }
   @media (min-width: 720px) {
+    .bar {
+      padding-block: 10px 2px;
+    }
     .search-link .label {
       display: inline;
     }
     .nav {
-      mask-image: none;
+      display: flex;
+      gap: 24px;
+    }
+    .nav a {
+      font-size: 0.9rem;
+      padding-inline: 2px;
+    }
+    .nav .short {
+      display: none;
+    }
+    .nav .long {
+      display: inline;
     }
   }
 </style>
