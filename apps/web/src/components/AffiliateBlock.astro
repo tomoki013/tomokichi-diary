@@ -2,38 +2,50 @@
 import type { PublicAffiliatePlacement } from "@tomokichi/contracts";
 interface Props {
   placement: PublicAffiliatePlacement;
+  inline?: boolean;
 }
-const { placement: p } = Astro.props;
+const { placement: p, inline = p.format === "text" } = Astro.props;
 ---
 
 <aside
-  class:list={["affiliate-block", { "affiliate-block--text": p.format === "text" }]}
+  class:list={["affiliate-block", { "affiliate-block--text": inline }]}
   aria-label={`広告・${p.provider}の予約案内`}
 >
-  <small>広告・{p.provider}</small>
-  <h3>{p.heading}</h3>
-  {p.description && <p>{p.description}</p>}
-  <a class="affiliate-block__link" href={p.url} rel="sponsored nofollow noopener">
-    {p.provider}で予約情報を見る <span aria-hidden="true">↗</span>
-  </a>
+  {inline ? (
+    <p class="affiliate-block__inline">
+      <a href={p.url} rel="sponsored nofollow noopener">
+        {p.heading}（{p.provider}）
+      </a>
+    </p>
+  ) : (
+    <>
+      <small>広告・{p.provider}</small>
+      <h3>{p.heading}</h3>
+      {p.description && <p>{p.description}</p>}
+      <a class="button affiliate-block__link" href={p.url} rel="sponsored nofollow noopener">
+        {p.provider}で料金・予約を見る <span aria-hidden="true">↗</span>
+      </a>
+    </>
+  )}
   <p class="affiliate-block__disclosure">
-    このリンク経由の予約で当サイトが報酬を受け取る場合があります。料金・条件は予約先でご確認ください。
+    広告：このリンク経由の予約で当サイトが報酬を受け取る場合があります。料金・条件は予約先でご確認ください。
   </p>
 </aside>
 <style>
   .affiliate-block {
     margin: 3rem 0;
     padding: clamp(1.1rem, 3vw, 1.75rem);
-    border: 1px solid var(--border, #a89a803d);
+    border: 1px solid var(--accent-line);
+    border-top: 4px solid var(--accent);
     border-radius: 14px;
-    background: var(--surface, #a89a800b);
+    background: var(--accent-tint);
     overflow-wrap: anywhere;
   }
   .affiliate-block small {
     display: block;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
-    opacity: 0.75;
+    color: var(--ink-soft);
   }
   .affiliate-block h3 {
     margin: 0.6rem 0;
@@ -44,20 +56,36 @@ const { placement: p } = Astro.props;
     margin: 0.6rem 0;
   }
   .affiliate-block__link {
-    display: inline-block;
-    padding: 0.65rem 0;
-    font-weight: 600;
-    text-underline-offset: 0.25em;
+    margin: 0.4rem 0;
+    text-align: center;
   }
   .affiliate-block .affiliate-block__disclosure {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     line-height: 1.7;
-    opacity: 0.8;
+    color: var(--ink-soft);
   }
   .affiliate-block--text {
+    margin: 1.5rem 0;
+    padding: 0;
     border: 0;
-    border-left: 2px solid var(--border, #a89a8060);
     border-radius: 0;
     background: none;
+  }
+  .affiliate-block--text .affiliate-block__inline {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .affiliate-block__inline a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .affiliate-block--text .affiliate-block__disclosure {
+    margin: 0.25rem 0 0;
+  }
+  @media (max-width: 46rem) {
+    .affiliate-block__link {
+      width: 100%;
+    }
   }
 </style>

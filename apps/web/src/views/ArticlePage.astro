@@ -23,6 +23,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 import WebMcpTools from "../components/WebMcpTools.astro";
 import ExperienceChips from "../components/ExperienceChips.astro";
 import StoryRail from "../components/StoryRail.astro";
+import PlaceStories from "../components/PlaceStories.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../lib/experiences";
 import { snapshot } from "../lib/content";
 
@@ -77,6 +78,7 @@ const jsonLd = [
 ];
 
 const related = content.relatedTo(article.id, 3);
+const placeStories = content.placeStoriesFor(article.id);
 // Two more ways on from a story — how it felt, and where it happened — each
 // skipping what the rails before it already offer.
 const shown = new Set([article.id, ...related.map((item) => item.article.id)]);
@@ -234,6 +236,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           .map((p) => (
             <AffiliateBlock placement={p} />
           ))}
+        {placeStories.length > 0 && <PlaceStories views={placeStories} />}
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong>

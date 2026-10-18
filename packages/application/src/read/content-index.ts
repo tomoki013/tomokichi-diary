@@ -29,6 +29,7 @@ import {
 } from "@tomokichi/domain";
 import type { ContentSnapshot } from "@tomokichi/data";
 import type { TravelKnowledgeView } from "./travel-knowledge.js";
+import { PLACE_STORIES_SERIES_SLUG, sharesStoryPlace } from "./place-stories.js";
 
 export interface ArticleView {
   readonly article: Article;
@@ -197,7 +198,7 @@ export class ContentIndex {
   relatedTo(id: ArticleId, limit = 6): readonly ArticleView[] {
     return findRelatedArticles({
       articleId: id,
-      articles: this.snapshot.articles,
+      articles: this.snapshot.articles.filter((article) => !this.isPlaceStory(article.id)),
       relations: this.relations,
       now: this.now,
       limit,
@@ -214,6 +215,25 @@ export class ContentIndex {
         const collection = this.collectionById.get(m.collectionId);
         return collection ? [collection] : [];
       });
+  }
+
+  isPlaceStory(id: ArticleId): boolean {
+    return this.collectionsOf(id).some(
+      (collection) => collection.kind === "series" && collection.slug === PLACE_STORIES_SERIES_SLUG,
+    );
+  }
+
+  /** Published short stories about a concrete place in this article. */
+  placeStoriesFor(id: ArticleId, limit = 4): readonly ArticleView[] {
+    const source = this.viewOf(id);
+    if (!source) return [];
+    const series = this.snapshot.collections.find(
+      (collection) => collection.kind === "series" && collection.slug === PLACE_STORIES_SERIES_SLUG,
+    );
+    if (!series) return [];
+    return this.membersOf(series.id)
+      .filter((story) => story.article.id !== id && sharesStoryPlace(source, story))
+      .slice(0, limit);
   }
 
   /**
@@ -290,7 +310,12 @@ export class ContentIndex {
     if (own.size === 0) return [];
     return this.articleViews()
       .flatMap((view, order) => {
-        if (view.article.id === id || exclude.has(view.article.id)) return [];
+        if (
+          view.article.id === id ||
+          exclude.has(view.article.id) ||
+          this.isPlaceStory(view.article.id)
+        )
+          return [];
         const shared = view.article.experienceTags.filter((tag) => own.has(tag)).length;
         return shared > 0 ? [{ view, shared, order }] : [];
       })
@@ -320,6 +345,7 @@ export class ContentIndex {
       (view) =>
         view.article.id !== id &&
         !exclude.has(view.article.id) &&
+        !this.isPlaceStory(view.article.id) &&
         view.locations.some(
           ({ location }) => this.locations.countryOf(location.id)?.id === country.id,
         ),
