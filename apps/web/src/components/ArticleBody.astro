@@ -9,6 +9,7 @@ import type { AdPlan } from "../lib/monetization";
 import EmbedBlock from "./EmbedBlock.astro";
 import { cardImageUrl, enhanceBodyImages } from "../lib/images";
 import { enhanceAppleMusic } from "@tomokichi/contracts";
+import { enhanceInlineAffiliates } from "../lib/inline-affiliates";
 import { content } from "../lib/content";
 
 interface Props {
@@ -116,9 +117,14 @@ const withHeadingIds = (value: string) =>
 const segments =
   html === null
     ? null
-    : withInternalLinkCards(withHeadingIds(enhanceAppleMusic(enhanceBodyImages(html)))).split(
-        PLACEHOLDER,
-      );
+    : withInternalLinkCards(
+        withHeadingIds(
+          enhanceInlineAffiliates(
+            enhanceAppleMusic(enhanceBodyImages(html)),
+            affiliates.map((placement) => placement.url),
+          ),
+        ),
+      ).split(PLACEHOLDER);
 
 const fallback = html === null ? await render(entry) : null;
 const FallbackContent = fallback?.Content;

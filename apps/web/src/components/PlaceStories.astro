@@ -1,0 +1,59 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+
+interface Props {
+  views: readonly ArticleView[];
+}
+const { views } = Astro.props;
+---
+
+<aside class="place-stories" aria-labelledby="place-stories-heading">
+  <p class="eyebrow">旅先の小話</p>
+  <h2 id="place-stories-heading">この場所の小話</h2>
+  <p class="place-stories__intro">記事に登場した場所を、もう少し。</p>
+  <ul>
+    {views.map((view) => (
+      <li>
+        <a href={view.route.path}>
+          <span>{view.revision.title}</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</aside>
+
+<style>
+  .place-stories {
+    margin-block: 2.5rem;
+    padding-block: 1.5rem;
+    border-block: 1px solid var(--line);
+  }
+  .place-stories h2 {
+    margin: 0.3rem 0;
+    font-size: 1.3rem;
+  }
+  .place-stories__intro {
+    margin: 0 0 1rem;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+  }
+  .place-stories ul {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .place-stories a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: var(--tap);
+    color: var(--accent);
+    line-height: 1.7;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

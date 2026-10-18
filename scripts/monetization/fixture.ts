@@ -9,13 +9,18 @@ const snapshot = parseExportFiles((path) => {
     return null;
   }
 });
-const articleId = "52b1cb6d-eb74-85a3-b6a1-392f83313051";
+const withAffiliates = process.argv.includes("--affiliates");
+// Affiliate checks use the actual Omio booking story, not an unrelated food article.
+const articleId = withAffiliates
+  ? "73b6b342-bee5-861d-9d18-2a3c46a50e93"
+  : "52b1cb6d-eb74-85a3-b6a1-392f83313051";
 const article = snapshot.articles.find((a) => a.id === articleId);
 if (!article) throw new Error("missing fixture article");
 const revision = snapshot.revisions.find((r) => r.id === article.publishedRevisionId)!;
 const paragraphs = revision.bodyMarkdown.split(/\n\s*\n/);
 const insertion = paragraphs.findIndex(
   (p) =>
+    (withAffiliates && p.startsWith("## 予約の流れ")) ||
     p.startsWith("## 初めて") ||
     p.startsWith("## 5") ||
     p.startsWith("## 注文") ||
@@ -37,16 +42,25 @@ const fixture = {
   ),
   monetization: [
     {
-      ...(process.argv.includes("--affiliates")
+      ...(withAffiliates
         ? {
             affiliates: [
               {
                 key: "private-affiliate",
                 position: "marker" as const,
-                provider: "Trip.com",
-                heading: "旅の予約先を比較する",
+                provider: "Omio",
+                heading: "スペインの鉄道の時刻・料金を確認する",
                 description: "料金・変更条件は予約先で確認できます。",
-                url: "https://www.trip.com/t/FixtureLink",
+                url: "https://omio.sjv.io/FixtureLink",
+                format: "text" as const,
+              },
+              {
+                key: "affiliate-end",
+                position: "article_end" as const,
+                provider: "Omio",
+                heading: "スペインの鉄道を比較・予約する",
+                description: "料金・変更条件は予約先で確認できます。",
+                url: "https://omio.sjv.io/FixtureLink",
                 format: "booking_card" as const,
               },
             ],
@@ -56,7 +70,7 @@ const fixture = {
       enabled: true,
       placement: { key: "article-end", position: "article_end" as const, adUnit: "7152502134" },
       experiment: {
-        id: "chagee-placement-v1",
+        id: withAffiliates ? `placement-v1-${articleId}` : "chagee-placement-v1",
         markerKey: "answers-complete",
         adUnitA: "7152502134",
         adUnitB: "1234567890",
