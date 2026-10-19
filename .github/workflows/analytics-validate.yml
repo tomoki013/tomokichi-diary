@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --build
       - run: pnpm exec vitest run scripts/analytics packages/application/src/analytics apps/api/src/__tests__/analytics.test.ts infrastructure/database/d1/src/__tests__/analytics.test.ts
