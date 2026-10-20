@@ -10,6 +10,7 @@ import { ArticleEditor } from "./pages/editor/ArticleEditor";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { SeriesEditor, SeriesList } from "./pages/Series";
 import { Routes } from "./pages/Routes";
+import { Likes } from "./pages/Likes";
 import { Inquiries } from "./pages/inquiries/Inquiries";
 import { InquiryDetail } from "./pages/inquiries/InquiryDetail";
 import { LegacyMessages } from "./pages/inquiries/LegacyMessages";
@@ -21,6 +22,7 @@ const NAV = [
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
   { key: "analytics", label: "Analytics", href: href.analytics() },
   { key: "articles", label: "記事", href: href.articles() },
+  { key: "likes", label: "いいね", href: href.likes() },
   { key: "media", label: "画像", href: href.media() },
   { key: "series", label: "シリーズ", href: href.series() },
   { key: "routes", label: "URL", href: href.routes() },
@@ -112,6 +114,7 @@ export function App() {
         {route.name === "series" && <SeriesList />}
         {route.name === "series-edit" && <SeriesEditor key={route.id} id={route.id} />}
         {route.name === "routes" && <Routes />}
+        {route.name === "likes" && <Likes />}
         {route.name === "inquiries" && <Inquiries />}
         {route.name === "inquiry" && <InquiryDetail key={route.id} id={route.id} />}
         {route.name === "legacy-messages" && <LegacyMessages />}

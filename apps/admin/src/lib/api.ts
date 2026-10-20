@@ -17,6 +17,7 @@ import type {
   InquiryTicketDetailDto,
   InquiryTicketStatus,
   InquiryTicketSummaryDto,
+  LikeActivityDto,
   LocationDto,
   MediaAssetDto,
   MediaUploadDto,
@@ -261,6 +262,7 @@ export const api = {
 
   // Articles
   listArticles: () => request<{ items: ArticleSummaryDto[] }>("/admin/articles"),
+  likeActivity: () => request<LikeActivityDto>("/admin/likes"),
   getArticle: (articleId: string) => request<ArticleDetailDto>(`/admin/articles/${id(articleId)}`),
   createArticle: (input: {
     slug: string;

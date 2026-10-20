@@ -127,6 +127,30 @@ export function createRepositories(db: SqlDatabase): Repositories {
       );
       return Number(row?.["count"] ?? 0);
     },
+    countAll: async () =>
+      (
+        await all(
+          "SELECT article_id, COUNT(*) AS count, MAX(created_at) AS last_liked_at FROM article_likes GROUP BY article_id",
+        )
+      ).map((row) => ({
+        articleId: row["article_id"] as import("@tomokichi/domain").ArticleId,
+        count: Number(row["count"] ?? 0),
+        lastLikedAt: String(row["last_liked_at"]),
+      })),
+    countVisitors: async () => {
+      const row = await first("SELECT COUNT(DISTINCT visitor_hash) AS count FROM article_likes");
+      return Number(row?.["count"] ?? 0);
+    },
+    listRecent: async (limit: number) =>
+      (
+        await all(
+          "SELECT article_id, created_at FROM article_likes ORDER BY created_at DESC LIMIT ?",
+          limit,
+        )
+      ).map((row) => ({
+        articleId: row["article_id"] as import("@tomokichi/domain").ArticleId,
+        createdAt: String(row["created_at"]),
+      })),
     has: async (articleId: string, visitorHash: string) =>
       (await first(
         "SELECT 1 AS found FROM article_likes WHERE article_id = ? AND visitor_hash = ?",

@@ -1,5 +1,11 @@
 import { Hono } from "hono";
-import { getArticleLikeState, toggleArticleLike } from "@tomokichi/application";
+import type { LikeActivityDto } from "@tomokichi/contracts";
+import {
+  getArticleLikeState,
+  getLikeActivity,
+  listArticleLikeCounts,
+  toggleArticleLike,
+} from "@tomokichi/application";
 import type { ArticleId } from "@tomokichi/domain";
 import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
@@ -14,6 +20,13 @@ async function hashVisitor(value: string, salt: string): Promise<string> {
 
 export function likeRoutes() {
   const routes = new Hono<AppEnv>();
+
+  // Counts only, no visitor state: the same answer for everyone, so it can be
+  // cached briefly. The archive uses it to sort by likes.
+  routes.get("/", async (c) => {
+    c.header("cache-control", "public, max-age=60");
+    return c.json({ counts: await listArticleLikeCounts(c.get("ctx")) });
+  });
 
   routes.get("/:articleId", async (c) => {
     const visitorId = c.req.query("visitorId")?.trim();
@@ -44,6 +57,18 @@ export function likeRoutes() {
       visitorHash,
     );
     return state ? c.json(state) : errorResponse(c, "ARTICLE_NOT_FOUND", "article not found", 404);
+  });
+
+  return routes;
+}
+
+/** Mounted under `/admin`, behind the admin guard. */
+export function likeAdminRoutes() {
+  const routes = new Hono<AppEnv>();
+
+  routes.get("/", async (c) => {
+    const activity: LikeActivityDto = await getLikeActivity(c.get("ctx"));
+    return c.json(activity);
   });
 
   return routes;

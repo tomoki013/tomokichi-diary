@@ -56,6 +56,20 @@ export interface ArticleRepository {
 
 export interface ArticleLikeRepository {
   count(articleId: ArticleId): Promise<number>;
+  /** Every article that has at least one like, with its count. */
+  countAll(): Promise<
+    readonly {
+      readonly articleId: ArticleId;
+      readonly count: number;
+      readonly lastLikedAt: string;
+    }[]
+  >;
+  /** Distinct (hashed) browsers that have liked anything. */
+  countVisitors(): Promise<number>;
+  /** Newest first. */
+  listRecent(
+    limit: number,
+  ): Promise<readonly { readonly articleId: ArticleId; readonly createdAt: string }[]>;
   has(articleId: ArticleId, visitorHash: string): Promise<boolean>;
   add(articleId: ArticleId, visitorHash: string, createdAt: string): Promise<void>;
   remove(articleId: ArticleId, visitorHash: string): Promise<void>;

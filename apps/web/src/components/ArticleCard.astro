@@ -40,6 +40,7 @@ const published = view.article.publishedAt?.slice(0, 10);
   data-country={countryText}
   data-experience={experienceText}
   data-published={published}
+  data-article-id={view.article.id}
   data-title={view.revision.title.toLocaleLowerCase("ja")}
 >
   {cover && (

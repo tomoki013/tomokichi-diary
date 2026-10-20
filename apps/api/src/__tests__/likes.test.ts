@@ -118,3 +118,53 @@ describe("/v1/likes/:articleId", () => {
     expect(await anonymous.json()).toMatchObject({ count: 2, liked: false });
   });
 });
+
+describe("/v1/likes", () => {
+  it("returns counts for published articles only, without visitor state", async () => {
+    const id = await createArticle();
+    await publish(id);
+    for (const visitorId of [visitor, `${visitor}-2`]) {
+      await app.request(
+        `/v1/likes/${id}`,
+        { method: "POST", headers: json, body: JSON.stringify({ visitorId }) },
+        env,
+      );
+    }
+    const response = await app.request("/v1/likes", {}, env);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ counts: { [id]: 2 } });
+
+    const article = await ctx.repos.articles.findById(id as never);
+    if (!article) throw new Error("fixture article missing");
+    await ctx.repos.articles.save({ ...article, status: "draft" });
+    expect(await (await app.request("/v1/likes", {}, env)).json()).toEqual({ counts: {} });
+  });
+});
+
+describe("/v1/admin/likes", () => {
+  it("requires the admin token", async () => {
+    expect((await app.request("/v1/admin/likes", {}, env)).status).toBe(401);
+  });
+
+  it("reports totals, per-article counts and recent likes without visitor hashes", async () => {
+    const id = await createArticle();
+    await publish(id);
+    for (const visitorId of [visitor, `${visitor}-2`]) {
+      await app.request(
+        `/v1/likes/${id}`,
+        { method: "POST", headers: json, body: JSON.stringify({ visitorId }) },
+        env,
+      );
+    }
+    const response = await app.request("/v1/admin/likes", { headers: auth }, env);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({
+      total: 2,
+      visitors: 2,
+      articles: [{ articleId: id, count: 2 }],
+    });
+    expect(body.recent).toHaveLength(2);
+    expect(JSON.stringify(body)).not.toMatch(/visitorHash|visitor_hash/);
+  });
+});
