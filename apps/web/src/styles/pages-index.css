@@ -330,6 +330,54 @@
     font-size: 0.75rem;
   }
 
+  /* "いいねした旅": the reader's own shelf as one more filter. Hidden until
+     this browser has likes; the flag on <html> is set before first paint so
+     the row never pops in and shifts the list. */
+  .posts-filter__liked {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+  }
+
+  :root[data-has-liked] .posts-filter__liked,
+  .posts-filter__liked.is-available {
+    display: flex;
+  }
+
+  .posts-filter__liked button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: var(--tap);
+    padding: 0.3rem 0.85rem;
+    border: 1.5px solid var(--accent-line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent-strong);
+    font-size: var(--step-small);
+  }
+
+  .posts-filter__liked button:is(:hover, :focus-visible) {
+    background: var(--accent-tint);
+  }
+
+  .posts-filter__liked button.is-active {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .posts-filter__liked small {
+    font-family: var(--font-label);
+    font-size: 0.75rem;
+  }
+
+  .posts-filter__liked-note {
+    flex-basis: 100%;
+  }
+
   .posts-filter__chips {
     display: flex;
     flex-wrap: wrap;

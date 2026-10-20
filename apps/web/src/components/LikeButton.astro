@@ -34,19 +34,32 @@ const { articleId, compact = false, title, path } = Astro.props;
 </button>
 
 <script>
-  import { forget, remember } from "../lib/my-trips";
+  import { forget, onShelfChange, remember, shelf } from "../lib/my-trips";
 
   const storageKey = "tomokichi-like-visitor";
+  // Used when storage is refused (hardened or private modes): likes still
+  // work for this page view, they just are not remembered across visits.
+  let pageVisitorId: string | null = null;
 
   function visitorId(): string {
-    const stored = localStorage.getItem(storageKey);
-    if (stored) return stored;
-    const created = crypto.randomUUID();
-    localStorage.setItem(storageKey, created);
-    return created;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return stored;
+      const created = crypto.randomUUID();
+      localStorage.setItem(storageKey, created);
+      return created;
+    } catch {
+      pageVisitorId ??= crypto.randomUUID();
+      return pageVisitorId;
+    }
   }
 
-  function render(button: HTMLButtonElement, state: { count: number; liked: boolean }) {
+  const allButtons = () => [...document.querySelectorAll<HTMLButtonElement>("[data-like-button]")];
+  /** A page can show the same story twice (header and end of article, a card). */
+  const sameStory = (button: HTMLButtonElement) =>
+    allButtons().filter((other) => other.dataset.articleId === button.dataset.articleId);
+
+  function paint(button: HTMLButtonElement, state: { count: number; liked: boolean }) {
     button.setAttribute("aria-pressed", String(state.liked));
     button.setAttribute(
       "aria-label",
@@ -55,16 +68,23 @@ const { articleId, compact = false, title, path } = Astro.props;
     const heart = button.querySelector<HTMLElement>(".like-button__heart");
     const count = button.querySelector<HTMLOutputElement>(".like-button__count");
     if (heart) heart.textContent = state.liked ? "♥" : "♡";
+    if (count) {
+      // A row of zeroes says nothing; the number appears once there is one.
+      count.textContent = state.count > 0 ? new Intl.NumberFormat("ja-JP").format(state.count) : "";
+      count.classList.remove("skeleton");
+    }
+  }
+
+  function render(button: HTMLButtonElement, state: { count: number; liked: boolean }) {
+    for (const each of sameStory(button)) {
+      each.dataset.loaded = "true";
+      paint(each, state);
+    }
     // The server's answer is the truth; the shelf follows it.
     const { path, title } = button.dataset;
     if (path && title) {
       if (state.liked) remember("liked", path, title);
       else forget("liked", path);
-    }
-    if (count) {
-      // A row of zeroes says nothing; the number appears once there is one.
-      count.textContent = state.count > 0 ? new Intl.NumberFormat("ja-JP").format(state.count) : "";
-      count.classList.remove("skeleton");
     }
   }
 
@@ -90,9 +110,7 @@ const { articleId, compact = false, title, path } = Astro.props;
       .catch(() => settle(button, ""));
   }
 
-  const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-like-button]")].filter(
-    (button) => !button.dataset.ready,
-  );
+  const buttons = allButtons().filter((button) => !button.dataset.ready);
 
   const observer =
     "IntersectionObserver" in window
@@ -129,4 +147,26 @@ const { articleId, compact = false, title, path } = Astro.props;
       }
     });
   });
+
+  /*
+   * A like or unlike in another tab changes the shelf here too. Buttons whose
+   * story moved on or off the shelf ask the server again for the fresh count;
+   * the rest are left alone. Changes made in this tab already match.
+   */
+  if (buttons.length > 0 && !document.documentElement.dataset.likeSync) {
+    document.documentElement.dataset.likeSync = "true";
+    onShelfChange(() => {
+      const liked = new Set(shelf("liked").map((entry) => entry.path));
+      const seen = new Set<string>();
+      for (const button of allButtons()) {
+        const { articleId, path } = button.dataset;
+        if (!button.dataset.loaded || !articleId || !path || seen.has(articleId)) continue;
+        seen.add(articleId);
+        if (liked.has(path) !== (button.getAttribute("aria-pressed") === "true")) {
+          sameStory(button).forEach((each) => delete each.dataset.loaded);
+          load(button);
+        }
+      }
+    });
+  }
 </script>

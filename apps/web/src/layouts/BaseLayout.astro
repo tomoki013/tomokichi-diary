@@ -106,6 +106,19 @@ const footerPhoto = {
     {structuredData.map((node) => (
       <script type="application/ld+json" set:html={serializeJsonLd(node)}></script>
     ))}
+    {/* Sets <html data-has-liked> before first paint when this browser keeps
+        liked stories (lib/my-trips.ts), so the shortcuts and the home list are
+        laid out from the start instead of popping in. Reads only a yes/no from
+        local storage; nothing is sent. */}
+    <script is:inline>
+      try {
+        const saved = JSON.parse(localStorage.getItem("tomokichi-my-trips") || "null");
+        if (Array.isArray(saved && saved.liked) && saved.liked.length > 0)
+          document.documentElement.setAttribute("data-has-liked", "");
+      } catch {
+        // Storage refused or unreadable: the page simply shows no shortcuts.
+      }
+    </script>
     {/* GA4, on the production hostname only. The queue is defined up front
         so events fired early are kept; gtag.js itself is fetched once the page
         has loaded and the main thread is idle, so it never competes with the
@@ -163,6 +176,14 @@ const footerPhoto = {
               </a>
             ))}
           </nav>
+          <a
+            class="site-header__action site-header__liked"
+            href="/posts?liked=1"
+            aria-label="いいねした旅"
+            title="いいねした旅"
+          >
+            <span aria-hidden="true">♡</span>
+          </a>
           <button
             class="site-header__action"
             type="button"
@@ -211,6 +232,15 @@ const footerPhoto = {
               </a>
             ))}
           </nav>
+          <div class="mobile-menu__sub mobile-menu__mine">
+            <p>MY TRIPS</p>
+            <a href="/posts?liked=1">
+              <span>
+                <span aria-hidden="true">♡</span> いいねした旅
+                <small data-shelf-count="liked"></small>
+              </span>
+            </a>
+          </div>
           <div class="mobile-menu__sub" aria-label="ご案内・お問い合わせ">
             <p>GUIDE &amp; SUPPORT</p>
             <a href="/faq">よくある質問</a>

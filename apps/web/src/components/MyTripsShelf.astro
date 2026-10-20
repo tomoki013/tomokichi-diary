@@ -1,10 +1,12 @@
 ---
 import { ShareIcon, XIcon } from "./TravelIcons";
+import LikedPrivacyNote from "./LikedPrivacyNote.astro";
 
 /**
  * "さぁ、あなたはどこへ行く？" — the reader's own way back into the diary:
  * the stories they liked (♡) and the ones they shared. Both lists live in
- * this browser (`lib/my-trips.ts`); nothing leaves it.
+ * this browser (`lib/my-trips.ts`) and are never sent anywhere. The liked
+ * list can also be browsed with the archive's filters at `/posts?liked=1`.
  */
 ---
 
@@ -50,11 +52,19 @@ import { ShareIcon, XIcon } from "./TravelIcons";
   </header>
   <ul data-shelf-list></ul>
   <p class="my-trips__empty" data-shelf-empty hidden></p>
-  <p class="my-trips__note">このリストはこのブラウザにだけ保存されています。</p>
+  <a class="my-trips__all" href="/posts?liked=1" data-shelf-only="liked">
+    記事一覧で絞り込んで見る <span aria-hidden="true">→</span>
+  </a>
+  <div class="my-trips__note" data-shelf-only="liked">
+    <LikedPrivacyNote />
+  </div>
+  <p class="my-trips__note" data-shelf-only="shared">
+    このリストはこのブラウザにだけ保存されています。
+  </p>
 </dialog>
 
 <script>
-  import { shelf, type ShelfKind } from "../lib/my-trips";
+  import { onShelfChange, shelf, syncLikedFlag, type ShelfKind } from "../lib/my-trips";
 
   const dialog = document.querySelector<HTMLDialogElement>("[data-shelf-dialog]");
 
@@ -72,6 +82,11 @@ import { ShareIcon, XIcon } from "./TravelIcons";
     const title = dialog.querySelector<HTMLElement>("[data-shelf-title]");
     const entries = shelf(kind);
     if (title) title.textContent = button.dataset.label ?? "";
+    dialog.querySelectorAll<HTMLElement>("[data-shelf-only]").forEach((element) => {
+      element.hidden =
+        element.dataset.shelfOnly !== kind ||
+        (element.classList.contains("my-trips__all") && entries.length === 0);
+    });
     list?.replaceChildren(
       ...entries.map((entry) => {
         const item = document.createElement("li");
@@ -99,6 +114,9 @@ import { ShareIcon, XIcon } from "./TravelIcons";
   dialog?.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
   });
+  // The head script guessed from raw storage; settle it against the parsed
+  // shelf (an unreadable entry does not count).
+  syncLikedFlag();
   updateCounts();
-  addEventListener("storage", updateCounts);
+  onShelfChange(updateCounts);
 </script>
