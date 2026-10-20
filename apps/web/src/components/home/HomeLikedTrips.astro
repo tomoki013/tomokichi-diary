@@ -1,0 +1,93 @@
+---
+import LikedPrivacyNote from "../LikedPrivacyNote.astro";
+
+/**
+ * "いいねした旅" under the hero, for readers whose browser holds likes. It is
+ * drawn entirely in the browser from the shelf (`lib/my-trips.ts`) and the
+ * public story list (`/story-cards.json`), so the static page is the same for
+ * everyone and first-time visitors never see it. Kept small on purpose: the
+ * editor's picks below stay the main thing on the page.
+ */
+const MAX = 6;
+---
+
+<section class="home-liked" data-home-liked data-max={MAX} aria-labelledby="home-liked-title">
+  <header class="section-heading">
+    <div>
+      <h2 id="home-liked-title">いいねした旅</h2>
+      <p>あとでもう一度、あの旅へ。</p>
+    </div>
+    <a href="/posts?liked=1">すべて見る&nbsp; →</a>
+  </header>
+  <ul class="home-liked__row" data-home-liked-list aria-busy="true">
+    {Array.from({ length: 3 }, () => (
+      <li class="home-liked__placeholder" aria-hidden="true" />
+    ))}
+  </ul>
+  <LikedPrivacyNote />
+</section>
+
+<script>
+  import { onShelfChange, shelf } from "../../lib/my-trips";
+
+  interface StoryCard {
+    url: string;
+    title: string;
+    image: string | null;
+  }
+
+  const section = document.querySelector<HTMLElement>("[data-home-liked]");
+  const list = section?.querySelector<HTMLUListElement>("[data-home-liked-list]");
+  const max = Number(section?.dataset.max) || 6;
+  let cards: Promise<Map<string, StoryCard>> | null = null;
+
+  const loadCards = () =>
+    (cards ??= fetch("/story-cards.json")
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
+      .then((records: StoryCard[]) => new Map(records.map((record) => [record.url, record])))
+      .catch(() => new Map<string, StoryCard>()));
+
+  const item = (card: StoryCard) => {
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = card.url;
+    const media = document.createElement("span");
+    media.className = "home-liked__media";
+    if (card.image) {
+      const image = document.createElement("img");
+      image.src = card.image;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.width = 320;
+      image.height = 200;
+      media.append(image);
+    }
+    const title = document.createElement("span");
+    title.className = "home-liked__title";
+    title.textContent = card.title;
+    link.append(media, title);
+    li.append(link);
+    return li;
+  };
+
+  const render = async () => {
+    if (!section || !list) return;
+    const saved = shelf("liked");
+    if (saved.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    const byUrl = await loadCards();
+    // Stories that are no longer public are skipped, not shown broken. They
+    // stay on the shelf in case they come back.
+    const visible = saved.flatMap((entry) => byUrl.get(entry.path) ?? []).slice(0, max);
+    section.hidden = visible.length === 0;
+    list.replaceChildren(...visible.map(item));
+    list.removeAttribute("aria-busy");
+  };
+
+  void render();
+  onShelfChange(() => void render());
+</script>

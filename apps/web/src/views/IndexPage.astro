@@ -13,6 +13,7 @@ import { visitedContinents } from "../lib/destinations";
 import { bestEpisodes } from "../lib/editorial";
 import { EXPERIENCES } from "../lib/experiences";
 import { SearchIcon, XIcon } from "../components/TravelIcons";
+import LikedPrivacyNote from "../components/LikedPrivacyNote.astro";
 
 interface Props {
   route: Route;
@@ -395,6 +396,17 @@ const labelOf = (target: Route): string => {
               </label>
             </div>
           </div>
+          {/* Shown only to readers whose browser holds likes (or who arrive on
+              `?liked=1`); first-time visitors see the filter as it was. */}
+          <div class="posts-filter__liked" data-archive-liked-row>
+            <button type="button" aria-pressed="false" data-archive-liked>
+              <span aria-hidden="true">♡</span> いいねした旅
+              <small data-archive-liked-count></small>
+            </button>
+            <div class="posts-filter__liked-note" data-archive-liked-note hidden>
+              <LikedPrivacyNote />
+            </div>
+          </div>
           {archiveExperiences.length > 0 && (
             <div class="posts-filter__moods">
               <p id="archive-mood-label">気分で選ぶ</p>
@@ -455,6 +467,12 @@ const labelOf = (target: Route): string => {
           </ul>
           <p class="posts-empty" data-archive-empty hidden>
             まだ記録のない旅先です。別の条件でも探してみてください。
+          </p>
+          <p class="posts-empty" data-archive-liked-empty hidden>
+            このブラウザには、まだいいねした旅がありません。
+            <a href="/posts" data-archive-liked-exit>
+              記事一覧へ戻る
+            </a>
           </p>
           <footer class="posts-results__footer">
             <p data-archive-page-status aria-live="polite">
@@ -904,6 +922,8 @@ const labelOf = (target: Route): string => {
     </div>
   )}
   <script>
+    import { onShelfChange, shelf } from "../lib/my-trips";
+
     /**
      * Filter state belongs in the query string: every list on this page can be
      * linked to in the state the reader is looking at. Values equal to their
@@ -948,6 +968,38 @@ const labelOf = (target: Route): string => {
     const archiveCount = document.querySelector<HTMLElement>("[data-archive-count]");
     const archiveEmpty = document.querySelector<HTMLElement>("[data-archive-empty]");
     const archivePageSize = Number(archivePagination?.dataset.pageSize) || 12;
+    const archiveLiked = document.querySelector<HTMLButtonElement>("[data-archive-liked]");
+    const archiveLikedRow = document.querySelector<HTMLElement>("[data-archive-liked-row]");
+    const archiveLikedNote = document.querySelector<HTMLElement>("[data-archive-liked-note]");
+    const archiveLikedCount = document.querySelector<HTMLElement>("[data-archive-liked-count]");
+    const archiveLikedEmpty = document.querySelector<HTMLElement>("[data-archive-liked-empty]");
+
+    /*
+     * "いいねした旅" filters by the shelf this browser keeps. Only the on/off
+     * flag reaches the URL (`?liked=1`); which stories are on the shelf stays
+     * here, so the same link on another device simply shows its own shelf.
+     */
+    let likedOnly = false;
+    let likedPaths = new Set<string>();
+    // Only stories still listed here count: one that was unpublished stays
+    // on the shelf in case it returns, but is not offered as a result.
+    const listedPaths = new Set(archiveCards.map((card) => card.dataset.path ?? ""));
+    const readLikedShelf = () => {
+      likedPaths = new Set(
+        shelf("liked")
+          .map((entry) => entry.path)
+          .filter((path) => listedPaths.has(path)),
+      );
+      if (archiveLikedCount)
+        archiveLikedCount.textContent = likedPaths.size > 0 ? String(likedPaths.size) : "";
+    };
+    const markLiked = () => {
+      archiveLiked?.setAttribute("aria-pressed", String(likedOnly));
+      archiveLiked?.classList.toggle("is-active", likedOnly);
+      archiveLikedRow?.classList.toggle("is-available", likedOnly || likedPaths.size > 0);
+      if (archiveLikedNote) archiveLikedNote.hidden = !likedOnly;
+    };
+    readLikedShelf();
 
     /**
      * Every part of the archive's state lives in the query string, so a
@@ -961,6 +1013,7 @@ const labelOf = (target: Route): string => {
       category: "all",
       country: "all",
       sort: "newest",
+      liked: "",
       page: "1",
     };
     let activeArchiveFilter = ARCHIVE_DEFAULTS.category;
@@ -981,6 +1034,7 @@ const labelOf = (target: Route): string => {
         category: params.get("category") ?? ARCHIVE_DEFAULTS.category,
         country: params.get("country") ?? ARCHIVE_DEFAULTS.country,
         sort: params.get("sort") ?? ARCHIVE_DEFAULTS.sort,
+        liked: params.get("liked") === "1",
         page: Math.max(1, Number(params.get("page")) || 1),
       };
     };
@@ -993,6 +1047,7 @@ const labelOf = (target: Route): string => {
           ["category", activeArchiveFilter, ARCHIVE_DEFAULTS.category],
           ["country", archiveCountry?.value ?? "all", ARCHIVE_DEFAULTS.country],
           ["sort", archiveSort?.value ?? "newest", ARCHIVE_DEFAULTS.sort],
+          ["liked", likedOnly ? "1" : "", ARCHIVE_DEFAULTS.liked],
           ["page", String(archivePage), ARCHIVE_DEFAULTS.page],
         ],
         mode,
@@ -1027,6 +1082,8 @@ const labelOf = (target: Route): string => {
         ? state.experience
         : ARCHIVE_DEFAULTS.experience;
       markExperience();
+      likedOnly = state.liked;
+      markLiked();
       archivePage = state.page;
     };
 
@@ -1132,6 +1189,7 @@ const labelOf = (target: Route): string => {
           (!archiveQuery || haystack.includes(archiveQuery)) &&
           (activeExperience === "all" || experiences.includes(activeExperience)) &&
           (activeArchiveFilter === "all" || categories.includes(activeArchiveFilter)) &&
+          (!likedOnly || likedPaths.has(card.dataset.path ?? "")) &&
           (!archiveCountry ||
             archiveCountry.value === "all" ||
             countries.includes(archiveCountry.value));
@@ -1166,9 +1224,14 @@ const labelOf = (target: Route): string => {
         archivePageStatus.textContent = `${rangeStart}–${rangeEnd} / ${visible}件`;
       }
       if (archiveCount) archiveCount.textContent = String(visible);
-      if (archiveEmpty) archiveEmpty.hidden = visible !== 0;
+      // An empty shelf gets its own message; "no match" is for filters that
+      // narrowed a shelf that does have stories.
+      const shelfEmpty = likedOnly && likedPaths.size === 0;
+      if (archiveEmpty) archiveEmpty.hidden = visible !== 0 || shelfEmpty;
+      if (archiveLikedEmpty) archiveLikedEmpty.hidden = !shelfEmpty;
       if (archiveSummary) {
         const conditions = [
+          likedOnly && "いいねした旅",
           archiveQuery && `「${archiveQuery}」`,
           activeExperience !== "all" &&
             `「${
@@ -1208,7 +1271,29 @@ const labelOf = (target: Route): string => {
         updateArchive();
       }),
     );
+    archiveLiked?.addEventListener("click", () => {
+      likedOnly = !likedOnly;
+      markLiked();
+      updateArchive();
+    });
+    document
+      .querySelector<HTMLAnchorElement>("[data-archive-liked-exit]")
+      ?.addEventListener("click", (event) => {
+        event.preventDefault();
+        likedOnly = false;
+        markLiked();
+        updateArchive();
+      });
+    // A like taken back here or in another tab updates the list in place,
+    // keeping the page the reader is on where possible.
+    onShelfChange(() => {
+      readLikedShelf();
+      markLiked();
+      if (likedOnly) updateArchive(false, "none");
+    });
     archiveReset?.addEventListener("click", () => {
+      likedOnly = false;
+      markLiked();
       if (archiveSearch) archiveSearch.value = "";
       if (archiveCountry) archiveCountry.value = "all";
       if (archiveSort) archiveSort.value = "newest";

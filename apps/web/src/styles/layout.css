@@ -273,8 +273,38 @@
     display: none;
   }
 
+  /* Shortcut to the reader's liked stories: only when this browser has some
+     (the flag is set before first paint), and only on wide screens — on a
+     phone it lives in the menu instead. */
+  .site-header__liked {
+    display: none;
+    font-size: 1.15rem;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  :root[data-has-liked] .site-header__liked {
+    display: grid;
+  }
+
+  .mobile-menu__sub.mobile-menu__mine {
+    display: none;
+  }
+
+  :root[data-has-liked] .mobile-menu__sub.mobile-menu__mine {
+    display: grid;
+  }
+
+  .mobile-menu__mine small {
+    margin-inline-start: 0.3rem;
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: 0.75rem;
+  }
+
   @media (max-width: 62rem) {
-    .site-nav {
+    .site-nav,
+    :root[data-has-liked] .site-header__liked {
       display: none;
     }
     .site-header__menu-button {
@@ -918,6 +948,13 @@
 
   .my-trips__note {
     margin-top: var(--space-sm);
+  }
+
+  .my-trips__all {
+    display: inline-block;
+    margin-top: var(--space-sm);
+    color: var(--accent-strong);
+    font-size: var(--step-small);
   }
 
   .site-footer__body {

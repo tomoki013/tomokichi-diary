@@ -25,7 +25,7 @@
      near the viewport: the home page carries a map, several sideways rows and
      a gallery, and laying all of them out up front was most of its blocking
      time. `auto` remembers each band's real size once it has been rendered. */
-  .home > section:not(.home-hero, .home-picker),
+  .home > section:not(.home-hero, .home-picker, .home-liked),
   .home > aside {
     content-visibility: auto;
     contain-intrinsic-size: auto 42rem;
@@ -1200,5 +1200,86 @@
     .home-picks__row {
       grid-auto-columns: 80vw;
     }
+  }
+
+  /* "いいねした旅": only for readers whose browser holds likes. The flag on
+     <html> is set before first paint, so the band's space is there from the
+     start and nothing below it jumps when the list arrives. Smaller than the
+     editorial rows on purpose. */
+  .home-liked {
+    display: none;
+  }
+
+  :root[data-has-liked] .home-liked:not([hidden]) {
+    display: block;
+    padding-block: var(--band-tight);
+  }
+
+  .home-liked .section-heading {
+    margin-bottom: var(--space-sm);
+  }
+
+  .home-liked .section-heading h2 {
+    font-size: var(--step-h3);
+  }
+
+  .home-liked__row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(9.5rem, 11rem);
+    gap: var(--space-sm);
+    overflow-x: auto;
+    margin: 0;
+    padding: 0.2rem 0.2rem 0.8rem;
+    list-style: none;
+    scroll-snap-type: x proximity;
+    scrollbar-color: var(--line-mid) transparent;
+    scrollbar-width: thin;
+  }
+
+  .home-liked__row > li {
+    scroll-snap-align: start;
+  }
+
+  .home-liked__row a {
+    display: grid;
+    gap: 0.45rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .home-liked__row a:hover .home-liked__title {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .home-liked__media,
+  .home-liked__placeholder {
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+  }
+
+  /* Room for the two title lines the real card will have. */
+  .home-liked__placeholder {
+    margin-bottom: 2.9rem;
+  }
+
+  .home-liked__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .home-liked__title {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--step-small);
+    font-weight: 600;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }

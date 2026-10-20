@@ -41,6 +41,7 @@ const published = view.article.publishedAt?.slice(0, 10);
   data-experience={experienceText}
   data-published={published}
   data-article-id={view.article.id}
+  data-path={view.route.path}
   data-title={view.revision.title.toLocaleLowerCase("ja")}
 >
   {cover && (
