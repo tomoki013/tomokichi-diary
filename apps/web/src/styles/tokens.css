@@ -17,19 +17,16 @@
     --color-background-base: #faf8f4;
     --color-surface-base: #ffffff;
     --color-surface-warm: #ebd5ca;
-    --color-text-primary: #4c565b;
-    --color-text-secondary: #606569;
-    /* Warm Slate taken down for long-form reading: at article length the
-       primary value read as washed out on a phone, so the article page swaps
-       its ink to these two. Same hue, more weight. */
-    --color-text-reading: #232a2d;
-    --color-text-reading-secondary: #474f53;
+    /* Warm Slate taken almost to black: the original #4c565b read as washed
+       out on a phone. The hue stays, so it is still the brand ink. */
+    --color-text-primary: #1b2022;
+    --color-text-secondary: #3a4246;
     --color-brand-soft: #c9927d;
     --color-brand-strong: #97594e;
     --color-brand-strong-hover: #854b43;
     --color-border-decorative: #e8e5e0;
     --color-border-interactive: #8d7f79;
-    --color-focus-ring: #4c565b;
+    --color-focus-ring: #1b2022;
     /* State colours sit apart from the brand so "error" never reads as
        decoration. Both clear 4.5:1 on the ivory page and on white. */
     --color-state-error: #a3362b;

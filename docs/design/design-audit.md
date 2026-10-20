@@ -49,14 +49,14 @@
 | `--color-background-base`       | `#faf8f4` | `--bg`                                          |
 | `--color-surface-base`          | `#ffffff` | `--surface`                                     |
 | `--color-surface-warm`          | `#ebd5ca` | `--surface-warm`（新規）                        |
-| `--color-text-primary`          | `#4c565b` | `--ink`                                         |
-| `--color-text-secondary`        | `#606569` | `--ink-soft`, `--ink-faint`                     |
+| `--color-text-primary`          | `#1b2022` | `--ink`                                         |
+| `--color-text-secondary`        | `#3a4246` | `--ink-soft`, `--ink-faint`                     |
 | `--color-brand-soft`            | `#c9927d` | `--accent-soft`, `--accent-line`                |
 | `--color-brand-strong`          | `#97594e` | `--accent`                                      |
 | `--color-brand-strong-hover`    | `#854b43` | `--accent-strong`                               |
 | `--color-border-decorative`     | `#e8e5e0` | `--line`                                        |
 | `--color-border-interactive`    | `#8d7f79` | `--line-strong`（入力・選択・チップ専用に限定） |
-| `--color-focus-ring`            | `#4c565b` | `--focus-ring`                                  |
+| `--color-focus-ring`            | `#1b2022` | `--focus-ring`                                  |
 | `--color-state-error`（追加）   | `#a3362b` | —                                               |
 | `--color-state-success`（追加） | `#3f6b4f` | —                                               |
 

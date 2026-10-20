@@ -45,9 +45,6 @@ const pairs: Array<[string, string, number, string]> = [
   ["--ink", "--surface", 7, "body text on cards (AAA)"],
   ["--ink", "--surface-alt", 4.5, "text on the alternate surface"],
   ["--ink", "--surface-warm", 4.5, "text on the warm surface"],
-  ["--color-text-reading", "--bg", 12, "article body text on the page"],
-  ["--color-text-reading-secondary", "--bg", 7, "article secondary text on the page"],
-  ["--color-text-reading-secondary", "--accent-tint", 4.5, "article meta on the accent tint"],
   ["--ink-soft", "--bg", 4.5, "secondary text on the page"],
   ["--ink-soft", "--surface", 4.5, "secondary text on cards"],
   ["--ink-faint", "--bg", 4.5, "meta text on the page"],
@@ -83,8 +80,8 @@ describe("design tokens", () => {
   it("matches the ratios the spec publishes", () => {
     const ratio = (a: string, b: string) =>
       Math.round(contrast(resolve(a), resolve(b)) * 100) / 100;
-    expect(ratio("--color-text-primary", "--color-background-base")).toBe(7.1);
-    expect(ratio("--color-text-secondary", "--color-background-base")).toBe(5.56);
+    expect(ratio("--color-text-primary", "--color-background-base")).toBe(15.51);
+    expect(ratio("--color-text-secondary", "--color-background-base")).toBe(9.67);
     expect(ratio("--color-brand-strong", "--color-background-base")).toBe(5.14);
     expect(ratio("--color-border-interactive", "--color-background-base")).toBe(3.64);
   });

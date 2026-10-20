@@ -132,29 +132,29 @@
 | background.base    | #FAF8F4 | ページ背景                 |
 | surface.base       | #FFFFFF | カード・入力面             |
 | surface.warm       | #EBD5CA | 柔らかい強調領域           |
-| text.primary       | #4C565B | 主要文字                   |
-| text.secondary     | #606569 | 補助文字                   |
+| text.primary       | #1B2022 | 主要文字                   |
+| text.secondary     | #3A4246 | 補助文字                   |
 | brand.soft         | #C9927D | 装飾・背景                 |
 | brand.strong       | #97594E | CTA・重要リンク            |
 | brand.strongHover  | #854B43 | CTAホバー                  |
 | border.decorative  | #E8E5E0 | 装飾的な区切り             |
 | border.interactive | #8D7F79 | 識別が必要な入力欄等の境界 |
-| focus.ring         | #4C565B | キーボードフォーカス       |
+| focus.ring         | #1B2022 | キーボードフォーカス       |
 
 エラー・警告・成功などの状態色は別途セマンティックトークンとして定義し、表示背景とのコントラストを検証する。装飾目的で使用するブランドカラーとは区別する。
 
 ### 4.3 コントラストの基準値
 
-| 組み合わせ                      |   比率 | 用途判定               |
-| ------------------------------- | -----: | ---------------------- |
-| Warm Slate / Milk Ivory         | 7.10:1 | 通常文字可、AAA        |
-| Secondary Text / Milk Ivory     | 5.56:1 | 通常文字可、AA         |
-| Strong Accent / Milk Ivory      | 5.14:1 | リンク・通常文字可、AA |
-| White / Strong Accent           | 5.45:1 | CTA文字可、AA          |
-| Warm Slate / Warm Surface       | 5.34:1 | 通常文字可、AA         |
-| Interactive Border / Milk Ivory | 3.64:1 | 必要なUI境界に使用可   |
-| Soft Clay / Milk Ivory          | 2.51:1 | 通常文字には使用禁止   |
-| Warm Slate / Soft Clay          | 2.83:1 | 文字配置禁止           |
+| 組み合わせ                      |    比率 | 用途判定               |
+| ------------------------------- | ------: | ---------------------- |
+| Warm Slate / Milk Ivory         | 15.51:1 | 通常文字可、AAA        |
+| Secondary Text / Milk Ivory     |  9.67:1 | 通常文字可、AAA        |
+| Strong Accent / Milk Ivory      |  5.14:1 | リンク・通常文字可、AA |
+| White / Strong Accent           |  5.45:1 | CTA文字可、AA          |
+| Warm Slate / Warm Surface       |  5.34:1 | 通常文字可、AA         |
+| Interactive Border / Milk Ivory |  3.64:1 | 必要なUI境界に使用可   |
+| Soft Clay / Milk Ivory          |  2.51:1 | 通常文字には使用禁止   |
+| Warm Slate / Soft Clay          |  2.83:1 | 文字配置禁止           |
 
 上記は指定した不透明色同士で計算した値。透過、画像、グラデーション、ホバー、重ね合わせがある場合は別途検証する。
 

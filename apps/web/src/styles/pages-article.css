@@ -21,12 +21,6 @@
 
   /* Article ---------------------------------------------------------- */
   .article-page {
-    --ink: var(--color-text-reading);
-    --ink-soft: var(--color-text-reading-secondary);
-    --ink-faint: var(--color-text-reading-secondary);
-    /* Re-declared so inherited text picks up the swapped ink, not the
-       value body already resolved. */
-    color: var(--ink);
     display: grid;
     /* The related section that follows draws its own top rule. Without this
        the last card in the pager sat directly on that line. */
