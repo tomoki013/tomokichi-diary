@@ -19,6 +19,11 @@
     --color-surface-warm: #ebd5ca;
     --color-text-primary: #4c565b;
     --color-text-secondary: #606569;
+    /* Warm Slate taken down for long-form reading: at article length the
+       primary value read as washed out on a phone, so the article page swaps
+       its ink to these two. Same hue, more weight. */
+    --color-text-reading: #232a2d;
+    --color-text-reading-secondary: #474f53;
     --color-brand-soft: #c9927d;
     --color-brand-strong: #97594e;
     --color-brand-strong-hover: #854b43;

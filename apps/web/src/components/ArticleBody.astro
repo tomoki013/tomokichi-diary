@@ -114,6 +114,42 @@ const withHeadingIds = (value: string) =>
     const id = `section-${++headingIndex}-${text.replace(/\s+/g, "-").slice(0, 48)}`;
     return `<h${level} id="${id}">${inner}</h${level}>`;
   });
+/*
+ * The sidebar and floating contents are easy to miss, so the body also opens
+ * with a plain list of its sections, set after the lede and right before the
+ * first heading. Rendered here rather than by script: the heading ids are
+ * known now, and the list shows without JavaScript or a layout shift. The
+ * title is not a heading so the other contents lists never pick it up.
+ * Heading text is taken from rendered HTML, so it is already escaped.
+ */
+const HEADING = /<h([23])\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/gi;
+type TocHeading = { id: string; level: string; text: string };
+const inlineToc = (list: readonly TocHeading[]) =>
+  `<nav class="inline-toc" aria-labelledby="inline-toc-title"><p class="inline-toc__title" id="inline-toc-title">目次</p><ol>${list
+    .map(
+      (heading) =>
+        `<li data-level="${heading.level}"><a href="#${heading.id}">${heading.text}</a></li>`,
+    )
+    .join("")}</ol></nav>`;
+const withInlineToc = (list: string[]) => {
+  // Odd segments are embed and placement keys, not HTML.
+  const headings = list.flatMap((segment, index) =>
+    index % 2 === 1
+      ? []
+      : [...segment.matchAll(HEADING)].map(([, level = "", id = "", inner = ""]) => ({
+          id,
+          level,
+          text: inner.replace(/<[^>]+>/g, "").trim(),
+        })),
+  );
+  if (headings.length < 2) return list;
+  const at = list.findIndex((segment, index) => index % 2 === 0 && /<h[23]\b/i.test(segment));
+  return list.map((segment, index) =>
+    index === at
+      ? segment.replace(/<h[23]\b/i, (heading) => inlineToc(headings) + heading)
+      : segment,
+  );
+};
 const segments =
   html === null
     ? null
@@ -125,18 +161,19 @@ const segments =
           ),
         ),
       ).split(PLACEHOLDER);
+const bodySegments = segments === null ? null : withInlineToc(segments);
 
 const fallback = html === null ? await render(entry) : null;
 const FallbackContent = fallback?.Content;
 ---
 
 <div class="prose article-content">
-  {segments === null ? (
+  {bodySegments === null ? (
     FallbackContent ? (
       <FallbackContent />
     ) : null
   ) : (
-    segments.map((segment, index) =>
+    bodySegments.map((segment, index) =>
       index % 2 === 1 ? (
         segment.startsWith("monetization:") ? (
           adPlan?.marker?.key === segment.slice(13) ? (
