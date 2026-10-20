@@ -1,0 +1,43 @@
+---
+import type { ArticleHeading } from "../lib/article-headings";
+import { ListIcon } from "./TravelIcons";
+
+interface Props {
+  headings: readonly ArticleHeading[];
+}
+
+/*
+ * The contents at the top of the body, in the same card as the sidebar list.
+ * The sidebar and the floating button are easy to miss on a phone, so this
+ * one sits where the reader already is. Only the main sections are listed
+ * here to keep the card short; the other two lists carry the sub-sections.
+ * Rendered on the server, so it needs no script and causes no layout shift.
+ */
+const { headings } = Astro.props;
+const sections = headings.filter((heading) => heading.level === 2);
+const items = sections.length >= 2 ? sections : headings;
+---
+
+{items.length >= 2 && (
+  <nav class="article-toc article-toc--inline" aria-labelledby="article-toc-inline-title">
+    <div class="article-toc__heading">
+      <span aria-hidden="true">
+        <ListIcon />
+      </span>
+      <div>
+        <small>JOURNEY GUIDE</small>
+        <p id="article-toc-inline-title">この旅の道しるべ</p>
+      </div>
+    </div>
+    <ol>
+      {items.map((heading, index) => (
+        <li>
+          <a href={`#${heading.id}`} data-level={String(heading.level)}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
