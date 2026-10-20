@@ -13,13 +13,17 @@ describe("parseRoute", () => {
     ["#/articles/a%2Fb", { name: "article", id: "a/b" }],
     ["#/inquiries/archive", { name: "legacy-messages" }],
     ["#/inquiries/t-1", { name: "inquiry", id: "t-1" }],
+    ["#/likes", { name: "likes" }],
   ])("reads %s", (hash, expected) => {
     expect(parseRoute(hash)).toEqual(expected);
   });
 
-  it.each(["#/nope", "#/media/x", "#/articles/a/b"])("does not guess at %s", (hash) => {
-    expect(parseRoute(hash).name).toBe("not-found");
-  });
+  it.each(["#/nope", "#/media/x", "#/likes/x", "#/articles/a/b"])(
+    "does not guess at %s",
+    (hash) => {
+      expect(parseRoute(hash).name).toBe("not-found");
+    },
+  );
 
   it("round-trips every link it builds", () => {
     expect(parseRoute(href.article("x y"))).toEqual({ name: "article", id: "x y" });

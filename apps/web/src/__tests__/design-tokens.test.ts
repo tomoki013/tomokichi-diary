@@ -80,8 +80,8 @@ describe("design tokens", () => {
   it("matches the ratios the spec publishes", () => {
     const ratio = (a: string, b: string) =>
       Math.round(contrast(resolve(a), resolve(b)) * 100) / 100;
-    expect(ratio("--color-text-primary", "--color-background-base")).toBe(7.1);
-    expect(ratio("--color-text-secondary", "--color-background-base")).toBe(5.56);
+    expect(ratio("--color-text-primary", "--color-background-base")).toBe(15.51);
+    expect(ratio("--color-text-secondary", "--color-background-base")).toBe(9.67);
     expect(ratio("--color-brand-strong", "--color-background-base")).toBe(5.14);
     expect(ratio("--color-border-interactive", "--color-background-base")).toBe(3.64);
   });

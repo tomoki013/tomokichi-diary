@@ -16,7 +16,7 @@ import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
-import { likeRoutes } from "./routes/likes.js";
+import { likeAdminRoutes, likeRoutes } from "./routes/likes.js";
 import { knowledgeRoutes } from "./routes/knowledge.js";
 import { inquiryRoutes } from "./routes/inquiry.js";
 import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
@@ -190,6 +190,7 @@ export function createApp(options: AppOptions = {}) {
   v1.route("/admin/articles", articleRoutes(publishSite));
   v1.route("/admin/publication", publicationRoutes(publishSite));
   v1.route("/admin/media", mediaRoutes());
+  v1.route("/admin/likes", likeAdminRoutes());
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());
   v1.route("/admin/knowledge", knowledgeRoutes());

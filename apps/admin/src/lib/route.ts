@@ -13,6 +13,7 @@ export type Route =
   | { name: "series" }
   | { name: "series-edit"; id: string }
   | { name: "routes" }
+  | { name: "likes" }
   | { name: "inquiries" }
   | { name: "inquiry"; id: string }
   | { name: "legacy-messages" }
@@ -36,6 +37,8 @@ export function parseRoute(hash: string): Route {
       return second ? { name: "not-found", path } : { name: "media" };
     case "routes":
       return second ? { name: "not-found", path } : { name: "routes" };
+    case "likes":
+      return second ? { name: "not-found", path } : { name: "likes" };
     case "series":
       return second ? { name: "series-edit", id: decodeURIComponent(second) } : { name: "series" };
     case "inquiries":
@@ -57,6 +60,7 @@ export const href = {
   series: () => "#/series",
   seriesEdit: (id: string) => `#/series/${encodeURIComponent(id)}`,
   routes: () => "#/routes",
+  likes: () => "#/likes",
   inquiries: () => "#/inquiries",
   inquiry: (id: string) => `#/inquiries/${encodeURIComponent(id)}`,
   legacyMessages: () => "#/inquiries/archive",
@@ -73,6 +77,7 @@ export function section(
   | "media"
   | "series"
   | "routes"
+  | "likes"
   | "inquiries"
   | null {
   switch (route.name) {
@@ -92,6 +97,8 @@ export function section(
       return "series";
     case "routes":
       return "routes";
+    case "likes":
+      return "likes";
     case "inquiries":
     case "inquiry":
     case "legacy-messages":

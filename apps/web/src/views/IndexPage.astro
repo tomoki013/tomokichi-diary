@@ -6,7 +6,7 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import { content } from "../lib/content";
 import Picture from "../components/Picture.astro";
-import { seoConfig, siteDescription } from "../lib/site";
+import { apiUrl, seoConfig, siteDescription } from "../lib/site";
 import { largeImageUrl } from "../lib/images";
 import WorldMap from "../components/WorldMap.astro";
 import { visitedContinents } from "../lib/destinations";
@@ -386,8 +386,9 @@ const labelOf = (target: Route): string => {
               </label>
               <label>
                 <span>並び順</span>
-                <select data-archive-sort>
+                <select data-archive-sort data-api-url={apiUrl}>
                   <option value="newest">新しい順</option>
+                  <option value="popular">人気順（いいね）</option>
                   <option value="oldest">古い順</option>
                   <option value="title">タイトル順</option>
                 </select>
@@ -1097,7 +1098,28 @@ const labelOf = (target: Route): string => {
       );
     };
 
+    /*
+     * Like counts live in the API, not the static HTML, so they are fetched
+     * once — and only when someone actually asks for the popular order.
+     */
+    let likeCounts: Record<string, number> | null = null;
+    let likeCountsRequest: Promise<void> | null = null;
+    const loadLikeCounts = () =>
+      (likeCountsRequest ??= fetch(`${archiveSort?.dataset.apiUrl}/v1/likes`)
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
+        .then((body: { counts: Record<string, number> }) => {
+          likeCounts = body.counts;
+        })
+        .catch(() => {
+          likeCounts = {};
+        }));
+    const likesOf = (card: HTMLElement) => likeCounts?.[card.dataset.articleId ?? ""] ?? 0;
+
     const updateArchive = (resetPage = true, urlMode: "push" | "replace" | "none" = "push") => {
+      if (archiveSort?.value === "popular" && !likeCounts) {
+        void loadLikeCounts().then(() => updateArchive(resetPage, urlMode));
+        return;
+      }
       if (resetPage) archivePage = 1;
       const archiveQuery = archiveSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
       let visible = 0;
@@ -1121,6 +1143,8 @@ const labelOf = (target: Route): string => {
           return (a.dataset.published ?? "").localeCompare(b.dataset.published ?? "");
         if (archiveSort?.value === "title")
           return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "", "ja");
+        if (archiveSort?.value === "popular" && likesOf(a) !== likesOf(b))
+          return likesOf(b) - likesOf(a);
         return (b.dataset.published ?? "").localeCompare(a.dataset.published ?? "");
       });
       if (archiveGrid) archiveGrid.append(...sorted);

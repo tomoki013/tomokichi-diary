@@ -37,6 +37,18 @@ export interface ArticleSummaryDto {
   readonly noindex: boolean;
 }
 
+/** `GET /v1/admin/likes`. Article titles are joined on the client from the article list. */
+export interface LikeActivityDto {
+  readonly total: number;
+  readonly visitors: number;
+  readonly articles: readonly {
+    readonly articleId: string;
+    readonly count: number;
+    readonly lastLikedAt: string;
+  }[];
+  readonly recent: readonly { readonly articleId: string; readonly createdAt: string }[];
+}
+
 export interface RevisionDto {
   readonly id: string;
   readonly revisionNumber: number;

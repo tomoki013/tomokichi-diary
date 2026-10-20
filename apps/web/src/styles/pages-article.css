@@ -494,6 +494,76 @@
   }
 
   /* Table of contents ------------------------------------------------ */
+  /* The one at the top of the body: a quiet card that is read in passing,
+     not a second navigation bar. Numbered like the sidebar list. */
+  .inline-toc {
+    margin-block: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--line);
+    border-inline-start: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .inline-toc__title {
+    margin: 0 0 var(--space-xs);
+    color: var(--ink);
+    font-size: var(--step-small);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .prose .inline-toc ol {
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0;
+    counter-reset: inline-toc;
+  }
+
+  .prose .inline-toc li {
+    list-style: none;
+    font-size: 0.94rem;
+    line-height: 1.7;
+  }
+
+  /* Hanging indent, so a wrapped title lines up under its own text. */
+  .prose .inline-toc li[data-level="2"] {
+    padding-inline-start: 1.6em;
+    text-indent: -1.6em;
+    counter-increment: inline-toc;
+  }
+
+  .prose .inline-toc li[data-level="2"]::before {
+    content: counter(inline-toc) ".";
+    display: inline-block;
+    min-width: 1.6em;
+    color: var(--accent);
+    font-family: var(--font-label);
+  }
+
+  .prose .inline-toc li[data-level="3"] {
+    padding-inline-start: 2.6em;
+    text-indent: -1em;
+    font-size: var(--step-small);
+  }
+
+  .prose .inline-toc li[data-level="3"]::before {
+    content: "–";
+    display: inline-block;
+    min-width: 1em;
+    color: var(--ink-faint);
+  }
+
+  .prose .inline-toc a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .prose .inline-toc a:hover {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
   .article-toc {
     display: grid;
     gap: 0.6rem;
