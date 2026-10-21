@@ -3,15 +3,8 @@
 //   node scripts/design/screenshots.mjs <label> [baseUrl]
 // Writes docs/design/screenshots/<label>/<page>-<width>.jpg
 import { mkdir } from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
-
-const require = createRequire(import.meta.url);
-const puppeteer = require(
-  require.resolve("puppeteer-core", {
-    paths: [path.resolve("node_modules/.pnpm/puppeteer-core@24.43.1/node_modules")],
-  }),
-);
+import puppeteer from "puppeteer-core";
 
 const label = process.argv[2] ?? "current";
 const base = process.argv[3] ?? "http://localhost:4321";

@@ -1,43 +1,52 @@
-# 旅先の小話｜下書き22本
+# 旅する雑学｜下書き22本
 
-2026年10月18日作成。同日、本文をです・ます調へ統一。**全22本をTomokichi DiaryのCMSに下書き保存済み。公開・公開予約は行っていません。**
+2026年10月18日作成。同日、本文をです・ます調へ統一。2026年10月19日、全22本を加筆してCMSへ再保存。**全22本をTomokichi DiaryのCMSに下書き保存済み。公開・公開予約は行っていません。**
 
-シリーズ管理: [旅先の小話](https://admin.tomokichidiary.com/#/series/01a14ada-3597-7a7b-aaad-b37c319b87f0)
+シリーズ管理: [旅する雑学](https://admin.tomokichidiary.com/#/series/01a14ada-3597-7a7b-aaad-b37c319b87f0)
 
-[企画・編集方針 v1.0](./EDITORIAL-POLICY-v1.0.md) / [2026-10-18 情報精査](./FACT-CHECK-2026-10-18.md)
+[企画・編集方針 v1.1](./EDITORIAL-POLICY-v1.1.md)（[初版](./EDITORIAL-POLICY-v1.0.md)） / [2026-10-18 情報精査](./FACT-CHECK-2026-10-18.md)
 
-#001、#002の公開順は確定。#003以降は仮順です。本文はです・ます調で統一し、写真・出典URLを除き398〜436字。各記事のfrontmatterに出典、訪問記録、写真候補、編集上の確認事項があります。CMS本文には出典リンクと旅行記への導線を含めています。
+#001、#002の公開順は確定。#003以降は仮順です。本文はです・ます調で統一し、写真・出典・Markdown記号・空白を除き1,045〜1,205字。歴史的背景、具体的な仕組み、現地で見るポイントを補い、各2〜3個の小見出しを付けました。各記事のfrontmatterに出典、訪問記録、写真候補、編集上の確認事項があります。CMS本文には出典リンクと旅行記への導線を含めています。
 
-19本は本人の既存写真を本文に使用し、17点の画像URLすべてで配信を確認しました。カバー画像は未選定です。#008、#013、#018には本文画像を入れず、本人写真の選定待ちです。#018の供物そのものの観察記録は本人確認が必要です。
+2026年10月21日、本文中の写真の位置を調整し、ブルーモスクの内外観を含む本人写真9枚を追加。20本に本文写真を使用しています。カバー画像は未選定です。#008、#018は該当する本人写真の選定待ちです。#018の供物そのものの観察記録は本人確認が必要です。
 
-全記事をシリーズへ紐付け、地域と「発見」の体験タグを設定。収益化は広告なし、公開予定日時は未設定です。保存後の一覧は下書き22本、予約0本、公開中の記事数は作業前後とも115本でした。
+全記事をシリーズへ紐付け、地域と「発見」の体験タグを設定。収益化は広告なし、公開予定日時は未設定です。2026年10月18日保存時の一覧は下書き22本、予約0本、公開中の記事数は作業前後とも115本でした。
+
+2026年10月19日の保存検証: 22本すべてで保存後に管理画面を再読み込みし、写真を保持したCMS本文と加筆原稿の一致、下書き状態を確認しました。シリーズ名の候補は「旅先のなぜ」「景色の裏ばなし」「旅する雑学」。2026年10月21日に「旅する雑学」へ改名しました。
 
 ## 原稿とCMS
 
 | No. | 原稿                                                                                             | 国・地域                     | 本文字数 | CMS                                                                                        |
 | --- | ------------------------------------------------------------------------------------------------ | ---------------------------- | -------: | ------------------------------------------------------------------------------------------ |
-| 001 | [エッフェル塔は、建設当時は反対されていた？](./001-eiffel-tower-protest.md)                      | フランス・パリ               |      435 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ad7-9ce3-77ed-bd30-828c8aa82e71) |
-| 002 | [サントリーニ島の家は、なぜ白い？](./002-santorini-white-houses.md)                              | ギリシャ・サントリーニ島     |      427 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adc-a138-7234-8451-5a223028a727) |
-| 003 | [ギザの大ピラミッドは、昔は白く輝いていた？](./003-pyramid-white-casing.md)                      | エジプト・ギザ               |      403 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-150d-7953-98a0-57def386800d) |
-| 004 | [アブシンベル神殿の奥を、年に2回、朝日が照らす？](./004-abu-simbel-sunlight.md)                  | エジプト・アブシンベル       |      409 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-378f-7ab1-add3-19c3f254532a) |
-| 005 | [巨大なアブシンベル神殿は、引っ越ししていた？](./005-abu-simbel-relocation.md)                   | エジプト・アブシンベル       |      422 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-5a08-72b0-9b14-6f9867b92a67) |
-| 006 | [パルテノン神殿の彫刻は、昔はカラフルだった？](./006-parthenon-colours.md)                       | ギリシャ・アテネ             |      416 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-7c93-752b-811a-d65f31d2818c) |
-| 007 | [サントリーニ島の独特な形は、火山が生み出した？](./007-santorini-caldera.md)                     | ギリシャ・サントリーニ島     |      410 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-9f15-70d6-b93d-90d4a94846a7) |
-| 008 | [バルセロナの交差点は、なぜ角が斜めになっている？](./008-barcelona-corners.md)                   | スペイン・バルセロナ         |      413 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-83a7-75d9-830d-f94f3967621d) |
-| 009 | [サグラダ・ファミリアは、見る面によって物語が違う？](./009-sagrada-familia-facades.md)           | スペイン・バルセロナ         |      428 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-a607-7cb6-906f-e13f06a9ce5d) |
-| 010 | [パリの広場に、エジプトから運ばれたオベリスクがある？](./010-paris-luxor-obelisk.md)             | フランス・パリ               |      426 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-c8f3-7d32-8258-e9befcd1640d) |
-| 011 | [凱旋門の下では、毎晩、炎をよみがえらせる儀式がある？](./011-arc-de-triomphe-flame.md)           | フランス・パリ               |      407 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-eb2e-7fae-b672-e0e1d7399ec7) |
-| 012 | [カッパドキアの奇妙な岩は、どうやってできた？](./012-cappadocia-rocks.md)                        | トルコ・カッパドキア         |      403 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-572b-7c5b-af5a-78e3343ae159) |
-| 013 | [ブルーモスクは、なぜ「ブルー」と呼ばれる？](./013-blue-mosque.md)                               | トルコ・イスタンブール       |      427 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-79be-7d11-b4fa-6bb5bbf524d3) |
-| 014 | [ジャイプルが「ピンクシティ」と呼ばれる理由は？](./014-jaipur-pink-city.md)                      | インド・ジャイプル           |      408 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-9c9a-79f7-a45b-b9af755f496f) |
-| 015 | [タージ・マハルの中央から外れた棺は、誰のもの？](./015-taj-mahal-cenotaph.md)                    | インド・アグラ               |      418 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-bf24-7036-9ab4-e0f355a1de71) |
-| 016 | [上海の外灘には、なぜヨーロッパ風の建物が並ぶ？](./016-shanghai-bund.md)                         | 中国・上海                   |      417 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-572d-76c0-bc8f-e598cae37e68) |
-| 017 | [ワット・アルンの塔には、陶磁器のかけらが使われている？](./017-wat-arun-porcelain.md)            | タイ・バンコク               |      398 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-79cb-74dc-8a7b-1796c22c4643) |
-| 018 | [バリ島の道端に置かれた、小さな花のお供え物は何？](./018-bali-canang-sari.md)                    | インドネシア・バリ島         |      436 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-9c3f-7a22-99e6-9d9e2acc4a61) |
-| 019 | [タージ・マハルは、亡くなった妻のために建てられた？](./019-taj-mahal-mumtaz.md)                  | インド・アグラ               |      425 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-beae-7c9a-987d-2b151511ce0e) |
-| 020 | [ペトロナスツインタワーの形には、イスラム文化が隠されている？](./020-petronas-islamic-design.md) | マレーシア・クアラルンプール |      398 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-24c4-739d-96f3-73f481f6abf8) |
-| 021 | [マーライオンは、なぜ上半身がライオンで下半身が魚なのか？](./021-merlion-origin.md)              | シンガポール                 |      412 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-47a6-7496-b1ae-88ded112b2b5) |
-| 022 | [マリーナベイの水は、実は淡水になっている？](./022-marina-bay-freshwater.md)                     | シンガポール                 |      406 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-6aad-7c4d-82dc-99094ee5d19d) |
+| 001 | [エッフェル塔は、建設当時は反対されていた？](./001-eiffel-tower-protest.md)                      | フランス・パリ               |     1099 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ad7-9ce3-77ed-bd30-828c8aa82e71) |
+| 002 | [サントリーニ島の家は、なぜ白い？](./002-santorini-white-houses.md)                              | ギリシャ・サントリーニ島     |     1103 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adc-a138-7234-8451-5a223028a727) |
+| 003 | [ギザの大ピラミッドは、昔は白く輝いていた？](./003-pyramid-white-casing.md)                      | エジプト・ギザ               |     1074 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-150d-7953-98a0-57def386800d) |
+| 004 | [アブシンベル神殿の奥を、年に2回、朝日が照らす？](./004-abu-simbel-sunlight.md)                  | エジプト・アブシンベル       |     1045 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-378f-7ab1-add3-19c3f254532a) |
+| 005 | [巨大なアブシンベル神殿は、引っ越ししていた？](./005-abu-simbel-relocation.md)                   | エジプト・アブシンベル       |     1095 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-5a08-72b0-9b14-6f9867b92a67) |
+| 006 | [パルテノン神殿の彫刻は、昔はカラフルだった？](./006-parthenon-colours.md)                       | ギリシャ・アテネ             |     1103 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-7c93-752b-811a-d65f31d2818c) |
+| 007 | [サントリーニ島の独特な形は、火山が生み出した？](./007-santorini-caldera.md)                     | ギリシャ・サントリーニ島     |     1077 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14add-9f15-70d6-b93d-90d4a94846a7) |
+| 008 | [バルセロナの交差点は、なぜ角が斜めになっている？](./008-barcelona-corners.md)                   | スペイン・バルセロナ         |     1046 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-83a7-75d9-830d-f94f3967621d) |
+| 009 | [サグラダ・ファミリアは、見る面によって物語が違う？](./009-sagrada-familia-facades.md)           | スペイン・バルセロナ         |     1118 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-a607-7cb6-906f-e13f06a9ce5d) |
+| 010 | [パリの広場に、エジプトから運ばれたオベリスクがある？](./010-paris-luxor-obelisk.md)             | フランス・パリ               |     1144 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-c8f3-7d32-8258-e9befcd1640d) |
+| 011 | [凱旋門の下では、毎晩、炎をよみがえらせる儀式がある？](./011-arc-de-triomphe-flame.md)           | フランス・パリ               |     1152 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ade-eb2e-7fae-b672-e0e1d7399ec7) |
+| 012 | [カッパドキアの奇妙な岩は、どうやってできた？](./012-cappadocia-rocks.md)                        | トルコ・カッパドキア         |     1166 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-572b-7c5b-af5a-78e3343ae159) |
+| 013 | [ブルーモスクは、なぜ「ブルー」と呼ばれる？](./013-blue-mosque.md)                               | トルコ・イスタンブール       |     1120 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-79be-7d11-b4fa-6bb5bbf524d3) |
+| 014 | [ジャイプルが「ピンクシティ」と呼ばれる理由は？](./014-jaipur-pink-city.md)                      | インド・ジャイプル           |     1170 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-9c9a-79f7-a45b-b9af755f496f) |
+| 015 | [タージ・マハルの中央から外れた棺は、誰のもの？](./015-taj-mahal-cenotaph.md)                    | インド・アグラ               |     1136 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14adf-bf24-7036-9ab4-e0f355a1de71) |
+| 016 | [上海の外灘には、なぜヨーロッパ風の建物が並ぶ？](./016-shanghai-bund.md)                         | 中国・上海                   |     1189 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-572d-76c0-bc8f-e598cae37e68) |
+| 017 | [ワット・アルンの塔には、陶磁器のかけらが使われている？](./017-wat-arun-porcelain.md)            | タイ・バンコク               |     1205 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-79cb-74dc-8a7b-1796c22c4643) |
+| 018 | [バリ島の道端に置かれた、小さな花のお供え物は何？](./018-bali-canang-sari.md)                    | インドネシア・バリ島         |     1170 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-9c3f-7a22-99e6-9d9e2acc4a61) |
+| 019 | [タージ・マハルは、亡くなった妻のために建てられた？](./019-taj-mahal-mumtaz.md)                  | インド・アグラ               |     1188 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae0-beae-7c9a-987d-2b151511ce0e) |
+| 020 | [ペトロナスツインタワーの形には、イスラム文化が隠されている？](./020-petronas-islamic-design.md) | マレーシア・クアラルンプール |     1190 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-24c4-739d-96f3-73f481f6abf8) |
+| 021 | [マーライオンは、なぜ上半身がライオンで下半身が魚なのか？](./021-merlion-origin.md)              | シンガポール                 |     1175 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-47a6-7496-b1ae-88ded112b2b5) |
+| 022 | [マリーナベイの水は、実は淡水になっている？](./022-marina-bay-freshwater.md)                     | シンガポール                 |     1164 | [下書き](https://admin.tomokichidiary.com/#/articles/01a14ae1-6aad-7c4d-82dc-99094ee5d19d) |
+
+## 加筆時に反映した表現修正
+
+- #020: 元の旅行記に直接ない「高さがとにかく印象的だった」という本人の感想を外し、確認済みのKLCC外観見学から入る構成に変更。
+- #021: 主要像を「小さな像」とする表現を削除。魚の来歴とライオンの伝説を分けて説明。
+- #004・#009・#013: 補足の一次資料をfrontmatterとCMSの参考資料へ追加。
+- 加筆時点では#008・#013・#018の写真選定と、#018の本人の供物観察記録が未確認でした。2026年10月21日に#013の本人写真を選定済み。#018の目撃談は追加していません。
 
 ## 公開前の確認メモ
 
@@ -105,7 +114,7 @@
 
 ### #013 ブルーモスクは、なぜ「ブルー」と呼ばれる？
 
-- モスク内部の訪問は旅行記で確認。使える本人写真は公開前に選定する。
+- モスク内部の訪問は旅行記で確認。2026年10月21日、本人の内装・外観写真を照合し本文に追加。
 - タイル枚数は資料間に差があるため、具体的な枚数は本文に入れない。
 
 ### #014 ジャイプルが「ピンクシティ」と呼ばれる理由は？
@@ -155,3 +164,5 @@
 - 湾周辺の訪問を確認。マリーナ・バラージへ本人が行ったとは書かない。
 - シンガポールの海全体を淡水とせず、堰の内側にあるマリーナ貯水池を対象にする。
 - 貯水池の水を直接飲めるという説明はしない。
+
+2026年10月21日の全記事推敲については[点検記録](../editorial-review-2026-10-21/README.md)を参照。ローカル原稿も本文写真・出典を含めてCMSの推敲案と同期しました。

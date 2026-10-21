@@ -10,33 +10,29 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - "@cloudflare/build-output-utils@0.8.4"
-  - "@cloudflare/codemods@0.3.0"
-  - "@cloudflare/config@0.22.0"
-  - "@cloudflare/runtime-types@0.1.6"
-  - "@cloudflare/workerd-darwin-64@1.20260930.2"
-  - "@cloudflare/workerd-darwin-arm64@1.20260930.2"
-  - "@cloudflare/workerd-linux-64@1.20260930.2"
-  - "@cloudflare/workerd-linux-arm64@1.20260930.2"
-  - "@cloudflare/workerd-windows-64@1.20260930.2"
-  - cf@1.0.0-beta.7
-  - miniflare@5.20260930.0-alpha
-  - workerd@1.20260930.2
-  - wrangler@4.145.0
+  - cf@1.0.0-beta.20
 
 overrides:
   # Lighthouse's i18n pulls intl-messageformat, which needs tslib 2 helpers;
   # an older transitive tslib makes every performance audit error out.
   tslib: ^2.8.1
-  # GHSA advisories 1158506 / 1158507 (array-limit bypass, isBuffer DoS) are
-  # fixed in 6.16.0. express 5 (MCP SDK) already allows it; express 4, reached
-  # only through @lhci/cli, pins ~6.15 and is lifted here with it.
-  qs: ^6.16.0
   # Same-major lifts for advisories published 2026-09: fast-uri (ajv in the MCP
-  # SDK), undici (astro's unifont; wrangler's miniflare), sharp (miniflare) and
-  # ip-address (@lhci/cli's proxy agent).
+  # SDK), undici (astro's unifont; wrangler's miniflare) and sharp (miniflare).
   fast-uri@3: ^3.1.8
   undici@8: ^8.10.2
   undici@7: ^7.29.1
-  sharp@0: ^0.35.4
-  ip-address@10: ^10.5.1
+  sharp@0: ^0.35.5
+  # Same-major lifts for advisories published 2026-10: the MCP SDK (ext-apps
+  # still allows the vulnerable 2.0; agents pins it exactly, so agents itself is
+  # raised to 0.28.1 in apps/mcp-server), hono (@hono/node-server),
+  # proxy-addr (express), http-cache-semantics (astro) and the lint tooling's
+  # brace-expansion, source-map-js and postcss-selector-parser.
+  "@modelcontextprotocol/sdk@1": ^1.32.1
+  "@modelcontextprotocol/client@2": ^2.3.1
+  "@modelcontextprotocol/server@2": ^2.3.1
+  hono@4: ^4.13.11
+  proxy-addr@2: ^2.0.8
+  http-cache-semantics@4: ^4.2.1
+  brace-expansion@5: ^5.0.12
+  source-map-js@1: ^1.2.2
+  postcss-selector-parser@7: ^7.1.6

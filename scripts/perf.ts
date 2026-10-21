@@ -1,6 +1,11 @@
-import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { run, tail } from "./lib/run.js";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { extname, join, normalize } from "node:path";
+import { gzipSync } from "node:zlib";
+import { launch } from "chrome-launcher";
+import lighthouse, { desktopConfig } from "lighthouse";
 import type { Finding } from "./lib/report.js";
 import { report } from "./lib/built-site.js";
 
@@ -32,22 +37,109 @@ interface LighthouseReport {
   audits: Record<string, { numericValue?: number; score?: number | null }>;
 }
 
-const findings: Finding[] = [];
+/** `lighthouserc.json` keeps the Lighthouse CI shape; only these fields are read. */
+interface PerfConfig {
+  ci: {
+    collect: {
+      staticDistDir: string;
+      numberOfRuns: number;
+      url: string[];
+      settings: { chromeFlags: string };
+    };
+  };
+}
 
-if (!existsSync(join(process.cwd(), "apps", "web", "dist", "index.html"))) {
+const findings: Finding[] = [];
+const { collect } = (JSON.parse(readFileSync("lighthouserc.json", "utf8")) as PerfConfig).ci;
+const DIST = join(process.cwd(), collect.staticDistDir);
+
+if (!existsSync(join(DIST, "index.html"))) {
   process.stdout.write(`${JSON.stringify({ skipped: true, reason: "site not built" })}\n`);
   process.exit(0);
 }
 
-rmSync(OUT_DIR, { recursive: true, force: true });
-const outcome = await run("pnpm", ["exec", "lhci", "autorun", "--config=lighthouserc.json"]);
+const CONTENT_TYPES: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".gif": "image/gif",
+  ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
+  ".xml": "application/xml",
+  ".txt": "text/plain; charset=utf-8",
+};
 
-const reports = existsSync(OUT_DIR)
-  ? readdirSync(OUT_DIR)
-      .filter((name) => name.endsWith(".json") && name !== "manifest.json")
-      .map((name) => JSON.parse(readFileSync(join(OUT_DIR, name), "utf8")) as LighthouseReport)
-      .filter((candidate) => candidate.categories !== undefined)
-  : [];
+/** Already-compressed formats; everything else is gzipped like the CDN does. */
+const PRECOMPRESSED = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".woff2"]);
+
+/**
+ * The built site served the way Lighthouse CI's `staticDistDir` did (gzip
+ * included), so byte weights stay comparable with earlier baselines.
+ */
+const server = createServer((request, response) => {
+  const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
+  const relative = normalize(pathname.endsWith("/") ? `${pathname}index.html` : pathname);
+  readFile(join(DIST, relative)).then(
+    (body) => {
+      const type = CONTENT_TYPES[extname(relative)] ?? "application/octet-stream";
+      const gzip =
+        !PRECOMPRESSED.has(extname(relative)) &&
+        /\bgzip\b/.test(String(request.headers["accept-encoding"] ?? ""));
+      response.writeHead(200, {
+        "content-type": type,
+        ...(gzip ? { "content-encoding": "gzip", vary: "accept-encoding" } : {}),
+      });
+      response.end(gzip ? gzipSync(body) : body);
+    },
+    () => {
+      response.writeHead(404).end();
+    },
+  );
+});
+await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+const origin = `http://localhost:${(server.address() as AddressInfo).port}`;
+
+rmSync(OUT_DIR, { recursive: true, force: true });
+mkdirSync(OUT_DIR, { recursive: true });
+
+const reports: LighthouseReport[] = [];
+let failure: string | undefined;
+try {
+  for (const configured of collect.url) {
+    const url = new URL(new URL(configured).pathname, origin).href;
+    for (let attempt = 1; attempt <= collect.numberOfRuns; attempt++) {
+      // A fresh Chrome per run, as Lighthouse CI did, so caches and warmed-up
+      // processes never carry from one run into the next.
+      const chrome = await launch({ chromeFlags: collect.settings.chromeFlags.split(" ") });
+      try {
+        const result = await lighthouse(
+          url,
+          { port: chrome.port, output: "html", logLevel: "error" },
+          desktopConfig,
+        );
+        if (result === undefined) continue;
+        const name = `${new URL(url).pathname.replace(/^\/|\.html$/g, "").replace(/\//g, "_") || "index"}-${attempt}`;
+        writeFileSync(join(OUT_DIR, `${name}.report.json`), JSON.stringify(result.lhr));
+        writeFileSync(join(OUT_DIR, `${name}.report.html`), result.report as string);
+        reports.push(result.lhr as LighthouseReport);
+      } finally {
+        chrome.kill();
+      }
+    }
+  }
+} catch (error) {
+  failure = error instanceof Error ? error.message : String(error);
+} finally {
+  server.close();
+}
 
 if (reports.length === 0) {
   // Chrome is not available everywhere; a missing run is reported as skipped
@@ -57,9 +149,8 @@ if (reports.length === 0) {
   process.stdout.write(
     `${JSON.stringify({
       skipped: true,
-      reason: outcome.ok
-        ? "no lighthouse reports produced"
-        : `lighthouse failed: ${tail(outcome.output, 4)}`,
+      reason:
+        failure === undefined ? "no lighthouse reports produced" : `lighthouse failed: ${failure}`,
     })}\n`,
   );
   process.exit(0);
