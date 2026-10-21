@@ -1,0 +1,33 @@
+version: 1
+project:
+  name: tomokichi-diary
+  type: other
+  owner: tomokichi
+  platforms: [web, api, mcp]
+repository:
+  default_branch: main
+mcp:
+  allowed:
+    - tomokichi-dev-rules-mcp
+checks:
+  required:
+    - format
+    - lint
+    - typecheck
+    - test
+    - build
+    - secret-scan
+    - dependency-scan
+    - diff
+security:
+  level: application
+testing:
+  level: application
+maturity: production
+production:
+  enabled: true
+deployment:
+  type: cloudflare
+  environments:
+    - preview
+    - production
