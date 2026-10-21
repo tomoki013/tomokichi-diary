@@ -1,0 +1,50 @@
+{
+  "kind": "historical-production-observations-not-controlled-AB",
+  "collectedAt": "2026-10-21",
+  "repository": "tomoki013/tomokichi-diary",
+  "notes": [
+    "No-op scheduled runs are excluded.",
+    "Workflow creation to completion is a lower bound for administrator end-to-end time; request timestamps were not recorded in these artifacts.",
+    "The two runs had identical image counts and cache keys, but runner load and trigger circumstances differ."
+  ],
+  "runs": [
+    {
+      "id": 39539104613,
+      "url": "https://github.com/tomoki013/tomokichi-diary/actions/runs/39539104613",
+      "createdAt": "2026-10-21T03:32:06Z",
+      "runnerStartedAt": "2026-10-21T03:32:11Z",
+      "recordedCompleteAt": "2026-10-21T03:38:15Z",
+      "workflowToCompleteSeconds": 369,
+      "queueSeconds": 5,
+      "installSeconds": 15,
+      "pullSeconds": 23,
+      "mediaAndBuildAndChecksSeconds": 296,
+      "imageGenerationApproxSeconds": 285,
+      "syncAndDeploySeconds": 17,
+      "derivatives": 2222,
+      "cached": 1760,
+      "regenerated": 462,
+      "uploaded": 0,
+      "cacheSaved": false
+    },
+    {
+      "id": 39464456013,
+      "url": "https://github.com/tomoki013/tomokichi-diary/actions/runs/39464456013",
+      "createdAt": "2026-10-20T17:15:18Z",
+      "runnerStartedAt": "2026-10-20T17:18:04Z",
+      "recordedCompleteAt": "2026-10-20T17:27:48Z",
+      "workflowToCompleteSeconds": 750,
+      "queueSeconds": 166,
+      "installSeconds": 12,
+      "pullSeconds": 17,
+      "mediaAndBuildAndChecksSeconds": 516,
+      "imageGenerationApproxSeconds": 500,
+      "syncAndDeploySeconds": 20,
+      "derivatives": 2222,
+      "cached": 1760,
+      "regenerated": 462,
+      "uploaded": 0,
+      "cacheSaved": false
+    }
+  ]
+}

@@ -1,7 +1,16 @@
-import { existsSync, mkdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import sharp from "sharp";
 import { loadSnapshot } from "./lib/built-site.js";
+import type { ContentSnapshot } from "@tomokichi/data";
+import {
+  concurrent,
+  downloadRemoteMedia,
+  downloadDerivative,
+  listRemoteMedia,
+  matchesRemote,
+  type RemoteMediaObject,
+} from "./lib/media-remote.js";
 
 /**
  * Builds the responsive derivatives that the site references.
@@ -38,11 +47,9 @@ export interface Derivative {
   format: Format;
 }
 
-export function plannedDerivatives(): Derivative[] {
-  return loadSnapshot()
-    .media.filter(
-      (asset) => asset.mimeType.startsWith("image/") && asset.mimeType !== "image/svg+xml",
-    )
+export function plannedDerivatives(snapshot: ContentSnapshot = loadSnapshot()): Derivative[] {
+  const plans = snapshot.media
+    .filter((asset) => asset.mimeType.startsWith("image/") && asset.mimeType !== "image/svg+xml")
     .flatMap((asset) =>
       widthsFor(asset.width).flatMap((width) =>
         FORMATS.map((format) => {
@@ -57,6 +64,7 @@ export function plannedDerivatives(): Derivative[] {
         }),
       ),
     );
+  return [...new Map(plans.map((job) => [job.key, job])).values()];
 }
 
 async function encode(job: Derivative): Promise<void> {
@@ -67,38 +75,88 @@ async function encode(job: Derivative): Promise<void> {
     .toFile(job.file);
 }
 
-if (process.argv[1]?.endsWith("media-build.ts") === true) {
-  const jobs = plannedDerivatives().filter((job) => existsSync(job.source));
-  const missing = plannedDerivatives().length - jobs.length;
+async function valid(job: Derivative) {
+  try {
+    const metadata = await sharp(job.file).metadata();
+    return (
+      metadata.width !== undefined &&
+      metadata.width > 0 &&
+      metadata.width <= job.width &&
+      (job.format === "avif" ? metadata.format === "heif" : metadata.format === "webp")
+    );
+  } catch {
+    return false;
+  }
+}
 
-  const queue = jobs.filter((job) => !existsSync(job.file));
-  const cached = jobs.length - queue.length;
+export async function buildMedia(
+  jobs = plannedDerivatives(),
+  options: {
+    remote?: boolean;
+    full?: boolean;
+    inventory?: () => Promise<Map<string, RemoteMediaObject>>;
+    download?: typeof downloadRemoteMedia;
+  } = {},
+) {
+  const inventory =
+    options.remote && !options.full ? await (options.inventory ?? listRemoteMedia)() : new Map();
+  let cached = 0;
+  let restored = 0;
+  let generated = 0;
   const failures: string[] = [];
-
-  const worker = async (): Promise<void> => {
-    for (let job = queue.shift(); job !== undefined; job = queue.shift()) {
-      try {
-        await encode(job);
-      } catch (error) {
-        // A single unreadable original must not fail the build; it simply
-        // keeps serving without derivatives.
-        failures.push(`${job.source}: ${String(error)}`);
+  await concurrent(jobs, CONCURRENCY, async (job) => {
+    try {
+      const object = inventory.get(job.key);
+      if (
+        !options.full &&
+        existsSync(job.file) &&
+        (await valid(job)) &&
+        (!object || matchesRemote(readFileSync(job.file), object))
+      ) {
+        cached++;
+        return;
       }
+      if (object) {
+        const body = options.download
+          ? await options.download(job.key)
+          : await downloadDerivative(object);
+        if (body && matchesRemote(body, object)) {
+          mkdirSync(dirname(job.file), { recursive: true });
+          writeFileSync(job.file, body);
+          if (await valid(job)) {
+            restored++;
+            return;
+          }
+        }
+      }
+      await encode(job);
+      generated++;
+    } catch (error) {
+      failures.push(`${job.source}: ${String(error)}`);
     }
-  };
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  });
 
   const bytes = jobs
     .filter((job) => existsSync(job.file))
     .reduce((sum, job) => sum + statSync(job.file).size, 0);
-  const originals = plannedDerivatives()
+  const originals = jobs
     .map((job) => job.source)
     .filter((source, index, all) => all.indexOf(source) === index && existsSync(source))
     .reduce((sum, source) => sum + statSync(source).size, 0);
 
   process.stdout.write(
-    `✓ media ${jobs.length} derivatives (${cached} cached) | ${(bytes / 1024 / 1024).toFixed(1)}MB from ${(originals / 1024 / 1024).toFixed(1)}MB of originals\n`,
+    `✓ media ${jobs.length} derivatives (${cached} cached) | ${restored} restored | ${generated} generated | hit rate ${jobs.length ? (((cached + restored) / jobs.length) * 100).toFixed(1) : 100}% | ${(bytes / 1024 / 1024).toFixed(1)}MB from ${(originals / 1024 / 1024).toFixed(1)}MB of originals\n`,
   );
-  if (missing > 0) process.stdout.write(`  ${missing} derivative(s) skipped: source missing\n`);
   for (const failure of failures.slice(0, 5)) process.stdout.write(`  ${failure}\n`);
+  if (failures.length) throw new Error(`${failures.length} media derivatives failed`);
+  return { total: jobs.length, cached, restored, generated };
+}
+
+if (process.argv[1]?.endsWith("media-build.ts") === true) {
+  const metrics = await buildMedia(undefined, {
+    remote: process.env.MEDIA_BUILD_REMOTE === "1",
+    full: process.env.MEDIA_BUILD_FULL === "1",
+  });
+  mkdirSync(".artifacts", { recursive: true });
+  writeFileSync(".artifacts/media-build.json", JSON.stringify(metrics));
 }

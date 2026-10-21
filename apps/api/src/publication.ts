@@ -2,6 +2,11 @@ import { Hono } from "hono";
 import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
 import type { AppEnv } from "./app.js";
 import type { Env } from "./env.js";
+import type {
+  SitePublicationStatus,
+  PublicationStage,
+  PublicationStageResult,
+} from "@tomokichi/contracts";
 
 export interface PublicationRow {
   requested_id: string | null;
@@ -12,8 +17,12 @@ export interface PublicationRow {
   failed_id: string | null;
   error: string | null;
   build_url: string | null;
+  active_build_id: string | null;
 }
-export async function publicationStatus(db: SqlDatabase, configured: boolean) {
+export async function publicationStatus(
+  db: SqlDatabase,
+  configured: boolean,
+): Promise<SitePublicationStatus> {
   const row = await db
     .prepare("SELECT * FROM site_publication WHERE id = 'site'")
     .first<PublicationRow>();
@@ -27,12 +36,48 @@ export async function publicationStatus(db: SqlDatabase, configured: boolean) {
           : row.building_id === row.requested_id
             ? "building"
             : "queued";
+  // An older build may still be running while the latest editor request waits.
+  // Never attach that build's progress, failure or log to the newer request.
+  const build =
+    row?.active_build_id && row.requested_id
+      ? await db
+          .prepare("SELECT * FROM publication_builds WHERE build_id = ? AND request_id = ?")
+          .bind(row.active_build_id, row.requested_id)
+          .first<{
+            build_id: string;
+            stage: PublicationStage;
+            started_at: string;
+            stage_started_at: string;
+            duration_ms: number | null;
+            error_code: string | null;
+            build_url: string | null;
+            stages: string;
+          }>()
+      : null;
+  const finished = state === "deployed" || state === "failed";
   return {
     state,
     configured,
+    requestId: row?.requested_id ?? null,
+    buildId: build?.build_id ?? null,
+    stage: build?.stage ?? null,
     requestedAt: row?.requested_at ?? null,
+    startedAt: build?.started_at ?? null,
+    stageStartedAt: build?.stage_started_at ?? null,
     deployedAt: row?.deployed_at ?? null,
-    buildUrl: row?.build_url ?? null,
+    durationMs: finished ? (build?.duration_ms ?? null) : null,
+    elapsedMs: row?.requested_at
+      ? finished
+        ? (build?.duration_ms ?? null)
+        : Math.max(0, Date.now() - Date.parse(row.requested_at))
+      : null,
+    stages: build
+      ? (JSON.parse(build.stages) as Partial<Record<PublicationStage, PublicationStageResult>>)
+      : {},
+    errorCode: state === "failed" ? (build?.error_code ?? "DISPATCH_FAILED") : null,
+    buildUrl:
+      build?.build_url ??
+      (row?.building_id === row?.requested_id ? (row?.build_url ?? null) : null),
     error: row?.failed_id === row?.requested_id ? (row?.error ?? null) : null,
   };
 }

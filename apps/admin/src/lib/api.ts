@@ -208,14 +208,7 @@ export interface CollectionInput {
   sortOrder: number;
 }
 
-export interface PublicationStatus {
-  state: "deployed" | "queued" | "building" | "failed" | "unconfigured";
-  configured: boolean;
-  requestedAt: string | null;
-  deployedAt: string | null;
-  buildUrl: string | null;
-  error: string | null;
-}
+export type PublicationStatus = import("@tomokichi/contracts").SitePublicationStatus;
 
 export const api = {
   monetization: () => request<MonetizationOverviewDto>("/admin/monetization"),
