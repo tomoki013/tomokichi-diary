@@ -1314,3 +1314,33 @@ fieldset {
 .preview .apple-music figcaption {
   font-size: 0.8125rem;
 }
+
+.publication-status {
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+.publication-status > a,
+.publication-status > button {
+  display: inline-block;
+  margin: 0.4rem 0.8rem 0.4rem 0;
+}
+.publication-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+}
+.publication-stages [data-state="completed"] {
+  color: var(--ok);
+}
+.publication-stages [data-state="running"] {
+  font-weight: 700;
+}
+.publication-stages [data-state="pending"] {
+  color: var(--ink-faint);
+}
+.publication-stages [data-state="failed"] {
+  color: var(--danger);
+}

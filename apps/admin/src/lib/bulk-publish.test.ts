@@ -4,6 +4,15 @@ import { ApiError, type PublicationStatus } from "./api";
 import { canSelectForPublication, publishSelection } from "./bulk-publish";
 
 const queued: PublicationStatus = {
+  requestId: "request",
+  buildId: null,
+  stage: null,
+  startedAt: null,
+  stageStartedAt: null,
+  durationMs: null,
+  elapsedMs: null,
+  errorCode: null,
+  stages: {},
   state: "queued",
   configured: true,
   requestedAt: null,

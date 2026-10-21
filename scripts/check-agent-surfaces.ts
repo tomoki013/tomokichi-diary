@@ -76,7 +76,7 @@ for (const knowledge of snapshot.articleKnowledge) {
 }
 
 const appBundle = join(root, "apps", "mcp-server", "ui-dist", "index.html");
-if (!existsSync(appBundle))
+if (!process.argv.includes("--web-only") && !existsSync(appBundle))
   findings.push({
     code: "AGENT_SURFACE_FAILED",
     target: appBundle,
