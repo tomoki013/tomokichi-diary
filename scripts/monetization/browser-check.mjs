@@ -1,10 +1,8 @@
 /* oxlint-disable eslint/no-shadow -- Browser evaluate callbacks are serialized into a separate JavaScript realm. */
 /** Requires the isolated web build and browser-server.ts. All ads/analytics are intercepted. */
-import { createRequire } from "node:module";
 import { mkdirSync, writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
-const require = createRequire(import.meta.url);
-const puppeteer = createRequire(require.resolve("@lhci/cli/package.json"))("puppeteer-core");
+import puppeteer from "puppeteer-core";
 const browser = await puppeteer.launch({
   executablePath:
     process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",

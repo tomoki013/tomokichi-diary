@@ -13,20 +13,20 @@
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^1.2.3",
-    "@modelcontextprotocol/ext-apps": "^2.0.0",
-    "@modelcontextprotocol/server": "^2.0.0",
+    "@modelcontextprotocol/ext-apps": "^2.0.3",
+    "@modelcontextprotocol/server": "^2.3.1",
     "@tomokichi/application": "workspace:*",
     "@tomokichi/infra-d1": "workspace:*",
-    "agents": "^0.24.0",
+    "agents": "^0.28.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260925.1",
-    "cf": "1.0.0-beta.12",
+    "cf": "1.0.0-beta.20",
     "tsx": "^4.20.6",
-    "vite": "^8.3.1",
-    "vite-plugin-singlefile": "^2.3.0",
-    "vitest": "^5.0.2",
-    "wrangler": "^4.148.0"
+    "vite": "^8.3.4",
+    "vite-plugin-singlefile": "^2.3.4",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.151.3"
   }
 }

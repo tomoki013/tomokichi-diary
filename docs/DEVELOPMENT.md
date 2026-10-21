@@ -6,7 +6,7 @@
 
 | もの     | 版                           | 出所                                                        |
 | -------- | ---------------------------- | ----------------------------------------------------------- |
-| Node     | **24.18.0**                  | `mise.toml`（`latest` は使わない、`ARCHITECTURE.md`）       |
+| Node     | **26.12.1**                  | `mise.toml`（`latest` は使わない、`ARCHITECTURE.md`）       |
 | pnpm     | **11.11.0**                  | `mise.toml` / `package.json` `packageManager`               |
 | mise     | 任意だが推奨                 | `mise install` で上の 2 つが揃う。CI も `jdx/mise-action`   |
 | Chrome   | Lighthouse 用（`pnpm perf`） | ローカルの `Google Chrome.app`。headless で起動             |
@@ -81,16 +81,16 @@ cf は beta（`1.0.0-beta.*` を exact で固定）。Vite / Astro を cf のフ
 
 ## Debug
 
-| 目的                | 手段                                                                                                                        |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| CI が落ちた理由     | `.artifacts/ci/summary.json`（stable code）。`OPERATIONS.md` がコード別の runbook                                           |
-| 1 ページの SEO      | `pnpm build` → `pnpm check:seo`。`SEO_*` コードで報告                                                                       |
-| 旧 URL が解決するか | `pnpm check:routes`（ローカル dist）、`pnpm verify:live <base>`（デプロイ先）                                               |
-| リンク切れ          | `pnpm check:links`                                                                                                          |
-| Lighthouse          | `pnpm perf`（desktop）。mobile で見るなら `node node_modules/.pnpm/lighthouse@*/node_modules/lighthouse/cli/index.js <url>` |
-| WebMCP              | ブラウザで記事を開き `document.modelContext`。`pnpm check:agents` が生成物を検査                                            |
-| MCP 本番            | `pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev`                                                      |
-| 型                  | `pnpm typecheck` + `pnpm --filter @tomokichi/web exec astro check`（後者は CI 外。2026-09-21 に 0 error）                   |
+| 目的                | 手段                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| CI が落ちた理由     | `.artifacts/ci/summary.json`（stable code）。`OPERATIONS.md` がコード別の runbook                         |
+| 1 ページの SEO      | `pnpm build` → `pnpm check:seo`。`SEO_*` コードで報告                                                     |
+| 旧 URL が解決するか | `pnpm check:routes`（ローカル dist）、`pnpm verify:live <base>`（デプロイ先）                             |
+| リンク切れ          | `pnpm check:links`                                                                                        |
+| Lighthouse          | `pnpm perf`（desktop）。mobile で見るなら `pnpm exec lighthouse <url>`                                    |
+| WebMCP              | ブラウザで記事を開き `document.modelContext`。`pnpm check:agents` が生成物を検査                          |
+| MCP 本番            | `pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev`                                    |
+| 型                  | `pnpm typecheck` + `pnpm --filter @tomokichi/web exec astro check`（後者は CI 外。2026-09-21 に 0 error） |
 
 ## Common commands
 

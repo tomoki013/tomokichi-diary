@@ -135,7 +135,7 @@ reader-v1を維持し、新配置は `article-placement-v2` に分離します�
 - ダークモードのカード／選択タブのコントラストと、モバイルの比較表の横スクロールを目視確認・修正。写真付き／テキスト／予約カードのpreviewは管理画面限定です。
 - `git diff --check` 通過。Gitの `export/`、URL、記事本文の実データ、本番D1、AdSense設定、secretsに変更はありません。
 
-再現する場合、先に通常buildで管理画面を生成し、別terminalで `pnpm exec tsx scripts/monetization/browser-server.mts` を起動します。このharnessはlocalhost:4178のみにbindし、インメモリDB・テスト認証・公開処理stubを使用します。公開Webのfixtureを生成してから、Web appの実行ディレクトリで `CONTENT_EXPORT_DIR=<絶対パス> pnpm exec astro build --outDir <絶対パス>/.artifacts/monetization/web` を実行し、リポジトリrootでbrowser-checkを起動してください。Chromeと、既存Lighthouse依存のpuppeteer-coreを使用します。browser結果とスクリーンショットは `.artifacts/monetization/` に保存されます。
+再現する場合、先に通常buildで管理画面を生成し、別terminalで `pnpm exec tsx scripts/monetization/browser-server.mts` を起動します。このharnessはlocalhost:4178のみにbindし、インメモリDB・テスト認証・公開処理stubを使用します。公開Webのfixtureを生成してから、Web appの実行ディレクトリで `CONTENT_EXPORT_DIR=<絶対パス> pnpm exec astro build --outDir <絶対パス>/.artifacts/monetization/web` を実行し、リポジトリrootでbrowser-checkを起動してください。Chromeと、ルートのdevDependencyのpuppeteer-coreを使用します。browser結果とスクリーンショットは `.artifacts/monetization/` に保存されます。
 
 この段階では第三者PRレビューと本番リリースは未実施です。本番反映前にレビューを行い、通常のmigration・配信フローを使用してください。新しいAdSenseユニットを作成する場合と、実Google CMP／同意別の確認は所有者の手動操作です。
 

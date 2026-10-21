@@ -1,7 +1,7 @@
 # Runtime versions are pinned so local development and CI resolve identically.
 # `latest` is intentionally not used (see docs/ARCHITECTURE.md).
 [tools]
-node = "24.18.0"
+node = "26.12.1"
 pnpm = "11.11.0"
 
 [settings]
