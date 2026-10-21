@@ -16,6 +16,9 @@ import { articleTrail } from "../lib/navigation";
 import { mediaUrl, seoConfig } from "../lib/site";
 import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
+import ArticleTocInline from "../components/ArticleTocInline.astro";
+import { articleHeadings } from "../lib/article-headings";
+import { getEntry } from "astro:content";
 import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
 import CopyLinkButton from "../components/CopyLinkButton.astro";
@@ -34,6 +37,9 @@ interface Props {
 
 const { view, route } = Astro.props;
 const { article, revision, cover, author } = view;
+const headings = articleHeadings(
+  (await getEntry("articles", article.slug))?.rendered?.html ?? null,
+);
 const adPlan = buildAdPlan(
   snapshot.monetization?.find((c) => c.articleId === article.id),
   revision.bodyMarkdown,
@@ -191,7 +197,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
               </dd>
             </div>
           )}
-          <div>
+          <div class="article-overview__reading">
             <dt>読了</dt>
             <dd>約{readingMinutes}分</dd>
           </div>
@@ -217,6 +223,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             ))}
           </div>
         )}
+        <ArticleTocInline headings={headings} />
         {knowledge && <ArticleKnowledge view={knowledge} />}
         {affiliates.length > 0 && !view.embeds.some((embed) => embed.type === "notice") && (
           <p class="notice">

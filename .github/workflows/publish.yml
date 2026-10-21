@@ -8,8 +8,14 @@ on:
         description: "Publication request (the build always takes the latest D1 state)"
         required: false
         type: string
+      full_media:
+        description: "Regenerate and resync all derivatives for recovery"
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: deploy
   cancel-in-progress: false
@@ -23,55 +29,123 @@ jobs:
       PUBLIC_INDEXABLE: "true"
     steps:
       - uses: actions/checkout@v7
+      - name: Record runner preparation
+        run: |
+          mkdir -p .artifacts
+          date -u +%FT%TZ > .artifacts/runner-ready.txt
+          echo '| Step | Result | Duration |' >> "$GITHUB_STEP_SUMMARY"
+          echo '| --- | --- | --- |' >> "$GITHUB_STEP_SUMMARY"
       - uses: jdx/mise-action@v4
-      - run: pnpm install --frozen-lockfile
+      - name: Locate dependency store
+        id: store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v6
         with:
-          path: .cache/images
-          key: image-derivatives-${{ hashFiles('export/media.json') }}
-          restore-keys: image-derivatives-
-      - name: Publish validated articles whose scheduled time has arrived
+          path: ${{ steps.store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install dependencies
+        run: node scripts/publication-step.mjs install - local pnpm install --frozen-lockfile
+      # A fresh key is saved after every content build. The restore prefix is
+      # the encoder recipe/toolchain, never Git's (potentially stale) media export.
+      - uses: actions/cache/restore@v6
+        with:
+          path: |
+            .cache/images
+            .cache/publication-originals
+          key: publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-
+      - name: Publish validated due articles
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec tsx scripts/content-release.ts due
-      - name: Pull the latest published revisions and uploaded photos
+        run: node scripts/publication-step.mjs due - remote pnpm exec tsx scripts/content-release.ts due
+      - name: Pull latest published D1 snapshot and originals
         id: content
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec tsx scripts/content-release.ts pull
-      - if: steps.content.outputs.changed == 'true'
-        run: pnpm media:build && pnpm build && pnpm check:routes && pnpm check:seo && pnpm check:links && pnpm check:knowledge
-      - if: steps.content.outputs.changed == 'true'
-        uses: actions/cache/restore@v6
-        with:
-          path: .cache/r2-manifest.json
-          key: r2-manifest-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: r2-manifest-
-      - name: Publish photos, site, and MCP
+        run: node scripts/publication-step.mjs pull - remote pnpm exec tsx scripts/content-release.ts pull ${{ inputs.full_media && '--force' || '' }}
+      - name: Optimize required images
         if: steps.content.outputs.changed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm media:sync && pnpm deploy:web && pnpm deploy:mcp
+          MEDIA_BUILD_REMOTE: "1"
+          MEDIA_BUILD_FULL: ${{ inputs.full_media && '1' || '' }}
+        run: node scripts/publication-step.mjs images images remote pnpm media:build
+      - name: Build static web only
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/publication-step.mjs web-build site local pnpm --filter @tomokichi/web build
+      - name: Build MCP only when deployed inputs differ
+        if: steps.content.outputs.changed == 'true' && steps.content.outputs.mcp_changed == 'true'
+        run: node scripts/publication-step.mjs mcp-build - local pnpm --filter @tomokichi/mcp-server build:content
+      - name: Validate routes SEO links and Knowledge
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/publication-step.mjs checks checks local pnpm content:check
+      - name: Verify and sync R2 objects
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MEDIA_SYNC_FULL: ${{ inputs.full_media && '1' || '' }}
+        run: node scripts/publication-step.mjs r2-sync deploy remote pnpm media:sync
+      - name: Add execution-specific publication marker
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/publication-step.mjs marker - remote pnpm exec tsx scripts/content-release.ts marker
+      - name: Deploy changed MCP
+        if: steps.content.outputs.changed == 'true' && steps.content.outputs.mcp_changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node scripts/publication-step.mjs mcp-deploy - remote pnpm --filter @tomokichi/mcp-server deploy:built
+          pnpm exec tsx scripts/content-release.ts mcp-deployed
+      - name: Deploy static web
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/publication-step.mjs web-deploy deploy remote pnpm deploy:web
+      - name: Confirm this execution is served
+        if: steps.content.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/publication-step.mjs verify verify remote pnpm exec tsx scripts/content-release.ts verify
       - name: Record successful publication
         if: steps.content.outputs.changed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec tsx scripts/content-release.ts complete
-      - name: Record a failed publication
-        if: failure()
+        run: node scripts/publication-step.mjs complete - remote pnpm exec tsx scripts/content-release.ts complete
+      - name: Record failed publication
+        if: failure() || cancelled()
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: pnpm exec tsx scripts/content-release.ts fail
-      - if: always() && hashFiles('.cache/r2-manifest.json') != ''
+      - name: Save expanded media cache
+        if: always() && steps.content.outputs.changed == 'true'
         uses: actions/cache/save@v6
         with:
-          path: .cache/r2-manifest.json
-          key: r2-manifest-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/images
+            .cache/publication-originals
+          key: publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-${{ steps.content.outputs.media_key }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Collect publication timings
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/publication-report.mjs
       - if: always()
         uses: actions/upload-artifact@v7
         with:

@@ -494,76 +494,6 @@
   }
 
   /* Table of contents ------------------------------------------------ */
-  /* The one at the top of the body: a quiet card that is read in passing,
-     not a second navigation bar. Numbered like the sidebar list. */
-  .inline-toc {
-    margin-block: var(--space-lg);
-    padding: var(--space-sm) var(--space-md);
-    border: 1px solid var(--line);
-    border-inline-start: 3px solid var(--accent);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-  }
-
-  .inline-toc__title {
-    margin: 0 0 var(--space-xs);
-    color: var(--ink);
-    font-size: var(--step-small);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-  }
-
-  .prose .inline-toc ol {
-    gap: 0.15rem;
-    margin: 0;
-    padding: 0;
-    counter-reset: inline-toc;
-  }
-
-  .prose .inline-toc li {
-    list-style: none;
-    font-size: 0.94rem;
-    line-height: 1.7;
-  }
-
-  /* Hanging indent, so a wrapped title lines up under its own text. */
-  .prose .inline-toc li[data-level="2"] {
-    padding-inline-start: 1.6em;
-    text-indent: -1.6em;
-    counter-increment: inline-toc;
-  }
-
-  .prose .inline-toc li[data-level="2"]::before {
-    content: counter(inline-toc) ".";
-    display: inline-block;
-    min-width: 1.6em;
-    color: var(--accent);
-    font-family: var(--font-label);
-  }
-
-  .prose .inline-toc li[data-level="3"] {
-    padding-inline-start: 2.6em;
-    text-indent: -1em;
-    font-size: var(--step-small);
-  }
-
-  .prose .inline-toc li[data-level="3"]::before {
-    content: "–";
-    display: inline-block;
-    min-width: 1em;
-    color: var(--ink-faint);
-  }
-
-  .prose .inline-toc a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .prose .inline-toc a:hover {
-    color: var(--accent-strong);
-    text-decoration: underline;
-  }
-
   .article-toc {
     display: grid;
     gap: 0.6rem;
@@ -605,8 +535,15 @@
     letter-spacing: 0.14em;
   }
 
-  .article-toc__heading h2 {
+  .article-toc__heading :is(h2, p) {
     font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  /* At the top of the body it is part of the reading column, not a panel
+     beside it. */
+  .article-toc--inline {
+    margin-bottom: var(--space-md);
   }
 
   .article-toc ol,
@@ -1350,10 +1287,45 @@
     .collection-detail__shade {
       background: linear-gradient(0deg, rgb(16 14 11 / 92%) 25%, rgb(16 14 11 / 58%) 100%);
     }
+    /* On a phone the header ran about a screen and a half before the first
+       line of the story. The author card (one author, every page) and the
+       second reading-time figure go; the facts and the like button share a
+       row; tags scroll sideways instead of stacking three rows deep. */
+    .article-hero__content {
+      gap: 0.4rem;
+      padding: var(--space-sm) 0;
+    }
+    .article-hero__media img {
+      height: 12rem;
+    }
     .article-intro {
-      grid-template-columns: minmax(0, 1fr);
-      justify-items: start;
-      gap: var(--space-sm);
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-xs) var(--space-sm);
+      margin-top: var(--space-sm);
+      padding: 0.6rem var(--space-sm);
+    }
+    .article-author,
+    .article-overview > .article-overview__reading {
+      display: none;
+    }
+    .article-layout {
+      margin-top: var(--space-sm);
+    }
+    .article-taxonomy {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      margin-bottom: var(--space-sm);
+      scrollbar-width: none;
+    }
+    .article-taxonomy::-webkit-scrollbar {
+      display: none;
+    }
+    .article-taxonomy :is(a, span) {
+      flex: none;
+      white-space: nowrap;
+    }
+    .article-content {
+      padding-top: var(--space-md);
     }
     .post-navigation {
       grid-template-columns: minmax(0, 1fr);

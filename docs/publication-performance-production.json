@@ -1,0 +1,214 @@
+{
+  "measuredAt": "2026-10-22T01:06:22+09:00",
+  "implementationCommit": "7860f107078360d0b95bb16e7cf9bbda20d734ef",
+  "sourceHash": "0320e22ce7bc354d8e5da5057f2c21d20d6f6df2ea4903c3cdfa3ffea1452e52",
+  "sourceHashFormat": "publication-inputs-v1",
+  "publishedArticles": 123,
+  "mediaAssets": 462,
+  "method": {
+    "production": "Unchanged-content republication against the same D1 published data, shared deploy lock, no article/revision changes. Two successful legacy attempts versus three new warm-cache runs.",
+    "comparableInterval": "GitHub job started_at to publication success log (legacy) / record-publication finishedAt (new). Includes runner setup, install, remote reads, images, builds, validation, deployment and recording; excludes pre-job queue.",
+    "e2e": "New request requestedAt to execution marker verifiedAt. Baseline requests include dispatch/operator delay and one recovered network failure, so a before/after request-E2E median is not asserted.",
+    "casesAE": "A–E, 3 local repetitions per case, are recorded separately in publication-performance-local.json. Production A–E article mutations were not performed."
+  },
+  "baselineSamples": [
+    {
+      "runId": 39624831894,
+      "attempt": 1,
+      "startedAt": "2026-10-21T15:21:10Z",
+      "recordedAt": "2026-10-21T15:31:20.4872630Z",
+      "jobToRecordedMs": 610487
+    },
+    {
+      "runId": 39626558830,
+      "attempt": 2,
+      "startedAt": "2026-10-21T15:34:20Z",
+      "recordedAt": "2026-10-21T15:44:53.9684990Z",
+      "jobToRecordedMs": 633968
+    }
+  ],
+  "warmSamples": [
+    {
+      "runId": 39630210657,
+      "requestToVerifiedMs": 85923,
+      "jobToRecordedMs": 80268,
+      "workflowToRecordedMs": 87268,
+      "imagesMs": 6712,
+      "webMs": 4471,
+      "deployMs": 9929,
+      "queueMs": 3000,
+      "requestId": "cc20ba31-2933-4167-a475-70c6ad5401b7",
+      "buildId": "958d82d5-d7c2-422d-8e72-577d2c31e1fd",
+      "media": {
+        "total": 2222,
+        "cached": 2222,
+        "restored": 0,
+        "generated": 0
+      },
+      "sync": {
+        "total": 2684,
+        "uploaded": 0,
+        "unchanged": 2684
+      },
+      "mcpBuild": "skipped",
+      "mcpDeploy": "skipped",
+      "pnpmInstallMs": 14580,
+      "d1Ms": 9446,
+      "r2SyncMs": 6860
+    },
+    {
+      "runId": 39630529350,
+      "requestToVerifiedMs": 105630,
+      "jobToRecordedMs": 98679,
+      "workflowToRecordedMs": 107679,
+      "imagesMs": 6138,
+      "webMs": 6460,
+      "deployMs": 17042,
+      "queueMs": 4000,
+      "requestId": "454b860b-b25e-4981-bdca-645546d07d22",
+      "buildId": "0e90f243-288d-41de-8d2a-b9b28f4fa3d0",
+      "media": {
+        "total": 2222,
+        "cached": 2222,
+        "restored": 0,
+        "generated": 0
+      },
+      "sync": {
+        "total": 2684,
+        "uploaded": 0,
+        "unchanged": 2684
+      },
+      "mcpBuild": "skipped",
+      "mcpDeploy": "skipped",
+      "pnpmInstallMs": 16135,
+      "d1Ms": 7539,
+      "r2SyncMs": 7959
+    },
+    {
+      "runId": 39630986694,
+      "requestToVerifiedMs": 84866,
+      "jobToRecordedMs": 78048,
+      "workflowToRecordedMs": 86048,
+      "imagesMs": 6734,
+      "webMs": 4779,
+      "deployMs": 11197,
+      "queueMs": 4000,
+      "requestId": "c8d21ba3-9cdc-407d-9422-f7a23ee672eb",
+      "buildId": "989e8705-2848-45d0-a1c5-2500b5f31f46",
+      "media": {
+        "total": 2222,
+        "cached": 2222,
+        "restored": 0,
+        "generated": 0
+      },
+      "sync": {
+        "total": 2684,
+        "uploaded": 0,
+        "unchanged": 2684
+      },
+      "mcpBuild": "skipped",
+      "mcpDeploy": "skipped",
+      "pnpmInstallMs": 11200,
+      "d1Ms": 9989,
+      "r2SyncMs": 6667
+    }
+  ],
+  "coldCache": {
+    "runId": 39629048406,
+    "requestToVerifiedMs": 270895,
+    "imagesMs": 157760,
+    "media": {
+      "total": 2222,
+      "cached": 0,
+      "restored": 2222,
+      "generated": 0
+    },
+    "sync": {
+      "total": 2684,
+      "uploaded": 0,
+      "unchanged": 2684
+    },
+    "mcpBuild": "required, initial deployed fingerprint",
+    "mcpDeploy": "required, initial deployed fingerprint"
+  },
+  "summary": {
+    "beforeJobMedianMs": 622227.5,
+    "afterJobMedianMs": 80268,
+    "jobReductionPercent": 87.09989513481806,
+    "afterRequestToVerifiedMedianMs": 85923,
+    "afterImagesMedianMs": 6712,
+    "afterWebMedianMs": 4779,
+    "afterDeployMedianMs": 11197
+  },
+  "failures": [
+    {
+      "runId": 39626558830,
+      "attempt": 1,
+      "stage": "pull",
+      "cause": "ECONNRESET before deployment",
+      "recoveredBy": "Successful attempt 2 of the same workflow run; excluded from successful-attempt timing median and retained as a failure observation."
+    }
+  ],
+  "actionsCounts": {
+    "baselinePublishWorkflowRuns": 2,
+    "baselinePublishAttempts": 3,
+    "newCacheLossWorkflowRuns": 1,
+    "newWarmWorkflowRuns": 3,
+    "mainCodeWorkflowRuns": 1,
+    "successfulWarmDispatchesPerSample": 1,
+    "additionalObservedScheduledPublishRuns": 0,
+    "maintenanceWorkflowRuns": 10,
+    "maintenanceNotes": "Separate tooling to inspect, apply migration, and request unchanged-content releases. One precondition rejection deliberately preserved an existing pending request; no articles were changed.",
+    "pullRequestValidationRuns": 1,
+    "totalTaskWorkflowRuns": 18,
+    "totalTaskWorkflowAttempts": 19,
+    "countScope": "The 18 task-specific workflows listed here; unrelated repository workflows are excluded. Legacy retry increments an attempt without creating a new run."
+  },
+  "verification": {
+    "pullRequest": 104,
+    "prCiRun": 39625816599,
+    "mainCiRun": 39628698159,
+    "tests": 557,
+    "legacyParity": "114 matched, 0 mismatched",
+    "seo": "189/189",
+    "internalLinks": 6030,
+    "imageReferences": 13914,
+    "performanceScore": 99,
+    "liveCutover": "10/10",
+    "mcp": "protocol 2025-11-25, 4 tools, firsthand query and MCP App resource passed",
+    "publicByteComparison": {
+      "home": true,
+      "sampleArticle": true,
+      "rss": true,
+      "robots": true,
+      "sitemap": "168 URLs unchanged; lastmod only"
+    }
+  },
+  "productionSetup": {
+    "migration": {
+      "runId": 39627137844,
+      "name": "0020_publication_progress.sql",
+      "appliedAt": "2026-10-21T15:45:46.849Z",
+      "conclusion": "success",
+      "sourceHash": "0320e22ce7bc354d8e5da5057f2c21d20d6f6df2ea4903c3cdfa3ffea1452e52"
+    },
+    "VERIFY_URL": "https://tomokichidiary.com",
+    "manualStepsRemaining": [],
+    "verificationBranch": "removed; maintenance workflow was never merged into main",
+    "finalInspectionRun": 39631419424,
+    "finalState": {
+      "requestedId": "c8d21ba3-9cdc-407d-9422-f7a23ee672eb",
+      "deployedId": "c8d21ba3-9cdc-407d-9422-f7a23ee672eb",
+      "buildId": "989e8705-2848-45d0-a1c5-2500b5f31f46",
+      "deployedAt": "2026-10-21T16:02:49.805Z",
+      "buildingId": null,
+      "pendingMigrations": [],
+      "sourceHash": "0320e22ce7bc354d8e5da5057f2c21d20d6f6df2ea4903c3cdfa3ffea1452e52"
+    }
+  },
+  "remaining": {
+    "e2eAE": "Controlled production A–E request-to-confirmation medians remain unmeasured; do not claim the 30% target from the job interval alone.",
+    "latency": "GitHub queue/setup, dependency installation, D1 reads and Cloudflare deployment vary independently of image cache hits.",
+    "recovery": "Admin retry / scheduled pending-request recovery retained; full_media regenerates and resynchronizes media when necessary."
+  }
+}

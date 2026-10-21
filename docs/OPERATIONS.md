@@ -27,36 +27,44 @@ read them), attached only to the steps that talk to Cloudflare.
   variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
   at the Worker. The production build must also carry
   `PUBLIC_INDEXABLE=true`; all other builds are noindex by default.
-- Media uploads are skipped by `.cache/r2-manifest.json`, which the job keeps
-  in the Actions cache (`r2-manifest-<run>`; each run restores the newest one
-  and saves its own, even when a later step fails). A deploy with no media
-  changes spends seconds on "Publish media to object storage"; the first run
-  without a cache entry re-sends everything (~20 min).
-- The manifest only knows what was sent, not what is in the bucket. If objects
-  were deleted or overwritten in R2 by hand, run the workflow on `main` with
-  **full_media_sync** ticked (it sets `MEDIA_SYNC_FULL=1`, which ignores the
-  manifest and re-sends every object, then saves a fresh one). Deleting every
-  `r2-manifest-` entry under Actions → Caches has the same effect on the next
-  deploy. Locally: `MEDIA_SYNC_FULL=1 pnpm media:sync`, or delete the file.
+- Media sync always lists the **current R2 origin** and compares object key, size,
+  ETag (byte digest) and Cache-Control. `.cache/r2-manifest.json` is diagnostic
+  only; losing it does not resend the bucket. Missing objects are repaired even
+  when an old manifest claims they exist. API/list failures stop publication.
+- The derivative/original Actions cache uses the encoder/toolchain and a unique
+  run/attempt key. Every build saves the expanded cache; no Git `export/media.json`
+  value is used as the production snapshot identity. Missing local derivatives
+  are restored from R2 and checked before encoding. Widths, AVIF/WebP quality,
+  existing object URLs and cache lifetimes are preserved.
+- For recovery, dispatch **Publish content** on `main` with **full_media** checked
+  to regenerate and resync all required images. `CI` still accepts
+  **full_media_sync** to resend objects. For a complete local rebuild, set
+  `MEDIA_BUILD_FULL=1` and `MEDIA_SYNC_FULL=1`. Normal cache loss needs no manual
+  action. No recovery command deletes objects or unpublishes articles.
 
-The same sequence can still be run by hand from a developer machine where
-both cf (`cf auth login`) and wrangler (`wrangler login`, for `media:sync`) are
-authenticated. Start from a clean `main` with a green
-`pnpm run ci`. The order matters and is
-the same one the site has always shipped in:
+Article publication builds only Astro, plus MCP when its embedded catalog or
+code/dependency/configuration inputs differ from the last successful MCP deployment.
+MCP deploy reuses its UI bundle; API, admin and CHAGEE builds are reserved for code CI.
+The existing route, SEO, link and Knowledge validators remain gates; publication
+also checks WebMCP surfaces. Read-only validators run concurrently against the same
+immutable generated site. Code CI still runs all existing checks and application builds.
 
-```bash
-PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm media:build && \
-PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true pnpm build && \
-pnpm media:sync && \
-pnpm db:migrate && \
-pnpm deploy:api && \
-pnpm deploy:mcp && \
-pnpm deploy:web && \
-VITE_API_URL=https://api.tomokichidiary.com pnpm --filter @tomokichi/admin build && \
-pnpm deploy:admin && \
-pnpm verify:live https://tomokichidiary.com
-```
+Use the GitHub workflows for production release: both hold the shared `deploy`
+concurrency lock, pull published D1 data, sync/verify R2, deploy, then confirm a
+unique `/__publication/<build-id>.json` marker from the public Worker **before**
+recording success. The marker identifies request, execution and snapshot, has
+no article content, and is served with no-store/noindex. A stale/missing marker
+causes failure and retry rather than a false completion. Do not run deployments
+from an unlocked local shell while Actions is publishing.
+
+Publication credentials stay in the production environment. The step wrapper
+removes Cloudflare/GitHub tokens from local build/validation child processes;
+package installation receives no Cloudflare credentials. The existing token must
+allow R2 object listing/reading as well as writes. The final timings collector
+uses Actions read permission and a short-lived GitHub token, never the admin token.
+
+See [publication-pipeline.md](publication-pipeline.md) for migration order,
+request/execution fencing, recovery, measured results and remaining production checks.
 
 ### Domain cutover preflight
 
