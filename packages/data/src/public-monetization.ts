@@ -44,6 +44,10 @@ export function publicMonetizationOnly(
           unit(p.adUnit)
             ? { key: p.key, position: p.position, adUnit: p.adUnit }
             : null,
+        inline:
+          c.enabled && c.inline && key(c.inline.key) && unit(c.inline.adUnit)
+            ? { key: c.inline.key, adUnit: c.inline.adUnit }
+            : null,
         experiment:
           c.enabled &&
           e &&

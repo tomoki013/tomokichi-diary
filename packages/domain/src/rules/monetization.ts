@@ -73,8 +73,12 @@ export function validateMonetization(
   if (config.maxAds !== 1) reject("広告は1記事1枠までです");
   if (config.placements.filter((p) => p.kind === "affiliate" && p.status === "ready").length > 2)
     reject("アフィリエイト紹介は1記事2件までです");
+  // One fixed ad after the story, plus at most one the author places in the body.
   const ads = config.placements.filter((p) => p.kind === "adsense" && p.status === "ready");
-  if (ads.length > 1) reject("有効なAdSense配置は1枠までです");
+  if (ads.filter((p) => p.position === "article_end").length > 1)
+    reject("記事末尾のAdSense配置は1枠までです");
+  if (ads.filter((p) => p.position === "marker").length > 1)
+    reject("本文中のAdSense配置は1枠までです");
   for (const p of config.placements) {
     if (p.kind === "adsense" && !settings.adUnits.some((u) => u.id === p.adUnit))
       reject("未登録の広告ユニットです");
@@ -109,18 +113,28 @@ export function publicMonetization(
 ): PublicMonetization {
   const enabled =
     settings.adsEnabled && config.adsEnabled && ["ads", "hybrid"].includes(config.mode);
-  const selected = config.placements.find((p) => p.kind === "adsense" && p.status === "ready");
+  const ready = config.placements.filter((p) => p.kind === "adsense" && p.status === "ready");
+  const selected = ready[0];
   const stopped = config.experimentId && experiment?.status === "stopped";
+  // An article in a placement experiment keeps its single A/B ad. Every other
+  // article always has the article-end ad and may add one in the body.
+  const end = ready.find((p) => p.position === "article_end");
+  const body = ready.find((p) => p.position === "marker");
+  const fixed = !config.experimentId;
   const placement =
-    stopped && enabled
-      ? { key: "article-end", position: "article_end" as const, adUnit: experiment.adUnitA }
-      : !enabled
-        ? null
-        : !settings.placementsEnabled
-          ? { key: "article-end", position: "article_end" as const, adUnit: "7152502134" }
-          : selected
-            ? { key: selected.key, position: selected.position, adUnit: selected.adUnit }
-            : null;
+    fixed && enabled
+      ? settings.placementsEnabled && end
+        ? { key: end.key, position: "article_end" as const, adUnit: end.adUnit }
+        : { key: "article-end", position: "article_end" as const, adUnit: "7152502134" }
+      : stopped && enabled
+        ? { key: "article-end", position: "article_end" as const, adUnit: experiment.adUnitA }
+        : !enabled
+          ? null
+          : !settings.placementsEnabled
+            ? { key: "article-end", position: "article_end" as const, adUnit: "7152502134" }
+            : selected
+              ? { key: selected.key, position: selected.position, adUnit: selected.adUnit }
+              : null;
   const affiliates =
     AFFILIATE_ENABLED &&
     AFFILIATE_RELEASE_APPROVED &&
@@ -157,6 +171,10 @@ export function publicMonetization(
     articleId,
     enabled,
     placement,
+    inline:
+      fixed && enabled && settings.placementsEnabled && body
+        ? { key: body.key, adUnit: body.adUnit }
+        : null,
     experiment:
       enabled &&
       settings.placementsEnabled &&

@@ -107,3 +107,38 @@ it("assigns each draw to one variant with approximate 50/50 and explicit boundar
     Array.from({ length: 1000 }, (_, i) => assignAdVariant(50, i / 1000)).filter((x) => x === "B"),
   ).toHaveLength(500);
 });
+it("allows the fixed end ad plus one body ad, but never two of either", () => {
+  const end = defaultArticleMonetization().placements[0]!;
+  const both = { ...config, placements: [end, ...config.placements] };
+  expect(validateMonetization(both, body, DEFAULT_MONETIZATION_SETTINGS)).toEqual([]);
+  const secondEnd = { ...end, key: "article-end-2" };
+  expect(
+    validateMonetization(
+      { ...both, placements: [...both.placements, secondEnd] },
+      body,
+      DEFAULT_MONETIZATION_SETTINGS,
+    ).map((e) => e.message),
+  ).toContain("記事末尾のAdSense配置は1枠までです");
+});
+it("publishes the end ad for every article and adds the body ad outside experiments", () => {
+  const settings = { ...DEFAULT_MONETIZATION_SETTINGS, placementsEnabled: true };
+  const end = defaultArticleMonetization().placements[0]!;
+  const bodyOnly = publicMonetization("a1", config, settings, null);
+  expect(bodyOnly.placement).toMatchObject({ position: "article_end", adUnit: "7152502134" });
+  expect(bodyOnly.inline).toEqual({ key: "stable-key", adUnit: "7152502134" });
+  const custom = { ...end, adUnit: "1234567890" };
+  expect(
+    publicMonetization(
+      "a1",
+      { ...config, placements: [custom, ...config.placements] },
+      settings,
+      null,
+    ).placement,
+  ).toMatchObject({ adUnit: "1234567890" });
+  // Without individual placements the body ad is not published.
+  expect(publicMonetization("a1", config, DEFAULT_MONETIZATION_SETTINGS, null).inline).toBeNull();
+  // An article in a placement experiment keeps its single A/B ad.
+  const inExperiment = publicMonetization("a1", { ...config, experimentId: "x" }, settings, null);
+  expect(inExperiment.placement).toMatchObject({ position: "marker" });
+  expect(inExperiment.inline).toBeNull();
+});
