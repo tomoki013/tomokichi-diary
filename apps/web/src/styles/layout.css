@@ -691,9 +691,20 @@
   }
 
   /* Footer ---------------------------------------------------------- */
+  /* A deeper slate than the shared dark panel, lit by a faint clay glow from
+     the top, with champagne hairlines: the closing frame should feel quieter
+     and richer than the content above it. */
   .site-footer {
+    --footer-gold: #dcbba9;
+    --footer-hairline: rgb(220 187 169 / 22%);
+    --footer-link: rgb(250 248 244 / 74%);
+
     margin-top: auto;
-    background: var(--surface-dark);
+    background:
+      radial-gradient(90% 38rem at 50% 0%, rgb(201 146 125 / 11%), transparent 70%),
+      linear-gradient(180deg, #232a2d 0%, #171b1d 100%);
+    background-color: #1d2326;
+    box-shadow: inset 0 1px 0 var(--footer-hairline);
     color: var(--on-dark);
   }
 
@@ -779,7 +790,7 @@
     width: 2.6rem;
     height: 1px;
     margin-top: 0.9rem;
-    background: var(--accent-on-dark);
+    background: var(--footer-gold);
   }
 
   /* Handwritten-style eyebrow shared by the band and the aside. */
@@ -788,7 +799,7 @@
     font-style: italic;
     font-size: 0.9rem;
     letter-spacing: 0.04em;
-    color: var(--accent-on-dark);
+    color: var(--footer-gold);
   }
 
   .site-footer__next-actions {
@@ -817,7 +828,7 @@
   .site-footer__cta .travel-icon {
     width: 1.05rem;
     height: 1.05rem;
-    color: var(--accent-on-dark);
+    color: var(--footer-gold);
   }
 
   .site-footer__cta:hover {
@@ -982,14 +993,15 @@
     font-family: var(--font-serif);
     font-size: 1.35rem;
     font-weight: 500;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
   }
 
   .site-footer__logo span {
     font-family: var(--font-label);
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    color: var(--on-dark-soft);
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--footer-gold);
   }
 
   .site-footer__logo::after {
@@ -997,7 +1009,7 @@
     width: 2.6rem;
     height: 1px;
     margin-block: 0.9rem 0.2rem;
-    background: var(--accent-on-dark);
+    background: var(--footer-gold);
   }
 
   .site-footer__tagline {
@@ -1022,9 +1034,9 @@
     place-items: center;
     width: 2.3rem;
     height: 2.3rem;
-    border: 1px solid rgb(247 243 234 / 18%);
+    border: 1px solid var(--footer-hairline);
     border-radius: 50%;
-    color: var(--on-dark-soft);
+    color: var(--footer-gold);
     transition:
       color var(--speed) var(--ease),
       border-color var(--speed) var(--ease),
@@ -1037,9 +1049,9 @@
   }
 
   .site-footer__social a:hover {
-    border-color: transparent;
-    background: var(--accent);
-    color: #fff;
+    border-color: var(--footer-gold);
+    background: rgb(220 187 169 / 8%);
+    color: var(--on-dark);
   }
 
   .site-footer__groups {
@@ -1052,9 +1064,9 @@
     margin-bottom: 0.9rem;
     color: var(--on-dark);
     font-family: var(--font-serif);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
   }
 
   .site-footer__groups h2::after {
@@ -1063,7 +1075,7 @@
     width: 1.8rem;
     height: 1px;
     margin-top: 0.55rem;
-    background: var(--accent-on-dark);
+    background: var(--footer-gold);
   }
 
   .site-footer__groups ul {
@@ -1074,14 +1086,19 @@
   .site-footer__groups a {
     display: inline-flex;
     padding-block: 0.3rem;
-    color: var(--on-dark-soft);
+    color: var(--footer-link);
     font-size: var(--step-small);
+    letter-spacing: 0.04em;
     text-decoration: none;
+    text-decoration-color: var(--footer-gold);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.4em;
     transition: color var(--speed) var(--ease);
   }
 
   .site-footer__groups a:hover {
-    color: #fff;
+    color: var(--on-dark);
+    text-decoration-line: underline;
   }
 
   /* Quiet closing line on the right, like a margin note. */
@@ -1096,7 +1113,7 @@
   .site-footer__aside .site-footer__script {
     font-size: 1.05rem;
     line-height: 1.5;
-    color: color-mix(in srgb, var(--accent-on-dark) 80%, transparent);
+    color: color-mix(in srgb, var(--footer-gold) 80%, transparent);
   }
 
   .site-footer__aside p:last-child {
@@ -1112,8 +1129,9 @@
     align-items: center;
     gap: var(--space-md);
     padding-top: var(--space-md);
-    border-top: 1px solid rgb(247 243 234 / 12%);
-    color: color-mix(in srgb, var(--on-dark-soft) 80%, transparent);
+    border-top: 1px solid var(--footer-hairline);
+    color: rgb(250 248 244 / 62%);
+    letter-spacing: 0.04em;
     font-size: var(--step-tiny);
   }
 
