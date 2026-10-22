@@ -22,9 +22,9 @@ it("keeps old exports at the original single end unit", () => {
     experiment: null,
   });
 });
-it("builds one requestable A/B pair only for the allowlisted article and provides build kill switches", () => {
+it("tests adding a body ad on top of the fixed end ad, only for the allowlisted article", () => {
   expect(buildAdPlan(config, body)).toMatchObject({
-    end: { variant: "A" },
+    end: { variant: "static", unit: "7152502134" },
     marker: { variant: "B", key: "answer-end" },
   });
   expect(buildAdPlan(config, body, { placements: true, experiments: false }).experiment).toBeNull();
@@ -33,20 +33,20 @@ it("builds one requestable A/B pair only for the allowlisted article and provide
   );
   expect(buildAdPlan({ ...config, articleId: "other" }, body).experiment).toBeNull();
 });
-it("fails closed on missing markers, duplicates, short body and injected units", () => {
+it("keeps only the end ad when an experiment cannot run: missing or duplicate markers, short body, injected units", () => {
   for (const markdown of [
     body.replace("{{monetization:answer-end}}", ""),
     body + "\n\n{{monetization:answer-end}}",
     "{{monetization:answer-end}}",
   ]) {
     const plan = buildAdPlan(config, markdown);
-    expect(plan.end).toBeNull();
+    expect(plan.end).toMatchObject({ unit: "7152502134", variant: "static" });
     expect(plan.marker).toBeNull();
+    expect(plan.experiment).toBeNull();
   }
   expect(
-    buildAdPlan({ ...config, experiment: { ...config.experiment!, adUnitA: "<script>" } }, body)
-      .end,
-  ).toBeNull();
+    buildAdPlan({ ...config, experiment: { ...config.experiment!, adUnitA: "<script>" } }, body),
+  ).toMatchObject({ end: { unit: "7152502134" }, marker: null, experiment: null });
   expect(buildAdPlan({ ...config, enabled: false }, body)).toMatchObject({
     end: null,
     marker: null,
@@ -61,7 +61,7 @@ it("builds an article-bound experiment on a second article without changing the 
     experiment: { ...config.experiment!, id: `placement-v1-${articleId}` },
   };
   expect(buildAdPlan(expanded, body)).toMatchObject({
-    end: { variant: "A" },
+    end: { variant: "static" },
     marker: { variant: "B" },
     experiment: { id: expanded.experiment.id },
   });

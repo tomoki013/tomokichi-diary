@@ -11,7 +11,7 @@ import {
 } from "@tomokichi/domain";
 export interface AdPlan {
   layout: "article-end-v1" | "article-placement-v2";
-  end: { unit: string; variant: "A" | "static" } | null;
+  end: { unit: string; variant: "static" } | null;
   marker: { key: string; unit: string; variant: "B" | "static" } | null;
   experiment: PublicMonetization["experiment"];
 }
@@ -38,15 +38,10 @@ export function buildAdPlan(
   };
   if (!config.enabled) return empty;
   if (!flags.placements || (config.experiment && !flags.experiments)) return legacy();
-  const experiment =
+  const candidate =
     flags.experiments && isAdExperimentForArticle(config.experiment?.id, config.articleId)
       ? config.experiment
       : null;
-  if (
-    experiment &&
-    (!Number.isInteger(experiment.shareB) || experiment.shareB < 10 || experiment.shareB > 90)
-  )
-    return empty;
   const markerFits = (p: { key: string; adUnit: string }): boolean =>
     validateMonetization(
       {
@@ -57,17 +52,25 @@ export function buildAdPlan(
       { ...DEFAULT_MONETIZATION_SETTINGS, adUnits: [{ id: p.adUnit, name: "published" }] },
     ).length === 0;
 
-  if (experiment) {
-    // Missing/duplicate marker never falls back to another position.
-    const b = { key: experiment.markerKey, adUnit: experiment.adUnitB };
-    if (!valid(b) || !/^\d{1,20}$/.test(experiment.adUnitA) || !markerFits(b)) return empty;
+  // An experiment tests adding a body ad: A keeps only the end ad, B adds
+  // the body ad. One that cannot run leaves the article on its end ad.
+  const experiment =
+    candidate &&
+    Number.isInteger(candidate.shareB) &&
+    candidate.shareB >= 10 &&
+    candidate.shareB <= 90 &&
+    /^\d{1,20}$/.test(candidate.adUnitA) &&
+    valid({ key: candidate.markerKey, adUnit: candidate.adUnitB }) &&
+    markerFits({ key: candidate.markerKey, adUnit: candidate.adUnitB })
+      ? candidate
+      : null;
+  if (experiment)
     return {
       ...empty,
-      end: { unit: experiment.adUnitA, variant: "A" },
-      marker: { key: b.key, unit: b.adUnit, variant: "B" },
+      end: { unit: experiment.adUnitA, variant: "static" },
+      marker: { key: experiment.markerKey, unit: experiment.adUnitB, variant: "B" },
       experiment,
     };
-  }
 
   // Every other article: the fixed article-end ad, plus at most one in the
   // body. Snapshots from before inline ads carried a body ad as `placement`.

@@ -713,7 +713,7 @@ function ExperimentEditor({
   };
   return (
     <Panel title="配置テスト">
-      <p>A: 記事末尾1枠 / B: 本文内1枠。割当は表示ごとに行い、識別子を保存しません。</p>
+      <p>A: 記事末尾のみ / B: 記事末尾＋本文中。割当は表示ごとに行い、識別子を保存しません。</p>
       <fieldset disabled={busy || value.status !== "draft"}>
         <label className="field">
           <span>対象記事</span>
