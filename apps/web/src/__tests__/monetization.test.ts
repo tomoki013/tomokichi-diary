@@ -101,3 +101,33 @@ it("renders approved affiliate positions independently of AdSense and rejects ba
     ),
   ).toEqual([]);
 });
+
+it("keeps the end ad on every article outside experiments and adds a valid body ad", () => {
+  const plain = { ...config, experiment: null };
+  expect(buildAdPlan({ ...plain, placement: null }, body)).toMatchObject({
+    layout: "article-end-v1",
+    end: { unit: "7152502134", variant: "static" },
+    marker: null,
+  });
+  expect(
+    buildAdPlan({ ...plain, inline: { key: "answer-end", adUnit: "1234567890" } }, body),
+  ).toMatchObject({
+    layout: "article-placement-v2",
+    end: { unit: "7152502134", variant: "static" },
+    marker: { key: "answer-end", unit: "1234567890", variant: "static" },
+  });
+  // A snapshot from before inline ads, with its one ad in the body, gains the end ad.
+  expect(
+    buildAdPlan(
+      { ...plain, placement: { key: "answer-end", position: "marker", adUnit: "1234567890" } },
+      body,
+    ),
+  ).toMatchObject({ end: { unit: "7152502134" }, marker: { key: "answer-end" } });
+  // A body ad that does not fit drops alone; the end ad stays.
+  expect(
+    buildAdPlan(
+      { ...plain, inline: { key: "answer-end", adUnit: "1234567890" } },
+      body.replace("{{monetization:answer-end}}", ""),
+    ),
+  ).toMatchObject({ end: { unit: "7152502134" }, marker: null });
+});

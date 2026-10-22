@@ -176,3 +176,18 @@ it("mounts only the selected variant before sending eligibility, including block
   expect(rejected.querySelector).not.toHaveBeenCalled();
   expect(vi.mocked(measureReader).mock.calls.filter(([m]) => m === "ad_eligible")).toHaveLength(1);
 });
+it("mounts both static slots when a page has an end ad and a body ad", async () => {
+  vi.mocked(measureReader).mockClear();
+  const { mountArticleAds } = await import("../lib/ads");
+  const body = fixture();
+  const end = fixture();
+  body.slot.dataset["variant"] = "static";
+  end.slot.dataset["variant"] = "static";
+  Object.assign(body.doc, {
+    documentElement: { dataset: {} },
+    querySelectorAll: () => [body.slot, end.slot],
+  });
+  mountArticleAds(body.doc, body.browser);
+  expect(body.slot.dataset["adMounted"]).toBe("1");
+  expect(end.slot.dataset["adMounted"]).toBe("1");
+});

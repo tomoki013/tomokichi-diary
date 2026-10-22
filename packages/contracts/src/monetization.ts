@@ -68,7 +68,10 @@ export interface PublicMonetization {
   affiliates?: PublicAffiliatePlacement[];
   articleId: string;
   enabled: boolean;
+  /** The article-end ad, or (experiments, and snapshots before inline ads) the one ad. */
   placement: { key: string; position: "article_end" | "marker"; adUnit: string } | null;
+  /** An in-body ad shown in addition to the article-end one. Absent in older snapshots. */
+  inline?: { key: string; adUnit: string } | null;
   experiment: {
     id: string;
     markerKey: string;

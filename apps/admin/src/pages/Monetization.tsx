@@ -259,7 +259,7 @@ function Settings({
         </label>
       ))}
       <p>
-        AdSenseは最大1枠。案件と記事の掲載設定を保存し、対象記事を公開すると反映されます。停止・リンク変更も対象記事の再公開が必要です。
+        AdSenseは記事末尾1枠（固定）＋本文中1枠まで。案件と記事の掲載設定を保存し、対象記事を公開すると反映されます。停止・リンク変更も対象記事の再公開が必要です。
       </p>
       {value.adUnits.map((u, i) => (
         <div className="monetization-row" key={unitKeys[i]}>

@@ -5,7 +5,7 @@ declare global {
   var googlefc: { callbackQueue?: (() => void)[]; showRevocationMessage?: () => void } | undefined;
 }
 
-/** One fixed ad after the story. Google handles the site's published CMP message. */
+/** One ad slot: after the story or in the body. Google handles the site's published CMP message. */
 export function mountArticleAd(
   slot: HTMLElement,
   doc: Document = document,
@@ -128,16 +128,16 @@ export function mountArticleAds(
 ): void {
   const variant = doc.documentElement.dataset["adVariant"] ?? "A";
   const slots = [...doc.querySelectorAll<HTMLElement>("[data-article-ad]")];
-  const selected = slots.find(
-    (slot) =>
-      !slot.dataset["variant"] ||
-      slot.dataset["variant"] === "static" ||
-      slot.dataset["variant"] === variant,
-  );
+  // A page shows its static slots (the end ad, and an optional body ad), or
+  // the one A/B alternative this visit was assigned.
+  const shown = (slot: HTMLElement): boolean =>
+    !slot.dataset["variant"] ||
+    slot.dataset["variant"] === "static" ||
+    slot.dataset["variant"] === variant;
   // AdSense push({}) discovers an unprocessed ins itself. Hidden alternatives
   // must leave the DOM before the loader can inspect them.
-  for (const slot of slots) if (slot !== selected) slot.remove();
-  if (selected) mountArticleAd(selected, doc, browser);
+  for (const slot of slots) if (!shown(slot)) slot.remove();
+  for (const slot of slots) if (shown(slot)) mountArticleAd(slot, doc, browser);
 }
 
 const loaders = new WeakMap<

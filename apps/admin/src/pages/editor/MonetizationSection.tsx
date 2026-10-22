@@ -105,7 +105,10 @@ function Loaded({
       ...c,
       placements: [
         ...c.placements.map((p) =>
-          kind === "adsense" && p.kind === "adsense" ? { ...p, status: "paused" as const } : p,
+          // The end ad stays; a new body ad replaces the previous one.
+          kind === "adsense" && p.kind === "adsense" && p.position === "marker"
+            ? { ...p, status: "paused" as const }
+            : p,
         ),
         {
           key,
@@ -152,7 +155,9 @@ function Loaded({
         />{" "}
         AdSenseを有効にする
       </label>
-      <p>最大広告枠数: 1</p>
+      <p className="muted">
+        AdSenseは記事末尾に1枠（固定）＋本文中に1枠まで（任意）。配置実験に参加中の記事はA/Bの1枠です。
+      </p>
       <label className="field">
         <span>配置実験への参加</span>
         <select
@@ -195,7 +200,7 @@ function Loaded({
           <span>スロット種別</span>
           <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}>
             <option value="affiliate">アフィリエイト紹介枠</option>
-            <option value="adsense">AdSense（既存の枠を一時停止）</option>
+            <option value="adsense">AdSense（本文中の1枠・既存の本文枠は一時停止）</option>
           </select>
         </label>
         <button type="button" disabled={position === null} onClick={insert}>

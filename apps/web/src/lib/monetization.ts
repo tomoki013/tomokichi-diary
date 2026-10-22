@@ -45,38 +45,46 @@ export function buildAdPlan(
     (!Number.isInteger(experiment.shareB) || experiment.shareB < 10 || experiment.shareB > 90)
   )
     return empty;
-  const p = experiment
-    ? { key: experiment.markerKey, position: "marker" as const, adUnit: experiment.adUnitB }
-    : config.placement;
-  if (!p || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) || !/^\d{1,20}$/.test(p.adUnit)) return empty;
-  const valid = validateMonetization(
-    {
-      ...defaultArticleMonetization(),
-      placements: [{ ...p, kind: "adsense", status: "ready", offerId: null }],
-    },
-    markdown,
-    { ...DEFAULT_MONETIZATION_SETTINGS, adUnits: [{ id: p.adUnit, name: "published" }] },
-  );
-  if (valid.length) return empty; // Missing/duplicate marker never falls back to another position.
+  const valid = (p: { key: string; adUnit: string }): boolean =>
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) && /^\d{1,20}$/.test(p.adUnit);
+  const markerFits = (p: { key: string; adUnit: string }): boolean =>
+    validateMonetization(
+      {
+        ...defaultArticleMonetization(),
+        placements: [{ ...p, position: "marker", kind: "adsense", status: "ready", offerId: null }],
+      },
+      markdown,
+      { ...DEFAULT_MONETIZATION_SETTINGS, adUnits: [{ id: p.adUnit, name: "published" }] },
+    ).length === 0;
+
   if (experiment) {
-    if (!/^\d{1,20}$/.test(experiment.adUnitA)) return empty;
+    // Missing/duplicate marker never falls back to another position.
+    const b = { key: experiment.markerKey, adUnit: experiment.adUnitB };
+    if (!valid(b) || !/^\d{1,20}$/.test(experiment.adUnitA) || !markerFits(b)) return empty;
     return {
       ...empty,
       end: { unit: experiment.adUnitA, variant: "A" },
-      marker: { key: p.key, unit: p.adUnit, variant: "B" },
+      marker: { key: b.key, unit: b.adUnit, variant: "B" },
       experiment,
     };
   }
-  return p.position === "article_end"
-    ? {
-        ...empty,
-        layout:
-          p.key === "article-end" && p.adUnit === "7152502134"
-            ? "article-end-v1"
-            : "article-placement-v2",
-        end: { unit: p.adUnit, variant: "static" },
-      }
-    : { ...empty, marker: { key: p.key, unit: p.adUnit, variant: "static" } };
+
+  // Every other article: the fixed article-end ad, plus at most one in the
+  // body. Snapshots from before inline ads carried a body ad as `placement`.
+  const placed = config.placement && valid(config.placement) ? config.placement : null;
+  const end =
+    placed?.position === "article_end" ? placed : { key: "article-end", adUnit: "7152502134" };
+  const inline = config.inline ?? (placed?.position === "marker" ? placed : null);
+  const marker = inline && valid(inline) && markerFits(inline) ? inline : null;
+  return {
+    ...empty,
+    layout:
+      !marker && end.key === "article-end" && end.adUnit === "7152502134"
+        ? "article-end-v1"
+        : "article-placement-v2",
+    end: { unit: end.adUnit, variant: "static" },
+    marker: marker && { key: marker.key, unit: marker.adUnit, variant: "static" },
+  };
 }
 
 /** Build-time kill switch and independent link/marker validation. No network requests. */
