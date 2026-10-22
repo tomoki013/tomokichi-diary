@@ -244,6 +244,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             <AffiliateBlock placement={p} />
           ))}
         {placeStories.length > 0 && <PlaceStories views={placeStories} />}
+        {adPlan.end && <ArticleAd unit={adPlan.end.unit} variant={adPlan.end.variant} />}
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong>
@@ -261,7 +262,6 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
           </div>
         </div>
-        {adPlan.end && <ArticleAd unit={adPlan.end.unit} variant={adPlan.end.variant} />}
         {(previousArticle || nextArticle) && (
           <nav class="post-navigation" aria-label="前後の記事">
             {previousArticle ? (
