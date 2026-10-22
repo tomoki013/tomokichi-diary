@@ -10,12 +10,13 @@ import { MediaUpload } from "../../ui/MediaUpload";
 import { MediaThumb } from "../../ui/MediaThumb";
 
 function usagesFrom(article: ArticleDetailDto): MediaUsageInput[] {
+  // Saved orders need not be 0..n-1; the editor sends positions, so it compares positions.
   return article.media
     .toSorted((a, b) => a.sortOrder - b.sortOrder)
-    .map((item) => ({
+    .map((item, index) => ({
       mediaId: item.mediaId,
       role: item.role as MediaRole,
-      sortOrder: item.sortOrder,
+      sortOrder: index,
       alt: item.alt,
       caption: item.caption,
     }));
