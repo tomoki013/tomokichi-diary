@@ -1,6 +1,7 @@
 import { publicMonetizationOnly } from "@tomokichi/data";
 import type { AppContext } from "../../context.js";
 import type { ContentSnapshot } from "@tomokichi/data";
+import { canonicalImageLinks } from "./media-links.js";
 
 export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnapshot> {
   const { repos } = ctx;
@@ -15,6 +16,8 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   const embeds = (
     await Promise.all(revisions.map((r) => repos.embeds.listByRevision(r.id)))
   ).flat();
+  const media = await repos.media.listAll();
+  const mediaSlugAliases = await repos.media.listSlugAliases();
   const articleMedia = (
     await Promise.all(articles.map((a) => repos.media.listForArticle(a.id)))
   ).flat();
@@ -22,7 +25,11 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   const snapshot: ContentSnapshot = {
     generatedAt: ctx.clock.now(),
     articles,
-    revisions,
+    // Revisions are never mutated in D1; only what the build reads is rewritten.
+    revisions: revisions.map((revision) => ({
+      ...revision,
+      bodyMarkdown: canonicalImageLinks(revision.bodyMarkdown, media, mediaSlugAliases),
+    })),
     embeds,
     routes: await repos.routes.listAll(),
     locations: await repos.locations.listAll(),
@@ -32,8 +39,8 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     tags: await repos.taxonomy.listTags(),
     collections: await repos.collections.listAll(),
     authors: await repos.authors.listAll(),
-    media: await repos.media.listAll(),
-    mediaSlugAliases: await repos.media.listSlugAliases(),
+    media,
+    mediaSlugAliases,
     mediaHashes: await repos.media.listHashes(),
     articleMedia,
     articleLocations: await repos.relations.listArticleLocations(),
