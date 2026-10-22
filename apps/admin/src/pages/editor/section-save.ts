@@ -11,14 +11,18 @@ export type RegisterSection = (key: string, section: SectionSave | null) => void
 /** The editor's Save and Publish buttons include each section's pending edits. */
 export function useEditorSections() {
   const sections = useRef(new Map<string, SectionSave>());
-  const [state, setState] = useState({ dirty: false, busy: false });
+  const [state, setState] = useState({ dirty: false, busy: false, dirtyKeys: "" });
   const register = useCallback<RegisterSection>((key, section) => {
     if (section) sections.current.set(key, section);
     else sections.current.delete(key);
     const all = [...sections.current.values()];
-    const next = { dirty: all.some((s) => s.dirty), busy: all.some((s) => s.busy) };
+    const dirtyKeys = [...sections.current]
+      .filter(([, s]) => s.dirty)
+      .map(([k]) => k)
+      .join();
+    const next = { dirty: dirtyKeys !== "", busy: all.some((s) => s.busy), dirtyKeys };
     setState((current) =>
-      current.dirty === next.dirty && current.busy === next.busy ? current : next,
+      current.dirtyKeys === next.dirtyKeys && current.busy === next.busy ? current : next,
     );
   }, []);
   const validate = () => {

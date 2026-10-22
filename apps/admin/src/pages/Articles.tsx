@@ -3,7 +3,7 @@ import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
 import { articleStatusLabels, formatDateTime, formatRelative } from "../lib/labels";
 import { href } from "../lib/route";
-import { useResource, useTitle } from "../ui/hooks";
+import { useRemembered, useResource, useTitle } from "../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../ui/parts";
 import { useToast } from "../ui/toast";
 import {
@@ -34,13 +34,16 @@ const FILTERS = [
   },
 ] as const;
 type FilterKey = (typeof FILTERS)[number]["key"];
+const FILTER_KEYS = FILTERS.map((entry) => entry.key);
+const KINDS = ["article", "page", "all"] as const;
 
 export function Articles() {
   useTitle("記事");
   const articles = useResource(() => api.listArticles().then((r) => r.items), "articles");
-  const [filter, setFilter] = useState<FilterKey>("all");
-  const [kind, setKind] = useState<"all" | "article" | "page">("article");
-  const [query, setQuery] = useState("");
+  // Kept while an article is open, so coming back lands on the same list.
+  const [filter, setFilter] = useRemembered<FilterKey>("articles.filter", "all", FILTER_KEYS);
+  const [kind, setKind] = useRemembered<(typeof KINDS)[number]>("articles.kind", "article", KINDS);
+  const [query, setQuery] = useRemembered<string>("articles.query", "");
   // Filtering re-renders every row; typing stays responsive while it catches up.
   const deferredQuery = useDeferredValue(query);
   const [creating, setCreating] = useState(false);
@@ -53,6 +56,13 @@ export function Articles() {
   const publication = useResource(() => api.publicationStatus(), "publication");
   const reloadPublication = publication.reload;
   const pending = publication.data?.state === "queued" || publication.data?.state === "building";
+  // Site status only takes room when it needs attention; the editor shows it always.
+  const showPublication =
+    pending ||
+    publication.error !== undefined ||
+    publication.data?.state === "failed" ||
+    publication.data?.state === "unconfigured" ||
+    result !== null;
   const toast = useToast();
   useEffect(() => {
     if (!pending) return;
@@ -200,76 +210,46 @@ export function Articles() {
         />
       </div>
 
-      <Panel title="まとめて公開">
-        <p className="muted">
-          各記事で「すべて保存」してから、公開したい記事を選んでください。「未公開の変更」で絞り込めます。
-        </p>
-        <div className="toolbar" aria-live="polite">
-          <label className="bulk-select">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              ref={(node) => {
-                if (node) node.indeterminate = chosen.length > 0 && !allSelected;
-              }}
-              disabled={publishing || articles.loading || selectable.length === 0}
-              onChange={() =>
-                setSelected(allSelected ? new Set() : new Set(selectable.map((item) => item.id)))
-              }
-            />
-            表示中の公開対象をすべて選択
-          </label>
-          <span>{chosen.length}件選択</span>
-          <button
-            type="button"
-            className="primary"
-            disabled={publishing || articles.loading || chosen.length === 0}
-            onClick={() => void publishChosen()}
-          >
-            {publishing
-              ? total > 0
-                ? `公開処理中… ${progress}/${total}`
-                : "サイトへの反映を再試行中…"
-              : `選択した${chosen.length}件をまとめて公開`}
-          </button>
-        </div>
-        {result && (
-          <div aria-live="polite">
-            <p>
-              {result.items.filter((item) => item.published).length}件の公開を受け付けました。
-              {result.items.some((item) => !item.published) &&
-                " 公開できなかった記事は、修正して再度選択してください。"}
-            </p>
-            {result.items.some((item) => !item.published) && (
-              <ul className="problems">
-                {result.items
-                  .filter((item) => !item.published)
-                  .map((item) => (
-                    <li key={item.article.id}>
-                      <a href={href.article(item.article.id)}>
-                        {item.article.title || item.article.slug}
-                      </a>
-                      ：{item.error}
-                    </li>
-                  ))}
-              </ul>
-            )}
-            {result.buildError && (
-              <div className="form-error">
-                <p>サイトへの反映を開始できませんでした：{result.buildError}</p>
-                <button type="button" disabled={publishing} onClick={() => void retryBuild()}>
-                  サイトへの反映を再試行
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-        <SitePublication
-          publication={publication}
-          disabled={publishing}
-          onRetry={() => void retryBuild()}
-        />
-      </Panel>
+      {showPublication && (
+        <Panel title="公開の状況">
+          {result && (
+            <div aria-live="polite">
+              <p>
+                {result.items.filter((item) => item.published).length}件の公開を受け付けました。
+                {result.items.some((item) => !item.published) &&
+                  " 公開できなかった記事は、修正して再度選択してください。"}
+              </p>
+              {result.items.some((item) => !item.published) && (
+                <ul className="problems">
+                  {result.items
+                    .filter((item) => !item.published)
+                    .map((item) => (
+                      <li key={item.article.id}>
+                        <a href={href.article(item.article.id)}>
+                          {item.article.title || item.article.slug}
+                        </a>
+                        ：{item.error}
+                      </li>
+                    ))}
+                </ul>
+              )}
+              {result.buildError && (
+                <div className="form-error">
+                  <p>サイトへの反映を開始できませんでした：{result.buildError}</p>
+                  <button type="button" disabled={publishing} onClick={() => void retryBuild()}>
+                    サイトへの反映を再試行
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          <SitePublication
+            publication={publication}
+            disabled={publishing}
+            onRetry={() => void retryBuild()}
+          />
+        </Panel>
+      )}
 
       <Panel className="panel--flush">
         {articles.error ? (
@@ -277,9 +257,23 @@ export function Articles() {
         ) : articles.loading ? (
           <SkeletonRows rows={10} />
         ) : visible.length === 0 ? (
-          <EmptyState>該当する記事はありません。</EmptyState>
+          <EmptyState>
+            該当する記事はありません。
+            {(filter !== "all" || query !== "") && (
+              <button
+                type="button"
+                className="link"
+                onClick={() => {
+                  setFilter("all");
+                  setQuery("");
+                }}
+              >
+                絞り込みを解除
+              </button>
+            )}
+          </EmptyState>
         ) : (
-          <table className="table">
+          <table className="table table--articles">
             <thead>
               <tr>
                 <th className="table__select">
@@ -295,22 +289,25 @@ export function Articles() {
               {visible.map((item) => (
                 <tr key={item.id}>
                   <td className="table__select">
-                    <input
-                      type="checkbox"
-                      aria-label={`${item.title || item.slug}を公開対象に選択`}
-                      checked={selected.has(item.id)}
-                      disabled={publishing || !canSelectForPublication(item)}
-                      onChange={() => toggle(item.id)}
-                    />
+                    {/* Only what can be published gets a box, so the column reads at a glance. */}
+                    {canSelectForPublication(item) && (
+                      <input
+                        type="checkbox"
+                        aria-label={`${item.title || item.slug}を公開対象に選択`}
+                        checked={selected.has(item.id)}
+                        disabled={publishing}
+                        onChange={() => toggle(item.id)}
+                      />
+                    )}
                   </td>
-                  <td>
+                  <td className="table__main">
                     <a className="table__title" href={href.article(item.id)}>
                       {item.title || item.slug}
                     </a>
                     {item.kind === "page" && <Badge>固定</Badge>}
                     {item.noindex && <Badge>noindex</Badge>}
                   </td>
-                  <td className="nowrap">
+                  <td className="nowrap table__status">
                     <Badge
                       tone={item.isLive ? "ok" : item.status === "scheduled" ? "accent" : "neutral"}
                     >
@@ -335,7 +332,7 @@ export function Articles() {
                       <span className="muted mono">{item.path ?? "—"}</span>
                     )}
                   </td>
-                  <td className="muted nowrap" title={formatDateTime(item.updatedAt)}>
+                  <td className="muted nowrap table__date" title={formatDateTime(item.updatedAt)}>
                     {formatRelative(item.updatedAt)}
                   </td>
                 </tr>
@@ -344,6 +341,38 @@ export function Articles() {
           </table>
         )}
       </Panel>
+
+      {(selectable.length > 0 || publishing) && (
+        <div className="bulk-bar" aria-live="polite">
+          <label className="bulk-bar__all">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(node) => {
+                if (node) node.indeterminate = chosen.length > 0 && !allSelected;
+              }}
+              disabled={publishing}
+              onChange={() =>
+                setSelected(allSelected ? new Set() : new Set(selectable.map((item) => item.id)))
+              }
+            />
+            公開できる{selectable.length}件
+            {chosen.length > 0 && <strong>（{chosen.length}件を選択）</strong>}
+          </label>
+          <button
+            type="button"
+            className="primary"
+            disabled={publishing || chosen.length === 0}
+            onClick={() => void publishChosen()}
+          >
+            {publishing
+              ? total > 0
+                ? `公開処理中… ${progress}/${total}`
+                : "サイトへの反映を再試行中…"
+              : "まとめて公開"}
+          </button>
+        </div>
+      )}
     </>
   );
 }

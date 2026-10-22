@@ -220,3 +220,36 @@ export function usePagedSearch<T>(
     setItems,
   };
 }
+
+/**
+ * State that survives opening an item and coming back, for this tab only.
+ * Storage can be unavailable (private windows, blocked site data); the state
+ * then simply starts fresh.
+ */
+export function useRemembered<T extends string>(
+  key: string,
+  initial: T,
+  allowed: readonly T[] | null = null,
+): [T, (value: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const stored = globalThis.sessionStorage.getItem(`admin:${key}`) as T | null;
+      if (stored !== null && (allowed === null || allowed.includes(stored))) return stored;
+    } catch {
+      // Fall through to the default.
+    }
+    return initial;
+  });
+  const remember = useCallback(
+    (next: T) => {
+      setValue(next);
+      try {
+        globalThis.sessionStorage.setItem(`admin:${key}`, next);
+      } catch {
+        // Not remembered; the screen still works.
+      }
+    },
+    [key],
+  );
+  return [value, remember];
+}

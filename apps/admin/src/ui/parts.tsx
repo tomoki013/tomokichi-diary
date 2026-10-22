@@ -41,14 +41,17 @@ export function Panel({
   actions,
   children,
   className,
+  part,
 }: {
   title?: ReactNode;
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** A jump target within the page (see the article editor's bar). */
+  part?: string;
 }) {
   return (
-    <section className={`panel${className ? ` ${className}` : ""}`}>
+    <section className={`panel${className ? ` ${className}` : ""}`} data-part={part}>
       {(title || actions) && (
         <div className="panel__head">
           {title && <h2>{title}</h2>}

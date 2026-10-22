@@ -21,6 +21,32 @@ import { KnowledgeSection } from "./KnowledgeSection";
 
 marked.setOptions({ gfm: true, breaks: false });
 
+/**
+ * Jump targets for the editor bar. The page is long (most of all on a phone,
+ * where Publish sits below everything), so every part is one tap away.
+ * `side` parts already stay in view beside the form on a wide screen.
+ */
+const PARTS = [
+  { key: "body", label: "本文" },
+  { key: "seo", label: "SEO" },
+  { key: "media", label: "画像" },
+  { key: "relations", label: "関連付け" },
+  { key: "experiences", label: "体験タグ", articleOnly: true },
+  { key: "monetization", label: "収益化", articleOnly: true },
+  { key: "knowledge", label: "Knowledge" },
+  { key: "publish", label: "公開", side: true },
+  { key: "preview", label: "プレビュー", side: true },
+] as const;
+
+const seoFrom = (draft: DraftInput) => ({
+  seoTitleOverride: draft.seoTitleOverride,
+  seoDescriptionOverride: draft.seoDescriptionOverride,
+});
+
+function jumpTo(key: string): void {
+  document.querySelector(`[data-part="${key}"]`)?.scrollIntoView({ block: "start" });
+}
+
 export function ArticleEditor({ id }: { id: string }) {
   const article = useResource(() => api.getArticle(id), `article:${id}`);
 
@@ -58,6 +84,13 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const sections = useEditorSections();
   const bodyDirty = isDirty(draft, saved);
   const dirty = bodyDirty || sections.dirty;
+  const seoDirty = isDirty({ ...saved, ...seoFrom(draft) }, saved);
+  const textDirty = isDirty({ ...draft, ...seoFrom(saved) }, saved);
+  const unsaved = new Set([
+    ...(textDirty ? ["body"] : []),
+    ...(seoDirty ? ["seo"] : []),
+    ...sections.dirtyKeys.split(","),
+  ]);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const selection = useRef({ start: draft.bodyMarkdown.length, end: draft.bodyMarkdown.length });
   const [publishing, setPublishing] = useState(false);
@@ -158,27 +191,45 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             )}
           </>
         }
-        actions={
-          <>
-            <span className={`save-state${dirty ? " save-state--dirty" : ""}`} aria-live="polite">
-              {saving ? "保存中…" : dirty ? "未保存の変更" : "保存済み"}
-            </span>
-            <button
-              type="button"
-              className="primary"
-              disabled={working || !dirty}
-              onClick={() => void save()}
-              title="⌘S / Ctrl+S"
-            >
-              すべて保存
-            </button>
-          </>
-        }
       />
+
+      <div className="editor-bar">
+        <nav className="editor-bar__parts" aria-label="編集画面内の移動">
+          {PARTS.filter((part) => !("articleOnly" in part) || article.kind === "article").map(
+            (part) => (
+              <button
+                key={part.key}
+                type="button"
+                className={`chip${"side" in part ? " editor-bar__side" : ""}`}
+                onClick={() => jumpTo(part.key)}
+              >
+                {part.label}
+                {unsaved.has(part.key) && (
+                  <span className="editor-bar__dot" title="未保存の変更">
+                    <span className="sr-only">（未保存）</span>
+                  </span>
+                )}
+              </button>
+            ),
+          )}
+        </nav>
+        <span className={`save-state${dirty ? " save-state--dirty" : ""}`} aria-live="polite">
+          {saving ? "保存中…" : dirty ? "未保存" : "保存済み"}
+        </span>
+        <button
+          type="button"
+          className="primary"
+          disabled={working || !dirty}
+          onClick={() => void save()}
+          title="⌘S / Ctrl+S"
+        >
+          すべて保存
+        </button>
+      </div>
 
       <div className="editor">
         <fieldset className="editor__main editor__fields" disabled={working}>
-          <Panel title="本文">
+          <Panel title="本文" part="body">
             <label className="field">
               <span>タイトル</span>
               <input
@@ -264,7 +315,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             </label>
           </Panel>
 
-          <Panel title="SEO（空欄なら自動生成）">
+          <Panel title="SEO（空欄なら自動生成）" part="seo">
             <label className="field">
               <span>
                 title
@@ -292,70 +343,83 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             </label>
           </Panel>
 
-          <MediaSection
-            article={article}
-            onSaved={afterChange}
-            register={sections.register}
-            onSaveAll={save}
-            onInsert={(url, alt) => {
-              const inserted = insertMarkdownImage(
-                draft.bodyMarkdown,
-                selection.current.start,
-                selection.current.end,
-                url,
-                alt,
-              );
-              update("bodyMarkdown", inserted.body);
-              selection.current = { start: inserted.cursor, end: inserted.cursor };
-              requestAnimationFrame(() => {
-                bodyRef.current?.focus();
-                bodyRef.current?.setSelectionRange(inserted.cursor, inserted.cursor);
-              });
-            }}
-          />
-          <RelationsSection
-            article={article}
-            onSaved={afterChange}
-            register={sections.register}
-            onSaveAll={save}
-          />
-          {article.kind === "article" && (
-            <ExperienceSection
+          <div data-part="media">
+            <MediaSection
+              article={article}
+              onSaved={afterChange}
+              register={sections.register}
+              onSaveAll={save}
+              onInsert={(url, alt) => {
+                const inserted = insertMarkdownImage(
+                  draft.bodyMarkdown,
+                  selection.current.start,
+                  selection.current.end,
+                  url,
+                  alt,
+                );
+                update("bodyMarkdown", inserted.body);
+                selection.current = { start: inserted.cursor, end: inserted.cursor };
+                requestAnimationFrame(() => {
+                  bodyRef.current?.focus();
+                  bodyRef.current?.setSelectionRange(inserted.cursor, inserted.cursor);
+                });
+              }}
+            />
+          </div>
+          <div data-part="relations">
+            <RelationsSection
               article={article}
               onSaved={afterChange}
               register={sections.register}
               onSaveAll={save}
             />
+          </div>
+          {article.kind === "article" && (
+            <div data-part="experiences">
+              <ExperienceSection
+                article={article}
+                onSaved={afterChange}
+                register={sections.register}
+                onSaveAll={save}
+              />
+            </div>
           )}
           {article.kind === "article" && (
-            <MonetizationSection
+            <div data-part="monetization">
+              <MonetizationSection
+                articleId={article.id}
+                needsPublication={article.hasUnpublishedChanges || article.status !== "published"}
+                body={draft.bodyMarkdown}
+                onBody={(body) => update("bodyMarkdown", body)}
+                register={sections.register}
+                onSaveAll={save}
+              />
+            </div>
+          )}
+          <div data-part="knowledge">
+            <KnowledgeSection
               articleId={article.id}
-              needsPublication={article.hasUnpublishedChanges || article.status !== "published"}
-              body={draft.bodyMarkdown}
-              onBody={(body) => update("bodyMarkdown", body)}
               register={sections.register}
               onSaveAll={save}
+              revisionId={article.currentRevision?.id ?? null}
             />
-          )}
-          <KnowledgeSection
-            articleId={article.id}
-            register={sections.register}
-            onSaveAll={save}
-            revisionId={article.currentRevision?.id ?? null}
-          />
+          </div>
         </fieldset>
 
         <aside className="editor__side">
-          <PublishSection
-            article={article}
-            check={check}
-            dirty={dirty}
-            save={save}
-            onChanged={afterChange}
-            working={working}
-            onBusy={setPublishing}
-          />
+          <div data-part="publish">
+            <PublishSection
+              article={article}
+              check={check}
+              dirty={dirty}
+              save={save}
+              onChanged={afterChange}
+              working={working}
+              onBusy={setPublishing}
+            />
+          </div>
           <Panel
+            part="preview"
             title="プレビュー（下書き）"
             actions={
               <button type="button" className="link" onClick={() => setShowPreview((on) => !on)}>
