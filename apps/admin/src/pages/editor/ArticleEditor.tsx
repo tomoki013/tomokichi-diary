@@ -5,6 +5,7 @@ import { enhanceAppleMusic } from "@tomokichi/contracts";
 import { insertAppleMusic } from "../../lib/apple-music";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { insertMarkdownImage } from "../../lib/markdown-image";
+import { copyText } from "../../lib/clipboard";
 import { useEditorSections } from "./section-save";
 import { api } from "../../lib/api";
 import { bodyStats, draftFrom, isDirty, normalizeDraft, type DraftInput } from "../../lib/draft";
@@ -229,7 +230,28 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
 
       <div className="editor">
         <fieldset className="editor__main editor__fields" disabled={working}>
-          <Panel title="本文" part="body">
+          <Panel
+            title="本文"
+            part="body"
+            actions={
+              <button
+                type="button"
+                className="link"
+                // Copies what is on screen, unsaved edits included.
+                onClick={() =>
+                  void copyText(draft.bodyMarkdown).then(
+                    () =>
+                      toast.info(
+                        `本文のMarkdownをコピーしました（${stats.characters.toLocaleString()}字）`,
+                      ),
+                    () => toast.error(new Error("クリップボードにコピーできませんでした")),
+                  )
+                }
+              >
+                Markdownをコピー
+              </button>
+            }
+          >
             <label className="field">
               <span>タイトル</span>
               <input

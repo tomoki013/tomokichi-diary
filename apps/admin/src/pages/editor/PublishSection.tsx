@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ArticleDetailDto, PublishCheckDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
 import { publishProblem } from "../../lib/publish-messages";
+import { articleState } from "../../lib/article-state";
 import { SitePublication } from "../../ui/SitePublication";
 import { formatDateTime, isoToJstLocal, jstLocalToIso } from "../../lib/labels";
 import { useResource, type Resource } from "../../ui/hooks";
@@ -39,6 +40,14 @@ export function PublishSection({
     const timer = setInterval(() => void reloadPublication(), 10000);
     return () => clearInterval(timer);
   }, [reloadPublication]);
+  const site = publication.data;
+  // The site-wide progress is shown only while it is moving or needs a hand.
+  const siteNeedsAttention =
+    publication.error !== undefined ||
+    site?.state === "queued" ||
+    site?.state === "building" ||
+    site?.state === "failed" ||
+    site?.state === "unconfigured";
 
   const run = async (
     action: () => Promise<unknown>,
@@ -74,9 +83,17 @@ export function PublishSection({
 
   return (
     <Panel title="公開">
-      {dirty && (
-        <p className="muted">未保存の本文・写真・関連付けをすべて保存してから確認します。</p>
-      )}
+      <dl className="article-state">
+        {articleState(article, dirty, site).map((line) => (
+          <div key={line.label}>
+            <dt>{line.label}</dt>
+            <dd>
+              <span className={`state-dot state-dot--${line.tone}`} aria-hidden="true" />
+              {line.text}
+            </dd>
+          </div>
+        ))}
+      </dl>
       {check.error ? (
         <ErrorState error={check.error} onRetry={() => void check.reload()} />
       ) : check.loading && !check.data ? (
@@ -91,18 +108,20 @@ export function PublishSection({
           ))}
         </ul>
       ) : (
-        <p className="ok-line">
-          {nothingToPublish
-            ? "DBの公開版は最新です"
-            : `公開できます${dirty ? "（保存してから公開します）" : ""}`}
-        </p>
+        !nothingToPublish && (
+          <p className="ok-line">
+            {`公開チェックOK${dirty ? "（未保存分を保存してから公開します）" : ""}`}
+          </p>
+        )
       )}
 
-      <SitePublication
-        publication={publication}
-        disabled={busy || working}
-        onRetry={() => void run(() => api.retryPublication(), "反映を再試行します")}
-      />
+      {siteNeedsAttention && (
+        <SitePublication
+          publication={publication}
+          disabled={busy || working}
+          onRetry={() => void run(() => api.retryPublication(), "反映を再試行します")}
+        />
+      )}
       <div className="stack">
         <button
           type="button"

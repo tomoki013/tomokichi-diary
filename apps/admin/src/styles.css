@@ -271,6 +271,46 @@ fieldset {
   font-weight: 600;
   margin: 0 0 0.6rem;
 }
+/* One article's own standing, read top to bottom: the article, edits, the site. */
+.article-state {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+.article-state > div {
+  display: grid;
+  grid-template-columns: 4.5em minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.article-state dt {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  padding-top: 0.1rem;
+}
+.article-state dd {
+  margin: 0;
+}
+.state-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  vertical-align: 0.1em;
+}
+.state-dot--ok {
+  background: var(--ok);
+}
+.state-dot--accent {
+  background: var(--accent);
+}
+.state-dot--warn {
+  background: var(--warn);
+}
+.state-dot--danger {
+  background: var(--danger);
+}
 .row {
   display: flex;
   flex-wrap: wrap;
