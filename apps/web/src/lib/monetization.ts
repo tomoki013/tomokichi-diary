@@ -21,6 +21,8 @@ const legacy = (): AdPlan => ({
   marker: null,
   experiment: null,
 });
+const valid = (p: { key: string; adUnit: string }): boolean =>
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) && /^\d{1,20}$/.test(p.adUnit);
 /** Revalidate the public snapshot at build time, independently of admin flags. */
 export function buildAdPlan(
   config: PublicMonetization | undefined,
@@ -45,8 +47,6 @@ export function buildAdPlan(
     (!Number.isInteger(experiment.shareB) || experiment.shareB < 10 || experiment.shareB > 90)
   )
     return empty;
-  const valid = (p: { key: string; adUnit: string }): boolean =>
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) && /^\d{1,20}$/.test(p.adUnit);
   const markerFits = (p: { key: string; adUnit: string }): boolean =>
     validateMonetization(
       {
