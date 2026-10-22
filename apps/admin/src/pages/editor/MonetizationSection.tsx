@@ -156,7 +156,7 @@ function Loaded({
         AdSenseを有効にする
       </label>
       <p className="muted">
-        AdSenseは記事末尾に1枠（固定）＋本文中に1枠まで（任意）。配置実験に参加中の記事はA/Bの1枠です。
+        AdSenseは記事末尾に1枠（固定）＋本文中に1枠まで（任意）。配置実験に参加中の記事は、本文中の枠を実験のBとして出し分けます。
       </p>
       <label className="field">
         <span>配置実験への参加</span>

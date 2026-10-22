@@ -191,3 +191,25 @@ it("mounts both static slots when a page has an end ad and a body ad", async () 
   expect(body.slot.dataset["adMounted"]).toBe("1");
   expect(end.slot.dataset["adMounted"]).toBe("1");
 });
+it("shows the end ad to both variants and the body ad only to B", async () => {
+  const { mountArticleAds } = await import("../lib/ads");
+  for (const [assigned, mounted] of [
+    ["A", false],
+    ["B", true],
+  ] as const) {
+    const end = fixture();
+    const bodyAd = fixture();
+    end.slot.dataset["variant"] = "static";
+    bodyAd.slot.dataset["variant"] = "B";
+    const remove = vi.fn();
+    Object.assign(bodyAd.slot, { remove });
+    Object.assign(end.doc, {
+      documentElement: { dataset: { adVariant: assigned } },
+      querySelectorAll: () => [bodyAd.slot, end.slot],
+    });
+    mountArticleAds(end.doc, end.browser);
+    expect(end.slot.dataset["adMounted"]).toBe("1");
+    expect(bodyAd.slot.dataset["adMounted"] === "1").toBe(mounted);
+    expect(remove).toHaveBeenCalledTimes(mounted ? 0 : 1);
+  }
+});
