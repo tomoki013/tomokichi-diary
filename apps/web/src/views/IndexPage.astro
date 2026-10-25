@@ -807,6 +807,13 @@ const labelOf = (target: Route): string => {
             </figure>
           ))}
         </div>
+        {galleryHeroSlides.length > 1 && (
+          <div class="gallery-hero__bars" aria-hidden="true">
+            {galleryHeroSlides.map(() => (
+              <i />
+            ))}
+          </div>
+        )}
         <div class="gallery-hero__copy">
           <p>GALLERY</p>
           <h1>旅の途中で、心が止まった瞬間。</h1>

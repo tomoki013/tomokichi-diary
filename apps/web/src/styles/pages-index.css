@@ -1672,10 +1672,68 @@
     position: absolute;
     z-index: 1;
     right: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
-    bottom: 1.2rem;
-    color: rgb(255 255 255 / 88%);
-    font-size: 0.74rem;
+    bottom: 1.05rem;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
     letter-spacing: 0.06em;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 55%);
+  }
+
+  /* One bar per photograph, filling while that photograph is up. Same cycle
+     and delays as the slides, so the two never drift apart. */
+  .gallery-hero__bars {
+    position: absolute;
+    z-index: 1;
+    left: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+    bottom: 1.6rem;
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .gallery-hero__bars i {
+    position: relative;
+    overflow: hidden;
+    width: 1.9rem;
+    height: 2px;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 35%);
+  }
+
+  .gallery-hero__bars i::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: gallery-hero-bar 18s -1s infinite linear;
+  }
+
+  .gallery-hero__bars i:nth-child(2)::after {
+    animation-delay: 5s;
+  }
+
+  .gallery-hero__bars i:nth-child(3)::after {
+    animation-delay: 11s;
+  }
+
+  @keyframes gallery-hero-bar {
+    0% {
+      transform: scaleX(0);
+    }
+    35.5% {
+      transform: scaleX(1);
+    }
+    38% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+    38.1%,
+    100% {
+      transform: scaleX(1);
+      opacity: 0;
+    }
   }
 
   @keyframes gallery-hero-fade {
@@ -1737,6 +1795,9 @@
     .gallery-hero__slides figure,
     .gallery-hero__slides img {
       animation: none;
+    }
+    .gallery-hero__bars {
+      display: none;
     }
     .gallery-hero__slides figure:first-child {
       opacity: 1;
@@ -1882,6 +1943,13 @@
   .gallery-wall button:hover > span,
   .gallery-wall button:focus-visible > span {
     opacity: 1;
+  }
+
+  /* Touch screens never hover, so the caption shows from the start. */
+  @media (hover: none) {
+    .gallery-wall button > span {
+      opacity: 1;
+    }
   }
 
   .gallery-wall small {
@@ -2204,14 +2272,26 @@
     .posts-results__footer .posts-pagination {
       grid-column: 1;
     }
-    /* Three across edge to edge: a phone wall reads as photographs, so the
-       titles wait for the lightbox. */
+    /* Three across edge to edge. The title stays on as one slim line, since a
+       phone has no hover to reveal it; the place waits for the lightbox. */
     .gallery-wall {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       margin-inline: calc(var(--gutter) * -1);
     }
     .gallery-wall button > span {
+      padding: 1.4rem 0.4rem 0.3rem;
+      background: linear-gradient(0deg, rgb(18 16 12 / 72%), transparent);
+    }
+    .gallery-wall button > span small {
       display: none;
+    }
+    .gallery-wall button > span strong {
+      display: block;
+      overflow: hidden;
+      font-size: 0.62rem;
+      line-height: 1.4;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
