@@ -100,7 +100,11 @@ export function photoLikeRoutes() {
       return errorResponse(c, "API_VALIDATION_FAILED", "invalid visitor identity", 400);
     }
     const visitorHash = await hashVisitor(visitorId, c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1");
-    const state = await toggleMediaLike(c.get("ctx"), c.req.param("mediaId") as MediaId, visitorHash);
+    const state = await toggleMediaLike(
+      c.get("ctx"),
+      c.req.param("mediaId") as MediaId,
+      visitorHash,
+    );
     return state ? c.json(state) : errorResponse(c, "MEDIA_NOT_FOUND", "photo not found", 404);
   });
 

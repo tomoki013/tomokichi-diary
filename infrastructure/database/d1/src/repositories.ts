@@ -175,7 +175,10 @@ export function createRepositories(db: SqlDatabase): Repositories {
 
   const mediaLikes = {
     count: async (mediaId: string) => {
-      const row = await first("SELECT COUNT(*) AS count FROM media_likes WHERE media_id = ?", mediaId);
+      const row = await first(
+        "SELECT COUNT(*) AS count FROM media_likes WHERE media_id = ?",
+        mediaId,
+      );
       return Number(row?.["count"] ?? 0);
     },
     countAll: async () =>
