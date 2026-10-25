@@ -15,6 +15,11 @@ export interface MediaAsset {
   readonly contentSha256?: string | null;
   readonly originalName?: string | null;
   readonly slug?: string | null;
+  /**
+   * Made by an image model rather than a camera. Such an image can illustrate
+   * an article, but it never stands in the gallery as a travel photograph.
+   */
+  readonly aiGenerated?: boolean;
   readonly createdAt: string;
 }
 

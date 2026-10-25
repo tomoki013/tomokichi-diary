@@ -3,6 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import { validate } from "@tomokichi/contracts";
 import {
   setArticleMedia,
+  setMediaAiGenerated,
   uploadMediaWithResult,
   updateMediaSlug,
   MAX_UPLOAD_BYTES,
@@ -97,15 +98,23 @@ export function mediaRoutes() {
   });
   routes.patch("/:id", async (c) => {
     const body: unknown = await c.req.json().catch(() => null);
+    const hasSlug = !!body && typeof body === "object" && "slug" in body;
+    const hasAiFlag = !!body && typeof body === "object" && "aiGenerated" in body;
     if (
       !body ||
       typeof body !== "object" ||
-      !("slug" in body) ||
-      (body.slug !== null && typeof body.slug !== "string")
+      (!hasSlug && !hasAiFlag) ||
+      (hasSlug && body.slug !== null && typeof body.slug !== "string") ||
+      (hasAiFlag && typeof body.aiGenerated !== "boolean")
     )
-      return errorResponse(c, "API_VALIDATION_FAILED", "invalid slug", 400);
+      return errorResponse(c, "API_VALIDATION_FAILED", "invalid media update", 400);
     const ctx = c.get("ctx");
-    const result = await updateMediaSlug(ctx, c.req.param("id") as MediaId, body.slug);
+    const id = c.req.param("id") as MediaId;
+    let result = hasSlug
+      ? await updateMediaSlug(ctx, id, body.slug as string | null)
+      : await setMediaAiGenerated(ctx, id, body.aiGenerated as boolean);
+    if (result.ok && hasSlug && hasAiFlag)
+      result = await setMediaAiGenerated(ctx, id, body.aiGenerated as boolean);
     return result.ok
       ? c.json(
           toMediaAssetDto(

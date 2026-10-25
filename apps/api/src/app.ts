@@ -16,7 +16,7 @@ import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
 import { messageRoutes } from "./routes/messages.js";
-import { likeAdminRoutes, likeRoutes } from "./routes/likes.js";
+import { likeAdminRoutes, likeRoutes, photoLikeRoutes } from "./routes/likes.js";
 import { knowledgeRoutes } from "./routes/knowledge.js";
 import { inquiryRoutes } from "./routes/inquiry.js";
 import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
@@ -140,6 +140,7 @@ export function createApp(options: AppOptions = {}) {
   // The only unauthenticated write: a challenge-protected contact form.
   v1.route("/contact", contactRoutes());
   v1.route("/likes", likeRoutes());
+  v1.route("/photo-likes", photoLikeRoutes());
   v1.route("/images", imageRoutes());
 
   // Everything below /admin requires the shared secret. A missing secret means

@@ -385,6 +385,7 @@ export const mediaRow = {
     contentSha256: nullableStr(row, "content_sha256"),
     originalName: nullableStr(row, "original_name"),
     slug: nullableStr(row, "slug"),
+    aiGenerated: row["ai_generated"] === 1 || row["ai_generated"] === true,
     createdAt: str(row, "created_at"),
   }),
   from: (asset: MediaAsset): Row => ({
@@ -398,6 +399,7 @@ export const mediaRow = {
     ...(asset.contentSha256 !== undefined ? { content_sha256: asset.contentSha256 } : {}),
     ...(asset.originalName !== undefined ? { original_name: asset.originalName } : {}),
     ...(asset.slug !== undefined ? { slug: asset.slug } : {}),
+    ...(asset.aiGenerated !== undefined ? { ai_generated: asset.aiGenerated ? 1 : 0 } : {}),
     created_at: asset.createdAt,
   }),
 };

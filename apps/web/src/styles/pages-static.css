@@ -86,30 +86,39 @@
     margin-top: var(--band);
   }
 
+  /* The writer opens the page: portrait first, then the name as the h1. */
   .about-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     align-items: center;
     gap: var(--space-lg);
     padding-top: var(--band-tight);
   }
 
+  .about-hero__portrait img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
   .about-hero__copy {
     display: grid;
     justify-items: start;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
   }
 
   .about-hero__copy > p:first-child {
     color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
   }
 
   .about-hero__copy h1 {
-    font-size: var(--step-h1);
+    font-size: clamp(2.2rem, 7vw, 3rem);
+    font-weight: 500;
+    line-height: 1.15;
   }
 
   .about-hero__copy > p:not(:first-child) {
@@ -119,42 +128,67 @@
     line-height: 1.95;
   }
 
+  .about-hero__copy dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    max-width: 24rem;
+    margin: 0.4rem 0 0.2rem;
+    border-block: 1px solid var(--line);
+  }
+
+  .about-hero__copy dl > div {
+    padding-block: 0.6rem;
+  }
+
+  .about-hero__copy dl > div + div {
+    padding-inline-start: var(--space-sm);
+    border-inline-start: 1px solid var(--line);
+  }
+
+  .about-hero__copy dt {
+    color: var(--ink-faint);
+    font-size: 0.68rem;
+  }
+
+  .about-hero__copy dd {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: 1.6rem;
+  }
+
+  .about-hero__copy dd span {
+    margin-inline-start: 0.25rem;
+    color: var(--ink-faint);
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+  }
+
   .about-hero__copy > a {
     font-size: var(--step-small);
     text-decoration: none;
   }
 
-  .about-hero__photos {
-    position: relative;
+  .about-intro {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    aspect-ratio: 4 / 3;
+    gap: var(--space-xs);
+    max-width: 40rem;
   }
 
-  .about-hero__photos picture:first-child {
-    grid-column: span 2;
+  .about-intro small {
+    color: var(--accent);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
   }
 
-  .about-hero__photos picture,
-  .about-hero__photos img {
-    width: 100%;
-    height: 100%;
+  .about-intro h2 {
+    font-size: var(--step-h2);
   }
 
-  .about-hero__photos img {
-    border-radius: var(--radius);
-    object-fit: cover;
-  }
-
-  .about-hero__photos > span {
-    grid-column: 2;
-    align-self: center;
+  .about-intro p {
     color: var(--ink-soft);
-    font-family: var(--font-label);
-    font-size: 0.95rem;
-    font-style: italic;
-    line-height: 1.4;
+    font-size: var(--step-small);
+    line-height: 1.95;
   }
 
   .about-principles {
@@ -218,69 +252,6 @@
     color: var(--ink-soft);
     font-size: var(--step-small);
     line-height: 1.95;
-  }
-
-  .about-author {
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    align-items: center;
-    gap: var(--space-lg);
-  }
-
-  .about-author__portrait img {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-lg);
-    object-fit: cover;
-  }
-
-  .about-author__copy {
-    display: grid;
-    gap: var(--space-xs);
-  }
-
-  .about-author__copy small {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-  }
-
-  .about-author__copy h2 {
-    font-size: var(--step-h2);
-  }
-
-  .about-author__copy p {
-    color: var(--ink-soft);
-    font-size: var(--step-small);
-    line-height: 1.95;
-  }
-
-  .about-author__copy dl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    margin: 0.6rem 0 0;
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--line);
-  }
-
-  .about-author__copy dt {
-    color: var(--ink-faint);
-    font-size: 0.68rem;
-  }
-
-  .about-author__copy dd {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.6rem;
-  }
-
-  .about-author__copy dd span {
-    margin-inline-start: 0.25rem;
-    color: var(--ink-faint);
-    font-family: var(--font-sans);
-    font-size: 0.68rem;
   }
 
   .about-map > header,
@@ -1118,7 +1089,6 @@
   @media (max-width: 62rem) {
     .about-hero,
     .about-manifesto,
-    .about-author,
     .faq-hero,
     .faq-layout,
     .contact-hero,
@@ -1129,8 +1099,8 @@
     .faq-contact {
       position: static;
     }
-    .about-author__portrait img {
-      aspect-ratio: 16 / 10;
+    .about-hero__portrait {
+      max-width: 26rem;
     }
     .error-page__visual {
       order: -1;
@@ -1141,11 +1111,30 @@
     .contact-form__row {
       grid-template-columns: minmax(0, 1fr);
     }
-    .about-hero__photos {
-      aspect-ratio: 16 / 10;
+    /* On a phone the portrait runs edge to edge and fades into the page, so
+       the name below reads as a caption on it. */
+    .about-hero {
+      gap: 0;
+      padding-top: 0;
     }
-    .about-hero__photos > span {
-      display: none;
+    .about-hero__portrait {
+      position: relative;
+      max-width: none;
+      margin-inline: calc(var(--gutter) * -1);
+    }
+    .about-hero__portrait img {
+      border-radius: 0;
+    }
+    .about-hero__portrait::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 40%;
+      background: linear-gradient(transparent, var(--bg));
+    }
+    .about-hero__copy {
+      position: relative;
+      margin-top: -4.5rem;
     }
   }
 }

@@ -307,6 +307,11 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ slug }),
     }),
+  updateMediaAiGenerated: (mediaId: string, aiGenerated: boolean) =>
+    request<MediaAssetDto>(`/admin/media/${encodeURIComponent(mediaId)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ aiGenerated }),
+    }),
   mediaFile: async (mediaId: string) => {
     const headers = new Headers();
     const token = getToken();

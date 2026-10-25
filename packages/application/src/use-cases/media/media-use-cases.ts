@@ -9,8 +9,20 @@ import {
   type Result,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
-import { extensionFor, inspectImage, MAX_UPLOAD_BYTES, sha256Hex } from "./image-content.js";
-export { extensionFor, inspectImage, MAX_UPLOAD_BYTES, sha256Hex } from "./image-content.js";
+import {
+  extensionFor,
+  hasAiProvenance,
+  inspectImage,
+  MAX_UPLOAD_BYTES,
+  sha256Hex,
+} from "./image-content.js";
+export {
+  extensionFor,
+  hasAiProvenance,
+  inspectImage,
+  MAX_UPLOAD_BYTES,
+  sha256Hex,
+} from "./image-content.js";
 
 export interface UploadMediaInput {
   readonly body: ArrayBuffer;
@@ -67,6 +79,7 @@ export async function uploadMediaWithResult(
         .join("")
         .slice(0, 255) || null,
     slug: slug.value,
+    aiGenerated: hasAiProvenance(input.body),
     createdAt: ctx.clock.now(),
   };
   if (!(await ctx.repos.media.reserveUpload(asset))) {
@@ -158,6 +171,18 @@ export async function updateMediaSlug(
     throw error;
   }
   return ok({ ...asset, slug: slug.value });
+}
+
+/** Marks an image as made by an image model, which keeps it out of the gallery. */
+export async function setMediaAiGenerated(
+  ctx: AppContext,
+  id: MediaId,
+  aiGenerated: boolean,
+): Promise<Result<MediaAsset>> {
+  const asset = await ctx.repos.media.findById(id);
+  if (!asset) return err({ code: "MEDIA_NOT_FOUND", message: "画像が見つかりません" });
+  await ctx.repos.media.setAiGenerated(id, aiGenerated);
+  return ok({ ...asset, aiGenerated });
 }
 
 /** Removing a usage never deletes original, thumbnail, OGP or Markdown URLs. */

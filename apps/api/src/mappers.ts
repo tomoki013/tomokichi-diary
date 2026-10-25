@@ -122,6 +122,7 @@ export function toMediaAssetDto(
     size: asset.size,
     originalName: asset.originalName ?? asset.storageKey.split("/").at(-1) ?? null,
     slug: asset.slug ?? null,
+    aiGenerated: asset.aiGenerated ?? false,
     hashVerified: Boolean(asset.contentSha256),
     slugUrl: publicImageUrl(asset, imageBase),
     thumbnailUrl: thumb && resolve ? resolve(thumb) : null,

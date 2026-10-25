@@ -129,7 +129,7 @@ export function MediaLibrary() {
               current.map((item) => (item.id === asset.id ? asset : item)),
             );
             setSelected(asset);
-            toast.info("Slugを保存しました");
+            toast.info("画像の設定を保存しました");
           }}
         />
       )}
