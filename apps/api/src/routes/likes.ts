@@ -3,10 +3,13 @@ import type { LikeActivityDto } from "@tomokichi/contracts";
 import {
   getArticleLikeState,
   getLikeActivity,
+  getMediaLikeState,
   listArticleLikeCounts,
+  listMediaLikeCounts,
   toggleArticleLike,
+  toggleMediaLike,
 } from "@tomokichi/application";
-import type { ArticleId } from "@tomokichi/domain";
+import type { ArticleId, MediaId } from "@tomokichi/domain";
 import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
 
@@ -57,6 +60,48 @@ export function likeRoutes() {
       visitorHash,
     );
     return state ? c.json(state) : errorResponse(c, "ARTICLE_NOT_FOUND", "article not found", 404);
+  });
+
+  return routes;
+}
+
+/**
+ * Likes on gallery photographs. Same visitor identity and hashing as article
+ * likes, so a reader is one person to both.
+ */
+export function photoLikeRoutes() {
+  const routes = new Hono<AppEnv>();
+
+  routes.get("/", async (c) => {
+    c.header("cache-control", "public, max-age=60");
+    return c.json({ counts: await listMediaLikeCounts(c.get("ctx")) });
+  });
+
+  routes.get("/:mediaId", async (c) => {
+    const visitorId = c.req.query("visitorId")?.trim();
+    if (visitorId && !VISITOR_ID.test(visitorId)) {
+      return errorResponse(c, "API_VALIDATION_FAILED", "invalid visitor identity", 400);
+    }
+    const visitorHash = visitorId
+      ? await hashVisitor(visitorId, c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1")
+      : undefined;
+    const state = await getMediaLikeState(
+      c.get("ctx"),
+      c.req.param("mediaId") as MediaId,
+      visitorHash,
+    );
+    return state ? c.json(state) : errorResponse(c, "MEDIA_NOT_FOUND", "photo not found", 404);
+  });
+
+  routes.post("/:mediaId", async (c) => {
+    const body = (await c.req.json().catch(() => null)) as { visitorId?: unknown } | null;
+    const visitorId = typeof body?.visitorId === "string" ? body.visitorId.trim() : "";
+    if (!VISITOR_ID.test(visitorId)) {
+      return errorResponse(c, "API_VALIDATION_FAILED", "invalid visitor identity", 400);
+    }
+    const visitorHash = await hashVisitor(visitorId, c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1");
+    const state = await toggleMediaLike(c.get("ctx"), c.req.param("mediaId") as MediaId, visitorHash);
+    return state ? c.json(state) : errorResponse(c, "MEDIA_NOT_FOUND", "photo not found", 404);
   });
 
   return routes;

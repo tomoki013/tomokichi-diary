@@ -36,6 +36,17 @@ export function MediaDetails({
       setBusy(false);
     }
   }
+  async function toggleAiGenerated(aiGenerated: boolean): Promise<void> {
+    setBusy(true);
+    setError("");
+    try {
+      onSaved(await api.updateMediaAiGenerated(asset.id, aiGenerated));
+    } catch (failure) {
+      setError(describeError(failure));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function download(): Promise<void> {
     setBusy(true);
     setError("");
@@ -109,6 +120,15 @@ export function MediaDetails({
           {asset.slugUrl}
         </a>
       )}
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={asset.aiGenerated}
+          disabled={busy}
+          onChange={(event) => void toggleAiGenerated(event.target.checked)}
+        />
+        <span>AI生成画像（ギャラリーに出さない）</span>
+      </label>
       <fieldset disabled={busy} className="media-export">
         <legend>形式を変えてダウンロード</legend>
         <div className="form-grid">

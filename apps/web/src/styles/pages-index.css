@@ -1636,24 +1636,22 @@
     background: linear-gradient(180deg, rgb(18 16 12 / 0%) 40%, rgb(18 16 12 / 78%));
   }
 
-  /* The first frame starts a second into its cycle, already faded in, so
-     the page never opens on an empty band. */
+  /* Only the frame on show and the one after it are displayed, so a phone
+     downloads two photographs rather than all ten; a short script moves the
+     classes along. Without it the first frame simply stays. */
   .gallery-hero__slides figure {
+    display: none;
     opacity: 0;
-    animation: gallery-hero-fade 18s -1s infinite;
+    transition: opacity 1.2s var(--ease);
   }
 
-  .gallery-hero__slides figure:nth-child(2) {
-    animation-delay: 5s;
+  .gallery-hero__slides figure:is(.is-active, .is-next, .is-leaving) {
+    display: block;
   }
 
-  .gallery-hero__slides figure:nth-child(3) {
-    animation-delay: 11s;
-  }
-
-  .gallery-hero__slides figure:only-child {
+  .gallery-hero__slides figure.is-active {
+    z-index: 1;
     opacity: 1;
-    animation: none;
   }
 
   .gallery-hero__slides picture,
@@ -1664,8 +1662,10 @@
 
   .gallery-hero__slides img {
     object-fit: cover;
-    animation: gallery-hero-drift 18s infinite;
-    animation-delay: inherit;
+  }
+
+  .gallery-hero__slides figure:is(.is-active, .is-leaving) img {
+    animation: gallery-hero-drift 7.5s var(--ease) both;
   }
 
   .gallery-hero__slides figcaption {
@@ -1680,8 +1680,7 @@
     text-shadow: 0 1px 10px rgb(0 0 0 / 55%);
   }
 
-  /* One bar per photograph, filling while that photograph is up. Same cycle
-     and delays as the slides, so the two never drift apart. */
+  /* One bar per photograph: the ones shown are full, the current one fills. */
   .gallery-hero__bars {
     position: absolute;
     z-index: 1;
@@ -1707,55 +1706,30 @@
     background: #fff;
     transform: scaleX(0);
     transform-origin: left center;
-    animation: gallery-hero-bar 18s -1s infinite linear;
   }
 
-  .gallery-hero__bars i:nth-child(2)::after {
-    animation-delay: 5s;
+  .gallery-hero__bars i.is-done::after {
+    transform: scaleX(1);
   }
 
-  .gallery-hero__bars i:nth-child(3)::after {
-    animation-delay: 11s;
+  .gallery-hero__bars i.is-active::after {
+    animation: gallery-hero-bar 6s linear both;
   }
 
   @keyframes gallery-hero-bar {
-    0% {
+    from {
       transform: scaleX(0);
     }
-    35.5% {
+    to {
       transform: scaleX(1);
-    }
-    38% {
-      transform: scaleX(1);
-      opacity: 1;
-    }
-    38.1%,
-    100% {
-      transform: scaleX(1);
-      opacity: 0;
-    }
-  }
-
-  @keyframes gallery-hero-fade {
-    0% {
-      opacity: 0;
-    }
-    5%,
-    33% {
-      opacity: 1;
-    }
-    38%,
-    100% {
-      opacity: 0;
     }
   }
 
   @keyframes gallery-hero-drift {
-    0% {
+    from {
       transform: scale(1.06);
     }
-    38%,
-    100% {
+    to {
       transform: scale(1);
     }
   }
@@ -1792,15 +1766,11 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gallery-hero__slides figure,
     .gallery-hero__slides img {
-      animation: none;
+      animation: none !important;
     }
     .gallery-hero__bars {
       display: none;
-    }
-    .gallery-hero__slides figure:first-child {
-      opacity: 1;
     }
   }
 
@@ -2088,6 +2058,47 @@
      panel, which left a large void beside a tall photo. */
   /* The full-width hairline was left over from the panel this used to sit in;
      it read as a divider rather than as a link. */
+  .gallery-lightbox__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+  }
+
+  .gallery-lightbox__actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: var(--tap);
+    padding: 0.35rem 0.95rem;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--on-dark);
+    font-size: var(--step-tiny);
+    transition:
+      border-color var(--speed) var(--ease),
+      background var(--speed) var(--ease);
+  }
+
+  .gallery-lightbox__actions button:is(:hover, :focus-visible) {
+    border-color: var(--on-dark);
+  }
+
+  .gallery-lightbox__actions button[aria-pressed="true"] {
+    border-color: var(--accent-on-dark);
+    color: var(--accent-on-dark);
+  }
+
+  .gallery-lightbox__actions svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .gallery-lightbox__actions output {
+    font-variant-numeric: tabular-nums;
+  }
+
   .gallery-lightbox figcaption a {
     position: relative;
     display: inline-flex;

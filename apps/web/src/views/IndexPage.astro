@@ -12,7 +12,8 @@ import WorldMap from "../components/WorldMap.astro";
 import { visitedContinents } from "../lib/destinations";
 import { bestEpisodes } from "../lib/editorial";
 import { EXPERIENCES } from "../lib/experiences";
-import { SearchIcon, XIcon } from "../components/TravelIcons";
+import { pickHeroPhotos, rankGallery } from "../lib/gallery";
+import { SearchIcon, ShareIcon, XIcon } from "../components/TravelIcons";
 import LikedPrivacyNote from "../components/LikedPrivacyNote.astro";
 
 interface Props {
@@ -73,36 +74,47 @@ const collections = (kind: "series" | "journey") =>
         : [];
     });
 
-const galleryImages = [
+// AI-generated illustrations can sit in an article but are not travel
+// photographs, so the gallery never shows them.
+const galleryImages = rankGallery([
   ...new Map(
     articles.flatMap((view) =>
       view.media
-        .filter((item) => item.usage.role !== "og" && item.asset?.storageKey)
+        .filter(
+          (item) => item.usage.role !== "og" && item.asset?.storageKey && !item.asset.aiGenerated,
+        )
         .map((item) => {
           const primary = view.locations[0]?.location;
           const country = primary ? content.locations.countryOf(primary.id) : null;
+          const countryName = country ? content.locations.nameOf(country.id, "ja") : null;
+          const placeName = primary ? content.locations.nameOf(primary.id, "ja") : null;
           return [
             item.asset.storageKey,
             {
               ...item,
+              key: item.asset.storageKey,
+              articleId: view.article.id,
+              role: item.usage.role,
+              alt: item.usage.alt,
+              mimeType: item.asset.mimeType,
+              width: item.asset.width,
+              height: item.asset.height,
+              tags: view.tags.map((tag) => tag.name),
               articleTitle: view.revision.title,
               articleSummary: view.revision.summary,
               articlePath: view.route.path,
-              country: country ? content.locations.nameOf(country.id, "ja") : "旅の景色",
+              country: countryName ?? "旅の景色",
+              place:
+                countryName && placeName && placeName !== countryName
+                  ? `${countryName}・${placeName}`
+                  : (countryName ?? ""),
             },
           ] as const;
         }),
     ),
   ).values(),
-];
-// Hand-picked, like the about page's photographs: picking by recency put
-// airport lounges and in-flight meals behind the title. Landscape frames only,
-// since the band crops anything taller.
-const galleryHeroSlides = [
-  { storageKey: "images/Greece/oia-castle-sunset-view2.jpg", place: "ギリシャ・イア" },
-  { storageKey: "images/Turkey/balloons-in-cappadocia.jpg", place: "トルコ・カッパドキア" },
-  { storageKey: "images/Thai/wat-phra-kaew2.jpg", place: "タイ・バンコク" },
-];
+]);
+const galleryHeroSlides = pickHeroPhotos(galleryImages);
 const galleryCountries = [...new Set(galleryImages.map((item) => item.country))]
   .map((name) => ({ name, count: galleryImages.filter((item) => item.country === name).length }))
   .toSorted((a, b) => b.count - a.count);
@@ -792,12 +804,15 @@ const labelOf = (target: Route): string => {
 
   {route.path === "/gallery" && (
     <div class="gallery-page">
-      <header class="gallery-hero">
+      <header class="gallery-hero" data-gallery-hero>
         <div class="gallery-hero__slides" aria-hidden="true">
           {galleryHeroSlides.map((item, index) => (
-            <figure>
+            <figure
+              data-gallery-slide
+              class:list={[index === 0 && "is-active", index === 1 && "is-next"]}
+            >
               <Picture
-                storageKey={item.storageKey}
+                storageKey={item.asset.storageKey}
                 alt=""
                 sizes="100vw"
                 loading={index === 0 ? "eager" : "lazy"}
@@ -809,8 +824,8 @@ const labelOf = (target: Route): string => {
         </div>
         {galleryHeroSlides.length > 1 && (
           <div class="gallery-hero__bars" aria-hidden="true">
-            {galleryHeroSlides.map(() => (
-              <i />
+            {galleryHeroSlides.map((_, index) => (
+              <i class:list={[index === 0 && "is-active"]} />
             ))}
           </div>
         )}
@@ -853,6 +868,7 @@ const labelOf = (target: Route): string => {
               <button
                 type="button"
                 data-gallery-open
+                data-media-id={item.asset.id}
                 data-src={largeImageUrl(item.asset.storageKey)}
                 data-alt={item.usage.alt}
                 data-title={item.usage.alt || item.articleTitle}
@@ -896,6 +912,26 @@ const labelOf = (target: Route): string => {
             <small data-gallery-lightbox-country>PHOTO JOURNAL</small>
             <strong data-gallery-lightbox-title />
             <p data-gallery-lightbox-summary />
+            <div class="gallery-lightbox__actions">
+              <button
+                type="button"
+                class="gallery-lightbox__like"
+                data-photo-like
+                data-api-url={apiUrl}
+                aria-pressed="false"
+                aria-label="この写真にいいねする"
+              >
+                <span data-photo-like-heart aria-hidden="true">
+                  ♡
+                </span>
+                いいね
+                <output data-photo-like-count aria-label="いいね数" />
+              </button>
+              <button type="button" class="gallery-lightbox__share" data-photo-share>
+                <ShareIcon />
+                <span data-photo-share-label>共有</span>
+              </button>
+            </div>
             <a data-gallery-lightbox-link href="/posts">
               この写真の記事を読む<span aria-hidden="true">→</span>
             </a>
@@ -932,6 +968,7 @@ const labelOf = (target: Route): string => {
     </div>
   )}
   <script>
+    import { visitorId } from "../lib/like-visitor";
     import { onShelfChange, shelf } from "../lib/my-trips";
 
     /**
@@ -1403,6 +1440,50 @@ const labelOf = (target: Route): string => {
       });
     }
 
+    // Hero frames: advance every six seconds, but only once the next photograph
+    // has loaded, so the band never fades to an empty frame on a slow line.
+    const galleryHero = document.querySelector<HTMLElement>("[data-gallery-hero]");
+    const heroSlides = [
+      ...(galleryHero?.querySelectorAll<HTMLElement>("[data-gallery-slide]") ?? []),
+    ];
+    const heroBars = [
+      ...(galleryHero?.querySelectorAll<HTMLElement>(".gallery-hero__bars i") ?? []),
+    ];
+    if (heroSlides.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      let current = 0;
+      let timer = 0;
+      const loaded = (index: number) => {
+        const image = heroSlides[index]?.querySelector("img");
+        return !image || (image.complete && image.naturalWidth > 0);
+      };
+      const show = (next: number) => {
+        const leaving = heroSlides[current]!;
+        leaving.classList.replace("is-active", "is-leaving");
+        window.setTimeout(() => leaving.classList.remove("is-leaving"), 1300);
+        heroSlides[next]!.classList.remove("is-next");
+        heroSlides[next]!.classList.add("is-active");
+        heroSlides[(next + 1) % heroSlides.length]!.classList.add("is-next");
+        heroBars.forEach((bar, index) => {
+          bar.classList.toggle("is-done", index < next);
+          bar.classList.remove("is-active");
+        });
+        void heroBars[next]?.offsetWidth;
+        heroBars[next]?.classList.add("is-active");
+        current = next;
+      };
+      const tick = () => {
+        const next = (current + 1) % heroSlides.length;
+        const ready = loaded(next);
+        if (ready) show(next);
+        timer = window.setTimeout(tick, ready ? 6000 : 500);
+      };
+      timer = window.setTimeout(tick, 6000);
+      document.addEventListener("visibilitychange", () => {
+        window.clearTimeout(timer);
+        if (!document.hidden) timer = window.setTimeout(tick, 6000);
+      });
+    }
+
     const galleryFilters = [
       ...document.querySelectorAll<HTMLButtonElement>("[data-gallery-filter]"),
     ];
@@ -1463,25 +1544,118 @@ const labelOf = (target: Route): string => {
       applyGalleryFilter(urlParam("country", "all"), "replace");
       addEventListener("popstate", () => applyGalleryFilter(urlParam("country", "all"), "none"));
     }
-    document.querySelectorAll<HTMLButtonElement>("[data-gallery-open]").forEach((button) =>
-      button.addEventListener("click", () => {
-        if (galleryImage) {
-          galleryImage.src = button.dataset.src ?? "";
-          galleryImage.alt = button.dataset.alt ?? "";
+    // Likes and sharing act on whichever photograph is open. Likes use the
+    // same anonymous identity as article likes.
+    const photoLike = galleryLightbox?.querySelector<HTMLButtonElement>("[data-photo-like]");
+    const photoLikeHeart = photoLike?.querySelector<HTMLElement>("[data-photo-like-heart]");
+    const photoLikeCount = photoLike?.querySelector<HTMLOutputElement>("[data-photo-like-count]");
+    const photoShare = galleryLightbox?.querySelector<HTMLButtonElement>("[data-photo-share]");
+    const photoShareLabel = photoShare?.querySelector<HTMLElement>("[data-photo-share-label]");
+    let openPhoto: HTMLButtonElement | null = null;
+    const photoLikeEndpoint = (mediaId: string) =>
+      `${photoLike?.dataset.apiUrl}/v1/photo-likes/${encodeURIComponent(mediaId)}`;
+    const paintPhotoLike = (state: { count: number; liked: boolean } | null) => {
+      if (!photoLike) return;
+      const liked = state?.liked ?? false;
+      photoLike.setAttribute("aria-pressed", String(liked));
+      photoLike.setAttribute(
+        "aria-label",
+        liked ? "この写真のいいねを取り消す" : "この写真にいいねする",
+      );
+      if (photoLikeHeart) photoLikeHeart.textContent = liked ? "♥" : "♡";
+      if (photoLikeCount)
+        photoLikeCount.textContent =
+          state && state.count > 0 ? new Intl.NumberFormat("ja-JP").format(state.count) : "";
+    };
+    const loadPhotoLike = (mediaId: string) => {
+      paintPhotoLike(null);
+      fetch(`${photoLikeEndpoint(mediaId)}?visitorId=${encodeURIComponent(visitorId())}`)
+        .then((response) => (response.ok ? response.json() : null))
+        .then((state) => {
+          if (openPhoto?.dataset.mediaId === mediaId) paintPhotoLike(state);
+        })
+        .catch(() => undefined);
+    };
+    photoLike?.addEventListener("click", async () => {
+      const mediaId = openPhoto?.dataset.mediaId;
+      if (!mediaId || photoLike.disabled) return;
+      photoLike.disabled = true;
+      try {
+        const response = await fetch(photoLikeEndpoint(mediaId), {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ visitorId: visitorId() }),
+        });
+        if (response.ok && openPhoto?.dataset.mediaId === mediaId)
+          paintPhotoLike(await response.json());
+      } finally {
+        photoLike.disabled = false;
+      }
+    });
+    const photoUrl = (mediaId: string) =>
+      new URL(`${location.pathname}?photo=${encodeURIComponent(mediaId)}`, location.href).href;
+    photoShare?.addEventListener("click", async () => {
+      const mediaId = openPhoto?.dataset.mediaId;
+      if (!mediaId) return;
+      const payload = {
+        title: openPhoto?.dataset.title ?? document.title,
+        text: openPhoto?.dataset.place ?? "",
+        url: photoUrl(mediaId),
+      };
+      const say = (text: string) => {
+        if (!photoShareLabel) return;
+        photoShareLabel.textContent = text;
+        window.setTimeout(() => (photoShareLabel.textContent = "共有"), 2200);
+      };
+      try {
+        if (navigator.share) await navigator.share(payload);
+        else {
+          await navigator.clipboard.writeText(payload.url);
+          say("リンクをコピーしました");
         }
-        if (galleryTitle) galleryTitle.textContent = button.dataset.title ?? "";
-        if (galleryCountry) galleryCountry.textContent = button.dataset.place ?? "PHOTO JOURNAL";
-        if (gallerySummary) gallerySummary.textContent = button.dataset.summary ?? "";
-        if (galleryLink) galleryLink.href = button.dataset.path ?? "/posts";
-        setGalleryLightbox(true);
-      }),
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        say("共有できませんでした");
+      }
+    });
+
+    const openGalleryPhoto = (button: HTMLButtonElement) => {
+      openPhoto = button;
+      if (galleryImage) {
+        galleryImage.src = button.dataset.src ?? "";
+        galleryImage.alt = button.dataset.alt ?? "";
+      }
+      if (galleryTitle) galleryTitle.textContent = button.dataset.title ?? "";
+      if (galleryCountry) galleryCountry.textContent = button.dataset.place ?? "PHOTO JOURNAL";
+      if (gallerySummary) gallerySummary.textContent = button.dataset.summary ?? "";
+      if (galleryLink) galleryLink.href = button.dataset.path ?? "/posts";
+      if (button.dataset.mediaId) {
+        loadPhotoLike(button.dataset.mediaId);
+        // The address names the open photograph, so it can be copied or shared.
+        setUrlParams([["photo", button.dataset.mediaId, ""]], "replace");
+      }
+      setGalleryLightbox(true);
+    };
+    const closeGalleryPhoto = () => {
+      openPhoto = null;
+      setUrlParams([["photo", "", ""]], "replace");
+      setGalleryLightbox(false);
+    };
+    const galleryOpeners = [...document.querySelectorAll<HTMLButtonElement>("[data-gallery-open]")];
+    galleryOpeners.forEach((button) =>
+      button.addEventListener("click", () => openGalleryPhoto(button)),
     );
+    // A shared link opens straight onto its photograph.
+    const sharedPhoto = urlParam("photo");
+    const sharedOpener = sharedPhoto
+      ? galleryOpeners.find((button) => button.dataset.mediaId === sharedPhoto)
+      : undefined;
+    if (sharedOpener) openGalleryPhoto(sharedOpener);
     galleryLightbox
       ?.querySelectorAll<HTMLButtonElement>("[data-gallery-close]")
-      .forEach((button) => button.addEventListener("click", () => setGalleryLightbox(false)));
+      .forEach((button) => button.addEventListener("click", closeGalleryPhoto));
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && galleryLightbox && !galleryLightbox.hidden)
-        setGalleryLightbox(false);
+      if (event.key === "Escape" && galleryLightbox && !galleryLightbox.hidden) closeGalleryPhoto();
     });
   </script>
 </BaseLayout>

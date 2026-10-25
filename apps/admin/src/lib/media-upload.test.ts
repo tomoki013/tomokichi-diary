@@ -8,6 +8,7 @@ const saved = {
   url: "https://media.example/image.png",
   originalName: "Tokyo.png",
   slug: "tokyo-trip",
+  aiGenerated: false,
   hashVerified: true,
   mimeType: "image/png",
   width: 1,

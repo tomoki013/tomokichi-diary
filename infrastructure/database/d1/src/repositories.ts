@@ -173,6 +173,40 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   } satisfies Repositories["articleLikes"];
 
+  const mediaLikes = {
+    count: async (mediaId: string) => {
+      const row = await first("SELECT COUNT(*) AS count FROM media_likes WHERE media_id = ?", mediaId);
+      return Number(row?.["count"] ?? 0);
+    },
+    countAll: async () =>
+      (await all("SELECT media_id, COUNT(*) AS count FROM media_likes GROUP BY media_id")).map(
+        (row) => ({
+          mediaId: row["media_id"] as import("@tomokichi/domain").MediaId,
+          count: Number(row["count"] ?? 0),
+        }),
+      ),
+    has: async (mediaId: string, visitorHash: string) =>
+      (await first(
+        "SELECT 1 AS found FROM media_likes WHERE media_id = ? AND visitor_hash = ?",
+        mediaId,
+        visitorHash,
+      )) !== null,
+    add: async (mediaId: string, visitorHash: string, createdAt: string) => {
+      await db
+        .prepare(
+          "INSERT INTO media_likes (media_id, visitor_hash, created_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
+        )
+        .bind(mediaId, visitorHash, createdAt)
+        .run();
+    },
+    remove: async (mediaId: string, visitorHash: string) => {
+      await db
+        .prepare("DELETE FROM media_likes WHERE media_id = ? AND visitor_hash = ?")
+        .bind(mediaId, visitorHash)
+        .run();
+    },
+  } satisfies Repositories["mediaLikes"];
+
   const revisions: RevisionRepository = {
     findById: async (id) => {
       const row = await first("SELECT * FROM article_revisions WHERE id = ?", id);
@@ -289,6 +323,12 @@ export function createRepositories(db: SqlDatabase): Repositories {
           : []),
         db.prepare("UPDATE media_assets SET slug = ? WHERE id = ?").bind(slug, id),
       ]);
+    },
+    setAiGenerated: async (id, aiGenerated) => {
+      await db
+        .prepare("UPDATE media_assets SET ai_generated = ? WHERE id = ?")
+        .bind(aiGenerated ? 1 : 0, id)
+        .run();
     },
     reserveUpload: async (asset) =>
       Boolean(
@@ -564,6 +604,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     monetization: createMonetizationRepository(db),
     publicationMetadata,
     articleLikes,
+    mediaLikes,
     revisions,
     embeds,
     routes,

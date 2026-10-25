@@ -34,25 +34,8 @@ const { articleId, compact = false, title, path } = Astro.props;
 </button>
 
 <script>
+  import { visitorId } from "../lib/like-visitor";
   import { forget, onShelfChange, remember, shelf } from "../lib/my-trips";
-
-  const storageKey = "tomokichi-like-visitor";
-  // Used when storage is refused (hardened or private modes): likes still
-  // work for this page view, they just are not remembered across visits.
-  let pageVisitorId: string | null = null;
-
-  function visitorId(): string {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) return stored;
-      const created = crypto.randomUUID();
-      localStorage.setItem(storageKey, created);
-      return created;
-    } catch {
-      pageVisitorId ??= crypto.randomUUID();
-      return pageVisitorId;
-    }
-  }
 
   const allButtons = () => [...document.querySelectorAll<HTMLButtonElement>("[data-like-button]")];
   /** A page can show the same story twice (header and end of article, a card). */

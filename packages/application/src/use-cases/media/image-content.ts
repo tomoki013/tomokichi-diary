@@ -170,3 +170,36 @@ export function inspectImage(body: ArrayBuffer): ImageContent | null {
   }
   return null;
 }
+
+/**
+ * Provenance a generator leaves in the file: the IPTC digital source type
+ * (trainedAlgorithmicMedia, also inside compositeWithTrainedAlgorithmicMedia)
+ * that Google, OpenAI and Adobe write, and the names generators put in their
+ * C2PA claims. A C2PA manifest on its own proves nothing, since phone cameras
+ * now sign real photographs too.
+ */
+const AI_PROVENANCE = [
+  "trainedAlgorithmicMedia",
+  "ChatGPT",
+  "DALL-E",
+  "DALL·E",
+  "Midjourney",
+  "Stable Diffusion",
+  "Adobe Firefly",
+];
+/** Metadata sits near the start; PNG may carry its chunk after the pixels. */
+const PROVENANCE_HEAD = 2 * 1024 * 1024;
+const PROVENANCE_TAIL = 256 * 1024;
+
+export function hasAiProvenance(body: ArrayBuffer): boolean {
+  const bytes = new Uint8Array(body);
+  const regions =
+    bytes.byteLength <= PROVENANCE_HEAD + PROVENANCE_TAIL
+      ? [bytes]
+      : [bytes.subarray(0, PROVENANCE_HEAD), bytes.subarray(bytes.byteLength - PROVENANCE_TAIL)];
+  const decoder = new TextDecoder("utf-8", { fatal: false });
+  return regions.some((region) => {
+    const text = decoder.decode(region);
+    return AI_PROVENANCE.some((marker) => text.includes(marker));
+  });
+}

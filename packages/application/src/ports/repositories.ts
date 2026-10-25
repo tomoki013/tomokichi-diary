@@ -75,6 +75,16 @@ export interface ArticleLikeRepository {
   remove(articleId: ArticleId, visitorHash: string): Promise<void>;
 }
 
+/** Likes on a single photograph, the same shape as article likes. */
+export interface MediaLikeRepository {
+  count(mediaId: MediaId): Promise<number>;
+  /** Every photograph that has at least one like, with its count. */
+  countAll(): Promise<readonly { readonly mediaId: MediaId; readonly count: number }[]>;
+  has(mediaId: MediaId, visitorHash: string): Promise<boolean>;
+  add(mediaId: MediaId, visitorHash: string, createdAt: string): Promise<void>;
+  remove(mediaId: MediaId, visitorHash: string): Promise<void>;
+}
+
 export interface RevisionRepository {
   findById(id: RevisionId): Promise<ArticleRevision | null>;
   findLatest(articleId: ArticleId): Promise<ArticleRevision | null>;
@@ -114,6 +124,7 @@ export interface MediaRepository {
   save(asset: MediaAsset): Promise<void>;
   findBySlug(slug: string): Promise<MediaAsset | null>;
   updateSlug(id: MediaId, slug: string | null): Promise<void>;
+  setAiGenerated(id: MediaId, aiGenerated: boolean): Promise<void>;
   reserveUpload(asset: MediaAsset): Promise<boolean>;
   completeUpload(asset: MediaAsset): Promise<void>;
   releaseUpload(sha256: string, id: MediaId): Promise<void>;
@@ -213,6 +224,7 @@ export interface Repositories {
   readonly articles: ArticleRepository;
   readonly publicationMetadata: PublicationMetadataRepository;
   readonly articleLikes: ArticleLikeRepository;
+  readonly mediaLikes: MediaLikeRepository;
   readonly revisions: RevisionRepository;
   readonly embeds: EmbedRepository;
   readonly routes: RouteRepository;

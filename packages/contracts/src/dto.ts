@@ -101,6 +101,8 @@ export interface MediaAssetDto {
   readonly size: number;
   readonly originalName: string | null;
   readonly slug: string | null;
+  /** Made by an image model; kept out of the gallery. */
+  readonly aiGenerated: boolean;
   readonly hashVerified: boolean;
   readonly slugUrl: string | null;
   /**
