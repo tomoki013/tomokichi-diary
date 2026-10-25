@@ -8,4 +8,8 @@ const publishMessages: Record<string, string> = {
   "scheduled publication time has not been reached": "予約日時になると公開されます",
   "archived articles cannot be published": "アーカイブした記事は公開できません",
 };
-export const publishProblem = (message: string) => publishMessages[message] ?? message;
+const brokenLink = "internal link target does not exist: ";
+export const publishProblem = (message: string) =>
+  message.startsWith(brokenLink)
+    ? `本文のリンク先 ${message.slice(brokenLink.length)} が存在しません。URLを確認してください`
+    : (publishMessages[message] ?? message);

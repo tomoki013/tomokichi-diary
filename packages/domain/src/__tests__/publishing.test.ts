@@ -20,6 +20,9 @@ const base = {
   now: NOW,
 };
 
+const body = (link: string) =>
+  makeRevision({ bodyMarkdown: `${"本文".repeat(120)}\n\n[関連記事](${link})` });
+
 describe("validatePublishable", () => {
   it("requires a title, a summary and a substantial body", () => {
     const errors = validatePublishable({
@@ -44,6 +47,21 @@ describe("validatePublishable", () => {
     expect(validatePublishable({ ...base, media: [makeCover({ alt: " " })] })[0]?.field).toBe(
       "media",
     );
+  });
+
+  it("rejects internal links that no route answers", () => {
+    const routes = [
+      makeRoute(),
+      makeRoute({ id: "route-2" as never, path: "/posts/other" as never }),
+    ];
+    expect(validatePublishable({ ...base, routes, revision: body("/posts/other#top") })).toEqual(
+      [],
+    );
+    expect(validatePublishable({ ...base, routes, revision: body("/rss.xml") })).toEqual([]);
+    const errors = validatePublishable({ ...base, routes, revision: body("/posts/missing") });
+    expect(errors.map((e) => e.message)).toEqual([
+      "internal link target does not exist: /posts/missing",
+    ]);
   });
 
   it("rejects a revision belonging to another article", () => {

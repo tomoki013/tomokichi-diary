@@ -178,7 +178,7 @@ async function publishInputFor(ctx: AppContext, articleId: ArticleId) {
       r.targetId === articleId,
   );
   const media = await ctx.repos.media.listForArticle(articleId);
-  return { article, revision, canonicalRoute, media, now: ctx.clock.now() };
+  return { article, revision, canonicalRoute, media, routes, now: ctx.clock.now() };
 }
 
 export async function publishArticle(
