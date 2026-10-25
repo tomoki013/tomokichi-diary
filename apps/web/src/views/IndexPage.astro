@@ -95,6 +95,14 @@ const galleryImages = [
     ),
   ).values(),
 ];
+// Hand-picked, like the about page's photographs: picking by recency put
+// airport lounges and in-flight meals behind the title. Landscape frames only,
+// since the band crops anything taller.
+const galleryHeroSlides = [
+  { storageKey: "images/Greece/oia-castle-sunset-view2.jpg", place: "ギリシャ・イア" },
+  { storageKey: "images/Turkey/balloons-in-cappadocia.jpg", place: "トルコ・カッパドキア" },
+  { storageKey: "images/Thai/wat-phra-kaew2.jpg", place: "タイ・バンコク" },
+];
 const galleryCountries = [...new Set(galleryImages.map((item) => item.country))]
   .map((name) => ({ name, count: galleryImages.filter((item) => item.country === name).length }))
   .toSorted((a, b) => b.count - a.count);
@@ -785,42 +793,37 @@ const labelOf = (target: Route): string => {
   {route.path === "/gallery" && (
     <div class="gallery-page">
       <header class="gallery-hero">
-        <div>
-          <p class="eyebrow">PHOTO JOURNAL</p>
-          <h1>
-            旅の途中で、
-            <br />
-            心が止まった瞬間。
-          </h1>
-          <p>
-            街の光、建築の輪郭、食卓の色。記事に残した写真を、ここでは言葉より少し自由に眺められます。
-          </p>
-          <span>
-            <strong>{galleryImages.length}</strong> photographs
-          </span>
-        </div>
-        <div class="gallery-hero__mosaic" aria-hidden="true">
-          {galleryImages.slice(0, 3).map((item, index) => (
-            <Picture
-              storageKey={item.asset.storageKey}
-              alt={item.usage.alt || item.articleTitle}
-              sizes="(max-width: 760px) 50vw, 300px"
-              loading={index === 0 ? "eager" : "lazy"}
-            />
+        <div class="gallery-hero__slides" aria-hidden="true">
+          {galleryHeroSlides.map((item, index) => (
+            <figure>
+              <Picture
+                storageKey={item.storageKey}
+                alt=""
+                sizes="100vw"
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchpriority={index === 0 ? "high" : "auto"}
+              />
+              <figcaption>{item.place}</figcaption>
+            </figure>
           ))}
+        </div>
+        <div class="gallery-hero__copy">
+          <p>GALLERY</p>
+          <h1>旅の途中で、心が止まった瞬間。</h1>
+          <span>
+            {galleryImages.length} photographs ·{" "}
+            {galleryCountries.filter((country) => country.name !== "旅の景色").length} countries
+          </span>
         </div>
       </header>
 
       <section class="gallery-browser" aria-labelledby="gallery-all-heading">
-        <header>
-          <div>
-            <p class="eyebrow">ALL PHOTOGRAPHS</p>
-            <h2 id="gallery-all-heading">すべての旅の写真</h2>
-          </div>
-          <p>
-            <span data-gallery-count>{galleryImages.length}</span>枚を表示中
-          </p>
-        </header>
+        <h2 id="gallery-all-heading" class="sr-only">
+          すべての旅の写真
+        </h2>
+        <p class="sr-only" aria-live="polite">
+          <span data-gallery-count>{galleryImages.length}</span>枚を表示中
+        </p>
         <div class="gallery-filters" aria-label="国で絞り込む">
           <button class="is-active" type="button" aria-pressed="true" data-gallery-filter="all">
             すべて <small>{galleryImages.length}</small>

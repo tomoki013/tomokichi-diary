@@ -86,40 +86,56 @@ const aboutCountries = content.snapshot.locations
     <article class="about-page">
       <Breadcrumbs trail={trail} />
       <header class="about-hero">
-        <div class="about-hero__copy">
-          <p>このブログについて</p>
-          <h1>
-            <span class="sr-only">{pageTitle} — </span>
-            旅に出る前の時間も、
-            <br />
-            旅のあとに残る記憶も。
-          </h1>
-          <p>
-            実際に歩いて、迷って、心が動いた瞬間を記録する場所です。読んだ人の中に「次はどこへ行こう」という小さな衝動が生まれたら、それがこのブログのいちばん嬉しい役目です。
-          </p>
-          <a href="/posts">旅の記録を読む&nbsp; →</a>
-        </div>
-        <div class="about-hero__photos">
+        <div class="about-hero__portrait">
           <Picture
-            storageKey="images/Greece/oia-castle-sunset-view2.jpg"
-            alt="旅先で眺めた夕景"
-            sizes="(max-width: 760px) 100vw, 680px"
+            storageKey="images/Introduce/introduce.jpg"
+            alt="ともきち"
+            sizes="(max-width: 62rem) 100vw, 480px"
             loading="eager"
             fetchpriority="high"
           />
-          <Picture
-            storageKey="images/Turkey/balloons-in-cappadocia.jpg"
-            alt="カッパドキアの空を進む気球"
-            sizes="(max-width: 760px) 42vw, 260px"
-            loading="eager"
-          />
-          <span>
-            Every journey
-            <br />
-            begins with wonder.
-          </span>
+        </div>
+        <div class="about-hero__copy">
+          <p>このブログを書いている人</p>
+          <h1>
+            <span class="sr-only">{pageTitle} — </span>
+            ともきち
+          </h1>
+          <p>歴史を感じる建築と、その土地の空気がゆっくり変わっていく夕暮れが好きです。</p>
+          <p>
+            名所を急いで巡るより、現地の人が通うカフェで過ごしたり、予定を決めずに裏路地を歩いたり。観光地の向こう側にある日常へ少しだけ混ざるような旅をしています。
+          </p>
+          <dl>
+            <div>
+              <dt>これまでの旅先</dt>
+              <dd>
+                {visitedCountries.length}
+                <span>か国</span>
+              </dd>
+            </div>
+            <div>
+              <dt>公開した記録</dt>
+              <dd>
+                {publicStories.length}
+                <span>本</span>
+              </dd>
+            </div>
+          </dl>
+          <a href="/posts">旅の記録を読む&nbsp; →</a>
         </div>
       </header>
+
+      <section class="about-intro" aria-labelledby="about-intro-title">
+        <small>このブログについて</small>
+        <h2 id="about-intro-title">
+          旅に出る前の時間も、
+          <br />
+          旅のあとに残る記憶も。
+        </h2>
+        <p>
+          実際に歩いて、迷って、心が動いた瞬間を記録する場所です。読んだ人の中に「次はどこへ行こう」という小さな衝動が生まれたら、それがこのブログのいちばん嬉しい役目です。
+        </p>
+      </section>
 
       <section class="about-principles" aria-label="このブログの読み方">
         <p>
@@ -155,42 +171,6 @@ const aboutCountries = content.snapshot.locations
           <p>
             このブログでは、息をのむ景色だけでなく、空港から街へ向かう方法や、現地で迷ったこと、ふらっと入った路地の空気まで残しています。きれいな思い出と実際に役立つ情報、その両方があることで、まだ知らない場所を少し身近に感じてもらえるはずです。
           </p>
-        </div>
-      </section>
-
-      <section class="about-author" aria-labelledby="about-author-title">
-        <div class="about-author__portrait">
-          <Picture
-            storageKey="images/Introduce/introduce.jpg"
-            alt="ともきち"
-            sizes="(max-width: 760px) 100vw, 520px"
-          />
-        </div>
-        <div class="about-author__copy">
-          <small>書いている人</small>
-          <h2 id="about-author-title">ともきち</h2>
-          <p>
-            京都在住の大学生。歴史を感じる建築と、その土地の空気がゆっくり変わっていく夕暮れが好きです。
-          </p>
-          <p>
-            名所を急いで巡るより、現地の人が通うカフェで過ごしたり、予定を決めずに裏路地を歩いたり。観光地の向こう側にある日常へ少しだけ混ざるような旅をしています。
-          </p>
-          <dl>
-            <div>
-              <dt>これまでの旅先</dt>
-              <dd>
-                {visitedCountries.length}
-                <span>か国</span>
-              </dd>
-            </div>
-            <div>
-              <dt>公開した記録</dt>
-              <dd>
-                {publicStories.length}
-                <span>本</span>
-              </dd>
-            </div>
-          </dl>
         </div>
       </section>
 

@@ -1604,99 +1604,179 @@
   }
 
   /* /gallery --------------------------------------------------------- */
+  /* Full-bleed like the home hero: three landscape frames cross-fade under
+     the title. CSS only, so the band costs no script. */
   .gallery-hero {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: center;
-    gap: var(--space-lg);
-    padding-top: var(--band-tight);
+    align-content: end;
+    overflow: hidden;
+    width: 100vw;
+    min-height: clamp(26rem, 62svh, 38rem);
+    margin-inline: calc(50% - 50vw);
+    background: var(--surface-dark);
+    isolation: isolate;
   }
 
-  .gallery-hero > div:first-child {
-    display: grid;
-    justify-items: start;
-    gap: var(--space-sm);
+  .gallery-hero__slides,
+  .gallery-hero__slides figure {
+    position: absolute;
+    inset: 0;
+    margin: 0;
   }
 
-  .gallery-hero h1 {
-    font-size: var(--step-h1);
+  .gallery-hero__slides {
+    z-index: -1;
   }
 
-  .gallery-hero p:not(.eyebrow) {
-    max-width: 32rem;
-    color: var(--ink-soft);
-    font-size: var(--step-small);
+  .gallery-hero__slides::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(18 16 12 / 0%) 40%, rgb(18 16 12 / 78%));
   }
 
-  .gallery-hero > div:first-child > span {
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--line);
-    width: 100%;
-    color: var(--ink-faint);
-    font-family: var(--font-label);
-    font-size: var(--step-tiny);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+  /* The first frame starts a second into its cycle, already faded in, so
+     the page never opens on an empty band. */
+  .gallery-hero__slides figure {
+    opacity: 0;
+    animation: gallery-hero-fade 18s -1s infinite;
   }
 
-  .gallery-hero > div:first-child > span strong {
-    margin-inline-end: 0.35rem;
-    color: var(--ink);
-    font-size: 1.5rem;
-    letter-spacing: 0;
+  .gallery-hero__slides figure:nth-child(2) {
+    animation-delay: 5s;
   }
 
-  .gallery-hero__mosaic {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    aspect-ratio: 3 / 2;
+  .gallery-hero__slides figure:nth-child(3) {
+    animation-delay: 11s;
   }
 
-  .gallery-hero__mosaic picture:first-child {
-    grid-row: span 2;
+  .gallery-hero__slides figure:only-child {
+    opacity: 1;
+    animation: none;
   }
 
-  .gallery-hero__mosaic picture,
-  .gallery-hero__mosaic img {
+  .gallery-hero__slides picture,
+  .gallery-hero__slides img {
     width: 100%;
     height: 100%;
   }
 
-  .gallery-hero__mosaic img {
-    border-radius: var(--radius);
+  .gallery-hero__slides img {
     object-fit: cover;
+    animation: gallery-hero-drift 18s infinite;
+    animation-delay: inherit;
   }
 
-  .gallery-browser > header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-xs) var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--line);
+  .gallery-hero__slides figcaption {
+    position: absolute;
+    z-index: 1;
+    right: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+    bottom: 1.2rem;
+    color: rgb(255 255 255 / 88%);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
   }
 
-  .gallery-browser > header > div {
+  @keyframes gallery-hero-fade {
+    0% {
+      opacity: 0;
+    }
+    5%,
+    33% {
+      opacity: 1;
+    }
+    38%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gallery-hero-drift {
+    0% {
+      transform: scale(1.06);
+    }
+    38%,
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .gallery-hero__copy {
     display: grid;
-    gap: 0.2rem;
+    justify-items: start;
+    gap: 0.5rem;
+    padding: 0 max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter))) 3.2rem;
+    color: #fff;
   }
 
-  .gallery-browser > header > p {
-    color: var(--ink-faint);
+  .gallery-hero__copy p {
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    opacity: 0.85;
+  }
+
+  .gallery-hero__copy h1 {
+    max-width: 16em;
+    color: inherit;
+    font-size: var(--step-h1);
+    font-weight: 500;
+    line-height: 1.4;
+    text-wrap: balance;
+    text-shadow: 0 1px 16px rgb(0 0 0 / 30%);
+  }
+
+  .gallery-hero__copy span {
     font-size: var(--step-tiny);
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-hero__slides figure,
+    .gallery-hero__slides img {
+      animation: none;
+    }
+    .gallery-hero__slides figure:first-child {
+      opacity: 1;
+    }
+  }
+
+  /* The wall follows the photograph straight away, with the filters held
+     under the masthead while it scrolls. */
+  .gallery-page {
+    /* The filter row scrolls sideways; without a fixed track its full
+       min-content width would set the column and push the wall off-screen. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery-page > .gallery-browser {
+    margin-top: 0;
   }
 
   .gallery-filters {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
     display: flex;
-    flex-wrap: wrap;
     gap: 0.45rem;
-    margin-block: var(--space-md);
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.3rem var(--gutter);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+
+  .gallery-filters::-webkit-scrollbar {
+    display: none;
   }
 
   .gallery-filters button {
     position: relative;
+    flex: none;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -1753,7 +1833,8 @@
   .gallery-wall {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-    gap: 0.6rem;
+    gap: 3px;
+    margin-top: 3px;
   }
 
   /* The wall holds every photograph on the site. Skipping layout and paint
@@ -1770,7 +1851,7 @@
     width: 100%;
     padding: 0;
     border: 0;
-    border-radius: var(--radius);
+    border-radius: 0;
     background: var(--surface-alt);
   }
 
@@ -1980,8 +2061,7 @@
   @media (max-width: 62rem) {
     .posts-archive__masthead,
     .destination-masthead,
-    .collections-hero,
-    .gallery-hero {
+    .collections-hero {
       grid-template-columns: minmax(0, 1fr);
     }
     .destination-intro {
@@ -1996,8 +2076,7 @@
       min-height: clamp(22rem, 52vw, 30rem);
     }
     .destination-masthead__mosaic,
-    .collections-hero__visual,
-    .gallery-hero__mosaic {
+    .collections-hero__visual {
       aspect-ratio: 16 / 9;
     }
     .posts-filter__primary {
@@ -2125,11 +2204,14 @@
     .posts-results__footer .posts-pagination {
       grid-column: 1;
     }
+    /* Three across edge to edge: a phone wall reads as photographs, so the
+       titles wait for the lightbox. */
     .gallery-wall {
-      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-inline: calc(var(--gutter) * -1);
     }
     .gallery-wall button > span {
-      opacity: 1;
+      display: none;
     }
   }
 
