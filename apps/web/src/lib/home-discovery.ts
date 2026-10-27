@@ -150,6 +150,8 @@ export interface DiscoveryCandidate {
 
 export interface RecommendOptions {
   readonly limit?: number;
+  /** Scene photos retain their original selection independently of the curated stories. */
+  readonly prioritizePicks?: boolean;
   /**
    * Articles already prominent on the page (the best-episode carousel right
    * below). Among automatic fallback picks, prefer stories not shown there.
@@ -172,10 +174,16 @@ export interface RecommendOptions {
 export function recommend<T extends DiscoveryCandidate>(
   candidates: readonly T[],
   tag: ExperienceTag,
-  { limit = DISCOVERY_LIMIT, shownElsewhere = new Set() }: RecommendOptions = {},
+  {
+    limit = DISCOVERY_LIMIT,
+    shownElsewhere = new Set(),
+    prioritizePicks = true,
+  }: RecommendOptions = {},
 ): T[] {
   const seen = new Set<string>();
-  const picks = new Map(DISCOVERY_PICKS[tag].map((slug, index) => [slug, index]));
+  const picks = new Map(
+    (prioritizePicks ? DISCOVERY_PICKS[tag] : []).map((slug, index) => [slug, index]),
+  );
   return candidates
     .flatMap((candidate, order) => {
       const { id, experienceTags } = candidate.article;

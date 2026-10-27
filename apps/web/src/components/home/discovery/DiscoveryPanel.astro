@@ -20,6 +20,8 @@ import {
 interface Props {
   tag: ExperienceTag;
   items: readonly DiscoveryItem[];
+  /** Keep the original scene photos when the featured story selection changes. */
+  backdropItems?: readonly DiscoveryItem[];
   /** Every story with this feeling, not just the ones shown. */
   total: number;
 }
@@ -30,14 +32,15 @@ interface Props {
  * the same place — the feeling's name, its English name in script and how
  * many stories it has. Below it, the feeling's own look.
  */
-const { tag, items, total } = Astro.props;
+const { tag, items, total, backdropItems = items } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
 const scene = DISCOVERY_SCENES[tag];
 const look = lookFor(tag);
-// The backdrop comes from the end of the list so it does not repeat the
-// photo the look leads with — except in "glow", whose lead has no photo.
+// Retain the scene's original photo selection, independently of the curated
+// cards below. "Glow" uses the first photo because its lead has no photo.
 const backdrop =
-  (look === "glow" ? items : items.toReversed()).find((item) => item.cover)?.cover ?? null;
+  (look === "glow" ? backdropItems : backdropItems.toReversed()).find((item) => item.cover)
+    ?.cover ?? null;
 
 const LOOKS: Record<DiscoveryLookId, typeof CarouselLook> = {
   carousel: CarouselLook,
