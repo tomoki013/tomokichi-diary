@@ -17,7 +17,7 @@ export interface BestEpisode {
   readonly hook: string;
 }
 
-/** "Read these first." The first entry leads, and all of them feed the hero slides. */
+/** "Read these first." The first entry leads the episode carousel. */
 export const BEST_EPISODES: readonly BestEpisode[] = [
   {
     slug: "turkey3",
@@ -40,6 +40,56 @@ export const BEST_EPISODES: readonly BestEpisode[] = [
     hook: "初めての海外、バンコク。駅を出た瞬間の第一印象は「臭い、汚い、暑い」、そして「帰りたい」。それでも、ここから海外旅行にハマっていった。",
   },
 ];
+
+/** Hero photographs are chosen independently of the episode cards. */
+export const HERO_STORIES: readonly (BestEpisode & {
+  readonly photo?: { readonly storageKey: string; readonly alt: string };
+})[] = [
+  {
+    slug: "turkey3",
+    featuredTitle: "カッパドキアの朝、空いっぱいの気球",
+    hook: "夜明けの空に浮かぶ気球。カッパドキアで迎えた、忘れられない朝の話。",
+    photo: {
+      storageKey: "images/Turkey/balloons-in-cappadocia.jpg",
+      alt: "カッパドキアの街と朝の空に浮かぶたくさんの気球",
+    },
+  },
+  {
+    slug: "greece2",
+    featuredTitle: "2時間待って出会った、イアの夕日",
+    hook: "白い街並みが夕日に染まるまで。場所取りの疲れも吹き飛んだ、サントリーニの夕暮れ。",
+    photo: {
+      storageKey: "images/Greece/oia-castle-sunset-view2.jpg",
+      alt: "海に沈む夕日とオレンジ色に染まるイアの白い街並み",
+    },
+  },
+  {
+    slug: "malaysia1",
+    featuredTitle: "屋台の熱気に、旅のスイッチが入った夜",
+    hook: "提灯の下に人も屋台もひしめくアロー通り。クアラルンプールの最初の夜は、ここから始まった。",
+    photo: {
+      storageKey: "images/Malaysia/people-enjoying-the-food-stalls-along-arrow-street-at-night.jpg",
+      alt: "赤い提灯と明るい屋台が並び、人々でにぎわう夜のアロー通り",
+    },
+  },
+  ...BEST_EPISODES.filter((episode) => ["egypt4", "india5"].includes(episode.slug)),
+];
+
+export function heroStories() {
+  return HERO_STORIES.flatMap((story) => {
+    const view = viewBySlug(story.slug);
+    const photo =
+      story.photo ??
+      (view?.cover ? { storageKey: view.cover.asset.storageKey, alt: view.cover.usage.alt } : null);
+    if (
+      !view ||
+      !photo ||
+      !content.snapshot.media.some((asset) => asset.storageKey === photo.storageKey)
+    )
+      return [];
+    return [{ view, title: story.featuredTitle, hook: story.hook, photo }];
+  });
+}
 
 export interface Selection {
   readonly id: string;

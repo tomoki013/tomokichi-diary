@@ -13,7 +13,7 @@ import HomeGallery from "../components/home/HomeGallery.astro";
 import HomeAbout from "../components/home/HomeAbout.astro";
 import HomeLikedTrips from "../components/home/HomeLikedTrips.astro";
 import { content } from "../lib/content";
-import { bestEpisodes, selections } from "../lib/editorial";
+import { bestEpisodes, heroStories, selections } from "../lib/editorial";
 import { seoConfig, siteDescription } from "../lib/site";
 
 /**
@@ -35,22 +35,18 @@ const metadata = buildPageMetadata(seoConfig, {
 });
 
 const episodes = bestEpisodes();
-const heroStories = episodes.map(({ episode, view }) => ({
-  view,
-  title: episode.featuredTitle,
-  hook: episode.hook,
-}));
-const heroPhotos = new Set(episodes.flatMap(({ view }) => view.cover?.asset.storageKey ?? []));
+const heroes = heroStories();
+const heroPhotos = new Set(heroes.map(({ photo }) => photo.storageKey));
 const latest: ArticleView[] = content.articleViews().slice(0, 8);
 ---
 
 <BaseLayout
   metadata={metadata}
-  headerOverlay={heroStories.some((story) => story.view.cover)}
+  headerOverlay={heroes.length > 0}
   jsonLd={[buildWebSiteJsonLd(seoConfig)]}
 >
   <div class="home">
-    <HomeHero stories={heroStories} />
+    <HomeHero stories={heroes} />
     <HomeLikedTrips />
     <HomeExperiencePicker shownElsewhere={new Set(episodes.map(({ view }) => view.article.id))} />
     <HomeBestEpisodes episodes={episodes} />

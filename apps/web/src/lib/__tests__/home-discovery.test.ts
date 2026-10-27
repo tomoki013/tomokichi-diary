@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EXPERIENCE_TAGS, type ExperienceTag } from "@tomokichi/domain";
 import {
   DISCOVERY_LIMIT,
+  DISCOVERY_PICKS,
   DISCOVERY_LOOKS,
   lookFor,
   defaultExperience,
@@ -89,6 +90,40 @@ describe("recommend", () => {
   it("drops duplicates", () => {
     const twice = [article("same", ["funny"]), article("same", ["funny"])];
     expect(recommend(twice, "funny")).toHaveLength(1);
+  });
+
+  it("leads with editorial stories even when they are older or featured elsewhere", () => {
+    const candidates = [
+      article("new-guide", ["moving"]),
+      article("spain6", ["moving"]),
+      article("greece2", ["moving"]),
+      article("turkey3", ["moving"]),
+    ];
+    expect(
+      slugs(
+        recommend(candidates, "moving", {
+          shownElsewhere: new Set(["id-turkey3"]),
+        }),
+      ),
+    ).toEqual(["turkey3", "greece2", "spain6", "new-guide"]);
+  });
+
+  it("skips unavailable or retagged picks and fills with eligible photos", () => {
+    expect(
+      slugs(
+        recommend(
+          [
+            article("turkey3", ["exciting"]),
+            article("greece2", ["moving"], false),
+            article("other-story", ["moving"]),
+          ],
+          "moving",
+        ),
+      ),
+    ).toEqual(["other-story", "greece2"]);
+    for (const tag of EXPERIENCE_TAGS) {
+      expect(new Set(DISCOVERY_PICKS[tag]).size).toBe(DISCOVERY_PICKS[tag].length);
+    }
   });
 
   it("is deterministic regardless of call order", () => {

@@ -105,6 +105,18 @@ export const DISCOVERY_SCENES: Record<ExperienceTag, DiscoveryScene> = {
 /** Stories per feeling. */
 export const DISCOVERY_LIMIT = 5;
 
+/** Lead with lived scenes that carry each feeling, rather than the latest guide. */
+export const DISCOVERY_PICKS: Readonly<Record<ExperienceTag, readonly string[]>> = {
+  moving: ["turkey3", "greece2", "spain6", "india2", "sunset1"],
+  exciting: ["egypt2", "china3", "malaysia1", "singapore2", "turkey1"],
+  thrilling: ["egypt4", "india1", "greece3", "turkey2", "china1"],
+  disaster: ["greece1", "egypt4", "turkey2", "india7", "thai4"],
+  funny: ["thai2", "malaysia3", "malaysia2", "thai4", "hokkaido1"],
+  discovery: ["travel-history2", "china2", "india6", "spain5", "malaysia-before-thailand"],
+  challenge: ["india5", "india4", "egypt3", "france2", "indonesia2"],
+  unforgettable: ["india6", "turkey3", "greece2", "egypt2", "spain6"],
+};
+
 /** The URL query that carries the selection. Home stays canonical to `/`. */
 export const HOME_EXPERIENCE_PARAM = "homeExperience";
 
@@ -140,8 +152,7 @@ export interface RecommendOptions {
   readonly limit?: number;
   /**
    * Articles already prominent on the page (the best-episode carousel right
-   * below). They are still eligible, but only after everything else, so the
-   * area surfaces stories the reader has not just scrolled past.
+   * below). Among automatic fallback picks, prefer stories not shown there.
    */
   readonly shownElsewhere?: ReadonlySet<string>;
 }
@@ -152,9 +163,9 @@ export interface RecommendOptions {
  *
  * 1. must carry the tag (duplicates by id are dropped)
  * 2. articles with a cover photo first (the layout leads with a photo)
- * 3. articles not already shown elsewhere on the page first
- * 4. the incoming order (newest first)
- * 5. slug, so the result never depends on sort stability
+ * 3. editorial picks in their chosen order
+ * 4. remaining articles not already shown elsewhere on the page first
+ * 5. the incoming order (newest first), then slug
  *
  * No engagement or "how moving" score exists in the data, so none is used.
  */
@@ -164,6 +175,7 @@ export function recommend<T extends DiscoveryCandidate>(
   { limit = DISCOVERY_LIMIT, shownElsewhere = new Set() }: RecommendOptions = {},
 ): T[] {
   const seen = new Set<string>();
+  const picks = new Map(DISCOVERY_PICKS[tag].map((slug, index) => [slug, index]));
   return candidates
     .flatMap((candidate, order) => {
       const { id, experienceTags } = candidate.article;
@@ -174,6 +186,8 @@ export function recommend<T extends DiscoveryCandidate>(
     .toSorted(
       (a, b) =>
         rank(!a.candidate.cover) - rank(!b.candidate.cover) ||
+        (picks.get(a.candidate.article.slug) ?? Infinity) -
+          (picks.get(b.candidate.article.slug) ?? Infinity) ||
         rank(shownElsewhere.has(a.candidate.article.id)) -
           rank(shownElsewhere.has(b.candidate.article.id)) ||
         a.order - b.order ||
