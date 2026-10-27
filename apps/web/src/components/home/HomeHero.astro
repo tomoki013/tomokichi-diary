@@ -1,22 +1,21 @@
 ---
-import type { ArticleView } from "@tomokichi/application";
 import Picture from "../Picture.astro";
 import { content } from "../../lib/content";
+import type { heroStories } from "../../lib/editorial";
 
 interface Props {
   /** One slide each. The card on the slide shows the story's hook, not its SEO title. */
-  stories: { view: ArticleView; title: string; hook: string }[];
+  stories: ReturnType<typeof heroStories>;
 }
 
 const { stories } = Astro.props;
-const slides = stories.filter((story) => story.view.cover);
+const slides = stories;
 ---
 
 {slides.length > 0 && (
   <section class="home-hero" aria-labelledby="home-title">
     <div class="home-hero__slides" data-hero-carousel>
       {slides.map((story, index) => {
-        const cover = story.view.cover!;
         return (
           <div
             class:list={["home-hero__slide", index === 0 && "is-active"]}
@@ -24,8 +23,8 @@ const slides = stories.filter((story) => story.view.cover);
             aria-hidden={index === 0 ? "false" : "true"}
           >
             <Picture
-              storageKey={cover.asset.storageKey}
-              alt={cover.usage.alt}
+              storageKey={story.photo.storageKey}
+              alt={story.photo.alt}
               sizes="100vw"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "auto"}
