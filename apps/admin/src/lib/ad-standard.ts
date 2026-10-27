@@ -180,29 +180,59 @@ export function applyLayout(
 }
 
 export type AdAuditKind =
-  "standard" | "missing-body" | "testing" | "end-stopped" | "off" | "unpublished" | "not-live";
+  | "standard"
+  | "end-only"
+  | "missing-body"
+  | "testing"
+  | "test-ended"
+  | "end-stopped"
+  | "off"
+  | "unpublished"
+  | "not-live";
 
 export const adAuditLabels: Record<
   AdAuditKind,
   { label: string; tone: "ok" | "warn" | "neutral" | "accent" }
 > = {
   standard: { label: "標準どおり", tone: "ok" },
+  "end-only": { label: "末尾のみ", tone: "neutral" },
   "missing-body": { label: "本文中の広告なし", tone: "warn" },
   testing: { label: "A/Bテスト中", tone: "accent" },
+  "test-ended": { label: "テスト終了・本文中なし", tone: "warn" },
   "end-stopped": { label: "末尾の広告が停止", tone: "warn" },
   off: { label: "広告オフ", tone: "neutral" },
   unpublished: { label: "変更未公開", tone: "neutral" },
   "not-live": { label: "未公開の記事", tone: "neutral" },
 };
 
-/** Kinds the bulk tool fixes without asking. Tests and "off" are deliberate choices. */
-export const autoFixKinds: readonly AdAuditKind[] = ["missing-body", "end-stopped"];
+/**
+ * Kinds the bulk tool selects up front. "末尾のみ" was chosen on purpose (or
+ * the body is too short); a running test is selected only once it has run
+ * long enough to read (see `AdAudit.startedAt`).
+ */
+export const autoFixKinds: readonly AdAuditKind[] = [
+  "missing-body",
+  "end-stopped",
+  "test-ended",
+  "off",
+];
+
+/**
+ * Where the bulk tool takes each kind. Articles with ads switched off get
+ * only the end ad, which is also where short articles land when no body
+ * paragraph qualifies.
+ */
+export function targetFor(kind: AdAuditKind): Exclude<AdLayout, "none"> {
+  return kind === "off" ? "end-only" : "standard";
+}
 
 export interface AdAudit {
   article: ArticleSummaryDto;
   kind: AdAuditKind;
   /** Whether the bulk tool can publish a fix for it now. */
   fixable: boolean;
+  /** For a running test: when it started. */
+  startedAt?: string | null;
 }
 
 export const blankConfig = (): ArticleMonetization => ({
@@ -222,11 +252,15 @@ export function auditArticles(
   return articles
     .filter((a) => a.kind === "article" && a.status !== "archived")
     .map((article) => {
-      const config =
-        overview.articles.find((a) => a.articleId === article.id)?.config ?? blankConfig();
-      const testing = overview.experiments.some(
+      const own = overview.articles.find((a) => a.articleId === article.id)?.config;
+      const config = own ?? blankConfig();
+      const testing = overview.experiments.find(
         (e) => e.articleId === article.id && e.status === "running",
       );
+      // A stopped test leaves its article on the end ad until it is detached.
+      const ended =
+        config.experimentId &&
+        overview.experiments.some((e) => e.id === config.experimentId && e.status !== "running");
       const ads = config.placements.filter((p) => isAd(p) && ready(p));
       const kind: AdAuditKind = !article.isLive
         ? "not-live"
@@ -234,19 +268,24 @@ export function auditArticles(
           ? "unpublished"
           : testing
             ? "testing"
-            : adLayoutOf(config) === "none"
-              ? "off"
-              : !ads.some((p) => p.position === "marker")
-                ? "missing-body"
-                : config.placements.some(
-                      (p) => isAd(p) && p.position === "article_end" && !ready(p),
-                    )
-                  ? "end-stopped"
-                  : "standard";
+            : ended
+              ? "test-ended"
+              : adLayoutOf(config) === "none"
+                ? "off"
+                : !ads.some((p) => p.position === "marker")
+                  ? own
+                    ? "end-only"
+                    : "missing-body"
+                  : config.placements.some(
+                        (p) => isAd(p) && p.position === "article_end" && !ready(p),
+                      )
+                    ? "end-stopped"
+                    : "standard";
       return {
         article,
         kind,
-        fixable: ["missing-body", "end-stopped", "testing", "off"].includes(kind),
+        fixable: !["standard", "unpublished", "not-live"].includes(kind),
+        ...(testing ? { startedAt: testing.startedAt } : {}),
       };
     });
 }
@@ -261,13 +300,15 @@ type Client = Pick<
 >;
 
 /**
- * Brings one live article to the standard layout and leaves it ready to
- * publish. Refuses when the article moved since the list was read, so it
- * never publishes someone's unrelated edits along with the ad change.
+ * Brings one live article to a layout and leaves it ready to publish. A body
+ * with no qualifying paragraph gets the end ad only. Refuses when the article
+ * moved since the list was read, so it never publishes someone's unrelated
+ * edits along with the ad change.
  */
-export async function prepareStandard(
+export async function prepareLayout(
   summary: ArticleSummaryDto,
   overview: MonetizationOverviewDto,
+  target: Exclude<AdLayout, "none"> = "standard",
   client: Client = api,
 ): Promise<{ article: ArticleDetailDto; changes: string[] }> {
   const article = await client.getArticle(summary.id);
@@ -276,8 +317,16 @@ export async function prepareStandard(
   const { draft } = await client.articleMonetization(article.id);
   const experiment =
     overview.experiments.find((e) => e.articleId === article.id && e.status === "running") ?? null;
-  const plan = applyLayout("standard", draft, article.currentRevision.bodyMarkdown, experiment);
-  if ("error" in plan) throw new Error(plan.error);
+  const body = article.currentRevision.bodyMarkdown;
+  let plan = applyLayout(target, draft, body, experiment);
+  if ("error" in plan) {
+    plan = applyLayout("end-only", draft, body, experiment);
+    if ("error" in plan) throw new Error(plan.error);
+    // An unconfigured article already shows the end ad; record the choice once.
+    const rest = plan.changes.filter((c) => c !== "記事末尾の広告を表示");
+    plan.changes =
+      rest.length || !draft.updatedAt ? [...rest, "本文に置ける段落がないため末尾のみ"] : [];
+  }
   if (plan.changes.length === 0) return { article, changes: [] };
   // Body, then configuration, then the test: a failure part-way leaves an
   // unpublished draft to finish in the editor, never a half-ended test.
@@ -285,7 +334,7 @@ export async function prepareStandard(
     await client.saveDraft(article.id, {
       ...draftFrom(article),
       bodyMarkdown: plan.body,
-      changeSummary: "広告を標準配置に揃える（本文内容は維持）",
+      changeSummary: "広告配置を揃える（本文内容は維持）",
     });
   await client.saveArticleMonetization(article.id, plan.config);
   if (plan.stopExperiment) await client.controlAdExperiment(plan.stopExperiment, "stop");

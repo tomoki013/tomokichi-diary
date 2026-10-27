@@ -7,8 +7,8 @@ import type {
   AnalyticsDashboardDto,
   ArticleSummaryDto,
 } from "@tomokichi/contracts";
-import { adExperimentId } from "@tomokichi/contracts";
-import { AdRollout } from "./AdRollout";
+import { AdTests } from "./AdTests";
+import { nextExperimentId } from "../lib/ad-test";
 import { AdPlacements } from "./AdPlacements";
 import { api } from "../lib/api";
 import { href } from "../lib/route";
@@ -554,7 +554,8 @@ function Experiments({
 }) {
   const [selection, setSelected] = useState(data.experiments[0]?.id ?? "");
   const selected = selection.startsWith("new:")
-    ? (data.experiments.find((e) => e.articleId === selection.slice(4))?.id ?? selection)
+    ? (data.experiments.find((e) => e.articleId === selection.slice(4) && e.status === "draft")
+        ?.id ?? selection)
     : selection;
   const [editingDirty, setEditingDirty] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -567,7 +568,7 @@ function Experiments({
   }
   return (
     <>
-      <AdRollout
+      <AdTests
         articles={articles}
         overview={data}
         analytics={analytics}
@@ -602,7 +603,9 @@ function Experiments({
                 (a) =>
                   a.kind === "article" &&
                   a.isLive &&
-                  !data.experiments.some((e) => e.articleId === a.id),
+                  !data.experiments.some(
+                    (e) => e.articleId === a.id && (e.status === "running" || e.status === "draft"),
+                  ),
               )
               .map((a) => (
                 <option key={a.id} value={`new:${a.id}`}>
@@ -693,7 +696,7 @@ function ExperimentEditor({
   const [value, setValue] = useState<AdExperiment>(
     () =>
       old ?? {
-        id: adExperimentId(articleId),
+        id: nextExperimentId(articleId, data.experiments),
         articleId,
         name: "末尾 / 本文内",
         markerKey: "",

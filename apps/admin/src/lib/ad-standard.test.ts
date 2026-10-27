@@ -13,7 +13,8 @@ import {
   blankConfig,
   bodyAdFits,
   markerKeys,
-  prepareStandard,
+  prepareLayout,
+  targetFor,
 } from "./ad-standard";
 
 const body = `導入文。\n\n## 回答\n\n${"体験の説明です。".repeat(75)}\n\n${"回答を伝える段落です。".repeat(12)}\n\n## 続きを読む\n\n${"残りの体験を説明します。".repeat(100)}`;
@@ -148,6 +149,12 @@ const overview = (patch: Partial<MonetizationOverviewDto> = {}): MonetizationOve
   ({ articles: [], experiments: [], offers: [], publishedAdArticles: 0, ...patch }) as never;
 
 describe("auditArticles", () => {
+  it("takes switched-off articles to the end ad only, everything else to the standard", () => {
+    expect(targetFor("off")).toBe("end-only");
+    expect(targetFor("testing")).toBe("standard");
+    expect(targetFor("missing-body")).toBe("standard");
+  });
+
   it("classifies every live article by what readers get", () => {
     const result = auditArticles(
       [
@@ -155,6 +162,7 @@ describe("auditArticles", () => {
         summary({ id: "standard" }),
         summary({ id: "testing" }),
         summary({ id: "off" }),
+        summary({ id: "end-only" }),
         summary({ id: "dirty", hasUnpublishedChanges: true }),
         summary({ id: "draft", status: "draft", isLive: false }),
         summary({ id: "page", kind: "page" }),
@@ -166,6 +174,7 @@ describe("auditArticles", () => {
             config: config({ placements: [end, { ...end, key: "b", position: "marker" }] }),
           },
           { articleId: "off", config: config({ mode: "none", adsEnabled: false }) },
+          { articleId: "end-only", config: config() },
         ],
         experiments: [{ ...experiment, articleId: "testing" }],
       }),
@@ -175,13 +184,14 @@ describe("auditArticles", () => {
       standard: "standard",
       testing: "testing",
       off: "off",
+      "end-only": "end-only",
       dirty: "unpublished",
       draft: "not-live",
     });
   });
 });
 
-describe("prepareStandard", () => {
+describe("prepareLayout", () => {
   const article = {
     id: experiment.articleId,
     kind: "article",
@@ -213,13 +223,36 @@ describe("prepareStandard", () => {
       saveArticleMonetization: vi.fn(async (_id, c) => (calls.push("config"), c)),
       controlAdExperiment: vi.fn(async () => (calls.push("stop"), experiment)),
     };
-    const result = await prepareStandard(
+    const result = await prepareLayout(
       summary({ id: article.id }),
       overview({ experiments: [experiment] }),
+      "standard",
       client,
     );
     expect(calls).toEqual(["body", "config", "stop"]);
     expect(result.changes).toContain("A/Bテストを終了");
+  });
+
+  it("gives a short article the end ad only instead of failing", async () => {
+    const short = {
+      ...article,
+      currentRevision: { ...article.currentRevision!, bodyMarkdown: "短い本文です。" },
+    } as ArticleDetailDto;
+    const client = {
+      getArticle: vi.fn(async () => short),
+      articleMonetization: vi.fn(async () => ({
+        draft: blankConfig(),
+        published: null,
+        needsPublication: false,
+      })),
+      saveDraft: vi.fn(),
+      saveArticleMonetization: vi.fn(async (_id, c) => c),
+      controlAdExperiment: vi.fn(),
+    };
+    const result = await prepareLayout(summary({}), overview(), "standard", client);
+    expect(result.changes).toEqual(["本文に置ける段落がないため末尾のみ"]);
+    expect(client.saveDraft).not.toHaveBeenCalled();
+    expect(adLayoutOf(client.saveArticleMonetization.mock.calls[0]![1])).toBe("end-only");
   });
 
   it("refuses an article that changed since the list was read", async () => {
@@ -230,7 +263,7 @@ describe("prepareStandard", () => {
       saveArticleMonetization: vi.fn(),
       controlAdExperiment: vi.fn(),
     };
-    await expect(prepareStandard(summary({}), overview(), client)).rejects.toThrow();
+    await expect(prepareLayout(summary({}), overview(), "standard", client)).rejects.toThrow();
     expect(client.saveDraft).not.toHaveBeenCalled();
   });
 });

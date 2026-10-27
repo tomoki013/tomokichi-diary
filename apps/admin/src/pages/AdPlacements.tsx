@@ -4,10 +4,13 @@ import {
   adAuditLabels,
   auditArticles,
   autoFixKinds,
-  prepareStandard,
+  adLayoutLabels,
+  prepareLayout,
+  targetFor,
   type AdAuditKind,
 } from "../lib/ad-standard";
 import { describeError } from "../lib/api";
+import { TEST_MIN_DAYS, testDay } from "../lib/ad-test";
 import { publishSelection } from "../lib/bulk-publish";
 import { href } from "../lib/route";
 import { Badge, EmptyState, Panel } from "../ui/parts";
@@ -15,8 +18,10 @@ import { Badge, EmptyState, Panel } from "../ui/parts";
 const ORDER: AdAuditKind[] = [
   "missing-body",
   "end-stopped",
+  "test-ended",
   "testing",
   "off",
+  "end-only",
   "standard",
   "unpublished",
   "not-live",
@@ -48,7 +53,17 @@ export function AdPlacements({
   const audit = useMemo(() => auditArticles(articles, overview), [articles, overview]);
   const [filter, setFilter] = useState<AdAuditKind | "fix">("fix");
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(audit.filter((a) => autoFixKinds.includes(a.kind)).map((a) => a.article.id)),
+    () =>
+      new Set(
+        audit
+          .filter(
+            (a) =>
+              autoFixKinds.includes(a.kind) ||
+              (a.kind === "testing" &&
+                testDay({ startedAt: a.startedAt ?? null }) >= TEST_MIN_DAYS),
+          )
+          .map((a) => a.article.id),
+      ),
   );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -71,9 +86,18 @@ export function AdPlacements({
   async function run() {
     if (!chosen.length) return;
     const ending = chosen.filter((a) => a.kind === "testing").length;
+    const endOnly = chosen.filter((a) => targetFor(a.kind) === "end-only").length;
     if (
       !confirm(
-        `${chosen.length}記事を標準配置（末尾＋本文中）に揃えて公開します。${ending ? `\nA/Bテスト中の${ending}記事はテストを終了します。` : ""}\n本文は広告マーカーの追加・移動以外変わりません。`,
+        [
+          `${chosen.length}記事の広告を揃えて公開します。`,
+          `・末尾＋本文中：${chosen.length - endOnly}記事（本文が短い記事は末尾のみ）`,
+          endOnly ? `・末尾のみ：${endOnly}記事（広告オフだった記事）` : "",
+          ending ? `・A/Bテスト中の${ending}記事はテストを終了します` : "",
+          "本文は広告マーカーの追加・移動以外変わりません。",
+        ]
+          .filter(Boolean)
+          .join("\n"),
       )
     )
       return;
@@ -85,7 +109,11 @@ export function AdPlacements({
       for (const [i, item] of chosen.entries()) {
         setMessage(`${i + 1}/${chosen.length} 記事を準備中…`);
         try {
-          const { article, changes } = await prepareStandard(item.article, overview);
+          const { article, changes } = await prepareLayout(
+            item.article,
+            overview,
+            targetFor(item.kind),
+          );
           if (changes.length) ready.push(article);
           results.push({
             id: item.article.id,
@@ -137,7 +165,8 @@ export function AdPlacements({
           ：記事末尾に1枠、本文中に1枠。本文中の位置は、見出しと600字以上の後・画像やカードから離れた段落を自動で選びます（すでに置いてある位置は維持）。アフィリエイト枠はそのまま残します。
         </p>
         <p className="muted small">
-          A/Bテスト中と広告オフの記事は、意図して設定している場合があるので最初は選択していません。変更未公開・未公開の記事は、記事編集で公開するときに整えてください。
+          A/Bテスト中の記事は目安の{TEST_MIN_DAYS}
+          日を過ぎたものだけ最初から選択します（選ぶとテストを終了し、Bの本文中の位置をそのまま使います）。広告オフだった記事と、本文が短く置ける段落がない記事は「末尾のみ」にします。変更未公開・未公開の記事は、記事編集で公開するときに整えてください。
         </p>
       </div>
 
@@ -209,10 +238,11 @@ export function AdPlacements({
               </th>
               <th>記事</th>
               <th>いまの広告</th>
+              <th className="hide-narrow">揃えた後</th>
             </tr>
           </thead>
           <tbody>
-            {visible.map(({ article, kind, fixable }) => {
+            {visible.map(({ article, kind, fixable, startedAt }) => {
               const outcome = outcomes.find((o) => o.id === article.id);
               return (
                 <tr key={article.id}>
@@ -239,6 +269,15 @@ export function AdPlacements({
                   </td>
                   <td className="nowrap">
                     <Badge tone={adAuditLabels[kind].tone}>{adAuditLabels[kind].label}</Badge>
+                    {kind === "testing" && (
+                      <span className="muted small">
+                        {" "}
+                        {testDay({ startedAt: startedAt ?? null })}/{TEST_MIN_DAYS}日
+                      </span>
+                    )}
+                  </td>
+                  <td className="nowrap muted small hide-narrow">
+                    {fixable ? adLayoutLabels[targetFor(kind)] : "—"}
                   </td>
                 </tr>
               );

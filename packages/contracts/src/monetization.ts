@@ -175,20 +175,29 @@ export interface MonetizationOverviewDto {
 export const LEGACY_AD_EXPERIMENT = "chagee-placement-v1";
 export const LEGACY_AD_ARTICLE = "52b1cb6d-eb74-85a3-b6a1-392f83313051";
 const articleUuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
-export function adExperimentId(articleId: string): string {
-  return `placement-v1-${articleId}`;
+/**
+ * One article can be tested again after a test ends: rounds after the first
+ * carry `-r<n>` (2–99). A finished ID is never reused, so results never mix.
+ */
+export function adExperimentId(articleId: string, round = 1): string {
+  return round > 1 ? `placement-v1-${articleId}-r${round}` : `placement-v1-${articleId}`;
+}
+const generated =
+  /^placement-v1-([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})(?:-r([2-9]|[1-9]\d))?$/;
+/** The round of a generated ID (1 for the first), or null for anything else. */
+export function adExperimentRound(value: unknown): number | null {
+  const match = typeof value === "string" ? generated.exec(value) : null;
+  return match ? Number(match[2] ?? 1) : null;
 }
 export function isAdExperimentId(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    (value === LEGACY_AD_EXPERIMENT ||
-      (value.startsWith("placement-v1-") && articleUuid.test(value.slice(13))))
-  );
+  return value === LEGACY_AD_EXPERIMENT || adExperimentRound(value) !== null;
 }
 export function isAdExperimentForArticle(value: unknown, articleId: string): value is string {
-  return value === LEGACY_AD_EXPERIMENT
-    ? articleId === LEGACY_AD_ARTICLE
-    : articleUuid.test(articleId) && value === adExperimentId(articleId);
+  if (value === LEGACY_AD_EXPERIMENT) return articleId === LEGACY_AD_ARTICLE;
+  const round = adExperimentRound(value);
+  return (
+    round !== null && articleUuid.test(articleId) && value === adExperimentId(articleId, round)
+  );
 }
 
 /** Approved network hosts and their tracking-link shapes; never accepts arbitrary redirects. */
