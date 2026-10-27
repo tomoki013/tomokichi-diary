@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SitePublicationStatus } from "@tomokichi/contracts";
-import { articleState } from "./article-state";
+import { articleState, phaseOf } from "./article-state";
 
 const site = (patch: Partial<SitePublicationStatus>): SitePublicationStatus => ({
   state: "deployed",
@@ -78,7 +78,36 @@ describe("articleState", () => {
       false,
       site({ deployedAt: "2026-10-01T00:00:00Z" }),
     );
-    expect(text(lines, "公開版")).toContain("まだ公開されていません");
-    expect(text(lines, "サイト")).toContain("公開版が表示されています");
+    expect(text(lines, "この記事")).toContain("まだ公開していません");
+    expect(text(lines, "サイト")).toBe("前回公開した版を表示しています。");
+  });
+
+  it("stays reflected when a later, unrelated build failed", () => {
+    const lines = articleState(
+      live,
+      false,
+      site({ state: "failed", deployedAt: "2026-10-20T00:05:00Z" }),
+    );
+    expect(text(lines, "サイト")).toContain("反映済み");
+  });
+});
+
+describe("phaseOf", () => {
+  it("never calls a draft's unpublished revision a pending change", () => {
+    expect(
+      phaseOf({
+        ...live,
+        status: "draft",
+        isLive: false,
+        hasUnpublishedChanges: true,
+        publishedAt: null,
+      }),
+    ).toBe("draft");
+    expect(phaseOf({ ...live, status: "draft", isLive: false, hasUnpublishedChanges: true })).toBe(
+      "withdrawn",
+    );
+    expect(phaseOf({ ...live, hasUnpublishedChanges: true })).toBe("changed");
+    expect(phaseOf(live)).toBe("live");
+    expect(phaseOf({ ...live, isLive: false })).toBe("scheduled");
   });
 });

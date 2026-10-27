@@ -1511,3 +1511,171 @@ fieldset {
 .publication-stages [data-state="failed"] {
   color: var(--danger);
 }
+
+/* Publication state ------------------------------------------------------ */
+
+.phase {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+.article-state {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+}
+.article-state > div:first-child dd {
+  font-weight: 700;
+}
+
+/* Ads: one rule, a few choices ------------------------------------------- */
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-width: 0;
+}
+.segmented legend {
+  float: left;
+  align-self: center;
+  padding: 0 0.7rem;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+.segmented button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  min-height: 2.6rem;
+  padding: 0.3rem 0.8rem;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  line-height: 1.25;
+}
+.segmented button small {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-weight: 700;
+}
+.segmented button[aria-pressed="true"] small {
+  color: inherit;
+}
+.notice {
+  margin: 0 0 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  background: var(--surface-alt);
+}
+.notice--warn {
+  background: var(--warn-tint);
+  color: var(--warn);
+}
+.notice--accent {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+.ad-spot {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: start;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-alt);
+}
+.ad-spot q {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+.ad-affiliates,
+.ad-picker {
+  margin-block: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+.ad-slots {
+  list-style: none;
+  margin: 0.4rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.ad-slots li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ad-slots select {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.ad-advanced {
+  margin-block: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+.ad-advanced summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+.ad-rule {
+  margin-bottom: 0.75rem;
+}
+.ad-rule p {
+  margin: 0 0 0.35rem;
+}
+.ad-table {
+  margin-top: 0.6rem;
+}
+.ad-outcome {
+  display: block;
+  font-size: 0.8rem;
+}
+.ad-outcome--ok {
+  color: var(--ok);
+}
+.ad-outcome--warn {
+  color: var(--warn);
+}
+.ad-outcome--danger {
+  color: var(--danger);
+}
+details.panel > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.ad-results {
+  margin-block: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+.ad-results summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.ad-results ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+  max-height: 20rem;
+  overflow: auto;
+}

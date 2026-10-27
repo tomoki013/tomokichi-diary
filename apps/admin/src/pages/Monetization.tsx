@@ -9,6 +9,7 @@ import type {
 } from "@tomokichi/contracts";
 import { adExperimentId } from "@tomokichi/contracts";
 import { AdRollout } from "./AdRollout";
+import { AdPlacements } from "./AdPlacements";
 import { api } from "../lib/api";
 import { href } from "../lib/route";
 import { useResource, useTitle, useUnsavedWarning } from "../ui/hooks";
@@ -17,7 +18,7 @@ import { useToast } from "../ui/toast";
 import { AffiliatePreview } from "./AffiliatePreview";
 import "./monetization.css";
 import "./analytics.css";
-const tabs = ["概要", "広告設定", "アフィリエイト案件", "配置管理", "配置テスト"];
+const tabs = ["概要", "広告配置", "広告設定", "アフィリエイト案件", "配置テスト"];
 const number = (value: number | null | undefined) =>
   value == null ? "未取得" : value.toLocaleString("ja-JP", { maximumFractionDigits: 2 });
 const percent = (value: number | null | undefined) =>
@@ -75,25 +76,27 @@ export function Monetization() {
           </button>
         ))}
       </nav>
-      <div className="analytics-range">
-        <label>
-          開始日
-          <input
-            type="date"
-            value={period.start}
-            onChange={(e) => setPeriod((p) => ({ ...p, start: e.target.value }))}
-          />
-        </label>
-        <label>
-          終了日
-          <input
-            type="date"
-            value={period.end}
-            onChange={(e) => setPeriod((p) => ({ ...p, end: e.target.value }))}
-          />
-        </label>
-        <span>93日以内・各指標の取得日数を確認してください</span>
-      </div>
+      {(tab === 0 || tab === 4) && (
+        <div className="analytics-range">
+          <label>
+            開始日
+            <input
+              type="date"
+              value={period.start}
+              onChange={(e) => setPeriod((p) => ({ ...p, start: e.target.value }))}
+            />
+          </label>
+          <label>
+            終了日
+            <input
+              type="date"
+              value={period.end}
+              onChange={(e) => setPeriod((p) => ({ ...p, end: e.target.value }))}
+            />
+          </label>
+          <span>93日以内・各指標の取得日数を確認してください</span>
+        </div>
+      )}
       {Boolean(data.error) && <ErrorState error={data.error} onRetry={() => void data.reload()} />}
       {!overview ? (
         <p>設定を読み込み中…</p>
@@ -164,44 +167,58 @@ export function Monetization() {
             </>
           )}
           {tab === 1 && (
-            <Settings initial={overview.settings} onDirty={setDirty} reload={data.reload} />
+            <>
+              {articles.data ? (
+                <AdPlacements
+                  articles={articles.data.items}
+                  overview={overview}
+                  onBusy={setDirty}
+                  reload={async () => {
+                    await Promise.all([data.reload(), articles.reload()]);
+                  }}
+                />
+              ) : (
+                <p>記事を読み込み中…</p>
+              )}
+              <details className="panel">
+                <summary>記事ごとの個別設定（詳細）</summary>
+                <p>
+                  位置の挿入・変更・削除・案件の割当は記事編集の「収益化」から操作します。マーカーが消えた配置は別の位置へ移動しません。
+                </p>
+                {overview.articles.length ? (
+                  <ul>
+                    {overview.articles.map((a) => (
+                      <li key={a.articleId}>
+                        <a href={href.article(a.articleId)}>
+                          {articles.data?.items.find((i) => i.id === a.articleId)?.title ??
+                            a.articleId}
+                        </a>{" "}
+                        · {a.config.mode}
+                        <ul>
+                          {a.config.placements.map((p) => (
+                            <li key={p.key}>
+                              {p.key} · {p.position} · {p.status} ·{" "}
+                              {p.kind === "affiliate"
+                                ? (overview.offers.find((o) => o.id === p.offerId)?.name ??
+                                  "案件未割当")
+                                : `AdSense ${p.adUnit}`}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>個別設定はまだありません。既存記事は末尾1枠の設定を維持します。</p>
+                )}
+              </details>
+            </>
           )}
           {tab === 2 && (
-            <Offers data={overview} dirty={dirty} onDirty={setDirty} reload={data.reload} />
+            <Settings initial={overview.settings} onDirty={setDirty} reload={data.reload} />
           )}
           {tab === 3 && (
-            <Panel title="配置管理">
-              <p>
-                位置の挿入・変更・削除・案件の割当は記事編集の「収益化」から操作します。マーカーが消えた配置は別の位置へ移動しません。
-              </p>
-              {overview.articles.length ? (
-                <ul>
-                  {overview.articles.map((a) => (
-                    <li key={a.articleId}>
-                      <a href={href.article(a.articleId)}>
-                        {articles.data?.items.find((i) => i.id === a.articleId)?.title ??
-                          a.articleId}
-                      </a>{" "}
-                      · {a.config.mode}
-                      <ul>
-                        {a.config.placements.map((p) => (
-                          <li key={p.key}>
-                            {p.key} · {p.position} · {p.status} ·{" "}
-                            {p.kind === "affiliate"
-                              ? (overview.offers.find((o) => o.id === p.offerId)?.name ??
-                                "案件未割当")
-                              : `AdSense ${p.adUnit}`}
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>個別設定はまだありません。既存記事は末尾1枠の設定を維持します。</p>
-              )}
-              <a href={href.articles()}>記事一覧へ</a>
-            </Panel>
+            <Offers data={overview} dirty={dirty} onDirty={setDirty} reload={data.reload} />
           )}
           {tab === 4 && (
             <Experiments
@@ -511,7 +528,7 @@ function Offers({
           </label>
           <p>
             公開対象:
-            Trip.com・Agoda・Omioの正式リンク、テキスト／予約カード。管理メモ・未承認案件は公開しません。案件の更新・一時停止・アーカイブは使用中の記事を公開待ちにします。記事一覧から再公開し、サイト反映完了を確認してください。
+            Trip.com・Agoda・Omioの正式リンク、テキスト／予約カード。管理メモ・未承認案件は公開しません。案件の更新・一時停止・アーカイブで、使用中の記事は「変更未公開」になります。記事一覧から再公開し、サイト反映完了を確認してください。
           </p>
           <AffiliatePreview offer={selected} />
           <button className="primary" disabled={busy} type="submit">

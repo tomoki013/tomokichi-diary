@@ -1,7 +1,8 @@
 import { type FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
-import { articleStatusLabels, formatDateTime, formatRelative } from "../lib/labels";
+import { formatDateTime, formatRelative } from "../lib/labels";
+import { inPhase as is } from "../lib/article-state";
+import { PhaseBadge } from "../ui/PhaseBadge";
 import { href } from "../lib/route";
 import { useRemembered, useResource, useTitle } from "../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../ui/parts";
@@ -15,23 +16,11 @@ import { SitePublication } from "../ui/SitePublication";
 
 const FILTERS = [
   { key: "all", label: "すべて", test: () => true },
-  { key: "live", label: "公開中", test: (item: ArticleSummaryDto) => item.isLive },
-  {
-    key: "changes",
-    label: "未公開の変更",
-    test: (item: ArticleSummaryDto) => item.hasUnpublishedChanges,
-  },
-  { key: "draft", label: "下書き", test: (item: ArticleSummaryDto) => item.status === "draft" },
-  {
-    key: "scheduled",
-    label: "予約",
-    test: (item: ArticleSummaryDto) => item.status === "scheduled",
-  },
-  {
-    key: "archived",
-    label: "アーカイブ",
-    test: (item: ArticleSummaryDto) => item.status === "archived",
-  },
+  { key: "live", label: "公開中", test: is("live", "changed") },
+  { key: "changes", label: "変更未公開", test: is("changed") },
+  { key: "draft", label: "下書き・非公開", test: is("draft", "withdrawn") },
+  { key: "scheduled", label: "予約", test: is("scheduled") },
+  { key: "archived", label: "アーカイブ", test: is("archived") },
 ] as const;
 type FilterKey = (typeof FILTERS)[number]["key"];
 const FILTER_KEYS = FILTERS.map((entry) => entry.key);
@@ -308,15 +297,7 @@ export function Articles() {
                     {item.noindex && <Badge>noindex</Badge>}
                   </td>
                   <td className="nowrap table__status">
-                    <Badge
-                      tone={item.isLive ? "ok" : item.status === "scheduled" ? "accent" : "neutral"}
-                    >
-                      {articleStatusLabels[item.status] ?? item.status}
-                    </Badge>
-                    {item.hasUnpublishedChanges && <Badge tone="warn">変更あり</Badge>}
-                    {item.status === "scheduled" && (
-                      <span className="muted small"> {formatDateTime(item.scheduledAt)}</span>
-                    )}
+                    <PhaseBadge article={item} />
                   </td>
                   <td className="hide-narrow">
                     {item.path && item.isLive ? (

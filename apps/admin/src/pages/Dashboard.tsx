@@ -2,6 +2,8 @@ import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { api } from "../lib/api";
 import { formatDateTime, formatRelative, ticketStatusLabels } from "../lib/labels";
 import { href } from "../lib/route";
+import { inPhase as is } from "../lib/article-state";
+import { PhaseBadge } from "../ui/PhaseBadge";
 import { useResource, useTitle } from "../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../ui/parts";
 
@@ -25,11 +27,11 @@ export function Dashboard() {
   const count = (predicate: (item: ArticleSummaryDto) => boolean): number =>
     items.filter(predicate).length;
   const pending = items
-    .filter((item) => item.hasUnpublishedChanges || item.status === "draft")
+    .filter(is("changed", "draft", "withdrawn"))
     .toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 8);
   const scheduled = items
-    .filter((item) => item.status === "scheduled")
+    .filter(is("scheduled"))
     .toSorted((a, b) => (a.scheduledAt ?? "").localeCompare(b.scheduledAt ?? ""));
 
   return (
@@ -46,19 +48,19 @@ export function Dashboard() {
         />
         <Stat
           label="公開中"
-          value={articles.data ? count((item) => item.isLive) : undefined}
+          value={articles.data ? count(is("live", "changed")) : undefined}
           loading={articles.loading}
           href={href.articles()}
         />
         <Stat
-          label="未公開の変更"
-          value={articles.data ? count((item) => item.hasUnpublishedChanges) : undefined}
+          label="変更未公開"
+          value={articles.data ? count(is("changed")) : undefined}
           loading={articles.loading}
           href={href.articles()}
         />
         <Stat
-          label="下書き"
-          value={articles.data ? count((item) => item.status === "draft") : undefined}
+          label="下書き・非公開"
+          value={articles.data ? count(is("draft", "withdrawn")) : undefined}
           loading={articles.loading}
           href={href.articles()}
         />
@@ -100,13 +102,13 @@ export function Dashboard() {
           )}
         </Panel>
 
-        <Panel title="公開待ち" actions={<a href={href.articles()}>記事一覧 →</a>}>
+        <Panel title="まだ公開していないもの" actions={<a href={href.articles()}>記事一覧 →</a>}>
           {articles.error ? (
             <ErrorState error={articles.error} onRetry={() => void articles.reload()} />
           ) : articles.loading ? (
             <SkeletonRows rows={4} />
           ) : pending.length === 0 ? (
-            <EmptyState>未公開の変更はありません。</EmptyState>
+            <EmptyState>公開していない下書き・変更はありません。</EmptyState>
           ) : (
             <ul className="rows">
               {pending.map((item) => (
@@ -114,9 +116,7 @@ export function Dashboard() {
                   <a href={href.article(item.id)} className="rows__main">
                     {item.title || item.slug}
                   </a>
-                  <Badge tone={item.status === "draft" ? "neutral" : "warn"}>
-                    {item.status === "draft" ? "下書き" : "未公開の変更"}
-                  </Badge>
+                  <PhaseBadge article={item} />
                   <span className="muted">{formatRelative(item.updatedAt)}</span>
                 </li>
               ))}
@@ -132,7 +132,9 @@ export function Dashboard() {
                   <a href={href.article(item.id)} className="rows__main">
                     {item.title || item.slug}
                   </a>
-                  <span className="muted">{formatDateTime(item.scheduledAt)}</span>
+                  <span className="muted">
+                    {formatDateTime(item.scheduledAt ?? item.publishedAt)}
+                  </span>
                 </li>
               ))}
             </ul>
