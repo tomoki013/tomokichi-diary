@@ -126,6 +126,21 @@ describe("recommend", () => {
     }
   });
 
+  it("keeps the scene's original photo order while curating the stories separately", () => {
+    const candidates = [
+      article("recent-story", ["moving"]),
+      article("greece2", ["moving"]),
+      article("turkey3", ["moving"]),
+      article("original-photo", ["moving"]),
+    ];
+    const options = { shownElsewhere: new Set(["id-turkey3"]) };
+    const stories = recommend(candidates, "moving", options);
+    const scene = recommend(candidates, "moving", { ...options, prioritizePicks: false });
+    expect(slugs(stories)).toEqual(["turkey3", "greece2", "recent-story", "original-photo"]);
+    expect(slugs(scene)).toEqual(["recent-story", "greece2", "original-photo", "turkey3"]);
+    expect(scene.toReversed().find((item) => item.cover)?.article.slug).toBe("turkey3");
+  });
+
   it("is deterministic regardless of call order", () => {
     const first = slugs(recommend(views, "moving"));
     recommend(views.toReversed(), "moving");

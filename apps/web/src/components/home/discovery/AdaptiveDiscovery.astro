@@ -51,6 +51,7 @@ const panels = EXPERIENCES.map(({ tag }) => ({
   tag,
   total: content.withExperience(tag).length,
   items: recommend(views, tag, { shownElsewhere }).map(toItem),
+  backdropItems: recommend(views, tag, { shownElsewhere, prioritizePicks: false }).map(toItem),
 }));
 const initial = defaultExperience(
   Object.fromEntries(panels.map((panel) => [panel.tag, panel.total])),
