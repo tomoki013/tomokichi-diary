@@ -274,6 +274,7 @@ describe("article lifecycle", () => {
         { type: "image/jpeg" },
       ),
     );
+    upload.append("slug", "cover");
     const uploaded = await (
       await request("/v1/admin/media", {
         method: "POST",
@@ -316,6 +317,7 @@ describe("media", () => {
   it("rejects an unsupported media type", async () => {
     const upload = new FormData();
     upload.append("file", new File([new Uint8Array([1])], "a.pdf", { type: "application/pdf" }));
+    upload.append("slug", "a");
     const response = await request("/v1/admin/media", {
       method: "POST",
       headers: { authorization: auth.authorization },

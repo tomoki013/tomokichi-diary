@@ -222,13 +222,14 @@ export function mediaRoutes() {
 
     const ctx = c.get("ctx");
     const slug = form.get("slug");
-    if (slug !== null && typeof slug !== "string")
-      return errorResponse(c, "API_VALIDATION_FAILED", "invalid slug", 400);
+    // A new upload is always published under a slug alias.
+    if (typeof slug !== "string" || !slug.trim())
+      return errorResponse(c, "API_VALIDATION_FAILED", "公開画像Slugを入力してください", 400);
     const result = await uploadMediaWithResult(ctx, {
       body: await file.arrayBuffer(),
       mimeType: file.type,
       originalName: file.name,
-      ...(slug ? { slug } : {}),
+      slug,
     });
     if (!result.ok) return domainErrorResponse(c, result.errors);
     return c.json(

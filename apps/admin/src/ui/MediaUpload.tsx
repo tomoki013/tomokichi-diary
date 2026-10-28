@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MediaAssetDto } from "@tomokichi/contracts";
 import { describeError } from "../lib/api";
 import { IMAGE_ACCEPT, uploadImage } from "../lib/media-upload";
@@ -6,11 +6,15 @@ import { IMAGE_ACCEPT, uploadImage } from "../lib/media-upload";
 type Item = {
   id: number;
   file: File;
+  /** Local object URL so the photo shows before it is uploaded. */
+  preview: string;
   slug: string;
   state: "queued" | "uploading" | "saved" | "duplicate" | "used" | "cancelled" | "failed";
   asset?: MediaAssetDto;
   error?: string;
 };
+
+const missingSlug = (item: Item) => !item.slug.trim();
 
 export function MediaUpload({
   onAsset,
@@ -23,6 +27,11 @@ export function MediaUpload({
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
   const counter = useRef(0);
+  const previews = useRef(new Set<string>());
+  useEffect(() => {
+    const urls = previews.current;
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
   const patch = (id: number, changes: Partial<Item>) =>
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
 
@@ -61,10 +70,12 @@ export function MediaUpload({
             const selected: Item[] = [...(event.target.files ?? [])].map((file) => ({
               id: ++counter.current,
               file,
+              preview: URL.createObjectURL(file),
               slug: "",
               state: "queued",
             }));
             event.target.value = "";
+            selected.forEach((item) => previews.current.add(item.preview));
             setItems((current) => [...current, ...selected]);
           }}
         />
@@ -73,7 +84,11 @@ export function MediaUpload({
         <button
           type="button"
           className="primary"
-          disabled={busy || disabled}
+          disabled={
+            busy ||
+            disabled ||
+            items.some((item) => item.state === "queued" && missingSlug(item))
+          }
           onClick={() => void run(items.filter((item) => item.state === "queued"))}
         >
           アップロード
@@ -83,13 +98,14 @@ export function MediaUpload({
         <ul className="upload-results" aria-live="polite">
           {items.map((item) => (
             <li key={item.id}>
-              {item.asset && <img src={item.asset.url} alt="" loading="lazy" />}
+              <img src={item.asset?.url ?? item.preview} alt="" loading="lazy" />
               <div className="upload-results__body">
                 <strong>{item.file.name}</strong>
                 {(item.state === "queued" || item.state === "failed") && (
                   <label className="field">
-                    <span>公開画像Slug（任意）</span>
+                    <span>公開画像Slug（必須）</span>
                     <input
+                      required
                       aria-label={`${item.file.name}のSlug`}
                       placeholder="tokyo-trip"
                       maxLength={96}
@@ -132,7 +148,7 @@ export function MediaUpload({
                     <span className="form-error">{item.error}</span>
                     <button
                       type="button"
-                      disabled={busy || disabled}
+                      disabled={busy || disabled || missingSlug(item)}
                       onClick={() => void run([item])}
                     >
                       再試行
@@ -156,7 +172,17 @@ export function MediaUpload({
       {items.length > 0 &&
         !busy &&
         !items.some((item) => ["duplicate", "queued", "failed"].includes(item.state)) && (
-          <button type="button" className="link" onClick={() => setItems([])}>
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              items.forEach((item) => {
+                URL.revokeObjectURL(item.preview);
+                previews.current.delete(item.preview);
+              });
+              setItems([]);
+            }}
+          >
             結果を閉じる
           </button>
         )}
