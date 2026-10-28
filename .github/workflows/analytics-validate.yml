@@ -18,4 +18,4 @@ jobs:
       - uses: jdx/mise-action@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --build
-      - run: pnpm exec vitest run scripts/analytics packages/application/src/analytics apps/api/src/__tests__/analytics.test.ts infrastructure/database/d1/src/__tests__/analytics.test.ts
+      - run: pnpm exec vitest run scripts/analytics apps/api/src/__tests__/analytics.test.ts apps/mcp-server/src/__tests__/analytics.test.ts

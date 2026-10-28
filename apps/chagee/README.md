@@ -27,8 +27,7 @@ pnpm --filter @tomokichi/chagee dev            # http://localhost:4321
 ## 内容を更新する
 
 1. `content/*.json` を編集する（メニューの評価・感想は `tasted: true` のときだけ書ける）
-2. `pnpm test` — `seed.test.ts` が全件を検証する
-3. `pnpm --filter @tomokichi/chagee db:seed` — 本番 D1 に upsert（再ビルド不要、数分以内に反映）
+2. `pnpm --filter @tomokichi/chagee db:seed` — 本番 D1 に upsert（再ビルド不要、数分以内に反映）
 
 写真は `media/` に置いて `media:sync`。`<name>-480.webp` と `<name>-735.webp` が R2 の `photos/` に入る。
 

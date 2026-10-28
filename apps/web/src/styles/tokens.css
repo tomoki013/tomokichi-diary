@@ -10,8 +10,7 @@
        hues: Milk Ivory (paper), Warm Slate (ink) and Soft Clay (accent).
        Every other value below is a tint or shade of one of them, or white.
        The per-experience hues on the mood scenes are the one deliberate
-       exception. Contrast of the pairs that matter is checked by
-       src/__tests__/design-tokens.test.ts.
+       exception.
 
        Semantic tokens: components should reach for these by role. */
     --color-background-base: #faf8f4;

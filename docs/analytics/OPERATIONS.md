@@ -28,7 +28,7 @@ pnpm exec tsx scripts/analytics/check-sql.ts
 # 任意期間の人数だけ読取検証（93日以内、D1なし）
 pnpm exec tsx scripts/analytics/run.ts --start 2026-08-01 --end 2026-10-10 --period-only --dry-run
 # オフラインの検証
-pnpm exec vitest run scripts/analytics packages/application/src/analytics apps/api/src/__tests__/analytics.test.ts infrastructure/database/d1/src/__tests__/analytics.test.ts
+pnpm exec vitest run scripts/analytics apps/api/src/__tests__/analytics.test.ts apps/mcp-server/src/__tests__/analytics.test.ts
 ```
 
 Actionsは日次15:47 JST予定。GitHubの混雑・公開repoの無活動による停止は起こりうる。source毎のtable/ExportLog readinessを確認し、当日intradayは含めない。7日を毎回置換し、遅延・訂正に対応。1GB/jobの上限を超えると停止（cost planを見直さず上限を無限にしない）。
