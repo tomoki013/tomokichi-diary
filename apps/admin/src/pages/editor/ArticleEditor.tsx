@@ -101,8 +101,6 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   useUnsavedWarning(dirty);
   useTitle(draft.title || article.slug);
 
-  const check = useResource(() => api.publishCheck(article.id), `check:${article.id}`);
-
   const save = useCallback(async (): Promise<boolean> => {
     if (!dirty) return true;
     if (saveInFlight.current || sections.busy) return false;
@@ -116,7 +114,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
       setSaved({ ...payload, changeSummary: null });
       setDraft({ ...payload, changeSummary: null });
       toast.info("下書きを保存しました");
-      await Promise.all([reload(), check.reload()]);
+      await reload();
       return true;
     } catch (error) {
       toast.error(error);
@@ -125,7 +123,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
       saveInFlight.current = false;
       setSaving(false);
     }
-  }, [article.id, check, dirty, draft, reload, sections, toast]);
+  }, [article.id, dirty, draft, reload, sections, toast]);
 
   // ⌘S / Ctrl+S saves, as every editor does.
   const saveRef = useRef(save);
@@ -167,7 +165,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const stats = bodyStats(draft.bodyMarkdown);
 
   const afterChange = async (): Promise<void> => {
-    await Promise.all([reload(), check.reload()]);
+    await reload();
   };
 
   return (
@@ -428,7 +426,6 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
           <div data-part="publish">
             <PublishSection
               article={article}
-              check={check}
               dirty={dirty}
               save={save}
               onChanged={afterChange}

@@ -5,17 +5,18 @@ import { publishProblem } from "../../lib/publish-messages";
 import { articleState } from "../../lib/article-state";
 import { SitePublication } from "../../ui/SitePublication";
 import { formatDateTime, isoToJstLocal, jstLocalToIso } from "../../lib/labels";
-import { useResource, type Resource } from "../../ui/hooks";
-import { ErrorState, Panel, SkeletonRows } from "../../ui/parts";
+import { useResource } from "../../ui/hooks";
+import { Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 
 /**
  * Everything that changes what readers see. Publishing takes the saved
  * revision, so unsaved edits are saved first rather than silently left out.
+ * The publish check runs only when publishing or scheduling, not on every
+ * open or save.
  */
 export function PublishSection({
   article,
-  check,
   dirty,
   save,
   onChanged,
@@ -23,7 +24,6 @@ export function PublishSection({
   onBusy,
 }: {
   article: ArticleDetailDto;
-  check: Resource<PublishCheckDto>;
   dirty: boolean;
   save: () => Promise<boolean>;
   onChanged: () => Promise<void>;
@@ -34,6 +34,10 @@ export function PublishSection({
   const [busy, setBusy] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [when, setWhen] = useState("");
+  // Problems from the last failed check, dropped as soon as anything is edited
+  // since they may no longer hold.
+  const [problems, setProblems] = useState<PublishCheckDto["problems"] | null>(null);
+  if (dirty && problems) setProblems(null);
   const publication = useResource(() => api.publicationStatus(), "publication");
   const reloadPublication = publication.reload;
   useEffect(() => {
@@ -60,7 +64,7 @@ export function PublishSection({
       if (dirty && !(await save())) return;
       const fresh = validate ? await api.publishCheck(article.id) : null;
       if (fresh && !fresh.publishable) {
-        await check.reload();
+        setProblems(fresh.problems);
         throw new Error(fresh.problems.map((p) => publishProblem(p.message)).join("\n"));
       }
       await action();
@@ -75,7 +79,6 @@ export function PublishSection({
     }
   };
 
-  const publishable = check.data?.publishable === true;
   // A live article with nothing new would republish the same revision.
   const nothingToPublish = article.isLive && !article.hasUnpublishedChanges && !dirty;
   const liveUrl =
@@ -94,13 +97,9 @@ export function PublishSection({
           </div>
         ))}
       </dl>
-      {check.error ? (
-        <ErrorState error={check.error} onRetry={() => void check.reload()} />
-      ) : check.loading && !check.data ? (
-        <SkeletonRows rows={2} />
-      ) : check.data && !check.data.publishable && !dirty ? (
+      {problems ? (
         <ul className="problems">
-          {check.data.problems.map((problem) => (
+          {problems.map((problem) => (
             <li key={`${problem.code}-${problem.field ?? ""}`}>
               {problem.field ? <code>{problem.field}</code> : null}{" "}
               {publishProblem(problem.message)}
@@ -108,10 +107,9 @@ export function PublishSection({
           ))}
         </ul>
       ) : (
+        dirty &&
         !nothingToPublish && (
-          <p className="ok-line">
-            {`公開チェックOK${dirty ? "（未保存分を保存してから公開します）" : ""}`}
-          </p>
+          <p className="muted small">未保存分を保存し、チェックしてから公開します</p>
         )
       )}
 
@@ -126,13 +124,7 @@ export function PublishSection({
         <button
           type="button"
           className="primary"
-          disabled={
-            busy ||
-            working ||
-            article.status === "scheduled" ||
-            (!publishable && !dirty) ||
-            nothingToPublish
-          }
+          disabled={busy || working || article.status === "scheduled" || nothingToPublish}
           onClick={() =>
             void run(
               () => api.publish(article.id),
@@ -171,10 +163,7 @@ export function PublishSection({
                 />
               </label>
               <div className="row">
-                <button
-                  type="submit"
-                  disabled={busy || working || (!publishable && !dirty) || when === ""}
-                >
+                <button type="submit" disabled={busy || working || when === ""}>
                   予約する
                 </button>
                 <button type="button" className="link" onClick={() => setScheduling(false)}>
@@ -185,7 +174,7 @@ export function PublishSection({
           ) : (
             <button
               type="button"
-              disabled={busy || working || (!publishable && !dirty)}
+              disabled={busy || working}
               onClick={() => {
                 setWhen(isoToJstLocal(article.scheduledAt));
                 setScheduling(true);

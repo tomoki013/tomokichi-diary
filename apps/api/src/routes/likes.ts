@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import type { LikeActivityDto } from "@tomokichi/contracts";
 import {
   getArticleLikeState,
@@ -20,6 +20,26 @@ async function hashVisitor(value: string, salt: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
+
+/**
+ * Whether this sender may press like again. Keyed by a salted IP hash, never
+ * stored. Without the binding (local dev, tests) every press is allowed.
+ */
+async function withinLikeLimit(c: Context<AppEnv>): Promise<boolean> {
+  const limiter = c.env.LIKE_RATE_LIMITER;
+  if (!limiter) return true;
+  const ip = c.req.header("cf-connecting-ip") ?? "unknown";
+  const key = await hashVisitor(
+    `ip:${ip}`,
+    c.env.IP_HASH_SALT ?? c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1",
+  );
+  const { success } = await limiter.limit({ key });
+  if (!success) c.get("ctx").logger.warn("likes.rate_limited", {});
+  return success;
+}
+
+const tooFast = (c: Context<AppEnv>) =>
+  errorResponse(c, "API_RATE_LIMITED", "too many likes, try again shortly", 429);
 
 export function likeRoutes() {
   const routes = new Hono<AppEnv>();
@@ -53,6 +73,7 @@ export function likeRoutes() {
     if (!VISITOR_ID.test(visitorId)) {
       return errorResponse(c, "API_VALIDATION_FAILED", "invalid visitor identity", 400);
     }
+    if (!(await withinLikeLimit(c))) return tooFast(c);
     const visitorHash = await hashVisitor(visitorId, c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1");
     const state = await toggleArticleLike(
       c.get("ctx"),
@@ -99,6 +120,7 @@ export function photoLikeRoutes() {
     if (!VISITOR_ID.test(visitorId)) {
       return errorResponse(c, "API_VALIDATION_FAILED", "invalid visitor identity", 400);
     }
+    if (!(await withinLikeLimit(c))) return tooFast(c);
     const visitorHash = await hashVisitor(visitorId, c.env.LIKE_HASH_SALT ?? "tomokichi-like-v1");
     const state = await toggleMediaLike(
       c.get("ctx"),
