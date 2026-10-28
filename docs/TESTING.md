@@ -31,7 +31,7 @@
 ブラウザ自動化は無い。代わりに:
 
 - `pnpm check:seo` / `check:links` / `check:routes` / `check:agents` が **188 ページの dist** を全件検査。
-- `pnpm perf` が 6 ページ × 3 回の Lighthouse（desktop）。予算は Perf ≥ 95 / SEO 100 / LCP ≤ 2.5s / CLS ≤ 0.10 / TBT ≤ 200ms（`lighthouserc.json`, `scripts/perf.ts`）。
+- `pnpm perf` が 6 ページ × 3 回の Lighthouse（desktop）。CI では PR のうち公開サイトの元になるファイルを変えたものだけで走り、main への push とテスト・ドキュメント・admin/api/mcp/chagee だけの PR では skip する（`SKIP_PERF`）。予算は Perf ≥ 95 / SEO 100 / LCP ≤ 2.5s / CLS ≤ 0.10 / TBT ≤ 200ms（`lighthouserc.json`, `scripts/perf.ts`）。
 - `pnpm verify:live <base>` — デプロイ先で旧 URL 194 件を実 HTTP で叩く（切替の合否）。
 - `pnpm verify:mcp <base>` — 本番 MCP の protocol/tool/UI。
 
@@ -47,8 +47,6 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 ## CI
 
 `.github/workflows/ci.yml`: push(main) / PR / 手動で `pnpm run ci`。`.cache/images` を `export/media.json` のハッシュでキャッシュ。artifact に `.artifacts/`（summary.json、Lighthouse、ログ）。**CI は deploy しない**（`OPERATIONS.md` Releasing）。
-
-`parity` ステップ（`pnpm content:parity`）は切替までの暫定で、`LEGACY_REPO`（CI では `tomoki013/travel-diary` の sparse checkout）の `posts/` と `export/` を `NormalizedArticle` で比較する。checkout が無ければ skip。
 
 `astro check` は CI に入っていない（`pnpm typecheck` は tsc のみ）。入れるなら `apps/web` の `typecheck` を `scripts/ci.ts` の typecheck ステップに足す。
 

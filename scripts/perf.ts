@@ -122,7 +122,8 @@ try {
       try {
         const result = await lighthouse(
           url,
-          { port: chrome.port, output: "html", logLevel: "error" },
+          // The full-page screenshot only decorates the HTML report.
+          { port: chrome.port, output: "html", logLevel: "error", disableFullPageScreenshot: true },
           desktopConfig,
         );
         if (result === undefined) continue;

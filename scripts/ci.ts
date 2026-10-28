@@ -103,17 +103,6 @@ const STEPS: Step[] = [
     interpret: (output) => parseJsonFindings(output),
   },
   {
-    // Temporary until the cutover: the legacy site must serve the same
-    // articles as export/ (scripts/legacy-sync/README.md). Skipped, not
-    // failed, when the legacy checkout is absent.
-    name: "parity",
-    code: "CONTENT_PARITY_MISMATCH",
-    command: "pnpm",
-    args: ["exec", "tsx", "scripts/content-parity.ts", "--json"],
-    rerun: "pnpm content:parity --report",
-    interpret: (output) => parseJsonFindings(output),
-  },
-  {
     name: "test",
     code: "TEST_FAILED",
     command: "pnpm",
@@ -235,6 +224,13 @@ async function main(): Promise<void> {
 
   for (const step of STEPS) {
     if (only.length > 0 && !only.includes(step.name)) continue;
+    // Lighthouse is the slowest gate by far. The workflow sets SKIP_PERF where
+    // it cannot tell anything new: on main (the PR already measured it) and on
+    // pull requests that change nothing the public site is built from.
+    if (step.name === "perf" && process.env.SKIP_PERF) {
+      checks.push({ name: step.name, status: "skipped", durationMs: 0, findings: [] });
+      continue;
+    }
     const stepStart = performance.now();
     const outcome = await run(step.command, step.args);
     const interpreted = step.interpret?.(outcome.output, outcome.ok) ?? {};
