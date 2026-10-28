@@ -5,6 +5,7 @@ import { enhanceAppleMusic } from "@tomokichi/contracts";
 import { insertAppleMusic } from "../../lib/apple-music";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { insertMarkdownImage } from "../../lib/markdown-image";
+import { markersToPlaceholders, withAdMocks, type AdPreview } from "../../lib/ad-preview";
 import { copyText } from "../../lib/clipboard";
 import { useEditorSections } from "./section-save";
 import { api } from "../../lib/api";
@@ -147,22 +148,21 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   const update = <K extends keyof DraftInput>(key: K, value: DraftInput[K]): void =>
     setDraft((current) => ({ ...current, [key]: value }));
 
+  // Filled in by the 収益化 section once its configuration loads; pages have none.
+  const [adPreview, setAdPreview] = useState<AdPreview | null>(null);
   // The preview renders the draft, which the public site is not serving until
-  // it is published.
+  // it is published. Ads are drawn as boxes where readers will get them.
   const previewHtml = useMemo(
     () =>
       showPreview
         ? enhanceAppleMusic(
-            marked.parse(
-              draft.bodyMarkdown.replace(
-                /\{\{monetization:([a-z0-9-]+)\}\}/g,
-                "\n\n**［収益化スロット: $1 / 管理画面のみ］**\n\n",
-              ),
-              { async: false },
-            ) as string,
+            withAdMocks(
+              marked.parse(markersToPlaceholders(draft.bodyMarkdown), { async: false }) as string,
+              adPreview,
+            ),
           )
         : "",
-    [draft.bodyMarkdown, showPreview],
+    [draft.bodyMarkdown, showPreview, adPreview],
   );
   const stats = bodyStats(draft.bodyMarkdown);
 
@@ -410,6 +410,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 onBody={(body) => update("bodyMarkdown", body)}
                 register={sections.register}
                 onSaveAll={save}
+                onPreview={setAdPreview}
               />
             </div>
           )}

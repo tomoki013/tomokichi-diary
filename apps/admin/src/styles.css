@@ -1725,3 +1725,54 @@ details.panel > summary {
   gap: 0.5rem;
   min-width: 0;
 }
+
+/* Ads in the draft preview: where readers get them, never the real thing. */
+.ad-mock {
+  display: grid;
+  place-content: center;
+  gap: 0.15rem;
+  width: min(100%, 300px);
+  min-height: 120px;
+  margin: 1.25rem auto;
+  padding: 0.75rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--surface-alt),
+    var(--surface-alt) 8px,
+    var(--surface) 8px,
+    var(--surface) 16px
+  );
+  text-align: center;
+}
+.ad-mock--ad {
+  aspect-ratio: 6 / 5;
+}
+.ad-mock__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.ad-mock__note {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.ad-mock--affiliate {
+  width: 100%;
+  min-height: 0;
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  text-align: left;
+}
+.ad-mock--affiliate .ad-mock__label {
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  color: var(--accent-strong);
+}
+.ad-mock--off {
+  min-height: 0;
+  opacity: 0.6;
+}
