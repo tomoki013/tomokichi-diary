@@ -29,6 +29,7 @@ import {
   type RouteId,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
+import { linkBodyImages, withBodyUsages, type BodyImage } from "../content/media-links.js";
 
 export interface CreateArticleInput {
   readonly slug: string;
@@ -38,11 +39,45 @@ export interface CreateArticleInput {
   readonly draft: DraftInput;
   /** Canonical URL for the article. Supplied explicitly — never derived from the slug. */
   readonly path: string;
+  /** Base of the public slug aliases body photos are pointed at (`…/v1/images`). */
+  readonly imageBase?: string | undefined;
 }
 
 export interface ArticleWithRevision {
   readonly article: Article;
   readonly revision: ArticleRevision;
+}
+
+/**
+ * The body decides which photos an article shows: a library photo written into
+ * it, by whatever URL, is pointed at its slug alias and listed on the article.
+ */
+async function linkDraftImages(
+  ctx: AppContext,
+  draft: DraftInput,
+  imageBase: string | undefined,
+): Promise<{ draft: DraftInput; images: readonly BodyImage[] }> {
+  if (!draft.bodyMarkdown.includes("![")) return { draft, images: [] };
+  const [media, aliases] = await Promise.all([
+    ctx.repos.media.listAll(),
+    ctx.repos.media.listSlugAliases(),
+  ]);
+  const linked = linkBodyImages(draft.bodyMarkdown, media, aliases, {
+    resolve: (key) => ctx.mediaUrls.resolve(key),
+    ...(imageBase ? { imageBase } : {}),
+  });
+  return { draft: { ...draft, bodyMarkdown: linked.markdown }, images: linked.images };
+}
+
+async function listBodyImages(
+  ctx: AppContext,
+  articleId: ArticleId,
+  images: readonly BodyImage[],
+): Promise<void> {
+  if (images.length === 0) return;
+  const usages = await ctx.repos.media.listForArticle(articleId);
+  const next = withBodyUsages(articleId, usages, images);
+  if (next !== usages) await ctx.repos.media.replaceForArticle(articleId, next);
 }
 
 export async function createArticle(
@@ -69,6 +104,7 @@ export async function createArticle(
     });
   }
 
+  const { draft, images } = await linkDraftImages(ctx, input.draft, input.imageBase);
   const now = ctx.clock.now();
   const id = ctx.ids.next<ArticleId>();
   const article: Article = {
@@ -94,7 +130,7 @@ export async function createArticle(
     article,
     previous: null,
     id: ctx.ids.next<RevisionId>(),
-    input: input.draft,
+    input: draft,
     createdBy: input.authorId,
     now,
   });
@@ -117,6 +153,7 @@ export async function createArticle(
   await ctx.repos.revisions.save(revision);
   await ctx.repos.articles.save({ ...article, currentRevisionId: revision.id });
   await ctx.repos.routes.save(route);
+  await listBodyImages(ctx, id, images);
   ctx.logger.info("article.created", { articleId: id, route: route.path });
 
   return ok({ article: { ...article, currentRevisionId: revision.id }, revision });
@@ -126,11 +163,13 @@ export async function createArticle(
 export async function updateArticleDraft(
   ctx: AppContext,
   articleId: ArticleId,
-  draft: DraftInput,
+  input: DraftInput,
   editedBy: AuthorId,
+  imageBase?: string,
 ): Promise<Result<ArticleWithRevision>> {
   const article = await ctx.repos.articles.findById(articleId);
   if (!article) return err({ code: "ARTICLE_NOT_FOUND", message: `no article ${articleId}` });
+  const { draft, images } = await linkDraftImages(ctx, input, imageBase);
 
   const previous = await ctx.repos.revisions.findLatest(articleId);
   const now = ctx.clock.now();
@@ -161,6 +200,7 @@ export async function updateArticleDraft(
   if (knowledge)
     await ctx.repos.knowledge.saveArticleKnowledge({ ...knowledge, revisionId: revision.id });
   await ctx.repos.articles.save(updated);
+  await listBodyImages(ctx, articleId, images);
   return ok({ article: updated, revision });
 }
 

@@ -4,6 +4,7 @@ import type { ArticleDetailDto, PublishCheckDto } from "@tomokichi/contracts";
 import {
   archiveArticle,
   checkPublishable,
+  linkBodyImages,
   createArticle,
   listArticlesForAdmin,
   publishArticle,
@@ -91,6 +92,7 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
       authorId,
       path: parsed.value.path,
       draft: parsed.value.draft,
+      imageBase: c.env.PUBLIC_IMAGE_URL,
     });
     if (!result.ok) return domainErrorResponse(c, result.errors);
     return c.json({ id: result.value.article.id }, 201);
@@ -109,6 +111,15 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
     const usages = await ctx.repos.media.listForArticle(id);
     const assets = await Promise.all(
       usages.map((usage) => ctx.repos.media.findById(usage.mediaId)),
+    );
+    const body = revision?.bodyMarkdown ?? "";
+    const bodyUrls = new Map(
+      linkBodyImages(
+        body,
+        assets.filter((asset) => asset !== null),
+        body.includes("/v1/images/") ? await ctx.repos.media.listSlugAliases() : [],
+        { resolve: (key) => ctx.mediaUrls.resolve(key) },
+      ).images.map((image) => [image.asset.id as string, image.urls]),
     );
 
     const [locations, places, categories, tags, memberships] = await Promise.all([
@@ -134,15 +145,16 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
       travelStartDate: article.travelStartDate,
       travelEndDate: article.travelEndDate,
       experienceTags: article.experienceTags,
-      media: usages.map((usage, index) =>
-        toArticleMediaDto(
+      media: usages.map((usage, index) => ({
+        ...toArticleMediaDto(
           usage,
           assets[index] ?? null,
           ctx.mediaUrls.resolve(assets[index]?.storageKey ?? ""),
           c.env.PUBLIC_IMAGE_URL,
           (key) => ctx.mediaUrls.resolve(key),
         ),
-      ),
+        bodyUrls: bodyUrls.get(usage.mediaId) ?? [],
+      })),
       relations: {
         locations: locations
           .filter((r) => r.articleId === id)
@@ -169,7 +181,13 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
     // row that exists.
     const article = await ctx.repos.articles.findById(articleId);
     if (!article) return errorResponse(c, "ARTICLE_NOT_FOUND", `no article ${articleId}`, 404);
-    const result = await updateArticleDraft(ctx, articleId, parsed.value, article.authorId);
+    const result = await updateArticleDraft(
+      ctx,
+      articleId,
+      parsed.value,
+      article.authorId,
+      c.env.PUBLIC_IMAGE_URL,
+    );
     if (!result.ok) return domainErrorResponse(c, result.errors);
     return c.json({ revision: toRevisionDto(result.value.revision) });
   });

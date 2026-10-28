@@ -4,7 +4,7 @@ import { marked } from "marked";
 import { enhanceAppleMusic } from "@tomokichi/contracts";
 import { insertAppleMusic } from "../../lib/apple-music";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
-import { insertMarkdownImage } from "../../lib/markdown-image";
+import { insertMarkdownImage, removeMarkdownImages } from "../../lib/markdown-image";
 import { markersToPlaceholders, withAdMocks, type AdPreview } from "../../lib/ad-preview";
 import { copyText } from "../../lib/clipboard";
 import { useEditorSections } from "./section-save";
@@ -109,10 +109,12 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
     setSaving(true);
     try {
       sections.validate();
-      await api.saveDraft(article.id, payload);
+      const { revision } = await api.saveDraft(article.id, payload);
       if (!(await sections.save())) return false;
-      setSaved({ ...payload, changeSummary: null });
-      setDraft({ ...payload, changeSummary: null });
+      // The API points pasted photo URLs at their slug aliases; show what it kept.
+      const kept = { ...payload, bodyMarkdown: revision.bodyMarkdown, changeSummary: null };
+      setSaved(kept);
+      setDraft(kept);
       toast.info("下書きを保存しました");
       await reload();
       return true;
@@ -379,6 +381,11 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                   bodyRef.current?.focus();
                   bodyRef.current?.setSelectionRange(inserted.cursor, inserted.cursor);
                 });
+              }}
+              onRemoveFromBody={(urls) => {
+                const removed = removeMarkdownImages(draft.bodyMarkdown, urls);
+                if (removed.removed > 0) update("bodyMarkdown", removed.body);
+                return removed.removed;
               }}
             />
           </div>

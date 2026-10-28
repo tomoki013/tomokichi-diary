@@ -14,6 +14,7 @@ export * from "./read/travel-knowledge.js";
 export * from "./read/knowledge-catalog.js";
 
 export * from "./use-cases/content/snapshot.js";
+export { linkBodyImages, type BodyImage } from "./use-cases/content/media-links.js";
 export type { ContentSnapshot } from "@tomokichi/data";
 export * from "./use-cases/articles/article-use-cases.js";
 export * from "./use-cases/articles/article-like-use-cases.js";
