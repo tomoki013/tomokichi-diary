@@ -85,9 +85,7 @@ export function MediaUpload({
           type="button"
           className="primary"
           disabled={
-            busy ||
-            disabled ||
-            items.some((item) => item.state === "queued" && missingSlug(item))
+            busy || disabled || items.some((item) => item.state === "queued" && missingSlug(item))
           }
           onClick={() => void run(items.filter((item) => item.state === "queued"))}
         >
