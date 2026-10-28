@@ -32,12 +32,15 @@ export function MediaSection({
   register,
   onSaveAll,
   onInsert,
+  onRemoveFromBody,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
   register: RegisterSection;
   onSaveAll: () => Promise<boolean>;
   onInsert: (url: string, alt: string) => void;
+  /** Removes the images showing any of `urls` from the draft body; returns how many. */
+  onRemoveFromBody: (urls: readonly string[]) => number;
 }) {
   const toast = useToast();
   const [usages, setUsages] = useState<MediaUsageInput[]>(() => usagesFrom(article));
@@ -57,6 +60,18 @@ export function MediaSection({
   const normalized = usages.map((usage, index) => ({ ...usage, sortOrder: index }));
   const dirty = JSON.stringify(normalized) !== baseline;
   const missingAlt = usages.some((usage) => usage.alt.trim() === "");
+
+  // Saving the body can list photos written into it; pick those up unless
+  // the list has edits of its own still unsaved.
+  const server = JSON.stringify(usagesFrom(article));
+  const [seen, setSeen] = useState(server);
+  if (seen !== server) {
+    setSeen(server);
+    if (!dirty) {
+      setUsages(usagesFrom(article));
+      setBaseline(server);
+    }
+  }
 
   const urlOf = (mediaId: string): string =>
     known[mediaId] ??
@@ -84,6 +99,21 @@ export function MediaSection({
     setUsages((current) =>
       current.map((usage, i) => (i === index ? { ...usage, ...changes } : usage)),
     );
+
+  // The body decides which photos an article shows, so taking one off the
+  // article takes it out of the text too; saving keeps both in step.
+  const remove = (index: number): void => {
+    const mediaId = usages[index]?.mediaId;
+    if (!mediaId) return;
+    const picked = library.items.find((item) => item.id === mediaId);
+    const removed = onRemoveFromBody([
+      ...(article.media.find((item) => item.mediaId === mediaId)?.bodyUrls ?? []),
+      urlOf(mediaId),
+      ...(picked ? [picked.url, picked.slugUrl ?? ""] : []),
+    ]);
+    setUsages((current) => current.filter((_, i) => i !== index));
+    if (removed > 0) toast.info(`本文からも外しました（${removed}か所）`);
+  };
 
   const move = (index: number, delta: -1 | 1): void =>
     setUsages((current) => {
@@ -179,11 +209,7 @@ export function MediaSection({
                 >
                   ↓
                 </button>
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => setUsages((current) => current.filter((_, i) => i !== index))}
-                >
+                <button type="button" className="danger" onClick={() => remove(index)}>
                   外す
                 </button>
               </div>

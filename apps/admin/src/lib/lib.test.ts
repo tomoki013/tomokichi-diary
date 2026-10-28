@@ -5,6 +5,7 @@ import { href, parseRoute, section } from "./route";
 import { treeOrder } from "./locations";
 import { bodyStats, draftFrom, isDirty, normalizeDraft } from "./draft";
 import { formatDateTime, formatRelative, isoToJstLocal, jstLocalToIso } from "./labels";
+import { removeMarkdownImages } from "./markdown-image";
 
 describe("parseRoute", () => {
   it.each([
@@ -137,5 +138,29 @@ describe("treeOrder", () => {
     expect(orphan).toEqual([{ location: at("x", "X", "gone"), depth: 0 }]);
     // a → b → a: neither is a root, so neither is reachable; nothing hangs.
     expect(treeOrder([at("a", "A", "b"), at("b", "B", "a")])).toEqual([]);
+  });
+});
+
+describe("removeMarkdownImages", () => {
+  it("removes every image of a photo, with the blank lines it leaves", () => {
+    const body = [
+      "前",
+      "![塔](<https://api.example/v1/images/tower.jpg>)",
+      "間",
+      '![別の \\] 説明](https://media.example/originals/a.jpg "夜")',
+      "![他](https://media.example/other.jpg)",
+      "後",
+    ].join("\n\n");
+    expect(
+      removeMarkdownImages(body, [
+        "https://api.example/v1/images/tower.jpg",
+        "https://media.example/originals/a.jpg",
+      ]),
+    ).toEqual({ body: "前\n\n間\n\n![他](https://media.example/other.jpg)\n\n後", removed: 2 });
+    expect(removeMarkdownImages("本文\n\n![a](/x.jpg)", ["/x.jpg"]).body).toBe("本文");
+    expect(removeMarkdownImages(body, ["https://example.com/none.jpg"])).toEqual({
+      body,
+      removed: 0,
+    });
   });
 });

@@ -9,6 +9,7 @@ import {
   type Result,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
+import { linkBodyImages, withBodyUsages } from "../content/media-links.js";
 import {
   extensionFor,
   hasAiProvenance,
@@ -185,14 +186,18 @@ export async function setMediaAiGenerated(
   return ok({ ...asset, aiGenerated });
 }
 
-/** Removing a usage never deletes original, thumbnail, OGP or Markdown URLs. */
+/**
+ * Removing a usage never deletes original, thumbnail, OGP or Markdown URLs. A
+ * photo the draft body still shows stays listed: the body decides, so an
+ * editor saving a list it loaded before the body changed cannot drop it.
+ */
 export async function setArticleMedia(
   ctx: AppContext,
   articleId: ArticleId,
   media: readonly ArticleMedia[],
 ): Promise<Result<readonly ArticleMedia[]>> {
-  if (!(await ctx.repos.articles.findById(articleId)))
-    return err({ code: "ARTICLE_NOT_FOUND", message: "記事が見つかりません" });
+  const article = await ctx.repos.articles.findById(articleId);
+  if (!article) return err({ code: "ARTICLE_NOT_FOUND", message: "記事が見つかりません" });
   const missingAlt = media.filter((m) => m.alt.trim() === "");
   if (missingAlt.length > 0)
     return err({
@@ -203,6 +208,17 @@ export async function setArticleMedia(
   for (const usage of media)
     if (usage.articleId !== articleId || !(await ctx.repos.media.findById(usage.mediaId)))
       return err({ code: "MEDIA_NOT_FOUND", message: "画像が見つかりません", field: "mediaId" });
-  await ctx.repos.media.replaceForArticle(articleId, media);
-  return ok(media);
+  const revision = article.currentRevisionId
+    ? await ctx.repos.revisions.findById(article.currentRevisionId)
+    : null;
+  const body = revision?.bodyMarkdown ?? "";
+  const [assets, aliases] = body.includes("![")
+    ? await Promise.all([ctx.repos.media.listAll(), ctx.repos.media.listSlugAliases()])
+    : [[], []];
+  const { images } = linkBodyImages(body, assets, aliases, {
+    resolve: (key) => ctx.mediaUrls.resolve(key),
+  });
+  const listed = withBodyUsages(articleId, media, images);
+  await ctx.repos.media.replaceForArticle(articleId, listed);
+  return ok(listed);
 }

@@ -76,6 +76,8 @@ export interface ArticleDetailDto extends ArticleSummaryDto {
 export interface ArticleMediaDto {
   readonly mediaId: string;
   readonly url: string;
+  /** The URLs the current draft body shows this photo by; empty when it is not in the body. */
+  readonly bodyUrls?: readonly string[];
   readonly thumbnailUrl?: string | null;
   readonly role: string;
   readonly sortOrder: number;

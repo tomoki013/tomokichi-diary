@@ -7,6 +7,7 @@ import type { AuthorId } from "@tomokichi/domain";
 import { createApp } from "../../api/src/app.js";
 import type { Env } from "../../api/src/env.js";
 import { configFromEnv, createOperatorClient, OperatorError, type Fetch } from "./client.js";
+import { bodyUrls } from "./server.js";
 
 let ctx: AppContext;
 let fetchApi: Fetch;
@@ -91,6 +92,30 @@ describe("operator client against the admin API", () => {
       title: "新しいタイトル",
       summary: "s",
       bodyMarkdown: "b",
+    });
+  });
+});
+
+describe("media search results", () => {
+  it("give each photo only the URL a body should use", () => {
+    expect(
+      bodyUrls({
+        items: [
+          {
+            id: "a",
+            url: "https://media.example/a.jpg",
+            slugUrl: "https://api.example/v1/images/a.jpg",
+          },
+          { id: "b", url: "https://media.example/b.jpg", slugUrl: null },
+        ],
+        total: 2,
+      }),
+    ).toEqual({
+      items: [
+        { id: "a", url: "https://api.example/v1/images/a.jpg" },
+        { id: "b", url: "https://media.example/b.jpg" },
+      ],
+      total: 2,
     });
   });
 });

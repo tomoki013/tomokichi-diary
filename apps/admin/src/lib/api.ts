@@ -265,7 +265,7 @@ export const api = {
     draft: DraftInput;
   }) => request<{ id: string }>("/admin/articles", json("POST", input)),
   saveDraft: (articleId: string, draft: DraftInput) =>
-    request<{ revision: { id: string; revisionNumber: number } }>(
+    request<{ revision: { id: string; revisionNumber: number; bodyMarkdown: string } }>(
       `/admin/articles/${id(articleId)}/draft`,
       json("PUT", draft),
     ),

@@ -212,3 +212,99 @@ describe("media search", () => {
     expect((await ids("")).length).toBe(2);
   });
 });
+
+const bodyDraft = (bodyMarkdown: string) => ({
+  title: "t",
+  summary: "s",
+  bodyMarkdown,
+  seoTitleOverride: null,
+  seoDescriptionOverride: null,
+  changeSummary: null,
+});
+const create = async (bodyMarkdown: string) => {
+  const created = await request("/admin/articles", {
+    method: "POST",
+    headers: auth,
+    body: JSON.stringify({
+      slug: "body-photos",
+      locale: "ja",
+      path: "/posts/body-photos",
+      draft: bodyDraft(bodyMarkdown),
+    }),
+  });
+  return ((await created.json()) as { id: string }).id;
+};
+const detail = async (id: string) =>
+  (await (await request(`/admin/articles/${id}`, { headers: auth })).json()) as {
+    currentRevision: { bodyMarkdown: string };
+    media: { mediaId: string; role: string; alt: string }[];
+  };
+
+describe("photos in an article body", () => {
+  it("points a pasted media URL at the slug alias and lists the photo on the article", async () => {
+    const slugged = await uploadMediaWithResult(ctx, input(bytes, "tower.png", "eiffel-tower"));
+    const plain = await uploadMediaWithResult(ctx, input(await image("blue"), "night.png"));
+    if (!slugged.ok || !plain.ok) throw new Error("fixture failed");
+    const media = (key: string) => ctx.mediaUrls.resolve(key);
+    const id = await create(
+      [
+        `![塔](${media(slugged.value.asset.storageKey)})`,
+        `![](${media(plain.value.asset.storageKey)} "夜")`,
+        "![外部](https://example.com/a.jpg)",
+      ].join("\n\n"),
+    );
+
+    const created = await detail(id);
+    expect(created.currentRevision.bodyMarkdown).toBe(
+      [
+        "![塔](https://api.example/v1/images/eiffel-tower.png)",
+        `![](${media(plain.value.asset.storageKey)} "夜")`,
+        "![外部](https://example.com/a.jpg)",
+      ].join("\n\n"),
+    );
+    expect(created.media).toEqual([
+      expect.objectContaining({
+        mediaId: slugged.value.asset.id,
+        role: "inline",
+        alt: "塔",
+        bodyUrls: ["https://api.example/v1/images/eiffel-tower.png"],
+      }),
+      expect.objectContaining({
+        mediaId: plain.value.asset.id,
+        role: "inline",
+        alt: "night",
+        bodyUrls: [media(plain.value.asset.storageKey)],
+      }),
+    ]);
+
+    // An editor saving the list it loaded earlier cannot drop a body photo,
+    // and a photo already listed keeps its role and alt.
+    await request(`/admin/media/article/${id}`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({
+        media: [
+          {
+            mediaId: plain.value.asset.id,
+            role: "cover",
+            sortOrder: 0,
+            alt: "カバー",
+            caption: null,
+          },
+        ],
+      }),
+    });
+    expect((await detail(id)).media).toEqual([
+      expect.objectContaining({ mediaId: plain.value.asset.id, role: "cover", alt: "カバー" }),
+      expect.objectContaining({ mediaId: slugged.value.asset.id, role: "inline", alt: "塔" }),
+    ]);
+
+    // A draft save lists a photo added later, written as its slug alias.
+    await request(`/admin/articles/${id}/draft`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify(bodyDraft("![塔](https://api.example/v1/images/eiffel-tower.png)")),
+    });
+    expect((await detail(id)).media).toHaveLength(2);
+  });
+});

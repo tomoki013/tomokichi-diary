@@ -10,6 +10,22 @@ const json = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
+/**
+ * Gives each library photo the one URL a body should use, the slug alias when
+ * it has one, so a model picking a field by name cannot write the storage URL.
+ */
+export function bodyUrls(page: unknown): unknown {
+  if (!page || typeof page !== "object" || !("items" in page) || !Array.isArray(page.items))
+    return page;
+  return {
+    ...page,
+    items: page.items.map((item: Record<string, unknown>) => {
+      const { slugUrl, ...rest } = item;
+      return { ...rest, url: slugUrl ?? item["url"] };
+    }),
+  };
+}
+
 const READ = { readOnlyHint: true, openWorldHint: false } as const;
 const WRITE = { readOnlyHint: false, destructiveHint: false, openWorldHint: false } as const;
 
@@ -101,11 +117,12 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     "search_media",
     {
       title: "Search media",
-      description: "画像ライブラリを slug・ファイル名で検索します（30件ずつ）。",
+      description:
+        "画像ライブラリを slug・ファイル名・地域で検索します（30件ずつ）。本文に入れるときは各画像の url を ![説明](url) で書きます。",
       inputSchema: { query: z.string().max(100), offset: z.number().int().min(0).optional() },
       annotations: READ,
     },
-    async ({ query, offset }) => json(await client.searchMedia(query, offset ?? 0)),
+    async ({ query, offset }) => json(bodyUrls(await client.searchMedia(query, offset ?? 0))),
   );
 
   server.registerTool(
@@ -113,7 +130,7 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     {
       title: "Create article draft",
       description:
-        "新しい記事を下書きとして作成します。公開はされません。URL は path で明示します（例: /posts/slug）。Apple Music は共有 URL を本文に1行で書くとプレーヤーになります。",
+        "新しい記事を下書きとして作成します。公開はされません。URL は path で明示します（例: /posts/slug）。Apple Music は共有 URL を本文に1行で書くとプレーヤーになります。本文の写真は search_media の url を使います（保存時に記事の画像にも自動で追加されます）。",
       inputSchema: {
         slug,
         path: z.string().regex(/^\/[a-z0-9/-]+$/),
@@ -147,7 +164,7 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     {
       title: "Save article draft",
       description:
-        "記事の下書きを保存します。指定しなかった項目は現在の内容のまま。公開中の記事でも、公開版は変わりません（公開は publish_article）。",
+        "記事の下書きを保存します。指定しなかった項目は現在の内容のまま。公開中の記事でも、公開版は変わりません（公開は publish_article）。本文の写真は search_media の url を使います（保存時に記事の画像にも自動で追加されます）。",
       inputSchema: {
         articleId: z.string().min(1),
         title: z.string().min(1).max(120).optional(),
