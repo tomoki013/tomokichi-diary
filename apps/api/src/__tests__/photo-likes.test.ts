@@ -27,9 +27,11 @@ async function image(color: string, xmp?: string): Promise<ArrayBuffer> {
   return Uint8Array.from(await (xmp ? pipeline.withXmp(xmp) : pipeline).jpeg().toBuffer()).buffer;
 }
 
+let uploads = 0;
 async function upload(body: ArrayBuffer): Promise<{ id: string; aiGenerated: boolean }> {
   const form = new FormData();
   form.append("file", new File([body], "photo.jpg", { type: "image/jpeg" }));
+  form.append("slug", `photo-${++uploads}`);
   const response = await request("/admin/media", {
     method: "POST",
     headers: { authorization: auth.authorization },

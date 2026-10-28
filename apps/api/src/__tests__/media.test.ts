@@ -29,7 +29,7 @@ const input = (body = bytes, name = "photo.png", slug?: string) => ({
   ...(slug ? { slug } : {}),
 });
 const request = (path: string, init: RequestInit = {}) => app.request(`/v1${path}`, init, env);
-async function post(body = bytes, name = "photo.png", type = "image/png", slug?: string) {
+async function post(body = bytes, name = "photo.png", type = "image/png", slug = "photo") {
   const form = new FormData();
   form.append("file", new File([body], name, { type }));
   // Untrusted client dimensions must not be stored.
@@ -132,6 +132,7 @@ describe("media upload API", () => {
     const form = new FormData();
     form.append("file", new File([await image("blue")], "photo.png", { type: "image/png" }));
     form.append("sha256", await sha256Hex(bytes));
+    form.append("slug", "blue-photo");
     expect(
       (
         await request("/admin/media", {
@@ -166,6 +167,11 @@ describe("media upload API", () => {
       expect((await post(body, `photo.${format}`, `image/${format}`)).status).toBe(201);
     },
   );
+  it("refuses an upload without a public slug", async () => {
+    for (const slug of ["", "   "])
+      expect((await post(bytes, "photo.png", "image/png", slug)).status).toBe(400);
+    expect(await ctx.repos.media.listAll()).toHaveLength(0);
+  });
 });
 
 const location = (id: string, slug: string, parentId: string | null) =>
