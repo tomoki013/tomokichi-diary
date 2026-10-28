@@ -8,7 +8,7 @@ import {
   unpublish,
   validatePublishable,
 } from "../rules/publishing.js";
-import { disallowedHtml, inlineInternalLinks } from "../rules/markdown.js";
+import { disallowedHtml, ineffectiveBold, inlineInternalLinks } from "../rules/markdown.js";
 import { hasUnpublishedChanges, nextRevision } from "../rules/revision.js";
 import { asId, type RevisionId } from "../primitives/id.js";
 import { AUTHOR, NOW, at, makeArticle, makeCover, makeRevision, makeRoute } from "./fixtures.js";
@@ -244,6 +244,30 @@ describe("body formatting", () => {
       "./menu",
       "https://tomokichidiary.com/posts/in-list",
       "../quoted",
+    ]);
+  });
+
+  it("finds bold the renderer leaves as asterisks next to Japanese punctuation", () => {
+    // Each expectation was checked against the site's renderer (satteri).
+    const works = [
+      "**太字**です",
+      "あ**太字**い",
+      "**1人RM2**。",
+      "**9:00〜18:00**、",
+      "これは、**「名前」**",
+      "「**名前**」",
+      "a **b** c",
+      "**「x」**",
+      "（**注意**）は",
+      "`**コード**`です",
+    ];
+    for (const markdown of works) expect(ineffectiveBold(markdown), markdown).toEqual([]);
+    expect(ineffectiveBold("**「霸王茶姬」**は")).toEqual(["**「霸王茶姬」**"]);
+    expect(ineffectiveBold("行政都市**プトラジャヤ（Putrajaya）**です")).toEqual([
+      "**プトラジャヤ（Putrajaya）**",
+    ]);
+    expect(ineffectiveBold("前**（注）**後\n\n<strong>「霸王茶姬」</strong>は")).toEqual([
+      "**（注）**",
     ]);
   });
 });

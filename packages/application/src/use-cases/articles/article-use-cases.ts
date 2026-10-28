@@ -6,6 +6,7 @@ import {
   archive,
   disallowedHtml,
   err,
+  ineffectiveBold,
   hasUnpublishedChanges,
   inlineInternalLinks,
   isPubliclyVisible,
@@ -348,11 +349,12 @@ export interface ArticleBodyFinding {
   readonly title: string;
   readonly disallowedHtml: readonly string[];
   readonly inlineInternalLinks: readonly string[];
+  readonly ineffectiveBold: readonly string[];
 }
 
 /**
  * Reads every article's current draft and reports only the bodies that need a
- * hand: raw HTML the publish check rejects, and site links sitting inside a
+ * hand: raw HTML and unrendered bold the publish check rejects, and site links sitting inside a
  * sentence where the page cannot turn them into cards. The bodies themselves
  * never leave the server.
  */
@@ -368,13 +370,16 @@ export async function auditArticleBodies(ctx: AppContext): Promise<readonly Arti
         title: revision.title,
         disallowedHtml: disallowedHtml(revision.bodyMarkdown),
         inlineInternalLinks: inlineInternalLinks(revision.bodyMarkdown),
+        ineffectiveBold: ineffectiveBold(revision.bodyMarkdown),
       };
     }),
   );
   return findings.filter(
     (finding): finding is ArticleBodyFinding =>
       finding !== null &&
-      (finding.disallowedHtml.length > 0 || finding.inlineInternalLinks.length > 0),
+      (finding.disallowedHtml.length > 0 ||
+        finding.inlineInternalLinks.length > 0 ||
+        finding.ineffectiveBold.length > 0),
   );
 }
 

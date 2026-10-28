@@ -117,6 +117,7 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
           )?.path ?? null,
         disallowedHtml: finding.disallowedHtml,
         inlineInternalLinks: finding.inlineInternalLinks,
+        ineffectiveBold: finding.ineffectiveBold,
       })),
       total: findings.length,
     });

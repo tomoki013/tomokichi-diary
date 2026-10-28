@@ -85,7 +85,7 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     {
       title: "Audit article bodies",
       description:
-        '全記事の現在の下書き本文を点検し、問題のある記事だけを返します。disallowedHtml は公開チェックで弾かれる HTML 記法（<strong> 以外。広告リンクは [ラベル](URL "広告") と書けば rel と広告表記はビルド時に付く）、inlineInternalLinks は文中にあって記事リンクカードにならないサイト内リンクです。',
+        '全記事の現在の下書き本文を点検し、問題のある記事だけを返します。disallowedHtml は公開チェックで弾かれる HTML 記法（<strong> 以外。広告リンクは [ラベル](URL "広告") と書けば rel と広告表記はビルド時に付く）、inlineInternalLinks は文中にあって記事リンクカードにならないサイト内リンク、ineffectiveBold は太字にならず ** がそのまま表示される箇所（日本語のカッコの隣では <strong> を使う）です。',
       inputSchema: {},
       annotations: READ,
     },
