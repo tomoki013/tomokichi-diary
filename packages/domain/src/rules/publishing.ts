@@ -4,7 +4,12 @@ import type { ArticleMedia } from "../entities/media.js";
 import type { Route } from "../entities/route.js";
 import { isAfterOrEqual, type Instant } from "../primitives/datetime.js";
 import { err, ok, type DomainError, type Result } from "../primitives/result.js";
-import { disallowedHtml, extractImages, extractInternalLinks } from "./markdown.js";
+import {
+  disallowedHtml,
+  extractImages,
+  extractInternalLinks,
+  ineffectiveBold,
+} from "./markdown.js";
 import { RouteTable } from "./routing.js";
 
 export interface PublishInput {
@@ -58,6 +63,11 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
   // Formatting written as HTML is invisible to every other check on the body.
   for (const tag of disallowedHtml(revision.bodyMarkdown)) {
     fail(`raw HTML is not allowed in the body (use Markdown): ${tag}`, "bodyMarkdown");
+  }
+
+  // These print as "**" on the page; nothing else would notice before a reader does.
+  for (const span of ineffectiveBold(revision.bodyMarkdown)) {
+    fail(`bold will not render here (use <strong>): ${span}`, "bodyMarkdown");
   }
 
   // The build's link check rejects a link to a path no route answers, and that

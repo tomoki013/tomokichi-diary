@@ -151,3 +151,38 @@ export function inlineInternalLinks(markdown: string): string[] {
     return extractLinks(unit).filter(isSiteLink);
   });
 }
+
+const PUNCTUATION_RE = /[\p{P}\p{S}]/u;
+const SPACE_RE = /\s/u;
+
+/**
+ * `**…**` pairs the renderer will print as literal asterisks. CommonMark only
+ * lets `**` close when it is not squeezed between punctuation and a letter, so
+ * `**「名前」**は` and `**（注）**後` stay as text — Japanese brackets are
+ * punctuation and Japanese has no spaces to break the tie. `<strong>` is the
+ * way out in those spots. Returns the unrendered spans.
+ */
+export function ineffectiveBold(markdown: string): string[] {
+  const kind = (ch: string | undefined): "space" | "punct" | "other" =>
+    ch === undefined || SPACE_RE.test(ch) ? "space" : PUNCTUATION_RE.test(ch) ? "punct" : "other";
+  const problems: string[] = [];
+  for (const block of stripCodeFences(markdown).split(/\n\s*\n/)) {
+    const text = block.replace(INLINE_CODE_RE, (code) => " ".repeat(code.length));
+    const runs: { at: number; canOpen: boolean; canClose: boolean }[] = [];
+    for (const m of text.matchAll(/(?<![*\\])\*\*(?!\*)/g)) {
+      const before = kind(text[m.index - 1]);
+      const after = kind(text[m.index + 2]);
+      const left = after !== "space" && (after !== "punct" || before !== "other");
+      const right = before !== "space" && (before !== "punct" || after !== "other");
+      runs.push({ at: m.index, canOpen: left, canClose: right });
+    }
+    for (let i = 0; i < runs.length; i += 2) {
+      const open = runs[i]!;
+      const close = runs[i + 1];
+      if (close && open.canOpen && close.canClose) continue;
+      const end = close ? close.at + 2 : Math.min(text.length, open.at + 30);
+      problems.push(block.slice(open.at, end).replace(/\s+/g, " "));
+    }
+  }
+  return problems;
+}
