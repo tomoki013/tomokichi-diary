@@ -87,6 +87,8 @@ export interface MediaLikeRepository {
 
 export interface RevisionRepository {
   findById(id: RevisionId): Promise<ArticleRevision | null>;
+  /** One query for any number of ids; the order of the result is unspecified. */
+  listByIds(ids: readonly RevisionId[]): Promise<readonly ArticleRevision[]>;
   findLatest(articleId: ArticleId): Promise<ArticleRevision | null>;
   listByArticle(articleId: ArticleId): Promise<readonly ArticleRevision[]>;
   save(revision: ArticleRevision): Promise<void>;
@@ -94,6 +96,8 @@ export interface RevisionRepository {
 
 export interface EmbedRepository {
   listByRevision(revisionId: RevisionId): Promise<readonly ArticleEmbed[]>;
+  /** One query for any number of revisions, each revision's embeds in stored order. */
+  listByRevisions(revisionIds: readonly RevisionId[]): Promise<readonly ArticleEmbed[]>;
   replaceForRevision(revisionId: RevisionId, embeds: readonly ArticleEmbed[]): Promise<void>;
 }
 
@@ -134,6 +138,8 @@ export interface MediaRepository {
   registerHash(id: MediaId, sha256: string): Promise<MediaAsset>;
   hashStatus(): Promise<{ total: number; verified: number; pending: number; uploads: number }>;
   listForArticle(articleId: ArticleId): Promise<readonly ArticleMedia[]>;
+  /** Every article's usages, grouped by article and in `listForArticle` order within each. */
+  listAllUsages(): Promise<readonly ArticleMedia[]>;
   replaceForArticle(articleId: ArticleId, media: readonly ArticleMedia[]): Promise<void>;
 }
 

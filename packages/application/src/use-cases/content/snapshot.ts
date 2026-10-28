@@ -5,22 +5,74 @@ import { canonicalImageLinks } from "./media-links.js";
 
 export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnapshot> {
   const { repos } = ctx;
+  // Every read goes out at once and none depends on another's result, so a
+  // remote database answers the whole snapshot in a single batch rather than
+  // one round trip per article. The per-article lists are regrouped below in
+  // the order the per-article queries used to return them.
   const articles = await repos.articles.listAll();
-
   // Only revisions the site can render are pulled: drafts stay out of the
   // snapshot so an unpublished edit can never leak into a build.
   const revisionIds = articles.map((a) => a.publishedRevisionId).filter((id) => id !== null);
-  const revisions = (
-    await Promise.all(revisionIds.map((id) => repos.revisions.findById(id)))
-  ).filter((revision) => revision !== null);
-  const embeds = (
-    await Promise.all(revisions.map((r) => repos.embeds.listByRevision(r.id)))
-  ).flat();
-  const media = await repos.media.listAll();
-  const mediaSlugAliases = await repos.media.listSlugAliases();
-  const articleMedia = (
-    await Promise.all(articles.map((a) => repos.media.listForArticle(a.id)))
-  ).flat();
+  const [
+    revisionList,
+    embedList,
+    media,
+    mediaSlugAliases,
+    mediaHashes,
+    usages,
+    routes,
+    locations,
+    locationNames,
+    places,
+    categories,
+    tags,
+    collections,
+    authors,
+    articleLocations,
+    articlePlaces,
+    articleCategories,
+    articleTags,
+    articleCollections,
+    sources,
+    travelRoutes,
+    travelFacts,
+    articleKnowledge,
+    publicationMetadata,
+  ] = await Promise.all([
+    repos.revisions.listByIds(revisionIds),
+    repos.embeds.listByRevisions(revisionIds),
+    repos.media.listAll(),
+    repos.media.listSlugAliases(),
+    repos.media.listHashes(),
+    repos.media.listAllUsages(),
+    repos.routes.listAll(),
+    repos.locations.listAll(),
+    repos.locations.listNames(),
+    repos.places.listAll(),
+    repos.taxonomy.listCategories(),
+    repos.taxonomy.listTags(),
+    repos.collections.listAll(),
+    repos.authors.listAll(),
+    repos.relations.listArticleLocations(),
+    repos.relations.listArticlePlaces(),
+    repos.relations.listArticleCategories(),
+    repos.relations.listArticleTags(),
+    repos.collections.listMemberships(),
+    repos.knowledge.listSources(),
+    repos.knowledge.listTravelRoutes(),
+    repos.knowledge.listTravelFacts(),
+    repos.knowledge.listArticleKnowledge(),
+    repos.publicationMetadata.listAll(),
+  ]);
+  const revisionById = new Map(revisionList.map((revision) => [revision.id, revision]));
+  const revisions = revisionIds.flatMap((id) => revisionById.get(id) ?? []);
+  const embeds = revisions.flatMap((revision) =>
+    embedList.filter((embed) => embed.revisionId === revision.id),
+  );
+  const usagesByArticle = new Map<string, (typeof usages)[number][]>();
+  for (const usage of usages)
+    usagesByArticle.set(usage.articleId, [...(usagesByArticle.get(usage.articleId) ?? []), usage]);
+  const articleMedia = articles.flatMap((article) => usagesByArticle.get(article.id) ?? []);
 
   const snapshot: ContentSnapshot = {
     generatedAt: ctx.clock.now(),
@@ -31,34 +83,32 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
       bodyMarkdown: canonicalImageLinks(revision.bodyMarkdown, media, mediaSlugAliases),
     })),
     embeds,
-    routes: await repos.routes.listAll(),
-    locations: await repos.locations.listAll(),
-    locationNames: await repos.locations.listNames(),
-    places: await repos.places.listAll(),
-    categories: await repos.taxonomy.listCategories(),
-    tags: await repos.taxonomy.listTags(),
-    collections: await repos.collections.listAll(),
-    authors: await repos.authors.listAll(),
+    routes,
+    locations,
+    locationNames,
+    places,
+    categories,
+    tags,
+    collections,
+    authors,
     media,
     mediaSlugAliases,
-    mediaHashes: await repos.media.listHashes(),
+    mediaHashes,
     articleMedia,
-    articleLocations: await repos.relations.listArticleLocations(),
-    articlePlaces: await repos.relations.listArticlePlaces(),
-    articleCategories: await repos.relations.listArticleCategories(),
-    articleTags: await repos.relations.listArticleTags(),
-    articleCollections: await repos.collections.listMemberships(),
+    articleLocations,
+    articlePlaces,
+    articleCategories,
+    articleTags,
+    articleCollections,
     aiArtifacts: [],
-    sources: await repos.knowledge.listSources(),
-    travelRoutes: await repos.knowledge.listTravelRoutes(),
-    travelFacts: await repos.knowledge.listTravelFacts(),
-    articleKnowledge: (await repos.knowledge.listArticleKnowledge()).filter((knowledge) =>
+    sources,
+    travelRoutes,
+    travelFacts,
+    articleKnowledge: articleKnowledge.filter((knowledge) =>
       revisionIds.includes(knowledge.revisionId),
     ),
   };
-  const published = new Map(
-    (await repos.publicationMetadata.listAll()).map((entry) => [entry.revisionId, entry.metadata]),
-  );
+  const published = new Map(publicationMetadata.map((entry) => [entry.revisionId, entry.metadata]));
   const metadataByArticle = new Map(
     articles.flatMap((article) => {
       const metadata = article.publishedRevisionId

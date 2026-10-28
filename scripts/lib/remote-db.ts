@@ -41,17 +41,23 @@ export function remoteDatabase(): SqlDatabase {
   const flushReads = async () => {
     const pending = reads.splice(0);
     scheduled = false;
+    // D1 takes at most 50 statements per batch; larger turns go out as
+    // concurrent batches instead of waiting on each other.
+    const groups: (typeof pending)[] = [];
+    for (let offset = 0; offset < pending.length; offset += 50)
+      groups.push(pending.slice(offset, offset + 50));
     try {
-      for (let offset = 0; offset < pending.length; offset += 50) {
-        const group = pending.slice(offset, offset + 50);
-        const results = await queryResults(
-          group.length === 1 ? group[0]!.input : group.map((item) => item.input),
-        );
-        if (group.length > 1 && results.length !== group.length)
-          throw new Error("Incomplete D1 read batch");
-        for (const [index, item] of group.entries())
-          item.resolve(group.length === 1 ? results.flat() : results[index]!);
-      }
+      await Promise.all(
+        groups.map(async (group) => {
+          const results = await queryResults(
+            group.length === 1 ? group[0]!.input : group.map((item) => item.input),
+          );
+          if (group.length > 1 && results.length !== group.length)
+            throw new Error("Incomplete D1 read batch");
+          for (const [index, item] of group.entries())
+            item.resolve(group.length === 1 ? results.flat() : results[index]!);
+        }),
+      );
     } catch (error) {
       for (const item of pending) item.reject(error);
     }

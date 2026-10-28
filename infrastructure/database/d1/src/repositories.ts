@@ -215,6 +215,14 @@ export function createRepositories(db: SqlDatabase): Repositories {
       const row = await first("SELECT * FROM article_revisions WHERE id = ?", id);
       return row ? revisionRow.to(row) : null;
     },
+    // json_each keeps it one bound parameter: D1 caps a statement at 100.
+    listByIds: async (ids) =>
+      (
+        await all(
+          "SELECT * FROM article_revisions WHERE id IN (SELECT value FROM json_each(?))",
+          JSON.stringify(ids),
+        )
+      ).map(revisionRow.to),
     findLatest: async (articleId) => {
       const row = await first(
         "SELECT * FROM article_revisions WHERE article_id = ? ORDER BY revision_number DESC LIMIT 1",
@@ -239,6 +247,13 @@ export function createRepositories(db: SqlDatabase): Repositories {
       (await all("SELECT * FROM article_embeds WHERE revision_id = ?", revisionId)).map(
         embedRow.to,
       ),
+    listByRevisions: async (revisionIds) =>
+      (
+        await all(
+          "SELECT * FROM article_embeds WHERE revision_id IN (SELECT value FROM json_each(?)) ORDER BY rowid",
+          JSON.stringify(revisionIds),
+        )
+      ).map(embedRow.to),
     replaceForRevision: async (revisionId, list) => {
       await db.batch([
         db.prepare("DELETE FROM article_embeds WHERE revision_id = ?").bind(revisionId),
@@ -426,6 +441,10 @@ export function createRepositories(db: SqlDatabase): Repositories {
     listForArticle: async (articleId) =>
       (
         await all("SELECT * FROM article_media WHERE article_id = ? ORDER BY sort_order", articleId)
+      ).map(articleMediaRow.to),
+    listAllUsages: async () =>
+      (
+        await all("SELECT * FROM article_media ORDER BY article_id, sort_order, media_id, role")
       ).map(articleMediaRow.to),
     replaceForArticle: async (articleId, list) => {
       await db.batch([
