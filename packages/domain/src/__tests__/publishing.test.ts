@@ -23,6 +23,9 @@ const base = {
 const body = (link: string) =>
   makeRevision({ bodyMarkdown: `${"本文".repeat(120)}\n\n[関連記事](${link})` });
 
+const withImages = (images: string) =>
+  makeRevision({ bodyMarkdown: `${"本文".repeat(120)}\n\n${images}` });
+
 describe("validatePublishable", () => {
   it("requires a title, a summary and a substantial body", () => {
     const errors = validatePublishable({
@@ -40,6 +43,23 @@ describe("validatePublishable", () => {
       canonicalRoute: makeRoute({ targetId: "article-99" }),
     });
     expect(mismatched[0]?.field).toBe("route");
+  });
+
+  it("requires alt text on every body image", () => {
+    expect(
+      validatePublishable({
+        ...base,
+        revision: withImages("![塔](/a.jpg)\n\n![](<https://x/b.jpg>)"),
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        field: "bodyMarkdown",
+        message: expect.stringContaining("https://x/b.jpg"),
+      }),
+    ]);
+    expect(
+      validatePublishable({ ...base, revision: withImages("```\n![](/code.jpg)\n```") }),
+    ).toEqual([]);
   });
 
   it("requires a cover image with alt text", () => {

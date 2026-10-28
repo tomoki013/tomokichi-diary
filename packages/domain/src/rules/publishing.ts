@@ -4,7 +4,7 @@ import type { ArticleMedia } from "../entities/media.js";
 import type { Route } from "../entities/route.js";
 import { isAfterOrEqual, type Instant } from "../primitives/datetime.js";
 import { err, ok, type DomainError, type Result } from "../primitives/result.js";
-import { extractInternalLinks } from "./markdown.js";
+import { extractImages, extractInternalLinks } from "./markdown.js";
 import { RouteTable } from "./routing.js";
 
 export interface PublishInput {
@@ -47,6 +47,12 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
   // otherwise publish as a bare link where the reader expects a player.
   for (const url of invalidAppleMusicReferences(revision.bodyMarkdown)) {
     fail(`Apple Music URL is not a song, album or playlist: ${url}`, "bodyMarkdown");
+  }
+
+  // Alt text is what a screen reader and a search engine get in place of the
+  // photo, and the editor cannot tell a forgotten one from a decorative one.
+  for (const image of extractImages(revision.bodyMarkdown)) {
+    if (image.alt.trim() === "") fail(`body image requires alt text: ${image.src}`, "bodyMarkdown");
   }
 
   // The build's link check rejects a link to a path no route answers, and that

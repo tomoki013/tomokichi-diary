@@ -9,7 +9,10 @@ const publishMessages: Record<string, string> = {
   "archived articles cannot be published": "アーカイブした記事は公開できません",
 };
 const brokenLink = "internal link target does not exist: ";
+const imageAlt = "body image requires alt text: ";
 export const publishProblem = (message: string) =>
   message.startsWith(brokenLink)
     ? `本文のリンク先 ${message.slice(brokenLink.length)} が存在しません。URLを確認してください`
-    : (publishMessages[message] ?? message);
+    : message.startsWith(imageAlt)
+      ? `本文の画像 ${message.slice(imageAlt.length)} に代替テキストがありません。![ここ](URL) に説明を書いてください`
+      : (publishMessages[message] ?? message);
