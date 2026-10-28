@@ -194,4 +194,19 @@ assert.equal(
   ).length,
   0,
 );
+// A later test round on the same article is its own experiment; malformed rounds are rejected.
+const withId = (id: string) =>
+  query(
+    experimentSql
+      .replaceAll(
+        "STRUCT('experiment_id',STRUCT('chagee-placement-v1'",
+        `STRUCT('experiment_id',STRUCT('${id}'`,
+      )
+      .replaceAll("/posts/shanghai-chagee-menu", "/posts/second-article"),
+  );
+const roundRows = withId(`${expandedId}-r2`);
+assert.equal(roundRows.length, 2);
+assert.ok(roundRows.every((r) => JSON.parse(r["key"]!).experimentId === `${expandedId}-r2`));
+for (const bad of [`${expandedId}-r1`, `${expandedId}-r100`, `${expandedId}-x2`])
+  assert.equal(withId(bad).length, 0, bad);
 process.stdout.write("BigQuery synthetic multi-article experiment identifier checks passed\n");

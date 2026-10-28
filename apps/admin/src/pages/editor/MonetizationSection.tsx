@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { marked } from "marked";
 import {
   validate,
@@ -20,6 +20,7 @@ import {
   type AdLayout,
 } from "../../lib/ad-standard";
 import { href } from "../../lib/route";
+import type { AdPreview } from "../../lib/ad-preview";
 import { useResource } from "../../ui/hooks";
 import { Badge, ErrorState, Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
@@ -32,6 +33,8 @@ type Props = {
   onBody: (body: string) => void;
   register: RegisterSection;
   onSaveAll: () => Promise<boolean>;
+  /** Tells the draft preview which ads to draw, unsaved choices included. */
+  onPreview?: (preview: AdPreview) => void;
 };
 export function MonetizationSection(props: Props) {
   const data = useResource(
@@ -72,6 +75,7 @@ function Loaded({
   onBody,
   register,
   onSaveAll,
+  onPreview,
   data,
   overview,
 }: Props & { data: ArticleMonetizationDto; overview: MonetizationOverviewDto }) {
@@ -110,6 +114,9 @@ function Loaded({
     (e) => e.id === config.experimentId && e.status === "running",
   );
   const layout = adLayoutOf(config);
+  useEffect(() => {
+    onPreview?.({ config, offers: overview.offers, testMarker: experiment?.markerKey ?? null });
+  }, [config, overview.offers, experiment, onPreview]);
   const bodyAd = config.placements.find(
     (p) => p.kind === "adsense" && p.position === "marker" && p.status === "ready",
   );
