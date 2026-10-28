@@ -79,6 +79,14 @@ export default defineConfig({
         namespace: "3001",
         simple: { limit: 1, period: 60 },
       }),
+      // Likes take a visitor id the browser makes up, so a script can mint a new
+      // one per request. This caps one sender (salted IP hash) at 30 presses a
+      // minute across articles and photos: far more than a reader, far less
+      // than a loop.
+      LIKE_RATE_LIMITER: bindings.rateLimit({
+        namespace: "3002",
+        simple: { limit: 30, period: 60 },
+      }),
     },
   },
 });

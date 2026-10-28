@@ -49,6 +49,11 @@ export interface Env {
   INQUIRY_OPERATOR?: ProjectOperatorApi;
   /** Salt used before anonymous like identities are persisted. */
   LIKE_HASH_SALT?: string;
+  /**
+   * Like and unlike presses per sender (salted IP hash) per minute, articles and
+   * photos together. Unset means likes are not rate-limited.
+   */
+  LIKE_RATE_LIMITER?: RateLimit;
   /** Cloudflare Access team domain, e.g. `example.cloudflareaccess.com`. */
   ACCESS_TEAM_DOMAIN?: string;
   /** Audience tag of the Access application protecting the admin. */

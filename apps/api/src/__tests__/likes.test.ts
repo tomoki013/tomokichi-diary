@@ -119,6 +119,45 @@ describe("/v1/likes/:articleId", () => {
   });
 });
 
+describe("like rate limit", () => {
+  it("refuses presses past the sender's limit, keyed by IP rather than the made-up visitor id", async () => {
+    const id = await createArticle();
+    await publish(id);
+    const keys: string[] = [];
+    let allowed = 2;
+    const limited = {
+      ...env,
+      LIKE_RATE_LIMITER: {
+        limit: async ({ key }: { key: string }) => {
+          keys.push(key);
+          return { success: allowed-- > 0 };
+        },
+      },
+    } as unknown as Env;
+    const press = (visitorId: string) =>
+      app.request(
+        `/v1/likes/${id}`,
+        {
+          method: "POST",
+          headers: { ...json, "cf-connecting-ip": "203.0.113.7" },
+          body: JSON.stringify({ visitorId }),
+        },
+        limited,
+      );
+
+    expect((await press(`${visitor}-a`)).status).toBe(200);
+    expect((await press(`${visitor}-b`)).status).toBe(200);
+    const refused = await press(`${visitor}-c`);
+    expect(refused.status).toBe(429);
+    expect(((await refused.json()) as { error: { code: string } }).error.code).toBe(
+      "API_RATE_LIMITED",
+    );
+    expect(new Set(keys).size).toBe(1);
+    expect(keys[0]).not.toContain("203.0.113.7");
+    expect(await ctx.repos.articleLikes.count(id as never)).toBe(2);
+  });
+});
+
 describe("/v1/likes", () => {
   it("returns counts for published articles only, without visitor state", async () => {
     const id = await createArticle();
