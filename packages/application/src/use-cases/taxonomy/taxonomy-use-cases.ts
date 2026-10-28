@@ -1,12 +1,19 @@
+import { parseThemeMusic } from "@tomokichi/contracts";
 import {
   COLLECTION_KINDS,
+  NO_ARTICLE_DEFAULTS,
+  THEME_MUSIC_PROVIDERS,
   err,
   ok,
+  parseExperienceTags,
   parseRoutePath,
   parseSlug,
+  type CategoryId,
   type Collection,
+  type CollectionArticleDefaults,
   type CollectionId,
   type CollectionKind,
+  type CollectionThemeMusic,
   type MediaId,
   type Result,
   type Route,
@@ -18,6 +25,7 @@ import type { AppContext } from "../../context.js";
 
 const MAX_NAME = 80;
 const MAX_DESCRIPTION = 400;
+const MAX_DEFAULTS = 20;
 
 function requireText(value: string, field: string, max: number): Result<string> {
   const text = value.trim();
@@ -78,6 +86,99 @@ export interface UpdateCollectionInput {
   readonly description?: string | null;
   readonly coverMediaId?: string | null;
   readonly sortOrder?: number;
+  /** null removes the music; `enabled: false` keeps the URL for later. */
+  readonly themeMusic?: ThemeMusicInput | null;
+  readonly articleDefaults?: ArticleDefaultsInput;
+}
+
+export interface ThemeMusicInput {
+  readonly provider: string;
+  readonly url: string;
+  readonly title?: string | null;
+  readonly enabled: boolean;
+}
+
+export interface ArticleDefaultsInput {
+  readonly tagIds: readonly unknown[];
+  readonly categoryIds: readonly unknown[];
+  readonly experienceTags: readonly unknown[];
+}
+
+/**
+ * Only a URL the provider's player can open is kept, stored in its canonical
+ * listening form; pasted markup or scripts never survive this. The check is
+ * the same one the admin runs while typing.
+ */
+function parseThemeMusicInput(input: ThemeMusicInput): Result<CollectionThemeMusic> {
+  if (!(THEME_MUSIC_PROVIDERS as readonly string[]).includes(input.provider))
+    return err({
+      code: "API_VALIDATION_FAILED",
+      message: `provider must be one of ${THEME_MUSIC_PROVIDERS.join(", ")}`,
+      field: "themeMusic.provider",
+    });
+  const player = parseThemeMusic(input.provider, input.url);
+  if (!player)
+    return err({
+      code: "API_VALIDATION_FAILED",
+      message: "url must be an Apple Music song, album or playlist share URL",
+      field: "themeMusic.url",
+    });
+  const title = input.title?.trim() ?? "";
+  if (title.length > MAX_NAME)
+    return err({
+      code: "API_VALIDATION_FAILED",
+      message: `themeMusic.title must be at most ${MAX_NAME} characters`,
+      field: "themeMusic.title",
+    });
+  return ok({
+    provider: player.provider,
+    url: player.pageUrl,
+    title: title === "" ? null : title,
+    enabled: input.enabled,
+  });
+}
+
+/** Defaults name existing tags and categories only; an unknown id is rejected, not kept. */
+async function parseArticleDefaults(
+  ctx: AppContext,
+  input: ArticleDefaultsInput,
+): Promise<Result<CollectionArticleDefaults>> {
+  const [tags, categories] = await Promise.all([
+    ctx.repos.taxonomy.listTags(),
+    ctx.repos.taxonomy.listCategories(),
+  ]);
+  const known = (values: readonly unknown[], ids: Set<string>, field: string) => {
+    const unique = [...new Set(values)];
+    if (unique.length > MAX_DEFAULTS)
+      return err({
+        code: "API_VALIDATION_FAILED",
+        message: `${field} must have at most ${MAX_DEFAULTS} entries`,
+        field,
+      });
+    const missing = unique.filter((id) => typeof id !== "string" || !ids.has(id));
+    return missing.length > 0
+      ? err({
+          code: "API_VALIDATION_FAILED",
+          message: `unknown ${field}: ${missing.join(", ")}`,
+          field,
+        })
+      : ok(unique as string[]);
+  };
+  const tagIds = known(input.tagIds, new Set(tags.map((t) => t.id)), "articleDefaults.tagIds");
+  if (!tagIds.ok) return err(...tagIds.errors);
+  const categoryIds = known(
+    input.categoryIds,
+    new Set(categories.map((c) => c.id)),
+    "articleDefaults.categoryIds",
+  );
+  if (!categoryIds.ok) return err(...categoryIds.errors);
+  const experienceTags = parseExperienceTags(input.experienceTags);
+  if (!experienceTags.ok) return err(...experienceTags.errors);
+  return ok({
+    tagIds: tagIds.value as TagId[],
+    categoryIds: categoryIds.value as CategoryId[],
+    experienceTags: experienceTags.value,
+  });
 }
 
 function parseDescription(value: string | null | undefined): Result<string | null> {
@@ -176,6 +277,9 @@ export async function createCollection(
     endDate: null,
     sortOrder:
       sortOrder?.value ?? collections.reduce((max, item) => Math.max(max, item.sortOrder), 0) + 10,
+    themeMusic: null,
+    articleDefaults: NO_ARTICLE_DEFAULTS,
+    updatedAt: ctx.clock.now(),
   };
   const route: Route = {
     id: ctx.ids.next<RouteId>(),
@@ -196,7 +300,9 @@ export async function createCollection(
 }
 
 /**
- * Title, description, cover and order. The slug and the URL are fixed once a
+ * Title, description, cover, order, theme music and article defaults. Saving
+ * never touches member articles or their revisions; the site picks the change
+ * up on its next build. The slug and the URL are fixed once a
  * collection exists: changing them would break links (moving a URL is the
  * route tool's job, with a redirect). Collections are never deleted here.
  */
@@ -229,6 +335,20 @@ export async function updateCollection(
     if (!sortOrder.ok) return err(...sortOrder.errors);
     next = { ...next, sortOrder: sortOrder.value };
   }
+  if (input.themeMusic !== undefined) {
+    if (input.themeMusic === null) next = { ...next, themeMusic: null };
+    else {
+      const music = parseThemeMusicInput(input.themeMusic);
+      if (!music.ok) return err(...music.errors);
+      next = { ...next, themeMusic: music.value };
+    }
+  }
+  if (input.articleDefaults !== undefined) {
+    const defaults = await parseArticleDefaults(ctx, input.articleDefaults);
+    if (!defaults.ok) return err(...defaults.errors);
+    next = { ...next, articleDefaults: defaults.value };
+  }
+  next = { ...next, updatedAt: ctx.clock.now() };
   await ctx.repos.collections.save(next);
   ctx.logger.info("collection.updated", { collectionId: id });
   return ok(next);

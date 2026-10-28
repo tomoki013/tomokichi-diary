@@ -18,7 +18,7 @@ import { Badge, ErrorState, PageHeader, Panel, SkeletonBlock } from "../../ui/pa
 import { useToast } from "../../ui/toast";
 import { PublishSection } from "./PublishSection";
 import { MediaSection } from "./MediaSection";
-import { RelationsSection } from "./RelationsSection";
+import { RelationsSection, type ExperienceDefaultsChange } from "./RelationsSection";
 import { ExperienceSection } from "./ExperienceSection";
 import { KnowledgeSection } from "./KnowledgeSection";
 
@@ -150,6 +150,9 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
 
   // Filled in by the 収益化 section once its configuration loads; pages have none.
   const [adPreview, setAdPreview] = useState<AdPreview | null>(null);
+  const [experienceDefaults, setExperienceDefaults] = useState<ExperienceDefaultsChange | null>(
+    null,
+  );
   // The preview renders the draft, which the public site is not serving until
   // it is published. Ads are drawn as boxes where readers will get them.
   const previewHtml = useMemo(
@@ -395,6 +398,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
               onSaved={afterChange}
               register={sections.register}
               onSaveAll={save}
+              onExperienceDefaults={setExperienceDefaults}
             />
           </div>
           {article.kind === "article" && (
@@ -404,6 +408,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 onSaved={afterChange}
                 register={sections.register}
                 onSaveAll={save}
+                defaults={experienceDefaults}
               />
             </div>
           )}

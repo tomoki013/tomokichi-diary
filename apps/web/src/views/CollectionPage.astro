@@ -4,8 +4,10 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import Picture from "../components/Picture.astro";
+import SeriesMusic from "../components/SeriesMusic.astro";
 import { content } from "../lib/content";
 import { collectionTrail } from "../lib/navigation";
+import { seriesMusicOf } from "../lib/series-music";
 import { seoConfig } from "../lib/site";
 
 interface Props {
@@ -22,6 +24,7 @@ const cover =
   null;
 
 const title = collection?.title ?? "";
+const seriesMusic = collection ? seriesMusicOf([collection]) : [];
 const trail = collectionTrail(route, title);
 const period =
   collection?.startDate &&
@@ -85,6 +88,8 @@ const otherCollections = content.snapshot.collections
         </div>
       </div>
     </header>
+
+    {seriesMusic.length > 0 && <SeriesMusic entries={seriesMusic} pageType="collection" />}
 
     <section class="collection-overview" aria-label="コレクション概要">
       <div>

@@ -366,9 +366,14 @@ function CreateArticle() {
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     const title = String(form.get("title")).trim();
     const path = String(form.get("path")).trim();
+    // The editor opens in its own tab so this list stays where it was. The tab
+    // is opened now, while the click still counts as the user's: browsers
+    // (Safari above all) block a window opened after the request returns.
+    const tab = globalThis.open("about:blank", "_blank");
     setBusy(true);
     try {
       const created = await api.createArticle({
@@ -386,8 +391,15 @@ function CreateArticle() {
           changeSummary: "作成",
         },
       });
-      globalThis.location.hash = href.article(created.id);
+      const editor = href.article(created.id);
+      if (tab && !tab.closed) {
+        tab.location.href = `${globalThis.location.pathname}${globalThis.location.search}${editor}`;
+        element.reset();
+        setSlug("");
+        toast.info(`「${title}」を作成し、別のタブで開きました`);
+      } else globalThis.location.hash = editor;
     } catch (error) {
+      tab?.close();
       toast.error(error);
     } finally {
       setBusy(false);
@@ -428,7 +440,7 @@ function CreateArticle() {
         </label>
         <div className="form-actions">
           <button className="primary" type="submit" disabled={busy}>
-            {busy ? "作成中…" : "作成して編集"}
+            {busy ? "作成中…" : "作成して別タブで編集"}
           </button>
         </div>
       </form>

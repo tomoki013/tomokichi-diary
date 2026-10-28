@@ -25,6 +25,8 @@ import CopyLinkButton from "../components/CopyLinkButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 import WebMcpTools from "../components/WebMcpTools.astro";
 import ExperienceChips from "../components/ExperienceChips.astro";
+import SeriesMusic from "../components/SeriesMusic.astro";
+import { seriesMusicOf } from "../lib/series-music";
 import StoryRail from "../components/StoryRail.astro";
 import PlaceStories from "../components/PlaceStories.astro";
 import { EXPERIENCE_COPY, experienceHref } from "../lib/experiences";
@@ -124,6 +126,7 @@ const currentIndex = articleViews.findIndex((item) => item.article.id === articl
 const previousArticle = currentIndex >= 0 ? articleViews[currentIndex + 1] : undefined;
 const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefined;
 const knowledge = content.knowledgeOf(article.id);
+const seriesMusic = seriesMusicOf(content.collectionsOf(article.id));
 const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 ---
 
@@ -207,6 +210,8 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
       )}
       <LikeButton articleId={article.id} title={revision.title} path={route.path} />
     </div>
+
+    {seriesMusic.length > 0 && <SeriesMusic entries={seriesMusic} pageType="article" />}
 
     <div class="article-layout">
       <div class="article-main">

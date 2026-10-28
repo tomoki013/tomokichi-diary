@@ -48,6 +48,7 @@ export function referenceRoutes() {
         slug: collection.slug,
         kind: collection.kind,
         title: collection.title,
+        articleDefaults: collection.articleDefaults,
       })),
     };
     return c.json(body);

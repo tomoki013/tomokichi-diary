@@ -23,6 +23,9 @@ import type {
   TravelRoute,
   TravelFact,
   ArticleKnowledge,
+  CategoryId,
+  TagId,
+  ThemeMusicProvider,
 } from "@tomokichi/domain";
 import { isExperienceTag } from "@tomokichi/domain";
 
@@ -543,6 +546,25 @@ export const collectionRow = {
     startDate: nullableStr(row, "start_date") as Collection["startDate"],
     endDate: nullableStr(row, "end_date") as Collection["endDate"],
     sortOrder: num(row, "sort_order"),
+    themeMusic: nullableStr(row, "theme_music_url")
+      ? {
+          provider: (nullableStr(row, "theme_music_provider") ??
+            "apple_music") as ThemeMusicProvider,
+          url: str(row, "theme_music_url"),
+          title: nullableStr(row, "theme_music_title"),
+          enabled: bool(row, "theme_music_enabled"),
+        }
+      : null,
+    articleDefaults: {
+      tagIds: json<unknown[]>(row, "default_tag_ids", []).filter(
+        (id): id is TagId => typeof id === "string",
+      ),
+      categoryIds: json<unknown[]>(row, "default_category_ids", []).filter(
+        (id): id is CategoryId => typeof id === "string",
+      ),
+      experienceTags: json<unknown[]>(row, "default_experience_tags", []).filter(isExperienceTag),
+    },
+    updatedAt: nullableStr(row, "updated_at") as Collection["updatedAt"],
   }),
   from: (collection: Collection): Row => ({
     id: collection.id,
@@ -554,6 +576,14 @@ export const collectionRow = {
     start_date: collection.startDate,
     end_date: collection.endDate,
     sort_order: collection.sortOrder,
+    theme_music_provider: collection.themeMusic?.provider ?? null,
+    theme_music_url: collection.themeMusic?.url ?? null,
+    theme_music_title: collection.themeMusic?.title ?? null,
+    theme_music_enabled: flag(collection.themeMusic?.enabled ?? false),
+    default_tag_ids: JSON.stringify(collection.articleDefaults.tagIds),
+    default_category_ids: JSON.stringify(collection.articleDefaults.categoryIds),
+    default_experience_tags: JSON.stringify(collection.articleDefaults.experienceTags),
+    updated_at: collection.updatedAt,
   }),
 };
 

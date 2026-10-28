@@ -162,7 +162,23 @@ export interface TaxonomyDto {
     readonly slug: string;
     readonly kind: string;
     readonly title: string;
+    /** Added to an article when it joins this collection in the editor. */
+    readonly articleDefaults: CollectionArticleDefaultsDto;
   }[];
+}
+
+export interface CollectionArticleDefaultsDto {
+  readonly tagIds: readonly string[];
+  readonly categoryIds: readonly string[];
+  readonly experienceTags: readonly string[];
+}
+
+/** Theme music as stored: the share URL and label, never player markup. */
+export interface CollectionThemeMusicDto {
+  readonly provider: "apple_music";
+  readonly url: string;
+  readonly title: string | null;
+  readonly enabled: boolean;
 }
 
 /** A series or journey as the admin manages it. */
@@ -179,6 +195,12 @@ export interface CollectionAdminDto {
   /** Members whose article is live on the site; zero keeps the page noindex. */
   readonly publishedCount: number;
   readonly memberCount: number;
+  readonly themeMusic: CollectionThemeMusicDto | null;
+  readonly articleDefaults: CollectionArticleDefaultsDto;
+  /** What most members already carry, offered as a starting point for the defaults. */
+  readonly suggestedDefaults: CollectionArticleDefaultsDto;
+  /** Last saved in the admin; compared with the site's last deploy. */
+  readonly updatedAt: string | null;
 }
 
 export interface TagDto {

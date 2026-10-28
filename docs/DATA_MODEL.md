@@ -57,6 +57,23 @@ Structured content Markdown cannot express (cost tables, maps, notices),
 referenced from the body as `{{embed:anchor-key}}`. The payload says _what_ the
 thing is; which component renders it is a frontend decision.
 
+## Collection
+
+A `series` or `journey`: an ordered group of articles with its own URL.
+
+- `themeMusic` — optional music a reader can choose to play while reading a
+  series: `provider` (`apple_music`), the share `url` in its canonical
+  listening form, an optional `title` and `enabled`. Never player markup. Only
+  enabled music reaches the content snapshot; a switched-off URL stays in D1.
+  The player is built from the URL by the frontend (`parseThemeMusic`).
+- `articleDefaults` — tag ids, category ids and experience tags the admin
+  editor adds when an article joins the collection. Editor convenience only;
+  saving a collection never touches member articles or revisions.
+- `updatedAt` — last admin edit, compared with the site's last deploy request.
+
+Migration `0022_collection_theme_music.sql` adds these as nullable / defaulted
+columns; existing rows start with music off and no defaults.
+
 ## Location / LocationName
 
 One table for every geographic level (`continent` … `district`), nested through

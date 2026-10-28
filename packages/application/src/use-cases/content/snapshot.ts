@@ -89,7 +89,12 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     places,
     categories,
     tags,
-    collections,
+    // A series' music reaches the build only while it is switched on; a
+    // URL kept for later stays in the database.
+    collections: collections.map((collection) => ({
+      ...collection,
+      themeMusic: collection.themeMusic?.enabled ? collection.themeMusic : null,
+    })),
     authors,
     media,
     mediaSlugAliases,

@@ -1,28 +1,56 @@
 import { useSectionSave, type RegisterSection } from "./section-save";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
 import { experienceLabels } from "../../lib/labels";
+import { addMissing, removeAdded } from "../../lib/relation-defaults";
 import { Panel } from "../../ui/parts";
+import type { ExperienceDefaultsChange } from "./RelationsSection";
 import { useToast } from "../../ui/toast";
 
-/** How a reader chooses a story: a small closed vocabulary, saved on its own. */
+/**
+ * How a reader chooses a story: a small closed vocabulary, saved on its own.
+ * Joining a series in the relations adds that series' default tags here.
+ */
 export function ExperienceSection({
   article,
   onSaved,
   register,
   onSaveAll,
+  defaults,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
   register: RegisterSection;
   onSaveAll: () => Promise<boolean>;
+  defaults?: ExperienceDefaultsChange | null;
 }) {
   const toast = useToast();
   const [chosen, setChosen] = useState<string[]>(() => [...article.experienceTags]);
   const [baseline, setBaseline] = useState(() => [...article.experienceTags].toSorted().join());
   const [busy, setBusy] = useState(false);
   const dirty = chosen.toSorted().join() !== baseline;
+  // What each series added in this session, so leaving it removes only that.
+  // The updaters below record it; they are pure in `current`, so a repeated
+  // call (React's strict mode) records the same thing.
+  const added = useRef(new Map<string, readonly string[]>());
+  const applied = useRef(0);
+  useEffect(() => {
+    if (!defaults || defaults.key === applied.current) return;
+    applied.current = defaults.key;
+    if (defaults.remove) {
+      const before = added.current.get(defaults.source) ?? [];
+      added.current.delete(defaults.source);
+      // oxlint-disable-next-line react/set-state-in-effect
+      setChosen((current) => removeAdded(current, before, defaults.keep));
+    } else {
+      setChosen((current) => {
+        const result = addMissing(current, defaults.add);
+        added.current.set(defaults.source, result.added);
+        return result.next;
+      });
+    }
+  }, [defaults]);
 
   async function save(): Promise<boolean> {
     setBusy(true);

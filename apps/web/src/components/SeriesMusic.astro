@@ -1,0 +1,324 @@
+---
+import { THEME_MUSIC_PROVIDER_LABELS } from "@tomokichi/contracts";
+import type { SeriesMusicEntry } from "../lib/series-music";
+
+interface Props {
+  entries: readonly SeriesMusicEntry[];
+  pageType: "article" | "collection";
+}
+
+/**
+ * "Read with music": a short note and a button. Nothing from the music
+ * service loads until the reader presses it; then the provider's own player
+ * appears here and stays while the article is read. One player only, even
+ * for an article in several series — the reader picks which.
+ */
+const { entries, pageType } = Astro.props;
+const first = entries[0];
+const kindLabel = { song: "曲", album: "アルバム", playlist: "プレイリスト" } as const;
+const frameTitle = (entry: SeriesMusicEntry) =>
+  entry.musicTitle ?? `「${entry.title}」のテーマ${kindLabel[entry.player.kind]}`;
+const provider = THEME_MUSIC_PROVIDER_LABELS[first?.player.provider ?? "apple_music"];
+---
+
+{first && (
+  <section
+    class="series-music"
+    aria-labelledby="series-music-heading"
+    data-series-music
+    data-page-type={pageType}
+  >
+    <div class="series-music__intro">
+      <p class="series-music__heading" id="series-music-heading">
+        <span aria-hidden="true">♪</span> 音楽と一緒に読む
+      </p>
+      <p class="series-music__lead">
+        {pageType === "collection" ? (
+          "このシリーズのテーマ音楽を聴きながら、記事を楽しめます。"
+        ) : entries.length > 1 ? (
+          "この記事が入っているシリーズのテーマ音楽を聴きながら読めます。"
+        ) : (
+          <>
+            シリーズ<a href={first.path}>「{first.title}」</a>
+            のテーマ音楽を聴きながら読めます。
+          </>
+        )}
+      </p>
+      {entries.length > 1 && (
+        <label class="series-music__choice">
+          <span>シリーズ</span>
+          <select data-series-music-choice>
+            {entries.map((entry) => (
+              <option value={entry.slug}>{entry.title}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      {entries.map((entry, index) => (
+        <template
+          data-series-music-entry={entry.slug}
+          data-provider={entry.player.provider}
+          data-embed={entry.player.embedUrl}
+          data-page={entry.player.pageUrl}
+          data-height={entry.player.height}
+          data-title={frameTitle(entry)}
+          data-label={entry.musicTitle ?? ""}
+          data-default={index === 0 ? "" : undefined}
+        />
+      ))}
+      <p class="series-music__now" data-series-music-label hidden={!first.musicTitle}>
+        ♫ {first.musicTitle}
+      </p>
+      <div class="series-music__actions">
+        <button
+          type="button"
+          class="series-music__open"
+          aria-expanded="false"
+          aria-controls="series-music-player"
+          data-series-music-open
+        >
+          音楽プレーヤーを開く
+        </button>
+        <a
+          href={first.player.pageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-series-music-external
+        >
+          {provider}で開く ↗
+        </a>
+      </div>
+    </div>
+    <div id="series-music-player" class="series-music__player" hidden data-series-music-player />
+    <p class="series-music__note">
+      {provider}
+      の公式プレーヤーで、再生はプレーヤー内から。サインインしていないと試聴（一部）のことがあります。
+    </p>
+    <a href="#series-music-heading" class="series-music__return" hidden data-series-music-return>
+      <span aria-hidden="true">♪</span> プレーヤーに戻る
+    </a>
+  </section>
+)}
+
+<script>
+  import { trackSemanticEvent } from "../lib/analytics";
+
+  // The provider's own player, with the same frame rules as the body's
+  // Apple Music embeds. No autoplay permission: playing is always the
+  // reader's tap inside the player.
+  function frameFor(entry: HTMLTemplateElement): HTMLIFrameElement {
+    const frame = document.createElement("iframe");
+    frame.src = entry.dataset.embed ?? "";
+    frame.title = `${entry.dataset.title ?? "テーマ音楽"}（Apple Music）`;
+    frame.height = entry.dataset.height ?? "175";
+    frame.allow = "encrypted-media *; clipboard-write";
+    frame.setAttribute(
+      "sandbox",
+      "allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation",
+    );
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    return frame;
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-series-music]").forEach((root) => {
+    const pageType = root.dataset.pageType === "collection" ? "collection" : "article";
+    const open = root.querySelector<HTMLButtonElement>("[data-series-music-open]");
+    const holder = root.querySelector<HTMLElement>("[data-series-music-player]");
+    const external = root.querySelector<HTMLAnchorElement>("[data-series-music-external]");
+    const label = root.querySelector<HTMLElement>("[data-series-music-label]");
+    const choice = root.querySelector<HTMLSelectElement>("[data-series-music-choice]");
+    const back = root.querySelector<HTMLAnchorElement>("[data-series-music-return]");
+    if (!open || !holder) return;
+
+    const entryFor = (slug: string | undefined) =>
+      root.querySelector<HTMLTemplateElement>(
+        slug ? `[data-series-music-entry="${CSS.escape(slug)}"]` : "[data-default]",
+      );
+    let current = entryFor(choice?.value);
+
+    const track = (name: "series_music_open" | "series_music_external_open") => {
+      if (!current) return;
+      trackSemanticEvent({
+        name,
+        series_slug: current.dataset.seriesMusicEntry ?? "",
+        page_type: pageType,
+        provider: current.dataset.provider ?? "",
+      });
+    };
+
+    const show = (entry: HTMLTemplateElement) => {
+      holder.replaceChildren(frameFor(entry));
+      holder.hidden = false;
+      open.setAttribute("aria-expanded", "true");
+      open.textContent = "プレーヤーを閉じる";
+    };
+
+    open.addEventListener("click", () => {
+      if (!current) return;
+      if (holder.hidden) {
+        show(current);
+        track("series_music_open");
+      } else {
+        // Closing is the reader's choice; it is the only thing that removes the player.
+        holder.replaceChildren();
+        holder.hidden = true;
+        open.setAttribute("aria-expanded", "false");
+        open.textContent = "音楽プレーヤーを開く";
+        if (back) back.hidden = true;
+      }
+    });
+
+    choice?.addEventListener("change", () => {
+      current = entryFor(choice.value);
+      if (!current) return;
+      if (label) {
+        label.textContent = `♫ ${current.dataset.label ?? ""}`;
+        label.hidden = !current.dataset.label;
+      }
+      if (external) external.href = current.dataset.page ?? external.href;
+      // Swapping replaces the one frame; two sources never load at once.
+      if (!holder.hidden) {
+        show(current);
+        track("series_music_open");
+      }
+    });
+
+    external?.addEventListener("click", () => track("series_music_external_open"));
+
+    // Once the player is open and scrolled away, a small link leads back to
+    // it. It moves the reader, never the player, so playback is not cut.
+    if (back && "IntersectionObserver" in globalThis) {
+      new IntersectionObserver(([entry]) => {
+        back.hidden = holder.hidden || Boolean(entry?.isIntersecting);
+      }).observe(root);
+      back.addEventListener("click", (event) => {
+        event.preventDefault();
+        root.scrollIntoView({ behavior: "smooth", block: "start" });
+        open.focus({ preventScroll: true });
+      });
+    }
+  });
+</script>
+
+<style>
+  .series-music {
+    margin-block: var(--space-md);
+    padding: var(--space-sm);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .series-music__heading {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .series-music__lead,
+  .series-music__now,
+  .series-music__note {
+    margin: 0.3rem 0 0;
+    font-size: var(--step-small);
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .series-music__note {
+    font-size: 0.78rem;
+  }
+  .series-music__now {
+    color: var(--ink);
+  }
+  .series-music__lead a {
+    color: var(--accent);
+  }
+  .series-music__choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: var(--step-small);
+  }
+  .series-music__choice select {
+    min-height: var(--tap);
+    max-width: 100%;
+    padding-inline: 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+  }
+  .series-music__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.6rem;
+  }
+  .series-music__open {
+    min-height: var(--tap);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-pill);
+    background: var(--accent-tint);
+    color: var(--accent-strong);
+    font: inherit;
+    font-size: var(--step-small);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .series-music__open:hover {
+    background: var(--surface);
+  }
+  .series-music__actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    color: var(--accent);
+    font-size: var(--step-small);
+    text-underline-offset: 0.2em;
+  }
+  .series-music__open:focus-visible,
+  .series-music__actions a:focus-visible,
+  .series-music__choice select:focus-visible,
+  .series-music__return:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .series-music__player {
+    margin-top: 0.75rem;
+  }
+  /* Apple's frame; only its box is ours. Its height is set before it loads. */
+  .series-music__player :global(iframe) {
+    display: block;
+    width: 100%;
+    max-width: 660px;
+    border: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--line);
+  }
+  .series-music__return {
+    /* Bottom left: the article's contents button sits bottom right. */
+    position: fixed;
+    left: 1rem;
+    bottom: calc(1.2rem + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: var(--tap);
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: var(--step-small);
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 12%);
+  }
+  .series-music__return[hidden] {
+    display: none;
+  }
+</style>

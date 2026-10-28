@@ -1,7 +1,8 @@
-import type { ArticleId, MediaId } from "../primitives/id.js";
+import type { ArticleId, CategoryId, MediaId, TagId } from "../primitives/id.js";
 import type { Brand } from "../primitives/brand.js";
-import type { PlainDate } from "../primitives/datetime.js";
+import type { Instant, PlainDate } from "../primitives/datetime.js";
 import type { Slug } from "../primitives/slug.js";
+import type { ExperienceTag } from "./experience.js";
 
 export type CollectionId = Brand<string, "CollectionId">;
 
@@ -23,7 +24,43 @@ export interface Collection {
   readonly startDate: PlainDate | null;
   readonly endDate: PlainDate | null;
   readonly sortOrder: number;
+  /** Optional music a reader can choose to play while reading the series. */
+  readonly themeMusic: CollectionThemeMusic | null;
+  /** What an article usually carries once it joins; the editor offers these. */
+  readonly articleDefaults: CollectionArticleDefaults;
+  /** Last edit in the admin; null for records older than the column. */
+  readonly updatedAt: Instant | null;
 }
+
+/**
+ * Music services a series can name. Only Apple Music is wired up; another
+ * service is a new value here plus its URL parser and player.
+ */
+export const THEME_MUSIC_PROVIDERS = ["apple_music"] as const;
+export type ThemeMusicProvider = (typeof THEME_MUSIC_PROVIDERS)[number];
+
+/**
+ * A share URL and an optional label — never player markup. Turning it off
+ * keeps the URL so it can be switched back on; removing it clears the record.
+ */
+export interface CollectionThemeMusic {
+  readonly provider: ThemeMusicProvider;
+  readonly url: string;
+  readonly title: string | null;
+  readonly enabled: boolean;
+}
+
+export interface CollectionArticleDefaults {
+  readonly tagIds: readonly TagId[];
+  readonly categoryIds: readonly CategoryId[];
+  readonly experienceTags: readonly ExperienceTag[];
+}
+
+export const NO_ARTICLE_DEFAULTS: CollectionArticleDefaults = {
+  tagIds: [],
+  categoryIds: [],
+  experienceTags: [],
+};
 
 export interface ArticleCollection {
   readonly articleId: ArticleId;
