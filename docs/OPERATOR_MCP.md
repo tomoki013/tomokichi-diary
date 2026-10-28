@@ -10,10 +10,10 @@ ChatGPT（Codex）や Claude などの AI クライアントから、記事・�
 
 ## ツール
 
-| 種類                                        | ツール                                                                                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 読み取り                                    | `list_articles` `get_article` `check_publishable` `publication_status` `list_taxonomy` `list_series` `search_media`                      |
-| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `set_article_series_and_tags` `create_series` `update_series` `create_tag` `publish_article` |
+| 種類                                        | ツール                                                                                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `publication_status` `list_taxonomy` `list_series` `search_media` |
+| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `set_article_series_and_tags` `create_series` `update_series` `create_tag` `publish_article`   |
 
 下書きの保存やシリーズ・タグの付け替えは公開サイトを変えません。公開中の記事は「変更を公開」（`publish_article`）で反映されます。
 

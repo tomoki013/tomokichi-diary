@@ -3,6 +3,7 @@ import { validate } from "@tomokichi/contracts";
 import type { ArticleDetailDto, PublishCheckDto } from "@tomokichi/contracts";
 import {
   archiveArticle,
+  auditArticleBodies,
   checkPublishable,
   linkBodyImages,
   createArticle,
@@ -96,6 +97,29 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
     });
     if (!result.ok) return domainErrorResponse(c, result.errors);
     return c.json({ id: result.value.article.id }, 201);
+  });
+
+  // Registered before "/:id" so the path is not read as an article id.
+  routes.get("/body-audit", async (c) => {
+    const ctx = c.get("ctx");
+    const table = new RouteTable(await ctx.repos.routes.listAll());
+    const findings = await auditArticleBodies(ctx);
+    return c.json({
+      items: findings.map((finding) => ({
+        id: finding.article.id,
+        slug: finding.article.slug,
+        status: finding.article.status,
+        title: finding.title,
+        path:
+          table.canonicalFor(
+            finding.article.kind === "page" ? "static" : "article",
+            finding.article.id,
+          )?.path ?? null,
+        disallowedHtml: finding.disallowedHtml,
+        inlineInternalLinks: finding.inlineInternalLinks,
+      })),
+      total: findings.length,
+    });
   });
 
   routes.get("/:id", async (c) => {

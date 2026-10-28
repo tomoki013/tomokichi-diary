@@ -81,6 +81,18 @@ export function createOperatorServer(client: OperatorClient): McpServer {
   );
 
   server.registerTool(
+    "audit_article_bodies",
+    {
+      title: "Audit article bodies",
+      description:
+        '全記事の現在の下書き本文を点検し、問題のある記事だけを返します。disallowedHtml は公開チェックで弾かれる HTML 記法（<strong> 以外。広告リンクは [ラベル](URL "広告") と書けば rel と広告表記はビルド時に付く）、inlineInternalLinks は文中にあって記事リンクカードにならないサイト内リンクです。',
+      inputSchema: {},
+      annotations: READ,
+    },
+    async () => json(await client.bodyAudit()),
+  );
+
+  server.registerTool(
     "publication_status",
     {
       title: "Publication status",

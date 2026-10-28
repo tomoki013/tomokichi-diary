@@ -91,3 +91,63 @@ export function truncate(text: string, maxLength: number): string {
   const boundary = Math.max(cut.lastIndexOf("。"), cut.lastIndexOf("、"), cut.lastIndexOf(" "));
   return `${(boundary > maxLength * 0.6 ? cut.slice(0, boundary + 1) : cut).trimEnd()}…`;
 }
+
+const INLINE_CODE_RE = /`[^`\n]*`/g;
+const HTML_TAG_RE = /<\/?([a-zA-Z][a-zA-Z0-9-]*)(?=[\s/>])[^>]*>/g;
+
+/**
+ * Raw HTML in the body that the editor did not need: Markdown covers it, and a
+ * pasted tag otherwise slips past every check that reads the Markdown. `strong`
+ * stays because `**` does not open or close next to Japanese brackets
+ * (`**「名前」**は`). Inline affiliate links are written `[ラベル](URL "広告")`
+ * and get their rel and disclosure at build time.
+ */
+export function disallowedHtml(markdown: string): string[] {
+  const body = stripCodeFences(markdown).replace(INLINE_CODE_RE, "");
+  return [
+    ...new Set(
+      [...body.matchAll(HTML_TAG_RE)]
+        .filter((m) => m[1]!.toLowerCase() !== "strong")
+        .map((m) => m[0]),
+    ),
+  ];
+}
+
+const SITE_ORIGIN = "https://tomokichidiary.com";
+const LIST_ITEM_RE = /^\s*(?:[-*+]|\d+\.)\s+/;
+const LONE_LINK_RE = /^\[[^\]]*\]\([^)\s]+(?:\s+"[^"]*")?\)$/;
+
+function isSiteLink(href: string): boolean {
+  if (href.startsWith("#") || href.startsWith("//")) return false;
+  try {
+    return new URL(href, `${SITE_ORIGIN}/posts/`).origin === SITE_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Links to the site's own pages that sit inside a sentence. The page turns a
+ * paragraph or list item holding nothing but one such link into a card with
+ * the target's photo and summary; a link inside running text stays a bare
+ * link, so the body is expected to give it its own line.
+ */
+export function inlineInternalLinks(markdown: string): string[] {
+  const units = stripCodeFences(markdown)
+    .split(/\n\s*\n/)
+    .flatMap((block) => {
+      const lines = block.split("\n").map((line) => line.replace(/^\s*>\s?/, ""));
+      if (lines.every((line) => line.trim() === "" || /^\s*(#|\|)/.test(line))) return [];
+      if (!LIST_ITEM_RE.test(lines[0] ?? "")) return [lines.join("\n")];
+      const items: string[] = [];
+      for (const line of lines) {
+        if (LIST_ITEM_RE.test(line)) items.push(line.replace(LIST_ITEM_RE, ""));
+        else items[items.length - 1] += `\n${line}`;
+      }
+      return items;
+    });
+  return units.flatMap((unit) => {
+    if (LONE_LINK_RE.test(unit.trim())) return [];
+    return extractLinks(unit).filter(isSiteLink);
+  });
+}

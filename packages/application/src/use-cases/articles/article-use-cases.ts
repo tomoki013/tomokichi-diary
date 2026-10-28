@@ -4,8 +4,10 @@ import {
 } from "../monetization/manage-monetization.js";
 import {
   archive,
+  disallowedHtml,
   err,
   hasUnpublishedChanges,
+  inlineInternalLinks,
   isPubliclyVisible,
   nextRevision,
   ok,
@@ -338,6 +340,41 @@ export async function listArticlesForAdmin(
         isLive: isPubliclyVisible(article, now),
       };
     }),
+  );
+}
+
+export interface ArticleBodyFinding {
+  readonly article: Article;
+  readonly title: string;
+  readonly disallowedHtml: readonly string[];
+  readonly inlineInternalLinks: readonly string[];
+}
+
+/**
+ * Reads every article's current draft and reports only the bodies that need a
+ * hand: raw HTML the publish check rejects, and site links sitting inside a
+ * sentence where the page cannot turn them into cards. The bodies themselves
+ * never leave the server.
+ */
+export async function auditArticleBodies(ctx: AppContext): Promise<readonly ArticleBodyFinding[]> {
+  const articles = await ctx.repos.articles.listAll();
+  const findings = await Promise.all(
+    articles.map(async (article): Promise<ArticleBodyFinding | null> => {
+      const revisionId = article.currentRevisionId;
+      const revision = revisionId ? await ctx.repos.revisions.findById(revisionId) : null;
+      if (!revision) return null;
+      return {
+        article,
+        title: revision.title,
+        disallowedHtml: disallowedHtml(revision.bodyMarkdown),
+        inlineInternalLinks: inlineInternalLinks(revision.bodyMarkdown),
+      };
+    }),
+  );
+  return findings.filter(
+    (finding): finding is ArticleBodyFinding =>
+      finding !== null &&
+      (finding.disallowedHtml.length > 0 || finding.inlineInternalLinks.length > 0),
   );
 }
 
