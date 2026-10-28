@@ -30,6 +30,10 @@ AdSenseはDATEだけで先行実装。公式v2にPAGE_URL dimensionはあるが�
 
 参照: [GA4 export schema](https://support.google.com/analytics/answer/7029846)、[GSC schema/ExportLog](https://support.google.com/webmasters/answer/12917991?hl=en)、[GA4 UIとの違い](https://support.google.com/analytics/answer/9358801)、[AdSense metrics](https://developers.google.com/adsense/management/reference/rest/v2/Metric)、[AdSense dimensions](https://developers.google.com/adsense/management/reference/rest/v2/Dimension)。
 
+## シリーズのテーマ音楽
+
+シリーズページと所属記事の「音楽と一緒に読む」で、読者がプレーヤーを開いたとき `series_music_open`、Apple Musicへのリンクを押したとき `series_music_external_open` を送る。パラメータは `series_slug`・`page_type`（article / collection）・`provider`。プレーヤー内の再生はiframeの中で観測できないため、再生数として扱わない。開いたかどうかは同じセッションの `diary_measurement`（本文到達・可視時間）とBigQueryで突き合わせて比較できる。管理画面の分析タブへの集計追加は未対応。
+
 ## 広告・読書体験の継続計測（reader-v1）
 
 記事ページの本番apex/wwwだけで `diary_measurement` を送信する。配置版は `article-end-v1`。中盤35%・65%の本文座標が実際にビューポート内へ入ったときの候補到達を記録し、広告を追加しない。ページ内1回の本文25/50/75/90%・末尾到達、次記事リンク・共有・いいね操作を記録する。操作は成功や遷移完了を保証しない。本文末到達は読了の証明ではない。

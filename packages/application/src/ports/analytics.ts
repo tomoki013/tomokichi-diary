@@ -34,6 +34,13 @@ export type SemanticEvent =
       readonly experience: string;
       readonly articleSlug: string;
       readonly placement: "home";
+    }
+  | {
+      /** A reader opened a series' theme music player; not a play, which the frame hides. */
+      readonly name: "series_music_open" | "series_music_external_open";
+      readonly series_slug: string;
+      readonly page_type: "article" | "collection";
+      readonly provider: string;
     };
 
 /** Vendor-neutral semantic events. Adapters may forward, log, or deliberately discard them. */

@@ -1,4 +1,5 @@
 import { publicMonetizationOnly } from "./public-monetization.js";
+import { NO_ARTICLE_DEFAULTS } from "@tomokichi/domain";
 import type { ContentSnapshot } from "./snapshot.js";
 
 /**
@@ -188,6 +189,13 @@ export function parseExportFiles(read: (path: string) => string | null): Content
     articles: parts.articles.map((article) => ({
       ...article,
       experienceTags: article.experienceTags ?? [],
+    })),
+    // Likewise for collections written before theme music and defaults.
+    collections: parts.collections.map((collection) => ({
+      ...collection,
+      themeMusic: collection.themeMusic ?? null,
+      articleDefaults: collection.articleDefaults ?? NO_ARTICLE_DEFAULTS,
+      updatedAt: collection.updatedAt ?? null,
     })),
   };
 }

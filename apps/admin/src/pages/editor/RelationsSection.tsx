@@ -1,8 +1,14 @@
 import { useSectionSave, type RegisterSection } from "./section-save";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { api, type PlaceDto, type Relation, type RelationsInput } from "../../lib/api";
-import { relationLabels } from "../../lib/labels";
+import { experienceLabels, relationLabels } from "../../lib/labels";
+import {
+  addMissing,
+  emptyDefaults,
+  locationTagIds,
+  removeAdded,
+} from "../../lib/relation-defaults";
 import { treeOrder } from "../../lib/locations";
 import { useResource } from "../../ui/hooks";
 import { href } from "../../lib/route";
@@ -25,20 +31,37 @@ function relationsFrom(article: ArticleDetailDto): RelationsInput {
   };
 }
 
+/** A series joined or left here, passed on to the experience tags. */
+export interface ExperienceDefaultsChange {
+  key: number;
+  source: string;
+  add: readonly string[];
+  /** Take back what this source added, except these. */
+  remove: boolean;
+  keep: readonly string[];
+}
+
 /**
  * Relations drive related articles, location hubs and structured data, so
  * they are edited as data rather than guessed from the body text.
+ *
+ * A choice that decides others fills them in: joining a series adds its
+ * default tags, categories and experience tags; choosing a place adds the
+ * tags named after it and 国内旅行 / 海外旅行. Taking the choice back removes
+ * what it added in this session, unless another choice still wants it.
  */
 export function RelationsSection({
   article,
   onSaved,
   register,
   onSaveAll,
+  onExperienceDefaults,
 }: {
   article: ArticleDetailDto;
   onSaved: () => Promise<void>;
   register: RegisterSection;
   onSaveAll: () => Promise<boolean>;
+  onExperienceDefaults?: (change: ExperienceDefaultsChange) => void;
 }) {
   const toast = useToast();
   const reference = useResource(
@@ -58,6 +81,9 @@ export function RelationsSection({
   const [newTag, setNewTag] = useState({ name: "", slug: "" });
   const [creatingTag, setCreatingTag] = useState(false);
   const [busy, setBusy] = useState(false);
+  // What each choice made in this session added, so undoing it is exact.
+  const added = useRef(new Map<string, { tagIds: string[]; categoryIds: string[] }>());
+  const changeKey = useRef(0);
   const dirty = JSON.stringify(value) !== baseline;
 
   const tree = useMemo(() => treeOrder(reference.data?.locations ?? []), [reference.data]);
@@ -69,6 +95,123 @@ export function RelationsSection({
   const placesHere: PlaceDto[] = (reference.data?.places ?? []).filter(
     (place) => place.locationId !== null && chosenLocations.has(place.locationId),
   );
+
+  const defaultsOf = (collectionId: string) =>
+    reference.data?.taxonomy.collections.find((c) => c.id === collectionId)?.articleDefaults ??
+    emptyDefaults;
+  const tagsOfLocation = (locationId: string) =>
+    reference.data
+      ? locationTagIds(locationId, reference.data.locations, reference.data.taxonomy.tags)
+      : [];
+  /** What the choices other than `source` still bring, so leaving one keeps the rest. */
+  const wantedExcept = (source: string, next: RelationsInput) => {
+    const collections = next.collectionIds.filter((id) => `collection:${id}` !== source);
+    const locations = next.locations
+      .map((item) => item.locationId)
+      .filter((id) => `location:${id}` !== source);
+    return {
+      tagIds: [
+        ...collections.flatMap((id) => defaultsOf(id).tagIds),
+        ...locations.flatMap(tagsOfLocation),
+      ],
+      categoryIds: collections.flatMap((id) => defaultsOf(id).categoryIds),
+      experienceTags: collections.flatMap((id) => defaultsOf(id).experienceTags),
+    };
+  };
+
+  /** Applies what a choice brings, or takes it back, on top of `next`. */
+  const linked = (
+    next: RelationsInput,
+    source: string,
+    on: boolean,
+    wanted: { tagIds: readonly string[]; categoryIds: readonly string[] },
+  ): { value: RelationsInput; tags: number; categories: number } => {
+    if (on) {
+      const tags = addMissing(next.tagIds, wanted.tagIds);
+      const categories = addMissing(next.categoryIds, wanted.categoryIds);
+      added.current.set(source, { tagIds: tags.added, categoryIds: categories.added });
+      return {
+        value: { ...next, tagIds: tags.next, categoryIds: categories.next },
+        tags: tags.added.length,
+        categories: categories.added.length,
+      };
+    }
+    const before = added.current.get(source);
+    added.current.delete(source);
+    if (!before) return { value: next, tags: 0, categories: 0 };
+    const keep = wantedExcept(source, next);
+    const tagIds = removeAdded(next.tagIds, before.tagIds, keep.tagIds);
+    const categoryIds = removeAdded(next.categoryIds, before.categoryIds, keep.categoryIds);
+    return {
+      value: { ...next, tagIds, categoryIds },
+      tags: next.tagIds.length - tagIds.length,
+      categories: next.categoryIds.length - categoryIds.length,
+    };
+  };
+
+  function toggleCollection(collectionId: string, title: string): void {
+    const on = !value.collectionIds.includes(collectionId);
+    const source = `collection:${collectionId}`;
+    const next = {
+      ...value,
+      collectionIds: on
+        ? [...value.collectionIds, collectionId]
+        : value.collectionIds.filter((id) => id !== collectionId),
+    };
+    const defaults = defaultsOf(collectionId);
+    const result = linked(next, source, on, defaults);
+    setValue(result.value);
+    onExperienceDefaults?.({
+      key: ++changeKey.current,
+      source,
+      add: on ? defaults.experienceTags : [],
+      remove: !on,
+      keep: on ? [] : wantedExcept(source, result.value).experienceTags,
+    });
+    const parts = [
+      result.tags > 0 && `タグ${result.tags}件`,
+      result.categories > 0 && `カテゴリー${result.categories}件`,
+      on &&
+        defaults.experienceTags.length > 0 &&
+        `体験タグ「${defaults.experienceTags.map((tag) => experienceLabels[tag] ?? tag).join("・")}」`,
+    ].filter(Boolean);
+    if (parts.length > 0)
+      toast.info(
+        on
+          ? `「${title}」の既定から${parts.join("・")}を追加しました`
+          : `「${title}」で追加した${parts.join("・")}を外しました`,
+      );
+  }
+
+  function addLocation(locationId: string): void {
+    const next: RelationsInput = {
+      ...value,
+      locations: [
+        ...value.locations,
+        { locationId, relation: value.locations.length === 0 ? "primary" : "mentioned" },
+      ],
+    };
+    const result = linked(next, `location:${locationId}`, true, {
+      tagIds: tagsOfLocation(locationId),
+      categoryIds: [],
+    });
+    setValue(result.value);
+  }
+
+  function removeLocation(index: number): void {
+    const item = value.locations[index];
+    if (!item) return;
+    const next: RelationsInput = {
+      ...value,
+      locations: value.locations.filter((_, i) => i !== index),
+      // Places hang off locations; drop the ones left without one.
+      places: value.places.filter((place) => {
+        const home = reference.data?.places.find((p) => p.id === place.placeId);
+        return home?.locationId !== item.locationId;
+      }),
+    };
+    setValue(linked(next, `location:${item.locationId}`, false, emptyDefaults).value);
+  }
 
   const toggle = (key: "categoryIds" | "tagIds" | "collectionIds", id: string): void =>
     setValue((current) => ({
@@ -163,21 +306,7 @@ export function RelationsSection({
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                aria-label="外す"
-                onClick={() =>
-                  setValue((current) => ({
-                    ...current,
-                    locations: current.locations.filter((_, i) => i !== index),
-                    // Places hang off locations; drop the ones left without one.
-                    places: current.places.filter((place) => {
-                      const home = reference.data?.places.find((p) => p.id === place.placeId);
-                      return home?.locationId !== item.locationId;
-                    }),
-                  }))
-                }
-              >
+              <button type="button" aria-label="外す" onClick={() => removeLocation(index)}>
                 ×
               </button>
             </span>
@@ -188,16 +317,7 @@ export function RelationsSection({
             onChange={(event) => {
               const locationId = event.target.value;
               if (!locationId || chosenLocations.has(locationId)) return;
-              setValue((current) => ({
-                ...current,
-                locations: [
-                  ...current.locations,
-                  {
-                    locationId,
-                    relation: current.locations.length === 0 ? "primary" : "mentioned",
-                  },
-                ],
-              }));
+              addLocation(locationId);
             }}
           >
             <option value="">＋ 地域を追加</option>
@@ -263,13 +383,16 @@ export function RelationsSection({
         <legend className="field__label">
           シリーズ・旅の記録 <a href={href.series()}>シリーズを管理</a>
         </legend>
+        <p className="muted small">
+          選ぶとシリーズの既定（タグ・カテゴリー・体験タグ）が入ります。地域を選ぶと、同じ名前のタグと国内旅行／海外旅行が入ります。
+        </p>
         <div className="checks">
           {taxonomy.collections.map((collection) => (
             <label key={collection.id} className="check">
               <input
                 type="checkbox"
                 checked={value.collectionIds.includes(collection.id)}
-                onChange={() => toggle("collectionIds", collection.id)}
+                onChange={() => toggleCollection(collection.id, collection.title)}
               />
               {collection.title}
             </label>

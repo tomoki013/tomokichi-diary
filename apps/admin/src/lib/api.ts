@@ -206,6 +206,9 @@ export interface CollectionInput {
   description: string | null;
   coverMediaId: string | null;
   sortOrder: number;
+  /** Only on update; null removes the music. */
+  themeMusic?: import("@tomokichi/contracts").CollectionThemeMusicDto | null;
+  articleDefaults?: import("@tomokichi/contracts").CollectionArticleDefaultsDto;
 }
 
 export type PublicationStatus = import("@tomokichi/contracts").SitePublicationStatus;

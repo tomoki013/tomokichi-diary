@@ -4,4 +4,5 @@ export * from "./dto.js";
 export * from "./analytics.js";
 export * from "./monetization.js";
 export * from "./apple-music.js";
+export * from "./theme-music.js";
 export * from "./publication.js";

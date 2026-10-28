@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import type { AppContext } from "@tomokichi/application";
 import {
+  NO_ARTICLE_DEFAULTS,
   extractImages,
   instantFrom,
   normalizeRoutePath,
@@ -357,6 +358,9 @@ async function main(): Promise<void> {
       startDate: null,
       endDate: null,
       sortOrder: index,
+      themeMusic: null,
+      articleDefaults: NO_ARTICLE_DEFAULTS,
+      updatedAt: null,
     };
     collected.collections.push(collection);
     collected.routes.push(route(`/collections/${series.slug}`, "series", id));
@@ -380,6 +384,9 @@ async function main(): Promise<void> {
       startDate: start,
       endDate: end,
       sortOrder: index,
+      themeMusic: null,
+      articleDefaults: NO_ARTICLE_DEFAULTS,
+      updatedAt: null,
     });
     collected.routes.push(route(`/collections/${tripSlug}`, "journey", id));
     // Straight to the destination rather than through `/trips/…`: a redirect
