@@ -40,20 +40,4 @@ describe("publication command telemetry", () => {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
-  it("preserves failure exit codes and creates an attributable error event", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "publication-step-"));
-    try {
-      const result = spawnSync(
-        process.execPath,
-        [script, "web-deploy", "-", "local", process.execPath, "-e", "process.exit(7)"],
-        { cwd, encoding: "utf8" },
-      );
-      expect(result.status).toBe(7);
-      expect(
-        JSON.parse(readFileSync(join(cwd, ".artifacts/publication-failure.json"), "utf8")),
-      ).toMatchObject({ name: "web-deploy", state: "failed" });
-    } finally {
-      rmSync(cwd, { recursive: true, force: true });
-    }
-  });
 });

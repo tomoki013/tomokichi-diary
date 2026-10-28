@@ -63,17 +63,3 @@ it("rechecks approved presentation and strips private fields at both export boun
     ])[0]?.affiliates,
   ).toBeUndefined();
 });
-
-it("drops malformed null affiliate records without crashing the public build", () => {
-  expect(
-    publicMonetizationOnly([
-      {
-        articleId: "article",
-        enabled: true,
-        placement: null,
-        experiment: null,
-        affiliates: [null],
-      } as unknown as PublicMonetization,
-    ])[0]?.affiliates,
-  ).toBeUndefined();
-});

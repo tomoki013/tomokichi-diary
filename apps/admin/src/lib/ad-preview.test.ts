@@ -37,38 +37,6 @@ const body =
   "本文。\n\n{{monetization:body-ad}}\n\n続き。\n\n{{monetization:slot-a}}\n\n{{monetization:old}}\n";
 
 describe("withAdMocks", () => {
-  it("never shows the raw marker and draws each slot as readers get it", () => {
-    const html = render(body, preview());
-    expect(html).not.toContain("{{monetization");
-    expect(html).toContain("本文中 300×250");
-    expect(html).toContain("Trip.comで比較する");
-    expect(html).toContain("一時停止中");
-    expect(html.trimEnd().endsWith("</aside>")).toBe(true);
-    expect(html).toContain("記事末尾 300×250");
-  });
-
-  it("shows a test's B slot even though it is stored paused, and hides other body ads", () => {
-    const html = render(body.replace("old", "body-test-v1"), {
-      ...preview({ testMarker: "body-test-v1" }),
-      config: config({
-        placements: [
-          end,
-          { ...end, key: "body-ad", position: "marker" },
-          { ...end, key: "body-test-v1", position: "marker", status: "paused" },
-        ],
-      }),
-    });
-    expect(html).toContain("テストのB");
-    expect(html).toContain("テスト中はBの枠だけが出ます");
-  });
-
-  it("draws no ad at all when ads are off, and neutral slots before the settings load", () => {
-    const off = render(body, preview({ config: config({ mode: "affiliate", adsEnabled: false }) }));
-    expect(off).not.toContain("記事末尾");
-    expect(off).toContain("広告なしの設定");
-    expect(render(body, null)).toContain("ad-mock--unknown");
-  });
-
   it("escapes offer text", () => {
     const html = render(
       body,

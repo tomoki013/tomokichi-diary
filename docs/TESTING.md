@@ -1,33 +1,30 @@
 # Testing
 
-最終更新: 2026-09-21
+最終更新: 2026-10-28
 
 ## Philosophy
 
-2 層で守る。
+個人の旅行日記なので、ユニットテストは**壊れたら困る所だけ**に絞る（2026-10-28 に大幅に削減）。
 
-1. **純関数の単体テスト**（`packages/*`）— ルール（公開条件、ルート解決、firsthand の人間確認、お問い合わせ検証）はフレームワーク無しで網羅する。ADR 0003 の帰結。
-2. **生成物の検査**（`scripts/check-*`）— サイトは静的生成なので、`dist/` を読めば「本当に出るもの」が検査できる。旧サイトの URL・SEO・内部リンク・Lighthouse をここで見る。ADR 0005 の帰結として、失敗は stable code で報告する。
+残す範囲:
 
-書かないもの: フレームワークの再確認、モックの自己検証、Astro コンポーネントのスナップショット（生成物検査で代替）。
-直っていない仕様は `it.fails` で望ましい契約を書く（`webmcp.test.ts` の catalog 外記事）。
+- **セキュリティ** — 認証（Admin token / Cloudflare Access JWT / OAuth）、入力検証、XSS・SQL インジェクション・パストラバーサル、秘密情報が公開データに漏れないこと。
+- **管理画面の最低限** — Admin API の認証と記事ライフサイクル、Admin のルーティング・下書き差分・公開状態の表示。
+- **お問い合わせフォーム** — Turnstile・honeypot・fail-closed・レート・基盤への引き渡し。
+- **いいね・共有** — 記事/写真のいいね API、ブラウザ側のいいね状態、再 seed で読者のいいねを消さないこと。
+- **記事品質** — 公開条件（`publishing.test`）、SEO 生成物（`seo.test` / `page-seo.test` / `check-routes.test`）と `scripts/check-*`・Lighthouse。
 
-## Unit（vitest）
+それ以外（広告配置、アナリティクス集計、ホームの並び、WebMCP、移行ロジックなど）はテストを書かず、preview と生成物検査で確認する。新しくテストを足すのも上の範囲に入るときだけにする。
 
-- `vitest.config.ts`: `{packages,apps,infrastructure,scripts}/**/*.test.ts`。18 ファイル、171 テスト（うち 1 expected fail）。
-- `packages/domain/src/__tests__/` — publishing / routing / knowledge / listing / contact / primitives。fixture は `fixtures.ts`。
-- `packages/seo/src/__tests__/seo.test.ts` — metadata / JSON-LD / sitemap / RSS / robots。
-- `packages/contracts/src/__tests__/validation.test.ts` — 入力検証の網羅報告。
-- `scripts/lib/__tests__/page-seo.test.ts` — built HTML の抽出関数と画像 URL の規則（`SEO_IMAGE_URL_INVALID`）。
+## Unit / Integration（vitest）
 
-## Integration（実 D1 スキーマ・実 HTTP）
-
+- `vitest.config.ts`: `{packages,apps,infrastructure,scripts}/**/*.test.ts`。
 - `@tomokichi/infra-d1/testing-context` の `createTestContext()` が **in-memory SQLite に全 migration を適用**した `AppContext` を返す。R2 は in-memory storage。時計は固定、id は連番。
-- `apps/api/src/__tests__/` — `api.test.ts`（認証・検証・記事ライフサイクル・media・knowledge）、`access.test.ts`（Cloudflare Access JWT: aud/iss/exp/署名/alg）、`contact.test.ts`（Turnstile 注入・honeypot・fail-closed・レート・基盤への引き渡し）、`likes.test.ts`（visitorId・未公開記事・toggle）、`inquiry.test.ts`（基盤 `ProjectOperator` binding の利用: 自 Project だけを指定・送るフィールド・操作者の記録・エラーの隠蔽）、`authors.test.ts`（revision の作者がデータ上の作者になること）。
-- `apps/admin/src/lib/lib.test.ts` — Admin の純ロジック（ハッシュルーティング、下書きの差分判定、日本時間の変換、地域のツリー順）。画面そのものは preview で確認する。
-- `infrastructure/database/d1/src/__tests__/` — migration の冪等、content-hash 重複、snapshot が published のみ、seed 復元。
-- `apps/mcp-server/src/__tests__/protocol.test.ts` — tool 一覧、firsthand 限定、MCP App resource。
-- `apps/web/src/lib/__tests__/webmcp.test.ts` — WebMCP 4 tool、登録/解除、不正入力、catalog 外記事（`it.fails`）。
+- セキュリティ: `apps/api/src/__tests__/{access,api,analytics,media,monetization}.test.ts`、`apps/admin/worker/*.test.ts`、`apps/mcp-server/{operator/operator,src/__tests__/analytics}.test.ts`、`packages/contracts/src/__tests__/validation.test.ts`、`packages/{data,domain}/src/__tests__/monetization.test.ts`（非公開フィールドの除去）、`scripts/analytics/analytics.test.ts`、`scripts/lib/__tests__/publication-{originals,step}.test.ts`、`apps/admin/src/lib/ad-preview.test.ts`・`apps/chagee/src/__tests__/{markdown,seed,seo}.test.ts`（エスケープ）。
+- 管理画面: `apps/api/src/__tests__/api.test.ts`、`apps/admin/src/lib/{lib,article-state}.test.ts`。
+- お問い合わせ: `apps/api/src/__tests__/{contact,inquiry}.test.ts`、`packages/domain/src/__tests__/contact.test.ts`、`apps/chagee/src/__tests__/contact.test.ts`。
+- いいね: `apps/api/src/__tests__/{likes,photo-likes}.test.ts`、`apps/web/src/__tests__/my-trips.test.ts`、`scripts/lib/__tests__/seed-sql.test.ts`。
+- 記事品質: `packages/domain/src/__tests__/publishing.test.ts`、`packages/seo/src/__tests__/seo.test.ts`、`scripts/lib/__tests__/{page-seo,check-routes}.test.ts`。
 
 ## UI / E2E
 
@@ -51,7 +48,7 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 
 `.github/workflows/ci.yml`: push(main) / PR / 手動で `pnpm run ci`。`.cache/images` を `export/media.json` のハッシュでキャッシュ。artifact に `.artifacts/`（summary.json、Lighthouse、ログ）。**CI は deploy しない**（`OPERATIONS.md` Releasing）。
 
-`parity` ステップ（`pnpm content:parity`）は切替までの暫定で、`LEGACY_REPO`（CI では `tomoki013/travel-diary` の sparse checkout）の `posts/` と `export/` を `NormalizedArticle` で比較する。checkout が無ければ skip。ロジックのユニットテストは `scripts/legacy-sync/__tests__/`。
+`parity` ステップ（`pnpm content:parity`）は切替までの暫定で、`LEGACY_REPO`（CI では `tomoki013/travel-diary` の sparse checkout）の `posts/` と `export/` を `NormalizedArticle` で比較する。checkout が無ければ skip。
 
 `astro check` は CI に入っていない（`pnpm typecheck` は tsc のみ）。入れるなら `apps/web` の `typecheck` を `scripts/ci.ts` の typecheck ステップに足す。
 
@@ -69,8 +66,7 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 3. `publishing.test` — 公開条件（route・cover・alt）。
 4. `access.test` / `api.test` authentication — Admin が閉じていること。
 5. `contact.test` — 唯一の無認証書き込み。
-6. `knowledge.test` + `check:knowledge` — AI が firsthand を「確認済み」にできないこと。
-7. `migrations.test` — 追記のみ、expand/contract。
+6. `likes.test` / `seed-sql.test` — 読者のいいねが正しく数えられ、再 seed で消えないこと。
 
 詳細は [testing/test-gap-analysis.md](testing/test-gap-analysis.md)。
 
