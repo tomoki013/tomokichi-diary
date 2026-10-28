@@ -238,6 +238,26 @@ describe("article lifecycle", () => {
     expect((await rejected.json()).error.code).toBe("API_VALIDATION_FAILED");
   });
 
+  it("reports only the bodies with raw HTML or in-sentence site links", async () => {
+    await createArticle({
+      draft: {
+        ...draft,
+        bodyMarkdown: `${"本文".repeat(120)}\n\n詳しくは[メニュー](./other)で。<br>\n\n[カード](./card)`,
+      },
+    });
+    await createArticle({ slug: "clean", path: "/posts/clean" });
+
+    const audit = await (await request("/v1/admin/articles/body-audit", { headers: auth })).json();
+    expect(audit.items).toEqual([
+      expect.objectContaining({
+        slug: "chagee-menu",
+        path: "/posts/chagee-menu",
+        disallowedHtml: ["<br>"],
+        inlineInternalLinks: ["./other"],
+      }),
+    ]);
+  });
+
   it("returns 404 for an unknown article", async () => {
     const response = await request("/v1/admin/articles/does-not-exist", { headers: auth });
     expect(response.status).toBe(404);

@@ -8,6 +8,7 @@ import {
   unpublish,
   validatePublishable,
 } from "../rules/publishing.js";
+import { disallowedHtml, inlineInternalLinks } from "../rules/markdown.js";
 import { hasUnpublishedChanges, nextRevision } from "../rules/revision.js";
 import { asId, type RevisionId } from "../primitives/id.js";
 import { AUTHOR, NOW, at, makeArticle, makeCover, makeRevision, makeRoute } from "./fixtures.js";
@@ -197,5 +198,52 @@ describe("revisions", () => {
         }),
       ),
     ).toBe(false);
+  });
+});
+
+describe("body formatting", () => {
+  it("rejects raw HTML except strong", () => {
+    const markdown = [
+      '<strong>「霸王茶姬」</strong>は<br>雲南発。<span class="x">色</span>',
+      '<a href="https://omio.sjv.io/x" rel="sponsored nofollow noopener">Omio</a>',
+      '<small class="affiliate-inline-disclosure">広告</small>',
+      '<a href="/posts/x">内部</a> と `<em>コード</em>` と <https://example.com>',
+      "![写真](<https://x/a.jpg>)",
+    ].join("\n\n");
+    expect(disallowedHtml(markdown)).toEqual([
+      "<br>",
+      '<span class="x">',
+      "</span>",
+      '<a href="https://omio.sjv.io/x" rel="sponsored nofollow noopener">',
+      "</a>",
+      '<small class="affiliate-inline-disclosure">',
+      "</small>",
+      '<a href="/posts/x">',
+    ]);
+    expect(
+      validatePublishable({
+        ...base,
+        revision: makeRevision({ bodyMarkdown: `${"本文".repeat(120)}\n\n改行<br>` }),
+      }),
+    ).toEqual([
+      expect.objectContaining({ field: "bodyMarkdown", message: expect.stringContaining("<br>") }),
+    ]);
+  });
+
+  it("finds site links that sit in a sentence instead of on their own line", () => {
+    const markdown = [
+      "詳しくは[メニュー](./menu)で。外部は[公式](https://chagee.com)。",
+      "[カードになる](./card)",
+      "- [一覧のカード](/posts/list)\n- 文中の[一覧](https://tomokichidiary.com/posts/in-list)です",
+      "> 引用の[記事](../quoted)も",
+      "| 表 | [セル](./cell) |\n| --- | --- |",
+      "```\n[コード](./code)\n```",
+      "![写真](/images/a.jpg) と [目次](#top)",
+    ].join("\n\n");
+    expect(inlineInternalLinks(markdown)).toEqual([
+      "./menu",
+      "https://tomokichidiary.com/posts/in-list",
+      "../quoted",
+    ]);
   });
 });

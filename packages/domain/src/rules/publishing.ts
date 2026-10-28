@@ -4,7 +4,7 @@ import type { ArticleMedia } from "../entities/media.js";
 import type { Route } from "../entities/route.js";
 import { isAfterOrEqual, type Instant } from "../primitives/datetime.js";
 import { err, ok, type DomainError, type Result } from "../primitives/result.js";
-import { extractImages, extractInternalLinks } from "./markdown.js";
+import { disallowedHtml, extractImages, extractInternalLinks } from "./markdown.js";
 import { RouteTable } from "./routing.js";
 
 export interface PublishInput {
@@ -53,6 +53,11 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
   // photo, and the editor cannot tell a forgotten one from a decorative one.
   for (const image of extractImages(revision.bodyMarkdown)) {
     if (image.alt.trim() === "") fail(`body image requires alt text: ${image.src}`, "bodyMarkdown");
+  }
+
+  // Formatting written as HTML is invisible to every other check on the body.
+  for (const tag of disallowedHtml(revision.bodyMarkdown)) {
+    fail(`raw HTML is not allowed in the body (use Markdown): ${tag}`, "bodyMarkdown");
   }
 
   // The build's link check rejects a link to a path no route answers, and that

@@ -101,6 +101,7 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
     getArticle: (articleId: string) => call<ArticleDetail>("GET", `/articles/${id(articleId)}`),
     publishCheck: (articleId: string) =>
       call<unknown>("GET", `/articles/${id(articleId)}/publish-check`),
+    bodyAudit: () => call<unknown>("GET", "/articles/body-audit"),
     publicationStatus: () => call<unknown>("GET", "/publication"),
     taxonomy: () => call<unknown>("GET", "/taxonomy"),
     listCollections: (kind?: string) =>
