@@ -8,6 +8,7 @@ import {
   updateMediaSlug,
   MAX_UPLOAD_BYTES,
 } from "@tomokichi/application";
+import type { AppContext } from "@tomokichi/application";
 import type { ArticleId, MediaAsset, MediaId } from "@tomokichi/domain";
 import type { MediaPageDto } from "@tomokichi/contracts";
 import type { AppEnv } from "../app.js";
@@ -16,18 +17,68 @@ import { toMediaAssetDto } from "../mappers.js";
 import { mediaUsageSchema } from "../schemas.js";
 
 /**
- * Every word must appear in the slug, the uploaded file name, or the storage
- * key. The full public URL is left out on purpose: every asset shares its host
- * and extension, so a query like "jpg" used to match the whole library.
+ * Every word must appear in the slug, the uploaded file name, the storage key,
+ * or `areas` (the areas of the articles that use the photo). The full public
+ * URL is left out on purpose: every asset shares its host and extension, so a
+ * query like "jpg" used to match the whole library.
  */
-export function matchesMediaQuery(asset: MediaAsset, query: string): boolean {
+export function matchesMediaQuery(asset: MediaAsset, query: string, areas = ""): boolean {
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return true;
-  const haystack = [asset.slug, asset.originalName, asset.storageKey]
+  const haystack = [asset.slug, asset.originalName, asset.storageKey, areas]
     .filter((value): value is string => typeof value === "string")
     .join(" ")
     .toLowerCase();
   return words.every((word) => haystack.includes(word));
+}
+
+/**
+ * Media id → searchable area text. A photo has no area of its own, so it takes
+ * the areas of every article that uses it, with their parents, so "京都" also
+ * finds photos from an article filed under 伏見.
+ */
+async function mediaAreaText(ctx: AppContext): Promise<Map<string, string>> {
+  const [usages, articleLocations, locations, names] = await Promise.all([
+    ctx.repos.media.listAllUsages(),
+    ctx.repos.relations.listArticleLocations(),
+    ctx.repos.locations.listAll(),
+    ctx.repos.locations.listNames(),
+  ]);
+  const parentOf = new Map<string, string | null>(
+    locations.map((location) => [location.id, location.parentId]),
+  );
+  const termsOf = new Map<string, string[]>(
+    locations.map((location) => [location.id, [location.slug]]),
+  );
+  for (const name of names)
+    termsOf
+      .get(name.locationId)
+      ?.push(
+        ...[name.name, name.shortName, name.romanizedName].filter(
+          (value): value is string => !!value,
+        ),
+      );
+  const areaTerms = (locationId: string) => {
+    const terms: string[] = [];
+    const seen = new Set<string>();
+    for (let id: string | null = locationId; id && !seen.has(id); id = parentOf.get(id) ?? null) {
+      seen.add(id);
+      terms.push(...(termsOf.get(id) ?? []));
+    }
+    return terms;
+  };
+  const byArticle = new Map<string, string[]>();
+  for (const { articleId, locationId } of articleLocations)
+    byArticle.set(articleId, [...(byArticle.get(articleId) ?? []), ...areaTerms(locationId)]);
+  const byMedia = new Map<string, Set<string>>();
+  for (const { articleId, mediaId } of usages) {
+    const terms = byArticle.get(articleId);
+    if (!terms) continue;
+    const set = byMedia.get(mediaId) ?? new Set<string>();
+    for (const term of terms) set.add(term);
+    byMedia.set(mediaId, set);
+  }
+  return new Map([...byMedia].map(([id, terms]) => [id, [...terms].join(" ")]));
 }
 
 export function mediaRoutes() {
@@ -66,7 +117,10 @@ export function mediaRoutes() {
 
     const limit = Math.min(Math.max(Number.parseInt(limitParam, 10) || 60, 1), 200);
     const offset = Math.max(Number.parseInt(c.req.query("offset") ?? "0", 10) || 0, 0);
-    const matching = assets.filter((asset) => matchesMediaQuery(asset, c.req.query("q") ?? ""));
+    const query = c.req.query("q") ?? "";
+    // Area lookups cost four more reads, so only a real search pays for them.
+    const areas = query.trim() === "" ? new Map<string, string>() : await mediaAreaText(ctx);
+    const matching = assets.filter((asset) => matchesMediaQuery(asset, query, areas.get(asset.id)));
     const page = matching.slice(offset, offset + limit);
     const next = offset + page.length;
     const body: MediaPageDto = {

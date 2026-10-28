@@ -217,7 +217,7 @@ export function MediaSection({
           <input
             type="search"
             aria-label="写真を検索"
-            placeholder="Slug・ファイル名で検索（スペースで絞り込み）"
+            placeholder="Slug・ファイル名・エリアで検索（スペースで絞り込み）"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />

@@ -167,3 +167,48 @@ describe("media upload API", () => {
     },
   );
 });
+
+const location = (id: string, slug: string, parentId: string | null) =>
+  ({ id, slug, type: "city", parentId }) as never;
+
+describe("media search", () => {
+  it("finds photos by the area of the articles that use them, parents included", async () => {
+    const kyoto = await asset();
+    const other = await uploadMediaWithResult(ctx, input(await image("blue"), "other.png"));
+    if (!other.ok) throw new Error("fixture failed");
+    vi.spyOn(ctx.repos.locations, "listAll").mockResolvedValue([
+      location("loc-kyoto", "kyoto", null),
+      location("loc-fushimi", "fushimi", "loc-kyoto"),
+    ]);
+    vi.spyOn(ctx.repos.locations, "listNames").mockResolvedValue([
+      { locationId: "loc-kyoto", locale: "ja", name: "京都", shortName: null, romanizedName: null },
+      {
+        locationId: "loc-fushimi",
+        locale: "ja",
+        name: "伏見",
+        shortName: null,
+        romanizedName: null,
+      },
+    ] as never);
+    vi.spyOn(ctx.repos.relations, "listArticleLocations").mockResolvedValue([
+      { articleId: "a1", locationId: "loc-fushimi", relation: "primary" },
+    ] as never);
+    vi.spyOn(ctx.repos.media, "listAllUsages").mockResolvedValue([
+      { articleId: "a1", mediaId: kyoto.id, role: "body", sortOrder: 0, alt: "", caption: null },
+    ] as never);
+
+    const ids = async (q: string) =>
+      (
+        (await (
+          await request(`/admin/media?limit=10&q=${encodeURIComponent(q)}`, { headers: auth })
+        ).json()) as {
+          items: { id: string }[];
+        }
+      ).items.map((item) => item.id);
+    expect(await ids("京都")).toEqual([kyoto.id]);
+    expect(await ids("fushimi")).toEqual([kyoto.id]);
+    expect(await ids("京都 photo")).toEqual([kyoto.id]);
+    expect(await ids("大阪")).toEqual([]);
+    expect((await ids("")).length).toBe(2);
+  });
+});
