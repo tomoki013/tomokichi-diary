@@ -20,3 +20,19 @@ it("binds bounded public experiment identifiers to their article and retains the
   ])
     expect(isAdExperimentId(value)).toBe(false);
 });
+
+it("accepts later rounds of a test on the same article, and only those", () => {
+  const uuid = "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50";
+  const second = adExperimentId(uuid, 2);
+  expect(second).toBe(`placement-v1-${uuid}-r2`);
+  expect(isAdExperimentForArticle(second, uuid)).toBe(true);
+  expect(isAdExperimentForArticle(adExperimentId(uuid, 42), uuid)).toBe(true);
+  for (const value of [
+    `${adExperimentId(uuid)}-r1`,
+    `${adExperimentId(uuid)}-r100`,
+    `${adExperimentId(uuid)}-r02`,
+    `${adExperimentId(uuid)}-x2`,
+  ])
+    expect(isAdExperimentId(value)).toBe(false);
+  expect(isAdExperimentForArticle(second, "52b1cb6d-eb74-85a3-b6a1-392f83313051")).toBe(false);
+});

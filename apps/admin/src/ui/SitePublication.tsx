@@ -36,7 +36,7 @@ export function SitePublication({
       : status?.durationMs;
   return (
     <div className="publication-status" aria-live="polite" aria-atomic="false">
-      <p className="muted">サイト全体の公開状況（各記事の下書き・DBの公開版とは別です）</p>
+      <p className="muted">サイト全体の反映状況（全記事で共通）</p>
       {publication.error ? (
         <ErrorState error={publication.error} onRetry={() => void publication.reload()} />
       ) : (
@@ -48,7 +48,7 @@ export function SitePublication({
                   ? "サイトの公開要求はありません"
                   : {
                       deployed: "サイトに反映済み",
-                      queued: "公開待ち — GitHub Actionsの開始待ち",
+                      queued: "反映の開始待ち（GitHub Actions）",
                       building: "サイトを更新しています",
                       failed: "サイトへの反映に失敗",
                       unconfigured: "自動反映の設定が必要です",
@@ -61,7 +61,7 @@ export function SitePublication({
             {status.requestId && (
               <ol className="publication-stages" aria-label="サイト公開の工程">
                 <li data-state={status.startedAt ? "completed" : "running"}>
-                  公開待ち{status.startedAt ? " ✓" : ""}
+                  開始待ち{status.startedAt ? " ✓" : ""}
                 </li>
                 {publicationStages.map((stage) => {
                   const result = status.stages[stage];
@@ -92,7 +92,7 @@ export function SitePublication({
             {elapsed != null && (
               <p aria-live="off">
                 {pending ? "経過時間" : "所要時間"}：{Math.floor(elapsed / 1000)}
-                秒（公開待ちを含む）
+                秒（開始待ちを含む）
               </p>
             )}
             {status.state === "deployed" && status.deployedAt && (

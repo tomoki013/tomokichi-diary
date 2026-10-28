@@ -3,20 +3,31 @@ import { marked } from "marked";
 import {
   validate,
   articleMonetizationSchema,
+  type ArticleMonetization,
   type ArticleMonetizationDto,
   type MonetizationOverviewDto,
   type MonetizationPlacement,
 } from "@tomokichi/contracts";
 import { api } from "../../lib/api";
+import {
+  adLayoutLabels,
+  adLayoutOf,
+  applyLayout,
+  bodyAdFits,
+  insertMarker,
+  modeFor,
+  removeMarker,
+  type AdLayout,
+} from "../../lib/ad-standard";
+import { href } from "../../lib/route";
 import { useResource } from "../../ui/hooks";
-import { ErrorState, Panel } from "../../ui/parts";
+import { Badge, ErrorState, Panel } from "../../ui/parts";
 import { useToast } from "../../ui/toast";
 import { useSectionSave, type RegisterSection } from "./section-save";
 import { AffiliatePreview } from "../AffiliatePreview";
 
 type Props = {
   articleId: string;
-  needsPublication: boolean;
   body: string;
   onBody: (body: string) => void;
   register: RegisterSection;
@@ -51,9 +62,12 @@ export function MonetizationSection(props: Props) {
     );
   return <Loaded {...props} data={data.data.article} overview={data.data.overview} />;
 }
+
+/** What the picker is choosing a block for. */
+type Picking = "body-ad" | "affiliate" | "adsense" | null;
+
 function Loaded({
   articleId,
-  needsPublication,
   body,
   onBody,
   register,
@@ -61,24 +75,26 @@ function Loaded({
   data,
   overview,
 }: Props & { data: ArticleMonetizationDto; overview: MonetizationOverviewDto }) {
-  const [config, setConfig] = useState(data.draft);
+  const [config, setConfigRaw] = useState(data.draft);
   const [baseline, setBaseline] = useState(JSON.stringify(data.draft));
   const [busy, setBusy] = useState(false);
-  const [selection, setSelection] = useState<{ body: string; offset: number } | null>(null);
-  const position = selection?.body === body ? selection.offset : null;
-  const setPosition = (offset: number | null) =>
-    setSelection(offset === null ? null : { body, offset });
-  const [kind, setKind] = useState<"adsense" | "affiliate">("affiliate");
+  const [picking, setPicking] = useState<Picking>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const toast = useToast();
   const dirty = JSON.stringify(config) !== baseline;
   const parsed = validate(articleMonetizationSchema, config);
   const problem = parsed.ok ? undefined : parsed.issues.map((i) => i.message).join(" / ");
+  // The mode is never picked by hand: it follows from the ads and affiliate slots.
+  const setConfig = (next: (c: ArticleMonetization) => ArticleMonetization) =>
+    setConfigRaw((c) => {
+      const n = next(c);
+      return { ...n, mode: modeFor(n.adsEnabled, n.placements) };
+    });
   async function save() {
     setBusy(true);
     try {
       const result = await api.saveArticleMonetization(articleId, config);
-      setConfig(result);
+      setConfigRaw(result);
       setBaseline(JSON.stringify(result));
       return true;
     } catch (error) {
@@ -89,241 +105,320 @@ function Loaded({
     }
   }
   useSectionSave(register, "monetization", { dirty, busy, problem, save });
-  const blocks = useMemo(() => insertionBlocks(body), [body]);
-  const updatePlacement = (index: number, patch: Partial<MonetizationPlacement>) =>
-    setConfig((c) => ({
-      ...c,
-      placements: c.placements.map((p, i) => (i === index ? { ...p, ...patch } : p)),
-    }));
-  function insert() {
-    if (position === null) return;
-    const key = `slot-${crypto.randomUUID()}`;
-    onBody(
-      `${body.slice(0, position).trimEnd()}\n\n{{monetization:${key}}}\n\n${body.slice(position).trimStart()}`,
-    );
-    setConfig((c) => ({
-      ...c,
-      placements: [
-        ...c.placements.map((p) =>
-          // The end ad stays; a new body ad replaces the previous one.
-          kind === "adsense" && p.kind === "adsense" && p.position === "marker"
-            ? { ...p, status: "paused" as const }
-            : p,
-        ),
-        {
-          key,
-          kind,
-          position: "marker",
-          status: "ready",
-          adUnit: overview.settings.adUnits[0]?.id ?? "7152502134",
-          offerId: null,
-        },
-      ],
-    }));
-    setPosition(null);
-    setPreview(key);
+
+  const experiment = overview.experiments.find(
+    (e) => e.id === config.experimentId && e.status === "running",
+  );
+  const layout = adLayoutOf(config);
+  const bodyAd = config.placements.find(
+    (p) => p.kind === "adsense" && p.position === "marker" && p.status === "ready",
+  );
+  const affiliates = config.placements.filter((p) => p.kind === "affiliate");
+  const blocks = useMemo(() => (picking ? insertionBlocks(body) : []), [body, picking]);
+
+  function chooseLayout(next: AdLayout) {
+    const plan = applyLayout(next, config, body, null);
+    if ("error" in plan) {
+      // No paragraph qualifies: keep the end ad and let the author pick.
+      const endOnly = applyLayout("end-only", config, body, null);
+      if (!("error" in endOnly)) {
+        setConfig(() => endOnly.config);
+        onBody(endOnly.body);
+      }
+      setPicking("body-ad");
+      toast.info("自動で置ける段落がありません。本文中の広告を置く位置を選んでください");
+      return;
+    }
+    setConfig(() => plan.config);
+    if (plan.body !== body) onBody(plan.body);
   }
+
+  function place(offset: number) {
+    if (picking === "body-ad") {
+      const key = bodyAd?.key ?? "body-ad";
+      const clean = bodyAd ? removeMarker(body, key) : body;
+      // The offset was measured on `body`; removing an earlier marker shifts it.
+      const marker = bodyAd ? body.indexOf(`{{monetization:${key}}}`) : -1;
+      const shift = marker >= 0 && marker < offset ? body.length - clean.length : 0;
+      const next = insertMarker(clean, offset - shift, key);
+      if (!bodyAdFits(next, key))
+        toast.info("この位置は導入文や画像・カードに近いため、公開前チェックで止まります");
+      onBody(next);
+      setConfig((c) => ({
+        ...c,
+        adsEnabled: true,
+        placements: bodyAd
+          ? c.placements
+          : [
+              ...c.placements,
+              {
+                key,
+                kind: "adsense",
+                position: "marker",
+                status: "ready",
+                adUnit: overview.settings.adUnits[0]?.id ?? "7152502134",
+                offerId: null,
+              },
+            ],
+      }));
+    } else if (picking) {
+      const key = `slot-${crypto.randomUUID()}`;
+      const kind = picking === "affiliate" ? "affiliate" : "adsense";
+      onBody(insertMarker(body, offset, key));
+      setConfig((c) => ({
+        ...c,
+        placements: [
+          ...c.placements.map((p) =>
+            // A new body ad replaces the previous one; the end ad stays.
+            kind === "adsense" && p.kind === "adsense" && p.position === "marker"
+              ? { ...p, status: "paused" as const }
+              : p,
+          ),
+          {
+            key,
+            kind,
+            position: "marker",
+            status: "ready",
+            adUnit: overview.settings.adUnits[0]?.id ?? "7152502134",
+            offerId: null,
+          },
+        ],
+      }));
+      setPreview(key);
+    }
+    setPicking(null);
+  }
+
+  const updatePlacement = (key: string, patch: Partial<MonetizationPlacement>) =>
+    setConfig((c) => ({
+      ...c,
+      placements: c.placements.map((p) => (p.key === key ? { ...p, ...patch } : p)),
+    }));
+  function remove(p: MonetizationPlacement) {
+    if (p.position === "marker") onBody(removeMarker(body, p.key));
+    setConfig((c) => ({ ...c, placements: c.placements.filter((x) => x.key !== p.key) }));
+  }
+
   return (
     <Panel title="収益化">
-      <p className="muted">
-        アフィリエイトはサイト方針と案件の公開承認が必要です。保存後は「変更を公開」してサイト反映が必要です。
-      </p>
-      <p>
-        最終編集:{" "}
-        {config.updatedAt
-          ? new Date(config.updatedAt).toLocaleString("ja-JP")
-          : "未編集（既存の末尾広告）"}{" "}
-        / {needsPublication || dirty ? "公開待ち" : "公開版あり・配信状況は公開パネルで確認"}
-      </p>
-      <label className="field">
-        <span>収益化モード</span>
-        <select
-          value={config.mode}
-          onChange={(e) => setConfig((c) => ({ ...c, mode: e.target.value as typeof c.mode }))}
-        >
-          <option value="none">広告なし</option>
-          <option value="ads">AdSenseのみ</option>
-          <option value="affiliate">アフィリエイトのみ</option>
-          <option value="hybrid">AdSenseとアフィリエイト</option>
-        </select>
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.adsEnabled}
-          onChange={(e) => setConfig((c) => ({ ...c, adsEnabled: e.target.checked }))}
-        />{" "}
-        AdSenseを有効にする
-      </label>
-      <p className="muted">
-        AdSenseは記事末尾に1枠（固定）＋本文中に1枠まで（任意）。配置実験に参加中の記事は、本文中の枠を実験のBとして出し分けます。
-      </p>
-      <label className="field">
-        <span>配置実験への参加</span>
-        <select
-          value={config.experimentId ?? ""}
-          onChange={(e) => setConfig((c) => ({ ...c, experimentId: e.target.value || null }))}
-        >
-          <option value="">参加しない</option>
-          {overview.experiments
-            .filter((e) => e.articleId === articleId)
-            .map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name}（{e.status}）
-              </option>
-            ))}
-        </select>
-      </label>
-      <details>
-        <summary>収益化スロットを挿入</summary>
-        <p>
-          本文プレビューでブロックを選び、その直後に配置します。広告は見出し・本文600字以上の後に置き、画像や関連カードから離してください。
-        </p>
-        <div className="monetization-picker" aria-label="挿入位置を選択">
-          {blocks.map((b) => (
-            <div
-              key={b.end}
-              className={position === b.end ? "monetization-block selected" : "monetization-block"}
+      <div className="ad-layout">
+        <fieldset className="segmented" disabled={Boolean(experiment)}>
+          <legend>AdSense</legend>
+          {(Object.keys(adLayoutLabels) as AdLayout[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={layout === key}
+              onClick={() => layout !== key && chooseLayout(key)}
             >
-              <div className="preview" dangerouslySetInnerHTML={{ __html: b.html }} />
+              {adLayoutLabels[key]}
+              {key === "standard" && <small>おすすめ</small>}
+            </button>
+          ))}
+        </fieldset>
+        {experiment ? (
+          <p className="notice notice--accent">
+            A/Bテスト中です（半数の読者は末尾のみ）。終了して標準にするには{" "}
+            <a href={href.monetization()}>収益化 → 広告配置</a> でまとめて揃えます。
+          </p>
+        ) : layout === "end-only" ? (
+          <p className="notice notice--warn">
+            本文中の広告がありません。「標準」を押すと、見出しと600字以上の後の段落を自動で選びます。
+          </p>
+        ) : null}
+        {layout === "standard" && bodyAd && (
+          <div className="ad-spot">
+            <span className="muted small">本文中の広告：この段落の後</span>
+            <q>{paragraphBefore(body, bodyAd.key) || "（段落を読み取れません）"}</q>
+            {!bodyAdFits(body, bodyAd.key) && (
+              <p className="form-error">導入文・画像・カードに近すぎます。位置を変えてください。</p>
+            )}
+            <button type="button" className="link" onClick={() => setPicking("body-ad")}>
+              位置を変える
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="ad-affiliates">
+        <div className="row">
+          <strong>アフィリエイト枠</strong>
+          <span className="muted small">
+            {overview.settings.affiliateEnabled
+              ? "承認済みの案件だけ公開されます"
+              : "サイト方針で無効（管理画面のみ）"}
+          </span>
+        </div>
+        {affiliates.length === 0 && <p className="muted small">なし</p>}
+        <ul className="ad-slots">
+          {affiliates.map((p) => (
+            <li key={p.key}>
+              <select
+                aria-label="案件"
+                value={p.offerId ?? ""}
+                onChange={(e) => updatePlacement(p.key, { offerId: e.target.value || null })}
+              >
+                <option value="">案件未割当</option>
+                {overview.offers.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}（{o.status}）
+                  </option>
+                ))}
+              </select>
+              {p.position === "article_end" && <Badge>記事末尾</Badge>}
+              {p.status === "paused" && <Badge tone="warn">停止中</Badge>}
               <button
                 type="button"
-                aria-pressed={position === b.end}
-                onClick={() => setPosition(b.end)}
+                className="link"
+                onClick={() => setPreview(preview === p.key ? null : p.key)}
               >
-                このブロックの後を選択
+                プレビュー
               </button>
-            </div>
+              <button type="button" className="link" onClick={() => remove(p)}>
+                削除
+              </button>
+              {preview === p.key && (
+                <AffiliatePreview offer={overview.offers.find((o) => o.id === p.offerId)} />
+              )}
+            </li>
           ))}
+        </ul>
+        <button type="button" onClick={() => setPicking("affiliate")}>
+          アフィリエイト枠を本文に追加
+        </button>
+      </div>
+
+      {picking && (
+        <div className="ad-picker">
+          <div className="row">
+            <strong>
+              {picking === "body-ad"
+                ? "本文中の広告を置く段落を選ぶ"
+                : picking === "affiliate"
+                  ? "アフィリエイト枠を置く段落を選ぶ"
+                  : "AdSense枠を置く段落を選ぶ"}
+            </strong>
+            <button type="button" className="link" onClick={() => setPicking(null)}>
+              やめる
+            </button>
+          </div>
+          <div className="monetization-picker" aria-label="挿入位置を選択">
+            {blocks.map((b) => (
+              <div key={b.end} className="monetization-block">
+                <div className="preview" dangerouslySetInnerHTML={{ __html: b.html }} />
+                <button type="button" onClick={() => place(b.end)}>
+                  この後に置く
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      <details className="ad-advanced">
+        <summary>詳細設定（A/Bテスト・ユニット・個別の枠）</summary>
         <label className="field">
-          <span>スロット種別</span>
-          <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}>
-            <option value="affiliate">アフィリエイト紹介枠</option>
-            <option value="adsense">AdSense（本文中の1枠・既存の本文枠は一時停止）</option>
+          <span>配置実験への参加</span>
+          <select
+            value={config.experimentId ?? ""}
+            onChange={(e) => setConfig((c) => ({ ...c, experimentId: e.target.value || null }))}
+          >
+            <option value="">参加しない</option>
+            {overview.experiments
+              .filter((e) => e.articleId === articleId)
+              .map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}（{e.status}）
+                </option>
+              ))}
           </select>
         </label>
-        <button type="button" disabled={position === null} onClick={insert}>
-          広告配置を追加
+        <button type="button" onClick={() => setPicking("adsense")}>
+          AdSense枠を位置を選んで追加（既存の本文枠は一時停止）
         </button>
+        <ol className="monetization-placements">
+          {config.placements.map((p) => (
+            <li key={p.key}>
+              <strong>
+                {p.kind === "adsense" ? "AdSense" : "アフィリエイト"} · <code>{p.key}</code>
+              </strong>
+              <div className="row">
+                <label className="field">
+                  <span>位置</span>
+                  <select
+                    value={p.position}
+                    onChange={(e) =>
+                      updatePlacement(p.key, { position: e.target.value as typeof p.position })
+                    }
+                  >
+                    <option value="article_end">記事末尾</option>
+                    <option value="marker">本文マーカー</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>状態</span>
+                  <select
+                    value={p.status}
+                    onChange={(e) =>
+                      updatePlacement(p.key, { status: e.target.value as typeof p.status })
+                    }
+                  >
+                    <option value="ready">表示</option>
+                    <option value="paused">一時停止</option>
+                  </select>
+                </label>
+                {p.kind === "adsense" && (
+                  <label className="field">
+                    <span>広告ユニット</span>
+                    <select
+                      value={p.adUnit}
+                      onChange={(e) => updatePlacement(p.key, { adUnit: e.target.value })}
+                    >
+                      {overview.settings.adUnits.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <button type="button" className="link" onClick={() => remove(p)}>
+                  {p.position === "marker" ? "枠とマーカーを削除" : "枠を削除"}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ol>
       </details>
-      <ol className="monetization-placements">
-        {config.placements.map((p, i) => (
-          <li key={p.key}>
-            <strong>
-              {p.kind === "adsense" ? "AdSense" : "アフィリエイト予定"} · {p.key}
-            </strong>
-            <label className="field">
-              <span>位置</span>
-              <select
-                value={p.position}
-                onChange={(e) =>
-                  updatePlacement(i, { position: e.target.value as typeof p.position })
-                }
-              >
-                <option value="article_end">記事末尾</option>
-                <option value="marker">本文マーカー</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>状態</span>
-              <select
-                value={p.status}
-                onChange={(e) => updatePlacement(i, { status: e.target.value as typeof p.status })}
-              >
-                <option value="ready">準備済み</option>
-                <option value="paused">一時停止</option>
-              </select>
-            </label>
-            {p.kind === "adsense" ? (
-              <label className="field">
-                <span>広告ユニット</span>
-                <select
-                  value={p.adUnit}
-                  onChange={(e) => updatePlacement(i, { adUnit: e.target.value })}
-                >
-                  {overview.settings.adUnits.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
-              <label className="field">
-                <span>案件</span>
-                <select
-                  value={p.offerId ?? ""}
-                  onChange={(e) => updatePlacement(i, { offerId: e.target.value || null })}
-                >
-                  <option value="">案件未割当</option>
-                  {overview.offers.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name}（{o.status}）
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <button type="button" onClick={() => setPreview(p.key)}>
-              プレビュー
-            </button>
-            {p.position === "marker" && position !== null && (
-              <button
-                type="button"
-                onClick={() => {
-                  const marker = `{{monetization:${p.key}}}`;
-                  const oldIndex = body.indexOf(marker);
-                  const clean = body.replace(marker, "");
-                  const at = position - (oldIndex >= 0 && oldIndex < position ? marker.length : 0);
-                  onBody(
-                    `${clean.slice(0, at).trimEnd()}\n\n${marker}\n\n${clean.slice(at).trimStart()}`,
-                  );
-                  setPosition(null);
-                }}
-              >
-                選択したブロックの後へ移動
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                const marker = `{{monetization:${p.key}}}`;
-                if (p.position === "marker") onBody(body.split(marker).join(""));
-                setConfig((c) => ({ ...c, placements: c.placements.filter((_, n) => n !== i) }));
-                setPosition(null);
-              }}
-            >
-              {p.position === "marker" ? "配置とマーカーを削除" : "配置を削除"}
-            </button>
-            <button
-              type="button"
-              disabled={i === 0}
-              onClick={() =>
-                setConfig((c) => {
-                  const placements = [...c.placements];
-                  [placements[i - 1], placements[i]] = [placements[i]!, placements[i - 1]!];
-                  return { ...c, placements };
-                })
-              }
-            >
-              順序を上へ
-            </button>
-            {preview === p.key &&
-              (p.kind === "affiliate" ? (
-                <AffiliatePreview offer={overview.offers.find((o) => o.id === p.offerId)} />
-              ) : (
-                <div className="ad-preview">広告 · 300 × 250（実広告は読み込みません）</div>
-              ))}
-          </li>
-        ))}
-      </ol>
+
       {problem && <p role="alert">{problem}</p>}
-      <button type="button" disabled={busy || !dirty} onClick={() => void onSaveAll()}>
-        収益化設定を保存
-      </button>
+      <div className="row">
+        <button type="button" disabled={busy || !dirty} onClick={() => void onSaveAll()}>
+          保存
+        </button>
+        <span className="muted small">
+          {config.updatedAt
+            ? `最終編集 ${new Date(config.updatedAt).toLocaleString("ja-JP")}`
+            : "未編集（既定の末尾広告）"}
+          ・保存後「変更を公開」でサイトに出ます
+        </span>
+      </div>
     </Panel>
   );
+}
+
+/** The paragraph a marker follows, trimmed for a one-line reminder. */
+function paragraphBefore(body: string, key: string): string {
+  const at = body.indexOf(`{{monetization:${key}}}`);
+  if (at < 0) return "";
+  const text = body
+    .slice(0, at)
+    .trim()
+    .split(/\n\s*\n/)
+    .at(-1)
+    ?.replace(/[#*_>`[\]]/g, "")
+    .trim();
+  return text && text.length > 80 ? `…${text.slice(-80)}` : (text ?? "");
 }
 
 function insertionBlocks(body: string) {

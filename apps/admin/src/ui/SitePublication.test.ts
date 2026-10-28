@@ -35,7 +35,7 @@ const render = (data: PublicationStatus) =>
 describe("site publication progress UI", () => {
   it("clearly scopes progress to the site and shows actual skipped/current stages", () => {
     const html = render(status);
-    expect(html).toContain("サイト全体の公開状況");
+    expect(html).toContain("サイト全体の反映状況");
     expect(html).toContain("現在：");
     expect(html).toContain("サイト生成中");
     expect(html).toContain("画像処理");

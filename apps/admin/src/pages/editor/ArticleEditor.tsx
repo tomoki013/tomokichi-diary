@@ -9,7 +9,8 @@ import { copyText } from "../../lib/clipboard";
 import { useEditorSections } from "./section-save";
 import { api } from "../../lib/api";
 import { bodyStats, draftFrom, isDirty, normalizeDraft, type DraftInput } from "../../lib/draft";
-import { articleStatusLabels, formatRelative } from "../../lib/labels";
+import { formatRelative } from "../../lib/labels";
+import { PhaseBadge } from "../../ui/PhaseBadge";
 import { href } from "../../lib/route";
 import { useResource, useTitle, useUnsavedWarning } from "../../ui/hooks";
 import { Badge, ErrorState, PageHeader, Panel, SkeletonBlock } from "../../ui/parts";
@@ -176,12 +177,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
         meta={
           <>
             <a href={href.articles()}>← 記事一覧</a>
-            <Badge
-              tone={article.isLive ? "ok" : article.status === "scheduled" ? "accent" : "neutral"}
-            >
-              {articleStatusLabels[article.status] ?? article.status}
-            </Badge>
-            {article.hasUnpublishedChanges && <Badge tone="warn">未公開の変更あり</Badge>}
+            <PhaseBadge article={article} />
             {article.kind === "page" && <Badge>固定ページ</Badge>}
             <span className="mono">{article.path ?? "URL 未設定"}</span>
             {article.currentRevision && (
@@ -410,7 +406,6 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             <div data-part="monetization">
               <MonetizationSection
                 articleId={article.id}
-                needsPublication={article.hasUnpublishedChanges || article.status !== "published"}
                 body={draft.bodyMarkdown}
                 onBody={(body) => update("bodyMarkdown", body)}
                 register={sections.register}
