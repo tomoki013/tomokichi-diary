@@ -19,6 +19,7 @@
     "ci": "tsx scripts/ci.ts",
     "diagnostics": "tsx scripts/diagnostics.ts",
     "check:routes": "tsx scripts/check-routes.ts",
+    "check:articles": "tsx scripts/check-articles.ts",
     "check:seo": "tsx scripts/check-seo.ts",
     "check:links": "tsx scripts/check-links.ts",
     "check:knowledge": "tsx scripts/check-knowledge.ts",
