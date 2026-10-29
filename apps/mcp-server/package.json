@@ -20,7 +20,7 @@
     "@tomokichi/application": "workspace:*",
     "@tomokichi/contracts": "workspace:*",
     "@tomokichi/infra-d1": "workspace:*",
-    "agents": "^0.28.1",
+    "agents": "^0.30.1",
     "zod": "^4.6.6"
   },
   "devDependencies": {
