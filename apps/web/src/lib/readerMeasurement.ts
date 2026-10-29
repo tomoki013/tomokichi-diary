@@ -44,6 +44,43 @@ export function measureReader(
     vital,
   });
 }
+/*
+ * A click to another article used to be sent as the page unloaded, and phones
+ * dropped almost all of them (about 30 recorded against 680 article-to-article
+ * page views in October 2026). The click now leaves a note in this tab, and
+ * the next article sends it with the first page's address and test arm.
+ */
+const PENDING_NEXT = "tomokichi-next-article";
+function deferNextArticle(): void {
+  try {
+    sessionStorage.setItem(
+      PENDING_NEXT,
+      JSON.stringify({ at: Date.now(), from: location.href, context: measurementContext() }),
+    );
+  } catch {
+    measureReader("next_article");
+  }
+}
+function sendPendingNextArticle(): void {
+  let note: { at?: number; from?: string; context?: ReturnType<typeof measurementContext> };
+  try {
+    note = JSON.parse(sessionStorage.getItem(PENDING_NEXT) ?? "null") ?? {};
+    sessionStorage.removeItem(PENDING_NEXT);
+  } catch {
+    return;
+  }
+  if (!note.context || !note.from || Date.now() - (note.at ?? 0) > 120_000) return;
+  trackSemanticEvent({
+    name: "diary_measurement",
+    measurement_version: "reader-v1",
+    ...note.context,
+    measurement: "next_article",
+    value: 1,
+    placement: "none",
+    vital: "none",
+    page_location: note.from,
+  });
+}
 /** No identity, text, link destinations, ad clicks or iframe inspection. */
 export function mountReaderMeasurement(): void {
   const body = document.querySelector<HTMLElement>(".article-content");
@@ -54,6 +91,7 @@ export function mountReaderMeasurement(): void {
     return;
   if (mounted.has(document)) return;
   mounted.add(document);
+  sendPendingNextArticle();
   measureReader("article_view");
   if (
     measurementContext().experiment_id !== "none" &&
@@ -111,12 +149,17 @@ export function mountReaderMeasurement(): void {
   });
   document.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : null;
-    if (
-      target?.closest(
-        ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb, .internal-link-card a",
-      )
-    )
-      once("next_article");
+    const next = target?.closest<HTMLAnchorElement>(
+      ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb, .internal-link-card a",
+    );
+    if (next && !sent.has("next_article:none")) {
+      const to = new URL(next.href, location.href);
+      // Only an article runs this script to send the note; other pages get the old path.
+      if (to.origin === location.origin && to.pathname.startsWith("/posts/")) {
+        sent.add("next_article:none");
+        deferNextArticle();
+      } else once("next_article");
+    }
     if (target?.closest(".article-share__actions button")) once("share_action");
     if (target?.closest("[data-like-button]")) once("like_action");
   });
