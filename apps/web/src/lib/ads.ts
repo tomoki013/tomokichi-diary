@@ -18,7 +18,7 @@ export function mountArticleAd(
   )
     return;
   slot.dataset["adMounted"] = "1";
-  const ad = slot.querySelector<HTMLElement>(".adsbygoogle");
+  const ad = slot.querySelector<HTMLElement>(".article-ad__unit");
   if (!ad?.dataset["adClient"] || !ad.dataset["adSlot"]) return;
   const placement = slot.dataset["placement"] === "body_slot" ? "body_slot" : "article_end";
   const measure = (name: Parameters<typeof measureReader>[0]) => measureReader(name, 1, placement);
@@ -93,6 +93,7 @@ export function mountArticleAd(
           return;
       }
       requested = true;
+      ad.classList.add("adsbygoogle");
       measure("ad_request");
       observer.disconnect();
       loadAdSense(
