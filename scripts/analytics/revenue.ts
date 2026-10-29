@@ -3,7 +3,7 @@ import { dateRange, shiftDate, type AnalyticsDay } from "@tomokichi/application"
 import { analyticsReplacement } from "@tomokichi/infra-d1";
 import { fetchAdSense } from "./adsense.js";
 import { affiliateDays, type AffiliateRecord } from "./affiliate.js";
-import { d1 } from "./cloudflare.js";
+import { d1, loadRoutes } from "./cloudflare.js";
 import { recordFailure } from "./collect.js";
 import type { Route } from "@tomokichi/domain";
 const args = process.argv.slice(2);
@@ -30,7 +30,7 @@ try {
     );
     if (days.some((day) => day.date < range.start || day.date > range.end))
       throw new Error("ANALYTICS_INVALID_RANGE");
-  } else days = await fetchAdSense(range);
+  } else days = await fetchAdSense(range, await loadRoutes(args.includes("--persist")));
   if (days === null) {
     process.stdout.write("AdSense disabled\n");
     process.exit(0);

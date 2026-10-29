@@ -1,5 +1,11 @@
 import { assertAnalyticsDay } from "@tomokichi/contracts";
-import { dates, type AnalyticsDay, type DateRange } from "@tomokichi/application";
+import {
+  dates,
+  resolveAnalyticsArticle,
+  type AnalyticsDay,
+  type DateRange,
+} from "@tomokichi/application";
+import type { Route } from "@tomokichi/domain";
 import { requestJson } from "./http.js";
 
 interface AdSenseReport {
@@ -13,7 +19,7 @@ interface AdSenseReport {
 export function adsenseUrl(
   account: string,
   range: DateRange,
-  units = false,
+  units: boolean | "pages" = false,
   host = "tomokichidiary.com",
 ): string {
   if (!/^accounts\/pub-\d+$/.test(account)) throw new Error("ANALYTICS_ADSENSE_ACCOUNT");
@@ -21,7 +27,8 @@ export function adsenseUrl(
   url.searchParams.set("dateRange", "CUSTOM");
   url.searchParams.set("currencyCode", "JPY");
   url.searchParams.append("dimensions", "DATE");
-  if (units) url.searchParams.append("dimensions", "AD_UNIT_ID");
+  if (units === "pages") url.searchParams.append("dimensions", "PAGE_URL");
+  else if (units) url.searchParams.append("dimensions", "AD_UNIT_ID");
   // DOMAIN_CODE is compatible with AD_UNIT_ID; owned-site + unit is rejected by Google.
   if (!["tomokichidiary.com", "www.tomokichidiary.com"].includes(host))
     throw new Error("ANALYTICS_ADSENSE_HOST");
@@ -122,7 +129,46 @@ export function parseAdSenseUnits(
   for (const day of byDate.values()) assertAnalyticsDay(day);
   return [...byDate.values()];
 }
-export async function fetchAdSense(range: DateRange): Promise<AnalyticsDay[] | null> {
+/** Per-article earnings: the ad units are shared across articles, so only the page URL tells them apart. */
+export function parseAdSensePages(
+  report: AdSenseReport,
+  range: DateRange,
+  routes: readonly Route[],
+  now: string,
+): AnalyticsDay[] {
+  const headers = report.headers ?? [];
+  if (!headers.some((h) => h.name === "PAGE_URL")) {
+    if (!report.rows?.length && report.totalMatchedRows === "0") return [];
+    throw new Error("ANALYTICS_ADSENSE_SCHEMA");
+  }
+  if (
+    Number(report.totalMatchedRows ?? 0) !== (report.rows ?? []).length ||
+    report.warnings?.length
+  )
+    throw new Error("ANALYTICS_ADSENSE_INCOMPLETE");
+  const byDate = new Map<string, AnalyticsDay>();
+  for (const row of report.rows ?? []) {
+    const url = row.cells[headers.findIndex((h) => h.name === "PAGE_URL")]?.value ?? "";
+    const resolved = resolveAnalyticsArticle(url, routes);
+    // Query strings and other hosts are folded into the path; unknown pages are dropped.
+    if (!resolved.path) continue;
+    const day = parseAdSense({ ...report, rows: [row], totalMatchedRows: "1" }, range, now)[0]!;
+    const record = { ...day.rows[0]!, grain: "page" as const, key: resolved.path, ...resolved };
+    const existing = byDate.get(day.date) ?? { ...day, rows: [] };
+    const match = existing.rows.find((r) => r.key === record.key);
+    if (!match) existing.rows.push(record);
+    else
+      for (const [metric, value] of Object.entries(record.metrics))
+        match.metrics[metric] = (match.metrics[metric] ?? 0) + (value ?? 0);
+    byDate.set(day.date, existing);
+  }
+  for (const day of byDate.values()) assertAnalyticsDay(day);
+  return [...byDate.values()];
+}
+export async function fetchAdSense(
+  range: DateRange,
+  routes: readonly Route[],
+): Promise<AnalyticsDay[] | null> {
   if (process.env["ADSENSE_ENABLED"] !== "1") return null;
   const clientId = process.env["ADSENSE_CLIENT_ID"],
     clientSecret = process.env["ADSENSE_CLIENT_SECRET"],
@@ -158,7 +204,21 @@ export async function fetchAdSense(range: DateRange): Promise<AnalyticsDay[] | n
       range,
       now,
     );
-    for (const unit of units) {
+    // Page earnings are new and optional: a rejected report keeps the site and unit totals.
+    let pages: AnalyticsDay[] = [];
+    try {
+      pages = parseAdSensePages(
+        await requestJson<AdSenseReport>(adsenseUrl(account, range, "pages", host), {
+          headers: { authorization: `Bearer ${token.access_token}` },
+        }),
+        range,
+        routes,
+        now,
+      );
+    } catch {
+      process.stdout.write(`AdSense page report skipped for ${host}\n`);
+    }
+    for (const unit of [...units, ...pages]) {
       const day = days.find((d) => d.date === unit.date);
       if (!day) throw new Error("ANALYTICS_ADSENSE_INCOMPLETE");
       day.rows.push(...unit.rows);
