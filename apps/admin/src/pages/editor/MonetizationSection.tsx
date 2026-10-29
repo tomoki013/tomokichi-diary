@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { marked } from "marked";
 import {
   validate,
+  renderArticleMarkdown,
   articleMonetizationSchema,
   type ArticleMonetization,
   type ArticleMonetizationDto,
@@ -437,7 +438,7 @@ function insertionBlocks(body: string) {
     offset = start + token.raw.length;
     if (token.type === "space" || token.type === "code" || /\{\{monetization:/.test(token.raw))
       continue;
-    result.push({ end: offset, html: marked.parse(token.raw, { async: false }) as string });
+    result.push({ end: offset, html: renderArticleMarkdown(token.raw) });
   }
   return result;
 }

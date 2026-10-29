@@ -4,7 +4,10 @@ import { adLayoutOf } from "./ad-standard";
 /** What the draft preview needs to stand in for the ads readers will see. */
 export interface AdPreview {
   config: ArticleMonetization;
-  offers: readonly Pick<AffiliateOffer, "id" | "name" | "heading" | "provider">[];
+  offers: readonly Pick<
+    AffiliateOffer,
+    "id" | "name" | "heading" | "provider" | "url" | "status" | "publicationApproved"
+  >[];
   /** A running test's B slot: shown to B readers only, whatever its stored status. */
   testMarker: string | null;
 }
@@ -60,4 +63,18 @@ export function withAdMocks(html: string, preview: AdPreview | null): string {
   });
   const end = config && adLayoutOf(config) !== "none" ? box("ad", "広告", "記事末尾 300×250") : "";
   return body + end;
+}
+
+/**
+ * URLs whose inline `[ラベル](URL "広告")` links readers will get as links:
+ * the offers assigned to this article's ready affiliate slots and cleared for
+ * publication. Any other marked link shows as plain text, as on the site.
+ */
+export function approvedInlineAffiliateUrls(preview: AdPreview | null): string[] {
+  if (!preview) return [];
+  return preview.config.placements.flatMap((placement) => {
+    if (placement.kind !== "affiliate" || placement.status !== "ready") return [];
+    const offer = preview.offers.find((o) => o.id === placement.offerId);
+    return offer?.url && offer.status === "ready" && offer.publicationApproved ? [offer.url] : [];
+  });
 }

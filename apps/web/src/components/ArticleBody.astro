@@ -1,5 +1,5 @@
 ---
-import { getEntry, render } from "astro:content";
+import { getEntry } from "astro:content";
 import type { ArticleEmbed } from "@tomokichi/domain";
 import type { ArticleView } from "@tomokichi/application";
 import AffiliateBlock from "./AffiliateBlock.astro";
@@ -8,8 +8,12 @@ import ArticleAd from "./ArticleAd.astro";
 import type { AdPlan } from "../lib/monetization";
 import EmbedBlock from "./EmbedBlock.astro";
 import { cardImageUrl, enhanceBodyImages } from "../lib/images";
-import { enhanceAppleMusic } from "@tomokichi/contracts";
-import { enhanceInlineAffiliates } from "../lib/inline-affiliates";
+import {
+  enhanceAppleMusic,
+  enhanceInlineAffiliates,
+  renderArticleMarkdown,
+  replaceLoneLinks,
+} from "@tomokichi/contracts";
 import { content } from "../lib/content";
 import { withHeadingIds } from "../lib/article-headings";
 
@@ -35,12 +39,9 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
  * structured blocks be real components rather than serialised HTML.
  */
 const PLACEHOLDER = /<p>\s*\{\{((?:embed|monetization):[a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
-const html = entry.rendered?.html ?? null;
-if (html === null && entry.body?.includes("{{monetization:")) {
-  throw new Error(
-    "MONETIZATION_INVALID: rendered HTML is required to remove private placement markers",
-  );
-}
+// Rendered by the same function as the admin preview, never by Astro's own
+// Markdown pipeline, so the editor's preview and the page cannot drift apart.
+const html = renderArticleMarkdown(entry.body ?? "");
 const escapeHtml = (value: string) =>
   value
     .replaceAll("&", "&amp;")
@@ -103,56 +104,40 @@ const internalCard = (href: string): string | null => {
     : `<span class="internal-link-card__media internal-link-card__media--empty" aria-hidden="true"><span>TRAVEL<br>NOTE</span></span>`;
   return `<aside class="internal-link-card" aria-label="関連コンテンツ"><a href="${escapeHtml(route.path)}">${image}<span class="internal-link-card__copy"><small>${label}</small><strong>${escapeHtml(title)}</strong><span>${escapeHtml(summary)}</span><b>詳しく見る <span aria-hidden="true">→</span></b></span></a></aside>`;
 };
-const withInternalLinkCards = (value: string) =>
-  value.replace(
-    /<(p|li)>\s*<a href="([^"]+)"(?:\s[^>]*)?>(.*?)<\/a>\s*<\/\1>/gi,
-    (match, _tag, href) => internalCard(href) ?? match,
-  );
-const segments =
-  html === null
-    ? null
-    : withInternalLinkCards(
-        withHeadingIds(
-          enhanceInlineAffiliates(
-            enhanceAppleMusic(enhanceBodyImages(html)),
-            affiliates.map((placement) => placement.url),
-          ),
-        ),
-      ).split(PLACEHOLDER);
-
-const fallback = html === null ? await render(entry) : null;
-const FallbackContent = fallback?.Content;
+const segments = replaceLoneLinks(
+  withHeadingIds(
+    enhanceInlineAffiliates(
+      enhanceAppleMusic(enhanceBodyImages(html)),
+      affiliates.map((placement) => placement.url),
+    ),
+  ),
+  internalCard,
+).split(PLACEHOLDER);
 ---
 
 <div class="prose article-content">
-  {segments === null ? (
-    FallbackContent ? (
-      <FallbackContent />
-    ) : null
-  ) : (
-    segments.map((segment, index) =>
-      index % 2 === 1 ? (
-        segment.startsWith("monetization:") ? (
-          adPlan?.marker?.key === segment.slice(13) ? (
-            <ArticleAd
-              unit={adPlan.marker.unit}
-              placement="body_slot"
-              slotKey={adPlan.marker.key}
-              variant={adPlan.marker.variant}
-            />
-          ) : affiliates.some((p) => p.position === "marker" && p.key === segment.slice(13)) ? (
-            <AffiliateBlock
-              placement={affiliates.find(
-                (p) => p.position === "marker" && p.key === segment.slice(13),
-              )!}
-            />
-          ) : null
-        ) : embedByAnchor.has(segment.slice(6)) ? (
-          <EmbedBlock embed={embedByAnchor.get(segment.slice(6))!} />
+  {segments.map((segment, index) =>
+    index % 2 === 1 ? (
+      segment.startsWith("monetization:") ? (
+        adPlan?.marker?.key === segment.slice(13) ? (
+          <ArticleAd
+            unit={adPlan.marker.unit}
+            placement="body_slot"
+            slotKey={adPlan.marker.key}
+            variant={adPlan.marker.variant}
+          />
+        ) : affiliates.some((p) => p.position === "marker" && p.key === segment.slice(13)) ? (
+          <AffiliateBlock
+            placement={affiliates.find(
+              (p) => p.position === "marker" && p.key === segment.slice(13),
+            )!}
+          />
         ) : null
-      ) : (
-        <Fragment set:html={segment.replace(/\{\{monetization:[^}\n]*\}\}/g, "")} />
-      ),
-    )
+      ) : embedByAnchor.has(segment.slice(6)) ? (
+        <EmbedBlock embed={embedByAnchor.get(segment.slice(6))!} />
+      ) : null
+    ) : (
+      <Fragment set:html={segment.replace(/\{\{monetization:[^}\n]*\}\}/g, "")} />
+    ),
   )}
 </div>

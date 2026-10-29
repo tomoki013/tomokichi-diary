@@ -1790,3 +1790,37 @@ details.panel > summary {
   min-height: 0;
   opacity: 0.6;
 }
+
+/* A site link the page turns into a card: its place in the draft preview. */
+.link-card-mock {
+  display: grid;
+  gap: 0.15rem;
+  margin: 1.25rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+.link-card-mock__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.link-card-mock__title {
+  font-weight: 700;
+  color: var(--ink);
+}
+.link-card-mock__href {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+/* The note the page adds after an inline affiliate link. */
+.preview .affiliate-inline-disclosure {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
