@@ -681,16 +681,16 @@ const labelOf = (target: Route): string => {
             ひとつの物語として。
           </h1>
           <span>
-            時系列でたどる旅程と、心に残った景色を集めたテーマ。気分に合う入口から、ブログを続けて読めます。
+            心に残った景色を集めたテーマと、時系列でたどる旅程。気分に合う入口から、ブログを続けて読めます。
           </span>
           <div>
             <b>
-              {collections("journey").length}
-              <small>旅程</small>
-            </b>
-            <b>
               {collections("series").length}
               <small>テーマ</small>
+            </b>
+            <b>
+              {collections("journey").length}
+              <small>旅程</small>
             </b>
             <b>
               {articles.length}
@@ -721,51 +721,13 @@ const labelOf = (target: Route): string => {
       </header>
 
       <nav class="collections-jump" aria-label="コレクション内メニュー">
-        <a href="#journey-collections-heading">
-          旅程から読む <span>→</span>
-        </a>
         <a href="#series-collections-heading">
           テーマから読む <span>→</span>
         </a>
+        <a href="#journey-collections-heading">
+          旅程から読む <span>→</span>
+        </a>
       </nav>
-
-      <section
-        class="collections-group collections-group--journey"
-        aria-labelledby="journey-collections-heading"
-      >
-        <div class="collections-group__heading">
-          <div>
-            <small>旅程コレクション</small>
-            <h2 id="journey-collections-heading">旅を順番にたどる</h2>
-          </div>
-          <p>出発から帰着まで、時系列でまとまった旅の記録です。</p>
-        </div>
-        <div class="journey-collection-grid">
-          {collections("journey").map((entry, index) => (
-            <a class="journey-collection-card" href={entry.path}>
-              {entry.cover && (
-                <Picture
-                  storageKey={entry.cover.storageKey}
-                  alt={entry.collection.title}
-                  sizes="(max-width: 760px) 100vw, 520px"
-                  loading={index < 2 ? "eager" : "lazy"}
-                />
-              )}
-              <span class="journey-collection-card__shade" />
-              <span class="journey-collection-card__copy">
-                <small>
-                  {entry.collection.startDate
-                    ? `${entry.collection.startDate.replaceAll("-", ".")} — ${entry.collection.endDate?.replaceAll("-", ".") ?? ""}`
-                    : "旅の記録"}
-                </small>
-                <strong>{entry.collection.title}</strong>
-                <span>{entry.collection.description}</span>
-                <b>{entry.count}本の記事</b>
-              </span>
-            </a>
-          ))}
-        </div>
-      </section>
 
       <section class="collections-group" aria-labelledby="series-collections-heading">
         <div class="collections-group__heading">
@@ -794,6 +756,44 @@ const labelOf = (target: Route): string => {
                 <strong>{entry.collection.title}</strong>
                 <span>{entry.collection.description}</span>
                 <b>{entry.count}本</b>
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section
+        class="collections-group collections-group--journey"
+        aria-labelledby="journey-collections-heading"
+      >
+        <div class="collections-group__heading">
+          <div>
+            <small>旅程コレクション</small>
+            <h2 id="journey-collections-heading">旅を順番にたどる</h2>
+          </div>
+          <p>出発から帰着まで、時系列でまとまった旅の記録です。</p>
+        </div>
+        <div class="journey-collection-grid">
+          {collections("journey").map((entry) => (
+            <a class="journey-collection-card" href={entry.path}>
+              {entry.cover && (
+                <Picture
+                  storageKey={entry.cover.storageKey}
+                  alt={entry.collection.title}
+                  sizes="(max-width: 760px) 100vw, 520px"
+                  loading="lazy"
+                />
+              )}
+              <span class="journey-collection-card__shade" />
+              <span class="journey-collection-card__copy">
+                <small>
+                  {entry.collection.startDate
+                    ? `${entry.collection.startDate.replaceAll("-", ".")} — ${entry.collection.endDate?.replaceAll("-", ".") ?? ""}`
+                    : "旅の記録"}
+                </small>
+                <strong>{entry.collection.title}</strong>
+                <span>{entry.collection.description}</span>
+                <b>{entry.count}本の記事</b>
               </span>
             </a>
           ))}
