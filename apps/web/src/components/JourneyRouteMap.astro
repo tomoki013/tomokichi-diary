@@ -1,0 +1,221 @@
+---
+import { geoDistance, geoMercator, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import world from "world-atlas/countries-110m.json";
+import type { FeatureCollection, Geometry } from "geojson";
+import type { ArticleView } from "@tomokichi/application";
+import { content } from "../lib/content";
+import { PLACE_COORDINATES } from "../lib/place-coordinates";
+
+interface Props {
+  /** The trip's episodes in order. */
+  episodes: readonly ArticleView[];
+}
+
+/*
+ * The trip as a route: each episode's main place, joined in order, drawn at
+ * build time as plain SVG (no tiles, no script). A stop links to the first
+ * episode written there; consecutive episodes in one place share a stop.
+ */
+const { episodes } = Astro.props;
+
+interface Stop {
+  name: string;
+  lon: number;
+  lat: number;
+  path: string;
+  numbers: number[];
+}
+const stops: Stop[] = [];
+episodes.forEach((view, index) => {
+  const place =
+    view.locations.find(({ relation }) => relation === "primary")?.location ??
+    view.locations[0]?.location;
+  const coordinates =
+    place && place.latitude != null && place.longitude != null
+      ? ([place.longitude, place.latitude] as const)
+      : place
+        ? PLACE_COORDINATES[place.slug]
+        : undefined;
+  if (!place || !coordinates) return;
+  const name = content.locations.nameOf(place.id, "ja");
+  const last = stops.at(-1);
+  if (last && last.name === name) last.numbers.push(index + 1);
+  else
+    stops.push({
+      name,
+      lon: coordinates[0],
+      lat: coordinates[1],
+      path: view.route.path,
+      numbers: [index + 1],
+    });
+});
+
+// Small enough that its text reads at phone width without scaling down much.
+const WIDTH = 360;
+const HEIGHT = 280;
+const drawable = new Set(stops.map((stop) => `${stop.lon},${stop.lat}`)).size >= 2;
+const lons = stops.map((stop) => stop.lon);
+const lats = stops.map((stop) => stop.lat);
+// At least a few degrees each way, so a trip within one region still shows
+// the coastline around it.
+const span = Math.max(4, (Math.max(...lons) - Math.min(...lons)) * 0.25);
+const frame = {
+  type: "MultiPoint",
+  coordinates: [
+    [Math.min(...lons) - span, Math.min(...lats) - span],
+    [Math.max(...lons) + span, Math.max(...lats) + span],
+  ],
+} as const;
+const projection = geoMercator().fitExtent(
+  [
+    [30, 24],
+    [WIDTH - 30, HEIGHT - 34],
+  ],
+  frame as never,
+);
+const path = geoPath(projection).digits(1);
+const countries = feature(
+  world as never,
+  (world as unknown as { objects: { countries: unknown } }).objects.countries as never,
+) as unknown as FeatureCollection<Geometry>;
+const land = drawable
+  ? countries.features.flatMap((country) => {
+      const [[x0, y0], [x1, y1]] = path.bounds(country);
+      if (x1 < 0 || y1 < 0 || x0 > WIDTH || y0 > HEIGHT) return [];
+      const d = path(country);
+      return d ? [d] : [];
+    })
+  : [];
+// Places within about 50 km (a city, its airport, an island off it) would
+// sit on top of each other; they share one numbered point.
+interface Point {
+  lon: number;
+  lat: number;
+  names: string[];
+  path: string;
+  numbers: number[];
+  x: number;
+  y: number;
+}
+const points: Point[] = [];
+const visits: Point[] = [];
+for (const stop of stops) {
+  const [x, y] = projection([stop.lon, stop.lat]) ?? [0, 0];
+  let point = points.find((p) => geoDistance([p.lon, p.lat], [stop.lon, stop.lat]) * 6371 < 50);
+  if (point) {
+    if (!point.names.includes(stop.name)) point.names.push(stop.name);
+    point.numbers.push(...stop.numbers);
+  } else {
+    point = {
+      lon: stop.lon,
+      lat: stop.lat,
+      names: [stop.name],
+      path: stop.path,
+      numbers: [...stop.numbers],
+      x,
+      y,
+    };
+    points.push(point);
+  }
+  if (visits.at(-1) !== point) visits.push(point);
+}
+const round = (n: number) => Math.round(n * 10) / 10;
+const line = visits.map((point) => `${round(point.x)},${round(point.y)}`).join(" ");
+// 1, 2, 3, 9 → "1–3・9"
+const label = (numbers: number[]) =>
+  [...new Set(numbers)]
+    .toSorted((a, b) => a - b)
+    .reduce<number[][]>((runs, n) => {
+      const run = runs.at(-1);
+      if (run && run.at(-1) === n - 1) run.push(n);
+      else runs.push([n]);
+      return runs;
+    }, [])
+    .map((run) => (run.length > 1 ? `${run[0]}–${run.at(-1)}` : String(run[0])))
+    .join("・");
+const nameOf = (point: Point) =>
+  point.names.length > 2 ? `${point.names[0]}ほか` : point.names.join("・");
+// Each name goes below, right, left or above its point, whichever first
+// clears the names already placed and the other points.
+type Box = [number, number, number, number];
+const placed: Box[] = points.map((p) => [p.x - 9, p.y - 9, p.x + 9, p.y + 9]);
+const overlaps = (a: Box, b: Box) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+const names = points.map((point, index) => {
+  const width = nameOf(point).length * 11;
+  const options = [
+    {
+      x: point.x,
+      y: point.y + 23,
+      anchor: "middle",
+      box: [point.x - width / 2, point.y + 13, point.x + width / 2, point.y + 27],
+    },
+    {
+      x: point.x + 15,
+      y: point.y + 4,
+      anchor: "start",
+      box: [point.x + 14, point.y - 7, point.x + 15 + width, point.y + 7],
+    },
+    {
+      x: point.x - 15,
+      y: point.y + 4,
+      anchor: "end",
+      box: [point.x - 15 - width, point.y - 7, point.x - 14, point.y + 7],
+    },
+    {
+      x: point.x,
+      y: point.y - 16,
+      anchor: "middle",
+      box: [point.x - width / 2, point.y - 27, point.x + width / 2, point.y - 13],
+    },
+  ] as const;
+  const others = placed.filter((_, i) => i !== index);
+  const fits = (box: Box) =>
+    box[0] >= 0 &&
+    box[2] <= WIDTH &&
+    box[1] >= 0 &&
+    box[3] <= HEIGHT &&
+    !others.some((o) => overlaps(o, box));
+  // With no clear spot the name is left out; the caption lists every place.
+  const choice = options.find((option) => fits([...option.box]));
+  if (choice) placed.push([...choice.box]);
+  return choice ?? null;
+});
+---
+
+{drawable && (
+  <figure class="journey-route">
+    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-labelledby="journey-route-caption">
+      <g class="journey-route__land">
+        {land.map((d) => (
+          <path d={d} />
+        ))}
+      </g>
+      <polyline class="journey-route__line" points={line} />
+      {points.map((point, index) => (
+        <a
+          href={point.path}
+          aria-label={`${point.names.join("・")}（第${label(point.numbers)}回）`}
+        >
+          <circle cx={round(point.x)} cy={round(point.y)} r="8" />
+          <text class="journey-route__number" x={round(point.x)} y={round(point.y)}>
+            {index + 1}
+          </text>
+          {names[index] && (
+            <text
+              class="journey-route__name"
+              x={round(names[index].x)}
+              y={round(names[index].y)}
+              text-anchor={names[index].anchor}
+            >
+              {nameOf(point)}
+            </text>
+          )}
+        </a>
+      ))}
+    </svg>
+    <figcaption id="journey-route-caption">
+      旅のルート：{stops.map((stop) => stop.name).join(" → ")}
+    </figcaption>
+  </figure>
+)}
