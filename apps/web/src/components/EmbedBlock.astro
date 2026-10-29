@@ -7,7 +7,10 @@ interface Props {
 }
 
 const { embed } = Astro.props;
-const programs = (embed.payload["programs"] ?? []) as { name?: string }[];
+// Stored as plain names (["Omio"]); older payloads wrapped them as { name }.
+const programs = ((embed.payload["programs"] ?? []) as (string | { name?: string })[])
+  .map((program) => (typeof program === "string" ? program : program?.name))
+  .filter((name): name is string => Boolean(name?.trim()));
 ---
 
 {embed.type === "table" && embed.anchorKey === "cost-report" && (
@@ -17,11 +20,7 @@ const programs = (embed.payload["programs"] ?? []) as { name?: string }[];
   <aside class="notice">
     <p>
       この記事にはプロモーションが含まれます。
-      {programs.length > 0 &&
-        `（${programs
-          .map((p) => p.name)
-          .filter(Boolean)
-          .join("、")}）`}
+      {programs.length > 0 && `（${programs.join("、")}）`}
       紹介の方針は<a href="/legal/affiliates">アフィリエイトポリシー</a>をご覧ください。
     </p>
   </aside>
