@@ -1,3 +1,4 @@
+import { AnalyticsArticles } from "./AnalyticsArticles";
 import { AnalyticsExperience } from "./AnalyticsExperience";
 import { useState } from "react";
 import type { AnalyticsDashboardDto, AnalyticsMetricRowDto } from "@tomokichi/contracts";
@@ -129,6 +130,10 @@ export function Analytics() {
     JSON.stringify([range, articleId]),
   );
   const data = resource.data;
+  const articleList = useResource(
+    () => api.listArticles().then((r) => r.items),
+    "analytics-articles",
+  );
   const reports = useResource(
     () => api.analyticsReports().then((r) => r.items),
     "analytics-reports",
@@ -337,6 +342,13 @@ export function Analytics() {
             />
             {!articleId && <Chart data={data} source="ga4" metric="users" label="日次ユーザー数" />}
           </Panel>
+          {!articleId && data.articles && (
+            <AnalyticsArticles
+              rows={data.articles}
+              articles={articleList.data ?? []}
+              onSelect={setArticleId}
+            />
+          )}
           <Panel title="記事別実績">
             <div className="analytics-table">
               <table>
