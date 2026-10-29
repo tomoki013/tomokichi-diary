@@ -24,8 +24,11 @@ const {
 >
   <small>広告</small>
   <div class="article-ad__space">
+    {/* Not `adsbygoogle` until this slot requests: AdSense fills the first
+        unprocessed `ins.adsbygoogle` on the page, so another slot's request
+        would otherwise fill this one before its own placement rules ran. */}
     <ins
-      class="adsbygoogle"
+      class="article-ad__unit"
       style="display:inline-block;width:300px;height:250px"
       data-ad-client={adsenseClient}
       data-ad-slot={unit}

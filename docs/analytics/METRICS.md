@@ -24,6 +24,8 @@
 
 GA4 UIはidentity、modeling、attributionなどの付加処理を行うのでBQ値と一致しない場合がある。匿名・consent・ID欠損、hostname不明イベントも差分要因。page_locationがないイベントは今回対象外。daily shardだけを読みintradayを排除する。GA4はproperty timezone、GSCはPacific日付、AdSenseはaccount timezone。表示日付をJSTへ勝手に付け替えない。取得時刻だけJST表示。
 
+GA4のproperty timezoneは米国太平洋時間（2026-10-29確認：各日の最初のイベントがUTC 07:00＝太平洋時間0時）。GSCと同じ日付軸なので揃っているが、JSTとは16〜17時間ずれる。JSTの0:00〜16:59（冬時間は〜15:59）のイベントは前日の日付に入る。たとえば10月17日昼（JST）に始めた広告実験の割当は「10月16日」に出る。実験の開始・終了、記事の公開・修正と日次の数字を突き合わせるときは、この時差を足してから比べる。
+
 直近7日を再取得し、取得時点から4日以内は暫定と表示（以後も訂正がない保証ではない）。GSCの遅れとrare historical correctionsはExportLogを監視しbackfillする。匿名query（NULL/空文字/flag）は検索語行から除外し、全体/page合計には残す。数字の検索語を数値化しない。重複GSCキーは増分値としてSUMし、DISTINCTで削除しない。
 
 AdSenseはDATEだけで先行実装。公式v2にPAGE_URL dimensionはあるが、accountで利用可能な組合せをまだ実認証で検証していないためページ収益は未取得表示。サイト収益をPV按分で捏造しない。リンククリック計測は既存UX/プライバシー方針を変えず、ASP adapterとGA4イベントの定義が決まるまで追加しない。
