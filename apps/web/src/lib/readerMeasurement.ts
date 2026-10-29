@@ -113,7 +113,7 @@ export function mountReaderMeasurement(): void {
     const target = event.target instanceof Element ? event.target : null;
     if (
       target?.closest(
-        ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb",
+        ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb, .internal-link-card a",
       )
     )
       once("next_article");

@@ -493,6 +493,16 @@
     font-size: var(--step-h2);
   }
 
+  /* Inside the article column, right after the story: two cards a row at most. */
+  .article-related--inline {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+  }
+
+  .article-related--inline .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  }
+
   /* Table of contents ------------------------------------------------ */
   .article-toc {
     display: grid;
