@@ -142,7 +142,19 @@ const footerPhoto = {
           window.dataLayer.push(arguments);
         };
         window.gtag("js", new Date());
-        window.gtag("config", gaMeasurementId);
+        // The owner's own browsers are marked once with ?internal=1 (?internal=0
+        // undoes it) and tagged as internal traffic, which the GA4 "Internal
+        // Traffic" data filter drops from reports.
+        let internal = false;
+        try {
+          const flag = new URLSearchParams(location.search).get("internal");
+          if (flag === "1") localStorage.setItem("tomokichi-internal", "1");
+          if (flag === "0") localStorage.removeItem("tomokichi-internal");
+          internal = localStorage.getItem("tomokichi-internal") === "1";
+        } catch {
+          // Storage refused: count the visit as a reader's.
+        }
+        window.gtag("config", gaMeasurementId, internal ? { traffic_type: "internal" } : {});
         if (document.readyState === "complete") loadGtagWhenIdle();
         else addEventListener("load", loadGtagWhenIdle, { once: true });
       }
