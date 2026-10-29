@@ -103,7 +103,10 @@ const HTML_TAG_RE = /<\/?([a-zA-Z][a-zA-Z0-9-]*)(?=[\s/>])[^>]*>/g;
  * and get their rel and disclosure at build time.
  */
 export function disallowedHtml(markdown: string): string[] {
-  const body = stripCodeFences(markdown).replace(INLINE_CODE_RE, "");
+  // `](</images/a.jpg>)` is a Markdown destination in angle brackets, not a tag.
+  const body = stripCodeFences(markdown)
+    .replace(INLINE_CODE_RE, "")
+    .replace(/\]\(\s*<[^>\n]*>/g, "](");
   return [
     ...new Set(
       [...body.matchAll(HTML_TAG_RE)]
