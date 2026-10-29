@@ -2,6 +2,7 @@
 import { SearchIcon } from "../TravelIcons";
 import { content } from "../../lib/content";
 import { EXPERIENCES, experienceHref } from "../../lib/experiences";
+import { searchSuggestions } from "../../lib/search-suggestions";
 import AdaptiveDiscovery from "./discovery/AdaptiveDiscovery.astro";
 
 interface Props {
@@ -20,6 +21,7 @@ const chips = EXPERIENCES.map((experience) => ({
   ...experience,
   count: content.withExperience(experience.tag).length,
 })).filter((chip) => chip.count > 0);
+const suggestions = searchSuggestions();
 ---
 
 <section class="home-picker" id="home-stories" aria-labelledby="home-picker-title">
@@ -35,6 +37,13 @@ const chips = EXPERIENCES.map((experience) => ({
     <input id="home-search" name="q" type="search" placeholder="国・街・気になる出来事で検索" />
     <button type="submit">検索</button>
   </form>
+  <ul class="home-picker__suggest" aria-label="検索の候補">
+    {suggestions.map((term) => (
+      <li>
+        <a href={`/posts?q=${encodeURIComponent(term)}#results`}>{term}</a>
+      </li>
+    ))}
+  </ul>
 
   <div class="home-picker__moods">
     <p class="home-picker__ask" id="home-picker-moods">

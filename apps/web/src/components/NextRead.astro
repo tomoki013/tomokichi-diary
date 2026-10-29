@@ -1,0 +1,63 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import { cardImageUrl } from "../lib/images";
+
+interface Props {
+  /** In order of preference; the first one this browser has not read is shown. */
+  candidates: readonly { view: ArticleView; label: string }[];
+}
+
+/*
+ * One article to go on to, right after the story: the trip's next episode, or
+ * an article the author pointed to near the end. Rendered for every candidate
+ * so it works without script; `chooseNextRead` swaps in the first unread one.
+ * It reuses the in-body link card, so the next-article measurement and the ad
+ * spacing rules already treat it as one.
+ */
+const { candidates } = Astro.props;
+---
+
+{candidates.length > 0 && (
+  <section class="next-read" aria-labelledby="next-read-heading">
+    <p class="eyebrow" id="next-read-heading">
+      NEXT
+    </p>
+    <div data-next-read>
+      {candidates.map(({ view, label }, index) => (
+        <aside class="internal-link-card" data-next-path={view.route.path} hidden={index > 0}>
+          <a href={view.route.path}>
+            {view.cover ? (
+              <span class="internal-link-card__media">
+                <img
+                  src={cardImageUrl(view.cover.asset.storageKey)}
+                  alt={view.cover.usage.alt}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+            ) : (
+              <span
+                class="internal-link-card__media internal-link-card__media--empty"
+                aria-hidden="true"
+              >
+                <span>
+                  TRAVEL
+                  <br />
+                  NOTE
+                </span>
+              </span>
+            )}
+            <span class="internal-link-card__copy">
+              <small>{label}</small>
+              <strong>{view.revision.title}</strong>
+              <span>{view.revision.summary}</span>
+              <b>
+                続きを読む <span aria-hidden="true">→</span>
+              </b>
+            </span>
+          </a>
+        </aside>
+      ))}
+    </div>
+  </section>
+)}

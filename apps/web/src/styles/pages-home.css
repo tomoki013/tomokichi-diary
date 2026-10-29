@@ -373,6 +373,29 @@
     transition: box-shadow var(--speed) var(--ease);
   }
 
+  /* Tap instead of typing (lib/search-suggestions.ts). */
+  .home-picker__suggest {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    width: min(100%, 36rem);
+    margin: 0.7rem auto 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .home-picker__suggest a {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    text-decoration: none;
+  }
+
   .home-picker__search:focus-within {
     outline: 2px solid var(--focus-ring);
     outline-offset: 3px;

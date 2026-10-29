@@ -1132,4 +1132,26 @@
   .card .exp-chips {
     margin-top: 0.1rem;
   }
+
+  /* Articles this browser has read to the end (lib/readMarks.ts). */
+  [data-read]
+    :is(
+      .card__title,
+      .story-rail__title,
+      .internal-link-card__copy strong,
+      .post-navigation__card strong
+    )::before {
+    content: "読んだ";
+    display: inline-block;
+    margin-inline-end: 0.4em;
+    padding: 0.05em 0.45em;
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    color: var(--ink-faint);
+    font-family: var(--font-sans);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    vertical-align: 0.15em;
+  }
 }
