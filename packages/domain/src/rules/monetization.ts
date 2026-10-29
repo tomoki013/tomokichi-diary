@@ -182,6 +182,7 @@ export function publicMonetization(
         ? {
             id: experiment.id,
             markerKey: experiment.markerKey,
+            markerKeyA: experiment.markerKeyA ?? null,
             adUnitA: experiment.adUnitA,
             adUnitB: experiment.adUnitB,
             shareB: experiment.shareB,

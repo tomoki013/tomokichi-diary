@@ -226,7 +226,7 @@ function Loaded({
         </fieldset>
         {experiment ? (
           <p className="notice notice--accent">
-            A/Bテスト中です（半数の読者は末尾のみ）。終了して標準にするには{" "}
+            本文中の広告の位置をA/Bテスト中です。終了して標準にするには{" "}
             <a href={href.monetization()}>収益化 → 広告配置</a> でまとめて揃えます。
           </p>
         ) : layout === "end-only" ? (

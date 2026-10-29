@@ -406,8 +406,12 @@ const unsafe = (raw: string) =>
   /!\[|\{\{(?:embed|monetization):|<\/?(?:img|figure|aside|iframe|video|script)|^\s*\[.+\]\(/im.test(
     raw,
   );
-/** Only top-level prose paragraphs, after the introduction and away from images/cards/embeds. */
-export function suggestAdParagraph(body: string): AdPosition | null {
+/**
+ * Every top-level prose paragraph an in-body ad may follow, between `from`
+ * and `to` of the way through the body: after the introduction and away from
+ * images, cards and embeds.
+ */
+export function adParagraphCandidates(body: string, from = 0.3, to = 0.65): AdPosition[] {
   const tokens = marked.lexer(body);
   let cursor = 0;
   const candidates: AdPosition[] = [];
@@ -431,11 +435,17 @@ export function suggestAdParagraph(body: string): AdPosition | null {
       continue;
     if (bodyAdPlacementProblem(before, body.slice(cursor)) === "introduction") continue;
     const fraction = cursor / body.length;
-    if (fraction < 0.3 || fraction > 0.65 || token.raw.trim().length < 30) continue;
+    if (fraction < from || fraction > to || token.raw.trim().length < 30) continue;
     candidates.push({ offset: cursor, excerpt: token.raw.trim().slice(-140), fraction });
   }
+  return candidates;
+}
+
+/** Only top-level prose paragraphs, after the introduction and away from images/cards/embeds. */
+export function suggestAdParagraph(body: string): AdPosition | null {
   return (
-    candidates.toSorted((a, b) => Math.abs(a.fraction - 0.4) - Math.abs(b.fraction - 0.4))[0] ??
-    null
+    adParagraphCandidates(body).toSorted(
+      (a, b) => Math.abs(a.fraction - 0.4) - Math.abs(b.fraction - 0.4),
+    )[0] ?? null
   );
 }

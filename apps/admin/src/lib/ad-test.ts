@@ -1,5 +1,6 @@
 import {
   adExperimentId,
+  adParagraphCandidates,
   adExperimentRound,
   type AdExperiment,
   type ArticleDetailDto,
@@ -7,28 +8,48 @@ import {
   type MonetizationOverviewDto,
 } from "@tomokichi/contracts";
 import type { AdClient } from "./ad-client";
-import { applyLayout, bodyAdFits } from "./ad-standard";
+import { applyLayout, bodyAdFits, insertMarker, markerKeys } from "./ad-standard";
 import { draftFrom } from "./draft";
 
 /**
- * A placement test, as the author describes it. The site renders one kind of
- * comparison — A shows the end ad only, B adds the body ad — so a condition
- * is who gets B, which units each side uses, and where B's body ad sits
- * (the article's own body ad, placed by the standard rule if missing).
+ * A placement test, as the author describes it. Every reader keeps the
+ * article-end ad; the test compares where the one body ad goes. A keeps the
+ * article's own body ad (placed by the standard rule if missing), B moves it
+ * to another paragraph: the one after `afterText` when given, otherwise one
+ * picked well away from A's.
  */
 export interface AdTestCondition {
   name: string;
   shareB: number;
   adUnitA: string;
   adUnitB: string;
+  afterText?: string;
 }
 
 export const defaultCondition = (unit = "7152502134"): AdTestCondition => ({
-  name: "本文中の広告あり/なし",
+  name: "本文中の広告の位置",
   shareB: 50,
   adUnitA: unit,
   adUnitB: unit,
 });
+
+/**
+ * Where B's body ad goes. With `afterText`, the qualifying paragraph whose
+ * closing text contains it; otherwise the qualifying paragraph at least 15% of the body
+ * away from A's, as close as possible to the other side of the article.
+ */
+export function positionB(body: string, aKey: string, afterText?: string) {
+  const candidates = adParagraphCandidates(body, 0.25, 0.85);
+  if (afterText?.trim())
+    return candidates.find((c) => c.excerpt.includes(afterText.trim())) ?? null;
+  const a = body.indexOf(`{{monetization:${aKey}}}`) / body.length;
+  const target = a < 0.45 ? 0.65 : 0.3;
+  return (
+    candidates
+      .filter((c) => Math.abs(c.fraction - a) >= 0.15)
+      .toSorted((x, y) => Math.abs(x.fraction - target) - Math.abs(y.fraction - target))[0] ?? null
+  );
+}
 
 /** The next unused ID for this article: a finished test is never restarted. */
 export function nextExperimentId(
@@ -69,9 +90,9 @@ export function canStartTest(article: ArticleSummaryDto, overview: MonetizationO
 type Client = AdClient;
 
 /**
- * Starts a test on one article and leaves it ready to publish. B's body ad is
- * the article's own (added by the standard rule when missing), so the test
- * compares exactly what the standard layout adds.
+ * Starts a position test on one article and leaves it ready to publish. A's
+ * body ad is the article's own (added by the standard rule when missing); B's
+ * marker is added at `positionB`. Both pass the publish check's rule.
  */
 export async function prepareAdTest(
   summary: ArticleSummaryDto,
@@ -90,17 +111,30 @@ export async function prepareAdTest(
   );
   if (!body || !bodyAdFits(plan.body, body.key))
     throw new Error("本文中の広告の位置を記事編集で確認してください");
-  if (plan.body !== article.currentRevision.bodyMarkdown)
+  const spot = positionB(plan.body, body.key, condition.afterText);
+  if (!spot)
+    throw new Error(
+      condition.afterText
+        ? "指定した段落の後には公開ルール上置けません"
+        : "Bの本文中の広告を置ける別の段落がありません",
+    );
+  const present = new Set(markerKeys(plan.body));
+  const bKey = ["body-ad-b", "body-ad-b-2", "body-ad-b-3"].find((k) => !present.has(k))!;
+  const nextBody = insertMarker(plan.body, spot.offset, bKey);
+  if (!bodyAdFits(nextBody, bKey) || !bodyAdFits(nextBody, body.key))
+    throw new Error("Bの本文中の広告の位置を記事編集で確認してください");
+  if (nextBody !== article.currentRevision.bodyMarkdown)
     await client.saveDraft(article.id, {
       ...draftFrom(article),
-      bodyMarkdown: plan.body,
-      changeSummary: "配置テスト用に本文中の広告を追加（本文内容は維持）",
+      bodyMarkdown: nextBody,
+      changeSummary: "広告の位置テスト用に本文中の広告の候補位置を追加（本文内容は維持）",
     });
   const experiment: AdExperiment = {
     id: nextExperimentId(article.id, overview.experiments),
     articleId: article.id,
     name: `${condition.name} · ${article.title}`.slice(0, 150),
-    markerKey: body.key,
+    markerKey: bKey,
+    markerKeyA: body.key,
     adUnitA: condition.adUnitA,
     adUnitB: condition.adUnitB,
     shareB: condition.shareB,
@@ -110,7 +144,23 @@ export async function prepareAdTest(
     updatedAt: null,
   };
   await client.saveAdExperiment(experiment);
-  await client.saveArticleMonetization(article.id, { ...plan.config, experimentId: experiment.id });
+  // B's marker is configured but paused: only one body ad is "ready" outside
+  // the test, and the test itself shows each arm its own.
+  await client.saveArticleMonetization(article.id, {
+    ...plan.config,
+    experimentId: experiment.id,
+    placements: [
+      ...plan.config.placements,
+      {
+        key: bKey,
+        kind: "adsense",
+        position: "marker",
+        status: "paused",
+        adUnit: condition.adUnitB,
+        offerId: null,
+      },
+    ],
+  });
   await client.controlAdExperiment(experiment.id, "start");
   return client.getArticle(article.id);
 }

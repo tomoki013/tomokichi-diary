@@ -126,6 +126,13 @@ const segments = replaceLoneLinks(
             slotKey={adPlan.marker.key}
             variant={adPlan.marker.variant}
           />
+        ) : adPlan?.markerA?.key === segment.slice(13) ? (
+          <ArticleAd
+            unit={adPlan.markerA.unit}
+            placement="body_slot"
+            slotKey={adPlan.markerA.key}
+            variant="A"
+          />
         ) : affiliates.some((p) => p.position === "marker" && p.key === segment.slice(13)) ? (
           <AffiliateBlock
             placement={affiliates.find(

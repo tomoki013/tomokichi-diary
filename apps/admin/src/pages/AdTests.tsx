@@ -65,7 +65,7 @@ export function AdTests({
     if (
       !chosen.length ||
       !confirm(
-        `${chosen.length}記事でテストを開始して公開します。\nA ${100 - condition.shareB}%：末尾のみ / B ${condition.shareB}%：末尾＋本文中\n本文中の広告がない記事は、標準ルールの位置に追加してから開始します。`,
+        `${chosen.length}記事でテストを開始して公開します。\nA ${100 - condition.shareB}%：末尾＋今の位置の本文中 / B ${condition.shareB}%：末尾＋別の段落の本文中\n本文中の広告がない記事は、標準ルールの位置に追加してから開始します。`,
       )
     )
       return;
@@ -114,7 +114,7 @@ export function AdTests({
   return (
     <Panel title="テストを作る">
       <p className="muted small">
-        A＝記事末尾の広告だけ、B＝末尾＋本文中の広告。読者ごとにランダムで振り分けます。目安は
+        A・Bとも記事末尾の広告は出し、本文中の広告の位置を比べます。A＝今の位置、B＝Aから離れた別の段落（自動で選びます）。読者ごとにランダムで振り分けます。目安は
         {TEST_MIN_DAYS}
         日・各パターン200表示です。終わったテストは「広告配置」から標準に戻せ、同じ記事で何度でも新しいテストを作れます。
       </p>

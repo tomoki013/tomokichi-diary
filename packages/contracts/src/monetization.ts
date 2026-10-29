@@ -45,7 +45,14 @@ export interface AdExperiment {
   id: string;
   articleId: string;
   name: string;
+  /** B's body ad. */
   markerKey: string;
+  /**
+   * A's body ad, at a different place from B's: the test compares where the
+   * body ad goes, and both arms keep the article-end ad. Null in tests from
+   * before position tests, where A had no body ad.
+   */
+  markerKeyA?: string | null;
   adUnitA: string;
   adUnitB: string;
   shareB: number;
@@ -75,6 +82,7 @@ export interface PublicMonetization {
   experiment: {
     id: string;
     markerKey: string;
+    markerKeyA?: string | null;
     adUnitA: string;
     adUnitB: string;
     shareB: number;
@@ -155,6 +163,7 @@ export const adExperimentSchema: Validator<AdExperiment> = v.object({
   articleId: id,
   name: v.string({ min: 1, max: 150 }),
   markerKey: key,
+  markerKeyA: v.optional(v.nullable(key), null),
   adUnitA: unit,
   adUnitB: unit,
   shareB: v.number({ min: 10, max: 90, integer: true }),

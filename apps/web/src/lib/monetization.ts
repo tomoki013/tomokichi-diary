@@ -13,6 +13,8 @@ export interface AdPlan {
   layout: "article-end-v1" | "article-placement-v2";
   end: { unit: string; variant: "static" } | null;
   marker: { key: string; unit: string; variant: "B" | "static" } | null;
+  /** In a position test, A's body ad (B's is `marker`). */
+  markerA?: { key: string; unit: string; variant: "A" } | null;
   experiment: PublicMonetization["experiment"];
 }
 const legacy = (): AdPlan => ({
@@ -52,8 +54,10 @@ export function buildAdPlan(
       { ...DEFAULT_MONETIZATION_SETTINGS, adUnits: [{ id: p.adUnit, name: "published" }] },
     ).length === 0;
 
-  // An experiment tests adding a body ad: A keeps only the end ad, B adds
-  // the body ad. One that cannot run leaves the article on its end ad.
+  // An experiment compares where the body ad goes: both arms keep the end
+  // ad, A's body ad is at markerKeyA and B's at markerKey. Older tests have
+  // no markerKeyA, and A shows the end ad alone. One that cannot run leaves
+  // the article on its end ad.
   const experiment =
     candidate &&
     Number.isInteger(candidate.shareB) &&
@@ -61,7 +65,11 @@ export function buildAdPlan(
     candidate.shareB <= 90 &&
     /^\d{1,20}$/.test(candidate.adUnitA) &&
     valid({ key: candidate.markerKey, adUnit: candidate.adUnitB }) &&
-    markerFits({ key: candidate.markerKey, adUnit: candidate.adUnitB })
+    markerFits({ key: candidate.markerKey, adUnit: candidate.adUnitB }) &&
+    (!candidate.markerKeyA ||
+      (candidate.markerKeyA !== candidate.markerKey &&
+        valid({ key: candidate.markerKeyA, adUnit: candidate.adUnitA }) &&
+        markerFits({ key: candidate.markerKeyA, adUnit: candidate.adUnitA })))
       ? candidate
       : null;
   if (experiment)
@@ -69,6 +77,9 @@ export function buildAdPlan(
       ...empty,
       end: { unit: experiment.adUnitA, variant: "static" },
       marker: { key: experiment.markerKey, unit: experiment.adUnitB, variant: "B" },
+      markerA: experiment.markerKeyA
+        ? { key: experiment.markerKeyA, unit: experiment.adUnitA, variant: "A" }
+        : null,
       experiment,
     };
 
@@ -103,7 +114,8 @@ export function buildAffiliatePlan(
     if (
       !isPublicAffiliatePlacement(p) ||
       p.key === config.placement?.key ||
-      p.key === config.experiment?.markerKey
+      p.key === config.experiment?.markerKey ||
+      p.key === config.experiment?.markerKeyA
     )
       return false;
     return (
