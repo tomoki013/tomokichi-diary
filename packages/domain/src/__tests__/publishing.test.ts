@@ -8,7 +8,12 @@ import {
   unpublish,
   validatePublishable,
 } from "../rules/publishing.js";
-import { disallowedHtml, ineffectiveBold, inlineInternalLinks } from "../rules/markdown.js";
+import {
+  disallowedHtml,
+  ineffectiveBold,
+  inlineAffiliateLinks,
+  inlineInternalLinks,
+} from "../rules/markdown.js";
 import { hasUnpublishedChanges, nextRevision } from "../rules/revision.js";
 import { asId, type RevisionId } from "../primitives/id.js";
 import { AUTHOR, NOW, at, makeArticle, makeCover, makeRevision, makeRoute } from "./fixtures.js";
@@ -268,6 +273,18 @@ describe("body formatting", () => {
     ]);
     expect(ineffectiveBold("前**（注）**後\n\n<strong>「霸王茶姬」</strong>は")).toEqual([
       "**（注）**",
+    ]);
+  });
+
+  it("reads the inline affiliate links, and only those", () => {
+    const markdown = [
+      '[Omioで探す](https://omio.sjv.io/a "広告")と[公式](https://renfe.com "Renfe")。',
+      '![写真](https://x/a.jpg "広告") と `[コード](https://x "広告")`',
+      '[Agoda](<https://agoda.com/p?a=1&b=2> "広告")',
+    ].join("\n\n");
+    expect(inlineAffiliateLinks(markdown)).toEqual([
+      "https://omio.sjv.io/a",
+      "https://agoda.com/p?a=1&b=2",
     ]);
   });
 });

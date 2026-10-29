@@ -1,11 +1,20 @@
 import { MonetizationSection } from "./MonetizationSection";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { marked } from "marked";
-import { enhanceAppleMusic } from "@tomokichi/contracts";
+import {
+  enhanceAppleMusic,
+  enhanceInlineAffiliates,
+  renderArticleMarkdown,
+  replaceLoneLinks,
+} from "@tomokichi/contracts";
 import { insertAppleMusic } from "../../lib/apple-music";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import { insertMarkdownImage, removeMarkdownImages } from "../../lib/markdown-image";
-import { markersToPlaceholders, withAdMocks, type AdPreview } from "../../lib/ad-preview";
+import {
+  approvedInlineAffiliateUrls,
+  markersToPlaceholders,
+  withAdMocks,
+  type AdPreview,
+} from "../../lib/ad-preview";
 import { copyText } from "../../lib/clipboard";
 import { useEditorSections } from "./section-save";
 import { api } from "../../lib/api";
@@ -22,7 +31,24 @@ import { RelationsSection, type ExperienceDefaultsChange } from "./RelationsSect
 import { ExperienceSection } from "./ExperienceSection";
 import { KnowledgeSection } from "./KnowledgeSection";
 
-marked.setOptions({ gfm: true, breaks: false });
+const SITE_ORIGIN = "https://tomokichidiary.com";
+const escapeHtml = (text: string) =>
+  text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+/**
+ * A site link alone in its paragraph becomes a card with the target's photo
+ * and summary on the page. The preview cannot read the other articles, so it
+ * draws the card's place with the link text.
+ */
+function linkCardPreview(target: string, label: string): string | null {
+  try {
+    if (target.startsWith("#") || new URL(target, `${SITE_ORIGIN}/posts/`).origin !== SITE_ORIGIN)
+      return null;
+  } catch {
+    return null;
+  }
+  return `<aside class="link-card-mock" aria-label="記事リンクカード（プレビュー）"><span class="link-card-mock__label">記事リンクカード</span><span class="link-card-mock__title">${label}</span><span class="link-card-mock__href">${escapeHtml(target)}</span></aside>`;
+}
 
 /**
  * Jump targets for the editor bar. The page is long (most of all on a phone,
@@ -155,14 +181,22 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
   );
   // The preview renders the draft, which the public site is not serving until
   // it is published. Ads are drawn as boxes where readers will get them.
+  // Rendered by the same function as the public page (renderArticleMarkdown),
+  // then the same inline-affiliate rule, so the preview cannot drift from it.
   const previewHtml = useMemo(
     () =>
       showPreview
-        ? enhanceAppleMusic(
-            withAdMocks(
-              marked.parse(markersToPlaceholders(draft.bodyMarkdown), { async: false }) as string,
-              adPreview,
+        ? replaceLoneLinks(
+            enhanceInlineAffiliates(
+              enhanceAppleMusic(
+                withAdMocks(
+                  renderArticleMarkdown(markersToPlaceholders(draft.bodyMarkdown)),
+                  adPreview,
+                ),
+              ),
+              approvedInlineAffiliateUrls(adPreview),
             ),
+            linkCardPreview,
           )
         : "",
     [draft.bodyMarkdown, showPreview, adPreview],

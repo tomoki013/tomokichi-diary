@@ -186,3 +186,9 @@ export function ineffectiveBold(markdown: string): string[] {
   }
   return problems;
 }
+
+/** URLs of the inline affiliate links, written `[ラベル](URL "広告")`. */
+export function inlineAffiliateLinks(markdown: string): string[] {
+  const body = stripCodeFences(markdown).replace(INLINE_CODE_RE, "");
+  return [...body.matchAll(/(?<!!)\[[^\]]*\]\(\s*<?([^\s)>]+)>?\s+"広告"\s*\)/g)].map((m) => m[1]!);
+}

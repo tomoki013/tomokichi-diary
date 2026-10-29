@@ -1,5 +1,6 @@
 import {
   err,
+  inlineAffiliateLinks,
   ok,
   publicMonetization,
   validateMonetization,
@@ -7,6 +8,7 @@ import {
   type ArticleMonetization,
   type AffiliateOffer,
   type AdExperiment,
+  type DomainError,
   type MonetizationSettings,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
@@ -209,6 +211,13 @@ export async function validateArticleMonetization(
   const config = await ctx.repos.monetization.article(id);
   const settings = await ctx.repos.monetization.settings();
   const errors = validateMonetization(config, revision?.bodyMarkdown ?? "", settings);
+  errors.push(
+    ...unbackedInlineAffiliates(
+      config,
+      await ctx.repos.monetization.offers(),
+      revision?.bodyMarkdown ?? "",
+    ),
+  );
   const experiment =
     override ??
     (await ctx.repos.monetization.experiments()).find((e) => e.id === config.experimentId);
@@ -239,4 +248,30 @@ export async function projectArticleMonetization(ctx: AppContext, id: ArticleId)
     (await ctx.repos.monetization.experiments()).find((e) => e.id === config.experimentId) ?? null,
     await ctx.repos.monetization.offers(),
   );
+}
+
+/**
+ * An inline affiliate link the page cannot back with an approved offer of
+ * this article is printed there as plain text, so publishing refuses it
+ * rather than letting it quietly lose its link.
+ */
+function unbackedInlineAffiliates(
+  config: ArticleMonetization,
+  offers: readonly AffiliateOffer[],
+  markdown: string,
+): DomainError[] {
+  const approved = new Set(
+    config.placements.flatMap((placement) => {
+      if (placement.kind !== "affiliate" || placement.status !== "ready") return [];
+      const offer = offers.find((o) => o.id === placement.offerId);
+      return offer?.url && offer.status === "ready" && offer.publicationApproved ? [offer.url] : [];
+    }),
+  );
+  return [...new Set(inlineAffiliateLinks(markdown))]
+    .filter((url) => !approved.has(url))
+    .map((url) => ({
+      code: "MONETIZATION_INVALID" as const,
+      field: "monetization",
+      message: `本文の広告リンクが、この記事の承認済みアフィリエイト案件と一致しません: ${url}`,
+    }));
 }

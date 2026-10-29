@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { enhanceInlineAffiliates } from "../lib/inline-affiliates";
+import {
+  enhanceInlineAffiliates,
+  renderArticleMarkdown,
+  replaceLoneLinks,
+} from "../article-markdown.js";
 
 const URL = "https://omio.sjv.io/oN3NYe";
 
@@ -25,5 +29,28 @@ describe("enhanceInlineAffiliates", () => {
   it("leaves ordinary links alone", () => {
     const html = '<p><a href="/posts/x" title="関連">記事</a></p>';
     expect(enhanceInlineAffiliates(html, [URL])).toBe(html);
+  });
+});
+
+describe("renderArticleMarkdown", () => {
+  it("renders like the site's former renderer: curly quotes, dashes and Astro's heading ids", () => {
+    expect(renderArticleMarkdown(`## Touch 'n Goの話\n\n"日本"の -- 旅... it's`)).toBe(
+      '<h2 id="touch-n-goの話">Touch ’n Goの話</h2>\n<p>“日本”の – 旅… it’s</p>\n',
+    );
+  });
+
+  it("leaves code and attributes alone", () => {
+    expect(renderArticleMarkdown('`"x" -- y` [a "b"](/c "広告")')).toBe(
+      '<p><code>&quot;x&quot; -- y</code> <a href="/c" title="広告">a “b”</a></p>\n',
+    );
+  });
+});
+
+describe("replaceLoneLinks", () => {
+  it("offers only a paragraph or list item that is one link", () => {
+    const html = renderArticleMarkdown("[カード](/posts/a)\n\n文中の[リンク](/posts/b)です");
+    expect(replaceLoneLinks(html, (href) => `<aside>${href}</aside>`)).toBe(
+      '<aside>/posts/a</aside>\n<p>文中の<a href="/posts/b">リンク</a>です</p>\n',
+    );
   });
 });

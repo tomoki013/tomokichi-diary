@@ -14,5 +14,9 @@
   "scripts": {
     "build": "tsc --build",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "marked": "^18.0.14",
+    "github-slugger": "^2.0.0"
   }
 }

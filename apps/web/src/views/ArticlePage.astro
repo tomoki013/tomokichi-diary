@@ -19,6 +19,7 @@ import ArticleToc from "../components/ArticleToc.astro";
 import ArticleTocInline from "../components/ArticleTocInline.astro";
 import { articleHeadings } from "../lib/article-headings";
 import { getEntry } from "astro:content";
+import { renderArticleMarkdown } from "@tomokichi/contracts";
 import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
 import CopyLinkButton from "../components/CopyLinkButton.astro";
@@ -39,9 +40,8 @@ interface Props {
 
 const { view, route } = Astro.props;
 const { article, revision, cover, author } = view;
-const headings = articleHeadings(
-  (await getEntry("articles", article.slug))?.rendered?.html ?? null,
-);
+const body = (await getEntry("articles", article.slug))?.body;
+const headings = articleHeadings(body === undefined ? null : renderArticleMarkdown(body));
 const adPlan = buildAdPlan(
   snapshot.monetization?.find((c) => c.articleId === article.id),
   revision.bodyMarkdown,
