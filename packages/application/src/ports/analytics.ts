@@ -10,6 +10,8 @@ export type SemanticEvent =
       readonly value: number;
       readonly placement: string;
       readonly vital: string;
+      /** The article the event belongs to, when it is sent from the next page. */
+      readonly page_location?: string;
     }
   | { readonly name: "article_published"; readonly articleId: string }
   | { readonly name: "knowledge_saved"; readonly articleId: string; readonly factCount: number }
