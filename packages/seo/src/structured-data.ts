@@ -1,4 +1,5 @@
 import {
+  publicModifiedAt,
   toAbsoluteUrl,
   type Article,
   type ArticleRevision,
@@ -43,7 +44,7 @@ export function buildArticleJsonLd(config: SeoConfig, input: ArticleJsonLdInput)
     url,
     inLanguage: input.article.locale,
     datePublished: input.article.publishedAt,
-    dateModified: input.article.updatedAt,
+    dateModified: publicModifiedAt(input.article, input.revision),
     publisher: publisher(config),
   };
   if (input.coverImageUrl) jsonLd["image"] = [input.coverImageUrl];

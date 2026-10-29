@@ -1,6 +1,6 @@
 ---
 import type { ArticleView } from "@tomokichi/application";
-import type { Route } from "@tomokichi/domain";
+import { publicModifiedAt, type Route } from "@tomokichi/domain";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
@@ -35,7 +35,7 @@ const metadata = buildPageMetadata(seoConfig, {
   noindex: route.noindex || view.article.noindex,
 });
 const trail = pageTrail(route, pageTitle);
-const updated = view.article.updatedAt.slice(0, 10);
+const updated = publicModifiedAt(view.article, view.revision).slice(0, 10);
 const publicStories = content.publicArticles().filter((article) => article.kind === "article");
 const visitedCountries = [
   ...new Set(

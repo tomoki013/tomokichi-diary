@@ -8,7 +8,7 @@ import SeriesMusic from "../components/SeriesMusic.astro";
 import { content } from "../lib/content";
 import { collectionTrail } from "../lib/navigation";
 import { seriesMusicOf } from "../lib/series-music";
-import { seoConfig } from "../lib/site";
+import { mediaUrl, seoConfig } from "../lib/site";
 
 interface Props {
   route: Route;
@@ -37,6 +37,7 @@ const metadata = buildPageMetadata(seoConfig, {
   description:
     collection?.description?.replace(/\s+/g, " ").trim() ?? `${title}に含まれる記事の一覧です。`,
   route,
+  imageUrl: cover ? mediaUrl(cover.storageKey) : null,
   // A collection with no published article yet is reachable but kept out of
   // search until it has something to read (the sitemap applies the same rule).
   noindex: route.noindex || members.length === 0,

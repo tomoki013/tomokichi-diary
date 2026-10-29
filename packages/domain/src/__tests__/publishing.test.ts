@@ -3,6 +3,7 @@ import {
   archive,
   isIndexable,
   isPubliclyVisible,
+  publicModifiedAt,
   publish,
   schedule,
   unpublish,
@@ -286,5 +287,22 @@ describe("body formatting", () => {
       "https://omio.sjv.io/a",
       "https://agoda.com/p?a=1&b=2",
     ]);
+  });
+});
+
+describe("publicModifiedAt", () => {
+  const live = makeArticle({
+    publishedAt: at("2026-08-24T00:00:00.000Z"),
+    updatedAt: at("2026-10-28T22:00:00.000Z"),
+  });
+
+  it("follows the published revision, never a later draft save", () => {
+    const revision = makeRevision({ createdAt: at("2026-09-10T00:00:00.000Z") });
+    expect(publicModifiedAt(live, revision)).toBe("2026-09-10T00:00:00.000Z");
+  });
+
+  it("is the first publication when the revision was written before it", () => {
+    const revision = makeRevision({ createdAt: at("2026-08-01T00:00:00.000Z") });
+    expect(publicModifiedAt(live, revision)).toBe("2026-08-24T00:00:00.000Z");
   });
 });

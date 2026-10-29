@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { buildSitemap, renderSitemapXml } from "@tomokichi/seo";
-import { isIndexable, type CollectionId } from "@tomokichi/domain";
+import { isIndexable, publicModifiedAt, type CollectionId } from "@tomokichi/domain";
 import { content, now } from "../lib/content";
 import { seoConfig } from "../lib/site";
 
@@ -24,7 +24,12 @@ export const GET: APIRoute = () => {
 
       return {
         route,
-        lastmod: article?.updatedAt ?? content.snapshot.generatedAt,
+        lastmod: article
+          ? publicModifiedAt(
+              article,
+              content.snapshot.revisions.find((r) => r.id === article.publishedRevisionId),
+            )
+          : content.snapshot.generatedAt,
         indexable: article
           ? isIndexable(article, now)
           : collection !== null

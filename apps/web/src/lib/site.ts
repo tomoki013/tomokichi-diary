@@ -7,6 +7,10 @@ import type { SeoConfig } from "@tomokichi/seo";
  * incomplete.
  */
 const siteUrl = (process.env.PUBLIC_SITE_URL ?? "https://tomokichidiary.com").replace(/\/+$/, "");
+const mediaOrigin = (process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com").replace(
+  /\/+$/,
+  "",
+);
 
 export const seoConfig: SeoConfig = {
   siteUrl,
@@ -16,9 +20,12 @@ export const seoConfig: SeoConfig = {
   trailingSlash: false,
   titleSeparator: "｜",
   publisherName: "ともきちの旅行日記",
-  publisherLogoUrl: `${siteUrl}/images/Introduce/introduce.jpg`,
+  // The media domain directly: the site path only redirects there.
+  publisherLogoUrl: `${mediaOrigin}/images/Introduce/introduce.jpg`,
   twitterHandle: null,
   indexable: process.env.PUBLIC_INDEXABLE === "true",
+  // The home page's first hero photo: the site's own picture of itself.
+  defaultImageUrl: `${mediaOrigin}/images/Turkey/balloons-in-cappadocia.jpg`,
 };
 
 export const siteDescription =
@@ -29,9 +36,7 @@ export const siteDescription =
  * Worker ships only HTML and CSS. The previous site's `/images/...` URLs are
  * kept alive by a redirect in the build output.
  */
-export const mediaBaseUrl = (
-  process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"
-).replace(/\/+$/, "");
+export const mediaBaseUrl = mediaOrigin;
 
 export function mediaUrl(storageKey: string): string {
   return `${mediaBaseUrl}/${storageKey.replace(/^\/+/, "")}`;

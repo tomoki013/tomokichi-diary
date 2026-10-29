@@ -1,6 +1,6 @@
 ---
 import { buildKnowledgeCatalog, type ArticleView } from "@tomokichi/application";
-import type { Route } from "@tomokichi/domain";
+import { publicModifiedAt, type Route } from "@tomokichi/domain";
 import { buildArticleJsonLd, buildArticleMetadata, buildBreadcrumbJsonLd } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
@@ -98,7 +98,7 @@ const countryRoute = country ? content.routes.canonicalFor("location", country.i
 const countryName = country ? content.locations.nameOf(country.id, "ja") : null;
 const leadExperience = article.experienceTags[0];
 const published = article.publishedAt?.slice(0, 10);
-const updated = article.updatedAt.slice(0, 10);
+const updated = publicModifiedAt(article, revision).slice(0, 10);
 const travel =
   article.travelStartDate &&
   (article.travelEndDate && article.travelEndDate !== article.travelStartDate
