@@ -255,16 +255,35 @@
     font-weight: 600;
   }
 
+  /* On a phone a stacked card (16:9 photo, title, summary) stood about 400px
+     tall, and an article with three cards pushed its own answer down by more
+     than a screen. A thumbnail beside the title is enough to recognise it. */
   @media (max-width: 34rem) {
-    .internal-link-card > a {
-      grid-template-columns: minmax(0, 1fr);
+    .internal-link-card {
+      margin-block: var(--space-md);
     }
-    .internal-link-card__media {
-      aspect-ratio: 16 / 9;
+    .internal-link-card > a {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
     }
     .internal-link-card__media--empty {
       min-height: 0;
-      aspect-ratio: 16 / 9;
+      font-size: 0.5rem;
+    }
+    .internal-link-card__copy {
+      gap: 0.2rem;
+      padding: var(--space-sm);
+    }
+    .internal-link-card__copy strong {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      overflow: hidden;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .internal-link-card__copy > span {
+      display: none;
     }
   }
 
