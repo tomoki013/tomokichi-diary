@@ -116,13 +116,14 @@ export function applyLayout(
       offerId: null,
     });
   }
-  // The body ad: the test's B slot, then the one already showing, then any.
+  // The body ad: a position test's A slot (an older test's B slot), then the
+  // one already showing, then any.
   const markers = ads.filter(
     (p) => p.position === "marker" && present.has(p.key) && bodyAdFits(body, p.key),
   );
   const keep =
     layout === "standard"
-      ? (markers.find((p) => p.key === running?.markerKey) ??
+      ? (markers.find((p) => p.key === (running?.markerKeyA || running?.markerKey)) ??
         markers.find(ready) ??
         markers[0] ??
         null)

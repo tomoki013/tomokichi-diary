@@ -698,8 +698,9 @@ function ExperimentEditor({
       old ?? {
         id: nextExperimentId(articleId, data.experiments),
         articleId,
-        name: "末尾 / 本文内",
+        name: "本文中の広告の位置",
         markerKey: "",
+        markerKeyA: "",
         adUnitA: "7152502134",
         adUnitB: "7152502134",
         shareB: 50,
@@ -733,7 +734,9 @@ function ExperimentEditor({
   };
   return (
     <Panel title="配置テスト">
-      <p>A: 記事末尾のみ / B: 記事末尾＋本文中。割当は表示ごとに行い、識別子を保存しません。</p>
+      <p>
+        A・Bとも記事末尾の広告あり。本文中の広告をAとBで別の位置に出します（Aのキーが空なら、Aは末尾のみの旧形式）。割当は表示ごとに行い、識別子を保存しません。
+      </p>
       <fieldset disabled={busy || value.status !== "draft"}>
         <label className="field">
           <span>対象記事</span>
@@ -742,6 +745,14 @@ function ExperimentEditor({
               {articles.find((a) => a.id === value.articleId)?.title ?? value.articleId}
             </option>
           </select>
+        </label>
+        <label className="field">
+          <span>Aの本文配置キー</span>
+          <input
+            value={value.markerKeyA ?? ""}
+            onChange={(e) => update({ markerKeyA: e.target.value || null })}
+            list="experiment-markers"
+          />
         </label>
         <label className="field">
           <span>Bの本文配置キー</span>

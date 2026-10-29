@@ -222,20 +222,35 @@ export async function validateArticleMonetization(
     override ??
     (await ctx.repos.monetization.experiments()).find((e) => e.id === config.experimentId);
   if (experiment?.status === "running") {
-    const b: ArticleMonetization = {
-      ...config,
-      placements: [
-        {
-          key: experiment.markerKey,
-          kind: "adsense",
-          position: "marker",
-          status: "ready",
-          adUnit: experiment.adUnitB,
-          offerId: null,
-        },
-      ],
-    };
-    errors.push(...validateMonetization(b, revision?.bodyMarkdown ?? "", settings));
+    // Each arm's body ad must pass the placement rule on its own.
+    const arms = [
+      { key: experiment.markerKey, adUnit: experiment.adUnitB },
+      ...(experiment.markerKeyA
+        ? [{ key: experiment.markerKeyA, adUnit: experiment.adUnitA }]
+        : []),
+    ];
+    if (experiment.markerKeyA === experiment.markerKey)
+      errors.push({
+        code: "MONETIZATION_INVALID",
+        message: "A と B の本文中の広告は別の位置にしてください",
+        field: "monetization",
+      });
+    for (const arm of arms) {
+      const one: ArticleMonetization = {
+        ...config,
+        placements: [
+          {
+            key: arm.key,
+            kind: "adsense",
+            position: "marker",
+            status: "ready",
+            adUnit: arm.adUnit,
+            offerId: null,
+          },
+        ],
+      };
+      errors.push(...validateMonetization(one, revision?.bodyMarkdown ?? "", settings));
+    }
   }
   return errors;
 }

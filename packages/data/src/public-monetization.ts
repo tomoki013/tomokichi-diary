@@ -53,6 +53,7 @@ export function publicMonetizationOnly(
           e &&
           isAdExperimentForArticle(e.id, c.articleId) &&
           key(e.markerKey) &&
+          (e.markerKeyA == null || (key(e.markerKeyA) && e.markerKeyA !== e.markerKey)) &&
           unit(e.adUnitA) &&
           unit(e.adUnitB) &&
           Number.isInteger(e.shareB) &&
@@ -61,6 +62,7 @@ export function publicMonetizationOnly(
             ? {
                 id: e.id,
                 markerKey: e.markerKey,
+                markerKeyA: e.markerKeyA ?? null,
                 adUnitA: e.adUnitA,
                 adUnitB: e.adUnitB,
                 shareB: e.shareB,

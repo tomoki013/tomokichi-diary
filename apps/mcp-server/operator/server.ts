@@ -388,16 +388,17 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     {
       title: "Start ad test",
       description:
-        "管理画面の「広告テスト」と同じ規則で、公開中の記事に本文中広告あり/なしのA/Bテストを作って開始し、下書き保存します（Aは末尾のみ、Bは末尾＋本文中）。ユニットを省くと登録済みの最初のユニット。公開は publish_article。",
+        "管理画面の「広告テスト」と同じ規則で、公開中の記事に本文中の広告の位置のA/Bテストを作って開始し、下書き保存します。A・Bとも記事末尾の広告あり、Aは今の本文中の位置、Bは別の段落。afterText を渡すと、末尾がその文を含む段落の後をBにします（公開ルールに合う段落だけ）。省くとAから離れた段落を自動で選びます。ユニットを省くと登録済みの最初のユニット。公開は publish_article。",
       inputSchema: {
         articleId: z.string().min(1),
         adUnitA: z.string().min(1).optional(),
         adUnitB: z.string().min(1).optional(),
-        shareB: z.number().int().min(1).max(99).optional(),
+        shareB: z.number().int().min(10).max(90).optional(),
+        afterText: z.string().min(2).max(140).optional(),
       },
       annotations: WRITE,
     },
-    async ({ articleId, adUnitA, adUnitB, shareB }) => {
+    async ({ articleId, adUnitA, adUnitB, shareB, afterText }) => {
       const overview = await client.monetization();
       const summary = await summaryOf(articleId);
       if (!canStartTest(summary, overview))
@@ -411,6 +412,7 @@ export function createOperatorServer(client: OperatorClient): McpServer {
           adUnitA: adUnitA ?? base.adUnitA,
           adUnitB: adUnitB ?? base.adUnitB,
           shareB: shareB ?? base.shareB,
+          ...(afterText ? { afterText } : {}),
         },
         ads,
       );
