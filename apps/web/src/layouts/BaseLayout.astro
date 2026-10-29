@@ -460,7 +460,20 @@ const footerPhoto = {
       } catch {
         // Storage can be unavailable in hardened browser modes; the cookie fallback remains.
       }
-      if (cookieBanner && !cookieAccepted) cookieBanner.hidden = false;
+      // Buttons fixed to the bottom of the screen (the contents button, the
+      // series player's return) sit above the notice instead of under it.
+      const reserveCookieSpace = () =>
+        document.documentElement.style.setProperty(
+          "--cookie-banner-space",
+          cookieBanner && !cookieBanner.hidden
+            ? `${Math.max(0, innerHeight - cookieBanner.getBoundingClientRect().top)}px`
+            : "0px",
+        );
+      if (cookieBanner && !cookieAccepted) {
+        cookieBanner.hidden = false;
+        reserveCookieSpace();
+        addEventListener("resize", reserveCookieSpace, { passive: true });
+      }
       cookieAccept?.addEventListener("click", () => {
         try {
           localStorage.setItem(cookieConsentKey, "accepted");
@@ -469,6 +482,7 @@ const footerPhoto = {
         }
         document.cookie = `${cookieConsentKey}=accepted; Max-Age=31536000; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
         if (cookieBanner) cookieBanner.hidden = true;
+        reserveCookieSpace();
       });
 
       // The worker is registered after load so its install (the offline page
