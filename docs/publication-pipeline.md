@@ -40,6 +40,14 @@ Actions成果物は14日保持する。長期比較に使う実行はダウン�
 
 通常は失敗理由を修正して管理画面から再試行する。手動の完全復旧は`Publish content`の`full_media`。新しい要求を作らず未処理要求を回収したい場合はrequest_id空欄でdispatchできる。コード配信は従来のCIを利用する。成功したMCPだけ先行してWebが失敗した場合もサイト全体は失敗表示となり、次回は実際に成功しているMCPを省略しWebを再配信する。
 
+## 公開ルールは1つ
+
+本番に出る記事は、どの経路で入っても `validatePublishable`（`packages/domain/src/rules/publishing.ts`）の1つのルールに従う。
+
+- API の公開（管理画面・operator MCP・予約公開・`revise-article`）は公開時にこのルールで判定する。
+- 配信前の `content:check` の `check:articles` が、スナップショットに入った全公開記事を同じルールで再判定し、1件でも違反があれば配信しない。ルール追加前に公開された記事や、D1 へ直接入った記事もここで止まる。
+- ルールを足すときは、先に `audit_article_bodies`・`check_publishable` で既存記事の違反を直してからマージする。順番を逆にすると次の配信がすべて止まる。
+
 ## 本番反映手順
 
 1. 新ワークフローをmainで実行する前に、production D1へ`0020_publication_progress.sql`までexpand migrationを適用する（既存の`pnpm db:migrate`）。既存列・記事・履歴を削除しない。旧API・旧ワークフローは引き続き動作する。

@@ -3,7 +3,7 @@ import { timed } from "./lib/publication-timing.js";
 
 // These validators read the same immutable build/snapshot and never modify it.
 // Keep each existing validator intact while overlapping their process startup and I/O.
-const checks = ["routes", "seo", "links", "knowledge", "agents"];
+const checks = ["articles", "routes", "seo", "links", "knowledge", "agents"];
 const results = await Promise.all(
   checks.map((name) =>
     timed(`check-${name}`, async () => {
