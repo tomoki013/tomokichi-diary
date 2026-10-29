@@ -209,6 +209,10 @@ describe("operator MCP server over stdio", () => {
           "create_series",
           "create_tag",
           "set_article_series_and_tags",
+          "move_body_ad",
+          "get_article_ads",
+          "set_ad_layout",
+          "start_ad_test",
           "publish_article",
         ]),
       );

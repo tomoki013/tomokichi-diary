@@ -7,7 +7,7 @@ import type {
   MonetizationPlacement,
 } from "@tomokichi/contracts";
 import { bodyAdPlacementProblem, suggestAdParagraph } from "@tomokichi/contracts";
-import { api } from "./api";
+import type { AdClient } from "./ad-client";
 import { draftFrom } from "./draft";
 
 /**
@@ -281,14 +281,7 @@ export function auditArticles(
     });
 }
 
-type Client = Pick<
-  typeof api,
-  | "getArticle"
-  | "articleMonetization"
-  | "saveDraft"
-  | "saveArticleMonetization"
-  | "controlAdExperiment"
->;
+type Client = Omit<AdClient, "saveAdExperiment">;
 
 /**
  * Brings one live article to a layout and leaves it ready to publish. A body
@@ -300,7 +293,7 @@ export async function prepareLayout(
   summary: ArticleSummaryDto,
   overview: MonetizationOverviewDto,
   target: Exclude<AdLayout, "none"> = "standard",
-  client: Client = api,
+  client: Client,
 ): Promise<{ article: ArticleDetailDto; changes: string[] }> {
   const article = await client.getArticle(summary.id);
   if (!article.isLive || article.hasUnpublishedChanges || !article.currentRevision)

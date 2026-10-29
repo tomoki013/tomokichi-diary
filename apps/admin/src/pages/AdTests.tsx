@@ -11,7 +11,7 @@ import {
   TEST_MIN_DAYS,
   type AdTestCondition,
 } from "../lib/ad-test";
-import { describeError } from "../lib/api";
+import { api, describeError } from "../lib/api";
 import { publishSelection } from "../lib/bulk-publish";
 import { href } from "../lib/route";
 import { Panel } from "../ui/parts";
@@ -78,7 +78,7 @@ export function AdTests({
       for (const [i, article] of chosen.entries()) {
         setMessage(`${i + 1}/${chosen.length} 記事のテストを準備中…`);
         try {
-          ready.push(await prepareAdTest(article, overview, condition));
+          ready.push(await prepareAdTest(article, overview, condition, api));
         } catch (error) {
           failed.push({ id: article.id, title: article.title, error: describeError(error) });
         }

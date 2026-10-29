@@ -1,3 +1,9 @@
+import type {
+  AdExperiment,
+  ArticleMonetization,
+  ArticleMonetizationDto,
+  MonetizationOverviewDto,
+} from "@tomokichi/contracts";
 /**
  * The admin API, as the local operator server calls it. Nothing here is
  * deployed: it runs on the operator's machine and talks to `/v1/admin/*` with
@@ -151,6 +157,16 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
         collectionIds: changes.collectionIds ?? article.collectionIds,
       });
     },
+
+    monetization: () => call<MonetizationOverviewDto>("GET", "/monetization"),
+    articleMonetization: (articleId: string) =>
+      call<ArticleMonetizationDto>("GET", `/monetization/articles/${id(articleId)}`),
+    saveArticleMonetization: (articleId: string, input: ArticleMonetization) =>
+      call<unknown>("PUT", `/monetization/articles/${id(articleId)}`, input),
+    saveAdExperiment: (experiment: AdExperiment) =>
+      call<unknown>("PUT", `/monetization/experiments/${id(experiment.id)}`, experiment),
+    controlAdExperiment: (experimentId: string, action: "start" | "stop") =>
+      call<unknown>("POST", `/monetization/experiments/${id(experimentId)}/${action}`),
 
     publish: (articleId: string) => call<unknown>("POST", `/articles/${id(articleId)}/publish`, {}),
     createSeries: (input: {
