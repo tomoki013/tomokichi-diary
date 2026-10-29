@@ -1287,6 +1287,11 @@
     .article-toc--desktop {
       display: none;
     }
+    /* Below the story the facts only repeat what the header already says
+       (dates, experience); the destination link is in the breadcrumbs. */
+    .article-facts {
+      display: none;
+    }
     .mobile-toc-button {
       display: flex;
     }
@@ -1318,6 +1323,14 @@
     .article-overview > .article-overview__reading {
       display: none;
     }
+    /* Small enough that a date range stays on one line beside the like button. */
+    .article-overview {
+      gap: 0.3rem var(--space-sm);
+    }
+    .article-overview dd {
+      gap: 0 0.5rem;
+      font-size: 0.82rem;
+    }
     .article-layout {
       margin-top: var(--space-sm);
     }
@@ -1329,6 +1342,23 @@
     }
     .article-taxonomy::-webkit-scrollbar {
       display: none;
+    }
+    /* The contents sat between the header and the first paragraph at about
+       400px; a tighter list keeps it a glance rather than a screen. */
+    .article-toc--inline {
+      gap: 0.3rem;
+      padding: 0.6rem var(--space-sm);
+    }
+    .article-toc--inline .article-toc__heading {
+      padding-bottom: 0.35rem;
+    }
+    .article-toc--inline .article-toc__heading > span,
+    .article-toc--inline .article-toc__heading small {
+      display: none;
+    }
+    .article-toc--inline a {
+      padding: 0.2rem 0.35rem;
+      line-height: 1.5;
     }
     .article-taxonomy :is(a, span) {
       flex: none;
