@@ -22,12 +22,17 @@ export function AnalyticsArticles({
   onSelect: (articleId: string) => void;
 }) {
   const byId = new Map(articles.map((a) => [a.id, a]));
+  // Content edits only: ad and tag changes leave this date alone.
+  const updatedOf = (id: string) => {
+    const article = byId.get(id);
+    return article ? (article.contentUpdatedAt ?? article.updatedAt) : null;
+  };
   const title = (row: ArticleReadingDto) =>
     byId.get(row.articleId)?.title ?? row.path ?? row.articleId;
   const review = rows
     .map((row) => ({
       row,
-      reasons: reviewReasons(row, byId.get(row.articleId)?.updatedAt ?? null),
+      reasons: reviewReasons(row, updatedOf(row.articleId)),
     }))
     .filter((item) => item.reasons.length > 0);
   return (

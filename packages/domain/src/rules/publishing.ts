@@ -159,6 +159,59 @@ export function schedule(article: Article, at: Instant, now: Instant): Result<Ar
   return ok({ ...article, status: "scheduled", scheduledAt: at, updatedAt: now });
 }
 
+/*
+ * What counts as the article having changed: its title, summary, SEO title and
+ * description, and its body read the way a reader reads it. Moving, adding or
+ * removing an ad marker, and the image link rewrites saves make, change none
+ * of these, so an ad or tag edit never shows up as "updated".
+ */
+function readerText(revision: ArticleRevision): string {
+  const body = revision.bodyMarkdown
+    .replace(/\{\{monetization:[^}\n]*\}\}/g, "")
+    .replace(/\]\([^)\s]*\/([^/)\s]+\.(?:jpe?g|png|webp|avif|gif))(\s[^)]*)?\)/gi, "]($1$2)")
+    .replace(/\s+/g, " ")
+    .trim();
+  return JSON.stringify([
+    revision.title.trim(),
+    revision.summary.trim(),
+    revision.seoTitleOverride?.trim() || null,
+    revision.seoDescriptionOverride?.trim() || null,
+    body,
+  ]);
+}
+
+/**
+ * When the reader-visible content last changed, up to and including revision
+ * `upTo` (by revision number): the creation time of the oldest revision in the
+ * unbroken run that reads the same as it. Null when `upTo` is not in the list.
+ */
+export function contentChangedAt(
+  revisions: readonly ArticleRevision[],
+  upTo: number,
+): Instant | null {
+  const ordered = revisions
+    .filter((revision) => revision.revisionNumber <= upTo)
+    .toSorted((a, b) => a.revisionNumber - b.revisionNumber);
+  if (ordered.at(-1)?.revisionNumber !== upTo) return null;
+  let changedAt: Instant | null = null;
+  let previous: string | null = null;
+  for (const revision of ordered) {
+    const text = readerText(revision);
+    if (text !== previous) changedAt = revision.createdAt;
+    previous = text;
+  }
+  return changedAt;
+}
+
+/** `contentChangedAt` for one revision of an article, found among its history by id. */
+export function contentChangedAtOf(
+  history: readonly ArticleRevision[],
+  revisionId: string | null,
+): Instant | null {
+  const revision = history.find((item) => item.id === revisionId);
+  return revision ? contentChangedAt(history, revision.revisionNumber) : null;
+}
+
 /**
  * When the content a reader sees last changed: when its published revision was
  * written, or first published if that came later. `article.updatedAt` also

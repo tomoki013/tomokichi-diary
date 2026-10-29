@@ -1,7 +1,7 @@
 /*
  * Which articles this browser has read to the end, kept only on the device
- * (localStorage). Cards for those articles say so, and the "next" card at the
- * end of an article skips them. Nothing here is sent anywhere.
+ * (localStorage). Cards for those articles say so; nothing else changes and
+ * nothing here is sent anywhere.
  */
 const KEY = "tomokichi-read-v1";
 const LIMIT = 300;
@@ -39,14 +39,4 @@ export function decorateReadLinks(root: ParentNode = document): void {
       .closest(".card, .internal-link-card, .story-rail li, .post-navigation__card")
       ?.setAttribute("data-read", "");
   }
-}
-
-/** Shows the first next-read candidate this browser has not read yet. */
-export function chooseNextRead(root: ParentNode = document): void {
-  const list = root.querySelector<HTMLElement>("[data-next-read]");
-  if (!list) return;
-  const items = [...list.querySelectorAll<HTMLElement>("[data-next-path]")];
-  const paths = readPaths();
-  const pick = items.find((item) => !paths.has(item.dataset["nextPath"] ?? "")) ?? items[0];
-  for (const item of items) item.hidden = item !== pick;
 }

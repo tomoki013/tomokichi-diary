@@ -72,7 +72,9 @@ export function Articles() {
           item.slug.includes(needle) ||
           (item.path ?? "").includes(needle),
       )
-      .toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      .toSorted((a, b) =>
+        (b.contentUpdatedAt ?? b.updatedAt).localeCompare(a.contentUpdatedAt ?? a.updatedAt),
+      );
   }, [articles.data, filter, kind, deferredQuery]);
 
   const selectable = visible.filter(canSelectForPublication);
@@ -313,8 +315,11 @@ export function Articles() {
                       <span className="muted mono">{item.path ?? "—"}</span>
                     )}
                   </td>
-                  <td className="muted nowrap table__date" title={formatDateTime(item.updatedAt)}>
-                    {formatRelative(item.updatedAt)}
+                  <td
+                    className="muted nowrap table__date"
+                    title={formatDateTime(item.contentUpdatedAt ?? item.updatedAt)}
+                  >
+                    {formatRelative(item.contentUpdatedAt ?? item.updatedAt)}
                   </td>
                 </tr>
               ))}

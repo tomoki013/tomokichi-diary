@@ -32,6 +32,12 @@ export interface ArticleSummaryDto {
   /** When a `scheduled` article goes live. */
   readonly scheduledAt: string | null;
   readonly updatedAt: string;
+  /**
+   * When the title, summary, SEO text or body last changed in the current
+   * revision's history; ad marker moves, ad, tag and series edits do not count.
+   * Null where the list does not compute it.
+   */
+  readonly contentUpdatedAt?: string | null;
   readonly hasUnpublishedChanges: boolean;
   readonly isLive: boolean;
   readonly noindex: boolean;
