@@ -117,6 +117,9 @@ const locationLinks = view.locations.flatMap(({ location }) => {
     ? [{ name: content.locations.nameOf(location.id, "ja"), path: locationRoute.path }]
     : [];
 });
+// The overview above the body already links the first three places; the
+// taxonomy row repeated them right below, pushing the article further down.
+const extraLocationLinks = locationLinks.slice(3);
 const articleViews = content.publicArticles().flatMap((item) => {
   if (item.kind !== "article") return [];
   const itemView = content.viewOf(item.id);
@@ -215,9 +218,9 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 
     <div class="article-layout">
       <div class="article-main">
-        {(view.categories.length + view.tags.length > 0 || locationLinks.length > 0) && (
+        {(view.categories.length + view.tags.length > 0 || extraLocationLinks.length > 0) && (
           <div class="article-taxonomy">
-            {locationLinks.map((location) => (
+            {extraLocationLinks.map((location) => (
               <a href={location.path}>⌖ {location.name}</a>
             ))}
             {view.categories.map((category) => (
@@ -250,6 +253,23 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           ))}
         {placeStories.length > 0 && <PlaceStories views={placeStories} />}
         {adPlan.end && <ArticleAd unit={adPlan.end.unit} variant={adPlan.end.variant} />}
+        {/* The articles sharing this one's tags and places come first: a reader
+            who just finished is looking for the next thing on the same subject
+            (the experience and country rails below drift further away). */}
+        {related.length > 0 && (
+          <section
+            class="article-related article-related--inline"
+            aria-labelledby="related-heading"
+          >
+            <p class="eyebrow">KEEP EXPLORING</p>
+            <h2 id="related-heading">次に読みたい旅の記録</h2>
+            <ul class="card-grid">
+              {related.map((item) => (
+                <ArticleCard view={item} level={3} />
+              ))}
+            </ul>
+          </section>
+        )}
         <footer class="article-endnote">
           <div>
             <strong>最後まで読んでいただき、ありがとうございます。</strong>
@@ -346,18 +366,6 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           />
         )}
       </div>
-    </section>
-  )}
-
-  {related.length > 0 && (
-    <section class="section article-related" aria-labelledby="related-heading">
-      <p class="eyebrow">KEEP EXPLORING</p>
-      <h2 id="related-heading">次に読みたい旅の記録</h2>
-      <ul class="card-grid">
-        {related.map((item) => (
-          <ArticleCard view={item} level={3} />
-        ))}
-      </ul>
     </section>
   )}
 </BaseLayout>

@@ -22,7 +22,17 @@ const payload = JSON.stringify({ catalog, articleId }).replaceAll("<", "\\u003c"
       articleId: string;
     };
     const unregister = registerWebMcpTools(context.catalog, context.articleId);
-    trackSemanticEvent({ name: "travel_knowledge_viewed", articleId: context.articleId });
+    // Sent when the quick-answer panel is on screen, not on every article load:
+    // the event was counting page views under the panel's name.
+    const panel = document.querySelector(".knowledge-answer");
+    if (panel && "IntersectionObserver" in globalThis) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        trackSemanticEvent({ name: "travel_knowledge_viewed", articleId: context.articleId });
+      });
+      observer.observe(panel);
+    }
     globalThis.addEventListener("pagehide", unregister, { once: true });
   }
 </script>

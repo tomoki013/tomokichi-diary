@@ -1209,14 +1209,37 @@
     color: #fff;
   }
 
+  /* On a phone the banner covered a fifth of the first screen of the article
+     a reader came for. One line of text beside the buttons is enough there. */
   @media (max-width: 40rem) {
     .cookie-banner {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-sm);
+      right: var(--space-xs);
+      bottom: var(--space-xs);
+      left: var(--space-xs);
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .cookie-banner strong {
+      display: none;
+    }
+
+    .cookie-banner p {
+      font-size: 0.72rem;
+      line-height: 1.5;
     }
 
     .cookie-banner__actions {
-      justify-content: flex-end;
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 0.1rem;
+    }
+
+    .cookie-banner__actions a,
+    .cookie-banner__actions button {
+      min-height: 2.2rem;
+      justify-content: center;
+      padding: 0.35rem 0.8rem;
     }
   }
 
