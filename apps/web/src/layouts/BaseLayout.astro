@@ -415,12 +415,14 @@ const footerPhoto = {
       <aside class="cookie-banner" data-cookie-banner aria-label="Cookieのご案内" hidden>
         <div>
           <strong>Cookieについて</strong>
+          {/* The details link sits in the sentence, not beside the button:
+              as a second button it was where readers tapped to make the
+              banner go away, and it took them off the article. */}
           <p>
-            アクセス解析・広告配信にCookieを利用します。利用目的や設定方法をご確認いただけます。
+            アクセス解析・広告配信にCookieを利用します（<a href="/legal/cookies">詳細</a>）。
           </p>
         </div>
         <div class="cookie-banner__actions">
-          <a href="/legal/cookies">詳細を見る</a>
           <button type="button" data-cookie-accept>
             同意する
           </button>
