@@ -303,7 +303,7 @@ const provider = THEME_MUSIC_PROVIDER_LABELS[first?.player.provider ?? "apple_mu
     /* Bottom left: the article's contents button sits bottom right. */
     position: fixed;
     left: 1rem;
-    bottom: calc(1.2rem + env(safe-area-inset-bottom));
+    bottom: calc(1.2rem + env(safe-area-inset-bottom) + var(--cookie-banner-space, 0px));
     z-index: 20;
     display: inline-flex;
     align-items: center;
