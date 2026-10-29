@@ -215,6 +215,7 @@ describe("body formatting", () => {
       '<small class="affiliate-inline-disclosure">広告</small>',
       '<a href="/posts/x">内部</a> と `<em>コード</em>` と <https://example.com>',
       "![写真](<https://x/a.jpg>)",
+      '![エッフェル塔](</images/France/eiffel-tower.jpg>) と [記事](</posts/x> "題")',
     ].join("\n\n");
     expect(disallowedHtml(markdown)).toEqual([
       "<br>",
