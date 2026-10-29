@@ -1,0 +1,25 @@
+---
+interface Props {
+  title: string;
+  path: string | null;
+  /** 1-based position of this article in the trip. */
+  episode: number;
+  total: number;
+}
+
+/* Where this article sits in its trip, one line under the header. */
+const { title, path, episode, total } = Astro.props;
+const percent = Math.round((episode / total) * 100);
+---
+
+<div class="journey-progress">
+  <p>
+    {path ? <a href={path}>{title}</a> : <span>{title}</span>}
+    <span class="journey-progress__count">
+      第{episode}回／全{total}回
+    </span>
+  </p>
+  <span class="journey-progress__bar" aria-hidden="true">
+    <span style={`width: ${percent}%`}></span>
+  </span>
+</div>

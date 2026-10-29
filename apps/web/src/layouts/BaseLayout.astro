@@ -18,6 +18,7 @@ import {
 } from "../components/TravelIcons";
 import Picture from "../components/Picture.astro";
 import MyTripsShelf from "../components/MyTripsShelf.astro";
+import { searchSuggestions } from "../lib/search-suggestions";
 
 interface Props {
   metadata: PageMetadata;
@@ -30,6 +31,7 @@ interface Props {
 
 const { metadata, jsonLd = [], width = "wide", headerOverlay = false } = Astro.props;
 const structuredData = jsonLd.filter((node) => node !== null);
+const suggestions = searchSuggestions();
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 
 const primaryNav = [
@@ -296,19 +298,12 @@ const footerPhoto = {
             />
           </label>
           <div class="header-search__suggestions" data-search-suggestions>
-            <p>よく探されているキーワード</p>
-            <button type="button" data-search-suggestion="バンコク">
-              バンコク
-            </button>
-            <button type="button" data-search-suggestion="空港">
-              空港
-            </button>
-            <button type="button" data-search-suggestion="ヨーロッパ">
-              ヨーロッパ
-            </button>
-            <button type="button" data-search-suggestion="交通">
-              交通
-            </button>
+            <p>よく読まれている旅先から</p>
+            {suggestions.map((term) => (
+              <button type="button" data-search-suggestion={term}>
+                {term}
+              </button>
+            ))}
           </div>
           <p class="header-search__status" data-search-status>
             キーワードを入力すると記事候補を表示します。
@@ -430,6 +425,8 @@ const footerPhoto = {
       </aside>
     </div>
     <script>
+      import { decorateReadLinks } from "../lib/readMarks";
+      decorateReadLinks();
       const body = document.body;
       const siteHeader = document.querySelector<HTMLElement>(".site-header");
       const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");

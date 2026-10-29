@@ -17,6 +17,8 @@ import { mediaUrl, seoConfig } from "../lib/site";
 import LikeButton from "../components/LikeButton.astro";
 import ArticleToc from "../components/ArticleToc.astro";
 import ArticleTocInline from "../components/ArticleTocInline.astro";
+import JourneyProgress from "../components/JourneyProgress.astro";
+import NextRead from "../components/NextRead.astro";
 import { articleHeadings } from "../lib/article-headings";
 import { getEntry } from "astro:content";
 import { renderArticleMarkdown } from "@tomokichi/contracts";
@@ -128,6 +130,45 @@ const articleViews = content.publicArticles().flatMap((item) => {
 const currentIndex = articleViews.findIndex((item) => item.article.id === article.id);
 const previousArticle = currentIndex >= 0 ? articleViews[currentIndex + 1] : undefined;
 const nextArticle = currentIndex > 0 ? articleViews[currentIndex - 1] : undefined;
+// A trip told in episodes: where this one sits, and which comes next.
+// A journey also holds the guides written from the trip; the episodes are the
+// members that are also in the travel-diary series.
+const ownCollections = content.collectionsOf(article.id);
+const diary = ownCollections.find((item) => item.kind === "series" && item.slug === "travel-diary");
+const journey = diary ? ownCollections.find((item) => item.kind === "journey") : undefined;
+const diaryIds = new Set(diary ? content.membersOf(diary.id).map((item) => item.article.id) : []);
+const journeyMembers = journey
+  ? content.membersOf(journey.id).filter((item) => diaryIds.has(item.article.id))
+  : [];
+const episode = journeyMembers.findIndex((item) => item.article.id === article.id) + 1;
+const journeyRoute = journey ? content.routes.canonicalFor("journey", journey.id) : undefined;
+// The one card to go on to after the story: the trip's next episode, then the
+// articles the author linked (the last link first, since closing links are
+// usually the next step), then the related ones.
+const viewByPath = new Map(articleViews.map((item) => [item.route.path, item]));
+const linkedFromBody = [...revision.bodyMarkdown.matchAll(/\]\(([^)\s]+)\)/g)]
+  .flatMap((match) => {
+    try {
+      const path = new URL(match[1]!, `https://tomokichidiary.com${view.route.path}`).pathname;
+      const linked = viewByPath.get(path.replace(/\/+$/, ""));
+      return linked ? [linked] : [];
+    } catch {
+      return [];
+    }
+  })
+  .toReversed();
+const nextEpisode = episode > 0 ? journeyMembers[episode] : undefined;
+const nextReadCandidates = [
+  ...(nextEpisode ? [{ view: nextEpisode, label: `この旅の続き・第${episode + 1}回` }] : []),
+  ...linkedFromBody.map((item) => ({ view: item, label: "この記事で紹介した記事" })),
+  ...related.map((item) => ({ view: item, label: "あわせて読みたい" })),
+]
+  .filter(
+    (item, index, all) =>
+      item.view.article.id !== article.id &&
+      all.findIndex((other) => other.view.article.id === item.view.article.id) === index,
+  )
+  .slice(0, 4);
 const knowledge = content.knowledgeOf(article.id);
 const seriesMusic = seriesMusicOf(content.collectionsOf(article.id));
 const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
@@ -214,6 +255,15 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
       <LikeButton articleId={article.id} title={revision.title} path={route.path} />
     </div>
 
+    {journey && episode > 0 && journeyMembers.length > 1 && (
+      <JourneyProgress
+        title={journey.title}
+        path={journeyRoute?.path ?? null}
+        episode={episode}
+        total={journeyMembers.length}
+      />
+    )}
+
     {seriesMusic.length > 0 && <SeriesMusic entries={seriesMusic} pageType="article" />}
 
     <div class="article-layout">
@@ -253,6 +303,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
           ))}
         {placeStories.length > 0 && <PlaceStories views={placeStories} />}
         {adPlan.end && <ArticleAd unit={adPlan.end.unit} variant={adPlan.end.variant} />}
+        <NextRead candidates={nextReadCandidates} />
         {/* The articles sharing this one's tags and places come first: a reader
             who just finished is looking for the next thing on the same subject
             (the experience and country rails below drift further away). */}
@@ -372,5 +423,17 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 
 <script>
   import { mountReaderMeasurement } from "../lib/readerMeasurement";
+  import { chooseNextRead, markRead } from "../lib/readMarks";
   mountReaderMeasurement();
+  chooseNextRead();
+  // Read means the last paragraph came into view.
+  const last = document.querySelector(".article-content > :last-child");
+  if (last && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      markRead(location.pathname);
+      observer.disconnect();
+    });
+    observer.observe(last);
+  }
 </script>
