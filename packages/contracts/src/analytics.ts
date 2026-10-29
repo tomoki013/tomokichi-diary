@@ -49,11 +49,28 @@ export interface ExperimentCohortDto extends ExperienceCohortDto {
   body75Rate: number | null;
   body90Rate: number | null;
 }
+export interface ArticleReadingDto {
+  articleId: string;
+  path: string | null;
+  pageViews: number | null;
+  measuredViews: number;
+  body75Rate: number | null;
+  bodyEndRate: number | null;
+  nextArticleRate: number | null;
+  clicks: number | null;
+  clicksPrevious: number | null;
+  impressions: number | null;
+  position: number | null;
+  positionPrevious: number | null;
+  earningsJPY: number | null;
+}
 export interface AnalyticsDashboardDto {
   experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
   experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
+  /** Per article for the period, site view only; see application analytics/articles.ts. */
+  articles?: ArticleReadingDto[];
   current: {
     source: string;
     periodCountsRetrievedAt?: string | null;

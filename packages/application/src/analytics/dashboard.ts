@@ -1,3 +1,4 @@
+import { articleReading } from "./articles.js";
 import { experienceSummary } from "./experience.js";
 import {
   ANALYTICS_SOURCES,
@@ -125,6 +126,7 @@ export async function analyticsDashboard(
       current: experienceSummary(days, range, articleId, true),
       previous: experienceSummary(days, previous, articleId, true),
     },
+    articles: articleId ? [] : articleReading(days, range, previous),
     statuses,
     daily: dates(range).map((date) => ({
       date,
