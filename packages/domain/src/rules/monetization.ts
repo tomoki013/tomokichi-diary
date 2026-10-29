@@ -1,4 +1,4 @@
-import { isAffiliateUrl, type AffiliateOffer } from "@tomokichi/contracts";
+import { bodyAdPlacementProblem, isAffiliateUrl, type AffiliateOffer } from "@tomokichi/contracts";
 import type {
   AdExperiment,
   ArticleMonetization,
@@ -91,15 +91,12 @@ export function validateMonetization(
     if (p.status !== "ready") continue;
     const before = markdown.slice(0, marker.offset);
     const after = markdown.slice(marker.offset + `{{monetization:${p.key}}}`.length);
-    if (before.replace(/\s/g, "").length < 600 || !/^## /m.test(before))
-      reject(`配置 ${p.key} は導入文から十分に離してください（見出しと本文600字以上）`);
-    const adjacent = `${
-      before
-        .trim()
-        .split(/\n\s*\n/)
-        .at(-1) ?? ""
-    }\n${after.trim().split(/\n\s*\n/)[0] ?? ""}`;
-    if (/!\[|\{\{embed:|^\s*\[.+\]\(/m.test(adjacent))
+    const problem = bodyAdPlacementProblem(before, after);
+    if (problem === "introduction")
+      reject(
+        `配置 ${p.key} は導入文から十分に離してください（見出しと、読者に見える本文600字以上）`,
+      );
+    else if (problem === "neighbour")
       reject(`配置 ${p.key} は画像・ギャラリー・関連リンクから離してください`);
   }
   return errors;

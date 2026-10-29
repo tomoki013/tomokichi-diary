@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import { bodyAdPlacementProblem } from "@tomokichi/contracts";
 
 export interface AdPosition {
   offset: number;
@@ -32,7 +33,7 @@ export function suggestAdParagraph(body: string): AdPosition | null {
       next.type === "table"
     )
       continue;
-    if (before.replace(/\s/g, "").length < 600 || !/^## /m.test(before)) continue;
+    if (bodyAdPlacementProblem(before, body.slice(cursor)) === "introduction") continue;
     const fraction = cursor / body.length;
     if (fraction < 0.3 || fraction > 0.65 || token.raw.trim().length < 30) continue;
     candidates.push({ offset: cursor, excerpt: token.raw.trim().slice(-140), fraction });

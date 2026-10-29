@@ -358,3 +358,40 @@ export function replaceLoneLinks(
     (match, _tag: string, href: string, label: string) => replace(href, label) ?? match,
   );
 }
+
+/** Text a reader must have passed before the in-body ad: a heading and this many characters. */
+export const AD_MIN_INTRODUCTION_CHARS = 600;
+
+/**
+ * Characters a reader sees as text in a stretch of body: headings, paragraphs,
+ * lists and tables as the page renders them. A photo, a link card, a music
+ * player, a URL or Markdown syntax adds nothing, so none of them can stand in
+ * for the reading the ad rule asks for.
+ */
+export function visibleTextLength(markdown: string): number {
+  const html = replaceLoneLinks(
+    renderArticleMarkdown(markdown.replace(/\{\{(?:embed|monetization):[^}\n]*\}\}/g, "")),
+    () => "",
+  );
+  const text = html
+    .replace(/<img\b[^>]*>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(?:#\d+|#x[\da-f]+|\w+);/gi, "x");
+  return text.replace(/\s/g, "").length;
+}
+
+/** The single rule for where an in-body ad may sit; the publish check and the admin both ask it. */
+export function bodyAdPlacementProblem(
+  before: string,
+  after: string,
+): "introduction" | "neighbour" | null {
+  if (visibleTextLength(before) < AD_MIN_INTRODUCTION_CHARS || !/^## /m.test(before))
+    return "introduction";
+  const adjacent = `${
+    before
+      .trim()
+      .split(/\n\s*\n/)
+      .at(-1) ?? ""
+  }\n${after.trim().split(/\n\s*\n/)[0] ?? ""}`;
+  return /!\[|\{\{embed:|^\s*\[.+\]\(/m.test(adjacent) ? "neighbour" : null;
+}

@@ -231,7 +231,7 @@ function Loaded({
           </p>
         ) : layout === "end-only" ? (
           <p className="notice notice--warn">
-            本文中の広告がありません。「標準」を押すと、見出しと600字以上の後の段落を自動で選びます。
+            本文中の広告がありません。「標準」を押すと、見出しと、読者に見える本文600字以上の後の段落を自動で選びます。
           </p>
         ) : null}
         {layout === "standard" && bodyAd && (

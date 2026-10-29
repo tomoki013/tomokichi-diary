@@ -6,6 +6,7 @@ import type {
   MonetizationOverviewDto,
   MonetizationPlacement,
 } from "@tomokichi/contracts";
+import { bodyAdPlacementProblem } from "@tomokichi/contracts";
 import { api } from "./api";
 import { suggestAdParagraph } from "./ad-rollout";
 import { draftFrom } from "./draft";
@@ -38,21 +39,12 @@ export function markerKeys(body: string): string[] {
   return [...body.matchAll(markerPattern)].map((m) => m[1]!);
 }
 
-/** Mirrors the domain's placement rule, so a plan never fails on save. */
+/** The publish check's own placement rule (bodyAdPlacementProblem), so a plan never fails on save. */
 export function bodyAdFits(body: string, key: string): boolean {
   const marker = `{{monetization:${key}}}`;
   const at = body.indexOf(marker);
   if (at < 0) return false;
-  const before = body.slice(0, at);
-  const after = body.slice(at + marker.length);
-  if (before.replace(/\s/g, "").length < 600 || !/^## /m.test(before)) return false;
-  const adjacent = `${
-    before
-      .trim()
-      .split(/\n\s*\n/)
-      .at(-1) ?? ""
-  }\n${after.trim().split(/\n\s*\n/)[0] ?? ""}`;
-  return !/!\[|\{\{embed:|^\s*\[.+\]\(/m.test(adjacent);
+  return bodyAdPlacementProblem(body.slice(0, at), body.slice(at + marker.length)) === null;
 }
 
 const isAd = (p: MonetizationPlacement) => p.kind === "adsense";

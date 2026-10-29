@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  bodyAdPlacementProblem,
   enhanceInlineAffiliates,
   renderArticleMarkdown,
   replaceLoneLinks,
+  visibleTextLength,
 } from "../article-markdown.js";
 
 const URL = "https://omio.sjv.io/oN3NYe";
@@ -51,6 +53,41 @@ describe("replaceLoneLinks", () => {
     const html = renderArticleMarkdown("[カード](/posts/a)\n\n文中の[リンク](/posts/b)です");
     expect(replaceLoneLinks(html, (href) => `<aside>${href}</aside>`)).toBe(
       '<aside>/posts/a</aside>\n<p>文中の<a href="/posts/b">リンク</a>です</p>\n',
+    );
+  });
+});
+
+describe("visibleTextLength", () => {
+  it("counts what a reader reads, not URLs, photos, cards, players or syntax", () => {
+    expect(visibleTextLength("## 見出し\n\n本文**です**。")).toBe(8);
+    const noise = [
+      "![写真の説明](https://media.tomokichidiary.com/images/a-very-long-file-name.jpg)",
+      "[記事カード](/posts/some-article)",
+      "https://music.apple.com/jp/album/x/1?i=2",
+      "{{monetization:body-ad}}",
+      "{{embed:cost-report}}",
+    ].join("\n\n");
+    expect(visibleTextLength(noise)).toBe(0);
+    expect(visibleTextLength("| 項目 | 内容 |\n| --- | --- |\n| 料金 | 無料 |")).toBe(8);
+    expect(visibleTextLength("文中の[リンク](https://example.com/long/path)です")).toBe(8);
+  });
+});
+
+describe("bodyAdPlacementProblem", () => {
+  const prose = "読".repeat(600);
+  it("asks for a heading and 600 visible characters before the ad", () => {
+    expect(bodyAdPlacementProblem(`## 見出し\n\n${prose}\n\n`, "\n\n続き")).toBeNull();
+    expect(bodyAdPlacementProblem(`${prose}\n\n`, "\n\n続き")).toBe("introduction");
+    const padded = `## 見出し\n\n${"読".repeat(300)}\n\n![${"x".repeat(400)}](https://x/${"y".repeat(400)}.jpg)\n\n本文。\n\n`;
+    expect(bodyAdPlacementProblem(padded, "\n\n続き")).toBe("introduction");
+  });
+
+  it("keeps the ad away from photos, embeds and link cards", () => {
+    expect(bodyAdPlacementProblem(`## 見出し\n\n${prose}\n\n![写真](/a.jpg)\n\n`, "\n\n続き")).toBe(
+      "neighbour",
+    );
+    expect(bodyAdPlacementProblem(`## 見出し\n\n${prose}\n\n`, "\n\n[カード](/posts/a)")).toBe(
+      "neighbour",
     );
   });
 });
