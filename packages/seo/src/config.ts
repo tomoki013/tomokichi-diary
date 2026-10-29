@@ -14,6 +14,8 @@ export interface SeoConfig {
   readonly twitterHandle: string | null;
   /** Preview and staging must never be indexed. */
   readonly indexable: boolean;
+  /** Share image for a page with no photo of its own, so no link is shared bare. */
+  readonly defaultImageUrl?: string | null;
 }
 
 export const DEFAULT_SEO_CONFIG: SeoConfig = {

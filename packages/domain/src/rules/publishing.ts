@@ -159,6 +159,22 @@ export function schedule(article: Article, at: Instant, now: Instant): Result<Ar
   return ok({ ...article, status: "scheduled", scheduledAt: at, updatedAt: now });
 }
 
+/**
+ * When the content a reader sees last changed: when its published revision was
+ * written, or first published if that came later. `article.updatedAt` also
+ * moves on draft saves and metadata edits, which change nothing on the page, so
+ * it must not be shown or announced as "last updated".
+ */
+export function publicModifiedAt(
+  article: Article,
+  publishedRevision: ArticleRevision | undefined,
+): Instant {
+  const written = publishedRevision?.createdAt;
+  const published = article.publishedAt;
+  if (!written) return published ?? article.updatedAt;
+  return published && !isAfterOrEqual(written, published) ? published : written;
+}
+
 /** What the public site renders — a draft edit on a live article changes nothing here. */
 export function publicRevisionId(article: Article): string | null {
   return article.status === "published" ? article.publishedRevisionId : null;

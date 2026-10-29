@@ -118,6 +118,23 @@ describe("buildPageMetadata", () => {
     expect(meta.openGraph["og:type"]).toBe("website");
     expect(meta.robots).toBe("noindex, nofollow");
   });
+
+  it("falls back to the site's share image so no page is shared without one", () => {
+    const page = { title: "利用規約", description: "規約です。", route };
+    expect(buildPageMetadata(config, page).openGraph["og:image"]).toBeUndefined();
+    const withDefault = buildPageMetadata(
+      { ...config, defaultImageUrl: "https://cdn.example.com/site.jpg" },
+      page,
+    );
+    expect(withDefault.openGraph["og:image"]).toBe("https://cdn.example.com/site.jpg");
+    expect(withDefault.twitter["twitter:card"]).toBe("summary_large_image");
+    expect(
+      buildPageMetadata(
+        { ...config, defaultImageUrl: "https://cdn.example.com/site.jpg" },
+        { ...page, imageUrl: "https://cdn.example.com/own.jpg" },
+      ).openGraph["og:image"],
+    ).toBe("https://cdn.example.com/own.jpg");
+  });
 });
 
 describe("robots", () => {
@@ -191,7 +208,9 @@ describe("JSON-LD", () => {
     });
     expect(jsonLd["@type"]).toBe("Article");
     expect(jsonLd["datePublished"]).toBe(article.publishedAt);
-    expect(jsonLd["dateModified"]).toBe(article.updatedAt);
+    // The revision was written before the first publication, and the draft
+    // save that moved updatedAt to 08-25 changed nothing on the page.
+    expect(jsonLd["dateModified"]).toBe(article.publishedAt);
     expect(jsonLd["url"]).toBe("https://tomokichidiary.com/posts/chagee-menu-explained");
     expect((jsonLd["about"] as unknown[])[0]).toMatchObject({
       "@type": "CafeOrCoffeeShop",

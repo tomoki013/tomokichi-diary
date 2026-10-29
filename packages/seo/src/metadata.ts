@@ -1,4 +1,5 @@
 import {
+  publicModifiedAt,
   toAbsoluteUrl,
   toPlainText,
   truncate,
@@ -66,7 +67,7 @@ export function buildArticleMetadata(config: SeoConfig, input: ArticleMetadataIn
   };
   if (coverImageUrl) openGraph["og:image"] = coverImageUrl;
   if (article.publishedAt) openGraph["article:published_time"] = article.publishedAt;
-  openGraph["article:modified_time"] = article.updatedAt;
+  openGraph["article:modified_time"] = publicModifiedAt(article, revision);
   if (input.authorName) openGraph["article:author"] = input.authorName;
 
   const twitter: Record<string, string> = {
@@ -105,10 +106,11 @@ export function buildPageMetadata(config: SeoConfig, input: SimplePageInput): Pa
     "og:url": canonical,
     "og:site_name": config.siteName,
   };
-  if (input.imageUrl) openGraph["og:image"] = input.imageUrl;
+  const imageUrl = input.imageUrl ?? config.defaultImageUrl ?? null;
+  if (imageUrl) openGraph["og:image"] = imageUrl;
 
   const twitter: Record<string, string> = {
-    "twitter:card": input.imageUrl ? "summary_large_image" : "summary",
+    "twitter:card": imageUrl ? "summary_large_image" : "summary",
     "twitter:title": input.title,
     "twitter:description": description,
   };
