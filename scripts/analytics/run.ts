@@ -1,9 +1,7 @@
-import { readFileSync } from "node:fs";
 import { dateRange, shiftDate, type DateRange } from "@tomokichi/application";
-import type { Route } from "@tomokichi/domain";
 import { accessToken, BigQuery, SQL_NAMES } from "./bigquery.js";
 import { collectPeriodCounts } from "./periods.js";
-import { d1 } from "./cloudflare.js";
+import { loadRoutes } from "./cloudflare.js";
 import { collectSource, COLLECT_SOURCES, recordFailure } from "./collect.js";
 
 const args = process.argv.slice(2);
@@ -43,35 +41,7 @@ if (countsOnly) {
     );
   await collectPeriodCounts(bq, range, false, true);
 } else {
-  let routes: Route[];
-  if (persist) {
-    const [rows] = await d1<{
-      id: string;
-      path: string;
-      locale: string;
-      target_type: string;
-      target_id: string | null;
-      is_canonical: number;
-      redirect_to: string | null;
-      redirect_status: number | null;
-      is_legacy: number;
-      noindex: number;
-    }>([{ sql: "SELECT * FROM routes" }]);
-    routes = rows!.map((r) => ({
-      id: r.id,
-      path: r.path,
-      locale: r.locale,
-      targetType: r.target_type,
-      targetId: r.target_id,
-      isCanonical: Boolean(r.is_canonical),
-      redirectTo: r.redirect_to,
-      redirectStatus: r.redirect_status,
-      isLegacy: Boolean(r.is_legacy),
-      noindex: Boolean(r.noindex),
-    })) as Route[];
-  } else {
-    routes = JSON.parse(readFileSync("export/routes.json", "utf8")) as Route[];
-  }
+  const routes = await loadRoutes(persist);
   const errors: string[] = [];
   for (const source of COLLECT_SOURCES) {
     try {
