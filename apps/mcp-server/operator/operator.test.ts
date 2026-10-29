@@ -7,7 +7,8 @@ import type { AuthorId } from "@tomokichi/domain";
 import { createApp } from "../../api/src/app.js";
 import type { Env } from "../../api/src/env.js";
 import { configFromEnv, createOperatorClient, OperatorError, type Fetch } from "./client.js";
-import { bodyUrls } from "./server.js";
+import { bodyAdPlacementProblem } from "@tomokichi/contracts";
+import { bodyUrls, misplacedMarkerKeys, moveBodyMarkers } from "./server.js";
 
 let ctx: AppContext;
 let fetchApi: Fetch;
@@ -117,6 +118,45 @@ describe("media search results", () => {
       ],
       total: 2,
     });
+  });
+});
+
+const paragraph = (n: number) => `段落${n}。${"旅の記録を書いています。".repeat(12)}`;
+
+describe("moving a misplaced body ad", () => {
+  const body = [
+    "導入の文章です。",
+    "{{monetization:body-test-v1}}",
+    "## 見出し",
+    ...Array.from({ length: 8 }, (_, i) => paragraph(i)),
+  ].join("\n\n");
+
+  it("reads the keys the publish check rejects for their position", () => {
+    expect(
+      misplacedMarkerKeys({
+        publishable: false,
+        problems: [
+          {
+            code: "MONETIZATION_INVALID",
+            message:
+              "配置 body-test-v1 は導入文から十分に離してください（見出しと、読者に見える本文600字以上）",
+          },
+          { code: "COVER_MISSING", message: "配置 x は" },
+        ],
+      }),
+    ).toEqual(["body-test-v1"]);
+  });
+
+  it("moves only the marker line, to a place that passes the rule", () => {
+    const result = moveBodyMarkers(body, ["body-test-v1"]);
+    expect(result.unmovable).toEqual([]);
+    const marker = "{{monetization:body-test-v1}}";
+    const at = result.body.indexOf(marker);
+    expect(
+      bodyAdPlacementProblem(result.body.slice(0, at), result.body.slice(at + marker.length)),
+    ).toBeNull();
+    const strip = (s: string) => s.replace(marker, "").replace(/\s+/g, "");
+    expect(strip(result.body)).toBe(strip(body));
   });
 });
 

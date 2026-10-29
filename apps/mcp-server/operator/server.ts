@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/server";
+import { suggestAdParagraph } from "@tomokichi/contracts";
 import { z } from "zod";
 import type { OperatorClient } from "./client.js";
 
@@ -24,6 +25,48 @@ export function bodyUrls(page: unknown): unknown {
       return { ...rest, url: slugUrl ?? item["url"] };
     }),
   };
+}
+
+/**
+ * Moves each named body marker to the paragraph the admin's ad standard would
+ * pick (`suggestAdParagraph`), one at a time, so the body keeps every word and
+ * only the `{{monetization:key}}` lines change place.
+ */
+export function moveBodyMarkers(
+  body: string,
+  keys: readonly string[],
+): { body: string; moved: { key: string; after: string }[]; unmovable: string[] } {
+  let next = body;
+  const moved: { key: string; after: string }[] = [];
+  const unmovable: string[] = [];
+  for (const key of keys) {
+    const line = new RegExp(`\\n*^\\{\\{monetization:${key}\\}\\}[ \\t]*$\\n*`, "m");
+    if (!line.test(next)) {
+      unmovable.push(key);
+      continue;
+    }
+    const without = next.replace(line, "\n\n").replace(/^\n+/, "");
+    const spot = suggestAdParagraph(without);
+    if (!spot) {
+      unmovable.push(key);
+      continue;
+    }
+    next = `${without.slice(0, spot.offset).trimEnd()}\n\n{{monetization:${key}}}\n\n${without.slice(spot.offset).trimStart()}`;
+    moved.push({ key, after: spot.excerpt });
+  }
+  return { body: next, moved, unmovable };
+}
+
+/** Marker keys the publish check rejects for where they sit in the body. */
+export function misplacedMarkerKeys(check: unknown): string[] {
+  const problems =
+    check && typeof check === "object" && "problems" in check && Array.isArray(check.problems)
+      ? (check.problems as { code?: string; message?: string }[])
+      : [];
+  return problems.flatMap((p) => {
+    const key = p.code === "MONETIZATION_INVALID" && /^配置 ([a-z0-9-]+) は/.exec(p.message ?? "");
+    return key ? [key[1]!] : [];
+  });
 }
 
 const READ = { readOnlyHint: true, openWorldHint: false } as const;
@@ -254,6 +297,28 @@ export function createOperatorServer(client: OperatorClient): McpServer {
       annotations: WRITE,
     },
     async (input) => json(await client.createTag(input)),
+  );
+
+  server.registerTool(
+    "move_body_ad",
+    {
+      title: "Move body ad",
+      description:
+        "公開チェックで「導入文から離して」「画像・関連リンクから離して」と言われた本文中の収益化マーカーを、管理画面の広告標準と同じ選び方の段落へ移して下書き保存します。本文の文章は変えません。A/Bテスト中の記事もテストは続きます。公開は publish_article。",
+      inputSchema: { articleId: z.string().min(1) },
+      annotations: WRITE,
+    },
+    async ({ articleId }) => {
+      const keys = misplacedMarkerKeys(await client.publishCheck(articleId));
+      const body = (await client.getArticle(articleId)).currentRevision?.bodyMarkdown ?? "";
+      const result = moveBodyMarkers(body, keys);
+      if (result.moved.length > 0)
+        await client.saveDraft(articleId, {
+          bodyMarkdown: result.body,
+          changeSummary: "本文中の広告位置を公開ルールに合わせる（本文内容は維持）",
+        });
+      return json({ moved: result.moved, unmovable: result.unmovable });
+    },
   );
 
   server.registerTool(

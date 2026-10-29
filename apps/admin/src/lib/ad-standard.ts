@@ -6,9 +6,8 @@ import type {
   MonetizationOverviewDto,
   MonetizationPlacement,
 } from "@tomokichi/contracts";
-import { bodyAdPlacementProblem } from "@tomokichi/contracts";
+import { bodyAdPlacementProblem, suggestAdParagraph } from "@tomokichi/contracts";
 import { api } from "./api";
-import { suggestAdParagraph } from "./ad-rollout";
 import { draftFrom } from "./draft";
 
 /**

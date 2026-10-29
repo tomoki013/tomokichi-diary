@@ -201,6 +201,9 @@ importers:
       '@tomokichi/application':
         specifier: workspace:*
         version: link:../../packages/application
+      '@tomokichi/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@tomokichi/infra-d1':
         specifier: workspace:*
         version: link:../../infrastructure/database/d1
