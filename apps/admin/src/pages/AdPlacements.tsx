@@ -9,7 +9,7 @@ import {
   targetFor,
   type AdAuditKind,
 } from "../lib/ad-standard";
-import { describeError } from "../lib/api";
+import { api, describeError } from "../lib/api";
 import { TEST_MIN_DAYS, testDay } from "../lib/ad-test";
 import { publishSelection } from "../lib/bulk-publish";
 import { href } from "../lib/route";
@@ -113,6 +113,7 @@ export function AdPlacements({
             item.article,
             overview,
             targetFor(item.kind),
+            api,
           );
           if (changes.length) ready.push(article);
           results.push({

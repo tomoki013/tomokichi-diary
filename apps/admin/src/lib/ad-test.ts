@@ -6,7 +6,7 @@ import {
   type ArticleSummaryDto,
   type MonetizationOverviewDto,
 } from "@tomokichi/contracts";
-import { api } from "./api";
+import type { AdClient } from "./ad-client";
 import { applyLayout, bodyAdFits } from "./ad-standard";
 import { draftFrom } from "./draft";
 
@@ -66,15 +66,7 @@ export function canStartTest(article: ArticleSummaryDto, overview: MonetizationO
   );
 }
 
-type Client = Pick<
-  typeof api,
-  | "getArticle"
-  | "articleMonetization"
-  | "saveDraft"
-  | "saveArticleMonetization"
-  | "saveAdExperiment"
-  | "controlAdExperiment"
->;
+type Client = AdClient;
 
 /**
  * Starts a test on one article and leaves it ready to publish. B's body ad is
@@ -85,7 +77,7 @@ export async function prepareAdTest(
   summary: ArticleSummaryDto,
   overview: MonetizationOverviewDto,
   condition: AdTestCondition,
-  client: Client = api,
+  client: Client,
 ): Promise<ArticleDetailDto> {
   const article = await client.getArticle(summary.id);
   if (!article.isLive || article.hasUnpublishedChanges || !article.currentRevision)

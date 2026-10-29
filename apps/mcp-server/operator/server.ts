@@ -1,5 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/server";
-import { suggestAdParagraph } from "@tomokichi/contracts";
+import {
+  suggestAdParagraph,
+  type ArticleDetailDto,
+  type ArticleSummaryDto,
+} from "@tomokichi/contracts";
+import type { AdClient } from "../../admin/src/lib/ad-client.js";
+import { prepareLayout } from "../../admin/src/lib/ad-standard.js";
+import { canStartTest, defaultCondition, prepareAdTest } from "../../admin/src/lib/ad-test.js";
 import { z } from "zod";
 import type { OperatorClient } from "./client.js";
 
@@ -318,6 +325,96 @@ export function createOperatorServer(client: OperatorClient): McpServer {
           changeSummary: "本文中の広告位置を公開ルールに合わせる（本文内容は維持）",
         });
       return json({ moved: result.moved, unmovable: result.unmovable });
+    },
+  );
+
+  // The admin's own ad rules (lib/ad-standard.ts, lib/ad-test.ts), driven
+  // through this token client instead of the browser's.
+  const ads: AdClient = {
+    ...client,
+    getArticle: (articleId) => client.getArticle(articleId) as unknown as Promise<ArticleDetailDto>,
+  };
+  const summaryOf = async (articleId: string) => {
+    const { items } = await client.listArticles();
+    const summary = (items as ArticleSummaryDto[]).find((item) => item.id === articleId);
+    if (!summary) throw new Error(`記事 ${articleId} が見つかりません`);
+    return summary;
+  };
+
+  server.registerTool(
+    "get_article_ads",
+    {
+      title: "Get article ads",
+      description:
+        "記事の広告設定（本文中・末尾の配置、A/Bテスト）と、サイトに登録済みの広告ユニット一覧を返します。",
+      inputSchema: { articleId: z.string().min(1) },
+      annotations: READ,
+    },
+    async ({ articleId }) => {
+      const overview = await client.monetization();
+      return json({
+        adUnits: overview.settings.adUnits,
+        article: overview.articles.find((a) => a.articleId === articleId)?.config ?? null,
+        experiments: overview.experiments.filter((e) => e.articleId === articleId),
+      });
+    },
+  );
+
+  server.registerTool(
+    "set_ad_layout",
+    {
+      title: "Set ad layout",
+      description:
+        "管理画面の「広告配置」と同じ規則で、公開中の記事の広告を「standard（末尾＋本文中）」か「end-only（末尾のみ）」に揃えて下書き保存します。本文に置ける段落がなければ末尾のみになります。動いているA/Bテストは終了します。公開は publish_article。",
+      inputSchema: {
+        articleId: z.string().min(1),
+        layout: z.enum(["standard", "end-only"]),
+      },
+      annotations: { ...WRITE, destructiveHint: true },
+    },
+    async ({ articleId, layout }) => {
+      const { changes } = await prepareLayout(
+        await summaryOf(articleId),
+        await client.monetization(),
+        layout,
+        ads,
+      );
+      return json({ changes });
+    },
+  );
+
+  server.registerTool(
+    "start_ad_test",
+    {
+      title: "Start ad test",
+      description:
+        "管理画面の「広告テスト」と同じ規則で、公開中の記事に本文中広告あり/なしのA/Bテストを作って開始し、下書き保存します（Aは末尾のみ、Bは末尾＋本文中）。ユニットを省くと登録済みの最初のユニット。公開は publish_article。",
+      inputSchema: {
+        articleId: z.string().min(1),
+        adUnitA: z.string().min(1).optional(),
+        adUnitB: z.string().min(1).optional(),
+        shareB: z.number().int().min(1).max(99).optional(),
+      },
+      annotations: WRITE,
+    },
+    async ({ articleId, adUnitA, adUnitB, shareB }) => {
+      const overview = await client.monetization();
+      const summary = await summaryOf(articleId);
+      if (!canStartTest(summary, overview))
+        throw new Error("公開中で未公開の変更がなく、テスト中でない記事だけで始められます");
+      const base = defaultCondition(overview.settings.adUnits[0]?.id);
+      const article = await prepareAdTest(
+        summary,
+        overview,
+        {
+          ...base,
+          adUnitA: adUnitA ?? base.adUnitA,
+          adUnitB: adUnitB ?? base.adUnitB,
+          shareB: shareB ?? base.shareB,
+        },
+        ads,
+      );
+      return json({ hasUnpublishedChanges: article.hasUnpublishedChanges });
     },
   );
 

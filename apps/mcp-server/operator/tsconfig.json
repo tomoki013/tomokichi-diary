@@ -5,6 +5,12 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["./*.ts"],
+  "include": [
+    "./*.ts",
+    "../../admin/src/lib/ad-client.ts",
+    "../../admin/src/lib/ad-standard.ts",
+    "../../admin/src/lib/ad-test.ts",
+    "../../admin/src/lib/draft.ts"
+  ],
   "exclude": ["./*.test.ts"]
 }
