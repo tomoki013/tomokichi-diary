@@ -3,6 +3,7 @@ import {
   archive,
   isIndexable,
   isPubliclyVisible,
+  contentChangedAt,
   publicModifiedAt,
   publish,
   schedule,
@@ -305,5 +306,52 @@ describe("publicModifiedAt", () => {
   it("is the first publication when the revision was written before it", () => {
     const revision = makeRevision({ createdAt: at("2026-08-01T00:00:00.000Z") });
     expect(publicModifiedAt(live, revision)).toBe("2026-08-24T00:00:00.000Z");
+  });
+});
+
+describe("contentChangedAt", () => {
+  const prose =
+    "導入。\n\n## 見出し\n\n本文です。\n\n![写真](https://media.tomokichidiary.com/images/Thai/a.jpg)";
+  const rev = (n: number, day: string, over: Parameters<typeof makeRevision>[0] = {}) =>
+    makeRevision({
+      revisionNumber: n,
+      createdAt: at(`2026-10-${day}T00:00:00.000Z`),
+      bodyMarkdown: prose,
+      ...over,
+    });
+
+  it("ignores ad markers moving, coming and going, and image link rewrites", () => {
+    const history = [
+      rev(1, "01"),
+      rev(2, "05", {
+        bodyMarkdown: prose.replace("## 見出し", "{{monetization:prose-ad}}\n\n## 見出し"),
+      }),
+      rev(3, "09", {
+        bodyMarkdown: `${prose.replace(
+          "https://media.tomokichidiary.com/images/Thai/a.jpg",
+          "https://api.tomokichidiary.com/v1/images/a.jpg",
+        )}\n\n{{monetization:prose-ad}}\n\n\n`,
+      }),
+    ];
+    expect(contentChangedAt(history, 3)).toBe("2026-10-01T00:00:00.000Z");
+  });
+
+  it("moves when the prose, title or description changes", () => {
+    expect(
+      contentChangedAt([rev(1, "01"), rev(2, "05", { bodyMarkdown: `${prose}\n\n追記。` })], 2),
+    ).toBe("2026-10-05T00:00:00.000Z");
+    expect(contentChangedAt([rev(1, "01"), rev(2, "05", { title: "新しい題" })], 2)).toBe(
+      "2026-10-05T00:00:00.000Z",
+    );
+    expect(
+      contentChangedAt([rev(1, "01"), rev(2, "05", { seoDescriptionOverride: "説明" })], 2),
+    ).toBe("2026-10-05T00:00:00.000Z");
+  });
+
+  it("dates an edit that was later undone from the undo", () => {
+    expect(contentChangedAt([rev(1, "01"), rev(2, "05", { title: "仮" }), rev(3, "07")], 3)).toBe(
+      "2026-10-07T00:00:00.000Z",
+    );
+    expect(contentChangedAt([rev(1, "01")], 2)).toBeNull();
   });
 });

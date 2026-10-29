@@ -168,7 +168,7 @@ const nextReadCandidates = [
       item.view.article.id !== article.id &&
       all.findIndex((other) => other.view.article.id === item.view.article.id) === index,
   )
-  .slice(0, 4);
+  .slice(0, 1);
 const knowledge = content.knowledgeOf(article.id);
 const seriesMusic = seriesMusicOf(content.collectionsOf(article.id));
 const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
@@ -423,9 +423,8 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 
 <script>
   import { mountReaderMeasurement } from "../lib/readerMeasurement";
-  import { chooseNextRead, markRead } from "../lib/readMarks";
+  import { markRead } from "../lib/readMarks";
   mountReaderMeasurement();
-  chooseNextRead();
   // Read means the last paragraph came into view.
   const last = document.querySelector(".article-content > :last-child");
   if (last && "IntersectionObserver" in window) {

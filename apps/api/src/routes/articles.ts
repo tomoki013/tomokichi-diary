@@ -17,6 +17,7 @@ import {
 import {
   hasUnpublishedChanges,
   isPubliclyVisible,
+  contentChangedAtOf,
   parseInstant,
   RouteTable,
   type ArticleId,
@@ -57,7 +58,11 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
   routes.get("/", async (c) => {
     const ctx = c.get("ctx");
     const summaries = await listArticlesForAdmin(ctx);
-    const table = new RouteTable(await ctx.repos.routes.listAll());
+    const [routeList, history] = await Promise.all([
+      ctx.repos.routes.listAll(),
+      ctx.repos.revisions.listByArticles(summaries.map((summary) => summary.article.id)),
+    ]);
+    const table = new RouteTable(routeList);
     return c.json({
       items: summaries.map((summary) =>
         toArticleSummaryDto({
@@ -70,6 +75,10 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
             )?.path ?? null,
           hasUnpublishedChanges: summary.hasUnpublishedChanges,
           isLive: summary.isLive,
+          contentUpdatedAt: contentChangedAtOf(
+            history.filter((revision) => revision.articleId === summary.article.id),
+            summary.article.currentRevisionId,
+          ),
         }),
       ),
       total: summaries.length,

@@ -38,6 +38,7 @@ export function toArticleSummaryDto(params: {
   path: string | null;
   hasUnpublishedChanges: boolean;
   isLive: boolean;
+  contentUpdatedAt?: string | null;
 }): ArticleSummaryDto {
   const { article } = params;
   return {
@@ -51,6 +52,7 @@ export function toArticleSummaryDto(params: {
     publishedAt: article.publishedAt,
     scheduledAt: article.scheduledAt,
     updatedAt: article.updatedAt,
+    contentUpdatedAt: params.contentUpdatedAt ?? null,
     hasUnpublishedChanges: params.hasUnpublishedChanges,
     isLive: params.isLive,
     noindex: article.noindex,

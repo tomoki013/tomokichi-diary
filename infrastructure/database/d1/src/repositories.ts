@@ -237,6 +237,13 @@ export function createRepositories(db: SqlDatabase): Repositories {
           articleId,
         )
       ).map(revisionRow.to),
+    listByArticles: async (articleIds) =>
+      (
+        await all(
+          "SELECT * FROM article_revisions WHERE article_id IN (SELECT value FROM json_each(?))",
+          JSON.stringify(articleIds),
+        )
+      ).map(revisionRow.to),
     save: async (revision) => {
       await upsert(db, "article_revisions", revisionRow.from(revision), ["id"]).run();
     },

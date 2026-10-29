@@ -3,6 +3,7 @@ import type { CollectionId, Route } from "@tomokichi/domain";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@tomokichi/seo";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
+import JourneyRouteMap from "../components/JourneyRouteMap.astro";
 import Picture from "../components/Picture.astro";
 import SeriesMusic from "../components/SeriesMusic.astro";
 import { content } from "../lib/content";
@@ -23,6 +24,15 @@ const cover =
   members.find((member) => member.cover)?.cover?.asset ??
   null;
 
+// The route follows the trip's diary episodes; the guides written from the
+// same trip would only double back over places already on it.
+const diary = content.snapshot.collections.find(
+  (item) => item.kind === "series" && item.slug === "travel-diary",
+);
+const diaryIds = new Set(diary ? content.membersOf(diary.id).map((view) => view.article.id) : []);
+const diaryEpisodes = members.filter((view) => diaryIds.has(view.article.id));
+const routeEpisodes =
+  collection?.kind === "journey" ? (diaryEpisodes.length > 0 ? diaryEpisodes : members) : [];
 const title = collection?.title ?? "";
 const seriesMusic = collection ? seriesMusicOf([collection]) : [];
 const trail = collectionTrail(route, title);
@@ -131,6 +141,8 @@ const otherCollections = content.snapshot.collections
         </div>
       )}
     </section>
+
+    {routeEpisodes.length > 1 && <JourneyRouteMap episodes={routeEpisodes} />}
 
     <section class="collection-members" aria-labelledby="collection-members-heading">
       <div class="collection-members__heading">

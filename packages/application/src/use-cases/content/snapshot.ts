@@ -1,3 +1,4 @@
+import { contentChangedAtOf } from "@tomokichi/domain";
 import { publicMonetizationOnly } from "@tomokichi/data";
 import type { AppContext } from "../../context.js";
 import type { ContentSnapshot } from "@tomokichi/data";
@@ -13,6 +14,10 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   // Only revisions the site can render are pulled: drafts stay out of the
   // snapshot so an unpublished edit can never leak into a build.
   const revisionIds = articles.map((a) => a.publishedRevisionId).filter((id) => id !== null);
+  // Every revision of a published article, to date its last content change.
+  const historyRead = repos.revisions.listByArticles(
+    articles.filter((a) => a.publishedRevisionId !== null).map((a) => a.id),
+  );
   const [
     revisionList,
     embedList,
@@ -64,6 +69,13 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.knowledge.listArticleKnowledge(),
     repos.publicationMetadata.listAll(),
   ]);
+  const history = await historyRead;
+  const historyByArticle = new Map<string, (typeof history)[number][]>();
+  for (const revision of history)
+    historyByArticle.set(revision.articleId, [
+      ...(historyByArticle.get(revision.articleId) ?? []),
+      revision,
+    ]);
   const revisionById = new Map(revisionList.map((revision) => [revision.id, revision]));
   const revisions = revisionIds.flatMap((id) => revisionById.get(id) ?? []);
   const embeds = revisions.flatMap((revision) =>
@@ -78,8 +90,14 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     generatedAt: ctx.clock.now(),
     articles,
     // Revisions are never mutated in D1; only what the build reads is rewritten.
+    // A published revision is dated by when its reader-visible content last
+    // changed, so a revision saved only for ads or tags does not read as an
+    // update (publicModifiedAt, the sitemap and structured data use it).
     revisions: revisions.map((revision) => ({
       ...revision,
+      createdAt:
+        contentChangedAtOf(historyByArticle.get(revision.articleId) ?? [], revision.id) ??
+        revision.createdAt,
       bodyMarkdown: canonicalImageLinks(revision.bodyMarkdown, media, mediaSlugAliases),
     })),
     embeds,

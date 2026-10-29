@@ -91,6 +91,8 @@ export interface RevisionRepository {
   listByIds(ids: readonly RevisionId[]): Promise<readonly ArticleRevision[]>;
   findLatest(articleId: ArticleId): Promise<ArticleRevision | null>;
   listByArticle(articleId: ArticleId): Promise<readonly ArticleRevision[]>;
+  /** Every revision of these articles in one query, for dating content changes. */
+  listByArticles(articleIds: readonly ArticleId[]): Promise<readonly ArticleRevision[]>;
   save(revision: ArticleRevision): Promise<void>;
 }
 
