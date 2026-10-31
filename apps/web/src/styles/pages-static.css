@@ -741,6 +741,15 @@
     font-size: var(--step-tiny);
   }
 
+  .contact-policy {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: var(--space-md);
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.8;
+  }
+
   .contact-form {
     display: grid;
     gap: var(--space-sm);
