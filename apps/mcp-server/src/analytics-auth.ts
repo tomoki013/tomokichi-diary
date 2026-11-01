@@ -5,7 +5,7 @@ import { ANALYTICS_SCOPE, createAnalyticsServer } from "./analytics-server.js";
 
 export const MCP_ORIGIN = "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev";
 export const ANALYTICS_RESOURCE = `${MCP_ORIGIN}/analytics/mcp`;
-const CONSENT_ORIGIN = "https://admin.tomokichidiary.com";
+export const CONSENT_ORIGIN = "https://admin.tomokichidiary.com";
 export interface AnalyticsEnv {
   DB: D1Like;
   OAUTH_KV: KVNamespace;
@@ -20,8 +20,13 @@ export function escapeHtml(text: string) {
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
   );
 }
-export async function ownerIdentity(request: Request, env: AnalyticsEnv): Promise<string | null> {
-  if (!env.ANALYTICS_OWNER_SUBJECT) return null;
+/** The verified Access subject of the person at the consent page, if it is `owner`. */
+export async function ownerIdentity(
+  request: Request,
+  env: Pick<AnalyticsEnv, "API">,
+  owner: string | undefined,
+): Promise<string | null> {
+  if (!owner) return null;
   const assertion = request.headers.get("cf-access-jwt-assertion");
   if (!assertion) return null;
   const res = await env.API.fetch(
@@ -31,7 +36,7 @@ export async function ownerIdentity(request: Request, env: AnalyticsEnv): Promis
   );
   if (!res.ok) return null;
   const { subject } = (await res.json()) as { subject?: string };
-  return subject === env.ANALYTICS_OWNER_SUBJECT ? subject : null;
+  return subject === owner ? subject : null;
 }
 export function authorizedOwner(env: AnalyticsEnv, props: unknown, scope: string[] | undefined) {
   return (
@@ -48,7 +53,7 @@ export async function consent(request: Request, env: AnalyticsEnv): Promise<Resp
   // calls the public Worker with an assertion header.
   if (url.origin !== CONSENT_ORIGIN || url.pathname !== "/analytics-connect")
     return new Response("Not found", { status: 404 });
-  const subject = await ownerIdentity(request, env);
+  const subject = await ownerIdentity(request, env, env.ANALYTICS_OWNER_SUBJECT);
   if (!subject) return new Response("Owner login required", { status: 403 });
   const oauth = env.OAUTH_PROVIDER;
   if (request.method === "GET") {

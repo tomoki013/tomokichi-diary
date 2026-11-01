@@ -1,16 +1,28 @@
 import { createMcpHandler } from "agents/mcp/server";
 import { analyticsOAuth, type AnalyticsEnv } from "./analytics-auth.js";
+import { isOperatorPath, operatorFetch, type OperatorEnv } from "./operator-auth.js";
 import { createServer } from "./server.js";
 import evidenceAppHtml from "../ui-dist/index.html";
 
-interface Env extends AnalyticsEnv {
+const privateHeaders = (response: Response) => {
+  const headers = new Headers(response.headers);
+  headers.set("cache-control", "private, no-store");
+  headers.set("x-robots-tag", "noindex, nofollow");
+  return new Response(response.body, { status: response.status, headers });
+};
+
+interface Env extends AnalyticsEnv, OperatorEnv {
   SITE_ORIGIN: string;
 }
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === "/analytics/oauth/register" && request.method === "POST") {
+    if (
+      (url.pathname === "/analytics/oauth/register" ||
+        url.pathname === "/operator/oauth/register") &&
+      request.method === "POST"
+    ) {
       if (!env.OAUTH_REGISTRATION_LIMITER) return new Response("Unavailable", { status: 503 });
       const digest = await crypto.subtle.digest(
         "SHA-256",
@@ -26,17 +38,13 @@ export default {
         });
     }
     if (url.pathname === "/health") return Response.json({ status: "ok" });
+    if (isOperatorPath(url.pathname)) return privateHeaders(await operatorFetch(request, env, ctx));
     if (
       url.pathname.startsWith("/analytics/") ||
       url.pathname === "/analytics-connect" ||
       url.pathname.startsWith("/.well-known/oauth-")
     ) {
-      return Promise.resolve(analyticsOAuth.fetch(request, env, ctx)).then((response) => {
-        const headers = new Headers(response.headers);
-        headers.set("cache-control", "private, no-store");
-        headers.set("x-robots-tag", "noindex, nofollow");
-        return new Response(response.body, { status: response.status, headers });
-      });
+      return privateHeaders(await analyticsOAuth.fetch(request, env, ctx));
     }
     if (url.pathname !== "/mcp") return new Response("Not found", { status: 404 });
     return createMcpHandler(() => createServer(env.SITE_ORIGIN, evidenceAppHtml))(

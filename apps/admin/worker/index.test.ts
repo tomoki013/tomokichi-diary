@@ -59,3 +59,18 @@ it("routes only the private consent page to the MCP binding and preserves the Ac
   expect(forwarded!.headers.get("cookie")).toBe("__Host-oauth-consent=session");
   expect(await forwarded!.text()).toBe("decision=deny&handle=test");
 });
+
+it("routes the operator consent page to the same MCP binding", async () => {
+  let forwarded: Request | undefined;
+  await worker.fetch(new Request("https://admin.tomokichidiary.com/operator-connect?client_id=c"), {
+    ASSETS: { fetch: async () => new Response("SPA") },
+    API: { fetch: async () => new Response("API") },
+    ANALYTICS_MCP: {
+      fetch: async (request) => {
+        forwarded = request;
+        return new Response("consent");
+      },
+    },
+  });
+  expect(forwarded!.url).toBe("https://admin.tomokichidiary.com/operator-connect?client_id=c");
+});

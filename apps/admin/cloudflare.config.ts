@@ -17,7 +17,7 @@ export default defineConfig({
     assets: {
       notFoundHandling: "single-page-application",
       // Access/OAuth navigations must reach the Worker, even with Accept:text/html.
-      runWorkerFirst: ["/api/*", "/analytics-connect"],
+      runWorkerFirst: ["/api/*", "/analytics-connect", "/operator-connect"],
     },
     env: {
       ASSETS: bindings.assets(),

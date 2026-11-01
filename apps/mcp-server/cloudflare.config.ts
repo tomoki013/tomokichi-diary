@@ -15,6 +15,14 @@ export default defineConfig({
       OAUTH_KV: bindings.kv({ id: "4554c3ab766c40eabb06afcea5da8beb" }),
       DB: bindings.d1({ name: "tomokichi-diary", id: "b799453b-ada9-454e-81dc-26999c2c29db" }),
       API: bindings.worker({ worker: "tomokichi-diary-api" }),
+      // The remote operator's door to /v1/admin/*: a named entrypoint with no
+      // public URL, so this Worker never holds the admin token. The API checks
+      // `caller` (apps/api/src/operator.ts).
+      OPERATOR_API: bindings.worker({
+        worker: "tomokichi-diary-api",
+        exportName: "AdminOperator",
+        props: { caller: "tomokichi-diary-mcp" },
+      }),
       SITE_ORIGIN: bindings.text("https://tomokichidiary.com"),
     },
   },

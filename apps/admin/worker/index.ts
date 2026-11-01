@@ -18,9 +18,9 @@ const API_PREFIX = "/api";
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === "/analytics-connect") {
-      if (!env.ANALYTICS_MCP)
-        return new Response("Analytics connection unavailable", { status: 503 });
+    // The MCP Worker's two consent pages: analytics and the remote operator.
+    if (url.pathname === "/analytics-connect" || url.pathname === "/operator-connect") {
+      if (!env.ANALYTICS_MCP) return new Response("MCP connection unavailable", { status: 503 });
       // Preserve Access assertion, consent cookie, method and body. This one
       // path is the human login/consent page; MCP transport stays off the admin.
       return env.ANALYTICS_MCP.fetch(request);
