@@ -11,8 +11,11 @@ interface Props {
 /**
  * Rankings side by side in a row that scrolls sideways, so there is room for as many as the author likes.
  * Each rank carries the author's one line on why it is there; #1 also shows its cover.
+ * Only the top few show on the home page; the rest fold away so one long ranking
+ * does not stretch the whole row.
  */
 const { selections } = Astro.props;
+const HOME_TOP = 5;
 ---
 
 {selections.length > 0 && (
@@ -36,7 +39,7 @@ const { selections } = Astro.props;
             <p class="home-picks__note">{selection.note}</p>
           </header>
           <ol>
-            {picks.map(({ view, comment }, index) => (
+            {picks.slice(0, HOME_TOP).map(({ view, comment }, index) => (
               <li>
                 <a href={view.route.path}>
                   {index === 0 && view.cover && (
@@ -59,6 +62,26 @@ const { selections } = Astro.props;
               </li>
             ))}
           </ol>
+          {picks.length > HOME_TOP && (
+            <details class="home-picks__rest">
+              <summary>{HOME_TOP + 1}位以下を見る（{picks.length - HOME_TOP}件）</summary>
+              <ol start={HOME_TOP + 1}>
+                {picks.slice(HOME_TOP).map(({ view, comment }, index) => (
+                  <li>
+                    <a href={view.route.path}>
+                      <span class="home-picks__rank" aria-hidden="true">
+                        {HOME_TOP + index + 1}.
+                      </span>
+                      <span class="home-picks__text">
+                        {comment && <span class="home-picks__comment">{comment}</span>}
+                        <span class="home-picks__title">{view.revision.title}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
           {selection.experienceTag && (
             <a class="home-picks__more" href={experienceHref(selection.experienceTag)}>
               もっと読む&nbsp; →
