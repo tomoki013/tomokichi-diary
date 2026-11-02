@@ -14,19 +14,19 @@ import type {
   ArticleSummaryDto,
   ErrorBody,
   InquiryAppliedTemplateDto,
+  InquiryComposeDto,
   InquiryReplyTemplateDto,
   InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
+  InquiryTicketPageDto,
   InquiryTicketStatus,
-  InquiryTicketSummaryDto,
   LikeActivityDto,
   LocationDto,
   MediaAssetDto,
   MediaUploadDto,
   MediaHashStatusDto,
   MediaPageDto,
-  PageDto,
   PublishCheckDto,
   RouteDto,
   TaxonomyDto,
@@ -428,12 +428,13 @@ export const api = {
 
   // Inquiries (the shared platform, through the diary API)
   inquiryStatus: () => request<InquiryStatusDto>("/admin/inquiry/status"),
-  listTickets: (filter: { status?: string; query?: string; offset?: number }) => {
+  listTickets: (filter: { status?: string; lane?: string; query?: string; offset?: number }) => {
     const query = new URLSearchParams();
     if (filter.status) query.set("status", filter.status);
+    if (filter.lane) query.set("lane", filter.lane);
     if (filter.query) query.set("query", filter.query);
     if (filter.offset) query.set("offset", String(filter.offset));
-    return request<PageDto<InquiryTicketSummaryDto>>(`/admin/inquiry/tickets?${query}`);
+    return request<InquiryTicketPageDto>(`/admin/inquiry/tickets?${query}`);
   },
   getTicket: (ticketId: string, offset = 0) =>
     request<InquiryTicketDetailDto>(`/admin/inquiry/tickets/${id(ticketId)}?offset=${offset}`),
@@ -444,16 +445,21 @@ export const api = {
       `/admin/inquiry/tickets/${id(ticketId)}/notes`,
       json("POST", { body, idempotencyKey }),
     ),
+  getCompose: (ticketId: string) =>
+    request<InquiryComposeDto>(`/admin/inquiry/tickets/${id(ticketId)}/compose`),
   replyToTicket: (
     ticketId: string,
     reply: {
       body: string;
       idempotencyKey: string;
-      reopenIfResolved: boolean;
-      templateId: string | null;
+      subject: string | null;
+      afterStatus: "WAITING_CUSTOMER" | "RESOLVED" | null;
     },
   ) =>
-    request<{ ok: boolean }>(`/admin/inquiry/tickets/${id(ticketId)}/reply`, json("POST", reply)),
+    request<{ ok: boolean; status: InquiryTicketStatus }>(
+      `/admin/inquiry/tickets/${id(ticketId)}/reply`,
+      json("POST", reply),
+    ),
   applyTemplate: (ticketId: string, templateId: string) =>
     request<InquiryAppliedTemplateDto>(
       `/admin/inquiry/tickets/${id(ticketId)}/apply-template`,

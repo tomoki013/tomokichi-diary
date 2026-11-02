@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 import { INQUIRY_PROJECT_SLUG } from "../inquiry.js";
+import { DEFAULT_TEMPLATES, OPENING_KEY, SUBJECT_KEY } from "../inquiry-templates.js";
 
 /*
  * The admin's inquiry screen works this site's tickets through the platform's
@@ -31,7 +32,9 @@ interface Call {
 
 let ctx: AppContext;
 let calls: Call[];
+/** A fixed answer, or one worked out from the call's arguments. */
 let answer: Partial<Record<keyof ProjectOperatorApi, unknown>>;
+let templates: OperatorReplyTemplate[];
 
 function ticket(overrides: Partial<OperatorTicketDetail> = {}): OperatorTicketDetail {
   return {
@@ -92,23 +95,82 @@ function template(overrides: Partial<OperatorReplyTemplate> = {}): OperatorReply
   };
 }
 
+/** The site's defaults as the platform would hold them once created. */
+function seeded(): OperatorReplyTemplate[] {
+  return [
+    ...DEFAULT_TEMPLATES.map((entry, index) =>
+      template({ ...entry, id: `tpl-${entry.key}`, sortOrder: entry.sortOrder + index * 0 }),
+    ),
+    template({
+      id: "tpl-carrier",
+      key: SUBJECT_KEY,
+      name: "（システム）返信の件名",
+      subject: "【ともきちの旅行日記】お問い合わせいただいた件について",
+      isActive: false,
+    }),
+  ];
+}
+
+/**
+ * What the platform does for these calls when a test sets nothing: tickets
+ * move where they are told, a template applied to a form message keeps its
+ * own subject, and a reply returns the ticket.
+ */
+function platformDefault(method: string, args: unknown[]): unknown {
+  switch (method) {
+    case "project":
+    case "setSignature":
+      return { ...project, mailConfigured: true, signature: "" };
+    case "listTickets":
+      return { items: [ticket()], total: 1 };
+    case "listTemplates":
+      return templates;
+    case "applyTemplate": {
+      const found = templates.find((entry) => entry.id === args[2]);
+      return {
+        body: found?.body.replace("{{userName}}", "ともきち") ?? "",
+        unresolved: [],
+        subject: found?.subject ?? "お問い合わせいただいた件について",
+      };
+    }
+    case "createTemplate":
+      return template(args[1] as Partial<OperatorReplyTemplate>);
+    case "updateTemplate":
+      return template({ id: String(args[1]), ...(args[2] as Partial<OperatorReplyTemplate>) });
+    case "changeTicket": {
+      const change = args[2] as { revision: number; status?: OperatorTicketDetail["status"] };
+      const next = change.status ?? "NEW";
+      return ticket({
+        status: next,
+        revision: change.revision + 1,
+        allowedStatuses:
+          next === "ACKNOWLEDGED"
+            ? ["IN_PROGRESS", "RESOLVED"]
+            : next === "IN_PROGRESS"
+              ? ["WAITING_CUSTOMER", "RESOLVED"]
+              : [],
+      });
+    }
+    case "reply":
+      return ticket({
+        status: "IN_PROGRESS",
+        revision: 9,
+        allowedStatuses: ["WAITING_CUSTOMER", "RESOLVED"],
+      });
+    default:
+      return ticket();
+  }
+}
+
 /** A stand-in platform: records what it was asked, answers what the test set. */
 const platform = new Proxy({} as ProjectOperatorApi, {
   get:
     (_target, method: string) =>
     async (...args: unknown[]) => {
       calls.push({ method, args });
-      return (
-        answer[method as keyof ProjectOperatorApi] ?? {
-          ok: true,
-          value:
-            method === "project" || method === "setSignature"
-              ? { ...project, mailConfigured: true, signature: "" }
-              : method === "listTickets"
-                ? { items: [ticket()], total: 31 }
-                : ticket(),
-        }
-      );
+      const set = answer[method as keyof ProjectOperatorApi];
+      if (typeof set === "function") return (set as (...a: unknown[]) => unknown)(...args);
+      return set ?? { ok: true, value: platformDefault(method, args) };
     },
 });
 
@@ -130,7 +192,10 @@ beforeEach(async () => {
   ctx = await createTestContext();
   calls = [];
   answer = {};
+  templates = seeded();
 });
+
+const calledWith = (method: string) => calls.filter((call) => call.method === method);
 
 describe("/v1/admin/inquiry", () => {
   it("sits behind the admin gate", async () => {
@@ -160,23 +225,82 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("names only this site's project, whatever the request says", async () => {
-    await request("/tickets?status=open&query=%E3%83%90%E3%82%B9&offset=30&project=remeet");
+    await request("/tickets?status=open&query=%E3%83%90%E3%82%B9&project=remeet");
     expect(last("listTickets")?.args).toEqual([
       "tomokichi-diary",
-      { status: "open", query: "バス", limit: 30, offset: 30 },
+      { query: "バス", limit: 100, offset: 0 },
     ]);
     expect(calls.every((call) => call.args[0] === "tomokichi-diary")).toBe(true);
   });
 
-  it("pages what the platform returns", async () => {
+  it("reads the whole inbox in the platform's largest pages", async () => {
+    const many = (from: number, count: number) =>
+      Array.from({ length: count }, (_, index) =>
+        ticket({
+          id: `t${from + index}`,
+          createdAt: `2026-10-01T00:00:${String(index % 60).padStart(2, "0")}.000Z`,
+        }),
+      );
+    answer.listTickets = (_slug: string, query: { offset: number }) => ({
+      ok: true,
+      value: { items: query.offset === 0 ? many(0, 100) : many(100, 20), total: 120 },
+    });
     const body = await (await request("/tickets")).json();
-    expect(body).toMatchObject({ total: 31, offset: 0, limit: 30, hasMore: true });
-    expect(body.items[0]).toMatchObject({ id: "t1", number: "TK-000001", status: "NEW" });
+    expect(
+      calledWith("listTickets").map((call) => (call.args[1] as { offset: number }).offset),
+    ).toEqual([0, 100]);
+    expect(body).toMatchObject({ total: 120, offset: 0, limit: 50, hasMore: true });
+    expect(body.items).toHaveLength(50);
   });
 
-  it("ignores a status filter it does not know", async () => {
-    await request("/tickets?status=DROP%20TABLE");
-    expect(last("listTickets")?.args[1]).toEqual({ limit: 30, offset: 0 });
+  it("counts every ticket, then narrows by status and lane, open and newest first", async () => {
+    answer.listTickets = {
+      ok: true,
+      value: {
+        items: [
+          ticket({ id: "old-done", status: "CLOSED", createdAt: "2026-10-03T00:00:00.000Z" }),
+          ticket({
+            id: "media-new",
+            subject: "お仕事・取材の相談",
+            createdAt: "2026-10-02T00:00:00.000Z",
+          }),
+          ticket({
+            id: "general-late",
+            status: "IN_PROGRESS",
+            slaState: "BREACHED",
+            createdAt: "2026-10-01T00:00:00.000Z",
+          }),
+        ],
+        total: 3,
+      },
+    };
+    const all = await (await request("/tickets")).json();
+    expect(all.items.map((item: { id: string }) => item.id)).toEqual([
+      "media-new",
+      "general-late",
+      "old-done",
+    ]);
+    expect(all.counts).toEqual({
+      all: 3,
+      open: 2,
+      new: 1,
+      overdue: 1,
+      openByLane: { general: 1, media: 1 },
+      byStatus: { CLOSED: 1, NEW: 1, IN_PROGRESS: 1 },
+    });
+
+    const media = await (await request("/tickets?status=open&lane=media")).json();
+    expect(media.items.map((item: { id: string }) => item.id)).toEqual(["media-new"]);
+    expect(media.counts.all).toBe(3);
+
+    const closed = await (await request("/tickets?status=CLOSED")).json();
+    expect(closed.items.map((item: { id: string }) => item.id)).toEqual(["old-done"]);
+  });
+
+  it("ignores a status or lane filter it does not know", async () => {
+    const body = await (await request("/tickets?status=DROP%20TABLE&lane=x")).json();
+    expect(last("listTickets")?.args[1]).toEqual({ limit: 100, offset: 0 });
+    expect(body.total).toBe(1);
   });
 
   it("opens a ticket by number, as a notification link carries it", async () => {
@@ -260,36 +384,126 @@ describe("/v1/admin/inquiry", () => {
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
-  it("mails a reply with only its body, and says who sent it", async () => {
+  it("takes a new ticket on before replying, then moves it where it was asked", async () => {
     const response = await request("/tickets/t1/reply", {
       method: "POST",
-      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-1" }),
+      body: JSON.stringify({
+        body: "お返事です",
+        idempotencyKey: "reply-key-1",
+        subject: null,
+        afterStatus: "WAITING_CUSTOMER",
+        to: "someone@example.com",
+      }),
     });
-    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true, status: "WAITING_CUSTOMER" });
+    expect(calledWith("changeTicket").map((call) => call.args[2])).toEqual([
+      { revision: 3, status: "ACKNOWLEDGED" },
+      { revision: 4, status: "IN_PROGRESS" },
+      { revision: 9, status: "WAITING_CUSTOMER" },
+    ]);
+    // Recipient and sender are the platform's; nothing else goes up.
     expect(last("reply")?.args).toEqual([
       "tomokichi-diary",
       "t1",
       { body: "お返事です", idempotencyKey: "reply-key-1", reopenIfResolved: false },
       { id: "admin-token" },
     ]);
+  });
 
+  it("resolves with a result when asked to, and reopens a resolved ticket to reply", async () => {
+    answer.getTicket = {
+      ok: true,
+      value: ticket({ status: "RESOLVED", allowedStatuses: ["IN_PROGRESS", "CLOSED"] }),
+    };
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "追記です",
+        idempotencyKey: "reply-key-2",
+        afterStatus: "RESOLVED",
+      }),
+    });
+    expect((last("reply")!.args[2] as { reopenIfResolved: boolean }).reopenIfResolved).toBe(true);
+    expect(last("changeTicket")?.args[2]).toEqual({
+      revision: 9,
+      status: "RESOLVED",
+      resolution: "RESOLVED",
+    });
+  });
+
+  it("sends a first reply under the subject typed in, through the subject carrier", async () => {
     await request("/tickets/t1/reply", {
       method: "POST",
       body: JSON.stringify({
         body: "お返事です",
-        idempotencyKey: "reply-key-2",
-        reopenIfResolved: true,
-        templateId: "tpl1",
-        to: "someone@example.com",
+        idempotencyKey: "reply-key-3",
+        subject: " 【ともきちの旅行日記】写真のご利用について ",
       }),
     });
-    // Recipient, sender and subject are the platform's; nothing else goes up.
-    expect(last("reply")?.args[2]).toEqual({
-      body: "お返事です",
-      idempotencyKey: "reply-key-2",
-      reopenIfResolved: true,
-      templateId: "tpl1",
+    expect(last("updateTemplate")?.args.slice(1, 3)).toEqual([
+      "tpl-carrier",
+      { subject: "【ともきちの旅行日記】写真のご利用について" },
+    ]);
+    expect(last("reply")?.args[2]).toMatchObject({ templateId: "tpl-carrier" });
+  });
+
+  it("leaves the subject alone once the conversation has one", async () => {
+    answer.applyTemplate = {
+      ok: true,
+      value: { body: "", unresolved: [], subject: "Re: 写真の件" },
+    };
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "続きです",
+        idempotencyKey: "reply-key-4",
+        subject: "別の件名",
+      }),
     });
+    expect(last("updateTemplate")).toBeUndefined();
+    expect(last("reply")?.args[2]).not.toHaveProperty("templateId");
+  });
+
+  it("lays out a reply: greeting, subject, closing and signature", async () => {
+    const body = await (await request("/tickets/t1/compose")).json();
+    expect(body).toEqual({
+      to: "reader@example.com",
+      from: "ともきちの旅行日記 <support@tmkch.io>",
+      subject: "【ともきちの旅行日記】お問い合わせいただいた件について",
+      subjectEditable: true,
+      opening: expect.stringContaining("ともきち 様"),
+      closing: "以上、よろしくお願いいたします。",
+      signature: "",
+    });
+    // A site still signing as the deployment gets its own signature.
+    expect(last("setSignature")?.args[1]).toContain("ともきちの旅行日記");
+
+    answer.applyTemplate = {
+      ok: true,
+      value: { body: "", unresolved: [], subject: "Re: 写真の件" },
+    };
+    const later = await (await request("/tickets/t1/compose")).json();
+    expect(later).toMatchObject({ subject: "Re: 写真の件", subjectEditable: false });
+  });
+
+  it("suggests the media subject for a media enquiry", async () => {
+    answer.getTicket = { ok: true, value: ticket({ subject: "お仕事・取材の相談" }) };
+    const body = await (await request("/tickets/t1/compose")).json();
+    expect(body.subject).toBe("【ともきちの旅行日記】ご相談いただいた件について");
+  });
+
+  it("creates the default templates and the subject carrier when they are missing", async () => {
+    templates = [];
+    answer.listTemplates = () => {
+      const listed = { ok: true, value: templates };
+      templates = seeded();
+      return listed;
+    };
+    await request("/templates");
+    const created = calledWith("createTemplate").map(
+      (call) => (call.args[1] as { key: string }).key,
+    );
+    expect(created).toEqual([...DEFAULT_TEMPLATES.map((entry) => entry.key), SUBJECT_KEY]);
   });
 
   it("refuses a reply that still has a placeholder, naming it", async () => {
@@ -330,14 +544,14 @@ describe("/v1/admin/inquiry", () => {
     ]);
   });
 
-  it("lists this site's templates, retired ones too, without the platform's key", async () => {
-    answer.listTemplates = {
-      ok: true,
-      value: [template({ id: "b", name: "B", sortOrder: 200 }), template({ id: "a", name: "A" })],
-    };
+  it("lists this site's templates, retired ones too, without the subject carrier", async () => {
     const body = await (await request("/templates")).json();
     expect(last("listTemplates")?.args).toEqual(["tomokichi-diary", { includeInactive: true }]);
-    expect(body.items.map((item: { id: string }) => item.id)).toEqual(["a", "b"]);
+    const ids = body.items.map((item: { id: string }) => item.id);
+    expect(ids).not.toContain("tpl-carrier");
+    expect(ids).toHaveLength(DEFAULT_TEMPLATES.length);
+    expect(body.items[0]).toMatchObject({ id: `tpl-${OPENING_KEY}`, role: "opening" });
+    expect(body.items[1]).toMatchObject({ role: "reply" });
     expect(body.items[0]).not.toHaveProperty("key");
   });
 
@@ -360,19 +574,37 @@ describe("/v1/admin/inquiry", () => {
     ]);
   });
 
-  it("fills a template for a ticket and lists what is left to fill", async () => {
-    answer.applyTemplate = {
-      ok: true,
-      value: { body: "ともきち 様\n{{日付}}にお送りします。", unresolved: [], subject: "x" },
-    };
+  it("fills a template for a ticket with its subject, and lists what is left to fill", async () => {
+    templates.push(
+      template({
+        id: "tpl-x",
+        key: "diary_x",
+        subject: "【件名】",
+        body: "{{userName}} 様 {{日付}}",
+      }),
+    );
     const body = await (
       await request("/tickets/t1/apply-template", {
         method: "POST",
-        body: JSON.stringify({ templateId: "tpl1" }),
+        body: JSON.stringify({ templateId: "tpl-x" }),
       })
     ).json();
-    expect(last("applyTemplate")?.args).toEqual(["tomokichi-diary", "t1", "tpl1"]);
-    expect(body).toEqual({ body: "ともきち 様\n{{日付}}にお送りします。", unresolved: ["日付"] });
+    expect(last("applyTemplate")?.args).toEqual(["tomokichi-diary", "t1", "tpl-x"]);
+    expect(body).toEqual({
+      body: "ともきち 様 {{日付}}",
+      subject: "【件名】",
+      unresolved: ["日付"],
+    });
+  });
+
+  it("will not apply the subject carrier or the opening as a template", async () => {
+    for (const id of ["tpl-carrier", `tpl-${OPENING_KEY}`]) {
+      const response = await request("/tickets/t1/apply-template", {
+        method: "POST",
+        body: JSON.stringify({ templateId: id }),
+      });
+      expect(response.status).toBe(404);
+    }
   });
 
   it("adds an internal note with its idempotency key", async () => {

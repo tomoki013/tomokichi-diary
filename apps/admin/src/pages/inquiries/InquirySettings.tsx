@@ -77,7 +77,9 @@ function SignatureForm({ initial }: { initial: InquirySignatureDto }) {
         ) : undefined
       }
     >
-      <p className="muted small">返信メールの末尾に自動で付きます。</p>
+      <p className="muted small">
+        返信メールの末尾に自動で付きます（その上に「以上、よろしくお願いいたします。」が入ります）。
+      </p>
       <textarea
         rows={4}
         maxLength={2000}
@@ -121,6 +123,11 @@ function TemplatesPanel() {
         )
       }
     >
+      <p className="muted small">
+        返信は「冒頭（宛名・名乗り）→ 本文 → 以上、よろしくお願いいたします。→
+        署名」の順に組み立てます。冒頭は返信画面を開くと自動で入り、本文はここのテンプレートから選べます。
+        名前を「区分：名前」にすると、返信画面で区分ごとにまとまります。
+      </p>
       {editing !== null && (
         <TemplateEditor
           key={editing}
@@ -159,9 +166,12 @@ function TemplatesPanel() {
                   >
                     {template.name}
                   </button>
+                  {template.role === "opening" && <Badge tone="accent">冒頭・自動で入る</Badge>}
                   {!template.isActive && <Badge>停止中</Badge>}
                 </td>
-                <td className="hide-narrow muted">{template.subject ?? "（既定の件名）"}</td>
+                <td className="hide-narrow muted">
+                  {template.role === "opening" ? "—" : (template.subject ?? "（既定の件名）")}
+                </td>
                 <td className="muted nowrap">{formatRelative(template.updatedAt)}</td>
               </tr>
             ))}

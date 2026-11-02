@@ -434,9 +434,47 @@ export interface InquiryTicketDetailDto extends InquiryTicketSummaryDto {
   readonly totalTimeline: number;
 }
 
+/** Every ticket, counted the ways the inbox filters them. */
+export interface InquiryCountsDto {
+  readonly all: number;
+  /** Not resolved or closed. */
+  readonly open: number;
+  /** Arrived and not yet looked at. */
+  readonly new: number;
+  /** Open and past the platform's response target. */
+  readonly overdue: number;
+  /** Open, by lane key. */
+  readonly openByLane: Readonly<Record<string, number>>;
+  readonly byStatus: Readonly<Partial<Record<InquiryTicketStatus, number>>>;
+}
+
+export interface InquiryTicketPageDto extends PageDto<InquiryTicketSummaryDto> {
+  readonly counts: InquiryCountsDto;
+}
+
+/** What a reply to one ticket will look like, before anything is written. */
+export interface InquiryComposeDto {
+  readonly to: string | null;
+  readonly from: string;
+  /**
+   * The subject the reply goes out with. Only the first reply to a form
+   * message chooses one; after that the platform keeps the conversation's
+   * `Re:` subject and `subjectEditable` is false.
+   */
+  readonly subject: string;
+  readonly subjectEditable: boolean;
+  /** The greeting, filled in for this reader, that a new reply starts with. */
+  readonly opening: string;
+  /** Added by the platform under every reply, above the signature. */
+  readonly closing: string;
+  readonly signature: string;
+}
+
 /** A reply template of this site's, kept on the platform. */
 export interface InquiryReplyTemplateDto {
   readonly id: string;
+  /** `opening` is put in front of every new reply; the rest are picked. */
+  readonly role: "opening" | "reply";
   readonly name: string;
   /** The reply's subject; null uses the platform's default. */
   readonly subject: string | null;
@@ -450,6 +488,8 @@ export interface InquiryReplyTemplateDto {
 /** A template filled in for one ticket, ready to edit and send. */
 export interface InquiryAppliedTemplateDto {
   readonly body: string;
+  /** The template's subject; null when it has none or the subject is fixed. */
+  readonly subject: string | null;
   /** Placeholders still standing; a reply containing any is refused. */
   readonly unresolved: readonly string[];
 }
