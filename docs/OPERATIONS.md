@@ -470,20 +470,47 @@ there.
 ### Admin inquiries
 
 The admin's お問い合わせ screen is where this site's contacts are worked as
-tickets on the inquiry platform, from `admin.tomokichidiary.com`: status and
-resolution, the next action, internal notes and replies. A reply is mailed by
-the platform from this site's support address under the name
-「ともきちの旅行日記」; only the body goes up, and the platform decides the
-recipient and subject from the ticket and adds the signature. The reader's
-answer to it joins the same ticket. A reply that still contains a `{{...}}`
-placeholder is refused, and a send the platform could not mail answers
-`INQUIRY_MAIL_FAILED`.
+tickets on the inquiry platform, from `admin.tomokichidiary.com`.
 
-お問い合わせ → 署名・テンプレート holds the signature (until one is set,
-replies carry the deployment's Tomokichi Studio signature, and the screen says
-so) and this site's reply templates. A template fills `{{userName}}` with the
-name the reader typed and `{{appName}}` / `{{supportUrl}}` with this site's;
-anything else in braces is filled in by hand before sending.
+- **Inbox (the screen's top):** every ticket on one list, open ones first and
+  newest first, with counts on top (未対応, 新着, each lane's open ones,
+  期限超過, すべて) that double as filters, plus a status select, lane chips
+  and search. The API reads the whole inbox from the platform (pages of 100, up
+  to 2,000) so the counts and the lane filter are exact; the platform itself
+  cannot filter by lane.
+- **A ticket:** the conversation (a mail answer's quoted history folded away),
+  a 進め方 panel offering only the next steps the platform allows (確認 → 対応中
+  → 返事待ち / 解決（対応完了・対応不要・迷惑）→ クローズ, 再開), the next action
+  with a due date, internal notes, and the reply.
+- **A reply** is laid out as the mail it becomes: 宛先, 差出人
+  (「ともきちの旅行日記」 <support@tmkch.io>, from the studio seed), 件名, the body
+  starting from the greeting template filled in for the reader, and the closing
+  「以上、よろしくお願いいたします。」 and signature the platform adds. Sending
+  goes through a preview of the whole mail. A ticket that is new or only
+  acknowledged is moved to 対応中 first; after sending it goes to 返事待ち,
+  解決済み or stays 対応中, as chosen.
+- **The subject** is filled in (the lane's default, or the inserted template's)
+  and editable on the first reply to a form message. The platform takes a
+  reply's subject only from the template named on send, so the API writes it
+  to an inactive carrier template (`diary_system_subject`, never listed) just
+  before sending. After the first reply the platform keeps the conversation's
+  `Re:` subject, and the screen shows it read-only.
+
+A reply that still contains a `{{...}}` placeholder is refused, and a send the
+platform could not mail answers `INQUIRY_MAIL_FAILED`. The reader's answer
+joins the same ticket and moves it back to 対応中.
+
+お問い合わせ → 署名・テンプレート holds the signature and this site's reply
+templates. The defaults (`apps/api/src/inquiry-templates.ts`: the greeting and
+replies for articles, requests, questions, work and press, photo use, sales
+pitches and closing a ticket) are created the first time the templates or a
+reply are opened, only when their key is missing, so edits in the admin win.
+The signature is set to the site's own the first time a reply is opened, if
+the project still signs with the deployment's Tomokichi Studio signature. A
+template fills `{{userName}}` with the name the reader typed and `{{appName}}`
+/ `{{supportUrl}}` with this site's; anything else in braces is filled in by
+hand before sending. Naming a template `区分：名前` groups it under 区分 in the
+reply's template picker.
 
 The diary API reaches the platform through the `INQUIRY_OPERATOR` service
 binding to the core Worker's `ProjectOperator` entrypoint (inquiry-platform

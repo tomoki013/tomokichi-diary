@@ -136,3 +136,8 @@ export function isoToJstLocal(iso: string | null): string {
   const date = new Date(Date.parse(iso) + 9 * 3_600_000);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 16);
 }
+
+/** Whether a deadline has gone by. */
+export function isPast(iso: string, now: number = Date.now()): boolean {
+  return Date.parse(iso) < now;
+}

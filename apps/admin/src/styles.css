@@ -1918,3 +1918,239 @@ details.panel > summary {
   padding-bottom: 0.8rem;
   margin-bottom: 0.8rem;
 }
+
+/* Inquiry inbox ---------------------------------------------------------- */
+
+.inbox-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+.inbox-stat {
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  gap: 0.1rem;
+  min-height: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: left;
+}
+.inbox-stat span {
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.inbox-stat strong {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+.inbox-stat--alert strong {
+  color: var(--accent);
+}
+.inbox-stat[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.inbox {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.inbox__row {
+  border-bottom: 1px solid var(--line);
+}
+.inbox__row:last-child {
+  border-bottom: 0;
+}
+.inbox__row > a {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.9rem;
+  color: inherit;
+  text-decoration: none;
+}
+.inbox__row > a:hover {
+  background: var(--surface-alt);
+}
+.inbox__row--new {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.inbox__row--done .inbox__subject {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.inbox__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+.inbox__when {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+.inbox__subject {
+  font-size: 0.98rem;
+  overflow-wrap: anywhere;
+}
+.inbox__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.75rem;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.inbox__next {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+.inbox__next--due {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.message__quoted {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+.workflow__now {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.3rem;
+}
+
+/* A reply, laid out as the mail it becomes. */
+.mail {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.mail__head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.8rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-alt);
+  font-size: 0.88rem;
+}
+.mail__head dt {
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.mail__head dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mail__head input {
+  width: 100%;
+  font-weight: 700;
+}
+.mail__note {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+.mail__text {
+  display: block;
+  width: 100%;
+  min-height: 16rem;
+  margin: 0;
+  padding: 0.8rem;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+textarea.mail__text:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.mail__added {
+  color: var(--ink-faint);
+  white-space: pre-wrap;
+}
+.mail__added--below {
+  display: block;
+  padding: 0.6rem 0.8rem 0.8rem;
+  border-top: 1px dashed var(--line);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.mail--preview {
+  border-color: var(--accent);
+}
+.mail__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-top: 0.75rem;
+}
+.mail__after {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.mail__after span {
+  white-space: nowrap;
+}
+.mail__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+@media (max-width: 760px) {
+  .mail__actions {
+    width: 100%;
+  }
+  .mail__actions button {
+    flex: 1;
+  }
+}
+@media (max-width: 760px) {
+  .inbox-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+  .inbox-stat {
+    padding: 0.4rem 0.5rem;
+  }
+  .inbox-stat strong {
+    font-size: 1.15rem;
+  }
+}
+.message__head {
+  flex-wrap: wrap;
+}
+.message__head strong,
+.panel__head h2 {
+  white-space: nowrap;
+}
+.panel__head {
+  flex-wrap: wrap;
+}
+.panel__actions select {
+  max-width: 100%;
+}
