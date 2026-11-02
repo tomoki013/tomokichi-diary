@@ -13,6 +13,8 @@ import type {
   ArticleCollection,
   Collection,
   CollectionId,
+  Ranking,
+  RankingId,
   ContactMessage,
   ContactMessageId,
   ContactMessageStatus,
@@ -178,6 +180,13 @@ export interface CollectionRepository {
   replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
 }
 
+/** The home page's rankings. Never deleted: an empty one is simply not shown. */
+export interface RankingRepository {
+  listAll(): Promise<readonly Ranking[]>;
+  findById(id: RankingId): Promise<Ranking | null>;
+  save(ranking: Ranking): Promise<void>;
+}
+
 /** Messages received before the contact form moved to the inquiry platform. */
 export interface ContactMessageRepository {
   save(message: ContactMessage): Promise<void>;
@@ -242,6 +251,7 @@ export interface Repositories {
   readonly taxonomy: TaxonomyRepository;
   readonly relations: RelationRepository;
   readonly collections: CollectionRepository;
+  readonly rankings: RankingRepository;
   readonly contactMessages: ContactMessageRepository;
   readonly authors: AuthorRepository;
   readonly aiArtifacts: AIArtifactRepository;

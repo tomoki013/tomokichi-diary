@@ -9,6 +9,8 @@ import { Articles } from "./pages/Articles";
 import { ArticleEditor } from "./pages/editor/ArticleEditor";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { SeriesEditor, SeriesList } from "./pages/Series";
+import { RankingEditor, RankingList } from "./pages/Rankings";
+import { LegalPages } from "./pages/LegalPages";
 import { Routes } from "./pages/Routes";
 import { Likes } from "./pages/Likes";
 import { Inquiries } from "./pages/inquiries/Inquiries";
@@ -25,6 +27,8 @@ const NAV = [
   { key: "likes", label: "いいね", href: href.likes() },
   { key: "media", label: "画像", href: href.media() },
   { key: "series", label: "シリーズ", href: href.series() },
+  { key: "rankings", label: "ランキング", href: href.rankings() },
+  { key: "legal", label: "サイトポリシー", href: href.legal() },
   { key: "routes", label: "URL", href: href.routes() },
   { key: "inquiries", label: "お問い合わせ", href: href.inquiries() },
 ] as const;
@@ -113,6 +117,9 @@ export function App() {
         {route.name === "media" && <MediaLibrary />}
         {route.name === "series" && <SeriesList />}
         {route.name === "series-edit" && <SeriesEditor key={route.id} id={route.id} />}
+        {route.name === "rankings" && <RankingList />}
+        {route.name === "ranking-edit" && <RankingEditor key={route.id} id={route.id} />}
+        {route.name === "legal" && <LegalPages />}
         {route.name === "routes" && <Routes />}
         {route.name === "likes" && <Likes />}
         {route.name === "inquiries" && <Inquiries />}

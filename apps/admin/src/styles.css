@@ -1466,6 +1466,94 @@ fieldset {
   }
 }
 
+/* Home-page rankings. */
+.ranking-list__count {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  color: var(--ink-faint);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.ranking-picks {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.ranking-picks li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.ranking-picks__rank {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+.ranking-picks li:first-child .ranking-picks__rank {
+  color: var(--accent);
+}
+.ranking-picks__body {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.ranking-picks__body strong {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+.ranking-picks__actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.ranking-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.ranking-picker ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.ranking-picker button {
+  display: grid;
+  justify-items: start;
+  gap: 0.1rem;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ranking-picker button span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+@media (max-width: 40rem) {
+  .ranking-picks li {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+  .ranking-picks__actions {
+    grid-column: 2;
+  }
+}
+
 /* Apple Music player in the preview, as the public site renders it. */
 .preview .apple-music {
   margin: 1.25rem 0;

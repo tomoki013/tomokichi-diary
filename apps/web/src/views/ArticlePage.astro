@@ -145,7 +145,9 @@ const journeyRoute = journey ? content.routes.canonicalFor("journey", journey.id
 // The one card to go on to after the story: the trip's next episode, then the
 // articles the author linked (the last link first, since closing links are
 // usually the next step), then the related ones.
-const viewByPath = new Map(articleViews.map((item) => [item.route.path, item]));
+const viewByPath = new Map<string, (typeof articleViews)[number]>(
+  articleViews.map((item) => [item.route.path, item]),
+);
 const linkedFromBody = [...revision.bodyMarkdown.matchAll(/\]\(([^)\s]+)\)/g)]
   .flatMap((match) => {
     try {

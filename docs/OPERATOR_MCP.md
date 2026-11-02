@@ -10,12 +10,14 @@ ChatGPT（Codex）や Claude などの AI クライアントから、記事・�
 
 ## ツール
 
-| 種類                                        | ツール                                                                                                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `publication_status` `list_taxonomy` `list_series` `search_media` |
-| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `set_article_series_and_tags` `create_series` `update_series` `create_tag` `publish_article`   |
+| 種類                                        | ツール                                                                                                                                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `publication_status` `list_taxonomy` `list_series` `list_rankings` `search_media`                                |
+| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `set_article_series_and_tags` `create_series` `update_series` `create_tag` `create_ranking` `update_ranking` `publish_article` `publish_site` |
 
 下書きの保存やシリーズ・タグの付け替えは公開サイトを変えません。公開中の記事は「変更を公開」（`publish_article`）で反映されます。
+
+ランキング（トップページの「ともきち的ランキング」）は `update_ranking` で順位・一言を保存し、`publish_site`（`confirm: "publish"` が必要）でサイト全体を再生成して反映します。記事は ID でも slug でも指定できます。サイトポリシー（/legal/ の固定ページ）は記事と同じツールで編集・公開します。
 
 ## 環境変数
 

@@ -75,6 +75,7 @@ export const ERROR_CODES = [
   "ROUTE_NOT_FOUND",
   "MEDIA_NOT_FOUND",
   "COLLECTION_NOT_FOUND",
+  "RANKING_NOT_FOUND",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

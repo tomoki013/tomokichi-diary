@@ -186,7 +186,21 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
       },
     ) => call<unknown>("PATCH", `/collections/${id(collectionId)}`, input),
     createTag: (input: { slug: string; name: string }) => call<unknown>("POST", "/tags", input),
+    listRankings: () => call<{ items: unknown[] }>("GET", "/rankings"),
+    createRanking: (input: RankingChanges & { title: string }) =>
+      call<unknown>("POST", "/rankings", input),
+    updateRanking: (rankingId: string, input: RankingChanges) =>
+      call<unknown>("PATCH", `/rankings/${id(rankingId)}`, input),
+    publishSite: () => call<unknown>("POST", "/publication/retry", {}),
   };
+}
+
+export interface RankingChanges {
+  title?: string;
+  note?: string;
+  experienceTag?: string | null;
+  picks?: { articleId: string; comment: string }[];
+  sortOrder?: number;
 }
 
 export type OperatorClient = ReturnType<typeof createOperatorClient>;

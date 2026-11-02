@@ -10,6 +10,7 @@ import type {
   ArticleTag,
   ArticleCollection,
   Collection,
+  Ranking,
   Author,
   Category,
   Location,
@@ -45,6 +46,8 @@ export interface ContentSnapshot {
   readonly categories: readonly Category[];
   readonly tags: readonly Tag[];
   readonly collections: readonly Collection[];
+  /** Optional so archives written before rankings existed still read. */
+  readonly rankings?: readonly Ranking[];
   readonly authors: readonly Author[];
   readonly media: readonly MediaAsset[];
   readonly mediaSlugAliases?: readonly { slug: string; mediaId: string }[];

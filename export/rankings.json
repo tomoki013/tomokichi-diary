@@ -1,0 +1,263 @@
+[
+  {
+    "id": "01a1998e-4400-7b5f-b66d-e227727cfb3e",
+    "title": "感動した瞬間ランキング",
+    "note": "写真じゃ足りなかった",
+    "experienceTag": "moving",
+    "picks": [
+      {
+        "articleId": "e05d5e67-f436-8696-b306-115f124db8a3",
+        "comment": "長い砂漠の移動の果てに現れたアブシンベル神殿"
+      },
+      {
+        "articleId": "0d4d62b2-7e34-8393-a23b-5450c1de00e3",
+        "comment": "カッパドキアで見た朝焼けと無数の気球"
+      },
+      {
+        "articleId": "8879a896-b683-8127-af3a-c596d1ab68b1",
+        "comment": "ギザのピラミッドを目の前にした瞬間"
+      },
+      {
+        "articleId": "267ada19-1140-8887-b5a9-4db0cd6068c2",
+        "comment": "サントリーニ島・イアで迎えた夕陽"
+      },
+      {
+        "articleId": "2903bd88-4e7d-84f2-b4b5-07b238815821",
+        "comment": "初めて目にしたタージマハルの美しさ"
+      },
+      {
+        "articleId": "fd608f15-40cf-8675-8944-566d10fd854e",
+        "comment": "トレドの展望台から見渡した街並みと夜景"
+      },
+      {
+        "articleId": "b3a83249-a187-8faa-9a42-996ed0f54ae4",
+        "comment": "サグラダファミリアの壮大な建築に圧倒された瞬間"
+      },
+      {
+        "articleId": "bfbb93de-a42f-8eb2-af54-edeb6235687e",
+        "comment": "バラナシのガンジス川で出会った祈りと人々の営み"
+      },
+      {
+        "articleId": "03343de2-ba31-8b4f-9ccf-bb81dcbed044",
+        "comment": "アテネでパルテノン神殿を目にした瞬間"
+      },
+      {
+        "articleId": "c9b5a75a-70d1-8ee6-bcee-b2ede6b9c1e3",
+        "comment": "初めて生で見た夜のエッフェル塔"
+      },
+      {
+        "articleId": "ac7e2084-5054-83df-a569-449a9c8a68d9",
+        "comment": "ボスポラス海峡の船上から眺めた瞬間"
+      }
+    ],
+    "sortOrder": 10,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4401-743d-a009-0ad989f260eb",
+    "title": "一番笑った出来事ランキング",
+    "note": "今だから笑える",
+    "experienceTag": "funny",
+    "picks": [],
+    "sortOrder": 20,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4402-75c8-aecd-b33ee18c2163",
+    "title": "泣きそうになったランキング",
+    "note": "寂しさも、うれしさも",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 30,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4403-71b2-ae11-4a147ffef01f",
+    "title": "人に助けられたランキング",
+    "note": "あの人たちに感謝",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 40,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4404-76fa-99bb-f65b2ba41b45",
+    "title": "だまされかけたランキング",
+    "note": "みんなは気をつけて",
+    "experienceTag": "thrilling",
+    "picks": [],
+    "sortOrder": 50,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4405-7c60-b512-b9a5cceaec1e",
+    "title": "ピンチだったランキング",
+    "note": "今だから書ける",
+    "experienceTag": "disaster",
+    "picks": [],
+    "sortOrder": 60,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4406-7f4e-8631-07330654dac7",
+    "title": "正直イマイチだった場所ランキング",
+    "note": "ごめん、正直に言う",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 70,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4407-7ba4-b0cc-6c78aba446b9",
+    "title": "準備不足を後悔したランキング",
+    "note": "次は絶対こうする",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 80,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4408-7931-8fd4-5f52ec231b71",
+    "title": "忘れられない移動ランキング",
+    "note": "着くまでが旅",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 90,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4409-73ac-9638-e0ffb5134452",
+    "title": "夜がよかった街ランキング",
+    "note": "昼より夜が好き",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 100,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440a-7459-9bbf-02df4aee5528",
+    "title": "朝がよかった場所ランキング",
+    "note": "早起きしてよかった",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 110,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440b-7fad-88dd-bbaad2621125",
+    "title": "泊まってよかった宿ランキング",
+    "note": "また泊まりたい",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 120,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440c-740e-ac28-50fa0bd620ca",
+    "title": "一番歩いた日ランキング",
+    "note": "足が棒になった",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 130,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440d-7731-8562-ced296810b39",
+    "title": "景色がすごかった場所ランキング",
+    "note": "言葉が出なかった",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 140,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440e-762e-ab7a-98f5fe18dcb4",
+    "title": "忘れられないごはんランキング",
+    "note": "思い出すとお腹がすく",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 150,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-440f-75d9-bd0f-19ffef20c6d2",
+    "title": "意外とおいしかったものランキング",
+    "note": "見た目で判断してごめん",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 160,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4410-7873-9101-545d9418fd36",
+    "title": "二度と食べないものランキング",
+    "note": "一回でいい",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 170,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4411-7ac5-a8cf-f6f040d49f9e",
+    "title": "想像と違った（いい意味で）ランキング",
+    "note": "行ってみてよかった",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 180,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4412-78d4-821b-f20490a006ac",
+    "title": "想像と違った（悪い意味で）ランキング",
+    "note": "こんなはずじゃ",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 190,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4413-7a92-973f-c245d56953b8",
+    "title": "写真より実物がすごかったランキング",
+    "note": "画面じゃ伝わらない",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 200,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4414-74b5-8a19-c6c7018f0e7b",
+    "title": "初めての海外ならここランキング",
+    "note": "昔の自分に教えたい",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 210,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4415-73d1-83d5-b047cf261325",
+    "title": "一人でも楽しかったランキング",
+    "note": "一人旅、悪くない",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 220,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4416-7de8-b016-31618d68a6a3",
+    "title": "学生におすすめの街ランキング",
+    "note": "時間がある今のうちに",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 230,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  },
+  {
+    "id": "01a1998e-4417-79d0-94cc-7935ea211dc1",
+    "title": "また行きたい街ランキング",
+    "note": "次は長めに滞在したい",
+    "experienceTag": null,
+    "picks": [],
+    "sortOrder": 240,
+    "updatedAt": "2026-11-02T00:00:00.000Z"
+  }
+]

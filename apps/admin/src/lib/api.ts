@@ -28,6 +28,7 @@ import type {
   RouteDto,
   TaxonomyDto,
   CollectionAdminDto,
+  RankingAdminDto,
   TagDto,
 } from "@tomokichi/contracts";
 import type { DraftInput } from "./draft";
@@ -211,6 +212,14 @@ export interface CollectionInput {
   articleDefaults?: import("@tomokichi/contracts").CollectionArticleDefaultsDto;
 }
 
+export interface RankingInput {
+  title?: string;
+  note?: string;
+  experienceTag?: string | null;
+  picks?: { articleId: string; comment: string }[];
+  sortOrder?: number;
+}
+
 export type PublicationStatus = import("@tomokichi/contracts").SitePublicationStatus;
 
 export const api = {
@@ -364,6 +373,14 @@ export const api = {
   ) => request<CollectionAdminDto>("/admin/collections", json("POST", input)),
   updateCollection: (collectionId: string, input: CollectionInput) =>
     request<CollectionAdminDto>(`/admin/collections/${id(collectionId)}`, json("PATCH", input)),
+
+  // Home-page rankings
+  listRankings: () => request<{ items: RankingAdminDto[] }>("/admin/rankings"),
+  getRanking: (rankingId: string) => request<RankingAdminDto>(`/admin/rankings/${id(rankingId)}`),
+  createRanking: (input: RankingInput & { title: string }) =>
+    request<RankingAdminDto>("/admin/rankings", json("POST", input)),
+  updateRanking: (rankingId: string, input: RankingInput) =>
+    request<RankingAdminDto>(`/admin/rankings/${id(rankingId)}`, json("PATCH", input)),
 
   // URLs
   listRoutes: () => request<{ items: RouteDto[] }>("/admin/routes"),
