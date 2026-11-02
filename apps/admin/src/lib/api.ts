@@ -13,6 +13,9 @@ import type {
   ArticleKnowledgeBundleDto,
   ArticleSummaryDto,
   ErrorBody,
+  InquiryAppliedTemplateDto,
+  InquiryReplyTemplateDto,
+  InquirySignatureDto,
   InquiryStatusDto,
   InquiryTicketDetailDto,
   InquiryTicketStatus,
@@ -100,6 +103,8 @@ export function describeError(error: unknown): string {
     if (error.code === "API_NOT_FOUND" || error.code.endsWith("_NOT_FOUND")) {
       return "見つかりませんでした";
     }
+    if (error.code === "INQUIRY_MAIL_FAILED")
+      return "返信メールを送れませんでした。時間をおいてもう一度送信してください";
     if (error.code.startsWith("INQUIRY_") && error.status === 502)
       return "共通お問い合わせ基盤に接続できませんでした";
     if (error.code.startsWith("INQUIRY_") && error.status === 503)
@@ -190,6 +195,14 @@ export interface LegacyMessageDto {
   body: string;
   status: "unread" | "read" | "spam";
   createdAt: string;
+}
+
+export interface TemplateInput {
+  name: string;
+  subject: string | null;
+  body: string;
+  isActive: boolean;
+  sortOrder: number;
 }
 
 export interface TicketChange {
@@ -430,6 +443,33 @@ export const api = {
     request<{ ok: boolean }>(
       `/admin/inquiry/tickets/${id(ticketId)}/notes`,
       json("POST", { body, idempotencyKey }),
+    ),
+  replyToTicket: (
+    ticketId: string,
+    reply: {
+      body: string;
+      idempotencyKey: string;
+      reopenIfResolved: boolean;
+      templateId: string | null;
+    },
+  ) =>
+    request<{ ok: boolean }>(`/admin/inquiry/tickets/${id(ticketId)}/reply`, json("POST", reply)),
+  applyTemplate: (ticketId: string, templateId: string) =>
+    request<InquiryAppliedTemplateDto>(
+      `/admin/inquiry/tickets/${id(ticketId)}/apply-template`,
+      json("POST", { templateId }),
+    ),
+  getSignature: () => request<InquirySignatureDto>("/admin/inquiry/signature"),
+  saveSignature: (signature: string) =>
+    request<InquirySignatureDto>("/admin/inquiry/signature", json("PUT", { signature })),
+  listReplyTemplates: () =>
+    request<{ items: InquiryReplyTemplateDto[] }>("/admin/inquiry/templates"),
+  createReplyTemplate: (input: TemplateInput) =>
+    request<InquiryReplyTemplateDto>("/admin/inquiry/templates", json("POST", input)),
+  updateReplyTemplate: (templateId: string, input: TemplateInput) =>
+    request<InquiryReplyTemplateDto>(
+      `/admin/inquiry/templates/${id(templateId)}`,
+      json("PATCH", input),
     ),
 
   // Messages received before the switch to the platform

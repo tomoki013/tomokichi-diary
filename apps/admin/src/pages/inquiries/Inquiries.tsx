@@ -5,6 +5,7 @@ import { formatDateTime, formatRelative, ticketStatusLabels } from "../../lib/la
 import { href } from "../../lib/route";
 import { useResource, useTitle } from "../../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../../ui/parts";
+import { LaneBadge } from "./InquiryDetail";
 
 const FILTERS = [
   { key: "open", label: "未対応" },
@@ -17,7 +18,8 @@ const FILTERS = [
 
 /**
  * This site's tickets on the shared inquiry platform. Contact-form messages
- * land here; replies are sent from the platform's mail address.
+ * land here, each under its lane (一般 / メディア・お仕事); replies are written
+ * here and sent from the platform's mail address.
  */
 export function Inquiries() {
   useTitle("お問い合わせ");
@@ -47,6 +49,7 @@ export function Inquiries() {
         meta={
           <>
             {tickets.data && <span>{tickets.data.total}件</span>}
+            <a href={href.inquirySettings()}>署名・テンプレート →</a>
             <a href={href.legacyMessages()}>切替前の受信箱 →</a>
           </>
         }
@@ -120,6 +123,7 @@ export function Inquiries() {
                         )}
                       </td>
                       <td className="nowrap">
+                        <LaneBadge lane={ticket.lane} status={status.data} />
                         <Badge tone={ticket.status === "NEW" ? "accent" : "neutral"}>
                           {ticketStatusLabels[ticket.status]}
                         </Badge>

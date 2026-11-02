@@ -15,6 +15,7 @@ import { Routes } from "./pages/Routes";
 import { Likes } from "./pages/Likes";
 import { Inquiries } from "./pages/inquiries/Inquiries";
 import { InquiryDetail } from "./pages/inquiries/InquiryDetail";
+import { InquirySettings } from "./pages/inquiries/InquirySettings";
 import { LegacyMessages } from "./pages/inquiries/LegacyMessages";
 import { SignIn } from "./pages/SignIn";
 import { EmptyState, ErrorState, PageHeader } from "./ui/parts";
@@ -124,6 +125,7 @@ export function App() {
         {route.name === "likes" && <Likes />}
         {route.name === "inquiries" && <Inquiries />}
         {route.name === "inquiry" && <InquiryDetail key={route.id} id={route.id} />}
+        {route.name === "inquiry-settings" && <InquirySettings />}
         {route.name === "legacy-messages" && <LegacyMessages />}
         {route.name === "not-found" && (
           <>

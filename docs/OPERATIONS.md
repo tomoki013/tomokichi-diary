@@ -399,24 +399,26 @@ slots or enable automatic optimization based on revenue alone.
 
 The form posts to the versioned `POST /v1/contact` API, which checks the
 honeypot, verifies a Turnstile token, validates the fields, rate-limits the
-sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`), then does
-two things at once:
+sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`), then:
 
-1. **Mails the message to `tomokichidiary@gmail.com`**, where it is read and
-   answered. The reader is the Reply-To, so answering is an ordinary Gmail
-   reply. `CONTACT_MAIL` is a `send_email` binding pinned to that one address
-   (it must be a verified destination in Cloudflare Email Routing), sent from
-   `noreply@tmkch.io` (a domain with Email Routing enabled).
-2. **Files a copy on the shared inquiry platform**
+1. **Files the message on the shared inquiry platform**
    ([tomoki013/inquiry-platform](https://github.com/tomoki013/inquiry-platform),
-   SDK pinned in `apps/api/package.json`), which the admin's お問い合わせ screen
-   shows.
+   SDK pinned in `apps/api/package.json`), where it becomes a ticket that is
+   worked and answered from the admin's お問い合わせ screen.
+2. **Tells `tomokichidiary@gmail.com` it arrived.** The mail carries the
+   message, its lane and a link to the ticket in the admin, and has no
+   Reply-To: replies are written in the admin so the ticket keeps the whole
+   conversation. If filing failed, the mail says so and makes the reader the
+   Reply-To, since it is then the only copy. `CONTACT_MAIL` is a `send_email`
+   binding pinned to that one address (it must be a verified destination in
+   Cloudflare Email Routing), sent from `noreply@tmkch.io` (a domain with Email
+   Routing enabled).
 
 The reader sees success when either went through, and `?error=unavailable` only
 when neither did; whichever failed is logged (`contact.not_mailed` /
 `contact.not_filed`).
 
-The copy goes through the `INQUIRY` service binding to the platform's
+The ticket goes through the `INQUIRY` service binding to the platform's
 `Intake` entrypoint (`tomokichi-admin-core`), declared in
 `apps/api/cloudflare.config.ts` with `props.projects = ["tomokichi-diary"]`. The
 project slug `tomokichi-diary` must be registered on the platform.
@@ -438,19 +440,54 @@ Set `TURNSTILE_EXPECTED_HOSTNAME=tomokichidiary.com,www.tomokichidiary.com` in
 production so a valid token is also checked against an expected hostname and
 the `contact` widget action.
 
+#### Contact lanes
+
+What a reader can pick (記事について, お仕事・取材の相談, …) and which lane (動線)
+each choice belongs to — `general` (一般) or `media` (メディア・お仕事) — is one
+table, `packages/domain/src/rules/contact-topics.ts`. The form's choices, the
+lane a message is filed under, the tag on the notification mail and the lane
+badge in the admin all come from it. The form posts a topic's key (its label is
+still accepted from older pages) and the ticket is filed with the label as its
+subject, which is how the admin recovers the lane; renaming a label moves the
+old wording to the topic's `aliases`.
+
+Ways to change the flow, from smallest to largest:
+
+- **Move or add a choice:** edit the table.
+- **A page of its own for one lane:** render `<ContactForm lane="media" />`;
+  it lists only that lane's topics. `/contact?topic=<key>` preselects a topic
+  from a link.
+- **Handle media enquiries apart** (own reply templates, signature or sending
+  address): register a second project on the platform, point the lane at it in
+  `INQUIRY_PROJECT_BY_LANE` (`apps/api/src/inquiry.ts`), add the slug to both
+  bindings' `props.projects`, and have the admin choose the operator client by
+  lane. Today both lanes share `tomokichi-diary`.
+
 Messages received before the switch stay in D1 `contact_messages` and are still
 readable in the admin under お問い合わせ → 切替前の受信箱. Nothing new is written
 there.
 
 ### Admin inquiries
 
-The admin's お問い合わせ screen lists, annotates and closes the copies of this
-site's contacts on the inquiry platform, from `admin.tomokichidiary.com`.
-Readers are answered from Gmail; the screen has internal notes only, and the
-diary API has no route that makes the platform mail a reader.
+The admin's お問い合わせ screen is where this site's contacts are worked as
+tickets on the inquiry platform, from `admin.tomokichidiary.com`: status and
+resolution, the next action, internal notes and replies. A reply is mailed by
+the platform from this site's support address under the name
+「ともきちの旅行日記」; only the body goes up, and the platform decides the
+recipient and subject from the ticket and adds the signature. The reader's
+answer to it joins the same ticket. A reply that still contains a `{{...}}`
+placeholder is refused, and a send the platform could not mail answers
+`INQUIRY_MAIL_FAILED`.
+
+お問い合わせ → 署名・テンプレート holds the signature (until one is set,
+replies carry the deployment's Tomokichi Studio signature, and the screen says
+so) and this site's reply templates. A template fills `{{userName}}` with the
+name the reader typed and `{{appName}}` / `{{supportUrl}}` with this site's;
+anything else in braces is filled in by hand before sending.
+
 The diary API reaches the platform through the `INQUIRY_OPERATOR` service
 binding to the core Worker's `ProjectOperator` entrypoint (inquiry-platform
-v0.3.1+), after this site's own admin gate has let the operator in. The
+v0.10.0, the release the studio deploys), after this site's own admin gate has let the operator in. The
 binding's `props` grant only `tomokichi-diary`: the platform filters every
 list to it and answers any other project's ticket as missing. Nothing is
 configured on the platform's API gateway (`admin.tmkch.io`) or its Access
@@ -461,9 +498,10 @@ Each change is audited on the platform as `tomokichi-diary-api:<who>`, where
 push links open `https://admin.tomokichidiary.com/#/inquiries/<ticket number>`
 (the studio seed's `mailSettings[].ticketUrlTemplate`).
 
-The platform's own "new ticket" notification (number and link only) also goes
-to the inbox set in the studio's `deploy/inquiry-platform/seed.ts`
-(`mailSettings`).
+The sending address and name, and whether the platform sends its own "new
+ticket" mail, are the studio's `deploy/inquiry-platform/seed.ts`
+(`mailSettings`). The blog sets `notifyByEmail: false` there, since its own
+notification mail (above) already carries the ticket link.
 
 ### `API_UNAUTHORIZED`
 

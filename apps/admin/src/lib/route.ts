@@ -19,6 +19,7 @@ export type Route =
   | { name: "likes" }
   | { name: "inquiries" }
   | { name: "inquiry"; id: string }
+  | { name: "inquiry-settings" }
   | { name: "legacy-messages" }
   | { name: "not-found"; path: string };
 
@@ -53,6 +54,7 @@ export function parseRoute(hash: string): Route {
     case "inquiries":
       if (!second) return { name: "inquiries" };
       if (second === "archive") return { name: "legacy-messages" };
+      if (second === "settings") return { name: "inquiry-settings" };
       return { name: "inquiry", id: decodeURIComponent(second) };
     default:
       return { name: "not-found", path };
@@ -76,6 +78,7 @@ export const href = {
   inquiries: () => "#/inquiries",
   inquiry: (id: string) => `#/inquiries/${encodeURIComponent(id)}`,
   legacyMessages: () => "#/inquiries/archive",
+  inquirySettings: () => "#/inquiries/settings",
 };
 
 /** Which navigation entry a route belongs under. */
@@ -120,6 +123,7 @@ export function section(
       return "likes";
     case "inquiries":
     case "inquiry":
+    case "inquiry-settings":
     case "legacy-messages":
       return "inquiries";
     default:
