@@ -656,70 +656,97 @@
   }
 
   /* Contact ----------------------------------------------------------- */
-  /* Laid out the way a personal blog's form usually is: a ruled table with
-     the label on the left and a plain white field on the right, a square
-     "必須" tag, and one centred button. The form comes first; what it is
-     for and the email address follow underneath. */
+  /* After editorial contact pages (Mike L. Murphy, Bauwerk on Awwwards;
+     SANU's Japanese form): a large Mincho title, the form on one soft clay
+     sheet, each label set small above a field that is only an underline.
+     On a wide screen the title sits beside the sheet and the notes; on a phone they
+     stack, and what the form is for follows underneath. */
   .contact-page {
     display: grid;
     gap: var(--space-xl);
-    max-width: 44rem;
+    max-width: 64rem;
     margin-inline: auto;
     padding-block: var(--band-tight) var(--space-lg);
   }
 
   .contact-head {
     display: grid;
-    gap: 0.6rem;
+    align-content: start;
+    gap: 1rem;
   }
 
   .contact-head h1 {
-    font-size: var(--step-h1);
-    letter-spacing: 0.06em;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    white-space: nowrap;
   }
 
   .contact-head p {
+    max-width: 22rem;
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.9;
+    line-height: 2;
   }
 
   .contact-page > .contact-head + .contact-sheet {
     margin-top: calc(var(--space-md) - var(--space-xl));
   }
 
+  .contact-sheet {
+    padding: clamp(1.5rem, 1rem + 2.5vw, 3rem);
+    border-radius: var(--radius-lg);
+    background: var(--accent-tint);
+  }
+
+  @media (min-width: 56rem) {
+    .contact-page {
+      grid-template-columns: 17rem minmax(0, 1fr);
+      column-gap: clamp(2.5rem, 5vw, 4.5rem);
+    }
+    .contact-page > .contact-head + .contact-sheet {
+      margin-top: 0;
+    }
+    .contact-head {
+      grid-row: 1 / span 2;
+      padding-top: var(--space-sm);
+    }
+    .contact-notes {
+      grid-column: 2;
+    }
+  }
+
   .contact-form {
-    border-top: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem 1.5rem;
+  }
+
+  .contact-form > :not(.contact-form__half) {
+    grid-column: 1 / -1;
   }
 
   .contact-form > label {
     display: grid;
-    grid-template-columns: 11rem minmax(0, 1fr);
-    align-items: start;
-    gap: 1.5rem;
-    padding-block: 1.25rem;
-    border-bottom: 1px solid var(--line);
+    gap: 0.35rem;
   }
 
   .contact-form__label {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: baseline;
     gap: 0.5rem;
-    padding-top: 0.65rem;
-    font-size: var(--step-small);
+    font-size: var(--step-tiny);
     font-weight: 600;
+    letter-spacing: 0.08em;
   }
 
   .contact-form__label small {
-    flex: none;
-    padding: 0.1rem 0.4rem;
-    border-radius: 2px;
-    background: var(--accent);
-    color: #fff;
+    color: var(--accent);
     font-size: 0.6875rem;
-    font-weight: 600;
-    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0.04em;
   }
 
   .contact-form__control {
@@ -728,35 +755,51 @@
 
   .contact-form :is(input, textarea, select) {
     width: 100%;
-    min-height: 2.875rem;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 2px;
-    background: var(--surface);
+    min-height: var(--tap);
+    padding: 0.55rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    border-radius: 0;
+    background: transparent;
     font-size: var(--step-body);
     transition:
       border-color var(--speed) var(--ease),
       box-shadow var(--speed) var(--ease);
   }
 
-  .contact-form select {
-    appearance: none;
-    padding-right: 2.5rem;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2022' stroke-width='1.5'/%3E%3C/svg%3E")
-      right 0.85rem center / 0.7rem no-repeat var(--surface);
+  .contact-form ::placeholder {
+    color: var(--line-strong);
   }
 
+  .contact-form select {
+    appearance: none;
+    padding-right: 1.75rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2022' stroke-width='1.5'/%3E%3C/svg%3E")
+      right 0.25rem center / 0.7rem no-repeat transparent;
+  }
+
+  /* The message box is the one field that reads as a sheet of its own. */
   .contact-form textarea {
-    height: 14rem;
+    height: 12rem;
     min-height: 8rem;
-    line-height: 1.8;
+    margin-top: 0.25rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    line-height: 1.9;
     resize: vertical;
   }
 
-  .contact-form :is(input, textarea, select):focus-visible {
+  .contact-form :is(input, select):focus-visible {
+    outline: none;
+    border-bottom-color: var(--accent);
+    box-shadow: 0 1px 0 0 var(--accent);
+  }
+
+  .contact-form textarea:focus-visible {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
   }
 
   .contact-form__count {
@@ -769,10 +812,18 @@
 
   .contact-form__foot {
     display: grid;
-    justify-items: center;
-    gap: 1rem;
-    padding-top: var(--space-lg);
-    text-align: center;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.6rem 2rem;
+    padding-top: 0.5rem;
+  }
+
+  .contact-form__messages {
+    grid-column: 1 / -1;
+  }
+
+  .contact-form__messages:not(:has(.form-message:not([hidden]))) {
+    display: none;
   }
 
   .contact-form__privacy,
@@ -782,23 +833,36 @@
     line-height: 1.8;
   }
 
+  .contact-form__privacy a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+
   .contact-form__verification {
     display: grid;
-    justify-items: center;
     gap: 0.4rem;
   }
 
+  .contact-form__privacy {
+    grid-area: 2 / 1;
+  }
+
+  .contact-form__verification {
+    grid-area: 3 / 1;
+  }
+
   .contact-form button[type="submit"] {
-    min-width: 15rem;
-    min-height: 3rem;
-    padding: 0.7rem 2.5rem;
+    grid-area: 2 / 2 / span 2;
+    min-width: 11rem;
+    min-height: 3.25rem;
+    padding: 0.7rem 2.25rem;
     border: 0;
-    border-radius: 2px;
+    border-radius: 999px;
     background: var(--accent);
     color: #fff;
     font-size: var(--step-body);
     font-weight: 600;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.16em;
     transition: background var(--speed) var(--ease);
   }
 
@@ -832,38 +896,26 @@
     overflow: hidden;
   }
 
-  /* Failures sit right above the button, where the eye already is. */
-  .contact-form__messages {
-    justify-self: stretch;
-    text-align: left;
-  }
-
-  .contact-form__messages:not(:has(.form-message:not([hidden]))) {
-    display: none;
-  }
-
   .form-message {
     padding: 0.8rem 1rem;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     font-size: var(--step-small);
     line-height: 1.8;
   }
 
   /* State is carried by the bar and the wording, not by a tint alone. */
   .form-message--error {
-    border: 1px solid var(--line);
     border-left: 3px solid var(--color-state-error);
     background: var(--surface);
     color: var(--color-state-error);
   }
 
-  /* Sent: the form gives way to a short note in the same place. */
+  /* Sent: the sheet keeps its place and carries a short note instead. */
   .contact-done {
     display: grid;
     justify-items: center;
-    gap: 0.8rem;
-    padding: var(--space-xl) var(--space-sm);
-    border-block: 1px solid var(--ink);
+    gap: 1rem;
+    padding: var(--space-lg) 0;
     text-align: center;
   }
 
@@ -876,27 +928,33 @@
   }
 
   .contact-done h2 {
+    font-family: var(--font-serif);
     font-size: var(--step-h3);
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
   }
 
   .contact-done p {
     max-width: 30rem;
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.9;
+    line-height: 2;
     text-align: left;
   }
 
   .contact-done button {
     min-height: var(--tap);
-    padding: 0;
-    border: 0;
+    padding: 0 1.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
     background: none;
     color: var(--accent);
     font-size: var(--step-small);
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
+    letter-spacing: 0.06em;
+  }
+
+  .contact-done button:hover {
+    background: var(--surface);
   }
 
   .contact-notes {
@@ -906,21 +964,23 @@
 
   .contact-notes h2 {
     margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--line-mid);
-    font-size: 1rem;
-    letter-spacing: 0.04em;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
   }
 
   .contact-topics {
     margin: 0;
+    border-top: 1px solid var(--line-mid);
   }
 
   .contact-topics > div {
     display: grid;
     grid-template-columns: 9rem minmax(0, 1fr);
     gap: 0.75rem;
-    padding-block: 0.4rem;
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--line);
   }
 
   .contact-topics dt {
@@ -939,7 +999,7 @@
   .contact-direct {
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.85;
+    line-height: 1.9;
   }
 
   .contact-policy p + p {
@@ -1129,18 +1189,21 @@
   }
 
   @media (max-width: 40rem) {
-    /* On a phone the label sits above its field. */
-    .contact-form > label {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.5rem;
-      padding-block: 1rem;
-    }
-    .contact-form__label {
-      justify-content: flex-start;
-      padding-top: 0;
+    /* On a phone every field takes the full width and the button sits
+       under the small print, wide enough for a thumb. */
+    .contact-form > .contact-form__half {
+      grid-column: 1 / -1;
     }
     .contact-form textarea {
-      height: 11rem;
+      height: 10rem;
+    }
+    .contact-form__foot {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .contact-form__privacy,
+    .contact-form__verification,
+    .contact-form button[type="submit"] {
+      grid-area: auto;
     }
     .contact-form button[type="submit"] {
       width: 100%;
