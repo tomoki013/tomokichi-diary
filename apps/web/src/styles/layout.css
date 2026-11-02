@@ -70,7 +70,8 @@
     transition:
       border-color var(--speed) var(--ease),
       box-shadow var(--speed) var(--ease),
-      background var(--speed) var(--ease);
+      background var(--speed) var(--ease),
+      backdrop-filter var(--speed) var(--ease);
   }
 
   .site-header.is-scrolled {
@@ -93,7 +94,9 @@
   .site-header--overlay:not(.is-scrolled, .is-solid) {
     border-bottom-color: transparent;
     background: transparent;
-    backdrop-filter: none;
+    /* A zero blur rather than none, so the change to the solid bar fades
+       instead of switching the filter on in one frame. */
+    backdrop-filter: blur(0) saturate(100%);
     box-shadow: none;
   }
 
@@ -342,8 +345,14 @@
     width: 100%;
     padding: 0;
     border: 0;
-    background: rgb(26 22 17 / 45%);
-    backdrop-filter: blur(3px);
+    /* The dim fades in and out with the panel. It used to snap to full
+       strength on open and vanish only after the panel had gone, which read
+       as a flash. No blur here: a full-screen backdrop-filter repainting over
+       the masthead's own blur is what made the bar and the page flicker on
+       phones, and at this strength the blur added nothing. */
+    background: rgb(26 22 17 / 50%);
+    opacity: 0;
+    transition: opacity 260ms var(--ease);
   }
 
   /* The lightbox has no panel of its own, so the dimmed page is what the
@@ -351,8 +360,7 @@
   .gallery-lightbox__backdrop {
     background: rgb(14 12 9 / 96%);
     backdrop-filter: blur(14px) saturate(70%);
-    opacity: 0;
-    transition: opacity 240ms var(--ease);
+    transition-duration: 240ms;
   }
 
   .mobile-menu.is-open .mobile-menu__backdrop,
