@@ -64,7 +64,9 @@ const HOME_TOP = 5;
           </ol>
           {picks.length > HOME_TOP && (
             <details class="home-picks__rest">
-              <summary>{HOME_TOP + 1}位以下を見る（{picks.length - HOME_TOP}件）</summary>
+              <summary>
+                {HOME_TOP + 1}位以下を見る（{picks.length - HOME_TOP}件）
+              </summary>
               <ol start={HOME_TOP + 1}>
                 {picks.slice(HOME_TOP).map(({ view, comment }, index) => (
                   <li>
