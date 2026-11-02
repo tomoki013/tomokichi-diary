@@ -6,5 +6,13 @@
     "noEmit": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "operator/client.ts",
+    "operator/server.ts",
+    "../admin/src/lib/ad-client.ts",
+    "../admin/src/lib/ad-standard.ts",
+    "../admin/src/lib/ad-test.ts",
+    "../admin/src/lib/draft.ts"
+  ]
 }

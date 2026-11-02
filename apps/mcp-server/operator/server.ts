@@ -85,8 +85,17 @@ const WRITE = { readOnlyHint: false, destructiveHint: false, openWorldHint: fals
  * the session, and nothing here deletes. Publishing additionally needs the
  * caller to restate the article id, so it cannot happen as a side effect.
  */
-export function createOperatorServer(client: OperatorClient): McpServer {
+export function createOperatorServer(
+  client: OperatorClient,
+  { readOnly = false }: { readOnly?: boolean } = {},
+): McpServer {
   const server = new McpServer({ name: "tomokichi-diary-operator", version: "1.0.0" });
+  // A read-only remote grant does not even list the write tools.
+  if (readOnly) {
+    const register = server.registerTool.bind(server);
+    server.registerTool = ((...args: Parameters<typeof register>) =>
+      args[1].annotations?.readOnlyHint ? register(...args) : undefined) as typeof register;
+  }
 
   server.registerTool(
     "list_articles",

@@ -61,6 +61,12 @@ export interface AppOptions {
   /** Overridden by tests so the inquiry screen runs against a stand-in platform. */
   inquiryOperator?: (env: Env) => ProjectOperatorClient | null;
   publishSite?: (env: Env, deferBuild?: boolean) => Promise<unknown>;
+  /**
+   * Set only for the app behind the `AdminOperator` entrypoint (operator.ts),
+   * which nothing but a Service Binding can reach: the caller already proved
+   * who it is, so the admin gate lets it in as this actor without a token.
+   */
+  operatorActor?: string;
 }
 
 /**
@@ -152,6 +158,12 @@ export function createApp(options: AppOptions = {}) {
    * disable the token — remove `ADMIN_TOKEN` to make Access the only way in.
    */
   v1.use("/admin/*", async (c, next) => {
+    if (options.operatorActor) {
+      c.get("ctx").logger.info("admin.authenticated", { via: "operator-binding" });
+      c.set("adminActor", options.operatorActor);
+      await next();
+      return;
+    }
     const teamDomain = c.env.ACCESS_TEAM_DOMAIN?.trim();
     const audience = c.env.ACCESS_AUD?.trim();
     const assertion = c.req.header("cf-access-jwt-assertion");

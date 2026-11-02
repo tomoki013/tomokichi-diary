@@ -79,7 +79,8 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
     const response = await fetchImpl(`${config.apiUrl}/v1/admin${path}`, {
       method,
       headers: {
-        authorization: `Bearer ${config.token}`,
+        // The remote server reaches the API over a Service Binding instead.
+        ...(config.token === "" ? {} : { authorization: `Bearer ${config.token}` }),
         ...(body === undefined ? {} : { "content-type": "application/json" }),
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
