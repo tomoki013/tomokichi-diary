@@ -13,6 +13,7 @@ export * from "./entities/media.js";
 export * from "./entities/route.js";
 export * from "./entities/taxonomy.js";
 export * from "./entities/collection.js";
+export * from "./entities/ranking.js";
 export * from "./entities/relation.js";
 export * from "./entities/ai-artifact.js";
 export * from "./entities/contact-message.js";

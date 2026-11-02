@@ -12,6 +12,9 @@ export type Route =
   | { name: "media" }
   | { name: "series" }
   | { name: "series-edit"; id: string }
+  | { name: "rankings" }
+  | { name: "ranking-edit"; id: string }
+  | { name: "legal" }
   | { name: "routes" }
   | { name: "likes" }
   | { name: "inquiries" }
@@ -35,6 +38,12 @@ export function parseRoute(hash: string): Route {
       return second ? { name: "not-found", path } : { name: "monetization" };
     case "media":
       return second ? { name: "not-found", path } : { name: "media" };
+    case "rankings":
+      return second
+        ? { name: "ranking-edit", id: decodeURIComponent(second) }
+        : { name: "rankings" };
+    case "legal":
+      return second ? { name: "not-found", path } : { name: "legal" };
     case "routes":
       return second ? { name: "not-found", path } : { name: "routes" };
     case "likes":
@@ -59,6 +68,9 @@ export const href = {
   media: () => "#/media",
   series: () => "#/series",
   seriesEdit: (id: string) => `#/series/${encodeURIComponent(id)}`,
+  rankings: () => "#/rankings",
+  rankingEdit: (id: string) => `#/rankings/${encodeURIComponent(id)}`,
+  legal: () => "#/legal",
   routes: () => "#/routes",
   likes: () => "#/likes",
   inquiries: () => "#/inquiries",
@@ -76,6 +88,8 @@ export function section(
   | "monetization"
   | "media"
   | "series"
+  | "rankings"
+  | "legal"
   | "routes"
   | "likes"
   | "inquiries"
@@ -95,6 +109,11 @@ export function section(
     case "series":
     case "series-edit":
       return "series";
+    case "rankings":
+    case "ranking-edit":
+      return "rankings";
+    case "legal":
+      return "legal";
     case "routes":
       return "routes";
     case "likes":

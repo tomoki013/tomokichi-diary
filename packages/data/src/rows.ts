@@ -10,6 +10,7 @@ import type {
   ArticleTag,
   ArticleCollection,
   Collection,
+  Ranking,
   ContactMessage,
   Author,
   Category,
@@ -26,6 +27,7 @@ import type {
   CategoryId,
   TagId,
   ThemeMusicProvider,
+  ArticleId,
 } from "@tomokichi/domain";
 import { isExperienceTag } from "@tomokichi/domain";
 
@@ -620,5 +622,40 @@ export const contactMessageRow = {
     ip_hash: message.ipHash,
     status: message.status,
     created_at: message.createdAt,
+  }),
+};
+
+export const rankingRow = {
+  to: (row: Row): Ranking => {
+    const experienceTag = nullableStr(row, "experience_tag");
+    return {
+      id: str(row, "id") as Ranking["id"],
+      title: str(row, "title"),
+      note: str(row, "note"),
+      experienceTag: isExperienceTag(experienceTag) ? experienceTag : null,
+      picks: json<unknown[]>(row, "picks", []).flatMap((pick) => {
+        if (typeof pick !== "object" || pick === null) return [];
+        const { articleId, comment } = pick as Record<string, unknown>;
+        return typeof articleId === "string" && articleId !== ""
+          ? [
+              {
+                articleId: articleId as ArticleId,
+                comment: typeof comment === "string" ? comment : "",
+              },
+            ]
+          : [];
+      }),
+      sortOrder: num(row, "sort_order"),
+      updatedAt: nullableStr(row, "updated_at") as Ranking["updatedAt"],
+    };
+  },
+  from: (ranking: Ranking): Row => ({
+    id: ranking.id,
+    title: ranking.title,
+    note: ranking.note,
+    experience_tag: ranking.experienceTag,
+    picks: JSON.stringify(ranking.picks),
+    sort_order: ranking.sortOrder,
+    updated_at: ranking.updatedAt,
   }),
 };

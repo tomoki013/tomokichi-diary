@@ -10,6 +10,7 @@ import type {
   MediaRepository,
   PlaceRepository,
   CollectionRepository,
+  RankingRepository,
   ContactMessageRepository,
   RelationRepository,
   Repositories,
@@ -31,6 +32,7 @@ import {
   authorRow,
   categoryRow,
   collectionRow,
+  rankingRow,
   contactMessageRow,
   embedRow,
   locationNameRow,
@@ -555,6 +557,18 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  const rankings: RankingRepository = {
+    listAll: async () =>
+      (await all("SELECT * FROM rankings ORDER BY sort_order, id")).map(rankingRow.to),
+    findById: async (id) => {
+      const row = await first("SELECT * FROM rankings WHERE id = ?", id);
+      return row ? rankingRow.to(row) : null;
+    },
+    save: async (ranking) => {
+      await upsert(db, "rankings", rankingRow.from(ranking), ["id"]).run();
+    },
+  };
+
   const contactMessages: ContactMessageRepository = {
     save: async (message) => {
       await upsert(db, "contact_messages", contactMessageRow.from(message), ["id"]).run();
@@ -643,6 +657,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     taxonomy,
     relations,
     collections,
+    rankings,
     contactMessages,
     authors,
     aiArtifacts,

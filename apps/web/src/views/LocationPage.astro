@@ -7,6 +7,7 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import { content, now } from "../lib/content";
 import { locationTrail } from "../lib/navigation";
+import { heroVariantOf } from "../lib/hero-variation";
 import { mediaUrl, seoConfig } from "../lib/site";
 import Picture from "../components/Picture.astro";
 
@@ -67,8 +68,52 @@ const siblings = location?.parentId
       })
       .slice(0, 6)
   : [];
-const heroView = views.find((view) => view.cover) ?? views[0];
-const heroCover = heroView?.cover ?? null;
+const photoLocations = new Set([locationId, ...descendants]);
+const localPhotoViews = views.filter((view) => {
+  const primary = content.primaryLocationOf(view.article.id);
+  return primary && photoLocations.has(primary.id);
+});
+const diaryViews = localPhotoViews.filter((view) =>
+  content.collectionsOf(view.article.id).some((item) => item.slug === "travel-diary"),
+);
+const visibleArticles = new Set(localPhotoViews.map((view) => view.article.id));
+const journeyCovers = content.snapshot.collections
+  .filter((collection) => collection.kind === "journey" && collection.coverMediaId)
+  .flatMap((collection) => {
+    const asset = content.snapshot.media.find((media) => media.id === collection.coverMediaId);
+    if (!asset) return [];
+    const relatedMembers = content
+      .membersOf(collection.id)
+      .filter((view) => visibleArticles.has(view.article.id));
+    if (relatedMembers.length === 0) return [];
+    const coverUse = relatedMembers.find((view) => view.cover?.asset.id === asset.id)?.cover;
+    if (!coverUse) return [];
+    return [
+      {
+        asset,
+        alt: coverUse?.usage.alt ?? `${name}を旅したときの風景`,
+        relatedCount: relatedMembers.length,
+        startDate: collection.startDate ?? "",
+      },
+    ];
+  })
+  .toSorted((a, b) => b.relatedCount - a.relatedCount || b.startDate.localeCompare(a.startDate));
+const journeyCover = journeyCovers[0];
+const heroCover = journeyCover
+  ? { asset: journeyCover.asset, usage: { alt: journeyCover.alt } }
+  : (diaryViews.toReversed().find((view) => view.cover)?.cover ??
+    localPhotoViews.find((view) => view.cover)?.cover ??
+    null);
+const heroPhotos = [
+  ...(heroCover ? [heroCover] : []),
+  ...[...diaryViews, ...localPhotoViews].flatMap((view) => (view.cover ? [view.cover] : [])),
+]
+  .filter(
+    (photo, index, all) =>
+      all.findIndex((candidate) => candidate.asset.storageKey === photo.asset.storageKey) === index,
+  )
+  .slice(0, 3);
+const heroVariant = heroVariantOf(route.path);
 const locationKind =
   location?.type === "country" ? "国" : location?.type === "city" ? "街" : "地域";
 
@@ -85,21 +130,46 @@ const metadata = buildPageMetadata(seoConfig, {
 <BaseLayout metadata={metadata} jsonLd={[buildBreadcrumbJsonLd(seoConfig, trail)]}>
   <div class="location-page">
     <Breadcrumbs trail={trail} />
-    <header class:list={["location-hero", !heroCover && "location-hero--plain"]}>
-      {heroCover && (
-        <div class="location-hero__media">
-          <Picture
-            storageKey={heroCover.asset.storageKey}
-            alt={heroCover.usage.alt}
-            sizes="(max-width: 760px) 100vw, 1200px"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </div>
-      )}
-      <span class="location-hero__shade"></span>
+    <header
+      class:list={[
+        "location-hero",
+        `location-hero--variant-${heroVariant}`,
+        !heroCover && "location-hero--plain",
+      ]}
+    >
+      <div class="location-hero__art" role="group" aria-label={`${name}の旅の写真`}>
+        {heroPhotos.map((photo, index) => (
+          <figure class:list={["location-hero__frame", `location-hero__frame--${index}`]}>
+            <Picture
+              storageKey={photo.asset.storageKey}
+              alt={photo.usage.alt}
+              sizes="(max-width: 760px) 100vw, 1200px"
+              loading="eager"
+              fetchpriority={index === 0 ? "high" : "auto"}
+            />
+            {index === 0 && (
+              <figcaption class="location-hero__photo-note">
+                <small>FIELD NOTES</small>
+                <strong>{name}</strong>
+              </figcaption>
+            )}
+          </figure>
+        ))}
+        {heroPhotos.length === 0 && (
+          <div class="location-hero__media-placeholder" aria-hidden="true">
+            A PLACE TO REMEMBER
+          </div>
+        )}
+        <span class="location-hero__art-mark" aria-hidden="true">
+          {locationKind} <i>✳</i> TRAVEL NOTES
+        </span>
+      </div>
       <div class="location-hero__content">
-        <p>{parentName ? `${parentName}の${locationKind}` : `旅した${locationKind}`}</p>
+        <p class="location-hero__eyebrow">
+          <span>DESTINATION</span>
+          <i aria-hidden="true"></i>
+          <span>{parentName ?? `旅した${locationKind}`}</span>
+        </p>
         <h1>{name}</h1>
         <p>
           {name}
@@ -107,18 +177,29 @@ const metadata = buildPageMetadata(seoConfig, {
         </p>
         <dl>
           <div>
-            <dt>旅ブログ</dt>
-            <dd>{views.length}本</dd>
+            <dt>TRAVEL STORIES</dt>
+            <dd>
+              {views.length}
+              <small>本</small>
+            </dd>
           </div>
           {children.length > 0 && (
             <div>
               <>
-                <dt>{location?.type === "country" ? "訪れた街" : "エリア"}</dt>
-                <dd>{children.length}か所</dd>
+                <dt>{location?.type === "country" ? "PLACES VISITED" : "AREAS"}</dt>
+                <dd>
+                  {children.length}
+                  <small>か所</small>
+                </dd>
               </>
             </div>
           )}
         </dl>
+        {views.length > 0 && (
+          <a class="location-hero__link" href="#location-stories-title">
+            旅の記録を読む <span aria-hidden="true">↓</span>
+          </a>
+        )}
       </div>
     </header>
 

@@ -10,6 +10,7 @@ import { articleRoutes } from "./routes/articles.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
 import { mediaRoutes } from "./routes/media.js";
 import { collectionRoutes } from "./routes/collections.js";
+import { rankingRoutes } from "./routes/rankings.js";
 import { imageRoutes } from "./routes/images.js";
 import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
@@ -195,6 +196,7 @@ export function createApp(options: AppOptions = {}) {
   v1.route("/admin/routes", routeRoutes());
   v1.route("/admin/messages", messageRoutes());
   v1.route("/admin/knowledge", knowledgeRoutes());
+  v1.route("/admin/rankings", rankingRoutes());
   v1.route(
     "/admin/inquiry",
     inquiryRoutes((c) => inquiryOperator(c.env)),

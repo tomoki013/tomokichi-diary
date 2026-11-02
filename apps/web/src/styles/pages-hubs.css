@@ -1,0 +1,509 @@
+/* Destination field notes keep a stable composition for each route.
+   The photographs come from the destination’s own stories. */
+@layer pages {
+  :is(.location-hero) {
+    --hero-paper: #eee8dd;
+    --hero-ink: #faf8f4;
+    --hero-muted: #e2ddd3;
+    --hero-accent: #f0c5a9;
+    --focus-ring: var(--hero-ink);
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-height: 35rem;
+    margin-top: 1rem;
+    overflow: hidden;
+    background: #222a2d;
+    color: var(--hero-ink);
+  }
+  :is(.location-hero__art) {
+    position: absolute;
+    inset: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+  :is(.location-hero__frame) {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #74766d;
+  }
+  :is(.location-hero__frame) :is(picture, img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  :is(.location-hero__frame) img {
+    object-fit: cover;
+  }
+  :is(.location-hero__frame--1, .location-hero__frame--2) {
+    display: none;
+  }
+  :is(.location-hero__art)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgb(9 16 20 / 82%), rgb(9 16 20 / 15%) 85%),
+      linear-gradient(0deg, rgb(9 16 20 / 45%), transparent 65%);
+  }
+  :is(.location-hero__content) {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 1.1rem;
+    width: min(63%, 44rem);
+    padding: clamp(1.5rem, 4.5vw, 4rem);
+    color: var(--hero-ink);
+    min-width: 0;
+  }
+  :is(.location-hero__eyebrow) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    color: var(--hero-accent);
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+  }
+  :is(.location-hero__eyebrow) i {
+    width: 1.8rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .location-hero__content h1 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(3.2rem, 6.8vw, 6rem);
+    font-weight: 500;
+    letter-spacing: -0.055em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  :is(.location-hero__content) > p:not([class$="__eyebrow"]) {
+    max-width: 31rem;
+    margin: 0;
+    color: var(--hero-muted);
+    font-size: var(--step-small);
+    line-height: 1.95;
+    white-space: pre-line;
+  }
+  .location-hero dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.3rem;
+    width: 100%;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--hero-ink) 30%, transparent);
+  }
+  .location-hero dt {
+    color: var(--hero-muted);
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.13em;
+  }
+  .location-hero dd {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-label);
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+  .location-hero dd small {
+    margin-left: 0.25rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+  }
+  .location-hero__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.2rem;
+    min-height: var(--tap);
+    color: var(--hero-ink);
+    font-size: 0.8rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--hero-accent);
+  }
+  .location-hero__link span {
+    font-size: 1.1rem;
+    transition: transform 180ms ease;
+  }
+  .location-hero__link:hover span {
+    transform: translateY(3px);
+  }
+  :is(.location-hero__photo-note) {
+    position: absolute;
+    z-index: 2;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    display: grid;
+    gap: 0.2rem;
+    color: white;
+    text-align: right;
+    text-shadow: 0 1px 8px #000;
+  }
+  :is(.location-hero__photo-note) small {
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.17em;
+  }
+  :is(.location-hero__photo-note) strong {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+  }
+  .location-hero__art-mark {
+    position: absolute;
+    z-index: 2;
+    top: 1.5rem;
+    right: 1.5rem;
+    writing-mode: vertical-rl;
+    color: white;
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-shadow: 0 1px 8px #000;
+  }
+  .location-hero__art-mark i {
+    margin-block: 0.7rem;
+    font-size: 1.1rem;
+    font-style: normal;
+  }
+
+  /* Destination 0: cinematic landscape, a small photograph tucked in the corner. */
+  .location-hero--variant-0 .location-hero__content {
+    align-content: end;
+    padding-bottom: 3rem;
+  }
+  .location-hero--variant-0 .location-hero__frame--1 {
+    display: block;
+    inset: 8% 5% auto auto;
+    width: 23%;
+    height: 39%;
+    border: 0.5rem solid #f5eee3;
+    transform: rotate(5deg);
+    box-shadow: 0 15px 35px #0005;
+    z-index: 2;
+  }
+  /* Destination 1: a large editorial heading over a wide contact sheet. */
+  .location-hero--variant-1 {
+    --hero-ink: #242d2e;
+    --hero-muted: #454d4a;
+    --hero-accent: #885b42;
+    grid-template-rows: auto 20rem;
+    background: #eee8dd;
+  }
+  .location-hero--variant-1 .location-hero__content {
+    width: 100%;
+    grid-row: 1;
+    padding-block: 2rem;
+  }
+  .location-hero--variant-1 .location-hero__content > p:not(.location-hero__eyebrow) {
+    max-width: 45rem;
+  }
+  .location-hero--variant-1 .location-hero__content dl {
+    position: absolute;
+    top: 3.2rem;
+    right: 3rem;
+    width: auto;
+    border: 0;
+  }
+  .location-hero--variant-1 .location-hero__art {
+    position: relative;
+    grid-row: 2;
+    margin: 0 1rem 1rem;
+  }
+  .location-hero--variant-1 .location-hero__art::after {
+    background: linear-gradient(0deg, #0005, transparent 45%);
+  }
+  .location-hero--variant-1 .location-hero__frame--0 {
+    right: 42%;
+  }
+  .location-hero--variant-1 .location-hero__frame--1 {
+    display: block;
+    inset: 0 0 0 59%;
+  }
+  /* Destination 2: three different crops on warm atlas paper. */
+  .location-hero--variant-2 {
+    --hero-ink: #2c3433;
+    --hero-muted: #4e5550;
+    --hero-accent: #8c5c47;
+    grid-template-columns: 0.9fr 1.1fr;
+    background: #e9e2d4;
+  }
+  .location-hero--variant-2 .location-hero__content {
+    grid-area: 1/1;
+    width: auto;
+  }
+  .location-hero--variant-2 .location-hero__art {
+    position: relative;
+    grid-area: 1/2;
+    margin: 2rem 2rem 2rem 0;
+  }
+  .location-hero--variant-2 .location-hero__art::after {
+    background: none;
+  }
+  .location-hero--variant-2 .location-hero__frame--0 {
+    inset: 0 22% 12% 0;
+    border-radius: 50% 50% 0 0;
+  }
+  .location-hero--variant-2 .location-hero__frame--1 {
+    display: block;
+    inset: 55% 0 0 52%;
+    border: 0.5rem solid #e9e2d4;
+    transform: rotate(-5deg);
+    z-index: 2;
+  }
+  .location-hero--variant-2 .location-hero__photo-note {
+    display: none;
+  }
+  /* Destination 3: a floating paper note, with an uninterrupted photograph. */
+  .location-hero--variant-3 {
+    --hero-ink: #28322f;
+    --hero-muted: #4c5550;
+    --hero-accent: #875c49;
+  }
+  .location-hero--variant-3 .location-hero__art::after {
+    background: linear-gradient(0deg, #0004, transparent 40%);
+  }
+  .location-hero--variant-3 .location-hero__content {
+    align-self: center;
+    justify-self: end;
+    width: 43%;
+    margin: 2rem;
+    padding: 2.5rem;
+    background: #faf5e9ed;
+    border-top: 4px solid #9a6048;
+  }
+  .location-hero--variant-3 .location-hero__content h1 {
+    font-size: clamp(3rem, 5vw, 4.7rem);
+  }
+  .location-hero--variant-3 .location-hero__photo-note {
+    left: 1.5rem;
+    right: auto;
+    text-align: left;
+  }
+  /* Destination 4: night-city spread with an oblique photographic edge. */
+  .location-hero--variant-4 {
+    grid-template-columns: 1.15fr 0.85fr;
+    background: #222c31;
+  }
+  .location-hero--variant-4 .location-hero__art {
+    position: relative;
+    grid-area: 1/1;
+    clip-path: polygon(0 0, 100% 0, 89% 100%, 0 100%);
+  }
+  .location-hero--variant-4 .location-hero__art::after {
+    background: linear-gradient(0deg, #0005, transparent 50%);
+  }
+  .location-hero--variant-4 .location-hero__frame--1 {
+    display: block;
+    inset: auto 12% 9% auto;
+    width: 26%;
+    height: 29%;
+    border: 0.4rem solid #e8ded1;
+    transform: rotate(6deg);
+    z-index: 2;
+  }
+  .location-hero--variant-4 .location-hero__content {
+    grid-area: 1/2;
+    width: auto;
+    padding-left: 0.5rem;
+  }
+  .location-hero--variant-4 .location-hero__art-mark {
+    right: 13%;
+  }
+  /* Destination 5: typographic title at the top, panoramic image below. */
+  .location-hero--variant-5 {
+    --hero-ink: #242d2e;
+    --hero-muted: #49534f;
+    --hero-accent: #8c5c47;
+    grid-template-rows: auto 23rem;
+    background: #eee8dd;
+  }
+  .location-hero--variant-5 .location-hero__content {
+    width: 100%;
+    grid-row: 1;
+    padding: 2rem 3rem;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+  .location-hero--variant-5 .location-hero__eyebrow {
+    grid-column: 1/-1;
+  }
+  .location-hero--variant-5 .location-hero__content h1 {
+    grid-column: 1;
+    grid-row: 2/4;
+  }
+  .location-hero--variant-5 .location-hero__content dl {
+    width: auto;
+  }
+  .location-hero--variant-5 .location-hero__link {
+    display: none;
+  }
+  .location-hero--variant-5 .location-hero__art {
+    position: relative;
+    grid-row: 2;
+  }
+  .location-hero--variant-5 .location-hero__art::after {
+    background: linear-gradient(0deg, #0004, transparent 50%);
+  }
+
+  /* A single available photograph still fills the layout. */
+  :is(.location-hero__art):not(:has(figure:nth-of-type(2))) > figure:first-of-type {
+    inset: 0;
+  }
+  :is(.location-hero--plain) {
+    --hero-ink: #28332f;
+    --hero-muted: #4d5751;
+    --hero-accent: #875840;
+    background: #ece3d4;
+    min-height: 20rem;
+    display: block;
+  }
+  :is(.location-hero--plain) :is(.location-hero__content) {
+    width: 100%;
+    margin: 0;
+    background: none;
+  }
+  :is(.location-hero--plain) :is(.location-hero__art) {
+    display: none;
+  }
+  .location-stories h2 {
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  @media (max-width: 46rem) {
+    :is(.location-hero) {
+      min-height: 0;
+    }
+    :is(.location-hero__content) {
+      width: 100%;
+      padding: 1.25rem;
+      align-content: end;
+      gap: 0.65rem;
+    }
+    .location-hero__content h1 {
+      font-size: clamp(2.4rem, 10vw, 3.25rem);
+    }
+    :is(.location-hero__content) > p:not([class$="__eyebrow"]) {
+      font-size: 0.875rem;
+      line-height: 1.85;
+    }
+    /* Phone compositions put the title, photograph and useful facts within
+       the first screen; tall poster treatments expand only on wider screens. */
+    .location-hero--variant-0 {
+      min-height: 32rem;
+    }
+    :is(.location-hero__eyebrow) {
+      font-size: 0.65rem;
+      letter-spacing: 0.11em;
+    }
+    .location-hero dl {
+      gap: 0.65rem 1.5rem;
+      padding-top: 0.65rem;
+    }
+    .location-hero dt {
+      font-size: 0.65rem;
+      letter-spacing: 0.07em;
+    }
+    .location-hero dd {
+      font-size: 1.5rem;
+    }
+    .location-hero__link {
+      min-height: 2.75rem;
+      font-size: 0.875rem;
+    }
+    .location-hero__art-mark {
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.6rem;
+    }
+    .location-hero__frame--1,
+    .location-hero__frame--2 {
+      display: none !important;
+    }
+    .location-hero__photo-note {
+      display: none;
+    }
+    .location-hero--variant-0 .location-hero__content {
+      padding-bottom: 1.5rem;
+    }
+    .location-hero--variant-1 {
+      grid-template-rows: auto 14rem;
+    }
+    .location-hero--variant-1 .location-hero__content {
+      padding: 1.25rem;
+    }
+    .location-hero--variant-1 .location-hero__content dl {
+      position: static;
+      border-top: 1px solid #b6ac9d;
+      padding-top: 0.8rem;
+    }
+    .location-hero--variant-1 .location-hero__frame--0 {
+      inset: 0;
+    }
+    .location-hero--variant-2 {
+      grid-template-columns: 1fr;
+      grid-template-rows: 14rem auto;
+    }
+    .location-hero--variant-2 .location-hero__art {
+      grid-area: 1/1;
+      margin: 1rem 1rem 0;
+    }
+    .location-hero--variant-2 .location-hero__frame--0 {
+      inset: 0;
+      border-radius: 8rem 8rem 0 0;
+    }
+    .location-hero--variant-2 .location-hero__content {
+      grid-area: 2/1;
+    }
+    .location-hero--variant-3 .location-hero__content {
+      width: calc(100% - 2rem);
+      margin: 11rem 0.75rem 0.75rem;
+      padding: 1.25rem;
+    }
+    .location-hero--variant-3 .location-hero__content h1 {
+      font-size: 2.6rem;
+    }
+    .location-hero--variant-4 {
+      grid-template-columns: 1fr;
+      grid-template-rows: 14.5rem auto;
+    }
+    .location-hero--variant-4 .location-hero__art {
+      grid-area: 1/1;
+      clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+    }
+    .location-hero--variant-4 .location-hero__content {
+      grid-area: 2/1;
+      padding: 0.75rem 1.25rem 1.25rem;
+    }
+    .location-hero--variant-5 {
+      grid-template-rows: auto 14rem;
+    }
+    .location-hero--variant-5 .location-hero__content {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 1.25rem;
+    }
+    .location-hero--variant-5 .location-hero__content h1 {
+      grid-area: auto;
+    }
+    .location-hero--variant-5 .location-hero__eyebrow {
+      grid-column: auto;
+    }
+    .location-hero--variant-5 .location-hero__content dl {
+      width: 100%;
+    }
+    :is(.location-hero--plain) {
+      min-height: 0;
+    }
+  }
+}

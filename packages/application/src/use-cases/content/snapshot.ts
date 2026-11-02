@@ -32,6 +32,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     categories,
     tags,
     collections,
+    rankings,
     authors,
     articleLocations,
     articlePlaces,
@@ -57,6 +58,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.taxonomy.listCategories(),
     repos.taxonomy.listTags(),
     repos.collections.listAll(),
+    repos.rankings.listAll(),
     repos.authors.listAll(),
     repos.relations.listArticleLocations(),
     repos.relations.listArticlePlaces(),
@@ -70,6 +72,9 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.publicationMetadata.listAll(),
   ]);
   const history = await historyRead;
+  const publishedIds = new Set<string>(
+    articles.filter((a) => a.publishedRevisionId !== null).map((a) => a.id),
+  );
   const historyByArticle = new Map<string, (typeof history)[number][]>();
   for (const revision of history)
     historyByArticle.set(revision.articleId, [
@@ -112,6 +117,11 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     collections: collections.map((collection) => ({
       ...collection,
       themeMusic: collection.themeMusic?.enabled ? collection.themeMusic : null,
+    })),
+    // A pick whose article is not published would point the build at nothing.
+    rankings: rankings.map((ranking) => ({
+      ...ranking,
+      picks: ranking.picks.filter((pick) => publishedIds.has(pick.articleId)),
     })),
     authors,
     media,

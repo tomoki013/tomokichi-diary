@@ -1,0 +1,196 @@
+/* Collections use a photographic cover with publication notes on the image.
+   Destination heroes keep their separate image and text compositions. */
+@layer pages {
+  .collection-opening {
+    --focus-ring: #fff3d4;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: flex-end;
+    min-width: 0;
+    min-height: 32rem;
+    margin-top: 1rem;
+    background: #182a31;
+    color: #fffdf7;
+  }
+  .collection-opening--theme {
+    background: #25352d;
+  }
+  .collection-opening__image,
+  .collection-opening__image::after {
+    position: absolute;
+    inset: 0;
+  }
+  .collection-opening__image {
+    z-index: -1;
+    overflow: hidden;
+  }
+  .collection-opening__image picture,
+  .collection-opening__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .collection-opening__image img {
+    object-fit: cover;
+    object-position: center;
+  }
+  .collection-opening__image::after {
+    content: "";
+    background: linear-gradient(180deg, #13232d1a 0%, #10202640 24%, #102026c9 56%, #101f26f5 100%);
+  }
+  .collection-opening--theme .collection-opening__image::after {
+    background: linear-gradient(180deg, #15251e0d 0%, #15251e40 24%, #15251ec9 56%, #15251ef5 100%);
+  }
+  .collection-opening__copy {
+    width: 100%;
+    min-width: 0;
+    padding: 2rem 1.25rem 1.55rem;
+  }
+  .collection-opening__label {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin: 0 0 0.85rem;
+    color: #f5dcc1;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+  }
+  .collection-opening__label > span:first-child {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .collection-opening__label > span:nth-child(2) {
+    width: 1.8rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .collection-opening h1 {
+    max-width: 24ch;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.65rem, 7.1vw, 2.2rem);
+    line-height: 1.5;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+    text-shadow: 0 1px 12px #0003;
+  }
+  .collection-opening__description {
+    max-width: 40rem;
+    margin: 0.75rem 0 0;
+    color: #fffdf2;
+    font-size: 0.875rem;
+    line-height: 1.9;
+    white-space: pre-line;
+  }
+  .collection-opening__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.2rem;
+    margin: 0.9rem 0 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid #ffffff4d;
+  }
+  .collection-opening__facts > div {
+    min-width: 0;
+  }
+  .collection-opening__facts dt,
+  .collection-opening__route > p {
+    margin: 0 0 0.4rem;
+    color: #f5dcc1;
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.13em;
+  }
+  .collection-opening__facts dd {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+  .collection-opening__facts a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    margin-block: -0.7rem;
+    color: inherit;
+    text-decoration: none;
+    text-underline-offset: 0.3em;
+  }
+  .collection-opening__facts a:hover {
+    text-decoration: underline;
+  }
+  .collection-opening__route {
+    margin-top: 0.85rem;
+  }
+  .collection-opening__route ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .collection-opening__route li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    line-height: 1.8;
+  }
+  .collection-opening__route li > span {
+    color: #f5dcc1;
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    font-style: italic;
+  }
+  .collection-opening__route li:not(:last-child)::after {
+    content: "";
+    width: 0.8rem;
+    height: 1px;
+    margin-left: 0.35rem;
+    background: #f5dcc199;
+    align-self: center;
+  }
+  #collection-members-heading {
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+  @media (min-width: 46.001rem) {
+    .collection-opening {
+      min-height: 36rem;
+    }
+    .collection-opening__copy {
+      padding: 3rem;
+    }
+    .collection-opening h1 {
+      font-size: clamp(2.5rem, 4.2vw, 3.5rem);
+    }
+    .collection-opening__description {
+      max-width: 42rem;
+      font-size: 1rem;
+    }
+    .collection-opening__facts {
+      max-width: 42rem;
+      gap: 2.5rem;
+      margin-top: 1.4rem;
+      padding-top: 1.15rem;
+    }
+    .collection-opening__facts dd {
+      font-size: 0.9rem;
+    }
+    .collection-opening__route {
+      margin-top: 1.1rem;
+    }
+    .collection-opening__route li {
+      font-size: 0.8rem;
+    }
+    .collection-opening__image img {
+      object-position: center 45%;
+    }
+  }
+}

@@ -209,6 +209,30 @@ export interface CollectionAdminDto {
   readonly updatedAt: string | null;
 }
 
+/** A home-page ranking as the admin edits it. */
+export interface RankingAdminDto {
+  readonly id: string;
+  readonly title: string;
+  readonly note: string;
+  readonly experienceTag: string | null;
+  readonly sortOrder: number;
+  /** First is #1. */
+  readonly picks: readonly RankingPickDto[];
+  /** How many picks the site would show now; zero keeps the ranking off the page. */
+  readonly liveCount: number;
+  /** Last saved in the admin; compared with the site's last deploy. */
+  readonly updatedAt: string | null;
+}
+
+export interface RankingPickDto {
+  readonly articleId: string;
+  readonly comment: string;
+  readonly slug: string;
+  readonly title: string;
+  /** Only published articles appear on the site; others are kept but skipped. */
+  readonly live: boolean;
+}
+
 export interface TagDto {
   readonly id: string;
   readonly slug: string;

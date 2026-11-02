@@ -214,6 +214,10 @@ describe("operator MCP server over stdio", () => {
           "set_ad_layout",
           "start_ad_test",
           "publish_article",
+          "list_rankings",
+          "create_ranking",
+          "update_ranking",
+          "publish_site",
         ]),
       );
       expect(tools.some((tool) => /delete/i.test(tool.name))).toBe(false);

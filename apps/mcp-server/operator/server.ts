@@ -92,7 +92,8 @@ export function createOperatorServer(client: OperatorClient): McpServer {
     "list_articles",
     {
       title: "List articles",
-      description: "記事・固定ページの一覧（ID、タイトル、状態、URL、未公開の変更の有無）。",
+      description:
+        "記事・固定ページの一覧（ID、タイトル、状態、URL、未公開の変更の有無）。プライバシーポリシー・利用規約などのサイトポリシーは /legal/ の固定ページで、記事と同じ get_article・save_article_draft・publish_article で編集・公開します。",
       inputSchema: { query: z.string().max(100).optional() },
       annotations: READ,
     },
@@ -418,6 +419,109 @@ export function createOperatorServer(client: OperatorClient): McpServer {
       );
       return json({ hasUnpublishedChanges: article.hasUnpublishedChanges });
     },
+  );
+
+  server.registerTool(
+    "list_rankings",
+    {
+      title: "List rankings",
+      description:
+        "トップページの「ともきち的ランキング」の一覧（ID、名前、添え書き、もっと読むの体験タグ、表示順、順位ごとの記事と一言、公開中の本数）。公開中の記事が0本のランキングはサイトに出ません。",
+      inputSchema: {},
+      annotations: READ,
+    },
+    async () => json(await client.listRankings()),
+  );
+
+  const experienceTag = z
+    .enum([
+      "exciting",
+      "moving",
+      "thrilling",
+      "disaster",
+      "funny",
+      "discovery",
+      "challenge",
+      "unforgettable",
+    ])
+    .nullable();
+  const picks = z
+    .array(
+      z.object({
+        article: z.string().min(1).describe("記事の ID または slug"),
+        comment: z.string().max(80).optional().describe("なぜこの順位か。省くとタイトルだけ"),
+      }),
+    )
+    .max(15)
+    .describe("1位から順に。渡すと順位を丸ごと置き換えます");
+  const rankingChanges = {
+    note: z.string().max(40).optional(),
+    experienceTag: experienceTag.optional(),
+    picks: picks.optional(),
+    sortOrder: z.number().int().min(0).optional(),
+  };
+  /** Lets a model name articles by slug, as the author does in conversation. */
+  const resolvePicks = async (list: z.infer<typeof picks> | undefined) => {
+    if (!list) return undefined;
+    const { items } = await client.listArticles();
+    const articles = items as { id: string; slug: string }[];
+    return list.map(({ article, comment }) => {
+      const found = articles.find((a) => a.id === article || a.slug === article);
+      if (!found) throw new Error(`記事が見つかりません: ${article}`);
+      return { articleId: found.id, comment: comment ?? "" };
+    });
+  };
+
+  server.registerTool(
+    "create_ranking",
+    {
+      title: "Create ranking",
+      description:
+        "ランキングを新しく作ります（末尾に追加）。保存はDBだけで、トップページへの反映は publish_site。",
+      inputSchema: { title: z.string().min(1).max(60), ...rankingChanges },
+      annotations: WRITE,
+    },
+    async ({ picks: list, ...rest }) =>
+      json(
+        await client.createRanking({
+          ...rest,
+          ...(list ? { picks: await resolvePicks(list) } : {}),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "update_ranking",
+    {
+      title: "Update ranking",
+      description:
+        "ランキングの名前・添え書き・もっと読む・表示順・順位（記事と一言）を変更します。picks は丸ごと置き換え。下書きの記事も入れられますが、公開されるまでサイトには出ません。保存はDBだけで、トップページへの反映は publish_site。",
+      inputSchema: {
+        rankingId: z.string().min(1),
+        title: z.string().min(1).max(60).optional(),
+        ...rankingChanges,
+      },
+      annotations: WRITE,
+    },
+    async ({ rankingId, picks: list, ...rest }) =>
+      json(
+        await client.updateRanking(rankingId, {
+          ...rest,
+          ...(list ? { picks: await resolvePicks(list) } : {}),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "publish_site",
+    {
+      title: "Publish site",
+      description:
+        'DBの公開版でサイト全体を再生成・配信します（ランキング・シリーズの変更をサイトに出すとき）。記事の下書きは公開しません。利用者の明示的な指示があるときだけ使い、confirm に "publish" を入れてください。',
+      inputSchema: { confirm: z.literal("publish") },
+      annotations: { ...WRITE, openWorldHint: true },
+    },
+    async () => json(await client.publishSite()),
   );
 
   server.registerTool(

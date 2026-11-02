@@ -1,5 +1,5 @@
 import type { ArticleView } from "@tomokichi/application";
-import type { ExperienceTag } from "@tomokichi/domain";
+import type { Ranking } from "@tomokichi/domain";
 import { content } from "./content";
 
 /**
@@ -91,59 +91,6 @@ export function heroStories() {
   });
 }
 
-export interface Selection {
-  readonly id: string;
-  readonly title: string;
-  /** A handwritten-style aside next to the title. */
-  readonly note: string;
-  /** Linked from the selection's "more" link, so a pick can grow into a full list. */
-  readonly experience: ExperienceTag | null;
-  /** Ranked: first is #1. */
-  readonly slugs: readonly string[];
-}
-
-/** Rankings cut by how a trip felt to the author — never by popularity or page views. */
-export const SELECTIONS: readonly Selection[] = [
-  {
-    id: "thrilling",
-    title: "ともきちのハラハラしたランキング",
-    note: "今だから笑える",
-    experience: "thrilling",
-    slugs: ["egypt4", "india1", "greece3", "greece1", "thai4"],
-  },
-  {
-    id: "regret",
-    title: "ともきちの後悔したランキング",
-    note: "次は絶対こうする",
-    experience: "disaster",
-    slugs: ["turkey2", "india7", "egypt3", "thai6", "malaysia2"],
-  },
-  {
-    id: "moving",
-    title: "ともきちの感動したランキング",
-    note: "写真じゃ足りなかった",
-    experience: "moving",
-    slugs: ["turkey3", "greece2", "india2", "egypt2", "spain6"],
-  },
-  {
-    id: "again",
-    title: "また行きたい街ランキング",
-    note: "次は長めに滞在したい",
-    experience: null,
-    slugs: ["spain4", "malaysia-night-vibes", "spain5", "singapore2", "spain6"],
-  },
-  {
-    id: "food",
-    title: "ごはんが忘れられないランキング",
-    note: "思い出すとお腹がすく",
-    experience: null,
-    slugs: ["thai2", "hokkaido2", "spain3", "china4", "hokkaido1"],
-  },
-];
-
-/** Temporarily kept out of the home page while the rankings are being revised. */
-const HIDDEN_HOME_SELECTIONS = new Set(["regret", "food"]);
-
 const viewBySlug = (slug: string): ArticleView | null =>
   content.articleViews().find((view) => view.article.slug === slug) ?? null;
 
@@ -154,9 +101,23 @@ export function bestEpisodes(): { episode: BestEpisode; view: ArticleView }[] {
   });
 }
 
-export function selections(): { selection: Selection; views: ArticleView[] }[] {
-  return SELECTIONS.map((selection) => ({
-    selection,
-    views: selection.slugs.flatMap((slug) => viewBySlug(slug) ?? []),
-  })).filter((entry) => entry.views.length > 0 && !HIDDEN_HOME_SELECTIONS.has(entry.selection.id));
+/**
+ * "ともきち的ランキング": edited in the admin and read from the snapshot. A pick
+ * whose article is not public drops out; a ranking left with no picks is not shown.
+ */
+export function selections(): {
+  selection: Ranking;
+  picks: { view: ArticleView; comment: string }[];
+}[] {
+  const viewById = new Map(content.articleViews().map((view) => [view.article.id, view]));
+  return (content.snapshot.rankings ?? [])
+    .toSorted((a, b) => a.sortOrder - b.sortOrder)
+    .map((selection) => ({
+      selection,
+      picks: selection.picks.flatMap(({ articleId, comment }) => {
+        const view = viewById.get(articleId);
+        return view ? [{ view, comment }] : [];
+      }),
+    }))
+    .filter((entry) => entry.picks.length > 0);
 }

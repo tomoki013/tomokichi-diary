@@ -74,6 +74,18 @@ A `series` or `journey`: an ordered group of articles with its own URL.
 Migration `0022_collection_theme_music.sql` adds these as nullable / defaulted
 columns; existing rows start with music off and no defaults.
 
+## Ranking
+
+"ともきち的ランキング" on the home page, edited in the admin (`/v1/admin/rankings`).
+
+- `title`, `note` (handwritten aside), `experienceTag` (where "more" links, or null), `sortOrder`.
+- `picks` — ordered `{ articleId, comment }`, first is #1, at most 15. Stored as a
+  JSON column. The content snapshot keeps only picks whose article is published;
+  a ranking left with none is not rendered.
+- Never deleted; emptying the picks hides one.
+
+Migration `0023_rankings.sql` creates the table and seeds the rankings with no picks.
+
 ## Location / LocationName
 
 One table for every geographic level (`continent` … `district`), nested through
