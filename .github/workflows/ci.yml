@@ -89,13 +89,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
+      # Any lockfile change misses the exact prefix, so it falls back to the
+      # latest cache of any build rather than starting empty (which re-fetches
+      # every derivative, ~4 minutes). That is safe: media:build checks each
+      # cached derivative is a decodable image matching R2's bytes and remakes
+      # it otherwise, and originals are cached by content hash.
       - uses: actions/cache/restore@v6
         with:
           path: |
             .cache/images
             .cache/publication-originals
           key: publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-
+          restore-keys: |
+            publication-media-${{ runner.os }}-${{ hashFiles('scripts/media-build.ts', 'pnpm-lock.yaml') }}-
+            publication-media-${{ runner.os }}-
       - run: pnpm install --frozen-lockfile
 
       # Migrations run ahead of the API that reads the new shape, so they must
