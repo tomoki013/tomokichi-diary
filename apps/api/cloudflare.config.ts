@@ -36,8 +36,9 @@ export default defineConfig({
       // passes that directory to `cf d1 migrations apply`.
       DB: bindings.d1({ name: "tomokichi-diary", id: "b799453b-ada9-454e-81dc-26999c2c29db" }),
       MEDIA: bindings.r2({ name: "tomokichi-diary-media" }),
-      // Each contact is mailed to the blog's inbox, where it is read and
-      // answered from Gmail (the reader is the Reply-To). Pinned to that one
+      // Each contact is announced to the blog's inbox with a link to its
+      // ticket; it is answered from the admin. Only when the platform could not
+      // file it does the mail carry the reader as Reply-To. Pinned to that one
       // address: it must be a verified destination in Email Routing, and the
       // sender's domain must have Email Routing enabled.
       CONTACT_MAIL: bindings.sendEmail({
@@ -46,7 +47,7 @@ export default defineConfig({
       }),
       CONTACT_MAIL_FROM: bindings.text("noreply@tmkch.io"),
       CONTACT_MAIL_TO: bindings.text("tomokichidiary@gmail.com"),
-      // A copy of every message is filed on the shared inquiry platform
+      // Every message is filed on the shared inquiry platform
       // (github.com/tomoki013/inquiry-platform, SDK pinned in package.json)
       // through its `Intake` entrypoint: submit only, no reads. `props` is what
       // the platform checks — this Worker may file for `tomokichi-diary` and

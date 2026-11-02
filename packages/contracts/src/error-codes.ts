@@ -65,6 +65,8 @@ export const ERROR_CODES = [
   "API_CONFLICT",
   "API_RATE_LIMITED",
   "API_INTERNAL",
+  /** The inquiry platform could not mail a reply; nothing reached the reader. */
+  "INQUIRY_MAIL_FAILED",
 
   "MONETIZATION_INVALID",
 

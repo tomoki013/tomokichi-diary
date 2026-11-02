@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { submitContactMessage } from "@tomokichi/application";
-import { validateContactSubmission } from "@tomokichi/domain";
+import { findContactTopic, validateContactSubmission } from "@tomokichi/domain";
 import type { AppEnv } from "../app.js";
 
 /**
@@ -12,7 +12,8 @@ import type { AppEnv } from "../app.js";
  * the site with the result in the query string. Either way every outcome,
  * including an unexpected error, ends as one of `ContactResult`; the sender
  * never sees a bare error body from the API origin. What passes the checks here
- * is handed to the shared inquiry platform; this Worker keeps no copy.
+ * is filed on the shared inquiry platform and announced to the blog's inbox;
+ * this Worker keeps no copy.
  */
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
@@ -126,6 +127,8 @@ async function handleSubmission(c: Context<AppEnv>): Promise<ContactResult> {
     return "challenge";
   }
 
+  // `subject` is the topic the reader picked: its key, or its label from a
+  // page cached before the form posted keys.
   const submission = {
     name: String(form.get("name") ?? ""),
     email: String(form.get("email") ?? ""),
@@ -133,7 +136,12 @@ async function handleSubmission(c: Context<AppEnv>): Promise<ContactResult> {
     body: String(form.get("body") ?? ""),
   };
   // Checked before the limiter so fixing a typo does not cost a minute.
-  if (validateContactSubmission(submission).length > 0) return "invalid";
+  if (
+    validateContactSubmission(submission).length > 0 ||
+    findContactTopic(submission.subject) === undefined
+  ) {
+    return "invalid";
+  }
 
   const { success } = await limiter.limit({ key: await hashIp(ip ?? "unknown", salt) });
   if (!success) return "toofast";

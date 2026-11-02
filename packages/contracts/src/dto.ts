@@ -353,6 +353,14 @@ export interface InquiryStatusDto {
   readonly registered: boolean;
   /** The platform can send mail, so replies are possible. */
   readonly mailConfigured: boolean;
+  /** The contact lanes (動線) a ticket can belong to, in the form's order. */
+  readonly lanes: readonly InquiryLaneDto[];
+}
+
+/** A contact lane: how a kind of message is handled (`general`, `media`). */
+export interface InquiryLaneDto {
+  readonly key: string;
+  readonly label: string;
 }
 
 /** The signature the platform puts under this site's replies. */
@@ -378,6 +386,11 @@ export interface InquiryTicketSummaryDto {
   readonly number: string;
   readonly status: InquiryTicketStatus;
   readonly subject: string;
+  /**
+   * The lane the subject's topic belongs to; null for a subject no topic
+   * names (a ticket that did not come from the form).
+   */
+  readonly lane: string | null;
   readonly requesterEmail: string | null;
   readonly priority: string;
   readonly slaState: "OK" | "AT_RISK" | "BREACHED";
@@ -405,6 +418,8 @@ export type InquiryTimelineItemDto =
     };
 
 export interface InquiryTicketDetailDto extends InquiryTicketSummaryDto {
+  /** The reader's own reference for the conversation, opaque unlike `number`. */
+  readonly receiptId: string | null;
   /** Optimistic lock: every change sends back the revision it was based on. */
   readonly revision: number;
   readonly resolution: string | null;
@@ -417,4 +432,24 @@ export interface InquiryTicketDetailDto extends InquiryTicketSummaryDto {
   readonly canReply: boolean;
   readonly timeline: readonly InquiryTimelineItemDto[];
   readonly totalTimeline: number;
+}
+
+/** A reply template of this site's, kept on the platform. */
+export interface InquiryReplyTemplateDto {
+  readonly id: string;
+  readonly name: string;
+  /** The reply's subject; null uses the platform's default. */
+  readonly subject: string | null;
+  /** May contain `{{userName}}`, `{{appName}}` and `{{supportUrl}}`. */
+  readonly body: string;
+  readonly isActive: boolean;
+  readonly sortOrder: number;
+  readonly updatedAt: string;
+}
+
+/** A template filled in for one ticket, ready to edit and send. */
+export interface InquiryAppliedTemplateDto {
+  readonly body: string;
+  /** Placeholders still standing; a reply containing any is refused. */
+  readonly unresolved: readonly string[];
 }

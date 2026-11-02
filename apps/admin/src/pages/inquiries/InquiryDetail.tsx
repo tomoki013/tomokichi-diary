@@ -1,5 +1,9 @@
 import { useState } from "react";
-import type { InquiryTicketDetailDto, InquiryTicketStatus } from "@tomokichi/contracts";
+import type {
+  InquiryStatusDto,
+  InquiryTicketDetailDto,
+  InquiryTicketStatus,
+} from "@tomokichi/contracts";
 import { ApiError, api } from "../../lib/api";
 import {
   formatDateTime,
@@ -17,6 +21,7 @@ import { useToast } from "../../ui/toast";
 
 export function InquiryDetail({ id }: { id: string }) {
   const ticket = useResource(() => api.getTicket(id), `ticket:${id}`);
+  const status = useResource(() => api.inquiryStatus(), "inquiry-status");
 
   if (ticket.error && !ticket.data) {
     return (
@@ -37,15 +42,25 @@ export function InquiryDetail({ id }: { id: string }) {
       </>
     );
   }
-  return <Ticket ticket={ticket.data} reload={ticket.reload} reloading={ticket.loading} />;
+  return (
+    <Ticket
+      ticket={ticket.data}
+      status={status.data}
+      reload={ticket.reload}
+      reloading={ticket.loading}
+    />
+  );
 }
 
 function Ticket({
   ticket,
+  status,
   reload,
   reloading,
 }: {
   ticket: InquiryTicketDetailDto;
+  /** Undefined while loading: replies stay unavailable until it says mail works. */
+  status: InquiryStatusDto | undefined;
   reload: () => Promise<void>;
   reloading: boolean;
 }) {
@@ -78,6 +93,7 @@ function Ticket({
           <>
             <a href={href.inquiries()}>← 一覧</a>
             <span className="mono">{ticket.number}</span>
+            <LaneBadge lane={ticket.lane} status={status} />
             <Badge tone={isOpenTicket(ticket.status) ? "accent" : "ok"}>
               {ticketStatusLabels[ticket.status]}
             </Badge>
@@ -99,7 +115,12 @@ function Ticket({
       <div className="ticket">
         <div className="ticket__main">
           <Timeline ticket={ticket} reloading={reloading} />
-          <Composer ticket={ticket} busy={busy} act={act} />
+          <Composer
+            ticket={ticket}
+            mailConfigured={status?.mailConfigured ?? false}
+            busy={busy}
+            act={act}
+          />
         </div>
 
         <aside className="ticket__side">
@@ -115,6 +136,12 @@ function Ticket({
                   "なし（返信不要）"
                 )}
               </dd>
+              {ticket.receiptId && (
+                <>
+                  <dt>受付ID</dt>
+                  <dd className="mono small">{ticket.receiptId}</dd>
+                </>
+              )}
               <dt>優先度</dt>
               <dd>{ticket.priority}</dd>
               <dt>確認</dt>
@@ -190,55 +217,174 @@ function Timeline({ ticket, reloading }: { ticket: InquiryTicketDetailDto; reloa
   );
 }
 
+/** The lane (動線) a ticket's topic belongs to, as the API names it. */
+export function LaneBadge({
+  lane,
+  status,
+}: {
+  lane: string | null;
+  status: InquiryStatusDto | undefined;
+}) {
+  if (lane === null) return null;
+  const label = status?.lanes.find((entry) => entry.key === lane)?.label ?? lane;
+  return <Badge tone={lane === "media" ? "warn" : "neutral"}>{label}</Badge>;
+}
+
 /**
- * Internal notes only. Readers are answered from the blog's Gmail inbox, where
- * every contact arrives with the reader as Reply-To; the platform keeps the
- * copy this screen shows and never mails a reader on this site's behalf.
+ * A reply to the reader, mailed by the platform from this site's support
+ * address, or an internal note nobody outside sees. The platform adds the
+ * signature; a template fills in the reader's name and the site's.
  */
 function Composer({
   ticket,
+  mailConfigured,
   busy,
   act,
 }: {
   ticket: InquiryTicketDetailDto;
+  mailConfigured: boolean;
   busy: boolean;
   act: Act;
 }) {
+  const canReply = ticket.canReply && mailConfigured;
+  // Replying is the default; it falls back to a note while mail is unknown or unavailable.
+  const [mode, setMode] = useState<"reply" | "note">("reply");
   const [body, setBody] = useState("");
-  // One key per composed note, so a retried save never adds it twice.
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  // One key per composed message, so a retried send never mails twice.
   const [key, setKey] = useState(newIdempotencyKey);
   useUnsavedWarning(body.trim() !== "");
+  const toast = useToast();
+  const templates = useResource(
+    () => (canReply ? api.listReplyTemplates() : Promise.resolve({ items: [] })),
+    `reply-templates:${canReply}`,
+  );
+  const active = templates.data?.items.filter((template) => template.isActive) ?? [];
+  const closed = !isOpenTicket(ticket.status);
+  const replying = mode === "reply" && canReply;
 
-  async function save(): Promise<void> {
+  async function insert(id: string): Promise<void> {
+    if (id === "") return;
+    if (
+      body.trim() !== "" &&
+      !globalThis.confirm("書きかけの本文をテンプレートで置き換えますか？")
+    ) {
+      return;
+    }
+    try {
+      const applied = await api.applyTemplate(ticket.id, id);
+      setBody(applied.body);
+      setTemplateId(id);
+      if (applied.unresolved.length > 0) {
+        toast.info(
+          `埋めてから送ってください: ${applied.unresolved.map((name) => `{{${name}}}`).join(" ")}`,
+        );
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  }
+
+  async function send(): Promise<void> {
     const text = body.trim();
     if (text === "") return;
-    if (await act(() => api.addTicketNote(ticket.id, text, key), "メモを追加しました")) {
+    let sent: boolean;
+    if (replying) {
+      const question = closed
+        ? "解決済みのお問い合わせです。返信すると対応中に戻ります。送信しますか？"
+        : `${ticket.requesterEmail} にメールを送信します。よろしいですか？`;
+      if (!globalThis.confirm(question)) return;
+      sent = await act(
+        () =>
+          api.replyToTicket(ticket.id, {
+            body: text,
+            idempotencyKey: key,
+            reopenIfResolved: closed,
+            templateId,
+          }),
+        "返信を送信しました",
+      );
+    } else {
+      sent = await act(() => api.addTicketNote(ticket.id, text, key), "メモを追加しました");
+    }
+    if (sent) {
       setBody("");
+      setTemplateId(null);
       setKey(newIdempotencyKey());
     }
   }
 
   return (
-    <Panel title="内部メモ">
-      <p className="muted small">
-        返信は Gmail（tomokichidiary@gmail.com）に届いたメールから行います。
-      </p>
+    <Panel
+      title={
+        <span className="tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={replying}
+            disabled={!canReply}
+            onClick={() => setMode("reply")}
+          >
+            返信
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={!replying}
+            onClick={() => setMode("note")}
+          >
+            内部メモ
+          </button>
+        </span>
+      }
+      actions={
+        replying && active.length > 0 ? (
+          <select
+            aria-label="テンプレートを挿入"
+            value=""
+            disabled={busy}
+            onChange={(event) => void insert(event.target.value)}
+          >
+            <option value="">テンプレート…</option>
+            {active.map((template) => (
+              <option key={template.id} value={template.id}>
+                {template.name}
+              </option>
+            ))}
+          </select>
+        ) : undefined
+      }
+    >
+      {!canReply && (
+        <p className="muted small">
+          {!ticket.canReply
+            ? "返信先のアドレスがないため、内部メモだけ残せます。"
+            : "基盤のメール送信が未設定のため、返信できません。"}
+        </p>
+      )}
       <textarea
         className="composer"
-        rows={6}
-        aria-label="メモ"
-        placeholder="内部メモ（差出人には送られません）"
+        rows={replying ? 10 : 6}
+        aria-label={replying ? "返信本文" : "メモ"}
+        placeholder={
+          replying ? "返信本文（署名は送信時に付きます）" : "内部メモ（差出人には送られません）"
+        }
         value={body}
         onChange={(event) => setBody(event.target.value)}
       />
       <div className="panel__foot">
+        {replying && (
+          <span className="muted small">
+            宛先: {ticket.requesterEmail}・<a href={href.inquirySettings()}>署名・テンプレート</a>
+          </span>
+        )}
         <button
           type="button"
           className="primary"
           disabled={busy || body.trim() === ""}
-          onClick={() => void save()}
+          onClick={() => void send()}
         >
-          メモを追加
+          {replying ? "送信" : "メモを追加"}
         </button>
       </div>
     </Panel>

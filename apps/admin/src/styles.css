@@ -1912,3 +1912,9 @@ details.panel > summary {
   font-size: 0.75rem;
   color: var(--ink-soft);
 }
+
+.template-editor {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.8rem;
+  margin-bottom: 0.8rem;
+}

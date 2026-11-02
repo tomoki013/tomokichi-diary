@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
-import type { AppContext, ContactFiling } from "@tomokichi/application";
+import type { AppContext, ContactFiled, ContactFiling } from "@tomokichi/application";
 import type { IntakeBinding } from "@inquiry-platform/sdk";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
-import { createContactMailer } from "../contact-mail.js";
-import { createInquiryInbox, INQUIRY_PROJECT_SLUG } from "../inquiry.js";
+import { ADMIN_TICKET_URL, createContactMailer } from "../contact-mail.js";
+import { createInquiryInbox, INQUIRY_PROJECT_BY_LANE, INQUIRY_PROJECT_SLUG } from "../inquiry.js";
 
 /*
  * Why this exists: `/v1/contact` is the only unauthenticated write in the
@@ -21,7 +21,7 @@ const SITE = "https://tomokichidiary.com";
 let ctx: AppContext;
 let filed: ContactFiling[];
 let accepts: boolean;
-let mailed: ContactFiling[];
+let mailed: { filing: ContactFiling; filed: ContactFiled | null }[];
 let mails: boolean;
 let limiterKeys: string[];
 let limiterAllows: boolean;
@@ -87,12 +87,12 @@ beforeEach(async () => {
     inquiry: {
       file: async (filing) => {
         filed.push(filing);
-        return accepts;
+        return accepts ? { ticketNumber: "TK-000001" } : null;
       },
     },
     contactMail: {
-      send: async (filing) => {
-        mailed.push(filing);
+      send: async (filing, ticket) => {
+        mailed.push({ filing, filed: ticket });
         return mails;
       },
     },
@@ -108,14 +108,48 @@ describe("POST /v1/contact", () => {
 
     expect(mailed).toHaveLength(1);
     expect(filed).toHaveLength(1);
-    expect(mailed[0]).toEqual(filed[0]);
-    expect(filed[0]).toMatchObject({ email: "reader@example.com", subject: "記事について" });
+    expect(mailed[0]).toEqual({ filing: filed[0], filed: { ticketNumber: "TK-000001" } });
+    expect(filed[0]).toMatchObject({
+      email: "reader@example.com",
+      subject: "記事について",
+      lane: "general",
+    });
     expect(filed[0]?.idempotencyKey).toMatch(/^[0-9a-f-]{36}$/);
     // The address reaches the limiter only as a salted hash, and the platform not at all.
     expect(limiterKeys[0]).not.toContain("203.0.113.5");
     expect(JSON.stringify(filed[0])).not.toContain("203.0.113.5");
     // Nothing is kept locally any more.
     expect(await ctx.repos.contactMessages.list(10)).toHaveLength(0);
+  });
+
+  it("files a topic key under its label and lane", async () => {
+    const app = appWith(async () => true);
+    const response = await app.request(
+      "/v1/contact",
+      form({ ...valid, subject: "work" }),
+      configured(),
+    );
+    expect(response.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
+    expect(filed[0]).toMatchObject({ subject: "お仕事・取材の相談", lane: "media" });
+  });
+
+  it("refuses a topic the form does not offer, before the rate limit", async () => {
+    const app = appWith(async () => true);
+    const response = await app.request(
+      "/v1/contact",
+      form({ ...valid, subject: "SEO対策のご提案" }),
+      configured(),
+    );
+    expect(response.headers.get("location")).toBe(`${SITE}/contact?error=invalid`);
+    expect(limiterKeys).toHaveLength(0);
+    expect(filed).toHaveLength(0);
+  });
+
+  it("still mails the inbox when the platform refused, saying so", async () => {
+    const app = appWith(async () => true);
+    accepts = false;
+    await app.request("/v1/contact", form(valid), configured());
+    expect(mailed[0]?.filed).toBeNull();
   });
 
   it("fails closed when a secret or the limiter is missing", async () => {
@@ -252,6 +286,7 @@ const binding = (submitContact: IntakeBinding["submitContact"]) =>
 describe("createInquiryInbox", () => {
   const filing: ContactFiling = {
     idempotencyKey: "test-filing-1",
+    lane: "general",
     name: "ともきち",
     email: "reader@example.com",
     subject: "記事について",
@@ -261,9 +296,11 @@ describe("createInquiryInbox", () => {
   it("files a web-form contact for this site's project", async () => {
     const submitContact = vi.fn().mockResolvedValue({
       ok: true,
-      value: { ticketNumber: "1", status: "OPEN", duplicate: false },
+      value: { ticketNumber: "TK-000001", receiptId: "r1", status: "OPEN", duplicate: false },
     });
-    expect(await createInquiryInbox(binding(submitContact)).file(filing)).toBe(true);
+    expect(await createInquiryInbox(binding(submitContact)).file(filing)).toEqual({
+      ticketNumber: "TK-000001",
+    });
     expect(submitContact).toHaveBeenCalledWith({
       projectSlug: INQUIRY_PROJECT_SLUG,
       idempotencyKey: filing.idempotencyKey,
@@ -280,9 +317,16 @@ describe("createInquiryInbox", () => {
       ok: false,
       error: { code: "FORBIDDEN", message: "not granted" },
     });
-    expect(await createInquiryInbox(binding(refused)).file(filing)).toBe(false);
+    expect(await createInquiryInbox(binding(refused)).file(filing)).toBeNull();
     const thrown = vi.fn().mockRejectedValue(new Error("binding is down"));
-    expect(await createInquiryInbox(binding(thrown)).file(filing)).toBe(false);
+    expect(await createInquiryInbox(binding(thrown)).file(filing)).toBeNull();
+  });
+
+  it("files every lane to a project both bindings are granted", () => {
+    const config = readFileSync(new URL("../../cloudflare.config.ts", import.meta.url), "utf8");
+    for (const slug of Object.values(INQUIRY_PROJECT_BY_LANE)) {
+      expect(config).toContain(`projects: ["${slug}"`);
+    }
   });
 
   it("is granted exactly this site's project in cloudflare.config.ts", () => {
@@ -297,29 +341,43 @@ describe("createInquiryInbox", () => {
 describe("createContactMailer", () => {
   const filing: ContactFiling = {
     idempotencyKey: "test-filing-1",
+    lane: "media",
     name: "ともきち",
     email: "reader@example.com",
-    subject: "記事について",
-    body: "アブシンベルへのバスの時刻について教えてください。",
+    subject: "お仕事・取材の相談",
+    body: "旅行特集の記事を書いていただけないでしょうか。",
   };
   const addresses = { from: "noreply@example.com", to: "inbox@example.com" };
 
-  it("mails the whole message to the inbox, with the reader as Reply-To", async () => {
+  it("points a filed message at its ticket, with no Reply-To to answer from", async () => {
     const send = vi.fn().mockResolvedValue({ messageId: "m1" });
-    expect(await createContactMailer({ send }, addresses).send(filing)).toBe(true);
+    const mailer = createContactMailer({ send }, addresses);
+    expect(await mailer.send(filing, { ticketNumber: "TK-000042" })).toBe(true);
     const [message] = send.mock.calls[0] as [Record<string, unknown>];
     expect(message).toMatchObject({
       to: "inbox@example.com",
       from: { email: "noreply@example.com" },
-      replyTo: { name: "ともきち", email: "reader@example.com" },
-      subject: "[ともきちの旅行日記] 記事について",
+      subject: "[ともきちの旅行日記/メディア・お仕事] TK-000042 お仕事・取材の相談",
     });
+    expect(message).not.toHaveProperty("replyTo");
     expect(message.text).toContain(filing.body);
+    expect(message.text).toContain(`${ADMIN_TICKET_URL}TK-000042`);
+  });
+
+  it("makes the reader the Reply-To when the platform has no copy", async () => {
+    const send = vi.fn().mockResolvedValue({ messageId: "m1" });
+    expect(await createContactMailer({ send }, addresses).send(filing, null)).toBe(true);
+    const [message] = send.mock.calls[0] as [Record<string, unknown>];
+    expect(message).toMatchObject({
+      replyTo: { name: "ともきち", email: "reader@example.com" },
+      subject: "[ともきちの旅行日記/メディア・お仕事] お仕事・取材の相談",
+    });
+    expect(message.text).toContain("このメールに返信すると、送信者に届きます。");
   });
 
   it("reports a failed send as false instead of throwing", async () => {
     const send = vi.fn().mockRejectedValue(new Error("destination not verified"));
-    expect(await createContactMailer({ send }, addresses).send(filing)).toBe(false);
+    expect(await createContactMailer({ send }, addresses).send(filing, null)).toBe(false);
   });
 
   it("is pinned to the blog's inbox in cloudflare.config.ts", () => {

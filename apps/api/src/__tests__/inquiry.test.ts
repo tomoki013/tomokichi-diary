@@ -3,6 +3,7 @@ import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
 import {
   createProjectOperatorClient,
+  type OperatorReplyTemplate,
   type OperatorTicketDetail,
   type ProjectOperatorApi,
 } from "@inquiry-platform/sdk";
@@ -37,6 +38,10 @@ function ticket(overrides: Partial<OperatorTicketDetail> = {}): OperatorTicketDe
     id: "t1",
     number: "TK-000001",
     status: "NEW",
+    type: "contact",
+    source: "web_form",
+    assignee: null,
+    receiptId: "receipt-1",
     resolution: null,
     priority: "P3",
     subject: "記事について",
@@ -68,6 +73,24 @@ function ticket(overrides: Partial<OperatorTicketDetail> = {}): OperatorTicketDe
 }
 
 const project = { id: "app-diary", slug: "tomokichi-diary", name: "ともきちの旅行日記" };
+const LANES = [
+  { key: "general", label: "一般" },
+  { key: "media", label: "メディア・お仕事" },
+];
+
+function template(overrides: Partial<OperatorReplyTemplate> = {}): OperatorReplyTemplate {
+  return {
+    id: "tpl1",
+    key: "diary_abc",
+    name: "お礼",
+    subject: null,
+    body: "{{userName}} 様\n\nご連絡ありがとうございます。",
+    isActive: true,
+    sortOrder: 100,
+    updatedAt: "2026-11-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
 
 /** A stand-in platform: records what it was asked, answers what the test set. */
 const platform = new Proxy({} as ProjectOperatorApi, {
@@ -121,6 +144,7 @@ describe("/v1/admin/inquiry", () => {
       configured: false,
       registered: false,
       mailConfigured: false,
+      lanes: LANES,
     });
     expect((await request("/tickets", {}, false)).status).toBe(503);
   });
@@ -131,6 +155,7 @@ describe("/v1/admin/inquiry", () => {
       configured: true,
       registered: false,
       mailConfigured: false,
+      lanes: LANES,
     });
   });
 
@@ -157,7 +182,28 @@ describe("/v1/admin/inquiry", () => {
   it("opens a ticket by number, as a notification link carries it", async () => {
     const body = await (await request("/tickets/TK-000001")).json();
     expect(last("getTicket")?.args).toEqual(["tomokichi-diary", "TK-000001", 0]);
-    expect(body).toMatchObject({ id: "t1", revision: 3, canReply: true });
+    expect(body).toMatchObject({
+      id: "t1",
+      revision: 3,
+      canReply: true,
+      receiptId: "receipt-1",
+      lane: "general",
+    });
+  });
+
+  it("names the lane a ticket's topic belongs to, and none for other subjects", async () => {
+    answer.listTickets = {
+      ok: true,
+      value: {
+        items: [
+          ticket({ id: "a", subject: "お仕事・取材の相談" }),
+          ticket({ id: "b", subject: "Re: 先日の件" }),
+        ],
+        total: 2,
+      },
+    };
+    const body = await (await request("/tickets")).json();
+    expect(body.items.map((item: { lane: string | null }) => item.lane)).toEqual(["media", null]);
   });
 
   it("answers 404 when the platform says the ticket is not this site's", async () => {
@@ -214,20 +260,119 @@ describe("/v1/admin/inquiry", () => {
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
-  it("has no way to mail a reader or change the reply signature", async () => {
-    for (const [path, method] of [
-      ["/tickets/t1/reply", "POST"],
-      ["/signature", "GET"],
-      ["/signature", "PUT"],
-    ] as const) {
-      const response = await request(path, {
-        method,
-        ...(method === "GET" ? {} : { body: JSON.stringify({ body: "x", signature: "x" }) }),
-      });
-      expect(response.status, `${method} ${path}`).toBe(404);
-    }
+  it("mails a reply with only its body, and says who sent it", async () => {
+    const response = await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-1" }),
+    });
+    expect(response.status).toBe(200);
+    expect(last("reply")?.args).toEqual([
+      "tomokichi-diary",
+      "t1",
+      { body: "お返事です", idempotencyKey: "reply-key-1", reopenIfResolved: false },
+      { id: "admin-token" },
+    ]);
+
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "お返事です",
+        idempotencyKey: "reply-key-2",
+        reopenIfResolved: true,
+        templateId: "tpl1",
+        to: "someone@example.com",
+      }),
+    });
+    // Recipient, sender and subject are the platform's; nothing else goes up.
+    expect(last("reply")?.args[2]).toEqual({
+      body: "お返事です",
+      idempotencyKey: "reply-key-2",
+      reopenIfResolved: true,
+      templateId: "tpl1",
+    });
+  });
+
+  it("refuses a reply that still has a placeholder, naming it", async () => {
+    const response = await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({ body: "{{userName}} 様 {{ 日付 }}", idempotencyKey: "reply-key-3" }),
+    });
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.message).toContain("{{日付}}");
     expect(last("reply")).toBeUndefined();
-    expect(last("setSignature")).toBeUndefined();
+  });
+
+  it("says plainly when the platform could not mail the reply", async () => {
+    answer.reply = { ok: false, error: { code: "MAIL_ERROR", message: "resend 500" } };
+    const response = await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-4" }),
+    });
+    expect(response.status).toBe(502);
+    const body = await response.json();
+    expect(body.error.code).toBe("INQUIRY_MAIL_FAILED");
+    expect(JSON.stringify(body)).not.toContain("resend 500");
+  });
+
+  it("reads and sets the reply signature", async () => {
+    expect(await (await request("/signature")).json()).toEqual({
+      signature: "",
+      usesDefault: true,
+    });
+    await request("/signature", {
+      method: "PUT",
+      body: JSON.stringify({ signature: "  ともきちの旅行日記\n  " }),
+    });
+    expect(last("setSignature")?.args).toEqual([
+      "tomokichi-diary",
+      "ともきちの旅行日記",
+      { id: "admin-token" },
+    ]);
+  });
+
+  it("lists this site's templates, retired ones too, without the platform's key", async () => {
+    answer.listTemplates = {
+      ok: true,
+      value: [template({ id: "b", name: "B", sortOrder: 200 }), template({ id: "a", name: "A" })],
+    };
+    const body = await (await request("/templates")).json();
+    expect(last("listTemplates")?.args).toEqual(["tomokichi-diary", { includeInactive: true }]);
+    expect(body.items.map((item: { id: string }) => item.id)).toEqual(["a", "b"]);
+    expect(body.items[0]).not.toHaveProperty("key");
+  });
+
+  it("creates and edits a template, choosing the platform's key itself", async () => {
+    answer.createTemplate = { ok: true, value: template() };
+    answer.updateTemplate = { ok: true, value: template() };
+    const input = { name: " お礼 ", subject: " ", body: "本文", isActive: true, sortOrder: 10 };
+
+    expect(
+      (await request("/templates", { method: "POST", body: JSON.stringify(input) })).status,
+    ).toBe(201);
+    const [, created] = last("createTemplate")!.args as [string, Record<string, unknown>];
+    expect(created).toMatchObject({ name: "お礼", subject: null, body: "本文", sortOrder: 10 });
+    expect(created.key).toMatch(/^diary_[0-9a-f]{12}$/);
+
+    await request("/templates/tpl1", { method: "PATCH", body: JSON.stringify(input) });
+    expect(last("updateTemplate")?.args.slice(1, 3)).toEqual([
+      "tpl1",
+      { name: "お礼", subject: null, body: "本文", isActive: true, sortOrder: 10 },
+    ]);
+  });
+
+  it("fills a template for a ticket and lists what is left to fill", async () => {
+    answer.applyTemplate = {
+      ok: true,
+      value: { body: "ともきち 様\n{{日付}}にお送りします。", unresolved: [], subject: "x" },
+    };
+    const body = await (
+      await request("/tickets/t1/apply-template", {
+        method: "POST",
+        body: JSON.stringify({ templateId: "tpl1" }),
+      })
+    ).json();
+    expect(last("applyTemplate")?.args).toEqual(["tomokichi-diary", "t1", "tpl1"]);
+    expect(body).toEqual({ body: "ともきち 様\n{{日付}}にお送りします。", unresolved: ["日付"] });
   });
 
   it("adds an internal note with its idempotency key", async () => {

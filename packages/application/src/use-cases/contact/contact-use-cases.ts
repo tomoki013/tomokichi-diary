@@ -1,42 +1,59 @@
 import {
   err,
+  findContactTopic,
   ok,
   validateContactSubmission,
   type ContactMessage,
   type ContactMessageId,
   type ContactMessageStatus,
+  type ContactSubmission,
   type Result,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
 import type { ContactFiling } from "../../ports/inquiry.js";
 
+export interface ContactInput extends ContactSubmission {
+  readonly idempotencyKey: string;
+}
+
 /**
- * A new message is mailed to the blog's inbox, where it is read and answered,
- * and a copy is filed on the shared inquiry platform. Nothing is written to D1:
- * the `contact_messages` table only holds what arrived before the switch.
+ * A new message is filed on the shared inquiry platform, where it is worked and
+ * answered from this site's admin, and the blog's inbox is told it arrived.
+ * Nothing is written to D1: the `contact_messages` table only holds what
+ * arrived before the switch.
  *
- * Accepted when either arrived, so the message always exists somewhere the
- * owner looks; whichever failed is logged. Refused only when neither did.
+ * `subject` is the topic the reader picked (its key, or its label from an
+ * older page); it is filed under the topic's label and lane. Filing goes first
+ * so the mail can point at the ticket. Accepted when either arrived, so the
+ * message always exists somewhere the owner looks; whichever failed is logged.
+ * Refused only when neither did.
  */
 export async function submitContactMessage(
   ctx: AppContext,
-  input: ContactFiling,
+  input: ContactInput,
 ): Promise<Result<null>> {
   const errors = validateContactSubmission(input);
   if (errors.length > 0) return err<null>(...errors);
+  const topic = findContactTopic(input.subject);
+  if (!topic) {
+    return err<null>({
+      code: "API_VALIDATION_FAILED",
+      message: "お問い合わせの種類を選んでください",
+      field: "subject",
+    });
+  }
 
   const filing: ContactFiling = {
     idempotencyKey: input.idempotencyKey,
+    lane: topic.lane,
     name: input.name.trim(),
     email: input.email.trim(),
-    subject: input.subject.trim(),
+    subject: topic.label,
     body: input.body.trim(),
   };
   // Neither may throw; an unbound one counts as failed.
-  const [mailed, filed] = await Promise.all([
-    ctx.contactMail ? ctx.contactMail.send(filing) : Promise.resolve(false),
-    ctx.inquiry ? ctx.inquiry.file(filing) : Promise.resolve(false),
-  ]);
+  const filed = ctx.inquiry ? await ctx.inquiry.file(filing) : null;
+  const mailed = ctx.contactMail ? await ctx.contactMail.send(filing, filed) : false;
   if (!mailed) ctx.logger.error("contact.not_mailed", { code: "API_INTERNAL" });
   if (!filed) ctx.logger.error("contact.not_filed", { code: "API_INTERNAL" });
   // A success with neither would mean a message that exists nowhere.
@@ -44,7 +61,7 @@ export async function submitContactMessage(
     return err<null>({ code: "API_INTERNAL", message: "お問い合わせを受け付けられませんでした" });
   }
 
-  ctx.logger.info("contact.accepted", { mailed, filed });
+  ctx.logger.info("contact.accepted", { mailed, filed: filed !== null, lane: topic.lane });
   return ok(null);
 }
 

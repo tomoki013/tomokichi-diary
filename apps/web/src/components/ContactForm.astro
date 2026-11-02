@@ -1,5 +1,17 @@
 ---
+import { CONTACT_TOPICS, contactTopicsIn, type ContactLane } from "@tomokichi/domain";
 import { apiUrl, turnstileSiteKey } from "../lib/site";
+
+interface Props {
+  /**
+   * Only this lane's topics. Unset lists every topic; a page of its own for
+   * one lane (media enquiries, say) passes it.
+   */
+  lane?: ContactLane;
+}
+
+const { lane } = Astro.props;
+const topics = lane ? contactTopicsIn(lane) : CONTACT_TOPICS;
 
 /**
  * Submitted with fetch so that any failure — a refused challenge, an API error,
@@ -8,6 +20,9 @@ import { apiUrl, turnstileSiteKey } from "../lib/site";
  * API redirects that back here with the result in the query string. Turnstile
  * is the only third-party script on the page, and without a site key the form
  * is not rendered at all rather than shipped unprotected.
+ *
+ * `?topic=<key>` preselects a topic, so a link elsewhere on the site can open
+ * the form on the right one.
  *
  * Kept as a string because the markup below sits inside a conditional
  * expression, where an element's children are parsed as JSX rather than as
@@ -35,6 +50,11 @@ const RESULT_SCRIPT = `
   var params = new URLSearchParams(location.search);
   var initial = params.get('sent') ? 'sent' : params.get('error');
   if (initial && RESULTS.indexOf(initial) !== -1) show(initial);
+  var topic = document.querySelector('[data-contact-topic]');
+  var preset = params.get('topic');
+  if (topic && preset && topic.querySelector('option[value="' + CSS.escape(preset) + '"]')) {
+    topic.value = preset;
+  }
 
   window.contactTurnstileReady = function () {
     setReady(true);
@@ -167,15 +187,13 @@ const MESSAGES = [
         <span>
           お問い合わせの種類 <small>必須</small>
         </span>
-        <select name="subject" required>
+        <select name="subject" required data-contact-topic>
           <option value="" selected disabled>
             選択してください
           </option>
-          <option value="記事について">記事について</option>
-          <option value="旅先・記事のリクエスト">旅先・記事のリクエスト</option>
-          <option value="お仕事・取材の相談">お仕事・取材の相談</option>
-          <option value="写真の利用について">写真の利用について</option>
-          <option value="その他">その他</option>
+          {topics.map((topic) => (
+            <option value={topic.key}>{topic.label}</option>
+          ))}
         </select>
       </label>
       <label>

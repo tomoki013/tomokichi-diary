@@ -26,6 +26,7 @@ export * from "./rules/routing.js";
 export * from "./rules/listing.js";
 export * from "./rules/related.js";
 export * from "./rules/contact.js";
+export * from "./rules/contact-topics.js";
 export * from "./rules/markdown.js";
 export * from "./rules/location-tree.js";
 export * from "./rules/knowledge.js";
