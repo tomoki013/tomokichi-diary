@@ -656,36 +656,29 @@
   }
 
   /* Contact ----------------------------------------------------------- */
-  /* One narrow column: the form comes first, and what it is for, the note on
-     sales enquiries and the email address follow underneath it. */
+  /* Laid out the way a personal blog's form usually is: a ruled table with
+     the label on the left and a plain white field on the right, a square
+     "必須" tag, and one centred button. The form comes first; what it is
+     for and the email address follow underneath. */
   .contact-page {
     display: grid;
     gap: var(--space-xl);
-    max-width: 42rem;
+    max-width: 44rem;
     margin-inline: auto;
     padding-block: var(--band-tight) var(--space-lg);
   }
 
   .contact-head {
     display: grid;
-    gap: 0.5rem;
-  }
-
-  /* The one soft, hand-lettered touch; everything else stays upright. */
-  .contact-head__note {
-    color: var(--accent);
-    font-family: var(--font-hand);
-    font-size: var(--step-small);
-    letter-spacing: 0.1em;
+    gap: 0.6rem;
   }
 
   .contact-head h1 {
     font-size: var(--step-h1);
-    font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
   }
 
-  .contact-head p:last-child {
+  .contact-head p {
     color: var(--ink-soft);
     font-size: var(--step-small);
     line-height: 1.9;
@@ -695,60 +688,54 @@
     margin-top: calc(var(--space-md) - var(--space-xl));
   }
 
-  /* A white sheet warmed by a faint clay wash along its head. */
-  .contact-sheet {
-    padding: clamp(1.25rem, 4vw, 2.25rem);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: linear-gradient(var(--accent-tint), var(--surface) 9rem);
-    box-shadow: var(--shadow);
-  }
-
   .contact-form {
-    display: grid;
-    gap: 1.35rem;
+    border-top: 1px solid var(--ink);
   }
 
-  .contact-form__row {
+  .contact-form > label {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.35rem 1rem;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
   }
 
-  .contact-form label {
-    display: grid;
-    gap: 0.45rem;
-  }
-
-  .contact-form label > span {
+  .contact-form__label {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
+    padding-top: 0.65rem;
     font-size: var(--step-small);
     font-weight: 600;
-    letter-spacing: 0.04em;
   }
 
-  .contact-form label > span small {
-    padding: 0.05rem 0.45rem;
-    border-radius: var(--radius-sm);
-    background: var(--accent-tint);
-    color: var(--accent);
+  .contact-form__label small {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    background: var(--accent);
+    color: #fff;
     font-size: 0.6875rem;
-    font-weight: 400;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .contact-form__control {
+    display: grid;
   }
 
   .contact-form :is(input, textarea, select) {
     width: 100%;
-    min-height: 3rem;
-    padding: 0.7rem 0.9rem;
+    min-height: 2.875rem;
+    padding: 0.6rem 0.8rem;
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    background: var(--surface-alt);
+    border-radius: 2px;
+    background: var(--surface);
     font-size: var(--step-body);
     transition:
       border-color var(--speed) var(--ease),
-      background var(--speed) var(--ease),
       box-shadow var(--speed) var(--ease);
   }
 
@@ -756,122 +743,85 @@
     appearance: none;
     padding-right: 2.5rem;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2022' stroke-width='1.5'/%3E%3C/svg%3E")
-      right 0.9rem center / 0.75rem no-repeat var(--surface-alt);
+      right 0.85rem center / 0.7rem no-repeat var(--surface);
   }
 
   .contact-form textarea {
-    height: 13rem;
+    height: 14rem;
     min-height: 8rem;
-    line-height: 1.85;
+    line-height: 1.8;
     resize: vertical;
-  }
-
-  .contact-form :is(input, textarea, select):hover {
-    background-color: var(--surface);
   }
 
   .contact-form :is(input, textarea, select):focus-visible {
     outline: none;
-    border-color: var(--focus-ring);
-    background-color: var(--surface);
-    box-shadow: 0 0 0 4px var(--accent-tint);
-  }
-
-  /* While a message is on its way the fields stay visible but untouchable. */
-  .contact-form[aria-busy="true"] :is(label, .contact-form__verification) {
-    opacity: 0.55;
-    pointer-events: none;
-    transition: opacity var(--speed) var(--ease);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
   }
 
   .contact-form__count {
-    justify-self: end;
+    margin-top: 0.35rem;
     color: var(--ink-faint);
     font-size: var(--step-tiny);
+    text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  .contact-form__foot {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding-top: var(--space-lg);
+    text-align: center;
+  }
+
+  .contact-form__privacy,
+  .contact-form__verification p {
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    line-height: 1.8;
   }
 
   .contact-form__verification {
     display: grid;
+    justify-items: center;
     gap: 0.4rem;
   }
 
-  .contact-form__verification p {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
   .contact-form button[type="submit"] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    width: 100%;
-    min-height: 3.25rem;
-    padding: 0.6rem 1.5rem;
+    min-width: 15rem;
+    min-height: 3rem;
+    padding: 0.7rem 2.5rem;
     border: 0;
-    border-radius: var(--radius);
-    background: var(--ink);
-    color: var(--on-dark);
+    border-radius: 2px;
+    background: var(--accent);
+    color: #fff;
     font-size: var(--step-body);
-    letter-spacing: 0.1em;
-    transition:
-      background var(--speed) var(--ease),
-      transform var(--speed) var(--ease);
-  }
-
-  .contact-form button[type="submit"]:active:not(:disabled) {
-    transform: translateY(1px);
-  }
-
-  .contact-form button[type="submit"]:disabled[aria-busy="true"] {
-    background: var(--ink);
-    color: var(--on-dark);
-    cursor: progress;
-  }
-
-  .contact-form button[type="submit"][aria-busy="true"]::before {
-    content: "";
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid rgb(250 248 244 / 35%);
-    border-top-color: var(--on-dark);
-    border-radius: 50%;
-    animation: contact-spin 0.8s linear infinite;
-  }
-
-  .contact-form button[type="submit"][aria-busy="true"] span:last-child {
-    display: none;
-  }
-
-  @keyframes contact-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .contact-form button[type="submit"][aria-busy="true"]::before {
-      animation-duration: 2.4s;
-    }
-  }
-
-  .contact-form button[type="submit"] span:last-child {
-    transition: transform var(--speed) var(--ease);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    transition: background var(--speed) var(--ease);
   }
 
   .contact-form button[type="submit"]:hover:not(:disabled) {
-    background: var(--accent);
-  }
-
-  .contact-form button[type="submit"]:hover:not(:disabled) span:last-child {
-    transform: translateX(0.25rem);
+    background: var(--accent-strong);
   }
 
   .contact-form button[type="submit"]:disabled {
     background: var(--line-mid);
     color: var(--ink-soft);
     cursor: not-allowed;
+  }
+
+  .contact-form button[type="submit"]:disabled[aria-busy="true"] {
+    background: var(--accent);
+    color: #fff;
+    cursor: progress;
+  }
+
+  /* While a message is on its way the fields stay visible but untouchable. */
+  .contact-form[aria-busy="true"] > label {
+    opacity: 0.55;
+    pointer-events: none;
   }
 
   .honeypot {
@@ -883,13 +833,18 @@
   }
 
   /* Failures sit right above the button, where the eye already is. */
+  .contact-form__messages {
+    justify-self: stretch;
+    text-align: left;
+  }
+
   .contact-form__messages:not(:has(.form-message:not([hidden]))) {
     display: none;
   }
 
   .form-message {
-    padding: 0.85rem 1rem;
-    border-radius: var(--radius);
+    padding: 0.8rem 1rem;
+    border-radius: 2px;
     font-size: var(--step-small);
     line-height: 1.8;
   }
@@ -902,12 +857,13 @@
     color: var(--color-state-error);
   }
 
-  /* Sent: the form gives way to a short thank-you in the same sheet. */
+  /* Sent: the form gives way to a short note in the same place. */
   .contact-done {
     display: grid;
     justify-items: center;
-    gap: 0.75rem;
-    padding-block: var(--space-lg);
+    gap: 0.8rem;
+    padding: var(--space-xl) var(--space-sm);
+    border-block: 1px solid var(--ink);
     text-align: center;
   }
 
@@ -919,97 +875,52 @@
     outline: none;
   }
 
-  .contact-done__mark {
-    position: relative;
-    width: 3.5rem;
-    height: 3.5rem;
-    margin-bottom: 0.25rem;
-    border-radius: 50%;
-    background: var(--accent-tint);
-  }
-
-  .contact-done__mark::after {
-    content: "";
-    position: absolute;
-    top: 1.05rem;
-    left: 1.3rem;
-    width: 0.8rem;
-    height: 1.25rem;
-    border: solid var(--color-state-success);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-  }
-
   .contact-done h2 {
     font-size: var(--step-h3);
-    font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
   }
 
   .contact-done p {
-    max-width: 26rem;
+    max-width: 30rem;
     color: var(--ink-soft);
     font-size: var(--step-small);
     line-height: 1.9;
-  }
-
-  .contact-done .contact-done__hint {
-    font-size: var(--step-tiny);
+    text-align: left;
   }
 
   .contact-done button {
     min-height: var(--tap);
-    margin-top: 0.5rem;
-    padding: 0.5rem 1.4rem;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--ink);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
     font-size: var(--step-small);
-    transition: background var(--speed) var(--ease);
-  }
-
-  .contact-done button:hover {
-    background: var(--accent-tint);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
   }
 
   .contact-notes {
     display: grid;
     gap: var(--space-lg);
-    padding: clamp(1.25rem, 4vw, 2rem);
-    border-radius: var(--radius-lg);
-    background: var(--surface-alt);
   }
 
   .contact-notes h2 {
     margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line-mid);
     font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-  }
-
-  .contact-notes h2::before {
-    content: "";
-    display: inline-block;
-    width: 0.45rem;
-    height: 0.45rem;
-    margin-right: 0.6rem;
-    border-radius: 50%;
-    vertical-align: 0.15em;
-    background: var(--accent-soft);
+    letter-spacing: 0.04em;
   }
 
   .contact-topics {
     margin: 0;
-    border-top: 1px solid var(--line-mid);
   }
 
   .contact-topics > div {
     display: grid;
-    grid-template-columns: 8rem minmax(0, 1fr);
+    grid-template-columns: 9rem minmax(0, 1fr);
     gap: 0.75rem;
-    padding-block: 0.75rem;
-    border-bottom: 1px solid var(--line-mid);
+    padding-block: 0.4rem;
   }
 
   .contact-topics dt {
@@ -1218,14 +1129,24 @@
   }
 
   @media (max-width: 40rem) {
-    .contact-form__row {
+    /* On a phone the label sits above its field. */
+    .contact-form > label {
       grid-template-columns: minmax(0, 1fr);
+      gap: 0.5rem;
+      padding-block: 1rem;
     }
-    .contact-topics > div {
-      grid-template-columns: 6.5rem minmax(0, 1fr);
+    .contact-form__label {
+      justify-content: flex-start;
+      padding-top: 0;
     }
     .contact-form textarea {
       height: 11rem;
+    }
+    .contact-form button[type="submit"] {
+      width: 100%;
+    }
+    .contact-topics > div {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
     }
     /* On a phone the portrait runs edge to edge and fades into the page, so
        the name below reads as a caption on it. */
