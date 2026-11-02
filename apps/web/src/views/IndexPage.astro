@@ -234,6 +234,9 @@ const ARCHIVE_PAGE_SIZE = 24;
 // rather than on whichever article happened to be published last.
 const archiveLead = bestEpisodes().find(({ view }) => view.cover);
 const archiveFeatured = archiveLead?.view ?? articles.find((view) => view.cover) ?? articles[0];
+const archiveLatest = articles
+  .map((view) => view.article.publishedAt?.slice(0, 10) ?? "")
+  .reduce((latest, date) => (date > latest ? date : latest), "");
 const archiveExperiences = EXPERIENCES.map((experience) => ({
   ...experience,
   count: articles.filter((view) => view.article.experienceTags.includes(experience.tag)).length,
@@ -328,56 +331,70 @@ const labelOf = (target: Route): string => {
 
   {route.path === "/posts" && (
     <div class="posts-archive">
-      <header class="posts-archive__masthead">
-        <div>
-          <p class="eyebrow">TOMOKICHI TRAVEL BLOG</p>
+      <header class="posts-hero">
+        <div class="posts-hero__copy">
+          <p class="eyebrow">TRAVEL BLOG</p>
           <h1>
-            旅の記録と、
-            <br />
-            次の旅に役立つこと。
+            旅のブログ、
+            <br class="posts-hero__break" />
+            {articles.length}本。
           </h1>
-        </div>
-        <div class="posts-archive__lead">
           <p>
             実際に歩いた街、心に残った景色、旅先で困ったこと。写真とともに、自分の言葉で綴っています。
           </p>
-          <span>
-            <strong>{articles.length}</strong> posts
-          </span>
-          <nav aria-label="ブログの探し方">
-            <a href="/destination">旅先から探す</a>
-            <a href="/collections">まとまりで読む</a>
+          <dl class="posts-hero__stats">
+            <div>
+              <dt>ブログ</dt>
+              <dd>{articles.length}</dd>
+            </div>
+            <div>
+              <dt>旅した国</dt>
+              <dd>{archiveCountries.length}</dd>
+            </div>
+            {archiveLatest && (
+              <div>
+                <dt>最終更新</dt>
+                <dd>
+                  <time datetime={archiveLatest}>{archiveLatest.slice(5).replace("-", "/")}</time>
+                </dd>
+              </div>
+            )}
+          </dl>
+          <nav class="posts-hero__links" aria-label="ブログの探し方">
+            <a href="/destination">
+              旅先から探す <span aria-hidden="true">→</span>
+            </a>
+            <a href="/collections">
+              まとまりで読む <span aria-hidden="true">→</span>
+            </a>
           </nav>
         </div>
-      </header>
 
-      {archiveFeatured && archiveFeatured.cover && (
-        <a class="posts-feature" href={archiveFeatured.route.path}>
-          <Picture
-            storageKey={archiveFeatured.cover.asset.storageKey}
-            alt={archiveFeatured.cover.usage.alt}
-            sizes="(max-width: 760px) 100vw, 1100px"
-            loading="eager"
-            fetchpriority="high"
-          />
-          <span class="posts-feature__shade" />
-          <span class="posts-feature__copy">
-            <small>{archiveLead ? "BEST EPISODE" : "FEATURED BLOG"}</small>
-            <strong>{archiveLead?.episode.featuredTitle ?? archiveFeatured.revision.title}</strong>
-            <span>{archiveLead?.episode.hook ?? archiveFeatured.revision.summary}</span>
-            <b>
-              この旅を読む <span aria-hidden="true">→</span>
-            </b>
-          </span>
-        </a>
-      )}
+        {archiveFeatured && archiveFeatured.cover && (
+          <a class="posts-feature" href={archiveFeatured.route.path}>
+            <Picture
+              storageKey={archiveFeatured.cover.asset.storageKey}
+              alt={archiveFeatured.cover.usage.alt}
+              sizes="(max-width: 62rem) 100vw, 560px"
+              loading="eager"
+              fetchpriority="high"
+            />
+            <span class="posts-feature__copy">
+              <small>{archiveLead ? "BEST EPISODE" : "FEATURED"}</small>
+              <strong>
+                {archiveLead?.episode.featuredTitle ?? archiveFeatured.revision.title}
+              </strong>
+              <b>
+                この旅を読む <span aria-hidden="true">→</span>
+              </b>
+            </span>
+          </a>
+        )}
+      </header>
 
       <section class="posts-discovery" aria-labelledby="all-stories-heading">
         <div class="posts-discovery__heading">
-          <div>
-            <p class="eyebrow">EXPLORE THE BLOG</p>
-            <h2 id="all-stories-heading">旅のブログを探す</h2>
-          </div>
+          <h2 id="all-stories-heading">すべてのブログ</h2>
           <p>
             <span data-archive-count>{archiveArticles.length}</span>件の旅
           </p>
