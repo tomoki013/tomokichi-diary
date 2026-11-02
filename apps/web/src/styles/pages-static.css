@@ -656,158 +656,115 @@
   }
 
   /* Contact ----------------------------------------------------------- */
+  /* One narrow column: the form comes first, and what it is for, the note on
+     sales enquiries and the email address follow underneath it. */
   .contact-page {
     display: grid;
+    gap: var(--space-xl);
+    max-width: 42rem;
+    margin-inline: auto;
+    padding-block: var(--band-tight) var(--space-lg);
   }
 
-  .contact-page > * + * {
-    margin-top: var(--band-tight);
-  }
-
-  .contact-hero {
+  .contact-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: end;
-    gap: var(--space-md) var(--space-lg);
-    padding-top: var(--band-tight);
+    gap: 0.6rem;
   }
 
-  .contact-hero h1 {
-    margin-top: 0.4rem;
+  .contact-head h1 {
     font-size: var(--step-h1);
+    font-weight: 500;
+    letter-spacing: 0.08em;
   }
 
-  .contact-hero p {
+  .contact-head p {
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.95;
+    line-height: 1.9;
   }
 
-  .contact-hero dl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    margin: var(--space-sm) 0 0;
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--line);
+  .contact-page > .contact-head + .contact-sheet {
+    margin-top: calc(var(--space-md) - var(--space-xl));
   }
 
-  .contact-hero dt {
-    color: var(--ink-faint);
-    font-size: 0.68rem;
-  }
-
-  .contact-hero dd {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-  }
-
-  .contact-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-lg);
-  }
-
-  .contact-form-card {
-    padding: var(--space-md);
+  .contact-sheet {
+    padding: clamp(1.25rem, 4vw, 2.25rem);
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface);
-  }
-
-  .contact-form-card > header {
-    display: grid;
-    gap: 0.2rem;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .contact-form-card > header p {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-  }
-
-  .contact-form-card > header h2 {
-    font-size: var(--step-h3);
-  }
-
-  .contact-form-card > header span {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .contact-policy {
-    display: grid;
-    gap: 0.4rem;
-    margin-bottom: var(--space-md);
-    color: var(--ink-soft);
-    font-size: var(--step-small);
-    line-height: 1.8;
+    box-shadow: var(--shadow-sm);
   }
 
   .contact-form {
     display: grid;
-    gap: var(--space-sm);
+    gap: 1.35rem;
   }
 
   .contact-form__row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-sm);
+    gap: 1.35rem 1rem;
   }
 
   .contact-form label {
     display: grid;
-    gap: 0.3rem;
+    gap: 0.45rem;
   }
 
   .contact-form label > span {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: var(--step-tiny);
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: var(--step-small);
     font-weight: 600;
+    letter-spacing: 0.04em;
   }
 
   .contact-form label > span small {
-    padding: 0.1rem 0.45rem;
-    border-radius: var(--radius-pill);
-    background: var(--accent-tint);
-    color: var(--accent-strong);
-    font-size: 0.62rem;
+    color: var(--accent);
+    font-size: 0.6875rem;
     font-weight: 400;
   }
 
   .contact-form :is(input, textarea, select) {
     width: 100%;
+    min-height: 3rem;
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     background: var(--bg);
+    font-size: var(--step-body);
+    transition:
+      border-color var(--speed) var(--ease),
+      background var(--speed) var(--ease);
+  }
+
+  .contact-form select {
+    appearance: none;
+    padding-right: 2.5rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2022' stroke-width='1.5'/%3E%3C/svg%3E")
+      right 0.9rem center / 0.75rem no-repeat var(--bg);
   }
 
   .contact-form textarea {
-    min-height: 11rem;
-    resize: vertical;
+    height: 13rem;
+    min-height: 8rem;
     line-height: 1.85;
+    resize: vertical;
   }
 
   .contact-form :is(input, textarea, select):focus-visible {
     outline: none;
     border-color: var(--focus-ring);
+    background-color: var(--surface);
     box-shadow: 0 0 0 1px var(--focus-ring);
   }
 
   .contact-form__count {
     justify-self: end;
     color: var(--ink-faint);
-    font-family: var(--font-label);
     font-size: var(--step-tiny);
+    font-variant-numeric: tabular-nums;
   }
 
   .contact-form__verification {
@@ -821,23 +778,32 @@
   }
 
   .contact-form button[type="submit"] {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    justify-self: start;
-    min-height: 3rem;
-    padding: 0.6rem 1.8rem;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.6rem 1.5rem;
     border: 0;
-    border-radius: var(--radius-pill);
-    background: var(--accent);
-    color: #fff;
-    font-size: var(--step-small);
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--on-dark);
+    font-size: var(--step-body);
+    letter-spacing: 0.1em;
     transition: background var(--speed) var(--ease);
   }
 
+  .contact-form button[type="submit"] span:last-child {
+    transition: transform var(--speed) var(--ease);
+  }
+
   .contact-form button[type="submit"]:hover:not(:disabled) {
-    background: var(--accent-strong);
+    background: var(--accent);
+  }
+
+  .contact-form button[type="submit"]:hover:not(:disabled) span:last-child {
+    transform: translateX(0.25rem);
   }
 
   .contact-form button[type="submit"]:disabled {
@@ -855,85 +821,88 @@
   }
 
   .form-message {
-    margin-bottom: var(--space-sm);
-    padding: 0.85rem 1.1rem;
-    border-radius: var(--radius);
+    margin-bottom: 1.35rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
     font-size: var(--step-small);
+    line-height: 1.8;
   }
 
   /* State is carried by the bar and the wording, not by a tint alone. */
   .form-message--ok {
     border: 1px solid var(--line);
-    border-left: 4px solid var(--color-state-success);
-    background: var(--surface);
+    border-left: 3px solid var(--color-state-success);
+    background: var(--bg);
     color: var(--ink);
   }
 
   .form-message--error {
     border: 1px solid var(--line);
-    border-left: 4px solid var(--color-state-error);
-    background: var(--surface);
+    border-left: 3px solid var(--color-state-error);
+    background: var(--bg);
     color: var(--color-state-error);
   }
 
-  .contact-guide {
+  .contact-notes {
     display: grid;
-    gap: var(--space-sm);
+    gap: var(--space-lg);
   }
 
-  .contact-guide > section {
+  .contact-notes h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .contact-notes h2::before {
+    content: "";
+    display: inline-block;
+    width: 0.9rem;
+    height: 1px;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+    background: var(--accent);
+  }
+
+  .contact-topics {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-topics > div {
     display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 0.8rem;
-    padding-bottom: var(--space-sm);
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-block: 0.75rem;
     border-bottom: 1px solid var(--line);
   }
 
-  .contact-guide > section span {
-    color: var(--accent);
-    font-family: var(--font-label);
+  .contact-topics dt {
     font-size: var(--step-small);
+    font-weight: 600;
   }
 
-  .contact-guide h2 {
-    font-size: 1.02rem;
-  }
-
-  .contact-guide p {
-    margin-top: 0.15rem;
+  .contact-topics dd {
+    margin: 0;
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.8;
+    line-height: 1.75;
   }
 
+  .contact-policy,
   .contact-direct {
-    display: grid;
-    gap: 0.25rem;
-    padding: var(--space-sm);
-    border-radius: var(--radius);
-    background: var(--surface-alt);
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.85;
   }
 
-  .contact-direct small {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.62rem;
-    letter-spacing: 0.16em;
+  .contact-policy p + p {
+    margin-top: 0.4rem;
   }
 
   .contact-direct a {
-    font-size: var(--step-small);
-    word-break: break-all;
-  }
-
-  .contact-direct p {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .contact-security {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
+    overflow-wrap: anywhere;
   }
 
   /* Error pages -------------------------------------------------------- */
@@ -1100,8 +1069,6 @@
     .about-manifesto,
     .faq-hero,
     .faq-layout,
-    .contact-hero,
-    .contact-layout,
     .error-page__hero {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -1119,6 +1086,12 @@
   @media (max-width: 40rem) {
     .contact-form__row {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .contact-topics > div {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+    }
+    .contact-form textarea {
+      height: 11rem;
     }
     /* On a phone the portrait runs edge to edge and fades into the page, so
        the name below reads as a caption on it. */
