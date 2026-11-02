@@ -3,76 +3,49 @@ import ContactForm from "./ContactForm.astro";
 ---
 
 <article class="contact-page">
-  <header class="contact-hero">
-    <div>
-      <p class="eyebrow">LET'S TALK ABOUT TRAVEL</p>
-      <h1>
-        <span class="sr-only">お問い合わせ — </span>旅の話を、
-        <br />
-        聞かせてください。
-      </h1>
-    </div>
-    <div>
-      <p>
-        記事の感想や掲載内容についてのご連絡、旅先のリクエスト、コラボレーションのご相談まで。ひとつずつ目を通してお返事します。
-      </p>
-      <dl>
-        <div>
-          <dt>返信の目安</dt>
-          <dd>3〜5日</dd>
-        </div>
-        <div>
-          <dt>受付</dt>
-          <dd>24時間</dd>
-        </div>
-      </dl>
-    </div>
+  <header class="contact-head">
+    <h1>お問い合わせ</h1>
+    <p>記事の感想やご質問、お仕事のご相談はこちらから。3〜5日ほどでお返事します。</p>
   </header>
 
-  <div class="contact-layout">
-    <section class="contact-form-card" aria-labelledby="contact-form-title">
-      <header>
-        <p>MESSAGE FORM</p>
-        <h2 id="contact-form-title">お問い合わせ内容</h2>
-        <span>必須項目を入力して送信してください。</span>
-      </header>
-      <div class="contact-policy">
-        <p>当サイトは、旅行好きの個人が趣味で運営している旅行ブログです。</p>
-        <p>
-          取材・コラボレーション・タイアップなどのご相談は歓迎しておりますが、サイト売却・M&amp;A・SEO対策等、当サイトの運営や記事内容に直接関係のない営業目的のご連絡はご遠慮ください。
-        </p>
-      </div>
-      <ContactForm />
+  <section class="contact-sheet" aria-label="お問い合わせフォーム">
+    <ContactForm />
+  </section>
+
+  <div class="contact-notes">
+    <section aria-labelledby="contact-topics-title">
+      <h2 id="contact-topics-title">お受けしているご連絡</h2>
+      <dl class="contact-topics">
+        <div>
+          <dt>記事のこと</dt>
+          <dd>掲載内容の訂正、リンク切れ、読んだ感想。</dd>
+        </div>
+        <div>
+          <dt>旅先のリクエスト</dt>
+          <dd>取り上げてほしい国や都市、知りたい移動の情報。</dd>
+        </div>
+        <div>
+          <dt>お仕事・取材</dt>
+          <dd>執筆、写真のご利用、コラボレーションのご相談。</dd>
+        </div>
+      </dl>
     </section>
 
-    <aside class="contact-guide">
-      <section>
-        <span>01</span>
-        <div>
-          <h2>記事について</h2>
-          <p>掲載内容の訂正、リンク切れ、記事の感想はこちらから。</p>
-        </div>
-      </section>
-      <section>
-        <span>02</span>
-        <div>
-          <h2>旅先のリクエスト</h2>
-          <p>取り上げてほしい国や都市、知りたい移動情報を教えてください。</p>
-        </div>
-      </section>
-      <section>
-        <span>03</span>
-        <div>
-          <h2>お仕事・取材</h2>
-          <p>執筆、写真利用、コラボレーションのご相談も受け付けています。</p>
-        </div>
-      </section>
-      <div class="contact-direct">
-        <small>DIRECT EMAIL</small>
+    <section class="contact-policy" aria-labelledby="contact-policy-title">
+      <h2 id="contact-policy-title">営業目的のご連絡について</h2>
+      <p>当サイトは、旅行好きの個人が趣味で運営している旅行ブログです。</p>
+      <p>
+        取材・コラボレーション・タイアップなどのご相談は歓迎しておりますが、サイト売却・M&amp;A・SEO対策等、当サイトの運営や記事内容に直接関係のない営業目的のご連絡はご遠慮ください。
+      </p>
+    </section>
+
+    <section class="contact-direct" aria-labelledby="contact-direct-title">
+      <h2 id="contact-direct-title">メールでのご連絡</h2>
+      <p>
+        フォームが使えないときは
         <a href="mailto:tomokichidiary@gmail.com">tomokichidiary@gmail.com</a>
-        <p>フォームが利用できない場合はこちらへ。</p>
-      </div>
-      <p class="contact-security">送信内容は不正利用防止の仕組みで保護されています。</p>
-    </aside>
+        へどうぞ。送信内容は不正利用防止の仕組みで保護されています。
+      </p>
+    </section>
   </div>
 </article>

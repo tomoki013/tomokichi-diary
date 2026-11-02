@@ -656,183 +656,149 @@
   }
 
   /* Contact ----------------------------------------------------------- */
+  /* Laid out the way a personal blog's form usually is: a ruled table with
+     the label on the left and a plain white field on the right, a square
+     "必須" tag, and one centred button. The form comes first; what it is
+     for and the email address follow underneath. */
   .contact-page {
     display: grid;
+    gap: var(--space-xl);
+    max-width: 44rem;
+    margin-inline: auto;
+    padding-block: var(--band-tight) var(--space-lg);
   }
 
-  .contact-page > * + * {
-    margin-top: var(--band-tight);
-  }
-
-  .contact-hero {
+  .contact-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: end;
-    gap: var(--space-md) var(--space-lg);
-    padding-top: var(--band-tight);
+    gap: 0.6rem;
   }
 
-  .contact-hero h1 {
-    margin-top: 0.4rem;
+  .contact-head h1 {
     font-size: var(--step-h1);
+    letter-spacing: 0.06em;
   }
 
-  .contact-hero p {
+  .contact-head p {
     color: var(--ink-soft);
     font-size: var(--step-small);
-    line-height: 1.95;
+    line-height: 1.9;
   }
 
-  .contact-hero dl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    margin: var(--space-sm) 0 0;
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--line);
-  }
-
-  .contact-hero dt {
-    color: var(--ink-faint);
-    font-size: 0.68rem;
-  }
-
-  .contact-hero dd {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-  }
-
-  .contact-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-lg);
-  }
-
-  .contact-form-card {
-    padding: var(--space-md);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .contact-form-card > header {
-    display: grid;
-    gap: 0.2rem;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .contact-form-card > header p {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-  }
-
-  .contact-form-card > header h2 {
-    font-size: var(--step-h3);
-  }
-
-  .contact-form-card > header span {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .contact-policy {
-    display: grid;
-    gap: 0.4rem;
-    margin-bottom: var(--space-md);
-    color: var(--ink-soft);
-    font-size: var(--step-small);
-    line-height: 1.8;
+  .contact-page > .contact-head + .contact-sheet {
+    margin-top: calc(var(--space-md) - var(--space-xl));
   }
 
   .contact-form {
-    display: grid;
-    gap: var(--space-sm);
+    border-top: 1px solid var(--ink);
   }
 
-  .contact-form__row {
+  .contact-form > label {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-sm);
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
   }
 
-  .contact-form label {
-    display: grid;
-    gap: 0.3rem;
-  }
-
-  .contact-form label > span {
+  .contact-form__label {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: var(--step-tiny);
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.65rem;
+    font-size: var(--step-small);
     font-weight: 600;
   }
 
-  .contact-form label > span small {
-    padding: 0.1rem 0.45rem;
-    border-radius: var(--radius-pill);
-    background: var(--accent-tint);
-    color: var(--accent-strong);
-    font-size: 0.62rem;
-    font-weight: 400;
+  .contact-form__label small {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .contact-form__control {
+    display: grid;
   }
 
   .contact-form :is(input, textarea, select) {
     width: 100%;
-    padding: 0.7rem 0.9rem;
+    min-height: 2.875rem;
+    padding: 0.6rem 0.8rem;
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    background: var(--bg);
+    border-radius: 2px;
+    background: var(--surface);
+    font-size: var(--step-body);
+    transition:
+      border-color var(--speed) var(--ease),
+      box-shadow var(--speed) var(--ease);
+  }
+
+  .contact-form select {
+    appearance: none;
+    padding-right: 2.5rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2022' stroke-width='1.5'/%3E%3C/svg%3E")
+      right 0.85rem center / 0.7rem no-repeat var(--surface);
   }
 
   .contact-form textarea {
-    min-height: 11rem;
+    height: 14rem;
+    min-height: 8rem;
+    line-height: 1.8;
     resize: vertical;
-    line-height: 1.85;
   }
 
   .contact-form :is(input, textarea, select):focus-visible {
     outline: none;
-    border-color: var(--focus-ring);
-    box-shadow: 0 0 0 1px var(--focus-ring);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
   }
 
   .contact-form__count {
-    justify-self: end;
+    margin-top: 0.35rem;
     color: var(--ink-faint);
-    font-family: var(--font-label);
     font-size: var(--step-tiny);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .contact-form__foot {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding-top: var(--space-lg);
+    text-align: center;
+  }
+
+  .contact-form__privacy,
+  .contact-form__verification p {
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    line-height: 1.8;
   }
 
   .contact-form__verification {
     display: grid;
+    justify-items: center;
     gap: 0.4rem;
   }
 
-  .contact-form__verification p {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
   .contact-form button[type="submit"] {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    justify-self: start;
+    min-width: 15rem;
     min-height: 3rem;
-    padding: 0.6rem 1.8rem;
+    padding: 0.7rem 2.5rem;
     border: 0;
-    border-radius: var(--radius-pill);
+    border-radius: 2px;
     background: var(--accent);
     color: #fff;
-    font-size: var(--step-small);
+    font-size: var(--step-body);
+    font-weight: 600;
+    letter-spacing: 0.2em;
     transition: background var(--speed) var(--ease);
   }
 
@@ -846,6 +812,18 @@
     cursor: not-allowed;
   }
 
+  .contact-form button[type="submit"]:disabled[aria-busy="true"] {
+    background: var(--accent);
+    color: #fff;
+    cursor: progress;
+  }
+
+  /* While a message is on its way the fields stay visible but untouchable. */
+  .contact-form[aria-busy="true"] > label {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
   .honeypot {
     position: absolute;
     left: -9999px;
@@ -854,86 +832,122 @@
     overflow: hidden;
   }
 
+  /* Failures sit right above the button, where the eye already is. */
+  .contact-form__messages {
+    justify-self: stretch;
+    text-align: left;
+  }
+
+  .contact-form__messages:not(:has(.form-message:not([hidden]))) {
+    display: none;
+  }
+
   .form-message {
-    margin-bottom: var(--space-sm);
-    padding: 0.85rem 1.1rem;
-    border-radius: var(--radius);
-    font-size: var(--step-small);
-  }
-
-  /* State is carried by the bar and the wording, not by a tint alone. */
-  .form-message--ok {
-    border: 1px solid var(--line);
-    border-left: 4px solid var(--color-state-success);
-    background: var(--surface);
-    color: var(--ink);
-  }
-
-  .form-message--error {
-    border: 1px solid var(--line);
-    border-left: 4px solid var(--color-state-error);
-    background: var(--surface);
-    color: var(--color-state-error);
-  }
-
-  .contact-guide {
-    display: grid;
-    gap: var(--space-sm);
-  }
-
-  .contact-guide > section {
-    display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 0.8rem;
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .contact-guide > section span {
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: var(--step-small);
-  }
-
-  .contact-guide h2 {
-    font-size: 1.02rem;
-  }
-
-  .contact-guide p {
-    margin-top: 0.15rem;
-    color: var(--ink-soft);
+    padding: 0.8rem 1rem;
+    border-radius: 2px;
     font-size: var(--step-small);
     line-height: 1.8;
   }
 
-  .contact-direct {
-    display: grid;
-    gap: 0.25rem;
-    padding: var(--space-sm);
-    border-radius: var(--radius);
-    background: var(--surface-alt);
+  /* State is carried by the bar and the wording, not by a tint alone. */
+  .form-message--error {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--color-state-error);
+    background: var(--surface);
+    color: var(--color-state-error);
   }
 
-  .contact-direct small {
+  /* Sent: the form gives way to a short note in the same place. */
+  .contact-done {
+    display: grid;
+    justify-items: center;
+    gap: 0.8rem;
+    padding: var(--space-xl) var(--space-sm);
+    border-block: 1px solid var(--ink);
+    text-align: center;
+  }
+
+  .contact-done[hidden] {
+    display: none;
+  }
+
+  .contact-done:focus {
+    outline: none;
+  }
+
+  .contact-done h2 {
+    font-size: var(--step-h3);
+    letter-spacing: 0.06em;
+  }
+
+  .contact-done p {
+    max-width: 30rem;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.9;
+    text-align: left;
+  }
+
+  .contact-done button {
+    min-height: var(--tap);
+    padding: 0;
+    border: 0;
+    background: none;
     color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.62rem;
-    letter-spacing: 0.16em;
+    font-size: var(--step-small);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .contact-notes {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .contact-notes h2 {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line-mid);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  .contact-topics {
+    margin: 0;
+  }
+
+  .contact-topics > div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-block: 0.4rem;
+  }
+
+  .contact-topics dt {
+    font-size: var(--step-small);
+    font-weight: 600;
+  }
+
+  .contact-topics dd {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.75;
+  }
+
+  .contact-policy,
+  .contact-direct {
+    color: var(--ink-soft);
+    font-size: var(--step-small);
+    line-height: 1.85;
+  }
+
+  .contact-policy p + p {
+    margin-top: 0.4rem;
   }
 
   .contact-direct a {
-    font-size: var(--step-small);
-    word-break: break-all;
-  }
-
-  .contact-direct p {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .contact-security {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
+    overflow-wrap: anywhere;
   }
 
   /* Error pages -------------------------------------------------------- */
@@ -1100,8 +1114,6 @@
     .about-manifesto,
     .faq-hero,
     .faq-layout,
-    .contact-hero,
-    .contact-layout,
     .error-page__hero {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -1117,8 +1129,24 @@
   }
 
   @media (max-width: 40rem) {
-    .contact-form__row {
+    /* On a phone the label sits above its field. */
+    .contact-form > label {
       grid-template-columns: minmax(0, 1fr);
+      gap: 0.5rem;
+      padding-block: 1rem;
+    }
+    .contact-form__label {
+      justify-content: flex-start;
+      padding-top: 0;
+    }
+    .contact-form textarea {
+      height: 11rem;
+    }
+    .contact-form button[type="submit"] {
+      width: 100%;
+    }
+    .contact-topics > div {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
     }
     /* On a phone the portrait runs edge to edge and fades into the page, so
        the name below reads as a caption on it. */

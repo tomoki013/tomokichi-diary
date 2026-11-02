@@ -21,6 +21,15 @@ const topics = lane ? contactTopicsIn(lane) : CONTACT_TOPICS;
  * is the only third-party script on the page, and without a site key the form
  * is not rendered at all rather than shipped unprotected.
  *
+ * A sent message swaps the form for a thank-you note; a failure is shown
+ * just above the button the reader pressed, so neither one moves the page out
+ * from under them. While the request is in flight the button says so.
+ *
+ * Turnstile runs invisibly as soon as the page opens, so its token is usually
+ * waiting by the time the form is filled in. The button never waits on it: a
+ * press that comes first is held, shown as sending, and goes out the moment
+ * the token arrives.
+ *
  * `?topic=<key>` preselects a topic, so a link elsewhere on the site can open
  * the form on the right one.
  *
@@ -34,17 +43,73 @@ const RESULT_SCRIPT = `
   var count = document.querySelector('[data-contact-count]');
   var body = document.querySelector('[data-contact-body]');
   var challengeCode = document.querySelector('[data-challenge-code]');
+  var done = document.querySelector('[data-contact-done]');
+  var again = document.querySelector('[data-contact-again]');
+  var label = document.querySelector('[data-contact-label]');
+  var idleLabel = label ? label.textContent : '';
   var RESULTS = ['sent', 'challenge', 'invalid', 'toofast', 'unavailable', 'network', 'widget'];
 
+  function reveal(element) {
+    var box = element.getBoundingClientRect();
+    if (box.top < 80 || box.bottom > window.innerHeight) {
+      element.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
   function show(result) {
+    var sent = result === 'sent';
+    if (form) form.hidden = sent;
+    if (done) done.hidden = !sent;
     document.querySelectorAll('[data-message]').forEach(function (message) {
       message.hidden = message.getAttribute('data-message') !== result;
     });
+    if (sent && done) {
+      reveal(done);
+      done.focus({ preventScroll: true });
+      return;
+    }
     var message = document.querySelector('[data-message="' + result + '"]');
-    if (message) message.scrollIntoView({ block: 'center' });
+    if (message) reveal(message);
   }
-  function setReady(ready) {
-    if (submit) submit.disabled = !ready;
+  // Whether a token is waiting, and whether a press is waiting for one.
+  var ready = false;
+  var held = false;
+  var holdTimer = 0;
+  // A press that never got a token is given back after this long.
+  var HOLD_MS = 20000;
+
+  function setReady(next) {
+    ready = next;
+    if (ready && held) {
+      held = false;
+      clearTimeout(holdTimer);
+      send();
+    }
+  }
+  function release(result) {
+    held = false;
+    clearTimeout(holdTimer);
+    setBusy(false);
+    if (submit) submit.disabled = false;
+    if (result) show(result);
+  }
+  function setBusy(busy) {
+    if (!submit || !form) return;
+    if (busy) {
+      submit.setAttribute('aria-busy', 'true');
+      form.setAttribute('aria-busy', 'true');
+    } else {
+      submit.removeAttribute('aria-busy');
+      form.removeAttribute('aria-busy');
+    }
+    if (label) label.textContent = busy ? '送信中…' : idleLabel;
+  }
+
+  if (again && form) {
+    again.addEventListener('click', function () {
+      show('');
+      var first = form.querySelector('input:not([tabindex])');
+      if (first) first.focus();
+    });
   }
 
   var params = new URLSearchParams(location.search);
@@ -70,7 +135,7 @@ const RESULT_SCRIPT = `
   window.contactTurnstileError = function (code) {
     setReady(false);
     if (challengeCode) challengeCode.textContent = String(code || 'unknown');
-    show('widget');
+    release('widget');
   };
 
   if (body && count) {
@@ -79,49 +144,58 @@ const RESULT_SCRIPT = `
     updateCount();
   }
 
+  function send() {
+    var controller = window.AbortController ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+      signal: controller ? controller.signal : undefined,
+    })
+      .then(function (response) {
+        return response.json().then(
+          function (data) { return data && data.result; },
+          function () { return 'unavailable'; }
+        );
+      })
+      .catch(function () { return 'network'; })
+      .then(function (result) {
+        clearTimeout(timer);
+        if (RESULTS.indexOf(result) === -1) result = 'unavailable';
+        if (result === 'sent') {
+          form.reset();
+          if (body && count) count.textContent = '0';
+        }
+        // A token is spent by any submission that reached the API; a fresh
+        // one is fetched now, and the next press waits for it if it must.
+        ready = false;
+        if (window.turnstile) window.turnstile.reset();
+        release(result);
+      });
+  }
+
   if (form && submit && window.fetch && window.FormData) {
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (submit.disabled) return;
       submit.disabled = true;
-      submit.setAttribute('aria-busy', 'true');
-      var controller = window.AbortController ? new AbortController() : null;
-      var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
-      fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { Accept: 'application/json' },
-        credentials: 'omit',
-        signal: controller ? controller.signal : undefined,
-      })
-        .then(function (response) {
-          return response.json().then(
-            function (data) { return data && data.result; },
-            function () { return 'unavailable'; }
-          );
-        })
-        .catch(function () { return 'network'; })
-        .then(function (result) {
-          clearTimeout(timer);
-          submit.removeAttribute('aria-busy');
-          if (RESULTS.indexOf(result) === -1) result = 'unavailable';
-          if (result === 'sent') {
-            form.reset();
-            if (body && count) count.textContent = '0';
-          }
-          show(result);
-          // A token is spent by any submission that reached the API, so a new
-          // one is needed before the next try; the ready callback re-enables
-          // the button when it arrives.
-          setReady(false);
-          if (window.turnstile) window.turnstile.reset();
-        });
+      document.querySelectorAll('[data-message]').forEach(function (message) {
+        message.hidden = true;
+      });
+      setBusy(true);
+      if (ready) {
+        send();
+        return;
+      }
+      held = true;
+      holdTimer = setTimeout(function () { release('challenge'); }, HOLD_MS);
     });
   }
 `;
 
 const MESSAGES = [
-  ["sent", "ok", "お問い合わせを受け付けました。ありがとうございます。"],
   ["challenge", "error", "認証に失敗しました。もう一度お試しください。"],
   ["invalid", "error", "入力内容をご確認のうえ、もう一度お試しください。"],
   ["toofast", "error", "送信間隔が短すぎます。しばらく時間をおいてからお試しください。"],
@@ -144,74 +218,86 @@ const MESSAGES = [
   </p>
 ) : (
   <div>
-    {MESSAGES.map(([key, tone, text]) => (
-      <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
-        {text}
+    <div
+      class="contact-done"
+      data-contact-done
+      tabindex="-1"
+      aria-labelledby="contact-done-title"
+      hidden
+    >
+      <h2 id="contact-done-title">送信が完了しました</h2>
+      <p>
+        お問い合わせありがとうございます。内容を拝見して、3〜5日ほどでご入力のメールアドレスへお返事します。しばらく届かないときは、迷惑メールのフォルダもご確認ください。
       </p>
-    ))}
-    <p class="form-message form-message--error" data-message="widget" hidden>
-      セキュリティ確認を完了できませんでした（コード: <span data-challenge-code></span>
-      ）。ページを再読み込みするか、時間をおいてお試しください。解決しない場合はメールでご連絡ください。
-    </p>
+      <button type="button" data-contact-again>
+        続けてもう一件送る
+      </button>
+    </div>
 
     <form class="contact-form" method="post" action={`${apiUrl}/v1/contact`} data-contact-form>
-      <div class="contact-form__row">
-        <label>
-          <span>
-            お名前 <small>必須</small>
-          </span>
+      <label>
+        <span class="contact-form__label">
+          お名前<small>必須</small>
+        </span>
+        <span class="contact-form__control">
           <input
             type="text"
             name="name"
             required
             maxlength="100"
             autocomplete="name"
-            placeholder="ともきち"
+            placeholder="例）ともきち"
           />
-        </label>
-        <label>
-          <span>
-            メールアドレス <small>必須</small>
-          </span>
+        </span>
+      </label>
+      <label>
+        <span class="contact-form__label">
+          メールアドレス<small>必須</small>
+        </span>
+        <span class="contact-form__control">
           <input
             type="email"
             name="email"
             required
             maxlength="254"
             autocomplete="email"
-            placeholder="you@example.com"
+            placeholder="例）name@example.com"
           />
-        </label>
-      </div>
-      <label>
-        <span>
-          お問い合わせの種類 <small>必須</small>
         </span>
-        <select name="subject" required data-contact-topic>
-          <option value="" selected disabled>
-            選択してください
-          </option>
-          {topics.map((topic) => (
-            <option value={topic.key}>{topic.label}</option>
-          ))}
-        </select>
       </label>
       <label>
-        <span>
-          お問い合わせ内容 <small>必須</small>
+        <span class="contact-form__label">
+          お問い合わせの種類<small>必須</small>
         </span>
-        <textarea
-          name="body"
-          rows="9"
-          required
-          minlength="10"
-          maxlength="4000"
-          placeholder="できるだけ具体的にご記入ください。"
-          data-contact-body
-        ></textarea>
-        <small class="contact-form__count">
-          <span data-contact-count>0</span> / 4000
-        </small>
+        <span class="contact-form__control">
+          <select name="subject" required data-contact-topic>
+            <option value="" selected disabled>
+              選択してください
+            </option>
+            {topics.map((topic) => (
+              <option value={topic.key}>{topic.label}</option>
+            ))}
+          </select>
+        </span>
+      </label>
+      <label>
+        <span class="contact-form__label">
+          お問い合わせ内容<small>必須</small>
+        </span>
+        <span class="contact-form__control">
+          <textarea
+            name="body"
+            rows="9"
+            required
+            minlength="10"
+            maxlength="4000"
+            placeholder="できるだけ具体的にご記入ください。"
+            data-contact-body
+          ></textarea>
+          <small class="contact-form__count">
+            <span data-contact-count>0</span> / 4000
+          </small>
+        </span>
       </label>
 
       {/* Not shown to anyone reading the page; only automation fills it in. */}
@@ -222,25 +308,43 @@ const MESSAGES = [
         </label>
       </div>
 
-      <div class="contact-form__verification">
-        <div
-          class="cf-turnstile"
-          data-sitekey={turnstileSiteKey}
-          data-language="ja"
-          data-action="contact"
-          data-theme="light"
-          data-appearance="interaction-only"
-          data-callback="contactTurnstileReady"
-          data-expired-callback="contactTurnstileReset"
-          data-timeout-callback="contactTurnstileReset"
-          data-error-callback="contactTurnstileError"
-        />
-        <p>送信ボタンを押す前に、セキュリティ確認を完了してください。</p>
+      <div class="contact-form__foot">
+        <div class="contact-form__messages" role="status" aria-live="polite">
+          {MESSAGES.map(([key, tone, text]) => (
+            <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
+              {text}
+            </p>
+          ))}
+          <p class="form-message form-message--error" data-message="widget" hidden>
+            セキュリティ確認を完了できませんでした（コード: <span data-challenge-code></span>
+            ）。ページを再読み込みするか、時間をおいてお試しください。解決しない場合はメールでご連絡ください。
+          </p>
+        </div>
+
+        <p class="contact-form__privacy">
+          ご入力いただいた内容は、お問い合わせへの返信にのみ使います。詳しくは
+          <a href="/legal/privacy">プライバシーポリシー</a>をご覧ください。
+        </p>
+
+        <div class="contact-form__verification">
+          <div
+            class="cf-turnstile"
+            data-sitekey={turnstileSiteKey}
+            data-language="ja"
+            data-action="contact"
+            data-theme="light"
+            data-appearance="interaction-only"
+            data-callback="contactTurnstileReady"
+            data-expired-callback="contactTurnstileReset"
+            data-timeout-callback="contactTurnstileReset"
+            data-error-callback="contactTurnstileError"
+          />
+          <p>迷惑メール対策のため、送信時に自動で確認を行います。</p>
+        </div>
+        <button type="submit" data-contact-submit>
+          <span data-contact-label>送信する</span>
+        </button>
       </div>
-      <button type="submit" data-contact-submit disabled>
-        <span>メッセージを送る</span>
-        <span aria-hidden="true">→</span>
-      </button>
     </form>
 
     <script
