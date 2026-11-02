@@ -78,7 +78,7 @@ function SignatureForm({ initial }: { initial: InquirySignatureDto }) {
       }
     >
       <p className="muted small">
-        返信メールの末尾に自動で付きます（その上に「以上、よろしくお願いいたします。」が入ります）。
+        返信メールの末尾に自動で付きます。「以上、よろしくお願いいたします。」は返信ごとに付けるか選べます。
       </p>
       <textarea
         rows={4}
@@ -124,9 +124,11 @@ function TemplatesPanel() {
       }
     >
       <p className="muted small">
-        返信は「冒頭（宛名・名乗り）→ 本文 → 以上、よろしくお願いいたします。→
-        署名」の順に組み立てます。冒頭は返信画面を開くと自動で入り、本文はここのテンプレートから選べます。
+        返信は「冒頭（宛名・名乗り）→ 本文 →（以上、よろしくお願いいたします。）→
+        署名」の順に組み立てます。冒頭は返信画面を開くと宛名（ニックネーム）まで埋まった状態で入り、本文はここのテンプレートから選べます。
         名前を「区分：名前」にすると、返信画面で区分ごとにまとまります。
+        記事名や場所など、その返信でしか書けないことは {"{{articleTitle}}"}{" "}
+        のように書いておくと、埋めるまで送信できません。
       </p>
       {editing !== null && (
         <TemplateEditor
@@ -240,7 +242,7 @@ function TemplateEditor({
         </label>
         <label className="field field--wide">
           <span>
-            件名 <em className="field__hint">空なら基盤の既定の件名</em>
+            件名 <em className="field__hint">空なら既定の件名</em>
           </span>
           <input
             maxLength={200}
@@ -258,7 +260,9 @@ function TemplateEditor({
             onChange={(event) => set({ body: event.target.value })}
           />
           <small className="muted">
-            {"{{userName}}"} は差出人の名前、{"{{appName}}"} はサイト名に置き換わります。
+            {"{{userName}}"} はフォームに入力されたニックネーム、{"{{appName}}"} はサイト名、
+            {"{{siteUrl}}"} はサイトの URL に置き換わります（件名でも使えます）。ほかの {"{{…}}"}{" "}
+            は返信のときに書き換えるまで送信できません。
           </small>
         </label>
         <label className="field">

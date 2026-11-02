@@ -405,11 +405,12 @@ sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`), then:
    ([tomoki013/inquiry-platform](https://github.com/tomoki013/inquiry-platform),
    SDK pinned in `apps/api/package.json`), where it becomes a ticket that is
    worked and answered from the admin's お問い合わせ screen.
-2. **Tells `tomokichidiary@gmail.com` it arrived.** The mail carries the
-   message, its lane and a link to the ticket in the admin, and has no
-   Reply-To: replies are written in the admin so the ticket keeps the whole
-   conversation. If filing failed, the mail says so and makes the reader the
-   Reply-To, since it is then the only copy. `CONTACT_MAIL` is a `send_email`
+2. **Tells `tomokichidiary@gmail.com` it arrived.** The mail is only a notice:
+   its lane, the ticket number and a link to the ticket in the admin, with no
+   name, address or message and no Reply-To. The message is read and answered
+   in the admin, so the ticket keeps the whole conversation. If filing failed,
+   the mail carries the whole message and makes the reader the Reply-To, since
+   it is then the only copy. `CONTACT_MAIL` is a `send_email`
    binding pinned to that one address (it must be a verified destination in
    Cloudflare Email Routing), sent from `noreply@tmkch.io` (a domain with Email
    Routing enabled).

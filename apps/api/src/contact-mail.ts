@@ -23,10 +23,10 @@ export const ADMIN_TICKET_URL = "https://admin.tomokichidiary.com/#/inquiries/";
  * that one verified address in `cloudflare.config.ts`, so this can mail nobody
  * else.
  *
- * Filed on the platform, the mail links to the ticket and has no Reply-To: the
- * reply is written in the admin, so the ticket keeps the whole conversation and
- * the reader hears from one address. Not filed, the mail is the only copy, so
- * the reader becomes the Reply-To and it is answered from the inbox.
+ * Filed on the platform, the mail is only a notice: no name, address or
+ * message, just a link to the ticket, where it is read and answered. Not
+ * filed, the mail is the only copy, so it carries the whole message and the
+ * reader becomes the Reply-To.
  */
 export function createContactMailer(
   binding: ContactMailBinding,
@@ -36,34 +36,35 @@ export function createContactMailer(
     send: async (filing, filed) => {
       const lane = CONTACT_LANE_LABELS[filing.lane];
       const ticket = filed?.ticketNumber ?? null;
-      const footer = filed
-        ? [
-            ticket
-              ? `返信は管理画面から: ${ADMIN_TICKET_URL}${encodeURIComponent(ticket)}`
-              : `返信は管理画面から: ${ADMIN_TICKET_URL}`,
-            "このメールに返信しても送信者には届きません。",
-          ]
-        : [
-            "共通お問い合わせ基盤に登録できなかったため、管理画面には出ていません。",
-            "このメールに返信すると、送信者に届きます。",
-          ];
+      const message = filed
+        ? {
+            subject: `[ともきちの旅行日記] 新しいお問い合わせ（${lane}）${ticket ? ` ${ticket}` : ""}`,
+            text: [
+              `${lane}のお問い合わせが届きました。内容は管理画面で確認してください。`,
+              "",
+              ticket ? `${ADMIN_TICKET_URL}${encodeURIComponent(ticket)}` : ADMIN_TICKET_URL,
+            ].join("\n"),
+          }
+        : {
+            subject: `[ともきちの旅行日記/${lane}] ${filing.subject}`,
+            text: [
+              `お名前: ${filing.name}`,
+              `メール: ${filing.email}`,
+              `種類: ${filing.subject}（${lane}）`,
+              "",
+              filing.body,
+              "",
+              "―",
+              "共通お問い合わせ基盤に登録できなかったため、管理画面には出ていません。",
+              "このメールに返信すると、送信者に届きます。",
+            ].join("\n"),
+          };
       try {
         await binding.send({
           from: { name: "ともきちの旅行日記 お問い合わせフォーム", email: addresses.from },
           to: addresses.to,
           ...(filed ? {} : { replyTo: { name: filing.name, email: filing.email } }),
-          subject: `[ともきちの旅行日記/${lane}]${ticket ? ` ${ticket}` : ""} ${filing.subject}`,
-          text: [
-            `お名前: ${filing.name}`,
-            `メール: ${filing.email}`,
-            `種類: ${filing.subject}（${lane}）`,
-            "",
-            filing.body,
-            "",
-            "―",
-            "tomokichidiary.com のお問い合わせフォームから送信されました。",
-            ...footer,
-          ].join("\n"),
+          ...message,
         });
         return true;
       } catch {

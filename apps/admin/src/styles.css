@@ -2089,6 +2089,12 @@ textarea.mail__text:focus {
   color: var(--ink-faint);
   white-space: pre-wrap;
 }
+.mail__closing {
+  display: flex;
+  padding: 0.5rem 0.8rem;
+  border-top: 1px dashed var(--line);
+  font-size: 0.85rem;
+}
 .mail__added--below {
   display: block;
   padding: 0.6rem 0.8rem 0.8rem;

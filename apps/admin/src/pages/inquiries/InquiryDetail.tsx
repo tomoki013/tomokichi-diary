@@ -453,13 +453,15 @@ function MailForm({
   const [subject, setSubject] = useState(compose.subject);
   const [body, setBody] = useState(start);
   const [after, setAfter] = useState<After>("WAITING_CUSTOMER");
+  const [closing, setClosing] = useState(true);
   const [previewing, setPreviewing] = useState(false);
   // One key per composed message, so a retried send never mails twice.
   const [key, setKey] = useState(newIdempotencyKey);
   const written = body.trim() !== "" && body.trim() !== start.trim();
   useUnsavedWarning(written);
 
-  const left = [...new Set([...body.matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)].map((m) => m[1]))];
+  const typed = compose.subjectEditable ? `${subject}\n${body}` : body;
+  const left = [...new Set([...typed.matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)].map((m) => m[1]))];
   const closed = !isOpenTicket(ticket.status);
   const ready = written && left.length === 0 && (!compose.subjectEditable || subject.trim() !== "");
 
@@ -484,6 +486,7 @@ function MailForm({
           idempotencyKey: key,
           subject: compose.subjectEditable ? subject.trim() : null,
           afterStatus: after === "" ? null : after,
+          closing,
         }),
       after === "RESOLVED"
         ? "返信を送り、解決済みにしました"
@@ -499,7 +502,9 @@ function MailForm({
     }
   }
 
-  const footer = [compose.closing, compose.signature].filter((part) => part.trim()).join("\n\n");
+  const footer = [closing ? compose.closing : "", compose.signature]
+    .filter((part) => part.trim())
+    .join("\n\n");
 
   return (
     <Panel
@@ -566,6 +571,14 @@ function MailForm({
               value={body}
               onChange={(event) => setBody(event.target.value)}
             />
+            <label className="check mail__closing">
+              <input
+                type="checkbox"
+                checked={closing}
+                onChange={(event) => setClosing(event.target.checked)}
+              />
+              最後に「{compose.closing}」を付ける
+            </label>
             {footer && (
               <div className="mail__added mail__added--below">
                 <span className="mail__note">送信時に自動で付きます</span>
@@ -579,7 +592,7 @@ function MailForm({
       {left.length > 0 && (
         <p className="form-error" role="alert">
           {left.map((name) => `{{${name}}}`).join("、")}{" "}
-          を書き換えてください。残っている間は送信できません。
+          を書き換えてください（件名も含みます）。残っている間は送信できません。
         </p>
       )}
 

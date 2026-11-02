@@ -454,6 +454,7 @@ export const api = {
       idempotencyKey: string;
       subject: string | null;
       afterStatus: "WAITING_CUSTOMER" | "RESOLVED" | null;
+      closing: boolean;
     },
   ) =>
     request<{ ok: boolean; status: InquiryTicketStatus }>(
