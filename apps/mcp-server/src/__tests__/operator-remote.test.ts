@@ -136,6 +136,15 @@ const rpc = (env: OperatorEnv, token: string, body: unknown) =>
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, ...(body as object) }),
   });
 
+/** Tool names from a tools/list reply; descriptions may mention other tools. */
+async function toolNames(env: OperatorEnv, token: string) {
+  const text = await (await rpc(env, token, { method: "tools/list" })).text();
+  const data = text.split("\n").find((line) => line.startsWith("data: "))!;
+  return (JSON.parse(data.slice(6)) as { result: { tools: { name: string }[] } }).result.tools.map(
+    (tool) => tool.name,
+  );
+}
+
 describe("remote operator authorization", () => {
   it("routes only operator paths here, leaving analytics untouched", () => {
     expect(isOperatorPath("/operator/mcp")).toBe(true);
@@ -228,11 +237,11 @@ describe("remote operator tools", () => {
     const { env, records, adminCalls } = fixture();
     const token = await connect(env, "read");
     expect([...records.keys()].every((key) => key.startsWith("operator:"))).toBe(true);
-    const list = await (await rpc(env, token, { method: "tools/list" })).text();
-    expect(list).toContain("list_articles");
-    expect(list).toContain("check_publishable");
-    expect(list).not.toContain("save_article_draft");
-    expect(list).not.toContain("publish_article");
+    const names = await toolNames(env, token);
+    expect(names).toContain("list_articles");
+    expect(names).toContain("check_publishable");
+    expect(names).not.toContain("save_article_draft");
+    expect(names).not.toContain("publish_article");
     const called = await rpc(env, token, {
       method: "tools/call",
       params: { name: "list_articles", arguments: {} },
@@ -246,10 +255,10 @@ describe("remote operator tools", () => {
   it("lists write tools for a write grant, still requiring the publish confirmation", async () => {
     const { env, adminCalls } = fixture();
     const token = await connect(env, "write");
-    const list = await (await rpc(env, token, { method: "tools/list" })).text();
-    expect(list).toContain("save_article_draft");
-    expect(list).toContain("publish_article");
-    expect(list).not.toMatch(/"delete_/);
+    const names = await toolNames(env, token);
+    expect(names).toContain("save_article_draft");
+    expect(names).toContain("publish_article");
+    expect(names.some((name) => name.startsWith("delete_"))).toBe(false);
     const refused = await rpc(env, token, {
       method: "tools/call",
       params: { name: "publish_article", arguments: { articleId: "a1", confirmArticleId: "a2" } },
