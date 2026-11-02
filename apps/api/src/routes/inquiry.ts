@@ -24,9 +24,11 @@ import type {
 import type { AppEnv } from "../app.js";
 import { errorResponse } from "../http.js";
 import {
-  DEFAULT_SUBJECT,
+  defaultSubject,
   OPENING_KEY,
   REPLY_CLOSING,
+  fillSiteVariables,
+  withClosing,
   REPLY_FROM,
   SUBJECT_KEY,
   ensureSignature,
@@ -94,6 +96,8 @@ const replySchema = v.object({
   subject: v.nullable(v.string({ max: 200 })),
   /** Where the ticket goes once the reply is out; null leaves it in progress. */
   afterStatus: v.nullable(v.literalUnion(["WAITING_CUSTOMER", "RESOLVED"] as const)),
+  /** 「以上、よろしくお願いいたします。」 last, or not. */
+  closing: v.optional(v.boolean(), true),
 });
 /** Empty is allowed: it hands the project back to the deployment's signature. */
 const signatureSchema = v.object({ signature: v.string({ max: 2000 }) });
@@ -481,8 +485,7 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     const carrier = templates.find((template) => template.key === SUBJECT_KEY);
     const opening = templates.find((template) => template.key === OPENING_KEY);
 
-    const lane = laneOf(ticket.value.subject) ?? "general";
-    let subject: string = DEFAULT_SUBJECT[lane];
+    let subject = defaultSubject(findContactTopic(ticket.value.subject));
     let subjectEditable = true;
     if (carrier && ticket.value.canReply) {
       const probed = await subjectOf(operator, ticket.value.id, carrier);
@@ -493,7 +496,7 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     let greeting = "";
     if (opening?.isActive && ticket.value.canReply) {
       const applied = await operator.applyTemplate(ticket.value.id, opening.id);
-      if (applied.ok) greeting = applied.value.body.trim();
+      if (applied.ok) greeting = fillSiteVariables(applied.value.body).trim();
     }
 
     return c.json({
@@ -524,11 +527,14 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     if (!applied.ok) return failure(c, applied);
     // The platform answers with the template's subject only where one can still be chosen.
     const subject =
-      template.subject && applied.value.subject === template.subject ? template.subject : null;
+      template.subject && applied.value.subject === template.subject
+        ? fillSiteVariables(template.subject)
+        : null;
+    const body = fillSiteVariables(applied.value.body);
     return c.json({
-      body: applied.value.body,
+      body,
       subject,
-      unresolved: unresolved(applied.value.body),
+      unresolved: unresolved(body),
     } satisfies InquiryAppliedTemplateDto);
   });
 
@@ -542,8 +548,10 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     const parsed = validate(replySchema, await c.req.json().catch(() => null));
     if (!parsed.ok)
       return errorResponse(c, parsed.code, "invalid request body", 400, parsed.issues);
+    const body = fillSiteVariables(parsed.value.body);
+    const subject = parsed.value.subject ? fillSiteVariables(parsed.value.subject).trim() : "";
     // The platform refuses these too; saying which ones is what helps.
-    const left = unresolved(parsed.value.body);
+    const left = unresolved(`${subject}\n${body}`);
     if (left.length > 0) {
       return errorResponse(
         c,
@@ -575,7 +583,6 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     }
 
     let templateId: string | undefined;
-    const subject = parsed.value.subject?.trim();
     if (subject) {
       const templates = await templatesOf(operator);
       const carrier = templates?.find((template) => template.key === SUBJECT_KEY);
@@ -594,7 +601,7 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
     const result = await operator.reply(
       ticket.id,
       {
-        body: parsed.value.body,
+        body: parsed.value.closing ? withClosing(body) : body,
         idempotencyKey: parsed.value.idempotencyKey,
         reopenIfResolved: !isOpen(ticket.status),
         ...(templateId ? { templateId } : {}),

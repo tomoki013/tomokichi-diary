@@ -405,9 +405,31 @@ describe("/v1/admin/inquiry", () => {
     expect(last("reply")?.args).toEqual([
       "tomokichi-diary",
       "t1",
-      { body: "お返事です", idempotencyKey: "reply-key-1", reopenIfResolved: false },
+      {
+        body: "お返事です\n\n以上、よろしくお願いいたします。",
+        idempotencyKey: "reply-key-1",
+        reopenIfResolved: false,
+      },
       { id: "admin-token" },
     ]);
+  });
+
+  it("leaves the closing off when asked, and never adds it twice", async () => {
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-5", closing: false }),
+    });
+    expect((last("reply")!.args[2] as { body: string }).body).toBe("お返事です");
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "お返事です\n\n以上、よろしくお願いいたします。\n",
+        idempotencyKey: "reply-key-6",
+      }),
+    });
+    expect((last("reply")!.args[2] as { body: string }).body).toBe(
+      "お返事です\n\n以上、よろしくお願いいたします。",
+    );
   });
 
   it("resolves with a result when asked to, and reopens a resolved ticket to reply", async () => {
@@ -437,7 +459,7 @@ describe("/v1/admin/inquiry", () => {
       body: JSON.stringify({
         body: "お返事です",
         idempotencyKey: "reply-key-3",
-        subject: " 【ともきちの旅行日記】写真のご利用について ",
+        subject: " 【{{appName}}】写真のご利用について ",
       }),
     });
     expect(last("updateTemplate")?.args.slice(1, 3)).toEqual([
@@ -469,7 +491,7 @@ describe("/v1/admin/inquiry", () => {
     expect(body).toEqual({
       to: "reader@example.com",
       from: "ともきちの旅行日記 <support@tmkch.io>",
-      subject: "【ともきちの旅行日記】お問い合わせいただいた件について",
+      subject: "【ともきちの旅行日記】記事についてのお問い合わせ",
       subjectEditable: true,
       opening: expect.stringContaining("ともきち 様"),
       closing: "以上、よろしくお願いいたします。",
@@ -486,10 +508,20 @@ describe("/v1/admin/inquiry", () => {
     expect(later).toMatchObject({ subject: "Re: 写真の件", subjectEditable: false });
   });
 
-  it("suggests the media subject for a media enquiry", async () => {
-    answer.getTicket = { ok: true, value: ticket({ subject: "お仕事・取材の相談" }) };
-    const body = await (await request("/tickets/t1/compose")).json();
-    expect(body.subject).toBe("【ともきちの旅行日記】ご相談いただいた件について");
+  it("starts the subject from the topic the reader picked, or else the lane", async () => {
+    const subjectFor = async (subject: string) => {
+      answer.getTicket = { ok: true, value: ticket({ subject }) };
+      return (await (await request("/tickets/t1/compose")).json()).subject;
+    };
+    expect(await subjectFor("お仕事・取材の相談")).toBe(
+      "【ともきちの旅行日記】お仕事のご相談について",
+    );
+    expect(await subjectFor("旅先・記事のリクエスト")).toBe(
+      "【ともきちの旅行日記】いただいたリクエストについて",
+    );
+    expect(await subjectFor("メールでの件名")).toBe(
+      "【ともきちの旅行日記】お問い合わせいただいた件について",
+    );
   });
 
   it("creates the default templates and the subject carrier when they are missing", async () => {
@@ -506,6 +538,26 @@ describe("/v1/admin/inquiry", () => {
     expect(created).toEqual([...DEFAULT_TEMPLATES.map((entry) => entry.key), SUBJECT_KEY]);
   });
 
+  it("moves an untouched first default to the current one, and keeps an edited one", async () => {
+    const opening = DEFAULT_TEMPLATES.find((entry) => entry.key === OPENING_KEY)!;
+    const thanks = DEFAULT_TEMPLATES.find((entry) => entry.key === "diary_thanks_feedback")!;
+    templates = seeded().map((entry) =>
+      entry.key === OPENING_KEY
+        ? {
+            ...entry,
+            body: "{{userName}} 様\n\n旅行ブログ「ともきちの旅行日記」を運営しております、ともきちです。",
+          }
+        : entry.key === thanks.key
+          ? { ...entry, body: "自分で書き直したお礼" }
+          : entry,
+    );
+    await request("/templates");
+    const updated = calledWith("updateTemplate").map((call) => call.args.slice(1, 3));
+    expect(updated).toEqual([
+      [`tpl-${OPENING_KEY}`, { name: opening.name, subject: opening.subject, body: opening.body }],
+    ]);
+  });
+
   it("refuses a reply that still has a placeholder, naming it", async () => {
     const response = await request("/tickets/t1/reply", {
       method: "POST",
@@ -514,6 +566,31 @@ describe("/v1/admin/inquiry", () => {
     expect(response.status).toBe(400);
     expect((await response.json()).error.message).toContain("{{日付}}");
     expect(last("reply")).toBeUndefined();
+  });
+
+  it("fills the site's own placeholders, and refuses one left in the subject", async () => {
+    const refused = await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "{{appName}}の記事です: {{siteUrl}}",
+        idempotencyKey: "reply-key-7",
+        subject: "{{articleTitle}}について",
+      }),
+    });
+    expect(refused.status).toBe(400);
+    expect((await refused.json()).error.message).toContain("{{articleTitle}}");
+
+    await request("/tickets/t1/reply", {
+      method: "POST",
+      body: JSON.stringify({
+        body: "{{appName}}の記事です: {{siteUrl}}",
+        idempotencyKey: "reply-key-8",
+        closing: false,
+      }),
+    });
+    expect((last("reply")!.args[2] as { body: string }).body).toBe(
+      "ともきちの旅行日記の記事です: https://tomokichidiary.com",
+    );
   });
 
   it("says plainly when the platform could not mail the reply", async () => {

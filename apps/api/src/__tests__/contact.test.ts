@@ -392,7 +392,7 @@ describe("createContactMailer", () => {
   };
   const addresses = { from: "noreply@example.com", to: "inbox@example.com" };
 
-  it("points a filed message at its ticket, with no Reply-To to answer from", async () => {
+  it("only tells the inbox a filed message arrived, without its content", async () => {
     const send = vi.fn().mockResolvedValue({ messageId: "m1" });
     const mailer = createContactMailer({ send }, addresses);
     expect(await mailer.send(filing, { ticketNumber: "TK-000042" })).toBe(true);
@@ -400,10 +400,12 @@ describe("createContactMailer", () => {
     expect(message).toMatchObject({
       to: "inbox@example.com",
       from: { email: "noreply@example.com" },
-      subject: "[ともきちの旅行日記/メディア・お仕事] TK-000042 お仕事・取材の相談",
+      subject: "[ともきちの旅行日記] 新しいお問い合わせ（メディア・お仕事） TK-000042",
     });
     expect(message).not.toHaveProperty("replyTo");
-    expect(message.text).toContain(filing.body);
+    for (const secret of [filing.body, filing.name, filing.email, filing.subject]) {
+      expect(message.text).not.toContain(secret);
+    }
     expect(message.text).toContain(`${ADMIN_TICKET_URL}TK-000042`);
   });
 
@@ -415,6 +417,7 @@ describe("createContactMailer", () => {
       replyTo: { name: "ともきち", email: "reader@example.com" },
       subject: "[ともきちの旅行日記/メディア・お仕事] お仕事・取材の相談",
     });
+    expect(message.text).toContain(filing.body);
     expect(message.text).toContain("このメールに返信すると、送信者に届きます。");
   });
 
