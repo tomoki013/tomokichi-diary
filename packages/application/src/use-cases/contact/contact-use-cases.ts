@@ -27,6 +27,11 @@ export interface ContactInput extends ContactSubmission {
  * so the mail can point at the ticket. Accepted when either arrived, so the
  * message always exists somewhere the owner looks; whichever failed is logged.
  * Refused only when neither did.
+ *
+ * Once the filing is in, the sender has nothing left to wait for: where the
+ * runtime can finish work after responding, the mail goes out then. Only when
+ * filing failed is the mail awaited, because it is then the one place the
+ * message exists.
  */
 export async function submitContactMessage(
   ctx: AppContext,
@@ -53,6 +58,16 @@ export async function submitContactMessage(
   };
   // Neither may throw; an unbound one counts as failed.
   const filed = ctx.inquiry ? await ctx.inquiry.file(filing) : null;
+  if (filed && ctx.contactMail && ctx.defer) {
+    const mail = ctx.contactMail;
+    ctx.defer(
+      mail.send(filing, filed).then((sent) => {
+        if (!sent) ctx.logger.error("contact.not_mailed", { code: "API_INTERNAL" });
+      }),
+    );
+    ctx.logger.info("contact.accepted", { mailed: "deferred", filed: true, lane: topic.lane });
+    return ok(null);
+  }
   const mailed = ctx.contactMail ? await ctx.contactMail.send(filing, filed) : false;
   if (!mailed) ctx.logger.error("contact.not_mailed", { code: "API_INTERNAL" });
   if (!filed) ctx.logger.error("contact.not_filed", { code: "API_INTERNAL" });

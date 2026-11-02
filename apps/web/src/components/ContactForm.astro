@@ -25,6 +25,11 @@ const topics = lane ? contactTopicsIn(lane) : CONTACT_TOPICS;
  * just above the button the reader pressed, so neither one moves the page out
  * from under them. While the request is in flight the button says so.
  *
+ * Turnstile runs invisibly as soon as the page opens, so its token is usually
+ * waiting by the time the form is filled in. The button never waits on it: a
+ * press that comes first is held, shown as sending, and goes out the moment
+ * the token arrives.
+ *
  * `?topic=<key>` preselects a topic, so a link elsewhere on the site can open
  * the form on the right one.
  *
@@ -65,8 +70,27 @@ const RESULT_SCRIPT = `
     var message = document.querySelector('[data-message="' + result + '"]');
     if (message) reveal(message);
   }
-  function setReady(ready) {
-    if (submit) submit.disabled = !ready;
+  // Whether a token is waiting, and whether a press is waiting for one.
+  var ready = false;
+  var held = false;
+  var holdTimer = 0;
+  // A press that never got a token is given back after this long.
+  var HOLD_MS = 20000;
+
+  function setReady(next) {
+    ready = next;
+    if (ready && held) {
+      held = false;
+      clearTimeout(holdTimer);
+      send();
+    }
+  }
+  function release(result) {
+    held = false;
+    clearTimeout(holdTimer);
+    setBusy(false);
+    if (submit) submit.disabled = false;
+    if (result) show(result);
   }
   function setBusy(busy) {
     if (!submit || !form) return;
@@ -111,7 +135,7 @@ const RESULT_SCRIPT = `
   window.contactTurnstileError = function (code) {
     setReady(false);
     if (challengeCode) challengeCode.textContent = String(code || 'unknown');
-    show('widget');
+    release('widget');
   };
 
   if (body && count) {
@@ -120,48 +144,53 @@ const RESULT_SCRIPT = `
     updateCount();
   }
 
+  function send() {
+    var controller = window.AbortController ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+      signal: controller ? controller.signal : undefined,
+    })
+      .then(function (response) {
+        return response.json().then(
+          function (data) { return data && data.result; },
+          function () { return 'unavailable'; }
+        );
+      })
+      .catch(function () { return 'network'; })
+      .then(function (result) {
+        clearTimeout(timer);
+        if (RESULTS.indexOf(result) === -1) result = 'unavailable';
+        if (result === 'sent') {
+          form.reset();
+          if (body && count) count.textContent = '0';
+        }
+        // A token is spent by any submission that reached the API; a fresh
+        // one is fetched now, and the next press waits for it if it must.
+        ready = false;
+        if (window.turnstile) window.turnstile.reset();
+        release(result);
+      });
+  }
+
   if (form && submit && window.fetch && window.FormData) {
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (submit.disabled) return;
-      // Read before the fields are dimmed, while every value is still in it.
-      var data = new FormData(form);
       submit.disabled = true;
       document.querySelectorAll('[data-message]').forEach(function (message) {
         message.hidden = true;
       });
       setBusy(true);
-      var controller = window.AbortController ? new AbortController() : null;
-      var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
-      fetch(form.action, {
-        method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
-        credentials: 'omit',
-        signal: controller ? controller.signal : undefined,
-      })
-        .then(function (response) {
-          return response.json().then(
-            function (data) { return data && data.result; },
-            function () { return 'unavailable'; }
-          );
-        })
-        .catch(function () { return 'network'; })
-        .then(function (result) {
-          clearTimeout(timer);
-          setBusy(false);
-          if (RESULTS.indexOf(result) === -1) result = 'unavailable';
-          if (result === 'sent') {
-            form.reset();
-            if (body && count) count.textContent = '0';
-          }
-          show(result);
-          // A token is spent by any submission that reached the API, so a new
-          // one is needed before the next try; the ready callback re-enables
-          // the button when it arrives.
-          setReady(false);
-          if (window.turnstile) window.turnstile.reset();
-        });
+      if (ready) {
+        send();
+        return;
+      }
+      held = true;
+      holdTimer = setTimeout(function () { release('challenge'); }, HOLD_MS);
     });
   }
 `;
@@ -310,9 +339,9 @@ const MESSAGES = [
             data-timeout-callback="contactTurnstileReset"
             data-error-callback="contactTurnstileError"
           />
-          <p>送信ボタンを押す前に、セキュリティ確認を完了してください。</p>
+          <p>迷惑メール対策のため、送信時に自動で確認を行います。</p>
         </div>
-        <button type="submit" data-contact-submit disabled>
+        <button type="submit" data-contact-submit>
           <span data-contact-label>送信する</span>
         </button>
       </div>

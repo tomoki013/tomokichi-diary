@@ -23,4 +23,10 @@ export interface AppContext {
   readonly inquiry?: ContactInbox;
   /** Absent where mail is not bound: the message reaches the inbox only as the copy. */
   readonly contactMail?: ContactMailer;
+  /**
+   * Lets work finish after the response has gone out. Absent where there is
+   * no response to outlive (builds, tests without one); work that would have
+   * been handed over is then awaited in place.
+   */
+  readonly defer?: (task: Promise<unknown>) => void;
 }

@@ -104,7 +104,16 @@ export function createApp(options: AppOptions = {}) {
   app.use("*", async (c, next) => {
     const requestId = c.req.header("x-request-id") ?? generateId();
     c.set("requestId", requestId);
-    c.set("ctx", buildContext(c.env, requestId));
+    const ctx = buildContext(c.env, requestId);
+    // Hono throws on `executionCtx` where the runtime gives none (tests).
+    let defer: ((task: Promise<unknown>) => void) | undefined;
+    try {
+      const execution = c.executionCtx;
+      defer = (task) => execution.waitUntil(task);
+    } catch {
+      defer = undefined;
+    }
+    c.set("ctx", defer && !ctx.defer ? { ...ctx, defer } : ctx);
     c.set("verifyChallenge", verifyChallenge);
     c.set("verifyAccess", verifyAccess);
     await next();

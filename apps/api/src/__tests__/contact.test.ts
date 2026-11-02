@@ -242,6 +242,49 @@ describe("POST /v1/contact", () => {
     expect(unbound.headers.get("location")).toBe(`${SITE}/contact?error=unavailable`);
   });
 
+  it("answers once the copy is filed and mails after the response", async () => {
+    const app = appWith(async () => true);
+    const mail = Promise.withResolvers<boolean>();
+    ctx = {
+      ...ctx,
+      contactMail: {
+        send: (filing, ticket) => {
+          mailed.push({ filing, filed: ticket });
+          return mail.promise;
+        },
+      },
+    };
+    const pending: Promise<unknown>[] = [];
+    const execution = {
+      waitUntil: (task: Promise<unknown>) => pending.push(task),
+      passThroughOnException: () => {},
+      props: {},
+    };
+
+    const response = await app.request("/v1/contact", form(valid), configured(), execution);
+    expect(response.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
+    // The mail was started but not waited for; the runtime is told to finish it.
+    expect(mailed).toHaveLength(1);
+    expect(pending).toHaveLength(1);
+    mail.resolve(true);
+    await Promise.all(pending);
+  });
+
+  it("waits for the mail when the copy could not be filed", async () => {
+    const app = appWith(async () => true);
+    accepts = false;
+    const pending: Promise<unknown>[] = [];
+    const execution = {
+      waitUntil: (task: Promise<unknown>) => pending.push(task),
+      passThroughOnException: () => {},
+      props: {},
+    };
+    const response = await app.request("/v1/contact", form(valid), configured(), execution);
+    expect(response.headers.get("location")).toBe(`${SITE}/contact?sent=1`);
+    expect(mailed).toHaveLength(1);
+    expect(pending).toHaveLength(0);
+  });
+
   it("sends the sender back to the form when something throws", async () => {
     const app = appWith(async () => {
       throw new Error("siteverify timed out");
