@@ -21,6 +21,10 @@ const topics = lane ? contactTopicsIn(lane) : CONTACT_TOPICS;
  * is the only third-party script on the page, and without a site key the form
  * is not rendered at all rather than shipped unprotected.
  *
+ * A sent message swaps the form for a thank-you note; a failure is shown
+ * just above the button the reader pressed, so neither one moves the page out
+ * from under them. While the request is in flight the button says so.
+ *
  * `?topic=<key>` preselects a topic, so a link elsewhere on the site can open
  * the form on the right one.
  *
@@ -34,17 +38,54 @@ const RESULT_SCRIPT = `
   var count = document.querySelector('[data-contact-count]');
   var body = document.querySelector('[data-contact-body]');
   var challengeCode = document.querySelector('[data-challenge-code]');
+  var done = document.querySelector('[data-contact-done]');
+  var again = document.querySelector('[data-contact-again]');
+  var label = document.querySelector('[data-contact-label]');
+  var idleLabel = label ? label.textContent : '';
   var RESULTS = ['sent', 'challenge', 'invalid', 'toofast', 'unavailable', 'network', 'widget'];
 
+  function reveal(element) {
+    var box = element.getBoundingClientRect();
+    if (box.top < 80 || box.bottom > window.innerHeight) {
+      element.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
   function show(result) {
+    var sent = result === 'sent';
+    if (form) form.hidden = sent;
+    if (done) done.hidden = !sent;
     document.querySelectorAll('[data-message]').forEach(function (message) {
       message.hidden = message.getAttribute('data-message') !== result;
     });
+    if (sent && done) {
+      reveal(done);
+      done.focus({ preventScroll: true });
+      return;
+    }
     var message = document.querySelector('[data-message="' + result + '"]');
-    if (message) message.scrollIntoView({ block: 'center' });
+    if (message) reveal(message);
   }
   function setReady(ready) {
     if (submit) submit.disabled = !ready;
+  }
+  function setBusy(busy) {
+    if (!submit || !form) return;
+    if (busy) {
+      submit.setAttribute('aria-busy', 'true');
+      form.setAttribute('aria-busy', 'true');
+    } else {
+      submit.removeAttribute('aria-busy');
+      form.removeAttribute('aria-busy');
+    }
+    if (label) label.textContent = busy ? '送信しています…' : idleLabel;
+  }
+
+  if (again && form) {
+    again.addEventListener('click', function () {
+      show('');
+      var first = form.querySelector('input:not([tabindex])');
+      if (first) first.focus();
+    });
   }
 
   var params = new URLSearchParams(location.search);
@@ -83,13 +124,18 @@ const RESULT_SCRIPT = `
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (submit.disabled) return;
+      // Read before the fields are dimmed, while every value is still in it.
+      var data = new FormData(form);
       submit.disabled = true;
-      submit.setAttribute('aria-busy', 'true');
+      document.querySelectorAll('[data-message]').forEach(function (message) {
+        message.hidden = true;
+      });
+      setBusy(true);
       var controller = window.AbortController ? new AbortController() : null;
       var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : 0;
       fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
+        body: data,
         headers: { Accept: 'application/json' },
         credentials: 'omit',
         signal: controller ? controller.signal : undefined,
@@ -103,7 +149,7 @@ const RESULT_SCRIPT = `
         .catch(function () { return 'network'; })
         .then(function (result) {
           clearTimeout(timer);
-          submit.removeAttribute('aria-busy');
+          setBusy(false);
           if (RESULTS.indexOf(result) === -1) result = 'unavailable';
           if (result === 'sent') {
             form.reset();
@@ -121,7 +167,6 @@ const RESULT_SCRIPT = `
 `;
 
 const MESSAGES = [
-  ["sent", "ok", "お問い合わせを受け付けました。ありがとうございます。"],
   ["challenge", "error", "認証に失敗しました。もう一度お試しください。"],
   ["invalid", "error", "入力内容をご確認のうえ、もう一度お試しください。"],
   ["toofast", "error", "送信間隔が短すぎます。しばらく時間をおいてからお試しください。"],
@@ -144,15 +189,25 @@ const MESSAGES = [
   </p>
 ) : (
   <div>
-    {MESSAGES.map(([key, tone, text]) => (
-      <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
-        {text}
+    <div
+      class="contact-done"
+      data-contact-done
+      tabindex="-1"
+      aria-labelledby="contact-done-title"
+      hidden
+    >
+      <span class="contact-done__mark" aria-hidden="true"></span>
+      <h2 id="contact-done-title">送信しました</h2>
+      <p>
+        お問い合わせありがとうございます。内容を拝見して、3〜5日ほどでご入力のメールアドレスへお返事します。
       </p>
-    ))}
-    <p class="form-message form-message--error" data-message="widget" hidden>
-      セキュリティ確認を完了できませんでした（コード: <span data-challenge-code></span>
-      ）。ページを再読み込みするか、時間をおいてお試しください。解決しない場合はメールでご連絡ください。
-    </p>
+      <p class="contact-done__hint">
+        しばらく届かないときは、迷惑メールのフォルダもご確認ください。
+      </p>
+      <button type="button" data-contact-again>
+        続けてもう一件送る
+      </button>
+    </div>
 
     <form class="contact-form" method="post" action={`${apiUrl}/v1/contact`} data-contact-form>
       <div class="contact-form__row">
@@ -222,6 +277,18 @@ const MESSAGES = [
         </label>
       </div>
 
+      <div class="contact-form__messages" role="status" aria-live="polite">
+        {MESSAGES.map(([key, tone, text]) => (
+          <p class:list={["form-message", `form-message--${tone}`]} data-message={key} hidden>
+            {text}
+          </p>
+        ))}
+        <p class="form-message form-message--error" data-message="widget" hidden>
+          セキュリティ確認を完了できませんでした（コード: <span data-challenge-code></span>
+          ）。ページを再読み込みするか、時間をおいてお試しください。解決しない場合はメールでご連絡ください。
+        </p>
+      </div>
+
       <div class="contact-form__verification">
         <div
           class="cf-turnstile"
@@ -238,7 +305,7 @@ const MESSAGES = [
         <p>送信ボタンを押す前に、セキュリティ確認を完了してください。</p>
       </div>
       <button type="submit" data-contact-submit disabled>
-        <span>メッセージを送る</span>
+        <span data-contact-label>メッセージを送る</span>
         <span aria-hidden="true">→</span>
       </button>
     </form>
