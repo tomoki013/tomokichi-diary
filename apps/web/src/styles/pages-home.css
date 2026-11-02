@@ -931,7 +931,7 @@
 
   .home-picks__board {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
     gap: 0.6rem;
     padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-sm) + 0.7rem);
     border: 1.5px solid var(--ink);
@@ -1050,6 +1050,21 @@
   .home-picks__board ol a:hover .home-picks__title:first-child {
     color: var(--accent-strong);
     text-decoration: underline;
+  }
+
+  /* Ranks below the home cut fold away, so a long ranking keeps the row short. */
+  .home-picks__rest summary {
+    color: var(--ink-soft);
+    font-size: var(--step-tiny);
+    cursor: pointer;
+  }
+
+  .home-picks__rest summary:hover {
+    color: var(--accent-strong);
+  }
+
+  .home-picks__rest[open] summary {
+    margin-bottom: 0.2rem;
   }
 
   .home-picks__more {
