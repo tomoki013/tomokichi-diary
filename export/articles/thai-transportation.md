@@ -1,5 +1,6 @@
 ---
 id: "666785b9-ae12-89ce-8376-70ad7c6d78bb"
+kind: "article"
 slug: "thai-transportation"
 locale: "ja"
 status: "published"

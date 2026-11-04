@@ -1,8 +1,10 @@
 ---
 id: "b23f6484-1a81-87e4-80ca-6cc9a456d27e"
+kind: "page"
 slug: "privacy"
 locale: "ja"
 status: "published"
+path: "/legal/privacy"
 title: "プライバシーポリシー"
 summary: "ともきちの旅行日記のプライバシーポリシーです。個人情報の取り扱いやCookieの使用について詳しく説明しています。"
 revision: 1

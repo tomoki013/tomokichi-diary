@@ -1,5 +1,6 @@
 ---
 id: "7f4548a7-cd59-8a67-ad0e-200ce7321c9f"
+kind: "article"
 slug: "spain-restaurant"
 locale: "ja"
 status: "published"

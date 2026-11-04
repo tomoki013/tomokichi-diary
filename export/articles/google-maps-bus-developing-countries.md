@@ -1,5 +1,6 @@
 ---
 id: "35b7fd08-2473-8a68-a3a1-1d9537e54b50"
+kind: "article"
 slug: "google-maps-bus-developing-countries"
 locale: "ja"
 status: "published"

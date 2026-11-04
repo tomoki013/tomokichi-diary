@@ -1,5 +1,6 @@
 ---
 id: "e961810f-344d-8b5d-9088-de69f0056f87"
+kind: "article"
 slug: "paris-navigo-easy"
 locale: "ja"
 status: "published"

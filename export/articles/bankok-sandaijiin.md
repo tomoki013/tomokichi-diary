@@ -1,5 +1,6 @@
 ---
 id: "a0857281-9fba-862d-a4b0-d0da9d1c20d7"
+kind: "article"
 slug: "bankok-sandaijiin"
 locale: "ja"
 status: "published"

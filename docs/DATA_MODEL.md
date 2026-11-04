@@ -32,7 +32,7 @@ erDiagram
 
 Identity and lifecycle only — no title, no body.
 
-- `kind` — `article` (listed, syndicated) or `page` (about, FAQ, legal).
+- `kind` — `article` (travel articles, listed and syndicated), `page` (about, FAQ, legal), or `note` (short personal diary notes).
 - `status` — `draft` | `scheduled` | `published` | `archived`.
 - `currentRevisionId` — what the editor is working on.
 - `publishedRevisionId` — what the public site renders.
@@ -44,6 +44,16 @@ Identity and lifecycle only — no title, no body.
   frontmatter. See [Editorial model](EDITORIAL.md).
 
 Saving in the admin never changes the live page: publishing swaps the pointer.
+
+`note` reuses the same immutable revision and publication pointer. Notes have a
+separate `/notes` index and `/notes/<slug>` pages; they do not enter travel
+article archives, rankings, RSS, or travel knowledge. They can have a short
+body, no summary, and no cover photo. `note_related_articles` stores optional
+links to travel articles and is copied into `publication_metadata` at publish
+time so editing links does not change the current public version.
+
+Migration `0024_diary_notes.sql` adds the note-to-article relation and reserves
+the built-in `/notes` route. It does not rewrite existing article rows.
 
 ## ArticleRevision
 

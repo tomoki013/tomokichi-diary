@@ -1,5 +1,6 @@
 ---
 id: "23ca3df8-d7bc-8fe2-b4ec-be07c71615d2"
+kind: "article"
 slug: "city-to-sultan-abdul-aziz-shah-airport"
 locale: "ja"
 status: "published"

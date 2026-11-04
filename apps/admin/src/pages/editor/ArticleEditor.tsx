@@ -30,6 +30,8 @@ import { MediaSection } from "./MediaSection";
 import { RelationsSection, type ExperienceDefaultsChange } from "./RelationsSection";
 import { ExperienceSection } from "./ExperienceSection";
 import { KnowledgeSection } from "./KnowledgeSection";
+import { DiaryNoteDateSection } from "./DiaryNoteDateSection";
+import { DiaryNoteRelatedSection } from "./DiaryNoteRelatedSection";
 
 const SITE_ORIGIN = "https://tomokichidiary.com";
 const escapeHtml = (text: string) =>
@@ -76,13 +78,21 @@ function jumpTo(key: string): void {
   document.querySelector(`[data-part="${key}"]`)?.scrollIntoView({ block: "start" });
 }
 
-export function ArticleEditor({ id }: { id: string }) {
+export function ArticleEditor({ id, mode }: { id: string; mode: "article" | "note" }) {
   const article = useResource(() => api.getArticle(id), `article:${id}`);
+  const isNote = mode === "note";
 
   if (article.error && !article.data) {
     return (
       <>
-        <PageHeader title="記事" meta={<a href={href.articles()}>← 記事一覧</a>} />
+        <PageHeader
+          title={isNote ? "一言日記" : "記事"}
+          meta={
+            <a href={isNote ? href.diaryNotes() : href.articles()}>
+              {isNote ? "← 一言日記一覧" : "← 記事一覧"}
+            </a>
+          }
+        />
         <ErrorState error={article.error} onRetry={() => void article.reload()} />
       </>
     );
@@ -90,11 +100,48 @@ export function ArticleEditor({ id }: { id: string }) {
   if (!article.data) {
     return (
       <>
-        <PageHeader title={<span className="skeleton skeleton--title" />} />
+        <PageHeader
+          title={
+            <>
+              {isNote ? "一言日記" : "記事"} <span className="skeleton skeleton--title" />
+            </>
+          }
+          meta={
+            <a href={isNote ? href.diaryNotes() : href.articles()}>
+              {isNote ? "← 一言日記一覧" : "← 記事一覧"}
+            </a>
+          }
+        />
         <div className="editor">
           <SkeletonBlock height="28rem" />
           <SkeletonBlock height="20rem" />
         </div>
+      </>
+    );
+  }
+  if ((isNote && article.data.kind !== "note") || (!isNote && article.data.kind === "note")) {
+    const correctNotesPage = article.data.kind === "note";
+    return (
+      <>
+        <PageHeader
+          title={isNote ? "一言日記" : "記事"}
+          meta={
+            <a href={isNote ? href.diaryNotes() : href.articles()}>
+              {isNote ? "← 一言日記一覧" : "← 記事一覧"}
+            </a>
+          }
+        />
+        <ErrorState
+          error={
+            new Error(
+              correctNotesPage
+                ? "このコンテンツは一言日記です。専用の管理画面から開いてください。"
+                : "一言日記が見つかりません。",
+            )
+          }
+          onRetry={() => void article.reload()}
+        />
+        {!isNote && correctNotesPage && <a href={href.diaryNote(id)}>一言日記の管理画面を開く →</a>}
       </>
     );
   }
@@ -135,7 +182,13 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
     setSaving(true);
     try {
       sections.validate();
-      const { revision } = await api.saveDraft(article.id, payload);
+      const { revision } =
+        article.kind === "note"
+          ? await api.saveDiaryNoteDraft(article.id, {
+              title: draft.title,
+              bodyMarkdown: draft.bodyMarkdown,
+            })
+          : await api.saveDraft(article.id, payload);
       if (!(await sections.save())) return false;
       // The API points pasted photo URLs at their slug aliases; show what it kept.
       const kept = { ...payload, bodyMarkdown: revision.bodyMarkdown, changeSummary: null };
@@ -151,7 +204,7 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
       saveInFlight.current = false;
       setSaving(false);
     }
-  }, [article.id, dirty, draft, reload, sections, toast]);
+  }, [article.id, article.kind, dirty, draft, reload, sections, toast]);
 
   // ⌘S / Ctrl+S saves, as every editor does.
   const saveRef = useRef(save);
@@ -213,10 +266,35 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
         title={draft.title || article.slug}
         meta={
           <>
-            <a href={href.articles()}>← 記事一覧</a>
+            <a href={article.kind === "note" ? href.diaryNotes() : href.articles()}>
+              ← {article.kind === "note" ? "一言日記一覧" : "記事一覧"}
+            </a>
             <PhaseBadge article={article} />
             {article.kind === "page" && <Badge>固定ページ</Badge>}
+            {article.kind === "note" && <Badge>一言日記</Badge>}
             <span className="mono">{article.path ?? "URL 未設定"}</span>
+            {article.kind === "note" && (
+              <button
+                type="button"
+                className="danger"
+                onClick={() => {
+                  const title = article.currentRevision?.title ?? article.slug;
+                  if (
+                    globalThis.confirm(`「${title}」を削除しますか？ この操作は取り消せません。`)
+                  ) {
+                    void api
+                      .deleteDiaryNote(article.id)
+                      .then(() => {
+                        toast.info("一言日記を削除しました");
+                        globalThis.location.hash = href.diaryNotes();
+                      })
+                      .catch((error: unknown) => toast.error(error));
+                  }
+                }}
+              >
+                削除
+              </button>
+            )}
             {article.currentRevision && (
               <span>
                 第{article.currentRevision.revisionNumber}版・
@@ -229,23 +307,25 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
 
       <div className="editor-bar">
         <nav className="editor-bar__parts" aria-label="編集画面内の移動">
-          {PARTS.filter((part) => !("articleOnly" in part) || article.kind === "article").map(
-            (part) => (
-              <button
-                key={part.key}
-                type="button"
-                className={`chip${"side" in part ? " editor-bar__side" : ""}`}
-                onClick={() => jumpTo(part.key)}
-              >
-                {part.label}
-                {unsaved.has(part.key) && (
-                  <span className="editor-bar__dot" title="未保存の変更">
-                    <span className="sr-only">（未保存）</span>
-                  </span>
-                )}
-              </button>
-            ),
-          )}
+          {PARTS.filter(
+            (part) =>
+              (!("articleOnly" in part) || article.kind === "article") &&
+              (!(part.key === "seo" || part.key === "knowledge") || article.kind !== "note"),
+          ).map((part) => (
+            <button
+              key={part.key}
+              type="button"
+              className={`chip${"side" in part ? " editor-bar__side" : ""}`}
+              onClick={() => jumpTo(part.key)}
+            >
+              {part.label}
+              {unsaved.has(part.key) && (
+                <span className="editor-bar__dot" title="未保存の変更">
+                  <span className="sr-only">（未保存）</span>
+                </span>
+              )}
+            </button>
+          ))}
         </nav>
         <span className={`save-state${dirty ? " save-state--dirty" : ""}`} aria-live="polite">
           {saving ? "保存中…" : dirty ? "未保存" : "保存済み"}
@@ -294,15 +374,17 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 onChange={(event) => update("title", event.target.value)}
               />
             </label>
-            <label className="field">
-              <span>要約（description の既定値）</span>
-              <textarea
-                rows={2}
-                maxLength={400}
-                value={draft.summary}
-                onChange={(event) => update("summary", event.target.value)}
-              />
-            </label>
+            {article.kind !== "note" && (
+              <label className="field">
+                <span>要約（description の既定値）</span>
+                <textarea
+                  rows={2}
+                  maxLength={400}
+                  value={draft.summary}
+                  onChange={(event) => update("summary", event.target.value)}
+                />
+              </label>
+            )}
             <label className="field">
               <span>
                 本文（Markdown）
@@ -330,73 +412,81 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
                 onChange={(event) => update("bodyMarkdown", event.target.value)}
               />
             </label>
-            <div className="row">
-              <button
-                type="button"
-                className="link"
-                onClick={() => {
-                  const pasted = globalThis.prompt(
-                    "Apple Music の共有URL、または「埋め込みコード」を貼り付けてください（曲・アルバム・プレイリスト）",
-                  );
-                  if (!pasted) return;
-                  const inserted = insertAppleMusic(
-                    draft.bodyMarkdown,
-                    selection.current.start,
-                    selection.current.end,
-                    pasted,
-                  );
-                  if (!inserted) {
-                    toast.error(
-                      new Error(
-                        "Apple Music の曲・アルバム・プレイリストのURLとして読み取れませんでした",
-                      ),
+            {article.kind !== "note" && (
+              <div className="row">
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => {
+                    const pasted = globalThis.prompt(
+                      "Apple Music の共有URL、または「埋め込みコード」を貼り付けてください（曲・アルバム・プレイリスト）",
                     );
-                    return;
-                  }
-                  update("bodyMarkdown", inserted.body);
-                  selection.current = { start: inserted.cursor, end: inserted.cursor };
-                }}
-              >
-                ♪ Apple Musicを挿入
-              </button>
-            </div>
-            <label className="field">
-              <span>変更の要約（履歴に残ります・任意）</span>
-              <input
-                maxLength={400}
-                value={draft.changeSummary ?? ""}
-                onChange={(event) => update("changeSummary", event.target.value)}
-              />
-            </label>
+                    if (!pasted) return;
+                    const inserted = insertAppleMusic(
+                      draft.bodyMarkdown,
+                      selection.current.start,
+                      selection.current.end,
+                      pasted,
+                    );
+                    if (!inserted) {
+                      toast.error(
+                        new Error(
+                          "Apple Music の曲・アルバム・プレイリストのURLとして読み取れませんでした",
+                        ),
+                      );
+                      return;
+                    }
+                    update("bodyMarkdown", inserted.body);
+                    selection.current = { start: inserted.cursor, end: inserted.cursor };
+                  }}
+                >
+                  ♪ Apple Musicを挿入
+                </button>
+              </div>
+            )}
+            {article.kind !== "note" && (
+              <label className="field">
+                <span>変更の要約（履歴に残ります・任意）</span>
+                <input
+                  maxLength={400}
+                  value={draft.changeSummary ?? ""}
+                  onChange={(event) => update("changeSummary", event.target.value)}
+                />
+              </label>
+            )}
           </Panel>
 
-          <Panel title="SEO（空欄なら自動生成）" part="seo">
-            <label className="field">
-              <span>
-                title
-                <em className="field__hint">{(draft.seoTitleOverride ?? "").length} / 120</em>
-              </span>
-              <input
-                maxLength={120}
-                value={draft.seoTitleOverride ?? ""}
-                placeholder={draft.title}
-                onChange={(event) => update("seoTitleOverride", event.target.value)}
-              />
-            </label>
-            <label className="field">
-              <span>
-                description
-                <em className="field__hint">{(draft.seoDescriptionOverride ?? "").length} / 400</em>
-              </span>
-              <textarea
-                rows={2}
-                maxLength={400}
-                value={draft.seoDescriptionOverride ?? ""}
-                placeholder={draft.summary}
-                onChange={(event) => update("seoDescriptionOverride", event.target.value)}
-              />
-            </label>
-          </Panel>
+          {article.kind !== "note" && (
+            <Panel title="SEO（空欄なら自動生成）" part="seo">
+              <label className="field">
+                <span>
+                  title
+                  <em className="field__hint">{(draft.seoTitleOverride ?? "").length} / 120</em>
+                </span>
+                <input
+                  maxLength={120}
+                  value={draft.seoTitleOverride ?? ""}
+                  placeholder={draft.title}
+                  onChange={(event) => update("seoTitleOverride", event.target.value)}
+                />
+              </label>
+              <label className="field">
+                <span>
+                  description
+                  <em className="field__hint">
+                    {(draft.seoDescriptionOverride ?? "").length} / 400
+                  </em>
+                </span>
+                <textarea
+                  rows={2}
+                  maxLength={400}
+                  value={draft.seoDescriptionOverride ?? ""}
+                  placeholder={draft.summary}
+                  onChange={(event) => update("seoDescriptionOverride", event.target.value)}
+                />
+              </label>
+            </Panel>
+          )}
 
           <div data-part="media">
             <MediaSection
@@ -427,13 +517,21 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             />
           </div>
           <div data-part="relations">
-            <RelationsSection
-              article={article}
-              onSaved={afterChange}
-              register={sections.register}
-              onSaveAll={save}
-              onExperienceDefaults={setExperienceDefaults}
-            />
+            {article.kind === "note" ? (
+              <DiaryNoteRelatedSection
+                article={article}
+                onSaved={afterChange}
+                register={sections.register}
+              />
+            ) : (
+              <RelationsSection
+                article={article}
+                onSaved={afterChange}
+                register={sections.register}
+                onSaveAll={save}
+                onExperienceDefaults={setExperienceDefaults}
+              />
+            )}
           </div>
           {article.kind === "article" && (
             <div data-part="experiences">
@@ -458,17 +556,22 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
               />
             </div>
           )}
-          <div data-part="knowledge">
-            <KnowledgeSection
-              articleId={article.id}
-              register={sections.register}
-              onSaveAll={save}
-              revisionId={article.currentRevision?.id ?? null}
-            />
-          </div>
+          {article.kind !== "note" && (
+            <div data-part="knowledge">
+              <KnowledgeSection
+                articleId={article.id}
+                register={sections.register}
+                onSaveAll={save}
+                revisionId={article.currentRevision?.id ?? null}
+              />
+            </div>
+          )}
         </fieldset>
 
         <aside className="editor__side">
+          {article.kind === "note" && (
+            <DiaryNoteDateSection article={article} onSaved={afterChange} />
+          )}
           <div data-part="publish">
             <PublishSection
               article={article}
@@ -491,8 +594,13 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
           >
             {showPreview && (
               <article className="preview">
+                {article.kind === "note" && (
+                  <time className="muted" dateTime={article.publishedAt ?? undefined}>
+                    {article.publishedAt?.slice(0, 10) ?? "投稿日未設定"}
+                  </time>
+                )}
                 <h1>{draft.title}</h1>
-                <p className="preview__lead">{draft.summary}</p>
+                {article.kind !== "note" && <p className="preview__lead">{draft.summary}</p>}
                 {/* Authored by the site owner in this same admin. */}
                 <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
               </article>

@@ -28,3 +28,10 @@ export interface ArticleTag {
   readonly articleId: ArticleId;
   readonly tagId: TagId;
 }
+
+/** Explicit editorial links from a diary note to a normal travel article. */
+export interface NoteRelatedArticle {
+  readonly noteId: ArticleId;
+  readonly articleId: ArticleId;
+  readonly sortOrder: number;
+}

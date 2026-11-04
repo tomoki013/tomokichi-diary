@@ -1,5 +1,6 @@
 ---
 id: "bb98cab2-1e83-8da9-82b6-a5abb9ef61ae"
+kind: "article"
 slug: "shanghai-chagee"
 locale: "ja"
 status: "published"

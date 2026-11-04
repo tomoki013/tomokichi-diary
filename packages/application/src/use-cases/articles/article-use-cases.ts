@@ -36,7 +36,7 @@ import { linkBodyImages, withBodyUsages, type BodyImage } from "../content/media
 
 export interface CreateArticleInput {
   readonly slug: string;
-  readonly kind?: "article" | "page";
+  readonly kind?: "article" | "page" | "note";
   readonly locale: Locale;
   readonly authorId: AuthorId;
   readonly draft: DraftInput;
@@ -239,14 +239,16 @@ export async function publishArticle(
     ctx.logger.warn("article.publish_rejected", { articleId, code: "ARTICLE_NOT_PUBLISHABLE" });
     return result;
   }
-  const [media, locations, places, categories, tags, collections] = await Promise.all([
-    ctx.repos.media.listForArticle(articleId),
-    ctx.repos.relations.listArticleLocations(),
-    ctx.repos.relations.listArticlePlaces(),
-    ctx.repos.relations.listArticleCategories(),
-    ctx.repos.relations.listArticleTags(),
-    ctx.repos.collections.listMemberships(),
-  ]);
+  const [media, locations, places, categories, tags, collections, noteRelatedArticles] =
+    await Promise.all([
+      ctx.repos.media.listForArticle(articleId),
+      ctx.repos.relations.listArticleLocations(),
+      ctx.repos.relations.listArticlePlaces(),
+      ctx.repos.relations.listArticleCategories(),
+      ctx.repos.relations.listArticleTags(),
+      ctx.repos.collections.listMemberships(),
+      ctx.repos.relations.listNoteRelatedArticles(),
+    ]);
   await ctx.repos.publicationMetadata.save(input.revision.id, {
     media,
     locations: locations.filter((r) => r.articleId === articleId),
@@ -255,6 +257,7 @@ export async function publishArticle(
     tags: tags.filter((r) => r.articleId === articleId),
     collections: collections.filter((r) => r.articleId === articleId),
     experienceTags: input.article.experienceTags,
+    noteRelatedArticles: noteRelatedArticles.filter((relation) => relation.noteId === articleId),
     ...(input.article.kind === "article"
       ? { monetization: await projectArticleMonetization(ctx, articleId) }
       : {}),
@@ -302,6 +305,68 @@ export async function archiveArticle(
   const updated = archive(article, ctx.clock.now());
   await ctx.repos.articles.save(updated);
   return ok(updated);
+}
+
+/** A note's editorial publication date is independent of its saved revision. */
+export async function setDiaryNotePublicationDate(
+  ctx: AppContext,
+  articleId: ArticleId,
+  publishedAt: Instant | null,
+): Promise<Result<Article>> {
+  const article = await ctx.repos.articles.findById(articleId);
+  if (!article || article.kind !== "note")
+    return err({ code: "ARTICLE_NOT_FOUND", message: `no diary note ${articleId}` });
+  const now = ctx.clock.now();
+  if (publishedAt !== null && Date.parse(publishedAt) > Date.parse(now))
+    return err({
+      code: "ARTICLE_NOT_PUBLISHABLE",
+      message: "diary note publication date cannot be in the future",
+      field: "date",
+    });
+  const updated = {
+    ...article,
+    publishedAt: publishedAt ?? (article.status === "published" ? now : null),
+    updatedAt: now,
+  };
+  await ctx.repos.articles.save(updated);
+  return ok(updated);
+}
+
+/** Saves explicit related travel articles as draft metadata for one diary note. */
+export async function setDiaryNoteRelatedArticles(
+  ctx: AppContext,
+  noteId: ArticleId,
+  relatedArticleIds: readonly ArticleId[],
+): Promise<Result<readonly ArticleId[]>> {
+  const note = await ctx.repos.articles.findById(noteId);
+  if (!note || note.kind !== "note")
+    return err({ code: "ARTICLE_NOT_FOUND", message: `no diary note ${noteId}` });
+  const unique = [...new Set(relatedArticleIds)];
+  const articles = await Promise.all(unique.map((id) => ctx.repos.articles.findById(id)));
+  const invalid = articles.find((article) => !article || article.kind !== "article");
+  if (invalid !== undefined)
+    return err({ code: "ARTICLE_NOT_FOUND", message: "related target must be a travel article" });
+  const relations = unique.map((articleId, sortOrder) => ({ noteId, articleId, sortOrder }));
+  await ctx.repos.relations.replaceNoteRelatedArticles(noteId, relations);
+  return ok(unique);
+}
+
+/** Permanently removes one note and its canonical route after an explicit admin confirmation. */
+export async function deleteDiaryNote(
+  ctx: AppContext,
+  articleId: ArticleId,
+): Promise<Result<void>> {
+  const article = await ctx.repos.articles.findById(articleId);
+  if (!article || article.kind !== "note")
+    return err({ code: "ARTICLE_NOT_FOUND", message: `no diary note ${articleId}` });
+  const routes = await ctx.repos.routes.listAll();
+  for (const route of routes.filter(
+    (item) => item.targetType === "article" && item.targetId === articleId,
+  ))
+    await ctx.repos.routes.delete(route.path);
+  await ctx.repos.articles.delete(articleId);
+  ctx.logger.info("diary_note.deleted", { articleId });
+  return ok(undefined);
 }
 
 export async function scheduleArticle(

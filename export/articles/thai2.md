@@ -1,5 +1,6 @@
 ---
 id: "1041e60a-352f-8c56-8a21-0afc42c5cd32"
+kind: "article"
 slug: "thai2"
 locale: "ja"
 status: "published"

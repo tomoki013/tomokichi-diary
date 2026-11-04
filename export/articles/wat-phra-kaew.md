@@ -1,5 +1,6 @@
 ---
 id: "1555383f-f8bb-8f48-83ee-b3e4904a813c"
+kind: "article"
 slug: "wat-phra-kaew"
 locale: "ja"
 status: "published"

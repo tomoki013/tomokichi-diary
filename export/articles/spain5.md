@@ -1,5 +1,6 @@
 ---
 id: "e1db2f2a-edfe-81ec-ae67-fa0a7e1fd7ac"
+kind: "article"
 slug: "spain5"
 locale: "ja"
 status: "published"

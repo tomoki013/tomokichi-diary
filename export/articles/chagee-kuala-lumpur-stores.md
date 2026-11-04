@@ -1,5 +1,6 @@
 ---
 id: "cd879190-5f59-8e81-9344-ab7d8efb21e0"
+kind: "article"
 slug: "chagee-kuala-lumpur-stores"
 locale: "ja"
 status: "published"

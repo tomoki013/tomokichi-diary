@@ -1,5 +1,6 @@
 ---
 id: "e63de725-3186-861c-9697-a2fd15bfff3a"
+kind: "article"
 slug: "wat-arun"
 locale: "ja"
 status: "published"

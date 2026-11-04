@@ -62,6 +62,7 @@ export const SEED_KEYS = {
   article_categories: ["article_id", "category_id"],
   article_tags: ["article_id", "tag_id"],
   article_collections: ["article_id", "collection_id"],
+  note_related_articles: ["note_id", "article_id"],
   source_references: ["id"],
   travel_routes: ["id"],
   travel_facts: ["id"],
@@ -125,7 +126,18 @@ export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
   // Old exports omit the added metadata: group shapes so omission cannot clear
   // a Slug or verified hash that was entered in the admin after the export.
   const mediaGroups = new Map<string, Row[]>();
-  for (const row of snapshot.media.map(mediaRow.from)) {
+  const mediaRows = snapshot.media.map((asset) => {
+    const row = mediaRow.from(asset);
+    // New exports serialize nullable metadata explicitly. Treat null (and the
+    // schema default false) as absent during a seed so a snapshot produced
+    // before the admin metadata was populated cannot clear newer D1 values.
+    for (const key of ["content_sha256", "original_name", "slug"] as const) {
+      if (row[key] === null) delete row[key];
+    }
+    if (row["ai_generated"] === 0) delete row["ai_generated"];
+    return row;
+  });
+  for (const row of mediaRows) {
     const key = Object.keys(row).join(",");
     const group = mediaGroups.get(key) ?? [];
     group.push(row);
@@ -171,6 +183,14 @@ export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
     ...upsert("article_categories", snapshot.articleCategories.map(articleCategoryRow.from)),
     ...upsert("article_tags", snapshot.articleTags.map(articleTagRow.from)),
     ...upsert("article_collections", snapshot.articleCollections.map(articleCollectionRow.from)),
+    ...upsert(
+      "note_related_articles",
+      (snapshot.noteRelatedArticles ?? []).map((relation) => ({
+        note_id: relation.noteId,
+        article_id: relation.articleId,
+        sort_order: relation.sortOrder,
+      })),
+    ),
     ...upsert("source_references", snapshot.sources.map(sourceReferenceRow.from)),
     ...upsert("travel_routes", snapshot.travelRoutes.map(travelRouteRow.from)),
     ...upsert("travel_facts", snapshot.travelFacts.map(travelFactRow.from)),

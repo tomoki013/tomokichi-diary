@@ -39,6 +39,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleCategories,
     articleTags,
     articleCollections,
+    noteRelatedArticles,
     sources,
     travelRoutes,
     travelFacts,
@@ -65,6 +66,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.relations.listArticleCategories(),
     repos.relations.listArticleTags(),
     repos.collections.listMemberships(),
+    repos.relations.listNoteRelatedArticles(),
     repos.knowledge.listSources(),
     repos.knowledge.listTravelRoutes(),
     repos.knowledge.listTravelFacts(),
@@ -133,6 +135,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleCategories,
     articleTags,
     articleCollections,
+    noteRelatedArticles,
     aiArtifacts: [],
     sources,
     travelRoutes,
@@ -173,5 +176,18 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleCategories: replace(snapshot.articleCategories, (m) => m.categories),
     articleTags: replace(snapshot.articleTags, (m) => m.tags),
     articleCollections: replace(snapshot.articleCollections, (m) => m.collections),
+    noteRelatedArticles: [
+      ...(snapshot.noteRelatedArticles ?? []).filter(
+        (relation) =>
+          !frozen.has(relation.noteId) &&
+          publishedIds.has(relation.noteId) &&
+          publishedIds.has(relation.articleId),
+      ),
+      ...[...metadataByArticle.values()].flatMap((metadata) =>
+        (metadata.noteRelatedArticles ?? []).filter((relation) =>
+          publishedIds.has(relation.articleId),
+        ),
+      ),
+    ],
   };
 }

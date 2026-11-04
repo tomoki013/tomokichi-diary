@@ -1,5 +1,6 @@
 ---
 id: "71e30e0b-989e-8873-8504-4a5d42bbe870"
+kind: "article"
 slug: "airport-access-santorini"
 locale: "ja"
 status: "published"

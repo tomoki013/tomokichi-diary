@@ -15,7 +15,10 @@ let fetchApi: Fetch;
 
 beforeEach(async () => {
   ctx = await createTestContext();
-  const app = createApp({ contextFactory: () => ctx });
+  const app = createApp({
+    contextFactory: () => ctx,
+    publishSite: async () => ({ state: "queued" }),
+  });
   // The real admin API, in process: the operator's requests go through the
   // same token check and validation as the admin's.
   fetchApi = async (input, init) => app.request(input, init, { ADMIN_TOKEN: "secret" } as Env);
@@ -94,6 +97,34 @@ describe("operator client against the admin API", () => {
       summary: "s",
       bodyMarkdown: "b",
     });
+  });
+
+  it("creates, checks, publishes and withdraws a separate diary note through shared admin routes", async () => {
+    const writer = client(true);
+    const created = await writer.createDiaryNote({
+      slug: "operator-santorini-note",
+      title: "テレビで見かけたサントリーニ島",
+    });
+    const note = await writer.getDiaryNote(created.id);
+    expect(note.kind).toBe("note");
+    expect(note.currentRevision?.bodyMarkdown).toBe("");
+    expect((await writer.listDiaryNotes()).items).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: created.id, kind: "note" })]),
+    );
+    expect((await writer.listArticles()).items).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: created.id })]),
+    );
+
+    await writer.saveDiaryNoteDraft(created.id, {
+      bodyMarkdown: "自分が行った場所をテレビで見ると、なんか嬉しい。",
+    });
+    expect(await writer.diaryNotePublishCheck(created.id)).toMatchObject({ publishable: true });
+    await writer.publishDiaryNote(created.id);
+    expect((await ctx.repos.articles.findById(created.id as never))?.status).toBe("published");
+    await writer.unpublishDiaryNote(created.id);
+    expect(
+      (await ctx.repos.articles.findById(created.id as never))?.publishedRevisionId,
+    ).toBeNull();
   });
 });
 
@@ -202,7 +233,10 @@ describe("operator MCP server over stdio", () => {
       expect((await reply(1))?.result).toBeDefined();
       send({ jsonrpc: "2.0", method: "notifications/initialized" });
       send({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-      const tools = ((await reply(2)).result?.["tools"] ?? []) as { name: string }[];
+      const tools = ((await reply(2)).result?.["tools"] ?? []) as {
+        name: string;
+        inputSchema?: { properties?: Record<string, unknown>; required?: string[] };
+      }[];
       expect(tools.map((tool) => tool.name)).toEqual(
         expect.arrayContaining([
           "list_articles",
@@ -214,12 +248,23 @@ describe("operator MCP server over stdio", () => {
           "set_ad_layout",
           "start_ad_test",
           "publish_article",
+          "list_diary_notes",
+          "get_diary_note",
+          "create_diary_note_draft",
+          "save_diary_note_draft",
+          "check_diary_note_publishable",
+          "set_diary_note_related_articles",
+          "publish_diary_note",
+          "unpublish_diary_note",
           "list_rankings",
           "create_ranking",
           "update_ranking",
           "publish_site",
         ]),
       );
+      expect(
+        tools.find((tool) => tool.name === "publish_diary_note")?.inputSchema?.required,
+      ).toContain("confirm");
       expect(tools.some((tool) => /delete/i.test(tool.name))).toBe(false);
       send({
         jsonrpc: "2.0",

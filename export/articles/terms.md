@@ -1,8 +1,10 @@
 ---
 id: "1a265c5a-6644-81bc-bfe8-6d3080036bd8"
+kind: "page"
 slug: "terms"
 locale: "ja"
 status: "published"
+path: "/legal/terms"
 title: "利用規約"
 summary: "ともきちの旅行日記の利用規約です。サイトの利用条件や禁止事項、免責事項などを詳しく説明しています。"
 revision: 1

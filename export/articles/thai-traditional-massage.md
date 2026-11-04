@@ -1,5 +1,6 @@
 ---
 id: "f29bbabc-3618-86ed-b348-d3374acda92d"
+kind: "article"
 slug: "thai-traditional-massage"
 locale: "ja"
 status: "published"

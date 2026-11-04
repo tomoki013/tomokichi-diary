@@ -204,6 +204,18 @@
     "noindex": false
   },
   {
+    "id": "25437fae-e26c-466c-89e8-c63c0b29ecce",
+    "path": "/collections/travel-soundtrack",
+    "locale": "ja",
+    "targetType": "series",
+    "targetId": "8b34b540-2d16-4d7e-bc20-97290b6a4c9a",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": false,
+    "noindex": false
+  },
+  {
     "id": "8bc02356-b520-80c1-aea9-0687abdf3116",
     "path": "/contact",
     "locale": "ja",
@@ -1401,6 +1413,18 @@
     "redirectTo": null,
     "redirectStatus": null,
     "isLegacy": true,
+    "noindex": false
+  },
+  {
+    "id": "c9f20a60-7a65-4e4d-8c0f-0f5b4c1a0024",
+    "path": "/notes",
+    "locale": "ja",
+    "targetType": "static",
+    "targetId": "notes",
+    "isCanonical": true,
+    "redirectTo": null,
+    "redirectStatus": null,
+    "isLegacy": false,
     "noindex": false
   },
   {

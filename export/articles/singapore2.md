@@ -1,5 +1,6 @@
 ---
 id: "a9d0c4ac-288e-80f9-9ddc-1a13a6905f08"
+kind: "article"
 slug: "singapore2"
 locale: "ja"
 status: "published"

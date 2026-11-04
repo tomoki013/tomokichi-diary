@@ -38,6 +38,15 @@ media:sync → db:migrate → deploy:api → deploy:mcp → deploy:web → (admi
 
 migration は旧 API が動いている間に当たる。だから expand/contract。
 
+一言日記の初回コードリリースでは、`0024_diary_notes.sql` が
+`note_related_articles` と `/notes` の静的ルートを追加する。既存行を
+変更・削除しない expand migration。production D1 migration を API の前に
+適用し、API、公開サイト、Admin の順に更新する。Operator MCP はローカル
+stdio プロセスなので独立した Worker deploy はなく、利用者側で再起動すると
+新しい日記ツールが読み込まれる。公開ページは Admin または Operator MCP の
+publish 操作から既存の `Publish content` workflow で生成・検証・反映される。
+初回記事はこの機能リリースでは作成しない。
+
 ## Cutover（Netlify → Cloudflare、1 回だけ）
 
 `audit/diary-2.0-full-audit.md` §12 の Phase 0〜3。要約:

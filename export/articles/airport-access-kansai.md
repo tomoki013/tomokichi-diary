@@ -1,5 +1,6 @@
 ---
 id: "0b099bdb-91ab-808b-97ca-bf1c1ba5d91b"
+kind: "article"
 slug: "airport-access-kansai"
 locale: "ja"
 status: "published"

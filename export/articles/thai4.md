@@ -1,5 +1,6 @@
 ---
 id: "19e12281-809e-891c-8aaf-29d64a521ca8"
+kind: "article"
 slug: "thai4"
 locale: "ja"
 status: "published"

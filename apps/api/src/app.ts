@@ -7,6 +7,7 @@ import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
 import { analyticsRoutes } from "./routes/analytics.js";
 import { articleRoutes } from "./routes/articles.js";
+import { diaryNoteRoutes } from "./routes/notes.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
 import { mediaRoutes } from "./routes/media.js";
 import { collectionRoutes } from "./routes/collections.js";
@@ -211,6 +212,7 @@ export function createApp(options: AppOptions = {}) {
   v1.route("/admin/analytics", analyticsRoutes());
   v1.route("/admin/monetization", monetizationRoutes());
   v1.route("/admin/articles", articleRoutes(publishSite));
+  v1.route("/admin/notes", diaryNoteRoutes(publishSite));
   v1.route("/admin/publication", publicationRoutes(publishSite));
   v1.route("/admin/media", mediaRoutes());
   v1.route("/admin/likes", likeAdminRoutes());

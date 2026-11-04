@@ -23,6 +23,7 @@ import type {
   TravelFact,
   TravelRoute,
   ArticleKnowledge,
+  NoteRelatedArticle,
 } from "@tomokichi/domain";
 
 /**
@@ -58,6 +59,7 @@ export interface ContentSnapshot {
   readonly articleCategories: readonly ArticleCategory[];
   readonly articleTags: readonly ArticleTag[];
   readonly articleCollections: readonly ArticleCollection[];
+  readonly noteRelatedArticles?: readonly NoteRelatedArticle[];
   readonly aiArtifacts: readonly AIArtifact[];
   readonly sources: readonly SourceReference[];
   readonly travelRoutes: readonly TravelRoute[];
@@ -85,6 +87,7 @@ export const EMPTY_SNAPSHOT: ContentSnapshot = {
   articleCategories: [],
   articleTags: [],
   articleCollections: [],
+  noteRelatedArticles: [],
   aiArtifacts: [],
   sources: [],
   travelRoutes: [],

@@ -121,6 +121,44 @@ export class ContentIndex {
     });
   }
 
+  /** Diary notes have their own index and never enter travel article feeds. */
+  publicNotes(): readonly Article[] {
+    return listPublicArticles({
+      articles: this.snapshot.articles,
+      filter: { kind: "note" },
+      now: this.now,
+    });
+  }
+
+  noteViews(): readonly ArticleView[] {
+    return this.publicNotes().flatMap((article) => {
+      const view = this.viewOf(article.id);
+      return view ? [view] : [];
+    });
+  }
+
+  relatedArticlesForNote(noteId: ArticleId): readonly ArticleView[] {
+    return (this.snapshot.noteRelatedArticles ?? [])
+      .filter((relation) => relation.noteId === noteId)
+      .toSorted((a, b) => a.sortOrder - b.sortOrder)
+      .flatMap((relation) => {
+        const article = this.articleById.get(relation.articleId);
+        const view = article?.kind === "article" ? this.viewOf(relation.articleId) : null;
+        return view ? [view] : [];
+      });
+  }
+
+  notesForArticle(articleId: ArticleId): readonly ArticleView[] {
+    return (this.snapshot.noteRelatedArticles ?? [])
+      .filter((relation) => relation.articleId === articleId)
+      .toSorted((a, b) => a.sortOrder - b.sortOrder)
+      .flatMap((relation) => {
+        const note = this.articleById.get(relation.noteId);
+        const view = note?.kind === "note" ? this.viewOf(relation.noteId) : null;
+        return view ? [view] : [];
+      });
+  }
+
   indexableArticles(): readonly Article[] {
     return this.publicArticles().filter((a) => isIndexable(a, this.now));
   }

@@ -78,7 +78,7 @@ describe("seed SQL", () => {
       ...snapshot,
       media: snapshot.media.map((asset) =>
         asset.id === first.id
-          ? { ...asset, slug: "current-photo", contentSha256: asset.sha256 }
+          ? { ...asset, slug: "current-photo", contentSha256: asset.sha256, aiGenerated: true }
           : asset,
       ),
       mediaHashes: [{ sha256: first.sha256, mediaId: first.id }],
@@ -98,6 +98,9 @@ describe("seed SQL", () => {
     expect(
       db.prepare("SELECT slug, content_sha256 FROM media_assets WHERE id = ?").get(first.id),
     ).toEqual({ slug: "current-photo", content_sha256: first.sha256 });
+    expect(db.prepare("SELECT ai_generated FROM media_assets WHERE id = ?").get(first.id)).toEqual({
+      ai_generated: 1,
+    });
     expect(db.prepare("SELECT COUNT(*) AS n FROM media_slug_aliases").get()).toEqual({ n: 2 });
     expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
   });

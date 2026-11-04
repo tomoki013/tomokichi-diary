@@ -1,5 +1,6 @@
 ---
 id: "ea3bf3bc-ffb6-84ed-8147-188ed74d7a50"
+kind: "article"
 slug: "shanghai-chagee-stores"
 locale: "ja"
 status: "published"

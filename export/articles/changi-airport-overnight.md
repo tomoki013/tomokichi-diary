@@ -1,5 +1,6 @@
 ---
 id: "f3ee37a3-eab4-8693-ac5f-80d14b9707c6"
+kind: "article"
 slug: "changi-airport-overnight"
 locale: "ja"
 status: "published"

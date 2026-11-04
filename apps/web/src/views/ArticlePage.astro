@@ -88,6 +88,7 @@ const jsonLd = [
 ];
 
 const related = content.relatedTo(article.id, 3);
+const diaryNotes = content.notesForArticle(article.id);
 const placeStories = content.placeStoriesFor(article.id);
 // Two more ways on from a story — how it felt, and where it happened — each
 // skipping what the rails before it already offer.
@@ -320,6 +321,25 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             <ul class="card-grid">
               {related.map((item) => (
                 <ArticleCard view={item} level={3} />
+              ))}
+            </ul>
+          </section>
+        )}
+        {diaryNotes.length > 0 && (
+          <section
+            class="article-related article-related--inline"
+            aria-labelledby="diary-notes-heading"
+          >
+            <p class="eyebrow">SMALL TRAVEL MEMORIES</p>
+            <h2 id="diary-notes-heading">この旅を思い出した一言日記</h2>
+            <ul class="diary-note-links">
+              {diaryNotes.map((note) => (
+                <li>
+                  <a href={note.route.path}>{note.revision.title}</a>
+                  <time datetime={note.article.publishedAt?.slice(0, 10)}>
+                    {note.article.publishedAt?.slice(0, 10)}
+                  </time>
+                </li>
               ))}
             </ul>
           </section>

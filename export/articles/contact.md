@@ -1,8 +1,10 @@
 ---
 id: "54775ea0-bbfc-83a3-b263-90af03305c18"
+kind: "page"
 slug: "contact"
 locale: "ja"
 status: "published"
+path: "/contact"
 title: "お問い合わせ"
 summary: "ご質問、ご意見、ご提案などがございましたら、お気軽にお問い合わせください。"
 revision: 1

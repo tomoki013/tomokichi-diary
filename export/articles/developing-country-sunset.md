@@ -1,5 +1,6 @@
 ---
 id: "3a1a80e2-8210-8f13-acba-500b391c63dc"
+kind: "article"
 slug: "developing-country-sunset"
 locale: "ja"
 status: "published"

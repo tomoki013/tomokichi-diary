@@ -1,8 +1,10 @@
 ---
 id: "41a89bca-e5ef-86fe-8123-8d3d400842ff"
+kind: "page"
 slug: "affiliates"
 locale: "ja"
 status: "published"
+path: "/legal/affiliates"
 title: "アフィリエイトポリシー"
 summary: "当サイトでは、商品やサービスを紹介する際にアフィリエイトプログラムを利用しています。読者の皆様に誠実な情報を提供するため、以下の方針を遵守することをお約束します。"
 revision: 1

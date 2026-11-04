@@ -1,5 +1,6 @@
 ---
 id: "d905fed5-ec46-8d4e-ad9c-989970d78ddb"
+kind: "article"
 slug: "exchange-rate"
 locale: "ja"
 status: "published"

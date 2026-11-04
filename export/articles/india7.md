@@ -1,5 +1,6 @@
 ---
 id: "bd6f1fdf-386e-828e-b710-0f3d69820a76"
+kind: "article"
 slug: "india7"
 locale: "ja"
 status: "published"

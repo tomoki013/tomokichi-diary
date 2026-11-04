@@ -1,5 +1,6 @@
 ---
 id: "a500e3d7-69aa-8167-9453-5da95155ed3a"
+kind: "article"
 slug: "route-of-arrival-to-arl-at-suvarnabhumi"
 locale: "ja"
 status: "published"

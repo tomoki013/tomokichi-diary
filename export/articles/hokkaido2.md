@@ -1,5 +1,6 @@
 ---
 id: "d5009eb8-2559-8894-a405-30bb0c728fe1"
+kind: "article"
 slug: "hokkaido2"
 locale: "ja"
 status: "published"

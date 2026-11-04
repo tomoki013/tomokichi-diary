@@ -1,5 +1,6 @@
 ---
 id: "bf84c2a5-821f-88a0-a171-0fffe3b45b76"
+kind: "article"
 slug: "arabic-number"
 locale: "ja"
 status: "published"

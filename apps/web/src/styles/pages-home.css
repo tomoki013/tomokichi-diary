@@ -741,6 +741,18 @@
     scroll-snap-align: start;
   }
 
+  .home-latest__notes-link {
+    margin: var(--space-xs) 0 0;
+    text-align: right;
+    font-size: var(--step-small);
+  }
+
+  .home-latest__notes-link a {
+    color: var(--ink-soft);
+    text-decoration-color: var(--line-mid);
+    text-underline-offset: 0.2em;
+  }
+
   /* The archive turns cards into compact rows on a phone; in a sideways row
      they stay as covers with the title underneath. */
   @media (max-width: 34rem) {

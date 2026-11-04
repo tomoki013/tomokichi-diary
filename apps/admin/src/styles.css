@@ -194,6 +194,15 @@ input[type="checkbox"] {
   min-height: 0;
   accent-color: var(--accent);
 }
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+}
+.check-row input[type="checkbox"] {
+  margin-top: 0.25rem;
+}
 input.invalid {
   border-color: var(--danger);
 }

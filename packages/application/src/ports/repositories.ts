@@ -10,6 +10,7 @@ import type {
   ArticlePlace,
   ArticleRevision,
   ArticleTag,
+  NoteRelatedArticle,
   ArticleCollection,
   Collection,
   CollectionId,
@@ -161,6 +162,11 @@ export interface RelationRepository {
   listArticlePlaces(): Promise<readonly ArticlePlace[]>;
   listArticleCategories(): Promise<readonly ArticleCategory[]>;
   listArticleTags(): Promise<readonly ArticleTag[]>;
+  listNoteRelatedArticles(): Promise<readonly NoteRelatedArticle[]>;
+  replaceNoteRelatedArticles(
+    noteId: ArticleId,
+    relations: readonly NoteRelatedArticle[],
+  ): Promise<void>;
   replaceForArticle(
     articleId: ArticleId,
     relations: {
@@ -168,6 +174,7 @@ export interface RelationRepository {
       places: readonly ArticlePlace[];
       categories: readonly ArticleCategory[];
       tags: readonly ArticleTag[];
+      noteRelatedArticles?: readonly NoteRelatedArticle[];
     },
   ): Promise<void>;
 }
@@ -229,6 +236,7 @@ export interface PublishedArticleMetadata {
   tags: readonly ArticleTag[];
   collections: readonly ArticleCollection[];
   experienceTags: Article["experienceTags"];
+  noteRelatedArticles?: readonly NoteRelatedArticle[];
 }
 export interface PublicationMetadataRepository {
   listAll(): Promise<readonly { revisionId: RevisionId; metadata: PublishedArticleMetadata }[]>;

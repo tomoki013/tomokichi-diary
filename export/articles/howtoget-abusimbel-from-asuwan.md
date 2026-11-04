@@ -1,5 +1,6 @@
 ---
 id: "034ecf00-ab8b-803f-b77f-f661514e5626"
+kind: "article"
 slug: "howtoget-abusimbel-from-asuwan"
 locale: "ja"
 status: "published"

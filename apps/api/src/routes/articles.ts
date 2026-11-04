@@ -57,7 +57,9 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
 
   routes.get("/", async (c) => {
     const ctx = c.get("ctx");
-    const summaries = await listArticlesForAdmin(ctx);
+    const summaries = (await listArticlesForAdmin(ctx)).filter(
+      ({ article }) => article.kind !== "note",
+    );
     const [routeList, history] = await Promise.all([
       ctx.repos.routes.listAll(),
       ctx.repos.revisions.listByArticles(summaries.map((summary) => summary.article.id)),
@@ -156,13 +158,15 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
       ).images.map((image) => [image.asset.id as string, image.urls]),
     );
 
-    const [locations, places, categories, tags, memberships] = await Promise.all([
-      ctx.repos.relations.listArticleLocations(),
-      ctx.repos.relations.listArticlePlaces(),
-      ctx.repos.relations.listArticleCategories(),
-      ctx.repos.relations.listArticleTags(),
-      ctx.repos.collections.listMemberships(),
-    ]);
+    const [locations, places, categories, tags, memberships, noteRelatedArticles] =
+      await Promise.all([
+        ctx.repos.relations.listArticleLocations(),
+        ctx.repos.relations.listArticlePlaces(),
+        ctx.repos.relations.listArticleCategories(),
+        ctx.repos.relations.listArticleTags(),
+        ctx.repos.collections.listMemberships(),
+        ctx.repos.relations.listNoteRelatedArticles(),
+      ]);
 
     const detail: ArticleDetailDto = {
       ...toArticleSummaryDto({
@@ -200,6 +204,10 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
         tagIds: tags.filter((r) => r.articleId === id).map((r) => r.tagId),
       },
       collectionIds: memberships.filter((m) => m.articleId === id).map((m) => m.collectionId),
+      relatedArticleIds: noteRelatedArticles
+        .filter((relation) => relation.noteId === id)
+        .toSorted((a, b) => a.sortOrder - b.sortOrder)
+        .map((relation) => relation.articleId),
     };
     return c.json(detail);
   });

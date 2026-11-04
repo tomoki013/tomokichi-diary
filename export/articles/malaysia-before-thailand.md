@@ -1,5 +1,6 @@
 ---
 id: "7726885a-54d1-83ca-b275-5635da44be19"
+kind: "article"
 slug: "malaysia-before-thailand"
 locale: "ja"
 status: "published"

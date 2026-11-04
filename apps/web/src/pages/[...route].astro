@@ -12,6 +12,8 @@ import LocationPage from "../views/LocationPage.astro";
 import CollectionPage from "../views/CollectionPage.astro";
 import IndexPage from "../views/IndexPage.astro";
 import HomePage from "../views/HomePage.astro";
+import DiaryNotesIndexPage from "../views/DiaryNotesIndexPage.astro";
+import DiaryNotePage from "../views/DiaryNotePage.astro";
 
 export function getStaticPaths() {
   return content.publicRoutes().map((route) => ({
@@ -29,16 +31,22 @@ const targetArticle =
     : null;
 ---
 
-{route.targetType === "article" && targetArticle && (
-  <ArticlePage view={targetArticle} route={route} />
-)}
+{route.targetType === "article" &&
+  targetArticle &&
+  (targetArticle.article.kind === "note" ? (
+    <DiaryNotePage view={targetArticle} route={route} />
+  ) : (
+    <ArticlePage view={targetArticle} route={route} />
+  ))}
 {route.targetType === "static" && targetArticle && <PagePage view={targetArticle} route={route} />}
 {route.targetType === "static" && !targetArticle && route.path === "/" && (
   <HomePage route={route} />
 )}
-{route.targetType === "static" && !targetArticle && route.path !== "/" && (
-  <IndexPage route={route} />
-)}
+{route.targetType === "static" && route.path === "/notes" && <DiaryNotesIndexPage route={route} />}
+{route.targetType === "static" &&
+  !targetArticle &&
+  route.path !== "/" &&
+  route.path !== "/notes" && <IndexPage route={route} />}
 {route.targetType === "location" && <LocationPage route={route} />}
 {(route.targetType === "series" || route.targetType === "journey") && (
   <CollectionPage route={route} />

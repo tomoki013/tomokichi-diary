@@ -1,5 +1,6 @@
 ---
 id: "a9dec31f-ad5b-8e55-b51e-8a384622b0f8"
+kind: "article"
 slug: "vietnam1"
 locale: "ja"
 status: "published"

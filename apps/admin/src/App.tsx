@@ -6,7 +6,9 @@ import { useHashRoute } from "./ui/hooks";
 import { Analytics } from "./pages/Analytics";
 import { Dashboard } from "./pages/Dashboard";
 import { Articles } from "./pages/Articles";
+import { DiaryNotes } from "./pages/DiaryNotes";
 import { ArticleEditor } from "./pages/editor/ArticleEditor";
+import { DiaryNoteEditor } from "./pages/editor/DiaryNoteEditor";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { SeriesEditor, SeriesList } from "./pages/Series";
 import { RankingEditor, RankingList } from "./pages/Rankings";
@@ -25,6 +27,7 @@ const NAV = [
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
   { key: "analytics", label: "Analytics", href: href.analytics() },
   { key: "articles", label: "記事", href: href.articles() },
+  { key: "diary-notes", label: "一言日記", href: href.diaryNotes() },
   { key: "likes", label: "いいね", href: href.likes() },
   { key: "media", label: "画像", href: href.media() },
   { key: "series", label: "シリーズ", href: href.series() },
@@ -114,7 +117,9 @@ export function App() {
         {route.name === "dashboard" && <Dashboard />}
         {route.name === "analytics" && <Analytics />}
         {route.name === "articles" && <Articles />}
-        {route.name === "article" && <ArticleEditor key={route.id} id={route.id} />}
+        {route.name === "article" && <ArticleEditor key={route.id} id={route.id} mode="article" />}
+        {route.name === "diary-notes" && <DiaryNotes />}
+        {route.name === "diary-note" && <DiaryNoteEditor key={route.id} id={route.id} />}
         {route.name === "media" && <MediaLibrary />}
         {route.name === "series" && <SeriesList />}
         {route.name === "series-edit" && <SeriesEditor key={route.id} id={route.id} />}

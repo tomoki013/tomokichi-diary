@@ -1,5 +1,6 @@
 ---
 id: "d3a1690d-6b6a-8850-8d83-85feac208cb0"
+kind: "article"
 slug: "sunset1"
 locale: "ja"
 status: "published"

@@ -1,5 +1,6 @@
 ---
 id: "3b67a2fb-3ae1-861e-b304-191913581fb5"
+kind: "article"
 slug: "city-to-changi-airport"
 locale: "ja"
 status: "published"

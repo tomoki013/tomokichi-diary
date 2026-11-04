@@ -1,5 +1,6 @@
 ---
 id: "b9cfc506-bee1-8d8a-91cd-faa61e377dae"
+kind: "article"
 slug: "putra-mosque-guide"
 locale: "ja"
 status: "published"

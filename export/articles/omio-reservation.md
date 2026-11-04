@@ -1,5 +1,6 @@
 ---
 id: "73b6b342-bee5-861d-9d18-2a3c46a50e93"
+kind: "article"
 slug: "omio-reservation"
 locale: "ja"
 status: "published"

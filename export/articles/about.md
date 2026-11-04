@@ -1,8 +1,10 @@
 ---
 id: "85deccb9-fed2-8b23-be2f-2cd73551ab04"
+kind: "page"
 slug: "about"
 locale: "ja"
 status: "published"
+path: "/about"
 title: "About-旅の記録と発見の物語"
 summary: "旅は新しい自分に出会う物語。『ともきちの旅行日記』へようこそ！このページでは、管理人ともきちの自己紹介と、旅の記録に込めた想いをお伝えします。あなたも一緒に、発見の旅に出かけませんか？"
 revision: 1

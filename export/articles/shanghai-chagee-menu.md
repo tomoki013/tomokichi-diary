@@ -1,5 +1,6 @@
 ---
 id: "52b1cb6d-eb74-85a3-b6a1-392f83313051"
+kind: "article"
 slug: "shanghai-chagee-menu"
 locale: "ja"
 status: "published"

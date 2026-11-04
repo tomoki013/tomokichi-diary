@@ -1,5 +1,6 @@
 ---
 id: "bb7301bb-31b8-8347-9056-a95530739223"
+kind: "article"
 slug: "chagee-ordering-china-malaysia-singapore"
 locale: "ja"
 status: "published"

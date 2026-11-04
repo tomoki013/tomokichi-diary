@@ -12,6 +12,8 @@ describe("parseRoute", () => {
     ["", { name: "dashboard" }],
     ["#/articles/", { name: "articles" }],
     ["#/articles/a%2Fb", { name: "article", id: "a/b" }],
+    ["#/notes", { name: "diary-notes" }],
+    ["#/notes/note-1", { name: "diary-note", id: "note-1" }],
     ["#/inquiries/archive", { name: "legacy-messages" }],
     ["#/inquiries/t-1", { name: "inquiry", id: "t-1" }],
     ["#/likes", { name: "likes" }],
@@ -28,12 +30,14 @@ describe("parseRoute", () => {
 
   it("round-trips every link it builds", () => {
     expect(parseRoute(href.article("x y"))).toEqual({ name: "article", id: "x y" });
+    expect(parseRoute(href.diaryNote("note 1"))).toEqual({ name: "diary-note", id: "note 1" });
     expect(parseRoute(href.inquiry("TK/1"))).toEqual({ name: "inquiry", id: "TK/1" });
     expect(parseRoute(href.legacyMessages()).name).toBe("legacy-messages");
   });
 
   it("puts detail screens under their list in the menu", () => {
     expect(section({ name: "article", id: "a" })).toBe("articles");
+    expect(section({ name: "diary-note", id: "n" })).toBe("diary-notes");
     expect(section({ name: "legacy-messages" })).toBe("inquiries");
     expect(section({ name: "not-found", path: "/x" })).toBeNull();
   });

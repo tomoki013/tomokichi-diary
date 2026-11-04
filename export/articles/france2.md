@@ -1,5 +1,6 @@
 ---
 id: "c43ba4a0-7177-82a4-9dea-742eb6a11c5c"
+kind: "article"
 slug: "france2"
 locale: "ja"
 status: "published"

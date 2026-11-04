@@ -1,5 +1,6 @@
 ---
 id: "a0ba40dc-5b69-8fc3-ada0-a428ed994ce7"
+kind: "article"
 slug: "changi-airport-lounge"
 locale: "ja"
 status: "published"

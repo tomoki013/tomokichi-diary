@@ -13,6 +13,7 @@
 - **お問い合わせフォーム** — Turnstile・honeypot・fail-closed・レート・基盤への引き渡し。
 - **いいね・共有** — 記事/写真のいいね API、ブラウザ側のいいね状態、再 seed で読者のいいねを消さないこと。
 - **記事品質** — 公開条件（`publishing.test`）、SEO 生成物（`seo.test` / `page-seo.test` / `check-routes.test`）と `scripts/check-*`・Lighthouse。
+- **一言日記の公開ライフサイクル** — 専用 API の一覧分離・下書き・短文公開・投稿日・関連記事、公開 revision の固定、取り下げ・削除確認、Operator MCP の明示的公開確認。
 
 それ以外（広告配置、アナリティクス集計、ホームの並び、WebMCP、移行ロジックなど）はテストを書かず、preview と生成物検査で確認する。新しくテストを足すのも上の範囲に入るときだけにする。
 
@@ -22,6 +23,7 @@
 - `@tomokichi/infra-d1/testing-context` の `createTestContext()` が **in-memory SQLite に全 migration を適用**した `AppContext` を返す。R2 は in-memory storage。時計は固定、id は連番。
 - セキュリティ: `apps/api/src/__tests__/{access,api,analytics,media,monetization}.test.ts`、`apps/admin/worker/*.test.ts`、`apps/mcp-server/{operator/operator,src/__tests__/analytics}.test.ts`、`packages/contracts/src/__tests__/validation.test.ts`、`packages/{data,domain}/src/__tests__/monetization.test.ts`（非公開フィールドの除去）、`scripts/analytics/analytics.test.ts`、`scripts/lib/__tests__/publication-{originals,step}.test.ts`、`apps/admin/src/lib/ad-preview.test.ts`・`apps/chagee/src/__tests__/{markdown,seed,seo}.test.ts`（エスケープ）。
 - 管理画面: `apps/api/src/__tests__/api.test.ts`、`apps/admin/src/lib/{lib,article-state}.test.ts`。
+- 一言日記: `apps/api/src/__tests__/api.test.ts`、`packages/data/src/__tests__/diary-notes.test.ts`、`apps/mcp-server/operator/operator.test.ts`、`packages/domain/src/__tests__/publishing.test.ts`。
 - お問い合わせ: `apps/api/src/__tests__/{contact,inquiry}.test.ts`、`packages/domain/src/__tests__/contact.test.ts`、`apps/chagee/src/__tests__/contact.test.ts`。
 - いいね: `apps/api/src/__tests__/{likes,photo-likes}.test.ts`、`apps/web/src/__tests__/my-trips.test.ts`、`scripts/lib/__tests__/seed-sql.test.ts`。
 - 記事品質: `packages/domain/src/__tests__/publishing.test.ts`、`packages/seo/src/__tests__/seo.test.ts`、`scripts/lib/__tests__/{page-seo,check-routes}.test.ts`。
@@ -75,3 +77,5 @@ pnpm build && pnpm check:seo && pnpm check:links # 生成物検査だけ
 2026-10-10 訂正: 0012は転送方向が最新実装と逆だったため、0013の追記移行で `/collections/*` を正本、`/trips/*` を301転送に修復する回帰テストを追加。0012適用済みのD1を再現し、転送ループ・別言語への誤転送・連載の変更を防ぐ。既存の予約公開テストはActionsと共通のapplication use caseを検証する。
 
 2026-10-11: 配信環境の初回ビルドを `pnpm exec tsc --build --clean && pnpm build` で再現する。共通の型定義を先に生成し、APIとMCPの並行処理によるsrc/distのブランド型混在を防ぐ。
+
+2026-11-04: 一言日記の API / publication snapshot / export / Operator MCP を追加。記事一覧からの分離、短文公開、下書き更新時の公開 revision 固定、明示確認のある MCP 公開を自動テストする。写真あり・なしの静的表示と SEO / route / link 整合性は全体 build と生成物検査で確認する。

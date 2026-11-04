@@ -1,5 +1,6 @@
 ---
 id: "bfbb93de-a42f-8eb2-af54-edeb6235687e"
+kind: "article"
 slug: "india5"
 locale: "ja"
 status: "published"
