@@ -44,6 +44,17 @@ describe("articleState", () => {
     expect(text(lines, "サイト")).toBeUndefined();
   });
 
+  it("labels a diary note by its own content name", () => {
+    const lines = articleState(
+      { ...live, status: "draft", isLive: false, publishedAt: null },
+      false,
+      undefined,
+      "この日記",
+    );
+    expect(text(lines, "この日記")).toContain("下書き");
+    expect(text(lines, "この記事")).toBeUndefined();
+  });
+
   it("flags unsaved edits", () => {
     expect(text(articleState(live, true, site({})), "編集")).toContain("未保存");
   });

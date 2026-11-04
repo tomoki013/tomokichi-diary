@@ -55,12 +55,12 @@ export function articleState(
   article: Article,
   unsaved: boolean,
   site: SitePublicationStatus | undefined,
+  subject = "この記事",
 ): StateLine[] {
   const phase = phaseOf(article);
-  const label = "この記事";
   const lines: StateLine[] = [
     {
-      label,
+      label: subject,
       tone: phases[phase].tone,
       text: {
         archived: "アーカイブ済み。サイトには表示されません。",

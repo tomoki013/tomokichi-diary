@@ -52,6 +52,7 @@ export function PublishSection({
     site?.state === "building" ||
     site?.state === "failed" ||
     site?.state === "unconfigured";
+  const isDiaryNote = article.kind === "note";
 
   const run = async (
     action: () => Promise<unknown>,
@@ -62,7 +63,11 @@ export function PublishSection({
     onBusy(true);
     try {
       if (dirty && !(await save())) return;
-      const fresh = validate ? await api.publishCheck(article.id) : null;
+      const fresh = validate
+        ? isDiaryNote
+          ? await api.diaryNotePublishCheck(article.id)
+          : await api.publishCheck(article.id)
+        : null;
       if (fresh && !fresh.publishable) {
         setProblems(fresh.problems);
         throw new Error(fresh.problems.map((p) => publishProblem(p.message)).join("\n"));
@@ -87,7 +92,7 @@ export function PublishSection({
   return (
     <Panel title="公開">
       <dl className="article-state">
-        {articleState(article, dirty, site).map((line) => (
+        {articleState(article, dirty, site, isDiaryNote ? "この日記" : "この記事").map((line) => (
           <div key={line.label}>
             <dt>{line.label}</dt>
             <dd>
@@ -127,7 +132,7 @@ export function PublishSection({
           disabled={busy || working || article.status === "scheduled" || nothingToPublish}
           onClick={() =>
             void run(
-              () => api.publish(article.id),
+              () => (isDiaryNote ? api.publishDiaryNote(article.id) : api.publish(article.id)),
               article.isLive ? "変更の公開を受け付けました" : "公開を受け付けました",
               true,
             )
@@ -136,7 +141,8 @@ export function PublishSection({
           {article.isLive ? "変更を公開" : "公開する"}
         </button>
 
-        {!article.isLive &&
+        {!isDiaryNote &&
+          !article.isLive &&
           (scheduling ? (
             <form
               className="inline-form"
@@ -192,7 +198,9 @@ export function PublishSection({
           </a>
         )}
 
-        {(article.status === "published" || article.status === "scheduled") && (
+        {(isDiaryNote
+          ? article.status === "published"
+          : article.status === "published" || article.status === "scheduled") && (
           <button
             type="button"
             disabled={busy}
@@ -200,10 +208,13 @@ export function PublishSection({
               const scheduled = article.status === "scheduled";
               const question = scheduled
                 ? "予約を取り消して下書きに戻しますか？"
-                : "非公開に戻しますか？ 公開ページは表示されなくなります。";
+                : isDiaryNote
+                  ? "この一言日記を公開取り下げにしますか？ 公開ページは表示されなくなります。"
+                  : "非公開に戻しますか？ 公開ページは表示されなくなります。";
               if (globalThis.confirm(question)) {
                 void run(
-                  () => api.unpublish(article.id),
+                  () =>
+                    isDiaryNote ? api.unpublishDiaryNote(article.id) : api.unpublish(article.id),
                   scheduled ? "予約を取り消しました" : "非公開に戻しました",
                 );
               }
@@ -213,7 +224,7 @@ export function PublishSection({
           </button>
         )}
 
-        {article.status !== "archived" && (
+        {!isDiaryNote && article.status !== "archived" && (
           <button
             type="button"
             className="danger"

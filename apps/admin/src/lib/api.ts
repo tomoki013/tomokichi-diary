@@ -307,6 +307,18 @@ export const api = {
       `/admin/notes/${id(articleId)}/related-articles`,
       json("PUT", { relatedArticleIds }),
     ),
+  diaryNotePublishCheck: (articleId: string) =>
+    request<PublishCheckDto>(`/admin/notes/${id(articleId)}/publish-check`),
+  publishDiaryNote: (articleId: string) =>
+    request<{ status: string; publication: PublicationStatus }>(
+      `/admin/notes/${id(articleId)}/publish`,
+      json("POST", {}),
+    ),
+  unpublishDiaryNote: (articleId: string) =>
+    request<{ status: string; publication: PublicationStatus }>(
+      `/admin/notes/${id(articleId)}/unpublish`,
+      json("POST"),
+    ),
   deleteDiaryNote: (articleId: string) =>
     request<{ deleted: boolean; publication: PublicationStatus | null }>(
       `/admin/notes/${id(articleId)}`,
