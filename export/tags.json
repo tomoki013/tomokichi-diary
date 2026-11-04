@@ -438,5 +438,15 @@
     "id": "62e4a416-cdc4-8ea9-93d8-53c3bd3dbbb2",
     "slug": "tag-f666fdd1",
     "name": "初海外"
+  },
+  {
+    "id": "1b725efb-0a86-4a96-9994-0e2577c36e57",
+    "slug": "travel-music",
+    "name": "旅と音楽"
+  },
+  {
+    "id": "5e278ac6-ef4c-4644-8470-cdb1e04d1f46",
+    "slug": "travel-playlist",
+    "name": "旅のプレイリスト"
   }
 ]

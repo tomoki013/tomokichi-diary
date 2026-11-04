@@ -54,6 +54,8 @@ Claude Code の `.claude/launch.json` には `api`（8795）と `admin`（5173�
 
 公開サイトは `export/` から静的生成するので、**D1 が無くても動く**（ADR 0006）。記事を直したいときは Admin → API → D1 → `pnpm export:data` → commit の順。ローカルの D1 は `.data/tomokichi.db`（`pnpm import:legacy` か `export/` から復元）。
 
+一言日記は記事と同じ revision・公開版・メディア管理を使い、Admin の「一言日記」または Operator MCP から編集する。通常記事の一覧や Knowledge には混ぜない。日記の公開・取り下げも既存のサイト公開パイプラインを通る。DB / export 形式を変える場合は [RELEASE.md](RELEASE.md) と [publication-pipeline.md](publication-pipeline.md) の順序を確認する。
+
 ## Build
 
 ```bash

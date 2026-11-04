@@ -1,5 +1,6 @@
 ---
 id: "57ceb9eb-0c4a-8c50-87e0-11b28602fd4c"
+kind: "article"
 slug: "batu-caves-guide"
 locale: "ja"
 status: "published"

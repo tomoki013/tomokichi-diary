@@ -1,5 +1,6 @@
 ---
 id: "d315414b-d3e8-8f4d-9e29-5c5a973e3165"
+kind: "article"
 slug: "best-city-for-student"
 locale: "ja"
 status: "published"

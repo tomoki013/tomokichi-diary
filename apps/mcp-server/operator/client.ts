@@ -54,6 +54,9 @@ export interface DraftInput {
 
 interface ArticleDetail {
   id: string;
+  kind: "article" | "page" | "note";
+  slug: string;
+  title: string;
   currentRevision: {
     title: string;
     summary: string;
@@ -105,7 +108,13 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
   return {
     config,
     listArticles: () => call<{ items: unknown[] }>("GET", "/articles"),
+    listDiaryNotes: () => call<{ items: unknown[]; total: number }>("GET", "/notes"),
     getArticle: (articleId: string) => call<ArticleDetail>("GET", `/articles/${id(articleId)}`),
+    async getDiaryNote(noteId: string) {
+      const note = await this.getArticle(noteId);
+      if (note.kind !== "note") throw new OperatorError(`一言日記が見つかりません: ${noteId}`);
+      return note;
+    },
     publishCheck: (articleId: string) =>
       call<unknown>("GET", `/articles/${id(articleId)}/publish-check`),
     bodyAudit: () => call<unknown>("GET", "/articles/body-audit"),
@@ -126,9 +135,48 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
       draft: DraftInput;
     }) => call<{ id: string }>("POST", "/articles", { ...input, locale: "ja" }),
 
+    createDiaryNote: (input: { slug: string; title: string; bodyMarkdown?: string }) =>
+      call<{ id: string }>("POST", "/notes", input),
+
+    async saveDiaryNoteDraft(noteId: string, changes: { title?: string; bodyMarkdown?: string }) {
+      const current = await this.getDiaryNote(noteId);
+      return call<unknown>("PUT", `/notes/${id(noteId)}/draft`, {
+        title: changes.title ?? current.currentRevision?.title ?? "",
+        bodyMarkdown: changes.bodyMarkdown ?? current.currentRevision?.bodyMarkdown ?? "",
+      });
+    },
+
+    diaryNotePublishCheck: (noteId: string) =>
+      call<unknown>("GET", `/notes/${id(noteId)}/publish-check`),
+
+    async publishDiaryNote(noteId: string) {
+      await this.getDiaryNote(noteId);
+      const check = await this.diaryNotePublishCheck(noteId);
+      const publishable =
+        check && typeof check === "object" && "publishable" in check && check.publishable === true;
+      if (!publishable)
+        throw new OperatorError(
+          "公開前検証が通っていません。check_diary_note_publishable を確認してください。",
+        );
+      return call<unknown>("POST", `/notes/${id(noteId)}/publish`, {});
+    },
+
+    async unpublishDiaryNote(noteId: string) {
+      await this.getDiaryNote(noteId);
+      return call<unknown>("POST", `/notes/${id(noteId)}/unpublish`);
+    },
+
+    async setDiaryNoteRelatedArticles(noteId: string, relatedArticleIds: string[]) {
+      await this.getDiaryNote(noteId);
+      return call<unknown>("PUT", `/notes/${id(noteId)}/related-articles`, { relatedArticleIds });
+    },
+
     /** Saves a new draft revision; fields left out keep their current value. */
     async saveDraft(articleId: string, changes: Partial<DraftInput>) {
-      const current = (await this.getArticle(articleId)).currentRevision;
+      const article = await this.getArticle(articleId);
+      if (article.kind === "note")
+        throw new OperatorError("一言日記には save_diary_note_draft を使ってください");
+      const current = article.currentRevision;
       const draft: DraftInput = {
         title: changes.title ?? current?.title ?? "",
         summary: changes.summary ?? current?.summary ?? "",
@@ -169,7 +217,12 @@ export function createOperatorClient(config: OperatorConfig, fetchImpl: Fetch = 
     controlAdExperiment: (experimentId: string, action: "start" | "stop") =>
       call<unknown>("POST", `/monetization/experiments/${id(experimentId)}/${action}`),
 
-    publish: (articleId: string) => call<unknown>("POST", `/articles/${id(articleId)}/publish`, {}),
+    async publish(articleId: string) {
+      const article = await this.getArticle(articleId);
+      if (article.kind === "note")
+        throw new OperatorError("一言日記には publish_diary_note を使ってください");
+      return call<unknown>("POST", `/articles/${id(articleId)}/publish`, {});
+    },
     createSeries: (input: {
       slug: string;
       title: string;

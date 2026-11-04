@@ -289,6 +289,29 @@ export const api = {
     path: string;
     draft: DraftInput;
   }) => request<{ id: string }>("/admin/articles", json("POST", input)),
+  listDiaryNotes: () => request<{ items: ArticleSummaryDto[]; total: number }>("/admin/notes"),
+  createDiaryNote: (input: { slug: string; title: string; bodyMarkdown?: string }) =>
+    request<{ id: string }>("/admin/notes", json("POST", input)),
+  saveDiaryNoteDraft: (articleId: string, input: { title: string; bodyMarkdown: string }) =>
+    request<{ revision: { id: string; revisionNumber: number; bodyMarkdown: string } }>(
+      `/admin/notes/${id(articleId)}/draft`,
+      json("PUT", input),
+    ),
+  saveDiaryNoteDate: (articleId: string, date: string | null) =>
+    request<{ date: string | null; publication: PublicationStatus | null }>(
+      `/admin/notes/${id(articleId)}/date`,
+      json("PUT", { date }),
+    ),
+  saveDiaryNoteRelatedArticles: (articleId: string, relatedArticleIds: string[]) =>
+    request<{ relatedArticleIds: string[] }>(
+      `/admin/notes/${id(articleId)}/related-articles`,
+      json("PUT", { relatedArticleIds }),
+    ),
+  deleteDiaryNote: (articleId: string) =>
+    request<{ deleted: boolean; publication: PublicationStatus | null }>(
+      `/admin/notes/${id(articleId)}`,
+      json("DELETE", { confirm: "delete" }),
+    ),
   saveDraft: (articleId: string, draft: DraftInput) =>
     request<{ revision: { id: string; revisionNumber: number; bodyMarkdown: string } }>(
       `/admin/articles/${id(articleId)}/draft`,

@@ -48,6 +48,8 @@ Actions成果物は14日保持する。長期比較に使う実行はダウン�
 - 配信前の `content:check` の `check:articles` が、スナップショットに入った全公開記事を同じルールで再判定し、1件でも違反があれば配信しない。ルール追加前に公開された記事や、D1 へ直接入った記事もここで止まる。
 - ルールを足すときは、先に `audit_article_bodies`・`check_publishable` で既存記事の違反を直してからマージする。順番を逆にすると次の配信がすべて止まる。
 
+一言日記 (`kind = "note"`) も同じ公開版固定と `validatePublishable` を通るが、通常記事の一覧・Knowledge / WebMCP カタログには含めない。日記は短文で成立するため本文の通常記事向け最小長、要約、カバー写真を要求しない。公開 snapshot は公開済み日記と公開済み関連記事だけを含み、関連記事の編集は日記を再公開するまで本番に反映しない。`/notes` の index route は空の状態でも migration で登録される。
+
 ## 本番反映手順
 
 1. 新ワークフローをmainで実行する前に、production D1へ`0020_publication_progress.sql`までexpand migrationを適用する（既存の`pnpm db:migrate`）。既存列・記事・履歴を削除しない。旧API・旧ワークフローは引き続き動作する。

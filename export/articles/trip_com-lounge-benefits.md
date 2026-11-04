@@ -1,5 +1,6 @@
 ---
 id: "a7cf9391-c07a-8709-b467-da1496fe1e53"
+kind: "article"
 slug: "trip_com-lounge-benefits"
 locale: "ja"
 status: "published"

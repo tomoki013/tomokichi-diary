@@ -1,5 +1,6 @@
 ---
 id: "ec5a4c60-e280-8bc7-b533-c5811a5451d2"
+kind: "article"
 slug: "howtoget-mirador-del-valle"
 locale: "ja"
 status: "published"

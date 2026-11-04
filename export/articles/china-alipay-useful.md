@@ -1,5 +1,6 @@
 ---
 id: "d408e860-a104-82ba-9b68-ca20a8aeeb2a"
+kind: "article"
 slug: "china-alipay-useful"
 locale: "ja"
 status: "published"

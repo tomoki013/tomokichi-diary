@@ -1,5 +1,6 @@
 ---
 id: "c9981e1b-292f-8681-ae38-8d887577a066"
+kind: "article"
 slug: "oia-sunset-guide"
 locale: "ja"
 status: "published"

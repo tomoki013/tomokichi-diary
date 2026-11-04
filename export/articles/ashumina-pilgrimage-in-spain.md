@@ -1,5 +1,6 @@
 ---
 id: "574617ab-b833-8521-bdf4-c67829c28c84"
+kind: "article"
 slug: "ashumina-pilgrimage-in-spain"
 locale: "ja"
 status: "published"

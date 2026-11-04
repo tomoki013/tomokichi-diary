@@ -1,5 +1,6 @@
 ---
 id: "120d37a0-d395-8766-8e46-12e2effe0907"
+kind: "article"
 slug: "indonesia1"
 locale: "ja"
 status: "published"

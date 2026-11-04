@@ -1,5 +1,6 @@
 ---
 id: "c103c46c-b099-8556-bce8-171265489609"
+kind: "article"
 slug: "chaophraya-express"
 locale: "ja"
 status: "published"

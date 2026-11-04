@@ -1,5 +1,6 @@
 ---
 id: "9217a13b-81e3-8f42-9714-436784e1dc1d"
+kind: "article"
 slug: "india-street-food-tips"
 locale: "ja"
 status: "published"

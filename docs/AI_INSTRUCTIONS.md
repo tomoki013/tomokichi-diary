@@ -24,6 +24,24 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 - `mediaUrl()` の結果は既に絶対 URL。`absoluteUrl()` に通さない（`SEO_IMAGE_URL_INVALID`）。
 - 新しい CI 検査は stable code（`packages/contracts/src/error-codes.ts`）を足し、`OPERATIONS.md` に runbook を書く。
 
+## 新機能・コンテンツ変更の影響確認（必須）
+
+公開サイトだけを実装して終わらない。変更ごとに次の全領域を確認し、作業報告にも「変更した」または「変更不要」と理由を残す。
+
+- [ ] 公開サイト（Astro）
+- [ ] 管理画面（React / Vite）
+- [ ] API（Hono / Workers）
+- [ ] データモデル・DB（D1 / migration）
+- [ ] メディア管理（R2）
+- [ ] 公開・ビルド・エクスポート処理
+- [ ] Operator MCP
+- [ ] その他の関連MCP・WebMCP
+- [ ] SEO・LLMO・canonical・サイトマップ・検索面
+- [ ] テスト・CI・生成物検査
+- [ ] 運用ドキュメント・デプロイ・ロールバック
+
+DB保存を完了条件にしない。公開対象のコンテンツは、認証された編集経路、公開版の固定、D1からの取得、Astro静的生成、配信後の確認まで一貫して追う。通常記事と別の性格を持つコンテンツは、既存一覧・検索・ランキング・MCPに混ぜるかも明示的に決める。
+
 ## Naming / Directory
 
 - apps: `apps/web`（Astro）、`apps/admin`（Vite+React、hash router）、`apps/api`（Hono）、`apps/mcp-server`（公開MCP。`operator/` はローカル専用の操作MCPで、デプロイしない: docs/OPERATOR_MCP.md）。

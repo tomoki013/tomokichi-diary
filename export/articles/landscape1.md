@@ -1,5 +1,6 @@
 ---
 id: "0c3d2abf-8eb3-8b71-aec4-9f133adb2275"
+kind: "article"
 slug: "landscape1"
 locale: "ja"
 status: "published"

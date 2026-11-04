@@ -1,5 +1,6 @@
 ---
 id: "1edc494e-7843-8173-9464-ecefe56f1de6"
+kind: "article"
 slug: "spain1"
 locale: "ja"
 status: "published"

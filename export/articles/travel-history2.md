@@ -1,5 +1,6 @@
 ---
 id: "75cbd1c4-8e81-8ce1-932e-e3ae5d2e894d"
+kind: "article"
 slug: "travel-history2"
 locale: "ja"
 status: "published"

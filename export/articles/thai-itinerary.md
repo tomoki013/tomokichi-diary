@@ -1,5 +1,6 @@
 ---
 id: "3bcefbca-a133-8794-a7dc-7de0b17eadb5"
+kind: "article"
 slug: "thai-itinerary"
 locale: "ja"
 status: "published"

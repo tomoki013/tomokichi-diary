@@ -1,5 +1,6 @@
 ---
 id: "74e63e8e-9a96-8aed-98e5-7ef3272e3b63"
+kind: "article"
 slug: "why-travelers-dont-return"
 locale: "ja"
 status: "published"

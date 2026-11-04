@@ -1,5 +1,6 @@
 ---
 id: "c3612dcf-f7bd-839d-bd96-d95f2520dd06"
+kind: "article"
 slug: "vietnam-transit"
 locale: "ja"
 status: "published"

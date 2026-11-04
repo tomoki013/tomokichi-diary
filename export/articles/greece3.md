@@ -1,5 +1,6 @@
 ---
 id: "45be5181-7a86-8b89-8bb3-0d1cd56e2dd2"
+kind: "article"
 slug: "greece3"
 locale: "ja"
 status: "published"

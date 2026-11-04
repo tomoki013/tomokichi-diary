@@ -1,5 +1,6 @@
 ---
 id: "12ff6f1f-55a5-8688-b19f-e0570eee98a0"
+kind: "article"
 slug: "thai6"
 locale: "ja"
 status: "published"

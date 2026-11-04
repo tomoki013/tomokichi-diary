@@ -1,5 +1,6 @@
 ---
 id: "4b9e865e-71d7-8540-97e9-d3f187a353a4"
+kind: "article"
 slug: "airport-access-donmuang"
 locale: "ja"
 status: "published"

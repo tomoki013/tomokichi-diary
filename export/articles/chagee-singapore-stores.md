@@ -1,5 +1,6 @@
 ---
 id: "36e965b9-cc50-82d1-b54a-3762181be974"
+kind: "article"
 slug: "chagee-singapore-stores"
 locale: "ja"
 status: "published"

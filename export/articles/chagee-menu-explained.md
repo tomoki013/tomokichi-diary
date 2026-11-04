@@ -1,5 +1,6 @@
 ---
 id: "4bb3bc46-70bd-8e36-b9f2-1d9cfcf6d1d6"
+kind: "article"
 slug: "chagee-menu-explained"
 locale: "ja"
 status: "published"

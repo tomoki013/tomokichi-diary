@@ -1,5 +1,6 @@
 ---
 id: "8aa6bd3e-d3a3-8a79-805f-359e820a317c"
+kind: "article"
 slug: "india-visa"
 locale: "ja"
 status: "published"

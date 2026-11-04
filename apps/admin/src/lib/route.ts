@@ -8,6 +8,8 @@ export type Route =
   | { name: "analytics" }
   | { name: "articles" }
   | { name: "article"; id: string }
+  | { name: "diary-notes" }
+  | { name: "diary-note"; id: string }
   | { name: "monetization" }
   | { name: "media" }
   | { name: "series" }
@@ -33,6 +35,10 @@ export function parseRoute(hash: string): Route {
       return { name: "dashboard" };
     case "articles":
       return second ? { name: "article", id: decodeURIComponent(second) } : { name: "articles" };
+    case "notes":
+      return second
+        ? { name: "diary-note", id: decodeURIComponent(second) }
+        : { name: "diary-notes" };
     case "analytics":
       return second ? { name: "not-found", path } : { name: "analytics" };
     case "monetization":
@@ -66,6 +72,8 @@ export const href = {
   analytics: () => "#/analytics",
   articles: () => "#/articles",
   article: (id: string) => `#/articles/${encodeURIComponent(id)}`,
+  diaryNotes: () => "#/notes",
+  diaryNote: (id: string) => `#/notes/${encodeURIComponent(id)}`,
   monetization: () => "#/monetization",
   media: () => "#/media",
   series: () => "#/series",
@@ -88,6 +96,7 @@ export function section(
   | "dashboard"
   | "analytics"
   | "articles"
+  | "diary-notes"
   | "monetization"
   | "media"
   | "series"
@@ -107,6 +116,9 @@ export function section(
     case "articles":
     case "article":
       return "articles";
+    case "diary-notes":
+    case "diary-note":
+      return "diary-notes";
     case "media":
       return "media";
     case "series":

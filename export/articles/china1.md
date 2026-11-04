@@ -1,5 +1,6 @@
 ---
 id: "b77c7d5c-5df3-8add-9ecd-24355370a733"
+kind: "article"
 slug: "china1"
 locale: "ja"
 status: "published"

@@ -1,5 +1,6 @@
 ---
 id: "e3b3dac3-2997-81f5-886b-2490eafda99c"
+kind: "article"
 slug: "architecture2"
 locale: "ja"
 status: "published"

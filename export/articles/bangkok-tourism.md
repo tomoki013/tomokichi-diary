@@ -1,5 +1,6 @@
 ---
 id: "30039f22-2e87-889d-9fdf-ee90467e6649"
+kind: "article"
 slug: "bangkok-tourism"
 locale: "ja"
 status: "published"

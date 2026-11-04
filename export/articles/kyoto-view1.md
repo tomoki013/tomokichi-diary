@@ -1,5 +1,6 @@
 ---
 id: "18f74da4-0360-8aa3-90a2-2df84855fc42"
+kind: "article"
 slug: "kyoto-view1"
 locale: "ja"
 status: "published"

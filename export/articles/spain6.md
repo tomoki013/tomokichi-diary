@@ -1,5 +1,6 @@
 ---
 id: "fd608f15-40cf-8675-8944-566d10fd854e"
+kind: "article"
 slug: "spain6"
 locale: "ja"
 status: "published"

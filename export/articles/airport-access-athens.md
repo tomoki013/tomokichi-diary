@@ -1,5 +1,6 @@
 ---
 id: "83ce59d8-edd3-8e18-90ab-f96d8f02533a"
+kind: "article"
 slug: "airport-access-athens"
 locale: "ja"
 status: "published"

@@ -1,5 +1,6 @@
 ---
 id: "d0fd313b-fb9d-8d9f-966f-104048a85a2f"
+kind: "article"
 slug: "changi-airport-liquids"
 locale: "ja"
 status: "published"

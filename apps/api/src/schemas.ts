@@ -19,6 +19,26 @@ export const createArticleSchema = v.object({
   draft: draftSchema,
 });
 
+/** Notes need only a title to start; their body and card description can be written later. */
+export const createDiaryNoteSchema = v.object({
+  slug: v.string({ min: 1, max: 96, pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ }),
+  title: v.string({ min: 1, max: 120 }),
+  bodyMarkdown: v.optional(v.string({ max: 200_000 }), ""),
+});
+
+export const diaryNoteDraftSchema = v.object({
+  title: v.string({ min: 1, max: 120 }),
+  bodyMarkdown: v.string({ max: 200_000 }),
+});
+
+export const diaryNoteDateSchema = v.object({
+  date: v.nullable(v.string({ min: 10, max: 10, pattern: /^\d{4}-\d{2}-\d{2}$/ })),
+});
+
+export const diaryNoteRelatedSchema = v.object({
+  relatedArticleIds: v.array(v.string({ min: 1 }), { max: 10 }),
+});
+
 export const scheduleSchema = v.object({ at: v.string({ min: 20, max: 40 }) });
 
 export const publishSchema = v.object({ deferBuild: v.optional(v.boolean(), false) });

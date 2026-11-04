@@ -1,5 +1,6 @@
 ---
 id: "8441de9a-5066-8cf1-a349-90f052fc07fc"
+kind: "article"
 slug: "santorini-transportation"
 locale: "ja"
 status: "published"

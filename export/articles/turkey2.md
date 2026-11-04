@@ -1,5 +1,6 @@
 ---
 id: "80b7982a-71be-812b-9b0e-63773f94d8cf"
+kind: "article"
 slug: "turkey2"
 locale: "ja"
 status: "published"

@@ -1,5 +1,6 @@
 ---
 id: "7f6d920c-bc3f-8963-9a72-96ece1b62dbb"
+kind: "article"
 slug: "bangkok-localbus"
 locale: "ja"
 status: "published"

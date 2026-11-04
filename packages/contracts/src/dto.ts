@@ -22,7 +22,7 @@ export interface PageDto<T> {
 
 export interface ArticleSummaryDto {
   readonly id: string;
-  readonly kind: "article" | "page";
+  readonly kind: "article" | "page" | "note";
   readonly slug: string;
   readonly title: string;
   readonly status: string;
@@ -77,6 +77,8 @@ export interface ArticleDetailDto extends ArticleSummaryDto {
   readonly media: readonly ArticleMediaDto[];
   readonly relations: ArticleRelationsDto;
   readonly collectionIds: readonly string[];
+  /** Travel articles explicitly linked from a diary note. */
+  readonly relatedArticleIds?: readonly string[];
 }
 
 export interface ArticleMediaDto {

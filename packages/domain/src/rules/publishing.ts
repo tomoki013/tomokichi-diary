@@ -43,9 +43,16 @@ export function validatePublishable(input: PublishInput): readonly DomainError[]
   if (revision.title.trim() === "") fail("title is required", "title");
   if (revision.title.length > MAX_TITLE_LENGTH)
     fail(`title must be at most ${MAX_TITLE_LENGTH} characters`, "title");
-  if (revision.summary.trim() === "") fail("summary is required", "summary");
-  if (revision.bodyMarkdown.trim().length < MIN_BODY_LENGTH) {
-    fail(`body must be at least ${MIN_BODY_LENGTH} characters`, "bodyMarkdown");
+  if (article.kind !== "note" && revision.summary.trim() === "")
+    fail("summary is required", "summary");
+  const minimumBodyLength = article.kind === "note" ? 1 : MIN_BODY_LENGTH;
+  if (revision.bodyMarkdown.trim().length < minimumBodyLength) {
+    fail(
+      article.kind === "note"
+        ? "body is required"
+        : `body must be at least ${MIN_BODY_LENGTH} characters`,
+      "bodyMarkdown",
+    );
   }
 
   // A pasted Apple Music link that is not a song, album or playlist would

@@ -102,7 +102,7 @@ export function createOperatorServer(
     {
       title: "List articles",
       description:
-        "記事・固定ページの一覧（ID、タイトル、状態、URL、未公開の変更の有無）。プライバシーポリシー・利用規約などのサイトポリシーは /legal/ の固定ページで、記事と同じ get_article・save_article_draft・publish_article で編集・公開します。",
+        "旅行記事・固定ページの一覧（ID、タイトル、状態、URL、未公開の変更の有無）。一言日記は list_diary_notes で別に取得します。プライバシーポリシー・利用規約などは固定ページで、記事と同じ get_article・save_article_draft・publish_article で編集・公開します。",
       inputSchema: { query: z.string().max(100).optional() },
       annotations: READ,
     },
@@ -125,7 +125,97 @@ export function createOperatorServer(
       inputSchema: { articleId: z.string().min(1) },
       annotations: READ,
     },
-    async ({ articleId }) => json(await client.getArticle(articleId)),
+    async ({ articleId }) => {
+      const article = await client.getArticle(articleId);
+      if (article.kind === "note") throw new Error("一言日記には get_diary_note を使ってください");
+      return json(article);
+    },
+  );
+
+  server.registerTool(
+    "list_diary_notes",
+    {
+      title: "List diary notes",
+      description:
+        "ともきちの一言日記の一覧を取得します。旅行記事とは分けて返し、下書き・公開中・未公開変更の状態も含みます。",
+      inputSchema: {},
+      annotations: READ,
+    },
+    async () => json(await client.listDiaryNotes()),
+  );
+
+  server.registerTool(
+    "get_diary_note",
+    {
+      title: "Get diary note",
+      description: "一言日記の下書き本文、投稿日、写真、関連記事、公開状態を取得します。",
+      inputSchema: { noteId: z.string().min(1) },
+      annotations: READ,
+    },
+    async ({ noteId }) => json(await client.getDiaryNote(noteId)),
+  );
+
+  server.registerTool(
+    "create_diary_note_draft",
+    {
+      title: "Create diary note draft",
+      description:
+        "一言日記を未公開の下書きとして作成します。タイトルと URL 用 slug を指定します。本文はあとから書けます。作成だけでは公開されません。",
+      inputSchema: {
+        slug,
+        title: z.string().min(1).max(120),
+        bodyMarkdown: z.string().max(200_000).optional(),
+      },
+      annotations: WRITE,
+    },
+    async (input) => json(await client.createDiaryNote(input)),
+  );
+
+  server.registerTool(
+    "save_diary_note_draft",
+    {
+      title: "Save diary note draft",
+      description:
+        "一言日記の下書きを保存します。指定しなかったタイトル・本文は現在の内容のままです。公開中の日記の公開版は変わりません。",
+      inputSchema: {
+        noteId: z.string().min(1),
+        title: z.string().min(1).max(120).optional(),
+        bodyMarkdown: z.string().max(200_000).optional(),
+      },
+      annotations: WRITE,
+    },
+    async ({ noteId, ...changes }) => json(await client.saveDiaryNoteDraft(noteId, changes)),
+  );
+
+  server.registerTool(
+    "check_diary_note_publishable",
+    {
+      title: "Check diary note publishable",
+      description:
+        "一言日記のタイトル、本文、URL、写真などを公開前に検証します。公開操作は行いません。",
+      inputSchema: { noteId: z.string().min(1) },
+      annotations: READ,
+    },
+    async ({ noteId }) => {
+      await client.getDiaryNote(noteId);
+      return json(await client.diaryNotePublishCheck(noteId));
+    },
+  );
+
+  server.registerTool(
+    "set_diary_note_related_articles",
+    {
+      title: "Set diary note related articles",
+      description:
+        "一言日記に関連する旅行記事を設定します。公開中の日記では、保存後に publish_diary_note を明示して実行するまで公開版に反映されません。",
+      inputSchema: {
+        noteId: z.string().min(1),
+        relatedArticleIds: z.array(z.string().min(1)).max(10),
+      },
+      annotations: WRITE,
+    },
+    async ({ noteId, relatedArticleIds }) =>
+      json(await client.setDiaryNoteRelatedArticles(noteId, relatedArticleIds)),
   );
 
   server.registerTool(
@@ -137,7 +227,12 @@ export function createOperatorServer(
       inputSchema: { articleId: z.string().min(1) },
       annotations: READ,
     },
-    async ({ articleId }) => json(await client.publishCheck(articleId)),
+    async ({ articleId }) => {
+      const article = await client.getArticle(articleId);
+      if (article.kind === "note")
+        throw new Error("一言日記には check_diary_note_publishable を使ってください");
+      return json(await client.publishCheck(articleId));
+    },
   );
 
   server.registerTool(
@@ -547,6 +642,30 @@ export function createOperatorServer(
         throw new Error("confirmArticleId が articleId と一致しないため公開しません");
       return json(await client.publish(articleId));
     },
+  );
+
+  server.registerTool(
+    "publish_diary_note",
+    {
+      title: "Publish diary note",
+      description:
+        "一言日記の保存済み下書きを公開し、静的サイトへの反映を開始します。利用者から一言日記の公開を明示的に頼まれた場合だけ実行し、confirm に publish を指定してください。先に check_diary_note_publishable で検証します。",
+      inputSchema: { noteId: z.string().min(1), confirm: z.literal("publish") },
+      annotations: { ...WRITE, openWorldHint: true },
+    },
+    async ({ noteId }) => json(await client.publishDiaryNote(noteId)),
+  );
+
+  server.registerTool(
+    "unpublish_diary_note",
+    {
+      title: "Unpublish diary note",
+      description:
+        "一言日記を公開取り下げにし、公開サイトから削除します。利用者から取り下げを明示的に頼まれた場合だけ実行し、confirm に unpublish を指定してください。",
+      inputSchema: { noteId: z.string().min(1), confirm: z.literal("unpublish") },
+      annotations: { ...WRITE, openWorldHint: true },
+    },
+    async ({ noteId }) => json(await client.unpublishDiaryNote(noteId)),
   );
 
   return server;

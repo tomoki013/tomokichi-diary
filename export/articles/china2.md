@@ -1,5 +1,6 @@
 ---
 id: "68c9477f-06ed-8fee-adbe-48720da6198b"
+kind: "article"
 slug: "china2"
 locale: "ja"
 status: "published"

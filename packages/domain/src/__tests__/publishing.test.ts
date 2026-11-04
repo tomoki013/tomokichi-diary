@@ -44,6 +44,18 @@ describe("validatePublishable", () => {
     expect(errors.every((e) => e.code === "ARTICLE_NOT_PUBLISHABLE")).toBe(true);
   });
 
+  it("lets a diary note publish with a short body, no summary and no cover", () => {
+    const note = makeArticle({ kind: "note" });
+    expect(
+      validatePublishable({
+        ...base,
+        article: note,
+        revision: makeRevision({ summary: "", bodyMarkdown: "なんか嬉しい。" }),
+        media: [],
+      }),
+    ).toEqual([]);
+  });
+
   it("requires a canonical route that points back at the article", () => {
     expect(validatePublishable({ ...base, canonicalRoute: undefined })).toHaveLength(1);
     const mismatched = validatePublishable({

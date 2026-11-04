@@ -1,5 +1,6 @@
 ---
 id: "48e81f38-c2cb-84aa-9870-c63e7ce71920"
+kind: "article"
 slug: "touch-n-go-how-much"
 locale: "ja"
 status: "published"

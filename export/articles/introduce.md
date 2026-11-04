@@ -1,5 +1,6 @@
 ---
 id: "d6bb731a-96fc-8b1c-b5ca-1d13a008ba4f"
+kind: "article"
 slug: "introduce"
 locale: "ja"
 status: "published"

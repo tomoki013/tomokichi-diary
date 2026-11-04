@@ -19,6 +19,7 @@ const articles = defineCollection({
   }),
   schema: z.object({
     id: z.string(),
+    kind: z.string().optional(),
     slug: z.string(),
     locale: z.string(),
     status: z.string(),

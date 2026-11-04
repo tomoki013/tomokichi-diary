@@ -62,6 +62,7 @@ export function articleMarkdownFiles(snapshot: ContentSnapshot): ExportFile[] {
         contents:
           frontmatter({
             id: article.id,
+            kind: article.kind,
             slug: article.slug,
             locale: article.locale,
             status: article.status,
@@ -104,6 +105,7 @@ const JSON_PARTS = [
   "articleCategories",
   "articleTags",
   "articleCollections",
+  "noteRelatedArticles",
   "sources",
   "travelRoutes",
   "travelFacts",
@@ -133,6 +135,7 @@ const FILE_NAMES: Record<(typeof JSON_PARTS)[number], string> = {
   articleCategories: "relations/article-categories.json",
   articleTags: "relations/article-tags.json",
   articleCollections: "relations/article-collections.json",
+  noteRelatedArticles: "relations/note-related-articles.json",
   sources: "knowledge/sources.json",
   travelRoutes: "knowledge/travel-routes.json",
   travelFacts: "knowledge/travel-facts.json",

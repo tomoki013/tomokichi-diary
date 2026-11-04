@@ -1,8 +1,10 @@
 ---
 id: "20e8ad93-bb1e-8f7b-976f-0e0356dd7481"
+kind: "page"
 slug: "cookie-policy"
 locale: "ja"
 status: "published"
+path: "/legal/cookies"
 title: "クッキーポリシー"
 summary: "ともきちの旅行日記のクッキーポリシーです。Cookieの使用目的、種類、および管理方法について詳しく説明しています。"
 revision: 1

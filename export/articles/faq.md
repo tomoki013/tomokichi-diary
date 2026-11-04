@@ -1,8 +1,10 @@
 ---
 id: "33dfa068-0c82-8e2a-98a3-2fc8547a0432"
+kind: "page"
 slug: "faq"
 locale: "ja"
 status: "published"
+path: "/faq"
 title: "FAQ"
 summary: "記事の探し方、旅行記と実用記事の違い、Gallery や補助機能の使い方など、ともきちの旅行日記に関するよくある質問をまとめています。"
 revision: 1

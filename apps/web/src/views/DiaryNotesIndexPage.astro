@@ -1,0 +1,160 @@
+---
+import type { Route } from "@tomokichi/domain";
+import { buildPageMetadata } from "@tomokichi/seo";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import Picture from "../components/Picture.astro";
+import { content } from "../lib/content";
+import { seoConfig } from "../lib/site";
+
+const { route } = Astro.props as { route: Route };
+const notes = content.noteViews();
+const metadata = buildPageMetadata(seoConfig, {
+  title: "ともきちの一言日記",
+  description: "旅先でふと思い出したことや、小さな発見を書き留めています。",
+  route,
+  noindex: route.noindex,
+});
+const trail = [
+  { name: "ホーム", route: { path: "/" } as Route },
+  { name: "ともきちの一言日記", route },
+];
+---
+
+<BaseLayout metadata={metadata} width="narrow">
+  <main class="diary-notes">
+    <Breadcrumbs trail={trail} />
+    <header class="diary-notes__intro">
+      <p class="eyebrow">SMALL TRAVEL MEMORIES</p>
+      <h1>ともきちの一言日記</h1>
+      <p>旅の記憶や、ふとした発見をそのままに。</p>
+    </header>
+    {notes.length === 0 ? (
+      <p class="diary-notes__empty">日記はまだありません。</p>
+    ) : (
+      <ol class="diary-notes__list">
+        {notes.map((view) => (
+          <li class="diary-notes__item">
+            {view.cover && (
+              <a class="diary-notes__image" href={view.route.path} tabindex="-1" aria-hidden="true">
+                <Picture
+                  storageKey={view.cover.asset.storageKey}
+                  alt={view.cover.usage.alt}
+                  sizes="(max-width: 46rem) 100vw, 14rem"
+                  loading="lazy"
+                />
+              </a>
+            )}
+            <div>
+              <time datetime={view.article.publishedAt?.slice(0, 10)}>
+                {view.article.publishedAt?.slice(0, 10)}
+              </time>
+              <h2>
+                <a href={view.route.path}>{view.revision.title}</a>
+              </h2>
+              {view.revision.summary && <p>{view.revision.summary}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .diary-notes {
+    padding: clamp(1.5rem, 4vw, 3.5rem) 0 5rem;
+  }
+
+  .diary-notes__intro {
+    max-width: 42rem;
+    margin: 0 auto clamp(2rem, 6vw, 4rem);
+    text-align: center;
+  }
+
+  .diary-notes__intro h1 {
+    margin: 0.5rem 0;
+    font-family: var(--font-serif, Georgia, serif);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    letter-spacing: 0.02em;
+  }
+
+  .diary-notes__intro > p:last-child {
+    color: var(--ink-soft, #3a4246);
+    font-size: 1.02rem;
+  }
+
+  .diary-notes__list {
+    display: grid;
+    gap: 0;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line, #e6e3dc);
+  }
+
+  .diary-notes__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.6rem 0;
+    border-bottom: 1px solid var(--line, #e6e3dc);
+  }
+
+  .diary-notes__item time {
+    color: var(--ink-soft, #3a4246);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .diary-notes__item h2 {
+    margin: 0.4rem 0;
+    font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+    line-height: 1.5;
+  }
+
+  .diary-notes__item h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .diary-notes__item h2 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .diary-notes__item p {
+    margin: 0;
+    color: var(--ink-muted, #6f716f);
+    line-height: 1.8;
+  }
+
+  .diary-notes__image {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border-radius: 0.65rem;
+  }
+
+  .diary-notes__image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .diary-notes__empty {
+    max-width: 46rem;
+    margin: auto;
+    padding: 2rem 0;
+    border-top: 1px solid var(--line, #e6e3dc);
+    color: var(--ink-soft, #3a4246);
+  }
+
+  @media (min-width: 38rem) {
+    .diary-notes__item:has(.diary-notes__image) {
+      grid-template-columns: 14rem minmax(0, 1fr);
+      align-items: center;
+    }
+  }
+</style>

@@ -1,5 +1,6 @@
 ---
 id: "35598e2f-c52f-890c-a16f-1e6ab60b6165"
+kind: "article"
 slug: "malaysia-night-vibes"
 locale: "ja"
 status: "published"

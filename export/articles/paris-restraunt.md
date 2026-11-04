@@ -1,5 +1,6 @@
 ---
 id: "a4418ede-f3b9-8136-bdf5-44b1d227f69d"
+kind: "article"
 slug: "paris-restraunt"
 locale: "ja"
 status: "published"

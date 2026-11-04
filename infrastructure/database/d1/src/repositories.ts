@@ -497,12 +497,36 @@ export function createRepositories(db: SqlDatabase): Repositories {
     listArticleCategories: async () =>
       (await all("SELECT * FROM article_categories")).map(articleCategoryRow.to),
     listArticleTags: async () => (await all("SELECT * FROM article_tags")).map(articleTagRow.to),
+    listNoteRelatedArticles: async () =>
+      (await all("SELECT * FROM note_related_articles ORDER BY note_id, sort_order")).map(
+        (row) => ({
+          noteId: String(row["note_id"]) as import("@tomokichi/domain").ArticleId,
+          articleId: String(row["article_id"]) as import("@tomokichi/domain").ArticleId,
+          sortOrder: Number(row["sort_order"] ?? 0),
+        }),
+      ),
+    replaceNoteRelatedArticles: async (noteId, next) => {
+      await db.batch([
+        db.prepare("DELETE FROM note_related_articles WHERE note_id = ?").bind(noteId),
+        ...next.map((r) =>
+          upsert(
+            db,
+            "note_related_articles",
+            { note_id: r.noteId, article_id: r.articleId, sort_order: r.sortOrder },
+            ["note_id", "article_id"],
+          ),
+        ),
+      ]);
+    },
     replaceForArticle: async (articleId, next) => {
       await db.batch([
         db.prepare("DELETE FROM article_locations WHERE article_id = ?").bind(articleId),
         db.prepare("DELETE FROM article_places WHERE article_id = ?").bind(articleId),
         db.prepare("DELETE FROM article_categories WHERE article_id = ?").bind(articleId),
         db.prepare("DELETE FROM article_tags WHERE article_id = ?").bind(articleId),
+        ...(next.noteRelatedArticles
+          ? [db.prepare("DELETE FROM note_related_articles WHERE note_id = ?").bind(articleId)]
+          : []),
         ...next.locations.map((r) =>
           upsert(db, "article_locations", articleLocationRow.from(r), [
             "article_id",
@@ -525,6 +549,14 @@ export function createRepositories(db: SqlDatabase): Repositories {
         ),
         ...next.tags.map((r) =>
           upsert(db, "article_tags", articleTagRow.from(r), ["article_id", "tag_id"]),
+        ),
+        ...(next.noteRelatedArticles ?? []).map((r) =>
+          upsert(
+            db,
+            "note_related_articles",
+            { note_id: r.noteId, article_id: r.articleId, sort_order: r.sortOrder },
+            ["note_id", "article_id"],
+          ),
         ),
       ]);
     },

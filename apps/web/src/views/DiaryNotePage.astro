@@ -1,0 +1,158 @@
+---
+import type { ArticleView } from "@tomokichi/application";
+import { buildArticleJsonLd, buildArticleMetadata, buildBreadcrumbJsonLd } from "@tomokichi/seo";
+import type { Route } from "@tomokichi/domain";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleBody from "../components/ArticleBody.astro";
+import Picture from "../components/Picture.astro";
+import { content } from "../lib/content";
+import { mediaUrl, seoConfig } from "../lib/site";
+
+interface Props {
+  view: ArticleView;
+  route: Route;
+}
+
+const { view, route } = Astro.props;
+const { article, revision, cover, author } = view;
+const metadata = buildArticleMetadata(seoConfig, {
+  article,
+  revision,
+  route,
+  coverImageUrl: cover ? mediaUrl(cover.asset.storageKey) : null,
+  authorName: author?.name ?? "ともきち",
+});
+const trail = [
+  { name: "ホーム", route: { path: "/" } as Route },
+  {
+    name: "ともきちの一言日記",
+    route: content.routes.find("/notes") ?? ({ path: "/notes" } as Route),
+  },
+  { name: revision.title, route },
+];
+const related = content.relatedArticlesForNote(article.id);
+const date = article.publishedAt?.slice(0, 10) ?? article.createdAt.slice(0, 10);
+const jsonLd = [
+  buildArticleJsonLd(seoConfig, {
+    article,
+    revision,
+    route,
+    description: metadata.description,
+    coverImageUrl: cover ? mediaUrl(cover.asset.storageKey) : null,
+    author: author ? { name: author.name, url: author.url } : { name: "ともきち", url: null },
+    about: [],
+  }),
+  buildBreadcrumbJsonLd(seoConfig, trail),
+];
+---
+
+<BaseLayout metadata={metadata} jsonLd={jsonLd} width="narrow">
+  <main class="diary-note-page">
+    <Breadcrumbs trail={trail} />
+    <article>
+      <header class="diary-note-page__header">
+        <p class="eyebrow">ともきちの一言日記</p>
+        <h1>{revision.title}</h1>
+        <time datetime={date}>{date}</time>
+        {cover && (
+          <div class="diary-note-page__cover">
+            <Picture
+              storageKey={cover.asset.storageKey}
+              alt={cover.usage.alt}
+              sizes="(max-width: 46rem) 100vw, 46rem"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+        )}
+      </header>
+      <ArticleBody slug={article.slug} embeds={view.embeds} path={route.path} />
+    </article>
+
+    {related.length > 0 && (
+      <section class="diary-note-page__related" aria-labelledby="diary-note-related-title">
+        <p class="eyebrow">FROM THE TRAVEL DIARY</p>
+        <h2 id="diary-note-related-title">関連する旅行記事</h2>
+        <ul>
+          {related.map((item) => (
+            <li>
+              <a href={item.route.path}>{item.revision.title}</a>
+              {item.revision.summary && <p>{item.revision.summary}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .diary-note-page {
+    padding: clamp(1rem, 3vw, 2rem) 0 5rem;
+  }
+
+  .diary-note-page__header {
+    max-width: 46rem;
+    margin: clamp(2rem, 6vw, 4rem) auto 2rem;
+  }
+
+  .diary-note-page__header h1 {
+    margin: 0.55rem 0 0.75rem;
+    font-family: var(--font-serif, Georgia, serif);
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+  }
+
+  .diary-note-page__header time {
+    color: var(--ink-soft, #3a4246);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .diary-note-page__cover {
+    overflow: hidden;
+    margin-top: 2rem;
+    border-radius: 0.75rem;
+  }
+
+  .diary-note-page__cover :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .diary-note-page__related {
+    max-width: 46rem;
+    margin: 3rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line, #e6e3dc);
+  }
+
+  .diary-note-page__related h2 {
+    margin: 0.45rem 0 1rem;
+    font-size: 1.35rem;
+  }
+
+  .diary-note-page__related ul {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .diary-note-page__related a {
+    color: inherit;
+    font-weight: 650;
+    text-decoration-color: var(--line, #d8d5ce);
+    text-underline-offset: 0.22em;
+  }
+
+  .diary-note-page__related p {
+    margin: 0.35rem 0 0;
+    color: var(--ink-soft, #3a4246);
+    line-height: 1.75;
+  }
+</style>

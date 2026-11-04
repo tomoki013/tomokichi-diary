@@ -1,5 +1,6 @@
 ---
 id: "947d6c5f-2561-8765-9c1b-039794bf58ac"
+kind: "article"
 slug: "airport-access-suvarnabhumi"
 locale: "ja"
 status: "published"

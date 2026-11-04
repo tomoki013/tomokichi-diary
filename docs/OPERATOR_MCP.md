@@ -1,6 +1,6 @@
 # ローカル操作用 MCP（operator）
 
-ChatGPT（Codex）や Claude などの AI クライアントから、記事・シリーズ・タグを操作するための **ローカル専用** MCP サーバーです。同じツールを ChatGPT（スマホ含む）から使うリモート接続は[後半](#chatgptスマホ含むからのリモート接続)を参照してください。
+ChatGPT（Codex）や Claude などの AI クライアントから、旅行記事・一言日記・シリーズ・タグを操作するための Operator MCP です。ローカル stdio 接続と ChatGPT 向けリモート接続の両方があります。
 
 - 起動したクライアントと標準入出力（stdio）だけで通信します。**ポートを開かず、どこにもデプロイしません。**
 - 操作は既存の管理API `/v1/admin/*` を管理トークンで呼ぶだけです。入力検証・slug 重複チェック・公開条件はすべて API 側と同じです。
@@ -10,12 +10,14 @@ ChatGPT（Codex）や Claude などの AI クライアントから、記事・�
 
 ## ツール
 
-| 種類                                        | ツール                                                                                                                                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `publication_status` `list_taxonomy` `list_series` `list_rankings` `search_media`                                |
-| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `set_article_series_and_tags` `create_series` `update_series` `create_tag` `create_ranking` `update_ranking` `publish_article` `publish_site` |
+| 種類                                        | ツール                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `list_diary_notes` `get_diary_note` `check_diary_note_publishable` `publication_status` `list_taxonomy` `list_series` `list_rankings` `search_media`                                                               |
+| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `create_diary_note_draft` `save_diary_note_draft` `set_diary_note_related_articles` `create_series` `update_series` `create_tag` `create_ranking` `update_ranking` `publish_article` `publish_diary_note` `unpublish_diary_note` `publish_site` |
 
 下書きの保存やシリーズ・タグの付け替えは公開サイトを変えません。公開中の記事は「変更を公開」（`publish_article`）で反映されます。
+
+一言日記は `list_diary_notes` / `get_diary_note` で旅行記事から分けて取得します。`create_diary_note_draft` と `save_diary_note_draft` はD1に下書きを保存します。公開前に `check_diary_note_publishable` を実行し、利用者が明示的に公開を頼んだ場合だけ `publish_diary_note` に `confirm: "publish"` を渡します。取り下げも明示指示と `confirm: "unpublish"` が必要です。関連記事の変更も日記を再公開するまで公開版に反映されません。
 
 ランキング（トップページの「ともきち的ランキング」）は `update_ranking` で順位・一言を保存し、`publish_site`（`confirm: "publish"` が必要）でサイト全体を再生成して反映します。記事は ID でも slug でも指定できます。サイトポリシー（/legal/ の固定ページ）は記事と同じツールで編集・公開します。
 
@@ -56,7 +58,7 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 - 認証: OAuth（DCR・PKCE S256）。分析とは別の issuer `…/operator` で、client・grant・token は共有 KV 内の `operator:` 接頭辞に分けて保存し、互いのトークンは使えません。
 - 許可できるのは MCP Worker secret `OPERATOR_OWNER_SUBJECT`（本人の検証済み Cloudflare Access subject）と一致する人だけ。許可画面は `https://admin.tomokichidiary.com/operator-connect`（Access の内側）にだけ出ます。
 - スコープ: `operator:read`（読み取りツールのみ表示）と `operator:write`（書き込みツールも表示）。どちらにするかは許可画面のボタンで本人が選びます。
-- 削除ツールはありません。公開は従来どおり `publish_article` の `confirmArticleId`（`publish_site` が入れば `confirm: "publish"`）が必要です。
+- 削除ツールはありません。公開は `publish_article` の `confirmArticleId`、一言日記は `publish_diary_note` の `confirm: "publish"`、サイト全体は `publish_site` の `confirm: "publish"` が必要です。取り下げには一言日記専用の `unpublish_diary_note` が必要です。
 - **共有の `ADMIN_TOKEN` は MCP Worker に置きません。** ツールは API Worker の名前付き入口 `AdminOperator` を Service Binding（`OPERATOR_API`）で呼びます。この入口には公開URLがなく、`caller` が MCP Worker のときだけ `/v1/admin/*` を通し、`DELETE` は拒否します。API のログでは操作者が `operator-mcp` と記録されます。
 - アクセストークンは1時間、接続（refresh）は最大30日。期限が切れたら ChatGPT から再接続します。
 

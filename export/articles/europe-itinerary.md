@@ -1,5 +1,6 @@
 ---
 id: "dea2eadc-bf82-88ba-b23b-c1f268962c13"
+kind: "article"
 slug: "europe-itinerary"
 locale: "ja"
 status: "published"

@@ -1,5 +1,6 @@
 ---
 id: "8879a896-b683-8127-af3a-c596d1ab68b1"
+kind: "article"
 slug: "egypt2"
 locale: "ja"
 status: "published"

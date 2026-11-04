@@ -23,7 +23,8 @@ export function parseInstant(value: string): Result<Instant> {
 }
 
 export function parsePlainDate(value: string): Result<PlainDate> {
-  if (!PLAIN_DATE_RE.test(value) || Number.isNaN(new Date(`${value}T00:00:00Z`).getTime())) {
+  const parsed = PLAIN_DATE_RE.test(value) ? new Date(`${value}T00:00:00Z`) : null;
+  if (!parsed || Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
     return err({ code: "API_VALIDATION_FAILED", message: `invalid date: ${value}` });
   }
   return ok(value as PlainDate);

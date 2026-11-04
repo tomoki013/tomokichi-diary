@@ -1,5 +1,6 @@
 ---
 id: "4da6fe75-290a-8080-9f94-66035a948991"
+kind: "article"
 slug: "bathing-ganga"
 locale: "ja"
 status: "published"

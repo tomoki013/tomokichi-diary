@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import sharp from "sharp";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
+import { loadContentSnapshot } from "@tomokichi/application";
 import type { ContactMessage } from "@tomokichi/domain";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
@@ -141,6 +142,136 @@ describe("bulk publication through the authenticated article API", () => {
           .status,
       ).toBe(401);
     }
+  });
+});
+
+describe("diary notes", () => {
+  it("keeps short note drafts separate and publishes a frozen revision with date and related articles", async () => {
+    const publishSite = vi.fn(async () => ({ state: "queued" }));
+    app = createApp({ contextFactory: () => ctx, publishSite });
+    const created = await request("/v1/admin/notes", {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({ slug: "santorini-memory", title: "テレビで見かけたサントリーニ島" }),
+    });
+    expect(created.status).toBe(201);
+    const { id } = (await created.json()) as { id: string };
+
+    const noteList = await (await request("/v1/admin/notes", { headers: auth })).json();
+    const articleList = await (await request("/v1/admin/articles", { headers: auth })).json();
+    expect(noteList.items.map((item: { id: string }) => item.id)).toEqual([id]);
+    expect(articleList.items.some((item: { id: string }) => item.id === id)).toBe(false);
+
+    const savedDraft = await request(`/v1/admin/notes/${id}/draft`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({
+        title: "テレビで見かけたサントリーニ島",
+        bodyMarkdown: "自分が行った場所をテレビで見ると、なんか嬉しい。",
+      }),
+    });
+    expect(savedDraft.status).toBe(200);
+    expect((await savedDraft.json()).revision.bodyMarkdown).toContain("なんか嬉しい");
+
+    const target = await createArticle({ slug: "note-related", path: "/posts/note-related" });
+    const targetArticle = await ctx.repos.articles.findById(target as never);
+    if (!targetArticle) throw new Error("related article fixture missing");
+    await ctx.repos.articles.save({
+      ...targetArticle,
+      status: "published",
+      publishedRevisionId: targetArticle.currentRevisionId,
+      publishedAt: "2026-08-30T00:00:00.000Z" as never,
+    });
+    const related = await request(`/v1/admin/notes/${id}/related-articles`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({ relatedArticleIds: [target] }),
+    });
+    expect(related.status).toBe(200);
+    expect((await related.json()).relatedArticleIds).toEqual([target]);
+
+    const date = await request(`/v1/admin/notes/${id}/date`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({ date: "2025-06-15" }),
+    });
+    expect(date.status).toBe(200);
+    expect((await date.json()).date).toBe("2025-06-15");
+
+    const checked = await request(`/v1/admin/notes/${id}/publish-check`, { headers: auth });
+    expect(await checked.json()).toMatchObject({ publishable: true, problems: [] });
+    const published = await request(`/v1/admin/notes/${id}/publish`, {
+      method: "POST",
+      headers: auth,
+      body: "{}",
+    });
+    expect(published.status).toBe(200);
+    expect(publishSite).toHaveBeenCalledTimes(1);
+
+    const live = await ctx.repos.articles.findById(id as never);
+    const publicRevisionId = live?.publishedRevisionId;
+    expect(live?.publishedAt).toBe("2025-06-15T00:00:00.000Z");
+    const publicBeforeEdit = await loadContentSnapshot(ctx);
+    expect(publicBeforeEdit.noteRelatedArticles).toEqual([
+      { noteId: id, articleId: target, sortOrder: 0 },
+    ]);
+    expect(
+      publicBeforeEdit.revisions.find((revision) => revision.id === publicRevisionId)?.bodyMarkdown,
+    ).toContain("なんか嬉しい");
+
+    await request(`/v1/admin/notes/${id}/draft`, {
+      method: "PUT",
+      headers: auth,
+      body: JSON.stringify({
+        title: "テレビで見かけたサントリーニ島",
+        bodyMarkdown: "公開後に書いた下書き。",
+      }),
+    });
+    const afterDraft = await ctx.repos.articles.findById(id as never);
+    expect(afterDraft?.currentRevisionId).not.toBe(publicRevisionId);
+    expect(afterDraft?.publishedRevisionId).toBe(publicRevisionId);
+    const stillPublic = await loadContentSnapshot(ctx);
+    expect(
+      stillPublic.revisions.find((revision) => revision.id === publicRevisionId)?.bodyMarkdown,
+    ).toContain("なんか嬉しい");
+
+    const withdrawn = await request(`/v1/admin/notes/${id}/unpublish`, {
+      method: "POST",
+      headers: auth,
+    });
+    expect(withdrawn.status).toBe(200);
+    expect(publishSite).toHaveBeenCalledTimes(2);
+    expect((await ctx.repos.articles.findById(id as never))?.publishedRevisionId).toBeNull();
+  });
+
+  it("requires a real calendar date and protects delete with explicit confirmation", async () => {
+    const created = await request("/v1/admin/notes", {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({ slug: "delete-me-note", title: "削除確認" }),
+    });
+    const { id } = (await created.json()) as { id: string };
+    for (const date of ["2026-02-30", "20261104"]) {
+      const response = await request(`/v1/admin/notes/${id}/date`, {
+        method: "PUT",
+        headers: auth,
+        body: JSON.stringify({ date }),
+      });
+      expect(response.status).toBe(400);
+    }
+    const refused = await request(`/v1/admin/notes/${id}`, {
+      method: "DELETE",
+      headers: auth,
+      body: JSON.stringify({ confirm: "no" }),
+    });
+    expect(refused.status).toBe(400);
+    const deleted = await request(`/v1/admin/notes/${id}`, {
+      method: "DELETE",
+      headers: auth,
+      body: JSON.stringify({ confirm: "delete" }),
+    });
+    expect(deleted.status).toBe(200);
+    expect(await ctx.repos.articles.findById(id as never)).toBeNull();
   });
 });
 

@@ -1,5 +1,6 @@
 ---
 id: "7342692c-27c7-80e5-8538-7be1edfca1b5"
+kind: "article"
 slug: "santorini-tourism"
 locale: "ja"
 status: "published"

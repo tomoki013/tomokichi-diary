@@ -1,5 +1,6 @@
 ---
 id: "5721b825-24ea-892c-9ba5-ac087e29b604"
+kind: "article"
 slug: "seletar-airport-to-city"
 locale: "ja"
 status: "published"

@@ -1,8 +1,10 @@
 ---
 id: "623c2125-3027-83fc-b109-316b326cd6ec"
+kind: "page"
 slug: "editorial-policy"
 locale: "ja"
 status: "published"
+path: "/legal/editorial-policy"
 title: "執筆・編集ポリシー"
 summary: "ともきちの旅行日記の記事がどのような基準で書かれ、更新されているかをまとめたページです。体験談と実用情報の扱い、情報確認の方針、公式リンクの考え方などを説明しています。"
 revision: 1

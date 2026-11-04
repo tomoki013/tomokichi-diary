@@ -1,5 +1,6 @@
 ---
 id: "85007683-cdd2-8b3a-9214-d1b8e45c9ed1"
+kind: "article"
 slug: "putra-mosque-ramadan-hours"
 locale: "ja"
 status: "published"

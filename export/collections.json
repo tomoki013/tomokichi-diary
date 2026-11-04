@@ -8,7 +8,14 @@
     "coverMediaId": "fb86b284-6a1c-8ea6-8962-d48addd7d491",
     "startDate": "2024-02-26",
     "endDate": "2024-02-28",
-    "sortOrder": 0
+    "sortOrder": 0,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "7f0f11aa-890d-848f-816e-3a7bd3e5e587",
@@ -19,7 +26,14 @@
     "coverMediaId": "45252547-c9c5-8663-bc6d-85259fb89beb",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 0
+    "sortOrder": 0,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "b8ceb24e-cd10-8031-ba5b-926826b3c84e",
@@ -30,7 +44,14 @@
     "coverMediaId": "c244f2ef-1c6e-87ac-85e8-4c83ef007109",
     "startDate": "2024-03-01",
     "endDate": "2024-03-04",
-    "sortOrder": 1
+    "sortOrder": 1,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "178f854a-a224-85b6-91c2-24fa0fa8b436",
@@ -41,7 +62,14 @@
     "coverMediaId": "9241d90b-227b-8532-8b8c-f53b1ee0bd18",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 1
+    "sortOrder": 1,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "467d94d8-4ac7-827e-9fc5-e193c111697d",
@@ -52,7 +80,14 @@
     "coverMediaId": "a16e475a-85ba-8613-8c2e-4704d056e855",
     "startDate": "2024-09-21",
     "endDate": "2024-09-30",
-    "sortOrder": 2
+    "sortOrder": 2,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "b0573905-7582-824e-8279-b13ab2126afb",
@@ -63,7 +98,14 @@
     "coverMediaId": "43e73c29-8da0-8944-9c4a-866f63239d0b",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 2
+    "sortOrder": 2,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "78ea9dba-1722-8b02-a07a-b927c0591566",
@@ -74,7 +116,14 @@
     "coverMediaId": "5393ca2e-ad36-881a-ab28-42fae1db3c7d",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 3
+    "sortOrder": 3,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "e7699446-3290-8716-9171-382056de81f6",
@@ -85,7 +134,14 @@
     "coverMediaId": "5cee5707-fe7d-87e5-a0df-99e9b038959e",
     "startDate": "2025-02-13",
     "endDate": "2025-02-28",
-    "sortOrder": 3
+    "sortOrder": 3,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "21533941-b913-8a79-94ea-42b3dd473ee1",
@@ -96,7 +152,14 @@
     "coverMediaId": "a16e475a-85ba-8613-8c2e-4704d056e855",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 4
+    "sortOrder": 4,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "b5c92001-976c-8801-8d9c-00a6f7b3ad1a",
@@ -107,7 +170,14 @@
     "coverMediaId": "5393ca2e-ad36-881a-ab28-42fae1db3c7d",
     "startDate": "2025-06-10",
     "endDate": "2025-06-30",
-    "sortOrder": 4
+    "sortOrder": 4,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "96865e1c-448a-850d-b347-25c44f8d9615",
@@ -118,7 +188,14 @@
     "coverMediaId": "846915e0-64b7-84fa-b59d-fd5ad93a2714",
     "startDate": null,
     "endDate": null,
-    "sortOrder": 5
+    "sortOrder": 5,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "d204fa1c-cbe1-805d-bcbe-1745c8795478",
@@ -129,7 +206,14 @@
     "coverMediaId": "735b6b9a-9107-8d41-ba9f-da480ada31c3",
     "startDate": "2025-11-29",
     "endDate": "2025-12-02",
-    "sortOrder": 5
+    "sortOrder": 5,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   },
   {
     "id": "d6dc5a01-e7ab-811d-a48b-756dbc209f31",
@@ -140,6 +224,31 @@
     "coverMediaId": "0d4352a0-35df-8196-a352-3d847cd35e1c",
     "startDate": "2026-03-12",
     "endDate": "2026-03-20",
-    "sortOrder": 6
+    "sortOrder": 6,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
+  },
+  {
+    "id": "8b34b540-2d16-4d7e-bc20-97290b6a4c9a",
+    "slug": "travel-soundtrack",
+    "kind": "series",
+    "title": "旅のサウンドトラック",
+    "description": "あの曲を聴くと、あの旅に戻れる。\n\n旅先で何気なく聴いていた一曲が、いつの間にか忘れられない旅の記憶になっている。\n世界の街角、飛行機の窓から見える景色、知らない土地で迎える朝。\n旅先で聴いた音楽と、その曲に結びついた風景や思い出を紹介するシリーズ。\n\n曲と旅先に、特別な関係がある必要はありません。\nあのとき、あの場所で聴いていた。それだけで、私にとっては特別な一曲だから。",
+    "coverMediaId": null,
+    "startDate": null,
+    "endDate": null,
+    "sortOrder": 20,
+    "themeMusic": null,
+    "articleDefaults": {
+      "tagIds": [],
+      "categoryIds": [],
+      "experienceTags": []
+    },
+    "updatedAt": null
   }
 ]

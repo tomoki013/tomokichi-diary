@@ -1,5 +1,6 @@
 ---
 id: "242dfd00-2c51-8b81-87f7-662889ee18b6"
+kind: "article"
 slug: "malaysia3"
 locale: "ja"
 status: "published"
