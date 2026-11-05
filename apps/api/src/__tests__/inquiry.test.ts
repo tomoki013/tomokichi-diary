@@ -490,10 +490,14 @@ describe("/v1/admin/inquiry", () => {
     const body = await (await request("/tickets/t1/compose")).json();
     expect(body).toEqual({
       to: "reader@example.com",
-      from: "ともきちの旅行日記 <support@tmkch.io>",
+      from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
       subject: "【ともきちの旅行日記】記事についてのお問い合わせ",
       subjectEditable: true,
       opening: expect.stringContaining("ともきち 様"),
+      openings: {
+        takagi: expect.stringContaining("ともきちの旅行日記を運営しております、髙木です。"),
+        tomokichi: expect.stringContaining("ともきちの旅行日記を運営しております、ともきちです。"),
+      },
       closing: "以上、よろしくお願いいたします。",
       signature: "",
     });

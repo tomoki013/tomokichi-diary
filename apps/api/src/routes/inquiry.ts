@@ -504,7 +504,11 @@ export function inquiryRoutes(operatorFor: (c: Ctx) => ProjectOperatorClient | n
       from: REPLY_FROM,
       subject,
       subjectEditable,
-      opening: greeting,
+      opening: greeting.replaceAll("{{operatorName}}", "ともきち"),
+      openings: {
+        takagi: greeting.replaceAll("{{operatorName}}", "髙木"),
+        tomokichi: greeting.replaceAll("{{operatorName}}", "ともきち"),
+      },
       closing: REPLY_CLOSING,
       signature: project.value.signature,
     } satisfies InquiryComposeDto);

@@ -1,3 +1,4 @@
+import { resendWebhook } from "./resend-webhook.js";
 import { monetizationRoutes } from "./routes/monetization.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
@@ -137,6 +138,8 @@ export function createApp(options: AppOptions = {}) {
     if (c.req.method === "OPTIONS") return c.body(null, 204);
     await next();
   });
+
+  app.post("/webhooks/resend", (c) => resendWebhook(c.req.raw, c.env));
 
   // `/health` is deliberately unversioned: it answers "is this Worker up",
   // which is not a contract that can change shape.
