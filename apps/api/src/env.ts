@@ -32,6 +32,8 @@ export interface Env {
   INQUIRY?: IntakeBinding;
   /** Domain-scoped Resend key used for the contact-form notification email. */
   MAIL_API_KEY_TOMOKICHI_DIARY?: string;
+  /** Resend email.sent webhook signing secret, never an API sending key. */
+  RESEND_WEBHOOK_SECRET?: string;
   /** Sender address on the verified Resend domain. */
   CONTACT_MAIL_FROM?: string;
   /** The blog's inbox for contact-form notifications. */

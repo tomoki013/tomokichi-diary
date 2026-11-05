@@ -1,3 +1,4 @@
+import { replaceReplyOpening } from "../../lib/inquiry-compose";
 import { useState } from "react";
 import type {
   InquiryComposeDto,
@@ -449,7 +450,9 @@ function MailForm({
   onSent: () => void;
 }) {
   const toast = useToast();
-  const start = compose.opening ? `${compose.opening}\n\n` : "";
+  const [identity, setIdentity] = useState<"takagi" | "tomokichi">("tomokichi");
+  const opening = compose.openings[identity];
+  const start = opening ? `${opening}\n\n` : "";
   const [subject, setSubject] = useState(compose.subject);
   const [body, setBody] = useState(start);
   const [after, setAfter] = useState<After>("WAITING_CUSTOMER");
@@ -564,6 +567,24 @@ function MailForm({
           </div>
         ) : (
           <>
+            <label className="field">
+              <span>名乗り</span>
+              <select
+                aria-label="名乗り"
+                value={identity}
+                disabled={busy}
+                onChange={(event) => {
+                  const next = event.target.value as "takagi" | "tomokichi";
+                  setBody((value) => replaceReplyOpening(value, opening, compose.openings[next]));
+                  setIdentity(next);
+                }}
+              >
+                <option value="takagi">ともきちの旅行日記を運営しております、髙木です。</option>
+                <option value="tomokichi">
+                  ともきちの旅行日記を運営しております、ともきちです。
+                </option>
+              </select>
+            </label>
             <textarea
               className="mail__text"
               rows={14}
