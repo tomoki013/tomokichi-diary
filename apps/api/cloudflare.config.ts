@@ -81,6 +81,11 @@ export default defineConfig({
         namespace: "3002",
         simple: { limit: 30, period: 60 },
       }),
+      // Keep the probe separate from the existing likes limiter.
+      STATUS_PROBE_RATE_LIMITER: bindings.rateLimit({
+        namespace: "3003",
+        simple: { limit: 6, period: 60 },
+      }),
     },
   },
 });
