@@ -423,12 +423,14 @@ describe("createContactMailer", () => {
 
   it("reports a failed send as false instead of throwing", async () => {
     const send = vi.fn().mockRejectedValue(new Error("destination not verified"));
-    expect(await createContactMailer({ send }, addresses).send(filing, null)).toBe(false);
+    expect(
+      await createContactMailer({ send }, addresses).send(filing, { ticketNumber: "TK-000042" }),
+    ).toBe(false);
   });
 
-  it("is pinned to the blog's inbox in cloudflare.config.ts", () => {
+  it("uses the blog's Resend sender and inbox in cloudflare.config.ts", () => {
     const config = readFileSync(new URL("../../cloudflare.config.ts", import.meta.url), "utf8");
-    expect(config).toContain('destinationAddress: "tomokichidiary@gmail.com"');
+    expect(config).toContain('CONTACT_MAIL_FROM: bindings.text("noreply@tomokichidiary.com")');
     expect(config).toContain('CONTACT_MAIL_TO: bindings.text("tomokichidiary@gmail.com")');
   });
 });

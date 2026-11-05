@@ -36,16 +36,9 @@ export default defineConfig({
       // passes that directory to `cf d1 migrations apply`.
       DB: bindings.d1({ name: "tomokichi-diary", id: "b799453b-ada9-454e-81dc-26999c2c29db" }),
       MEDIA: bindings.r2({ name: "tomokichi-diary-media" }),
-      // Each contact is announced to the blog's inbox with a link to its
-      // ticket; it is answered from the admin. Only when the platform could not
-      // file it does the mail carry the reader as Reply-To. Pinned to that one
-      // address: it must be a verified destination in Email Routing, and the
-      // sender's domain must have Email Routing enabled.
-      CONTACT_MAIL: bindings.sendEmail({
-        destinationAddress: "tomokichidiary@gmail.com",
-        allowedSenderAddresses: ["noreply@tmkch.io"],
-      }),
-      CONTACT_MAIL_FROM: bindings.text("noreply@tmkch.io"),
+      // Each contact notice is sent through the domain-scoped Resend key.
+      // The message contains only a ticket link when the platform filed it.
+      CONTACT_MAIL_FROM: bindings.text("noreply@tomokichidiary.com"),
       CONTACT_MAIL_TO: bindings.text("tomokichidiary@gmail.com"),
       // Every message is filed on the shared inquiry platform
       // (github.com/tomoki013/inquiry-platform, SDK pinned in package.json)

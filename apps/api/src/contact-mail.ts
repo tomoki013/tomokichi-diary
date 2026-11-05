@@ -1,7 +1,7 @@
 import type { ContactMailer } from "@tomokichi/application";
 import { CONTACT_LANE_LABELS } from "@tomokichi/domain";
 
-/** The part of Cloudflare's `send_email` binding this file uses. */
+/** The email delivery port used by the contact notice. */
 export interface ContactMailBinding {
   send(message: {
     from: { name: string; email: string };
@@ -12,6 +12,35 @@ export interface ContactMailBinding {
   }): Promise<unknown>;
 }
 
+/** Sends through the domain-scoped Resend key configured on the API Worker. */
+export function createResendContactMailBinding(
+  apiKey: string,
+  fetcher: typeof fetch = fetch,
+): ContactMailBinding {
+  return {
+    send: async (message) => {
+      const response = await fetcher("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `${message.from.name} <${message.from.email}>`,
+          to: [message.to],
+          ...(message.replyTo
+            ? { reply_to: `${message.replyTo.name} <${message.replyTo.email}>` }
+            : {}),
+          subject: message.subject,
+          text: message.text,
+        }),
+      });
+      if (!response.ok) throw new Error(`Resend email request failed (${response.status})`);
+      return response.json();
+    },
+  };
+}
+
 /**
  * Where the admin opens a ticket by number. The same address the platform's
  * own notification links use (the studio seed's `ticketUrlTemplate`).
@@ -19,14 +48,12 @@ export interface ContactMailBinding {
 export const ADMIN_TICKET_URL = "https://admin.tomokichidiary.com/#/inquiries/";
 
 /**
- * Tells the blog's own inbox that a contact arrived. The binding is pinned to
- * that one verified address in `cloudflare.config.ts`, so this can mail nobody
- * else.
+ * Tells the blog's own inbox that a contact arrived. The recipient is fixed in
+ * `cloudflare.config.ts`; the request cannot choose where a message is sent.
  *
  * Filed on the platform, the mail is only a notice: no name, address or
- * message, just a link to the ticket, where it is read and answered. Not
- * filed, the mail is the only copy, so it carries the whole message and the
- * reader becomes the Reply-To.
+ * message, just a link to the ticket, where it is read and answered. If filing
+ * fails, the mail carries the whole message and the reader becomes the Reply-To.
  */
 export function createContactMailer(
   binding: ContactMailBinding,
