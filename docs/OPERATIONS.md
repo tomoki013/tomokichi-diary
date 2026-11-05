@@ -407,13 +407,12 @@ sender (one per minute per salted IP hash, `CONTACT_RATE_LIMITER`), then:
    worked and answered from the admin's お問い合わせ screen.
 2. **Tells `tomokichidiary@gmail.com` it arrived.** The mail is only a notice:
    its lane, the ticket number and a link to the ticket in the admin, with no
-   name, address or message and no Reply-To. The message is read and answered
-   in the admin, so the ticket keeps the whole conversation. If filing failed,
-   the mail carries the whole message and makes the reader the Reply-To, since
-   it is then the only copy. `CONTACT_MAIL` is a `send_email`
-   binding pinned to that one address (it must be a verified destination in
-   Cloudflare Email Routing), sent from `noreply@tmkch.io` (a domain with Email
-   Routing enabled).
+   name, address or message and no Reply-To. Resend sends it from
+   `noreply@tomokichidiary.com` using the domain-scoped
+   `MAIL_API_KEY_TOMOKICHI_DIARY` secret. The message is read and answered in
+   the admin, so the ticket keeps the whole conversation. If filing fails, the
+   email carries the full message and sets the reader as Reply-To; Resend
+   delivers it directly to the fixed inbox as the fallback copy.
 
 The reader sees success when either went through, and `?error=unavailable` only
 when neither did; whichever failed is logged (`contact.not_mailed` /
@@ -424,14 +423,25 @@ The ticket goes through the `INQUIRY` service binding to the platform's
 `apps/api/cloudflare.config.ts` with `props.projects = ["tomokichi-diary"]`. The
 project slug `tomokichi-diary` must be registered on the platform.
 
-Two secrets and the limiter gate it, and a missing one closes the form rather
-than opening it:
+The Turnstile secret, IP hash salt and rate limiter are required for the form.
+`INQUIRY` and Resend are independent storage and notification paths; the form
+reports `unavailable` only when neither succeeds. Without the Resend key, a
+filed ticket is still accepted but no inbox notice is sent:
 
-| Setting                | Purpose                                         |
-| ---------------------- | ----------------------------------------------- |
-| `TURNSTILE_SECRET_KEY` | Verifies the challenge token                    |
-| `IP_HASH_SALT`         | Salts the sender hash used for rate limiting    |
-| `CONTACT_RATE_LIMITER` | Rate Limiting binding in `cloudflare.config.ts` |
+| Setting                        | Purpose                                         |
+| ------------------------------ | ----------------------------------------------- |
+| `TURNSTILE_SECRET_KEY`         | Verifies the challenge token                    |
+| `IP_HASH_SALT`                 | Salts the sender hash used for rate limiting    |
+| `MAIL_API_KEY_TOMOKICHI_DIARY` | Sends the ticket notice through Resend          |
+| `CONTACT_RATE_LIMITER`         | Rate Limiting binding in `cloudflare.config.ts` |
+
+Register the domain-scoped Resend key on the Diary API Worker as well as
+`tomokichi-admin-core` (the value is entered interactively and never belongs in
+the repository):
+
+```bash
+pnpm --filter @tomokichi/api exec wrangler secret put MAIL_API_KEY_TOMOKICHI_DIARY --name tomokichi-diary-api
+```
 
 The public site key (widget `tomokichi-diary-contact`) is built in from
 `apps/web/src/lib/site.ts`; `PUBLIC_TURNSTILE_SITE_KEY` overrides it, and an
