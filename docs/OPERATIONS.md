@@ -590,3 +590,14 @@ summary, body length, a canonical route, and a cover image with alt text.
 ## MONETIZATION_INVALID
 
 収益化設定の公開前検証・参照・状態遷移に問題があります。重複／消失マーカー、見出しと本文600字未満、画像・カード隣接、1枠上限、未登録ユニット、別記事の実験・未登録案件の参照を確認してください。実施済み実験の条件書換え・再開はできません。DBを直接修正せず、管理画面から修正・保存後、公開チェックを再実行します。切り戻しと機能フラグは [収益化Phase 2](monetization-phase2.md#切り戻し) を参照してください。0017はexpandのみで、旧版へコードを戻す際にもdropは不要です。
+
+## 問い合わせの返信メールと配信通知
+
+- 管理画面の差出人は `contact@tomokichidiary.com`。フォームの運営宛て新着通知は引き続き `noreply@tomokichidiary.com`。
+- 返信画面の「名乗り」で「ともきちの旅行日記を運営しております、髙木です。」「ともきちの旅行日記を運営しております、ともきちです。」を切り替えられる。回答本文を保持して冒頭だけを置き換える。
+- 一次受付メールの実際の Message-ID を `In-Reply-To` と `References` に付け、管理画面の回答を同じ会話の返信として送る。送信 API が返す transport ID と、受信側のメールに付く Message-ID は別の識別子。仮の ID を実際の配信 ID として使わない。
+- Resend の Webhook：URL `https://api.tomokichidiary.com/webhooks/resend`、イベント `email.sent`。Signing secret は Diary API の `RESEND_WEBHOOK_SECRET` に登録する。API キーとは別の値であり、チャットや Git へ貼らない。
+- 署名鍵の登録：`pnpm --filter @tomokichi/api exec wrangler secret put RESEND_WEBHOOK_SECRET --name tomokichi-diary-api`。登録の有無は secret list で名前だけ確認する。
+- Webhook は Svix の ID・時刻・署名を未加工の本文と照合し、5 分以上のずれ、不正な署名、64 KiB 超の本文を拒否する。Core へは transport ID と Message-ID だけを渡す。宛先や件名、本文を転送しない。他プロジェクトと noreply の配信通知は取り込まない。
+- Core は確認済みの配信 ID が届くまで返信を保留する。`受付メールの送信情報を確認中です` が出たときは、Webhook の配信状況・署名鍵を確認する。新規メールに切り替えて送らない。
+- 署名鍵が未設定の Webhook は 404。Webhook が送信記録より先に到着した場合は 503 を返し、Resend の再配信を待つ。同じ配信の再通知は冪等に処理する。

@@ -27,7 +27,7 @@ export const REPLY_CLOSING = "以上、よろしくお願いいたします。";
  * (`mailSettings`) and the deployment's support address it falls back to.
  * Shown in the admin only; the platform decides what is actually sent.
  */
-export const REPLY_FROM = "ともきちの旅行日記 <support@tmkch.io>";
+export const REPLY_FROM = "ともきちの旅行日記 <contact@tomokichidiary.com>";
 
 export const OPENING_KEY = "diary_opening";
 
@@ -95,6 +95,7 @@ export const DEFAULT_SIGNATURE = [
   "ともきちの旅行日記",
   "ともきち",
   "https://tomokichidiary.com",
+  "contact@tomokichidiary.com",
 ].join("\n");
 
 export interface DefaultTemplate {
@@ -119,6 +120,197 @@ const lines = (...text: string[]): string => text.join("\n");
  * and `{{supportUrl}}` are this site's.
  */
 export const DEFAULT_TEMPLATES: readonly DefaultTemplate[] = [
+  {
+    key: OPENING_KEY,
+    name: "冒頭：宛名・名乗り",
+    subject: null,
+    sortOrder: 0,
+    body: lines("{{userName}} 様", "", "{{appName}}を運営しております、{{operatorName}}です。"),
+  },
+  {
+    key: "diary_thanks_feedback",
+    name: "記事：ご感想へのお礼",
+    subject: `${SITE}ご感想へのお礼`,
+    sortOrder: 10,
+    body: lines(
+      "記事をお読みいただき、ご感想をお寄せくださりありがとうございます。",
+      "",
+      "{{personalNote}}",
+      "",
+      "いただいたお声を励みに、これからも旅先で得た経験や情報を丁寧にお届けしてまいります。",
+    ),
+  },
+  {
+    key: "diary_correction_fixed",
+    name: "記事：修正完了のご報告",
+    subject: `${SITE}記事の修正について`,
+    sortOrder: 20,
+    body: lines(
+      "記事の内容についてご指摘いただき、ありがとうございます。",
+      "確認のうえ、以下のとおり修正いたしました。",
+      "",
+      "対象記事：{{articleUrl}}",
+      "修正内容：{{whatWasFixed}}",
+      "",
+      "誤った情報を掲載してしまい、申し訳ございませんでした。",
+      "ご連絡いただきましたこと、重ねてお礼申し上げます。",
+    ),
+  },
+  {
+    key: "diary_correction_checking",
+    name: "記事：ご指摘の確認中",
+    subject: `${SITE}ご指摘いただいた内容について`,
+    sortOrder: 30,
+    body: lines(
+      "記事の内容についてご連絡いただき、ありがとうございます。",
+      "",
+      "ご指摘いただいた点は、現在、情報源と照らし合わせて確認しております。",
+      "確認が取れ次第、必要な対応を行い、改めてご連絡いたします。",
+      "恐れ入りますが、今しばらくお待ちいただけますと幸いです。",
+    ),
+  },
+  {
+    key: "diary_request_thanks",
+    name: "リクエスト：ご要望へのお礼",
+    subject: `${SITE}リクエストへのお礼`,
+    sortOrder: 40,
+    body: lines(
+      "{{requestedPlace}}についてのリクエストをお寄せいただき、ありがとうございます。",
+      "",
+      "いただいたご要望は、今後の取材先や記事を検討する際の参考にさせていただきます。",
+      "掲載の可否や時期を現時点でお約束することはできませんが、貴重なご意見として受け止めております。",
+    ),
+  },
+  {
+    key: "diary_question_answer",
+    name: "質問：お問い合わせへの回答",
+    subject: `${SITE}お問い合わせへの回答`,
+    sortOrder: 50,
+    body: lines(
+      "お問い合わせいただいた件につきまして、以下のとおり回答いたします。",
+      "",
+      "{{answer}}",
+      "",
+      "ご不明な点がございましたら、このメールにご返信ください。",
+    ),
+  },
+  {
+    key: "diary_more_information",
+    name: "質問：追加情報のお願い",
+    subject: `${SITE}確認事項のご案内`,
+    sortOrder: 60,
+    body: lines(
+      "お問い合わせの内容を確認するため、以下の点をお知らせいただけますでしょうか。",
+      "",
+      "{{requestedInformation}}",
+      "",
+      "お手数をおかけいたしますが、このメールへのご返信にてお知らせください。",
+      "いただいた内容を確認のうえ、改めてご案内いたします。",
+    ),
+  },
+  {
+    key: "diary_work_details",
+    name: "お仕事：ご依頼内容の確認",
+    subject: `${SITE}お仕事のご相談について`,
+    sortOrder: 70,
+    body: lines(
+      "このたびは、お仕事のご相談をいただきありがとうございます。",
+      "検討にあたり、以下の内容をお知らせいただけますでしょうか。",
+      "",
+      "・ご依頼内容と掲載媒体",
+      "・ご希望の時期、納期",
+      "・ご予算、報酬および利用条件",
+      "・ご回答の期限",
+      "",
+      "すでにお知らせいただいている項目は、ご記入いただかなくて結構です。",
+      "内容を確認のうえ、対応の可否を含めて改めてご連絡いたします。",
+    ),
+  },
+  {
+    key: "diary_work_accept",
+    name: "お仕事：お引き受けのご連絡",
+    subject: `${SITE}ご依頼への回答`,
+    sortOrder: 80,
+    body: lines(
+      "{{projectName}}の件につきまして、詳細をお知らせいただきありがとうございます。",
+      "ご相談いただいた内容でお引き受けしたく存じます。",
+      "",
+      "今後の進め方：",
+      "{{nextSteps}}",
+      "",
+      "上記の内容について、ご確認をお願いいたします。",
+    ),
+  },
+  {
+    key: "diary_work_decline",
+    name: "お仕事：お断りのご連絡",
+    subject: `${SITE}ご依頼への回答`,
+    sortOrder: 90,
+    body: lines(
+      "{{projectName}}の件でお声がけいただき、ありがとうございます。",
+      "",
+      "検討いたしましたが、{{reason}}ため、今回はお引き受けを見送らせていただきます。",
+      "ご期待に沿えず申し訳ございません。",
+      "このたびはご相談いただき、ありがとうございました。",
+    ),
+  },
+  {
+    key: "diary_photo_allow",
+    name: "写真：利用条件のご案内",
+    subject: `${SITE}写真のご利用について`,
+    sortOrder: 100,
+    body: lines(
+      "写真のご利用についてお問い合わせいただき、ありがとうございます。",
+      "以下の範囲と条件でご利用いただけます。",
+      "",
+      "対象の写真：{{photo}}",
+      "利用範囲・条件：",
+      "{{usageConditions}}",
+      "",
+      "上記の範囲を超えてご利用になる場合は、事前にご相談ください。",
+    ),
+  },
+  {
+    key: "diary_photo_decline",
+    name: "写真：利用をお断りするご連絡",
+    subject: `${SITE}写真のご利用について`,
+    sortOrder: 110,
+    body: lines(
+      "写真のご利用についてお問い合わせいただき、ありがとうございます。",
+      "",
+      "ご相談いただいた{{photo}}につきましては、今回の用途でのご利用をお断りさせていただきます。",
+      "ご希望に沿えず恐縮ですが、何卒ご了承くださいますようお願いいたします。",
+    ),
+  },
+  {
+    key: "diary_sales_decline",
+    name: "営業：ご提案へのお断り",
+    subject: `${SITE}ご提案への回答`,
+    sortOrder: 120,
+    body: lines(
+      "このたびはご提案をお寄せいただき、ありがとうございます。",
+      "",
+      "内容を拝見いたしましたが、今回は採用を見送らせていただきます。",
+      "ご期待に沿えず恐縮ですが、ご了承いただけますと幸いです。",
+    ),
+  },
+  {
+    key: "diary_resolved",
+    name: "共通：対応完了のご報告",
+    subject: `${SITE}対応完了のご報告`,
+    sortOrder: 130,
+    body: lines(
+      "お問い合わせいただいた件につきまして、以下の対応を行いました。",
+      "",
+      "{{whatWasDone}}",
+      "",
+      "ご確認いただき、追加でお気づきの点がございましたら、このメールにご返信ください。",
+      "このたびはご連絡いただき、ありがとうございました。",
+    ),
+  },
+];
+
+const SHIPPED_V2: readonly DefaultTemplate[] = [
   {
     key: OPENING_KEY,
     name: "冒頭：宛名・名乗り",
@@ -519,16 +711,16 @@ const SYSTEM = { id: "service:diary-defaults" };
 export const isPickable = (template: OperatorReplyTemplate): boolean =>
   template.key !== OPENING_KEY && template.key !== SUBJECT_KEY;
 
-const shippedByKey = new Map(SHIPPED_V1.map((template) => [template.key, template]));
+const shippedDefaults = [...SHIPPED_V1, ...SHIPPED_V2];
 
 /** Exactly as an older default left it: name, subject and body untouched. */
 function untouched(template: OperatorReplyTemplate): boolean {
-  const shipped = shippedByKey.get(template.key);
-  return (
-    shipped !== undefined &&
-    template.name === shipped.name &&
-    (template.subject ?? null) === shipped.subject &&
-    template.body === shipped.body
+  return shippedDefaults.some(
+    (shipped) =>
+      shipped.key === template.key &&
+      template.name === shipped.name &&
+      (template.subject ?? null) === shipped.subject &&
+      template.body === shipped.body,
   );
 }
 

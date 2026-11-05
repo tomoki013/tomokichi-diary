@@ -467,6 +467,7 @@ export interface InquiryComposeDto {
   readonly subjectEditable: boolean;
   /** The greeting, filled in for this reader, that a new reply starts with. */
   readonly opening: string;
+  readonly openings: Readonly<Record<"takagi" | "tomokichi", string>>;
   /** Added by the platform under every reply, above the signature. */
   readonly closing: string;
   readonly signature: string;
