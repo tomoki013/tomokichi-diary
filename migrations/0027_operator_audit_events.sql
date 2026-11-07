@@ -32,6 +32,9 @@ CREATE INDEX operator_audit_events_result
   ON operator_audit_events(result, occurred_at DESC);
 CREATE INDEX operator_audit_events_publication
   ON operator_audit_events(publication_id, occurred_at DESC);
+CREATE INDEX operator_audit_events_grant
+  ON operator_audit_events(oauth_grant_ref, occurred_at DESC)
+  WHERE oauth_grant_ref IS NOT NULL;
 
 CREATE TABLE operator_audit_client_names (
   client_id TEXT NOT NULL,

@@ -85,6 +85,20 @@ describe("admin MCP connection routes", () => {
     const unauthenticated = await app.request("/v1/admin/connections", {}, env);
     expect(unauthenticated.status).toBe(401);
 
+    const mismatched = await app.request(
+      `/v1/admin/connections/clients/${CLIENT_HASH}/label`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ redirectHost: "unregistered.example", displayName: "Muse" }),
+      },
+      env,
+    );
+    expect(mismatched.status).toBe(404);
+    expect(
+      await auditDb.prepare("SELECT COUNT(*) AS count FROM operator_audit_client_names").first(),
+    ).toEqual({ count: 0 });
+
     const saved = await app.request(
       `/v1/admin/connections/clients/${CLIENT_HASH}/label`,
       {
@@ -115,7 +129,10 @@ describe("admin MCP connection routes", () => {
     const events = await auditDb
       .prepare("SELECT action,result,target_id FROM operator_audit_events ORDER BY occurred_at")
       .all<Record<string, unknown>>();
-    expect(events).toHaveLength(2);
-    expect(events.map((event) => event["result"])).toEqual(["succeeded", "succeeded"]);
+    expect(events.map((event) => event["result"]).toSorted()).toEqual([
+      "rejected",
+      "succeeded",
+      "succeeded",
+    ]);
   });
 });

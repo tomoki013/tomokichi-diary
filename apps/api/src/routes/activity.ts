@@ -126,7 +126,9 @@ export function activityRoutes() {
       clientRedirectHost: row["client_redirect_host"],
     }));
     const total = Number(countRow?.total ?? 0);
-    return c.json({ items, page, limit, total, pages: Math.ceil(total / limit) });
+    return c.json({ items, page, limit, total, pages: Math.ceil(total / limit) }, 200, {
+      "cache-control": "private, no-store",
+    });
   });
   return routes;
 }
