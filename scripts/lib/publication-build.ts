@@ -168,5 +168,36 @@ export async function finishPublicationBuild(
             build.buildId,
             build.requestId,
           ),
+    db
+      .prepare(
+        `INSERT INTO operator_audit_events
+         (id,occurred_at,request_id,actor_type,actor_subject,client_id,client_name,client_trust,source,
+          action,target_type,target_id,result,status_code,metadata,oauth_grant_ref,mcp_tool_name,publication_id)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      )
+      .bind(
+        crypto.randomUUID(),
+        now,
+        build.requestId,
+        "system",
+        null,
+        null,
+        null,
+        "unknown",
+        "system",
+        failure ? "site.publication.failed" : "site.publication.completed",
+        "publication",
+        build.requestId,
+        failure ? "failed" : "succeeded",
+        failure ? 500 : 200,
+        JSON.stringify({
+          phase: "completion",
+          buildId: build.buildId,
+          ...(failure?.code ? { errorCode: failure.code } : {}),
+        }),
+        null,
+        null,
+        build.requestId,
+      ),
   ]);
 }

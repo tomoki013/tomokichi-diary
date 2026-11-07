@@ -7,6 +7,7 @@
   },
   "include": [
     "./*.ts",
+    "../src/audit.ts",
     "../../admin/src/lib/ad-client.ts",
     "../../admin/src/lib/ad-standard.ts",
     "../../admin/src/lib/ad-test.ts",

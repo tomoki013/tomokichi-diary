@@ -6,6 +6,7 @@ vi.mock("cloudflare:workers", () => ({
 }));
 import {
   analyticsOAuth,
+  analyticsOAuthEnv,
   ANALYTICS_RESOURCE,
   authorizedOwner,
   consent,
@@ -25,6 +26,7 @@ function fixture() {
   const env = {
     ANALYTICS_OWNER_SUBJECT: subject,
     API: { fetch: vi.fn(async () => Response.json({ subject })) },
+    CONSENT_IDENTITY: { fetch: vi.fn(async () => Response.json({ subject })) },
     OAUTH_KV: {
       get: async (key: string, kind?: string | { type: string }) => {
         const v = records.get(key);
@@ -80,10 +82,9 @@ describe("private analytics authorization", () => {
       404,
     );
     expect(
-      (await consent(new Request("https://admin.tomokichidiary.com/analytics-connect"), env))
-        .status,
+      (await consent(new Request("https://mcp.tomokichidiary.com/analytics-connect"), env)).status,
     ).toBe(403);
-    const request = new Request("https://admin.tomokichidiary.com/analytics-connect", {
+    const request = new Request("https://mcp.tomokichidiary.com/analytics-connect", {
       method: "POST",
       headers: { "cf-access-jwt-assertion": "signed", origin: "https://evil.example" },
     });
@@ -91,7 +92,7 @@ describe("private analytics authorization", () => {
     expect(
       (
         await consent(
-          new Request("https://admin.tomokichidiary.com/analytics-connect", {
+          new Request("https://mcp.tomokichidiary.com/analytics-connect", {
             method: "POST",
             headers: { "cf-access-jwt-assertion": "signed", origin: "null" },
           }),
@@ -103,7 +104,7 @@ describe("private analytics authorization", () => {
       (
         await consent(request, {
           ...env,
-          API: { fetch: async () => Response.json({ subject: "another-user" }) },
+          CONSENT_IDENTITY: { fetch: async () => Response.json({ subject: "another-user" }) },
         })
       ).status,
     ).toBe(403);
@@ -114,6 +115,7 @@ describe("private analytics authorization", () => {
     env.OAUTH_PROVIDER = {
       parseAuthRequest: vi.fn(async () => auth),
       describeConsent: vi.fn(async () => ({
+        clientId: "test-client",
         clientName: '<script>alert("x")</script>',
         redirectHost: "chatgpt.com",
         redirectUri: "https://chatgpt.com/connector_platform_oauth_redirect",
@@ -121,7 +123,7 @@ describe("private analytics authorization", () => {
       beginConsent: vi.fn(async () => ({ handle: '"bad', headers: new Headers() })),
     } as unknown as AnalyticsEnv["OAUTH_PROVIDER"];
     const response = await consent(
-      new Request("https://admin.tomokichidiary.com/analytics-connect", {
+      new Request("https://mcp.tomokichidiary.com/analytics-connect", {
         headers: { "cf-access-jwt-assertion": "signed" },
       }),
       env,
@@ -142,14 +144,12 @@ describe("private analytics authorization", () => {
   it("advertises one read scope, PKCE and the Access-protected consent page", async () => {
     const { env } = fixture();
     const response = await analyticsOAuth.fetch(
-      new Request(
-        "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/.well-known/oauth-authorization-server",
-      ),
+      new Request("https://mcp.tomokichidiary.com/.well-known/oauth-authorization-server"),
       env,
       context,
     );
     const data = (await response.json()) as Record<string, unknown>;
-    expect(data.authorization_endpoint).toBe("https://admin.tomokichidiary.com/analytics-connect");
+    expect(data.authorization_endpoint).toBe("https://mcp.tomokichidiary.com/analytics-connect");
     expect(data.scopes_supported).toEqual(["analytics:read", "offline_access"]);
     expect(data.code_challenge_methods_supported).toEqual(["S256"]);
   });
@@ -172,8 +172,9 @@ it("uses completed Japanese calendar periods at week/month/year boundaries", () 
 it("completes owner consent → PKCE → authenticated read-only tools, rejects code replay and wrong token audience", async () => {
   const { env } = fixture();
   const origin = new URL(ANALYTICS_RESOURCE).origin;
+  const oauthEnv = analyticsOAuthEnv(env);
   const send = (path: string, init?: RequestInit) =>
-    analyticsOAuth.fetch(new Request(`${origin}${path}`, init), env, context);
+    analyticsOAuth.fetch(new Request(`${origin}${path}`, init), oauthEnv, context);
   const clientResponse = await send("/analytics/oauth/register", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -201,10 +202,10 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
     code_challenge_method: "S256",
   });
   const page = await analyticsOAuth.fetch(
-    new Request(`https://admin.tomokichidiary.com/analytics-connect?${query}`, {
+    new Request(`${origin}/analytics-connect?${query}`, {
       headers: { "cf-access-jwt-assertion": "signed" },
     }),
-    env,
+    oauthEnv,
     context,
   );
   expect(page.status).toBe(200);
@@ -212,16 +213,16 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   expect(handle).toBeTruthy();
   const cookie = page.headers.get("set-cookie")!.split(";")[0]!;
   const post = await analyticsOAuth.fetch(
-    new Request("https://admin.tomokichidiary.com/analytics-connect", {
+    new Request(`${origin}/analytics-connect`, {
       method: "POST",
       headers: {
         "cf-access-jwt-assertion": "signed",
-        origin: "https://admin.tomokichidiary.com",
+        origin,
         cookie,
       },
       body: new URLSearchParams({ handle: handle!, decision: "allow" }),
     }),
-    env,
+    oauthEnv,
     context,
   );
   expect(post.status).toBe(303);
@@ -260,10 +261,12 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
       bind() {
         return this;
       },
+      run: async () => ({ success: true }),
       all: async () => ({ results: [] }),
       first: async () => null,
     }),
   } as unknown as AnalyticsEnv["DB"];
+  oauthEnv.DB = env.DB;
   const report = await send("/analytics/mcp", {
     method: "POST",
     headers: {

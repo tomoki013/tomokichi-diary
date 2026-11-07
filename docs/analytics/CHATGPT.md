@@ -5,15 +5,17 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 ## 接続
 
 - 名前: Tomokichi Diary Analytics（非公開）
-- Server URL: `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/analytics/mcp`
+- Server URL: `https://mcp.tomokichidiary.com/analytics/mcp`
 - 認証: OAuth、DCR、scope `analytics:read`
 - ChatGPT WebのPlugins → 追加 → カスタムMCPサーバー。個人用として作成・インストール。
-- 所有者のAdmin/Cloudflare Accessログイン後、戻り先ドメインと読み取り権限を確認して許可。APIの共有admin tokenでは許可できない。
+- `https://mcp.tomokichidiary.com/analytics-connect` でCloudflare Accessログイン後、client_id、戻り先ドメイン、読み取り権限、有効期間を確認して許可。APIの共有admin tokenでは許可できない。
 - 集計と保存レポートの読み取りだけ。記事・広告設定の変更、再集計起動、問い合わせ・閲覧者ID・認証情報の取得は提供しない。
 
-接続URL自体は到達可能だが、認証なしのデータ取得は401。OAuthメタデータに数値は含まれない。所有者はMCP Worker secret `ANALYTICS_OWNER_SUBJECT`（検証済みAccess subject）で固定し、欠落時は閉じる。トークンにも同じsubjectとread scopeを要求する。Accessの本人確認はAPIの既存署名・audience・issuer・期限検証で行う。許可フォームは管理ドメインのみ、Origin確認・ブラウザーcookieに結び付いた一度限りのconsent handle・PKCE S256・resource audienceを使用する。
+接続URL自体は到達可能だが、認証なしのデータ取得は401。OAuthメタデータに数値は含まれない。所有者はMCP Worker secret `ANALYTICS_OWNER_SUBJECT`（検証済みAccess subject）で固定し、欠落時は閉じる。トークンにも同じsubjectとread scopeを要求する。許可画面は新設した専用Accessアプリで保護し、API Workerの `McpConsentIdentity` Service Bindingが専用 `MCP_CONSENT_ACCESS_AUD`、Issuer、署名、有効期限を検証する。既存管理APIの `ACCESS_AUD` は使わない。許可フォームはOrigin確認・一度限りのconsent handle・PKCE S256・resource audienceを使用する。
 
-専用KV `tomokichi-diary-analytics-oauth` にOAuthのclient/grantを保存。ライブラリはcode/tokenをhash、propsを暗号化する。accessは1時間、refreshとDCR登録は90日。期限切れではChatGPTから再接続。緊急停止はOwner subject secretを削除すると既存tokenを含めデータ取得・新規許可とも閉じる。ChatGPT側の接続解除とproviderのrevocation endpointも使用できる。収集workflowは独立して継続。
+共有KV内で新Issuerは `analytics-v2:`、旧workers.dev Issuerは従来キーを使い、client/grant/tokenを分離する。新Issuerは `https://mcp.tomokichidiary.com`、Analytics Resourceは `/analytics/mcp`。旧URL `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/analytics/mcp` は移行期間中維持する。旧Tokenを新Issuerに暗黙移行せず、ChatGPTでは再認可する。accessは1時間、refreshとDCR登録は90日。緊急停止はOwner subject secretを削除すると既存tokenを含めデータ取得・新規許可とも閉じる。管理画面「MCP接続」からGrantを失効できる。収集workflowは独立して継続。
+
+操作履歴はMCPツール呼び出し単位でD1に記録します。client_idはハッシュ化し、client名は初期状態で自己申告として扱います。管理画面 `/mcp-connections` でclient_idハッシュとリダイレクト先を確認して表示名を確定できます。
 
 ## ツール
 

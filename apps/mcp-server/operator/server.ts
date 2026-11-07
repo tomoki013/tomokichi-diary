@@ -10,6 +10,11 @@ import { canStartTest, defaultCondition, prepareAdTest } from "../../admin/src/l
 import { z } from "zod";
 import type { OperatorClient } from "./client.js";
 
+interface ToolAudit {
+  start(toolName: string, requestId?: string): Promise<string>;
+  finish(id: string, success: boolean): Promise<void>;
+}
+
 const slug = z
   .string()
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "lowercase letters, digits and single hyphens");
@@ -87,7 +92,11 @@ const WRITE = { readOnlyHint: false, destructiveHint: false, openWorldHint: fals
  */
 export function createOperatorServer(
   client: OperatorClient,
-  { readOnly = false }: { readOnly?: boolean } = {},
+  {
+    readOnly = false,
+    audit,
+    auditRequestId,
+  }: { readOnly?: boolean; audit?: ToolAudit; auditRequestId?: string } = {},
 ): McpServer {
   const server = new McpServer({ name: "tomokichi-diary-operator", version: "1.0.0" });
   // A read-only remote grant does not even list the write tools.
@@ -95,6 +104,25 @@ export function createOperatorServer(
     const register = server.registerTool.bind(server);
     server.registerTool = ((...args: Parameters<typeof register>) =>
       args[1].annotations?.readOnlyHint ? register(...args) : undefined) as typeof register;
+  }
+  if (audit) {
+    const register = server.registerTool.bind(server);
+    server.registerTool = ((...args: Parameters<typeof register>) => {
+      const [name, config, handler] = args;
+      if (typeof handler !== "function") return register(...args);
+      const wrapped = async (...handlerArgs: Parameters<typeof handler>) => {
+        const id = await audit.start(name, auditRequestId);
+        try {
+          const response = await handler(...handlerArgs);
+          await audit.finish(id, true);
+          return response;
+        } catch (error) {
+          await audit.finish(id, false).catch(() => undefined);
+          throw error;
+        }
+      };
+      return register(name, config, wrapped as typeof handler);
+    }) as typeof register;
   }
 
   server.registerTool(

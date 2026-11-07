@@ -29,17 +29,17 @@ pnpm run ci           # 全部通れば環境は正しい（約 3.5 分、Lighth
 
 `.env.example` が一覧。公開サイトはビルド時に読む（`PUBLIC_*`）、Admin は `VITE_API_URL`、API は Worker の vars / secrets。
 
-| 変数                        | 既定                                             | 用途                                                                                                                                                                                |
-| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL`           | `https://tomokichidiary.com`                     | canonical / sitemap / OG                                                                                                                                                            |
-| `PUBLIC_INDEXABLE`          | `true`                                           | `false` で全ページ noindex + robots 全拒否（プレビュー用）                                                                                                                          |
-| `PUBLIC_MEDIA_URL`          | `https://media.tomokichidiary.com`               | R2 のメディアドメイン                                                                                                                                                               |
-| `PUBLIC_BUILD_TIME`         | 未設定                                           | 固定すると同一コミットのビルドが byte 同一                                                                                                                                          |
-| `PUBLIC_API_URL`            | `https://api.tomokichidiary.com`                 | お問い合わせフォームの POST 先                                                                                                                                                      |
-| `PUBLIC_TURNSTILE_SITE_KEY` | 未設定                                           | 未設定ならフォームを描画しない。dev では試験キー                                                                                                                                    |
-| `VITE_API_URL`              | `http://localhost:8787`                          | Admin → API。本番ビルドは `https://api.tomokichidiary.com`                                                                                                                          |
-| API secrets                 | `wrangler secret put --name tomokichi-diary-api` | `ADMIN_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`, `MAIL_API_KEY_TOMOKICHI_DIARY`（`apps/api/src/env.ts`）。ローカルは `apps/api/.dev.vars`（gitignore 済み） |
-| API vars                    | `apps/api/cloudflare.config.ts`                  | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`, `CONTACT_MAIL_FROM`, `CONTACT_MAIL_TO`                                                        |
+| 変数                        | 既定                                             | 用途                                                                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`           | `https://tomokichidiary.com`                     | canonical / sitemap / OG                                                                                                                                                                                    |
+| `PUBLIC_INDEXABLE`          | `true`                                           | `false` で全ページ noindex + robots 全拒否（プレビュー用）                                                                                                                                                  |
+| `PUBLIC_MEDIA_URL`          | `https://media.tomokichidiary.com`               | R2 のメディアドメイン                                                                                                                                                                                       |
+| `PUBLIC_BUILD_TIME`         | 未設定                                           | 固定すると同一コミットのビルドが byte 同一                                                                                                                                                                  |
+| `PUBLIC_API_URL`            | `https://api.tomokichidiary.com`                 | お問い合わせフォームの POST 先                                                                                                                                                                              |
+| `PUBLIC_TURNSTILE_SITE_KEY` | 未設定                                           | 未設定ならフォームを描画しない。dev では試験キー                                                                                                                                                            |
+| `VITE_API_URL`              | `http://localhost:8787`                          | Admin → API。本番ビルドは `https://api.tomokichidiary.com`                                                                                                                                                  |
+| API secrets                 | `wrangler secret put --name tomokichi-diary-api` | `ADMIN_TOKEN`, `LOCAL_OPERATOR_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`, `MAIL_API_KEY_TOMOKICHI_DIARY`（`apps/api/src/env.ts`）。ローカルは `apps/api/.dev.vars`（gitignore 済み） |
+| API vars                    | `apps/api/cloudflare.config.ts`                  | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `MCP_CONSENT_ACCESS_AUD`, `AUDIT_RETENTION_DAYS`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`, `CONTACT_MAIL_FROM`, `CONTACT_MAIL_TO`                              |
 
 ## Install / Development server
 
@@ -91,7 +91,7 @@ cf は beta（`1.0.0-beta.*` を exact で固定）。Vite / Astro を cf のフ
 | リンク切れ          | `pnpm check:links`                                                                                        |
 | Lighthouse          | `pnpm perf`（desktop）。mobile で見るなら `pnpm exec lighthouse <url>`                                    |
 | WebMCP              | ブラウザで記事を開き `document.modelContext`。`pnpm check:agents` が生成物を検査                          |
-| MCP 本番            | `pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev`                                    |
+| MCP 本番            | `pnpm verify:mcp https://mcp.tomokichidiary.com`（移行期間の旧Worker確認はworkers.dev URL）               |
 | 型                  | `pnpm typecheck` + `pnpm --filter @tomokichi/web exec astro check`（後者は CI 外。2026-09-21 に 0 error） |
 
 ## Common commands

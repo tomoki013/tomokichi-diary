@@ -6,6 +6,8 @@
 export type Route =
   | { name: "dashboard" }
   | { name: "analytics" }
+  | { name: "activity"; targetType?: string; targetId?: string }
+  | { name: "mcp-connections" }
   | { name: "articles" }
   | { name: "article"; id: string }
   | { name: "diary-notes" }
@@ -28,6 +30,12 @@ export type Route =
 export function parseRoute(hash: string): Route {
   const path = hash.replace(/^#/, "").replace(/\/+$/, "") || "/";
   const [first, second, ...rest] = path.split("/").filter(Boolean);
+  if (first === "activity") {
+    if (!second && rest.length === 0) return { name: "activity" };
+    if (second && rest.length === 1)
+      return { name: "activity", targetType: second, targetId: decodeURIComponent(rest[0]!) };
+    return { name: "not-found", path };
+  }
   if (rest.length > 0) return { name: "not-found", path };
 
   switch (first) {
@@ -41,6 +49,10 @@ export function parseRoute(hash: string): Route {
         : { name: "diary-notes" };
     case "analytics":
       return second ? { name: "not-found", path } : { name: "analytics" };
+    case "activity":
+      return second ? { name: "not-found", path } : { name: "activity" };
+    case "mcp-connections":
+      return second ? { name: "not-found", path } : { name: "mcp-connections" };
     case "monetization":
       return second ? { name: "not-found", path } : { name: "monetization" };
     case "media":
@@ -70,6 +82,9 @@ export function parseRoute(hash: string): Route {
 export const href = {
   dashboard: () => "#/",
   analytics: () => "#/analytics",
+  activity: (targetId?: string, targetType = "article") =>
+    `#/activity${targetId ? `/${encodeURIComponent(targetType)}/${encodeURIComponent(targetId)}` : ""}`,
+  mcpConnections: () => "#/mcp-connections",
   articles: () => "#/articles",
   article: (id: string) => `#/articles/${encodeURIComponent(id)}`,
   diaryNotes: () => "#/notes",
@@ -95,6 +110,8 @@ export function section(
 ):
   | "dashboard"
   | "analytics"
+  | "activity"
+  | "mcp-connections"
   | "articles"
   | "diary-notes"
   | "monetization"
@@ -113,6 +130,10 @@ export function section(
       return "monetization";
     case "analytics":
       return "analytics";
+    case "activity":
+      return "activity";
+    case "mcp-connections":
+      return "mcp-connections";
     case "articles":
     case "article":
       return "articles";

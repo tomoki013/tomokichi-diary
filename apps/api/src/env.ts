@@ -9,9 +9,13 @@ import type { IntakeBinding, ProjectOperatorApi } from "@inquiry-platform/sdk";
  */
 export interface Env {
   DB: D1Like;
+  /** Private management entrypoint for listing and revoking OAuth grants. */
+  MCP_CONNECTIONS?: { fetch(request: Request): Promise<Response> };
   MEDIA: R2Like;
   /** Shared secret for the admin API. Set with `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`. */
   ADMIN_TOKEN?: string;
+  /** Dedicated bearer identity for the local stdio Operator MCP process. */
+  LOCAL_OPERATOR_TOKEN?: string;
   /** Fine-grained GitHub token: this repository's Actions write permission only. */
   GITHUB_PUBLISH_TOKEN?: string;
   /** This repository Actions write only; separate from content publication. */
@@ -56,6 +60,10 @@ export interface Env {
   ACCESS_TEAM_DOMAIN?: string;
   /** Audience tag of the Access application protecting the admin. */
   ACCESS_AUD?: string;
+  /** Dedicated audience for the MCP consent pages; never accepted by the admin gate. */
+  MCP_CONSENT_ACCESS_AUD?: string;
+  /** Audit retention in days; the implementation enforces a minimum of 180 days. */
+  AUDIT_RETENTION_DAYS?: string;
   /**
    * Bearer token for `GET /internal/status-probe`, shared only with the status
    * platform. Unset means the route does not exist (404).

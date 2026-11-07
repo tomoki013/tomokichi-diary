@@ -2136,7 +2136,147 @@ textarea.mail__text:focus {
   gap: 0.5rem;
   margin-left: auto;
 }
+
+.activity-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+  gap: 0.5rem 0.75rem;
+}
+.activity-filters .field {
+  margin: 0;
+}
+.activity-filters .field > span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+.activity-list {
+  display: grid;
+  gap: 0.65rem;
+}
+.activity-event {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  padding: 0.75rem;
+}
+.activity-event__main {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 1fr);
+  gap: 0.25rem 0.8rem;
+  overflow-wrap: anywhere;
+}
+.activity-event__main time,
+.activity-event__main span {
+  color: var(--ink-soft);
+}
+.activity-event__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+.activity-result {
+  font-weight: 700;
+}
+.activity-result--succeeded {
+  color: var(--ok);
+}
+.activity-result--failed,
+.activity-result--rejected {
+  color: var(--danger);
+}
+.activity-result--requested {
+  color: var(--warn);
+}
+.activity-event__details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem 0.75rem;
+  margin: 0.65rem 0 0;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+}
+.activity-event__details dt {
+  color: var(--ink-faint);
+}
+.activity-event__details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.activity-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.connection-list {
+  display: grid;
+  gap: 0.75rem;
+}
+.connection-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  padding: 0.85rem;
+}
+.connection-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.connection-card > header p {
+  margin: 0.2rem 0 0;
+}
+.connection-card__trust {
+  margin-left: 0.6rem;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+.connection-card dl {
+  display: grid;
+  grid-template-columns: minmax(9rem, max-content) minmax(0, 1fr);
+  gap: 0.25rem 0.8rem;
+  margin: 0.75rem 0 0;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+}
+.connection-card dt {
+  color: var(--ink-faint);
+}
+.connection-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 760px) {
+  .connection-card > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .connection-card > header button {
+    width: 100%;
+  }
+  .connection-card dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .connection-card dd {
+    margin-bottom: 0.35rem;
+  }
+  .activity-event__main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .activity-event__details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .activity-event__details dd {
+    margin-bottom: 0.4rem;
+  }
   .mail__actions {
     width: 100%;
   }
