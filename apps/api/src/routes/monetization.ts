@@ -25,14 +25,19 @@ export function monetizationRoutes() {
     c.header("x-robots-tag", "noindex, nofollow");
   });
   routes.get("/", async (c) => {
-    const repo = c.get("ctx").repos.monetization;
-    const published = new Map(
-      (await c.get("ctx").repos.publicationMetadata.listAll()).map((m) => [
-        m.revisionId,
-        m.metadata.monetization,
-      ]),
-    );
-    const publishedAdArticles = (await c.get("ctx").repos.articles.listAll()).filter(
+    const repos = c.get("ctx").repos;
+    const [configs, offers, experiments, articles, metadata, settings] = await Promise.all([
+      repos.monetization.listArticles(),
+      repos.monetization.offers(),
+      repos.monetization.experiments(),
+      repos.articles.listAll(),
+      repos.publicationMetadata.listAll(),
+      repos.monetization.settings(),
+    ]);
+    const published = new Map(metadata.map((m) => [m.revisionId, m.metadata.monetization]));
+    const articleById = new Map<string, (typeof articles)[number]>();
+    for (const article of articles) articleById.set(article.id, article);
+    const publishedAdArticles = articles.filter(
       (a) =>
         a.kind === "article" &&
         isPubliclyVisible(a, c.get("ctx").clock.now()) &&
@@ -48,10 +53,22 @@ export function monetizationRoutes() {
     ).length;
     return c.json({
       publishedAdArticles,
-      settings: await repo.settings(),
-      articles: await repo.listArticles(),
-      offers: await repo.offers(),
-      experiments: await repo.experiments(),
+      settings,
+      articles: configs.map((item) => {
+        const article = articleById.get(item.articleId);
+        const publishedConfig = article?.publishedRevisionId
+          ? (published.get(article.publishedRevisionId) ?? null)
+          : null;
+        return {
+          ...item,
+          published: publishedConfig,
+          needsPublication: article
+            ? article.currentRevisionId !== article.publishedRevisionId
+            : false,
+        };
+      }),
+      offers,
+      experiments,
     });
   });
   routes.put("/settings", async (c) => {

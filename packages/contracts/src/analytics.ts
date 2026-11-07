@@ -55,8 +55,12 @@ export interface ArticleReadingDto {
   pageViews: number | null;
   measuredViews: number;
   body75Rate: number | null;
+  body75RatePrevious?: number | null;
   bodyEndRate: number | null;
+  bodyEndRatePrevious?: number | null;
   nextArticleRate: number | null;
+  nextArticleRatePrevious?: number | null;
+  measuredViewsPrevious?: number;
   clicks: number | null;
   clicksPrevious: number | null;
   impressions: number | null;
@@ -69,6 +73,8 @@ export interface AnalyticsDashboardDto {
   experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
+  /** Distinct GA4 dates with any reader-experience measurement in each interval. */
+  readerCoverage?: { currentDays: number; previousDays: number };
   /** Per article for the period, site view only; see application analytics/articles.ts. */
   articles?: ArticleReadingDto[];
   current: {
@@ -100,6 +106,7 @@ export interface AnalyticsDashboardDto {
   pages: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
   pagesPrevious: AnalyticsDashboardDto["pages"];
   queries: AnalyticsMetricRowDto[];
+  queriesPrevious?: AnalyticsMetricRowDto[];
   breakdowns: {
     sources: AnalyticsMetricRowDto[];
     devices: AnalyticsMetricRowDto[];

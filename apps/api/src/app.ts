@@ -7,6 +7,7 @@ import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
 import { analyticsRoutes } from "./routes/analytics.js";
+import { dashboardRoutes } from "./routes/dashboard.js";
 import { articleRoutes } from "./routes/articles.js";
 import { diaryNoteRoutes } from "./routes/notes.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
@@ -240,6 +241,7 @@ export function createApp(options: AppOptions = {}) {
   });
 
   v1.route("/admin/analytics", analyticsRoutes());
+  v1.route("/admin/dashboard", dashboardRoutes());
   v1.route("/admin/monetization", monetizationRoutes());
   v1.route("/admin/articles", articleRoutes(publishSite));
   v1.route("/admin/notes", diaryNoteRoutes(publishSite));

@@ -368,6 +368,14 @@ function CreateArticle() {
   const [busy, setBusy] = useState(false);
   const [slug, setSlug] = useState("");
   const [kind, setKind] = useState<"article" | "page">("article");
+  const [ideaId, setIdeaId] = useState("");
+  const ideas = useResource(
+    () => api.dashboardIdeas().then((result) => result.items),
+    "article-ideas",
+  );
+  const availableIdeas = (ideas.data ?? []).filter(
+    (idea) => idea.articleKind === kind && !idea.linkedArticleId,
+  );
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -375,6 +383,13 @@ function CreateArticle() {
     const form = new FormData(element);
     const title = String(form.get("title")).trim();
     const path = String(form.get("path")).trim();
+    const selectedIdea = ideaId ? availableIdeas.find((idea) => idea.id === ideaId) : undefined;
+    if (ideaId && !selectedIdea) {
+      toast.error(
+        new Error("選択した企画を確認できません。企画一覧を更新してから作成してください。"),
+      );
+      return;
+    }
     // The editor opens in its own tab so this list stays where it was. The tab
     // is opened now, while the click still counts as the user's: browsers
     // (Safari above all) block a window opened after the request returns.
@@ -396,13 +411,43 @@ function CreateArticle() {
           changeSummary: "作成",
         },
       });
+      let ideaLinkFailed = false;
+      if (selectedIdea) {
+        try {
+          await api.updateDashboardIdea(selectedIdea.id, {
+            provisionalTitle: selectedIdea.provisionalTitle,
+            articleKind: selectedIdea.articleKind,
+            seriesId: selectedIdea.seriesId,
+            summary: selectedIdea.summary,
+            priority: selectedIdea.priority,
+            status: "drafting",
+            relatedArticleId: selectedIdea.relatedArticleId,
+            linkedArticleId: created.id,
+          });
+        } catch (error) {
+          ideaLinkFailed = true;
+          toast.error(error);
+        }
+      }
       const editor = href.article(created.id);
       if (tab && !tab.closed) {
         tab.location.href = `${globalThis.location.pathname}${globalThis.location.search}${editor}`;
         element.reset();
         setSlug("");
-        toast.info(`「${title}」を作成し、別のタブで開きました`);
-      } else globalThis.location.hash = editor;
+        setIdeaId("");
+        toast.info(
+          ideaLinkFailed
+            ? `「${title}」を作成しました。企画との関連付けに失敗したため、ダッシュボードで再設定してください。`
+            : selectedIdea
+              ? `「${title}」を企画「${selectedIdea.provisionalTitle}」に関連付けて作成しました。`
+              : `「${title}」を作成し、別のタブで開きました`,
+        );
+      } else {
+        const target = new URL(globalThis.location.href);
+        target.hash = editor.slice(1);
+        globalThis.history.pushState(null, "", target);
+        globalThis.dispatchEvent(new Event("hashchange"));
+      }
     } catch (error) {
       tab?.close();
       toast.error(error);
@@ -430,10 +475,35 @@ function CreateArticle() {
         </label>
         <label className="field">
           <span>種別</span>
-          <select value={kind} onChange={(event) => setKind(event.target.value as typeof kind)}>
+          <select
+            value={kind}
+            onChange={(event) => {
+              setKind(event.target.value as typeof kind);
+              setIdeaId("");
+            }}
+          >
             <option value="article">記事</option>
             <option value="page">固定ページ</option>
           </select>
+        </label>
+        <label className="field field--wide">
+          <span>関連する企画（任意）</span>
+          <select value={ideaId} onChange={(event) => setIdeaId(event.target.value)}>
+            <option value="">企画に関連付けない</option>
+            {availableIdeas.map((idea) => (
+              <option value={idea.id} key={idea.id}>
+                {idea.priority} · {idea.provisionalTitle}
+              </option>
+            ))}
+          </select>
+          {ideas.error !== undefined && (
+            <small>
+              企画一覧を取得できません。
+              <button type="button" onClick={() => void ideas.reload()}>
+                再取得
+              </button>
+            </small>
+          )}
         </label>
         <label className="field field--wide">
           <span>URL</span>
