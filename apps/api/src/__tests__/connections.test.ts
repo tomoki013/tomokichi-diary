@@ -46,7 +46,7 @@ describe("admin MCP connection routes", () => {
   it("confirms names against client hash and redirect host, and revokes through the private binding", async () => {
     const context = await createTestContext();
     const { auditDb, d1 } = database();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     const bindingCalls: string[] = [];
     const env = {
       ADMIN_TOKEN: TOKEN,

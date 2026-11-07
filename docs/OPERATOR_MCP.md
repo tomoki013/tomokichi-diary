@@ -76,13 +76,25 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 
 既存の本番APIとMCP Workerを起点に、[通常の本番CI](OPERATIONS.md#releasing)のデプロイジョブで反映します。
 
-1. マージ前に、Cloudflare Zero Trustに本人だけを許可するSelf-hosted Accessアプリを作り、`mcp.tomokichidiary.com/analytics-connect` と `mcp.tomokichidiary.com/operator-connect` を登録します。MCP・OAuthの登録／トークン・Discoveryの各経路はAccessアプリの対象外です。アプリのAudience TagをGitHub Actionsの`production`環境変数 `MCP_CONSENT_ACCESS_AUD` に登録します。
-2. 本番CIがD1に `0025_operator_audit_events.sql` を適用します。MCPのツール実行と管理APIの更新は、先にこのテーブルへ監査行を記録します。
-3. Custom Domainが未登録の初回に限り、CIが `MCP_CONSENT_BOOTSTRAP=1` でMCP Workerを反映します。この段階では既存のworkers.devホストを使い、新しい `OperatorConnections` 入口をService Bindingから参照できるようにします。CIが旧URLの公開MCPも検証します。
+1. 既存のMCP・API・管理画面Workerの稼働バージョンIDを控えます。マージ前に、Cloudflare Zero Trustに本人だけを許可するSelf-hosted Accessアプリを作り、`mcp.tomokichidiary.com/analytics-connect` と `mcp.tomokichidiary.com/operator-connect` を登録します。MCP・OAuthの登録／トークン・Discoveryの各経路はAccessアプリの対象外です。アプリのAudience TagをGitHub Actionsの`production`環境変数 `MCP_CONSENT_ACCESS_AUD` に登録します。
+2. 本番CIがD1に `0027_operator_audit_events.sql` を適用します。MCPのツール実行と管理APIの更新は、先にこのテーブルへ監査行を記録します。
+3. Custom Domainが未登録の初回に限り、CIが `MCP_CONSENT_BOOTSTRAP=1` でMCP Workerを反映します。この段階では既存のworkers.devホストを使い、新しい `OperatorConnections` 入口をService Bindingから参照できるようにします。CIが旧URLの公開MCPも検証します。切り戻しに備えて、このデプロイのバージョンIDも控えます。
 4. CIが専用Audienceを渡してAPIを反映し、`McpConsentIdentity` を追加します。通常のMCPデプロイで専用本人確認用のService Bindingと新Custom Domainが有効になります。CIが管理画面を反映して新旧ホストの公開MCPを検証し、新ホストではDiscovery・匿名リクエストの401・専用Accessアプリへの遷移も確認します。手動で同じ検証をする場合は `MCP_CONSENT_ACCESS_AUD` を渡し、`pnpm verify:mcp https://mcp.tomokichidiary.com --private-access` を実行します。
 5. Museは読み取り専用で始め、ChatGPTのOperatorとAnalyticsは新URLで再認可します。両クライアントの識別と操作履歴を確認し、週次・月次分析タスクが新URLでツールを呼び出すことを確認します。
 
-検証中の切り戻しは旧URLへの再接続で行います。旧トークンは旧Issuerのリソースで使えます。Worker自体を以前のバージョンへ戻す場合、先に新しいService Bindingの呼び出し元を戻してから参照先を戻します。初回用の `MCP_CONSENT_BOOTSTRAP` は新ドメインを追加する前に使う設定です。
+切替前に以下の結果を記録します。OAuthトークンやAccess JWTは検証記録に含めません。
+
+| 対象       | 本番で確認する結果                                                                                                                            |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Muse       | 読み取り専用の新規接続でOperatorの読み取りが成功し、書き込みツールが利用できない                                                              |
+| ChatGPT    | 新URLのAnalyticsで週次・月次レポートを取得でき、Operatorで承認したscopeのツールが使える                                                       |
+| 監査       | 所有者が許可した検証用下書きの作成・保存が履歴に表示される。MCPツールとAPIイベントのrequest IDが一致し、接続一覧で確認したclient IDに対応する |
+| 定期タスク | 週次・月次の実行履歴に、新URLへ移した接続でのツール呼び出しが残る                                                                             |
+| 既存機能   | 旧URLの公開MCPと既存Grant、公開サイトの検索・画像、管理画面、ローカルstdio Operatorを使える                                                   |
+
+新接続だけに問題がある場合は旧URLに戻します。旧トークンは旧Issuerのリソースで使えます。
+
+Workerも移行前へ戻す場合は、管理画面、MCPの初回先行バージョン、移行前のAPI、移行前のMCPの順で戻します。先行バージョンに戻すとAPIの新しい `McpConsentIdentity` への参照が外れ、移行前のAPIに戻すとMCPの新しい `OperatorConnections` への参照が外れます。D1の監査テーブルと新旧のOAuth KVは残し、旧接続の読み取りを確認します。Workerのバージョンを戻した後、新ドメインのルートとAccess設定も別途確認します。[Cloudflare Workersの切り戻し](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
 
 この実装ではclient名やUser-AgentからChatGPT/Museを推測しません。接続一覧の「自己申告名」は初期値にすぎません。管理画面 `/mcp-connections` でclient_idハッシュとリダイレクト先を確認した後、表示名を確認済みにできます。管理画面 `/activity` では操作履歴を検索でき、記事編集画面から記事単位の履歴を開けます。
 

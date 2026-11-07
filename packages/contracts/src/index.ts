@@ -2,6 +2,7 @@ export * from "./error-codes.js";
 export * from "./validation.js";
 export * from "./dto.js";
 export * from "./analytics.js";
+export * from "./dashboard.js";
 export * from "./monetization.js";
 export * from "./apple-music.js";
 export * from "./theme-music.js";

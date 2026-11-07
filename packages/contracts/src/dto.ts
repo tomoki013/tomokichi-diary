@@ -38,6 +38,10 @@ export interface ArticleSummaryDto {
    * Null where the list does not compute it.
    */
   readonly contentUpdatedAt?: string | null;
+  /** Formal D1 memberships and taxonomy relations, included in admin lists. */
+  readonly collectionIds?: readonly string[];
+  readonly categoryIds?: readonly string[];
+  readonly locationIds?: readonly string[];
   readonly hasUnpublishedChanges: boolean;
   readonly isLive: boolean;
   readonly noindex: boolean;

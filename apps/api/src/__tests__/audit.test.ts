@@ -72,7 +72,7 @@ describe("management audit trail", () => {
   it("records mutation outcomes without storing request bodies and ignores public audit headers", async () => {
     const context = await createTestContext();
     const { sql: auditDb, d1 } = auditDatabase();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     const app = createApp({ contextFactory: () => context, auditDb });
     const testEnv = { ...env, DB: d1 } as unknown as Env;
     const created = await app.request(
@@ -150,7 +150,7 @@ describe("management audit trail", () => {
   it("includes the full UTC end date and rejects impossible filter dates", async () => {
     const context = await createTestContext();
     const { sql: auditDb, d1 } = auditDatabase();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     await insertAuditEvent(auditDb, {
       id: "end-of-day-event",
       occurredAt: "2026-11-07T23:59:59.999Z",
@@ -187,7 +187,7 @@ describe("management audit trail", () => {
   it("identifies the local stdio operator only through its separate bearer secret", async () => {
     const context = await createTestContext();
     const { sql: auditDb, d1 } = auditDatabase();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     const app = createApp({ contextFactory: () => context, auditDb });
     const localEnv = {
       ...env,
@@ -280,7 +280,7 @@ describe("management audit trail", () => {
   it("marks publication status reads as completed reads, not pending publications", async () => {
     const context = await createTestContext();
     const { sql: auditDb, d1 } = auditDatabase();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     const app = createApp({
       contextFactory: () => context,
       auditDb,
@@ -311,7 +311,7 @@ describe("management audit trail", () => {
   it("identifies the Admin Access application from its verified audience", async () => {
     const context = await createTestContext();
     const { sql: auditDb, d1 } = auditDatabase();
-    await auditDb.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+    await auditDb.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
     const app = createApp({
       contextFactory: () => context,
       auditDb,

@@ -39,6 +39,9 @@ export function toArticleSummaryDto(params: {
   hasUnpublishedChanges: boolean;
   isLive: boolean;
   contentUpdatedAt?: string | null;
+  collectionIds?: readonly string[];
+  categoryIds?: readonly string[];
+  locationIds?: readonly string[];
 }): ArticleSummaryDto {
   const { article } = params;
   return {
@@ -53,6 +56,9 @@ export function toArticleSummaryDto(params: {
     scheduledAt: article.scheduledAt,
     updatedAt: article.updatedAt,
     contentUpdatedAt: params.contentUpdatedAt ?? null,
+    collectionIds: params.collectionIds ?? [],
+    categoryIds: params.categoryIds ?? [],
+    locationIds: params.locationIds ?? [],
     hasUnpublishedChanges: params.hasUnpublishedChanges,
     isLive: params.isLive,
     noindex: article.noindex,

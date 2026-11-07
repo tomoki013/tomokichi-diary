@@ -17,7 +17,7 @@ function publicationDb(buildId: string, requestId: string) {
       error_code TEXT, error TEXT, build_url TEXT
     );
   `);
-  raw.exec(readFileSync("migrations/0025_operator_audit_events.sql", "utf8"));
+  raw.exec(readFileSync("migrations/0027_operator_audit_events.sql", "utf8"));
   raw
     .prepare(
       "INSERT INTO site_publication (id,active_build_id,building_id,requested_id,requested_at) VALUES ('site',?,?,?,?)",
