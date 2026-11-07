@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import { analyticsDashboard, dateRange, shiftDate } from "@tomokichi/application";
 import { createAnalyticsStore, fromD1, type D1Like } from "@tomokichi/infra-d1";
+import type { McpAudit } from "./audit.js";
 
 export const ANALYTICS_SCOPE = "analytics:read";
 export const ANALYSIS_GUIDANCE =
@@ -23,7 +24,7 @@ function result(data: Record<string, unknown>) {
     structuredContent: data,
   };
 }
-export function createAnalyticsServer(db: D1Like) {
+export function createAnalyticsServer(db: D1Like, audit?: McpAudit) {
   const server = new McpServer(
     { name: "Tomokichi Diary Private Analytics", version: "1.0.0" },
     { instructions: ANALYSIS_GUIDANCE },
@@ -35,6 +36,25 @@ export function createAnalyticsServer(db: D1Like) {
     openWorldHint: false,
   };
   const securitySchemes = [{ type: "oauth2", scopes: [ANALYTICS_SCOPE] }];
+  if (audit) {
+    const register = server.registerTool.bind(server);
+    server.registerTool = ((...args: Parameters<typeof register>) => {
+      const [name, config, handler] = args;
+      if (typeof handler !== "function") return register(...args);
+      const wrapped = async (...handlerArgs: Parameters<typeof handler>) => {
+        const id = await audit.start(name);
+        try {
+          const response = await handler(...handlerArgs);
+          await audit.finish(id, true);
+          return response;
+        } catch (error) {
+          await audit.finish(id, false).catch(() => undefined);
+          throw error;
+        }
+      };
+      return register(name, config, wrapped as typeof handler);
+    }) as typeof register;
+  }
   server.registerTool(
     "get_analytics_report",
     {

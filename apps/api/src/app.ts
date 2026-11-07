@@ -2,12 +2,15 @@ import { resendWebhook } from "./resend-webhook.js";
 import { monetizationRoutes } from "./routes/monetization.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
+import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
 import { generateId } from "@tomokichi/domain";
 import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
 import { analyticsRoutes } from "./routes/analytics.js";
 import { dashboardRoutes } from "./routes/dashboard.js";
+import { activityRoutes } from "./routes/activity.js";
+import { connectionRoutes } from "./routes/connections.js";
 import { articleRoutes } from "./routes/articles.js";
 import { diaryNoteRoutes } from "./routes/notes.js";
 import { publicationRoutes, requestPublication } from "./publication.js";
@@ -19,6 +22,7 @@ import { referenceRoutes } from "./routes/reference.js";
 import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
+import { isAllowedOperatorRequest } from "./operator-policy.js";
 import { messageRoutes } from "./routes/messages.js";
 import { likeAdminRoutes, likeRoutes, photoLikeRoutes } from "./routes/likes.js";
 import { knowledgeRoutes } from "./routes/knowledge.js";
@@ -26,6 +30,12 @@ import { inquiryRoutes } from "./routes/inquiry.js";
 import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
 import { createInquiryOperator } from "./inquiry-operator.js";
 import { runStatusProbe } from "./status-probe.js";
+import {
+  finishAuditEvent,
+  insertAuditEvent,
+  type AuditContext,
+  type AuditEventInput,
+} from "./audit.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -54,6 +64,7 @@ export type AppEnv = {
      * the Access subject, or `admin-token`. Never an address.
      */
     adminActor: string;
+    auditContext: AuditContext;
   };
 };
 
@@ -71,6 +82,10 @@ export interface AppOptions {
    * who it is, so the admin gate lets it in as this actor without a token.
    */
   operatorActor?: string;
+  /** Set only by the private MCP Service Binding entrypoint. */
+  operatorAuditContext?: AuditContext;
+  /** In-memory D1 used by audit-specific tests. */
+  auditDb?: SqlDatabase;
 }
 
 /**
@@ -106,7 +121,14 @@ export function createApp(options: AppOptions = {}) {
   const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
-    const requestId = c.req.header("x-request-id") ?? generateId();
+    const providedRequestId = c.req.header("x-request-id");
+    const trustedBindingRequestId =
+      options.operatorActor &&
+      providedRequestId &&
+      /^[A-Za-z0-9._:-]{1,100}$/.test(providedRequestId)
+        ? providedRequestId
+        : undefined;
+    const requestId = trustedBindingRequestId ?? generateId();
     c.set("requestId", requestId);
     const ctx = buildContext(c.env, requestId);
     // Hono throws on `executionCtx` where the runtime gives none (tests).
@@ -202,6 +224,15 @@ export function createApp(options: AppOptions = {}) {
     if (options.operatorActor) {
       c.get("ctx").logger.info("admin.authenticated", { via: "operator-binding" });
       c.set("adminActor", options.operatorActor);
+      c.set(
+        "auditContext",
+        options.operatorAuditContext ?? {
+          actorType: "remote-operator",
+          actorSubject: "unknown",
+          source: "remote-mcp",
+          clientTrust: "unknown",
+        },
+      );
       await next();
       return;
     }
@@ -215,6 +246,13 @@ export function createApp(options: AppOptions = {}) {
         c.get("ctx").logger.info("admin.authenticated", { via: "access", email: identity.email });
         const subject = identity.subject.replace(/[^A-Za-z0-9._:+-]/g, "").slice(0, 80);
         c.set("adminActor", subject ? `access:${subject}` : "access");
+        c.set("auditContext", {
+          actorType: "access-user",
+          actorSubject: subject || null,
+          source: "admin",
+          clientName: "Tomokichi Diary Admin",
+          clientTrust: "confirmed",
+        });
         await next();
         return;
       }
@@ -229,6 +267,32 @@ export function createApp(options: AppOptions = {}) {
       .header("authorization")
       ?.replace(/^Bearer\s+/i, "")
       .trim();
+    const localOperatorToken = c.env.LOCAL_OPERATOR_TOKEN?.trim();
+    const adminToken = expected;
+    if (
+      localOperatorToken &&
+      localOperatorToken !== adminToken &&
+      provided &&
+      secretsMatch(localOperatorToken, provided)
+    ) {
+      if (!isAllowedOperatorRequest(c.req.raw, true))
+        return errorResponse(
+          c,
+          "API_UNAUTHORIZED",
+          "this route is not available to the local operator",
+          403,
+        );
+      c.set("adminActor", "local-operator");
+      c.set("auditContext", {
+        actorType: "local-operator",
+        actorSubject: "local-operator",
+        source: "local-mcp",
+        clientName: "Tomokichi Diary Local Operator",
+        clientTrust: "confirmed",
+      });
+      await next();
+      return;
+    }
     if (!expected || !provided || !secretsMatch(expected, provided)) {
       c.get("ctx").logger.warn("admin.unauthorized", {
         code: "API_UNAUTHORIZED",
@@ -237,9 +301,193 @@ export function createApp(options: AppOptions = {}) {
       return errorResponse(c, "API_UNAUTHORIZED", "a valid admin token is required", 401);
     }
     c.set("adminActor", "admin-token");
+    c.set("auditContext", {
+      actorType: "admin-token",
+      actorSubject: "admin-token",
+      source: "admin",
+      clientTrust: "unknown",
+    });
     await next();
   });
 
+  // Common audit coverage for every management API mutation. Remote MCP reads
+  // are included too, with the server-verified tool and client context.
+  v1.use("/admin/*", async (c, next) => {
+    const context = c.get("auditContext");
+    const method = c.req.method.toUpperCase();
+    const shouldAudit =
+      ["POST", "PUT", "PATCH", "DELETE"].includes(method) ||
+      context.source === "remote-mcp" ||
+      context.source === "local-mcp";
+    if (!shouldAudit) {
+      await next();
+      return;
+    }
+    const auditDb =
+      options.auditDb ?? (!options.contextFactory && c.env.DB ? fromD1(c.env.DB) : undefined);
+    // Unit fixtures inject the application context but not a D1 binding. The
+    // deployed Worker always has DB; a missing production binding fails closed.
+    if (!auditDb) {
+      if (options.contextFactory) {
+        await next();
+        return;
+      }
+      return errorResponse(c, "API_INTERNAL", "operation audit is unavailable", 503);
+    }
+    let resolvedContext = context;
+    if (context.clientId && context.clientRedirectHost) {
+      try {
+        const alias = await auditDb
+          .prepare(
+            "SELECT display_name FROM operator_audit_client_names WHERE client_id=? AND redirect_host=?",
+          )
+          .bind(context.clientId, context.clientRedirectHost)
+          .first<{ display_name: string }>();
+        if (alias)
+          resolvedContext = {
+            ...context,
+            clientName: alias.display_name,
+            clientTrust: "confirmed",
+          };
+      } catch {
+        return errorResponse(c, "API_INTERNAL", "client identity lookup failed", 503);
+      }
+    }
+
+    const parts = new URL(c.req.url).pathname.split("/").filter(Boolean).slice(2);
+    const resource = (parts[0] ?? "admin").replace(/[^a-z0-9-]/gi, "").slice(0, 40);
+    const targetType =
+      (
+        {
+          articles: "article",
+          notes: "note",
+          collections: "series",
+          tags: "tag",
+          rankings: "ranking",
+          monetization: "ad",
+          publication: "publication",
+          connections: "connection",
+        } as Record<string, string>
+      )[resource] ?? resource;
+    const routeMarkers = new Set([
+      "retry",
+      "publish",
+      "unpublish",
+      "archive",
+      "draft",
+      "relations",
+      "publish-check",
+      "body-audit",
+      "taxonomy",
+      "experiments",
+      "articles",
+      "offers",
+      "settings",
+      "article",
+      "route",
+      "date",
+      "related-articles",
+      "schedule",
+      "cancel-schedule",
+      "media",
+      "revoke",
+    ]);
+    const targetId =
+      (resource === "connections"
+        ? parts[2]
+        : parts.slice(1).find((part) => !routeMarkers.has(part))
+      )?.slice(0, 120) ?? null;
+    const routeAction = parts
+      .slice(1)
+      .filter((part) => routeMarkers.has(part))
+      .join(".");
+    const action = `${method.toLowerCase()}.${resource}${routeAction ? `.${routeAction.replace(/[^a-z0-9.-]/gi, "").slice(0, 80)}` : ""}`;
+    const isToolInvocation =
+      resolvedContext.source === "remote-mcp" && !!resolvedContext.mcpToolName;
+    const asynchronousPublication =
+      method !== "GET" &&
+      (resource === "publication" || /(^|\.)(publish|unpublish|archive)(\.|$)/.test(action));
+    const event: AuditEventInput = {
+      ...resolvedContext,
+      id: crypto.randomUUID(),
+      occurredAt: new Date().toISOString(),
+      requestId: c.get("requestId"),
+      action: isToolInvocation ? `mcp.tool.${resolvedContext.mcpToolName}` : action,
+      targetType,
+      targetId,
+      result: "requested",
+      statusCode: null,
+      metadata: {
+        ...(resolvedContext.source === "remote-mcp" ? { apiAction: action } : {}),
+        ...(asynchronousPublication ? { phase: "request" } : {}),
+      },
+    };
+    try {
+      await insertAuditEvent(auditDb, event);
+    } catch (error) {
+      c.get("ctx").logger.error("audit.write_failed", {
+        requestId: event.requestId,
+        action: event.action,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      return errorResponse(c, "API_INTERNAL", "operation audit is unavailable", 503);
+    }
+
+    let thrown: unknown;
+    try {
+      await next();
+    } catch (error) {
+      thrown = error;
+    }
+    const statusCode = thrown ? 500 : c.res.status;
+    let publicationId: string | undefined;
+    let responseTargetId: string | undefined;
+    if (!thrown && statusCode < 400 && (asynchronousPublication || !targetId)) {
+      const response = (await c.res
+        .clone()
+        .json()
+        .catch(() => null)) as {
+        id?: unknown;
+        requestId?: unknown;
+        publication?: { requestId?: unknown };
+      } | null;
+      if (!targetId && typeof response?.id === "string")
+        responseTargetId = response.id.slice(0, 120);
+      const candidate = response?.publication?.requestId ?? response?.requestId;
+      if (asynchronousPublication && typeof candidate === "string")
+        publicationId = candidate.slice(0, 100);
+    }
+    const result =
+      statusCode >= 500
+        ? "failed"
+        : statusCode >= 400
+          ? "rejected"
+          : asynchronousPublication
+            ? "requested"
+            : "succeeded";
+    try {
+      await finishAuditEvent(
+        auditDb,
+        event.id,
+        result,
+        statusCode,
+        publicationId,
+        responseTargetId,
+      );
+    } catch (error) {
+      c.get("ctx").logger.error("audit.finalize_failed", {
+        requestId: event.requestId,
+        auditId: event.id,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      if (!thrown)
+        return errorResponse(c, "API_INTERNAL", "operation audit finalization failed", 503);
+    }
+    if (thrown) throw thrown;
+  });
+
+  v1.route("/admin/activity", activityRoutes());
+  v1.route("/admin/connections", connectionRoutes());
   v1.route("/admin/analytics", analyticsRoutes());
   v1.route("/admin/dashboard", dashboardRoutes());
   v1.route("/admin/monetization", monetizationRoutes());

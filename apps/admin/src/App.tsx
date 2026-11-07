@@ -4,6 +4,8 @@ import { ApiError, api, clearToken, getToken } from "./lib/api";
 import { href, section } from "./lib/route";
 import { useHashRoute } from "./ui/hooks";
 import { Analytics } from "./pages/Analytics";
+import { Activity } from "./pages/Activity";
+import { McpConnections } from "./pages/McpConnections";
 import { Dashboard } from "./pages/Dashboard";
 import { Articles } from "./pages/Articles";
 import { DiaryNotes } from "./pages/DiaryNotes";
@@ -26,6 +28,8 @@ const NAV = [
   { key: "monetization", label: "収益化", href: href.monetization() },
   { key: "dashboard", label: "ホーム", href: href.dashboard() },
   { key: "analytics", label: "Analytics", href: href.analytics() },
+  { key: "activity", label: "操作履歴", href: href.activity() },
+  { key: "mcp-connections", label: "MCP接続", href: href.mcpConnections() },
   { key: "articles", label: "記事", href: href.articles() },
   { key: "diary-notes", label: "一言日記", href: href.diaryNotes() },
   { key: "likes", label: "いいね", href: href.likes() },
@@ -116,6 +120,10 @@ export function App() {
         {route.name === "monetization" && <Monetization />}
         {route.name === "dashboard" && <Dashboard />}
         {route.name === "analytics" && <Analytics />}
+        {route.name === "activity" && (
+          <Activity targetType={route.targetType} targetId={route.targetId} />
+        )}
+        {route.name === "mcp-connections" && <McpConnections />}
         {route.name === "articles" && <Articles />}
         {route.name === "article" && <ArticleEditor key={route.id} id={route.id} mode="article" />}
         {route.name === "diary-notes" && <DiaryNotes />}

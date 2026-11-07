@@ -13,6 +13,7 @@ export default defineConfig({
     // The public face of the API. Admin traffic arrives instead through the admin
     // Worker's service binding, behind Cloudflare Access.
     domains: ["api.tomokichidiary.com"],
+    triggers: [{ type: "scheduled", schedule: "17 3 * * *" }],
     // ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`.
     // It is never committed, and a missing value closes the admin API.
     env: {
@@ -23,6 +24,8 @@ export default defineConfig({
       // exactly or every identity token is rejected.
       ACCESS_TEAM_DOMAIN: bindings.text("tomoki-ttttt.cloudflareaccess.com"),
       ACCESS_AUD: bindings.text("edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"),
+      MCP_CONSENT_ACCESS_AUD: bindings.text(process.env.MCP_CONSENT_ACCESS_AUD ?? ""),
+      AUDIT_RETENTION_DAYS: bindings.text(process.env.AUDIT_RETENTION_DAYS ?? "180"),
       PUBLIC_MEDIA_URL: bindings.text("https://media.tomokichidiary.com"),
       PUBLIC_IMAGE_URL: bindings.text("https://api.tomokichidiary.com/v1/images"),
       MEDIA_UPLOADS_PAUSED: bindings.text(process.env.MEDIA_UPLOADS_PAUSED ?? "0"),
@@ -35,6 +38,11 @@ export default defineConfig({
       // Migrations live in the repository's `migrations/`; `pnpm db:migrate`
       // passes that directory to `cf d1 migrations apply`.
       DB: bindings.d1({ name: "tomokichi-diary", id: "b799453b-ada9-454e-81dc-26999c2c29db" }),
+      MCP_CONNECTIONS: bindings.worker({
+        worker: "tomokichi-diary-mcp",
+        exportName: "OperatorConnections",
+        props: { caller: "tomokichi-diary-api" },
+      }),
       MEDIA: bindings.r2({ name: "tomokichi-diary-media" }),
       // Each contact notice is sent through the domain-scoped Resend key.
       // The message contains only a ticket link when the platform filed it.

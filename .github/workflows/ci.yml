@@ -105,6 +105,15 @@ jobs:
             publication-media-${{ runner.os }}-
       - run: pnpm install --frozen-lockfile
 
+      - name: Check MCP consent configuration
+        env:
+          MCP_CONSENT_ACCESS_AUD: ${{ vars.MCP_CONSENT_ACCESS_AUD }}
+        run: |
+          if [ -z "$MCP_CONSENT_ACCESS_AUD" ]; then
+            echo "::error::Set the production MCP_CONSENT_ACCESS_AUD variable before deploying."
+            exit 1
+          fi
+
       # Migrations run ahead of the API that reads the new shape, so they must
       # stay backwards compatible (expand/contract, docs/OPERATIONS.md).
       - name: Apply database migrations
@@ -163,10 +172,34 @@ jobs:
           MEDIA_SYNC_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.full_media_sync && '1' || '' }}
         run: node scripts/publication-step.mjs r2-sync deploy remote pnpm media:sync
 
+      # The new API references OperatorConnections, which must exist before
+      # the API ships McpConsentIdentity for the MCP Worker to bind to.
+      - name: Bootstrap MCP Service Binding on the first release
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          domains=$(curl --fail --silent --show-error --max-time 20 \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/domains")
+          jq -e '.success == true and (.result | type == "array")' <<< "$domains" >/dev/null
+          if jq -e 'any(.result[]; .hostname == "mcp.tomokichidiary.com")' <<< "$domains" >/dev/null; then
+            if ! jq -e 'any(.result[]; .hostname == "mcp.tomokichidiary.com" and .service == "tomokichi-diary-mcp")' \
+              <<< "$domains" >/dev/null; then
+              echo "::error::The MCP custom domain is already attached to another Worker."
+              exit 1
+            fi
+          else
+            MCP_CONSENT_BOOTSTRAP=1 pnpm --filter @tomokichi/mcp-server deploy:built
+            env -u CLOUDFLARE_API_TOKEN -u CLOUDFLARE_ACCOUNT_ID \
+              pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev
+          fi
+
       - name: Deploy API
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MCP_CONSENT_ACCESS_AUD: ${{ vars.MCP_CONSENT_ACCESS_AUD }}
         run: pnpm deploy:api
 
       # The API goes first so the clients below never call an endpoint that is
@@ -194,6 +227,20 @@ jobs:
 
       - name: Verify every legacy URL on the deployed site
         run: pnpm verify:live "$VERIFY_URL"
+
+      - name: Verify both public MCP hosts
+        timeout-minutes: 5
+        env:
+          MCP_CONSENT_ACCESS_AUD: ${{ vars.MCP_CONSENT_ACCESS_AUD }}
+        run: |
+          pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev
+          for attempt in {1..10}; do
+            if pnpm verify:mcp https://mcp.tomokichidiary.com --private-access; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 10 ]; then sleep 15; fi
+          done
+          exit 1
 
       - name: Confirm this publication is served
         env:
