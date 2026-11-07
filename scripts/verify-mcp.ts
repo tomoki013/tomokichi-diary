@@ -89,13 +89,13 @@ if (verifyPrivate) {
 
   for (const kind of ["analytics", "operator"]) {
     const issuerPath = kind === "operator" ? "/operator" : "";
-    const resource = `${origin}/${kind}/mcp`;
+    const resourceUrl = `${origin}/${kind}/mcp`;
     const resourcePath = `/.well-known/oauth-protected-resource/${kind}/mcp`;
     const consentPath = `/${kind}-connect`;
     const [resourceMetadata, serverMetadata, anonymous, consent] = await Promise.all([
       metadata(resourcePath),
       metadata(`/.well-known/oauth-authorization-server${issuerPath}`),
-      fetch(resource, {
+      fetch(resourceUrl, {
         method: "POST",
         redirect: "manual",
         headers: {
@@ -107,7 +107,7 @@ if (verifyPrivate) {
       fetch(`${origin}${consentPath}`, { redirect: "manual" }),
     ]);
     if (
-      resourceMetadata.resource !== resource ||
+      resourceMetadata.resource !== resourceUrl ||
       !Array.isArray(resourceMetadata.authorization_servers) ||
       resourceMetadata.authorization_servers.length !== 1 ||
       resourceMetadata.authorization_servers[0] !== `${origin}${issuerPath}` ||
