@@ -9,6 +9,10 @@ import type {
 import type {
   AnalyticsDashboardDto,
   AnalyticsReportDto,
+  DashboardIdeaDto,
+  DashboardIdeaInput,
+  DashboardTaskDto,
+  DashboardTaskInput,
   ArticleDetailDto,
   ArticleKnowledgeBundleDto,
   ArticleSummaryDto,
@@ -237,6 +241,22 @@ export type PublicationStatus = import("@tomokichi/contracts").SitePublicationSt
 
 export const api = {
   monetization: () => request<MonetizationOverviewDto>("/admin/monetization"),
+  dashboardTasks: () => request<{ items: DashboardTaskDto[] }>("/admin/dashboard/tasks"),
+  createDashboardTask: (input: DashboardTaskInput) =>
+    request<{ item: DashboardTaskDto; created: boolean }>(
+      "/admin/dashboard/tasks",
+      json("POST", input),
+    ),
+  updateDashboardTaskStatus: (taskId: string, status: DashboardTaskDto["status"]) =>
+    request<{ item: DashboardTaskDto }>(
+      `/admin/dashboard/tasks/${id(taskId)}`,
+      json("PATCH", { status }),
+    ),
+  dashboardIdeas: () => request<{ items: DashboardIdeaDto[] }>("/admin/dashboard/ideas"),
+  createDashboardIdea: (input: DashboardIdeaInput) =>
+    request<{ item: DashboardIdeaDto }>("/admin/dashboard/ideas", json("POST", input)),
+  updateDashboardIdea: (ideaId: string, input: DashboardIdeaInput) =>
+    request<{ item: DashboardIdeaDto }>(`/admin/dashboard/ideas/${id(ideaId)}`, json("PUT", input)),
   saveMonetizationSettings: (settings: MonetizationSettings) =>
     request<MonetizationSettings>("/admin/monetization/settings", json("PUT", settings)),
   articleMonetization: (articleId: string) =>

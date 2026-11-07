@@ -20,6 +20,7 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
     {
       path: string | null;
       experience: AnalyticsRow[];
+      experiencePrevious: AnalyticsRow[];
       ga4: AnalyticsRow[];
       gsc: AnalyticsRow[];
       gscPrevious: AnalyticsRow[];
@@ -31,6 +32,7 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
     const found = byArticle.get(id) ?? {
       path: row.path,
       experience: [],
+      experiencePrevious: [],
       ga4: [],
       gsc: [],
       gscPrevious: [],
@@ -42,14 +44,17 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
   };
   for (const day of days) {
     const current = inRange(day.date, range);
-    if (!current && !(day.source === "gsc_url" && inRange(day.date, previous))) continue;
+    const isPrevious = inRange(day.date, previous);
+    if (!current && !isPrevious) continue;
     for (const row of day.rows) {
       if (!row.articleId) continue;
-      if (day.source === "ga4" && row.grain === "experience") entry(row).experience.push(row);
-      else if (day.source === "ga4" && row.grain === "page") entry(row).ga4.push(row);
+      if (day.source === "ga4" && row.grain === "experience")
+        (current ? entry(row).experience : entry(row).experiencePrevious).push(row);
+      else if (current && day.source === "ga4" && row.grain === "page") entry(row).ga4.push(row);
       else if (day.source === "gsc_url" && row.grain === "page")
         (current ? entry(row).gsc : entry(row).gscPrevious).push(row);
-      else if (day.source === "adsense" && row.grain === "page") entry(row).adsense.push(row);
+      else if (current && day.source === "adsense" && row.grain === "page")
+        entry(row).adsense.push(row);
     }
   }
   return [...byArticle]
@@ -64,7 +69,18 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
             }
           })
           .reduce((sum, row) => sum + (row.metrics["observations"] ?? 0), 0);
+      const countPrevious = (measurement: string) =>
+        rows.experiencePrevious
+          .filter((row) => {
+            try {
+              return JSON.parse(row.key).measurement === measurement;
+            } catch {
+              return false;
+            }
+          })
+          .reduce((sum, row) => sum + (row.metrics["observations"] ?? 0), 0);
       const views = count("article_view");
+      const previousViews = countPrevious("article_view");
       const gsc = addMetrics(rows.gsc),
         gscPrevious = addMetrics(rows.gscPrevious);
       return {
@@ -72,9 +88,13 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
         path: rows.path,
         pageViews: addMetrics(rows.ga4)["pageViews"] ?? null,
         measuredViews: views,
+        measuredViewsPrevious: previousViews,
         body75Rate: ratio(count("body_75"), views),
+        body75RatePrevious: ratio(countPrevious("body_75"), previousViews),
         bodyEndRate: ratio(count("body_end"), views),
+        bodyEndRatePrevious: ratio(countPrevious("body_end"), previousViews),
         nextArticleRate: ratio(count("next_article"), views),
+        nextArticleRatePrevious: ratio(countPrevious("next_article"), previousViews),
         clicks: gsc["clicks"] ?? null,
         clicksPrevious: gscPrevious["clicks"] ?? null,
         impressions: gsc["impressions"] ?? null,

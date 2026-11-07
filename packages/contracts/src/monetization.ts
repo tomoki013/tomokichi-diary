@@ -175,7 +175,12 @@ export const adExperimentSchema: Validator<AdExperiment> = v.object({
 export interface MonetizationOverviewDto {
   publishedAdArticles: number;
   settings: MonetizationSettings;
-  articles: { articleId: string; config: ArticleMonetization }[];
+  articles: {
+    articleId: string;
+    config: ArticleMonetization;
+    published?: PublicMonetization | null;
+    needsPublication?: boolean;
+  }[];
   offers: AffiliateOffer[];
   experiments: AdExperiment[];
 }

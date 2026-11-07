@@ -116,6 +116,22 @@ export async function analyticsDashboard(
   return {
     range,
     previousRange: previous,
+    readerCoverage: {
+      currentDays: new Set(
+        days
+          .filter((day) => day.source === "ga4" && day.date >= range.start && day.date <= range.end)
+          .filter((day) => day.rows.some((row) => row.grain === "experience"))
+          .map((day) => day.date),
+      ).size,
+      previousDays: new Set(
+        days
+          .filter(
+            (day) => day.source === "ga4" && day.date >= previous.start && day.date <= previous.end,
+          )
+          .filter((day) => day.rows.some((row) => row.grain === "experience"))
+          .map((day) => day.date),
+      ).size,
+    },
     current: project(days, range, articleId, counts),
     previous: project(days, previous, articleId, counts),
     experience: {
@@ -147,6 +163,7 @@ export async function analyticsDashboard(
     pages: { ga4: group("page", "ga4"), gsc: group("page", "gsc_url") },
     pagesPrevious: { ga4: group("page", "ga4", previous), gsc: group("page", "gsc_url", previous) },
     queries: group("query", "gsc_url"),
+    queriesPrevious: group("query", "gsc_url", previous),
     breakdowns: {
       sources: group("source", "ga4"),
       devices: group("device", "ga4"),

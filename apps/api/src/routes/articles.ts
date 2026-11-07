@@ -60,10 +60,31 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
     const summaries = (await listArticlesForAdmin(ctx)).filter(
       ({ article }) => article.kind !== "note",
     );
-    const [routeList, history] = await Promise.all([
+    const [routeList, history, memberships, categories, locations] = await Promise.all([
       ctx.repos.routes.listAll(),
       ctx.repos.revisions.listByArticles(summaries.map((summary) => summary.article.id)),
+      ctx.repos.collections.listMemberships(),
+      ctx.repos.relations.listArticleCategories(),
+      ctx.repos.relations.listArticleLocations(),
     ]);
+    const collectionIdsByArticle = new Map<string, string[]>();
+    for (const relation of memberships) {
+      const items = collectionIdsByArticle.get(relation.articleId) ?? [];
+      items.push(relation.collectionId);
+      collectionIdsByArticle.set(relation.articleId, items);
+    }
+    const categoryIdsByArticle = new Map<string, string[]>();
+    for (const relation of categories) {
+      const items = categoryIdsByArticle.get(relation.articleId) ?? [];
+      items.push(relation.categoryId);
+      categoryIdsByArticle.set(relation.articleId, items);
+    }
+    const locationIdsByArticle = new Map<string, string[]>();
+    for (const relation of locations) {
+      const items = locationIdsByArticle.get(relation.articleId) ?? [];
+      items.push(relation.locationId);
+      locationIdsByArticle.set(relation.articleId, items);
+    }
     const table = new RouteTable(routeList);
     return c.json({
       items: summaries.map((summary) =>
@@ -81,6 +102,9 @@ export function articleRoutes(publishSite: (env: Env, deferBuild?: boolean) => P
             history.filter((revision) => revision.articleId === summary.article.id),
             summary.article.currentRevisionId,
           ),
+          collectionIds: collectionIdsByArticle.get(summary.article.id) ?? [],
+          categoryIds: categoryIdsByArticle.get(summary.article.id) ?? [],
+          locationIds: locationIdsByArticle.get(summary.article.id) ?? [],
         }),
       ),
       total: summaries.length,
