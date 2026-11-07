@@ -79,8 +79,8 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 1. マージ前に、Cloudflare Zero Trustに本人だけを許可するSelf-hosted Accessアプリを作り、`mcp.tomokichidiary.com/analytics-connect` と `mcp.tomokichidiary.com/operator-connect` を登録します。MCP・OAuthの登録／トークン・Discoveryの各経路はAccessアプリの対象外です。アプリのAudience TagをGitHub Actionsの`production`環境変数 `MCP_CONSENT_ACCESS_AUD` に登録します。
 2. 本番CIがD1に `0025_operator_audit_events.sql` を適用します。MCPのツール実行と管理APIの更新は、先にこのテーブルへ監査行を記録します。
 3. Custom Domainが未登録の初回に限り、CIが `MCP_CONSENT_BOOTSTRAP=1` でMCP Workerを反映します。この段階では既存のworkers.devホストを使い、新しい `OperatorConnections` 入口をService Bindingから参照できるようにします。CIが旧URLの公開MCPも検証します。
-4. CIが専用Audienceを渡してAPIを反映し、`McpConsentIdentity` を追加します。通常のMCPデプロイで専用本人確認用のService Bindingと新Custom Domainが有効になります。CIが管理画面を反映し、新旧ホストの公開MCPを検証します。
-5. 新旧それぞれで公開MCPを検証します。新ホストでDiscoveryが認証なしで取得でき、私用MCPはOAuthなしでは401、許可画面はAccessログインへ遷移することを確かめます。Museは読み取り専用で始め、ChatGPTのOperatorとAnalyticsは新URLで再認可します。両クライアントの識別と操作履歴を確認し、週次・月次分析タスクが新URLでツールを呼び出すことを確認します。
+4. CIが専用Audienceを渡してAPIを反映し、`McpConsentIdentity` を追加します。通常のMCPデプロイで専用本人確認用のService Bindingと新Custom Domainが有効になります。CIが管理画面を反映して新旧ホストの公開MCPを検証し、新ホストではDiscovery・匿名リクエストの401・専用Accessアプリへの遷移も確認します。手動で同じ検証をする場合は `MCP_CONSENT_ACCESS_AUD` を渡し、`pnpm verify:mcp https://mcp.tomokichidiary.com --private-access` を実行します。
+5. Museは読み取り専用で始め、ChatGPTのOperatorとAnalyticsは新URLで再認可します。両クライアントの識別と操作履歴を確認し、週次・月次分析タスクが新URLでツールを呼び出すことを確認します。
 
 検証中の切り戻しは旧URLへの再接続で行います。旧トークンは旧Issuerのリソースで使えます。Worker自体を以前のバージョンへ戻す場合、先に新しいService Bindingの呼び出し元を戻してから参照先を戻します。初回用の `MCP_CONSENT_BOOTSTRAP` は新ドメインを追加する前に使う設定です。
 

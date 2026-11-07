@@ -61,7 +61,9 @@ describe("private analytics authorization", () => {
         context,
       );
       expect(response.status).toBe(401);
-      expect(response.headers.get("www-authenticate")).toContain("oauth-protected-resource");
+      expect(response.headers.get("www-authenticate")).toContain(
+        "https://mcp.tomokichidiary.com/.well-known/oauth-protected-resource/analytics/mcp",
+      );
       expect(await response.text()).not.toContain("estimatedEarnings");
     }
   });
@@ -143,15 +145,31 @@ describe("private analytics authorization", () => {
   });
   it("advertises one read scope, PKCE and the Access-protected consent page", async () => {
     const { env } = fixture();
-    const response = await analyticsOAuth.fetch(
-      new Request("https://mcp.tomokichidiary.com/.well-known/oauth-authorization-server"),
+    const origin = "https://mcp.tomokichidiary.com";
+    const resource = await analyticsOAuth.fetch(
+      new Request(`${origin}/.well-known/oauth-protected-resource/analytics/mcp`),
       env,
       context,
     );
-    const data = (await response.json()) as Record<string, unknown>;
-    expect(data.authorization_endpoint).toBe("https://mcp.tomokichidiary.com/analytics-connect");
-    expect(data.scopes_supported).toEqual(["analytics:read", "offline_access"]);
-    expect(data.code_challenge_methods_supported).toEqual(["S256"]);
+    expect(resource.status).toBe(200);
+    expect(await resource.json()).toMatchObject({
+      resource: ANALYTICS_RESOURCE,
+      authorization_servers: [origin],
+    });
+    const response = await analyticsOAuth.fetch(
+      new Request(`${origin}/.well-known/oauth-authorization-server`),
+      env,
+      context,
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      issuer: origin,
+      authorization_endpoint: `${origin}/analytics-connect`,
+      token_endpoint: `${origin}/analytics/oauth/token`,
+      registration_endpoint: `${origin}/analytics/oauth/register`,
+      scopes_supported: ["analytics:read", "offline_access"],
+      code_challenge_methods_supported: ["S256"],
+    });
   });
 });
 it("uses completed Japanese calendar periods at week/month/year boundaries", () => {

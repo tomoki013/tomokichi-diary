@@ -219,6 +219,7 @@ describe("remote operator authorization", () => {
     expect(server.issuer).toBe(OPERATOR_ISSUER);
     expect(server.authorization_endpoint).toBe(`${origin}/operator-connect`);
     expect(server.token_endpoint).toBe(`${OPERATOR_ISSUER}/oauth/token`);
+    expect(server.registration_endpoint).toBe(`${OPERATOR_ISSUER}/oauth/register`);
     expect(server.scopes_supported).toEqual(["operator:read", "operator:write", "offline_access"]);
     expect(server.code_challenge_methods_supported).toEqual(["S256"]);
   });

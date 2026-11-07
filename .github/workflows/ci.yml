@@ -230,10 +230,12 @@ jobs:
 
       - name: Verify both public MCP hosts
         timeout-minutes: 5
+        env:
+          MCP_CONSENT_ACCESS_AUD: ${{ vars.MCP_CONSENT_ACCESS_AUD }}
         run: |
           pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev
           for attempt in {1..10}; do
-            if pnpm verify:mcp https://mcp.tomokichidiary.com; then
+            if pnpm verify:mcp https://mcp.tomokichidiary.com --private-access; then
               exit 0
             fi
             if [ "$attempt" -lt 10 ]; then sleep 15; fi
