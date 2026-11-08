@@ -13,7 +13,10 @@ export default defineConfig({
     // The public face of the API. Admin traffic arrives instead through the admin
     // Worker's service binding, behind Cloudflare Access.
     domains: ["api.tomokichidiary.com"],
-    triggers: [{ type: "scheduled", schedule: "17 3 * * *" }],
+    // No scheduled trigger: this account is on the Workers Free plan, whose
+    // 5 cron triggers (account-wide) are all used by other Workers. The audit
+    // retention cleanup (the scheduled handler in src/index.ts) stays dormant
+    // until a trigger slot frees up; audit rows are kept at least 180 days.
     // ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`.
     // It is never committed, and a missing value closes the admin API.
     env: {
