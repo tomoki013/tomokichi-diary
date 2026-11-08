@@ -63,7 +63,6 @@ export interface Env {
   /** Dedicated audience for the MCP consent pages; never accepted by the admin gate. */
   MCP_CONSENT_ACCESS_AUD?: string;
   /** Audit retention in days; the implementation enforces a minimum of 180 days. */
-  AUDIT_RETENTION_DAYS?: string;
   /**
    * Bearer token for `GET /internal/status-probe`, shared only with the status
    * platform. Unset means the route does not exist (404).

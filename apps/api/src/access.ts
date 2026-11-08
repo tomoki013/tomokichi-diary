@@ -72,8 +72,16 @@ export async function verifyAccessJwt(
   teamDomain: string,
   audience: string,
 ): Promise<AccessIdentity | null> {
-  const [headerSegment, payloadSegment, signatureSegment] = token.split(".");
-  if (!headerSegment || !payloadSegment || !signatureSegment) return null;
+  const segments = token.split(".");
+  const [headerSegment, payloadSegment, signatureSegment] = segments;
+  if (
+    segments.length !== 3 ||
+    !headerSegment ||
+    !payloadSegment ||
+    !signatureSegment ||
+    segments.some((segment) => !/^[A-Za-z0-9_-]+$/.test(segment) || segment.length % 4 === 1)
+  )
+    return null;
 
   const header = decodeSegment<{ kid?: string; alg?: string }>(headerSegment);
   const claims = decodeSegment<AccessClaims>(payloadSegment);

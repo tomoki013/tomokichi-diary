@@ -17,6 +17,12 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 
 操作履歴はMCPツール呼び出し単位でD1に記録します。client_idはハッシュ化し、client名は初期状態で自己申告として扱います。管理画面 `/mcp-connections` でclient_idハッシュとリダイレクト先を確認して表示名を確定できます。
 
+## 旧接続からの移行と復旧
+
+既存プラグインの設定画面でURLが表示項目になっている場合は、上記の新URLで別のカスタムMCP接続を作成します。旧接続は残し、本人の再認可後に新接続で週次・月次レポートを一度ずつ取得します。定期タスクは新接続を選び直し、実行履歴と管理画面の操作履歴を確認してから旧接続の廃止を判断します。
+
+レポートツールが内部エラーになり、Workerログの `/analytics/oauth/token` に `KV put() limit exceeded for the day` が出ている場合は、トークンの保存枠を使い切っています。Workers Freeの枠は毎日09:00 JSTに戻ります。回復後に旧接続の取得を再確認してから新接続を承認します。繰り返す場合はCloudflareのKV使用量をnamespace別に調べます。[Workers KVの料金と日次枠](https://developers.cloudflare.com/kv/platform/pricing/)・[KVの使用量確認](https://developers.cloudflare.com/kv/observability/metrics-analytics/)
+
 ## ツール
 
 `get_analytics_report({period:"weekly"|"monthly"})`: JSTで完了した前週（月〜日）/前月。保存snapshotの生成日時・未生成状態に加え、同期間の最新D1集計と前期間比較を返す。snapshot生成後のbackfillや収益遅延を最新集計から検証できる。

@@ -13,10 +13,8 @@ export default defineConfig({
     // The public face of the API. Admin traffic arrives instead through the admin
     // Worker's service binding, behind Cloudflare Access.
     domains: ["api.tomokichidiary.com"],
-    // No scheduled trigger: this account is on the Workers Free plan, whose
-    // 5 cron triggers (account-wide) are all used by other Workers. The audit
-    // retention cleanup (the scheduled handler in src/index.ts) stays dormant
-    // until a trigger slot frees up; audit rows are kept at least 180 days.
+    // Audit retention runs in GitHub Actions to stay within the account's
+    // Workers Free cron trigger limit.
     // ADMIN_TOKEN is a secret: `wrangler secret put ADMIN_TOKEN --name tomokichi-diary-api`.
     // It is never committed, and a missing value closes the admin API.
     env: {
@@ -28,7 +26,6 @@ export default defineConfig({
       ACCESS_TEAM_DOMAIN: bindings.text("tomoki-ttttt.cloudflareaccess.com"),
       ACCESS_AUD: bindings.text("edce2137d11aa91a88cb2ee68c87365a53ee0a8026b5694fccce977e02b8e02e"),
       MCP_CONSENT_ACCESS_AUD: bindings.text(process.env.MCP_CONSENT_ACCESS_AUD ?? ""),
-      AUDIT_RETENTION_DAYS: bindings.text(process.env.AUDIT_RETENTION_DAYS ?? "180"),
       PUBLIC_MEDIA_URL: bindings.text("https://media.tomokichidiary.com"),
       PUBLIC_IMAGE_URL: bindings.text("https://api.tomokichidiary.com/v1/images"),
       MEDIA_UPLOADS_PAUSED: bindings.text(process.env.MEDIA_UPLOADS_PAUSED ?? "0"),

@@ -108,4 +108,6 @@ Workerも移行前へ戻す場合は、管理画面、MCPの初回先行バー�
 
 再開するときは `OPERATOR_OWNER_SUBJECT` を設定し直し、ChatGPT から再接続します。共有トークンを使っていないので、トークンのローテーションは不要です。
 
+個別失効ではGrantと発行済みトークンをOAuthストアから削除します。すでに読み込まれたKVの値が各拠点で期限切れになるまで、失効の反映に時間がかかる場合があります。[Cloudflare Workers KVの整合性](https://developers.cloudflare.com/kv/concepts/how-kv-works/#consistency)
+
 ローカルstdio Operatorを履歴上で識別するには、API Workerに `LOCAL_OPERATOR_TOKEN` を設定し、クライアント環境に `TOMOKICHI_LOCAL_OPERATOR_TOKEN` を渡します。これはOperator用の読み書き許可ルートだけに通る専用bearer secretで、通常の `ADMIN_TOKEN` と異なる値にしてください。省略時も従来どおり `TOMOKICHI_ADMIN_TOKEN` で動作しますが、その場合は通常の管理APIトークンとして扱われ、Actorは `admin-token` になります。

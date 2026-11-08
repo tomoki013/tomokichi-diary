@@ -1,0 +1,40 @@
+name: Audit log retention
+on:
+  schedule:
+    - cron: "23 19 * * *" # 04:23 JST
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Delete expired rows (leave off to count eligible rows)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diary-audit-retention
+  cancel-in-progress: false
+
+jobs:
+  retain:
+    if: github.repository == 'tomoki013/tomokichi-diary' && github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Retain audit events for the configured period
+        env:
+          AUDIT_RETENTION_DAYS: ${{ vars.AUDIT_RETENTION_DAYS }}
+          APPLY_RETENTION: ${{ github.event_name == 'schedule' || inputs.apply }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ "$APPLY_RETENTION" = true ]; then
+            pnpm exec tsx scripts/audit-retention.ts --apply
+          else
+            pnpm exec tsx scripts/audit-retention.ts
+          fi

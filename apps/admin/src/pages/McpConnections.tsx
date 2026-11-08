@@ -31,7 +31,7 @@ export function McpConnections() {
         : connection.clientName;
     if (
       !globalThis.confirm(
-        `「${label}」の${issuerLabel[connection.issuer]}接続を無効化しますか？発行済みアクセストークンも直ちに失効します。`,
+        `「${label}」の${issuerLabel[connection.issuer]}接続を無効化しますか？発行済みトークンへの失効反映には時間がかかる場合があります。`,
       )
     )
       return;
