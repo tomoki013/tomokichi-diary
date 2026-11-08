@@ -113,7 +113,18 @@ describe("verifyAccessJwt", () => {
   });
 
   it("rejects malformed input without throwing", async () => {
-    for (const token of ["", "a.b", "a.b.c", "not.a.jwt.at.all", ".."]) {
+    const valid = await mint({ sub: "sub-1" });
+    const [header, payload] = valid.split(".");
+    for (const token of [
+      "",
+      "a.b",
+      "a.b.c",
+      "not.a.jwt.at.all",
+      "..",
+      `${header}.${payload}.!`,
+      `${header}.${payload}.A`,
+      `${valid}.extra`,
+    ]) {
       expect(await verifyAccessJwt(token, TEAM, AUD)).toBeNull();
     }
   });
