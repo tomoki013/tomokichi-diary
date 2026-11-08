@@ -39,7 +39,8 @@ pnpm run ci           # 全部通れば環境は正しい（約 3.5 分、Lighth
 | `PUBLIC_TURNSTILE_SITE_KEY` | 未設定                                           | 未設定ならフォームを描画しない。dev では試験キー                                                                                                                                                            |
 | `VITE_API_URL`              | `http://localhost:8787`                          | Admin → API。本番ビルドは `https://api.tomokichidiary.com`                                                                                                                                                  |
 | API secrets                 | `wrangler secret put --name tomokichi-diary-api` | `ADMIN_TOKEN`, `LOCAL_OPERATOR_TOKEN`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`, `LIKE_HASH_SALT`, `MAIL_API_KEY_TOMOKICHI_DIARY`（`apps/api/src/env.ts`）。ローカルは `apps/api/.dev.vars`（gitignore 済み） |
-| API vars                    | `apps/api/cloudflare.config.ts`                  | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `MCP_CONSENT_ACCESS_AUD`, `AUDIT_RETENTION_DAYS`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`, `CONTACT_MAIL_FROM`, `CONTACT_MAIL_TO`                              |
+| API vars                    | `apps/api/cloudflare.config.ts`                  | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `MCP_CONSENT_ACCESS_AUD`, `ALLOWED_ORIGINS`, `TURNSTILE_EXPECTED_HOSTNAME`, `CONTACT_MAIL_FROM`, `CONTACT_MAIL_TO`                                                      |
+| Audit retention             | GitHub Actions `production` environment          | `AUDIT_RETENTION_DAYS` (optional, minimum and default 180)                                                                                                                                                  |
 
 ## Install / Development server
 

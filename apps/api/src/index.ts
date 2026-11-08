@@ -3,24 +3,12 @@ import { createApp } from "./app.js";
 import type { Env } from "./env.js";
 import { operatorFetch } from "./operator.js";
 import { verifyAccessJwt } from "./access.js";
-import { fromD1 } from "@tomokichi/infra-d1";
 
 const MCP_CALLER = "tomokichi-diary-mcp";
 
 const app = createApp();
 export default {
   fetch: app.fetch,
-  scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
-    const configured = Number.parseInt(env.AUDIT_RETENTION_DAYS ?? "180", 10);
-    const retentionDays = Number.isFinite(configured) ? Math.max(180, configured) : 180;
-    const cutoff = new Date(Date.now() - retentionDays * 86_400_000).toISOString();
-    ctx.waitUntil(
-      fromD1(env.DB)
-        .prepare("DELETE FROM operator_audit_events WHERE occurred_at < ?")
-        .bind(cutoff)
-        .run(),
-    );
-  },
 };
 
 /** Reached only through the MCP Worker's `OPERATOR_API` binding; see operator.ts. */

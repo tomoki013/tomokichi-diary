@@ -163,6 +163,15 @@ The owner can search `/activity` and revoke individual
 OAuth grants from `/mcp-connections`; the existing owner-subject secret remains the
 emergency stop for all Operator connections.
 
+### Audit log retention
+
+The `Audit log retention` workflow runs daily from `main` against production D1.
+Set the optional GitHub Actions `production` variable `AUDIT_RETENTION_DAYS` to an
+integer of at least 180. The default is 180, and an invalid value stops the job
+before it writes. The cutoff uses UTC and preserves rows exactly at the cutoff.
+To check the number of eligible rows, dispatch the workflow with `apply` off.
+The workflow reports a cutoff and count without exporting audit rows.
+
 ### `AGENT_SURFACE_FAILED`
 
 An article knowledge record was built without its WebMCP context/tool registrations,
