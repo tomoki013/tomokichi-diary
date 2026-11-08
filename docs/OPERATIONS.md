@@ -148,8 +148,20 @@ exports and deploy with `pnpm deploy:mcp`. MCP Apps-capable hosts render the evi
 view; all other clients receive the same facts as text and structured content.
 `pnpm check:agents` verifies the built WebMCP contexts, tools, JSON projections and
 single-file MCP App. After deployment, run
-`pnpm verify:mcp https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev` to exercise
+`pnpm verify:mcp https://mcp.tomokichidiary.com` to exercise
 protocol negotiation, tools, firsthand filtering and the UI resource against production.
+
+The MCP Worker keeps its `workers.dev` host live during migration. The OAuth issuer,
+resource and KV prefixes are separate for the new custom domain; clients must reauthorize
+at `https://mcp.tomokichidiary.com`. Configure a dedicated Cloudflare Access application
+for exactly `/analytics-connect` and `/operator-connect`, then set its Audience Tag as
+`MCP_CONSENT_ACCESS_AUD` in the GitHub Actions `production` environment and pass it
+to manual API deploys. Leave MCP, OAuth, and discovery endpoints outside Access so
+token-based clients can reach them. Follow the [first rollout order](OPERATOR_MCP.md#cloudflare-設定と移行)
+for the D1 migration and the two new Service Binding entrypoints.
+The owner can search `/activity` and revoke individual
+OAuth grants from `/mcp-connections`; the existing owner-subject secret remains the
+emergency stop for all Operator connections.
 
 ### `AGENT_SURFACE_FAILED`
 

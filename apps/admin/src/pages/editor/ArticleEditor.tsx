@@ -269,6 +269,9 @@ function Editor({ article, reload }: { article: ArticleDetailDto; reload: () => 
             <a href={article.kind === "note" ? href.diaryNotes() : href.articles()}>
               ← {article.kind === "note" ? "一言日記一覧" : "記事一覧"}
             </a>
+            <a href={href.activity(article.id, article.kind === "note" ? "note" : "article")}>
+              この{article.kind === "note" ? "日記" : "記事"}の操作履歴
+            </a>
             <PhaseBadge article={article} />
             {article.kind === "page" && <Badge>固定ページ</Badge>}
             {article.kind === "note" && <Badge>一言日記</Badge>}

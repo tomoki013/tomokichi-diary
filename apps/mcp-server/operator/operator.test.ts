@@ -40,6 +40,12 @@ describe("operator configuration", () => {
     });
     expect(
       configFromEnv({
+        TOMOKICHI_ADMIN_TOKEN: "admin-token",
+        TOMOKICHI_LOCAL_OPERATOR_TOKEN: "local-operator-token",
+      }).token,
+    ).toBe("local-operator-token");
+    expect(
+      configFromEnv({
         TOMOKICHI_ADMIN_TOKEN: "t",
         TOMOKICHI_API_URL: "https://api.tomokichidiary.com/",
         TOMOKICHI_OPERATOR_WRITE: "1",

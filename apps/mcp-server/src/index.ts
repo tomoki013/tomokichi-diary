@@ -1,8 +1,17 @@
 import { createMcpHandler } from "agents/mcp/server";
-import { analyticsOAuth, type AnalyticsEnv } from "./analytics-auth.js";
+import {
+  analyticsOAuth,
+  analyticsOAuthEnv,
+  LEGACY_CONSENT_ORIGIN,
+  LEGACY_MCP_ORIGIN,
+  MCP_ORIGIN,
+  legacyAnalyticsOAuth,
+  type AnalyticsEnv,
+} from "./analytics-auth.js";
 import { isOperatorPath, operatorFetch, type OperatorEnv } from "./operator-auth.js";
 import { createServer } from "./server.js";
 import evidenceAppHtml from "../ui-dist/index.html";
+export { OperatorConnections } from "./connections.js";
 
 const privateHeaders = (response: Response) => {
   const headers = new Headers(response.headers);
@@ -18,6 +27,11 @@ interface Env extends AnalyticsEnv, OperatorEnv {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+    const consentProxy =
+      url.origin === LEGACY_CONSENT_ORIGIN &&
+      (url.pathname === "/analytics-connect" || url.pathname === "/operator-connect");
+    if (url.origin !== MCP_ORIGIN && url.origin !== LEGACY_MCP_ORIGIN && !consentProxy)
+      return new Response("Not found", { status: 404 });
     if (
       (url.pathname === "/analytics/oauth/register" ||
         url.pathname === "/operator/oauth/register") &&
@@ -44,7 +58,10 @@ export default {
       url.pathname === "/analytics-connect" ||
       url.pathname.startsWith("/.well-known/oauth-")
     ) {
-      return privateHeaders(await analyticsOAuth.fetch(request, env, ctx));
+      const provider =
+        url.origin === LEGACY_MCP_ORIGIN || consentProxy ? legacyAnalyticsOAuth : analyticsOAuth;
+      const oauthEnv = provider === analyticsOAuth ? analyticsOAuthEnv(env) : env;
+      return privateHeaders(await provider.fetch(request, oauthEnv, ctx));
     }
     if (url.pathname !== "/mcp") return new Response("Not found", { status: 404 });
     return createMcpHandler(() => createServer(env.SITE_ORIGIN, evidenceAppHtml))(

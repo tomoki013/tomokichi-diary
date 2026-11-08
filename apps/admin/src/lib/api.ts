@@ -239,7 +239,88 @@ export interface RankingInput {
 
 export type PublicationStatus = import("@tomokichi/contracts").SitePublicationStatus;
 
+export interface ActivityEventDto {
+  id: string;
+  occurredAt: string;
+  requestId: string;
+  actorType: string;
+  actorSubject: string | null;
+  clientId: string | null;
+  clientName: string | null;
+  clientTrust: "confirmed" | "self-asserted" | "unknown";
+  clientRedirectHost: string | null;
+  source: string;
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  result: "requested" | "succeeded" | "failed" | "rejected";
+  statusCode: number | null;
+  metadata: Record<string, unknown>;
+  oauthGrantRef: string | null;
+  mcpToolName: string | null;
+  publicationId: string | null;
+}
+
+export interface ActivityFilters {
+  start?: string;
+  end?: string;
+  client?: string;
+  action?: string;
+  targetType?: string;
+  targetId?: string;
+  result?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ActivityPageDto {
+  items: ActivityEventDto[];
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+export interface McpConnectionDto {
+  id: string;
+  issuer: "analytics" | "analytics-legacy" | "operator" | "operator-legacy";
+  clientId: string;
+  clientName: string;
+  clientTrust: "confirmed" | "self-asserted" | "unknown";
+  actorSubject: string;
+  scopes: string[];
+  approvedAt: string;
+  expiresAt: string | null;
+  redirectHost: string | null;
+  lastUsedAt: string | null;
+  active: boolean;
+}
+
 export const api = {
+  activity: (filters: ActivityFilters = {}) =>
+    request<ActivityPageDto>(
+      `/admin/activity?${new URLSearchParams(
+        Object.entries(filters).flatMap(([key, value]) =>
+          value === undefined || value === "" ? [] : [[key, String(value)]],
+        ),
+      )}`,
+    ),
+  connections: () => request<{ items: McpConnectionDto[] }>("/admin/connections"),
+  revokeConnection: (connection: Pick<McpConnectionDto, "issuer" | "id">) =>
+    request<{ revoked: boolean }>(
+      `/admin/connections/${connection.issuer}/${id(connection.id)}/revoke`,
+      json("POST", { confirm: "revoke" }),
+    ),
+  confirmMcpClientName: (clientId: string, redirectHost: string, displayName: string) =>
+    request<{
+      clientId: string;
+      redirectHost: string;
+      displayName: string;
+      clientTrust: "confirmed";
+    }>(
+      `/admin/connections/clients/${id(clientId)}/label`,
+      json("POST", { redirectHost, displayName }),
+    ),
   monetization: () => request<MonetizationOverviewDto>("/admin/monetization"),
   dashboardTasks: () => request<{ items: DashboardTaskDto[] }>("/admin/dashboard/tasks"),
   createDashboardTask: (input: DashboardTaskInput) =>

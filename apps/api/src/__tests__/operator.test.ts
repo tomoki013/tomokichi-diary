@@ -12,15 +12,42 @@ const request = () => new Request("https://api/v1/admin/articles");
 describe("AdminOperator entrypoint", () => {
   it("refuses other callers, paths outside the admin API, and deletes before the app runs", async () => {
     const app = { fetch: vi.fn(async () => new Response("ok")) };
-    const call = (url: string, method = "GET", caller: unknown = OPERATOR_CALLER) =>
-      operatorFetch(new Request(url, { method }), env, ctx, caller, app);
+    const audit = JSON.stringify({
+      actorType: "remote-operator",
+      actorSubject: "owner",
+      clientTrust: "unknown",
+      operatorWrite: true,
+    });
+    const call = (
+      url: string,
+      method = "GET",
+      caller: unknown = OPERATOR_CALLER,
+      auditContext?: string,
+    ) =>
+      operatorFetch(
+        new Request(url, {
+          method,
+          ...(auditContext ? { headers: { "x-operator-audit-context": auditContext } } : {}),
+        }),
+        env,
+        ctx,
+        caller,
+        app,
+      );
     expect((await call("https://api/v1/admin/articles", "GET", "someone-else")).status).toBe(403);
     expect((await call("https://api/v1/admin/articles", "GET", null)).status).toBe(403);
     expect((await call("https://api/v1/contact", "POST")).status).toBe(404);
     expect((await call("https://api/v1/admin", "GET")).status).toBe(404);
     expect((await call("https://api/v1/admin/tags/t1", "DELETE")).status).toBe(405);
+    expect((await call("https://api/v1/admin/activity", "GET")).status).toBe(403);
+    expect((await call("https://api/v1/admin/articles", "POST")).status).toBe(403);
+    expect(
+      (await call("https://api/v1/admin/activity", "POST", OPERATOR_CALLER, audit)).status,
+    ).toBe(403);
     expect(app.fetch).not.toHaveBeenCalled();
-    expect((await call("https://api/v1/admin/articles", "POST")).status).toBe(200);
+    expect(
+      (await call("https://api/v1/admin/articles", "POST", OPERATOR_CALLER, audit)).status,
+    ).toBe(200);
   });
 
   it("lets the operator app through the admin gate without a token, and only that app", async () => {

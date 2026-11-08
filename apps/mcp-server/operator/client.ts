@@ -22,10 +22,11 @@ export class OperatorError extends Error {}
 
 /** Reads the configuration from the environment and refuses to start half-configured. */
 export function configFromEnv(env: Record<string, string | undefined>): OperatorConfig {
-  const token = env["TOMOKICHI_ADMIN_TOKEN"]?.trim() ?? "";
+  const token =
+    env["TOMOKICHI_LOCAL_OPERATOR_TOKEN"]?.trim() || env["TOMOKICHI_ADMIN_TOKEN"]?.trim() || "";
   if (token === "")
     throw new OperatorError(
-      "TOMOKICHI_ADMIN_TOKEN is not set. Pass the admin token through the MCP client's env, never in a file in the repository.",
+      "Set TOMOKICHI_LOCAL_OPERATOR_TOKEN (preferred) or TOMOKICHI_ADMIN_TOKEN through the MCP client's env, never in a file in the repository.",
     );
   const apiUrl = (env["TOMOKICHI_API_URL"]?.trim() || "http://localhost:8787").replace(/\/+$/, "");
   let parsed: URL;

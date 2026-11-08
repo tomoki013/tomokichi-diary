@@ -5,13 +5,18 @@ vi.mock("cloudflare:workers", () => ({
   },
 }));
 import { analyticsOAuth, ANALYTICS_RESOURCE, type AnalyticsEnv } from "../analytics-auth";
+import { OperatorConnections } from "../connections";
 import {
   authorizedOperator,
   isOperatorPath,
   operatorConsent,
   operatorFetch,
+  LEGACY_OPERATOR_ISSUER,
+  LEGACY_OPERATOR_RESOURCE,
   OPERATOR_ISSUER,
   OPERATOR_RESOURCE,
+  operatorAuthorization,
+  prefixedKv,
   type OperatorEnv,
 } from "../operator-auth";
 
@@ -27,10 +32,36 @@ const context = {
 function fixture() {
   const records = new Map<string, string>();
   const adminCalls: Request[] = [];
+  const auditRows: { sql: string; values: unknown[] }[] = [];
   const env = {
     OPERATOR_OWNER_SUBJECT: subject,
     ANALYTICS_OWNER_SUBJECT: subject,
     API: { fetch: vi.fn(async () => Response.json({ subject })) },
+    CONSENT_IDENTITY: { fetch: vi.fn(async () => Response.json({ subject })) },
+    DB: {
+      prepare(sql: string) {
+        const statement: {
+          values: unknown[];
+          bind(...values: unknown[]): typeof statement;
+          run(): Promise<{ success: boolean }>;
+          first(): Promise<unknown>;
+        } = {
+          values: [],
+          bind(...values) {
+            statement.values = values;
+            return statement;
+          },
+          async run() {
+            auditRows.push({ sql, values: statement.values });
+            return { success: true };
+          },
+          async first() {
+            return null;
+          },
+        };
+        return statement;
+      },
+    },
     OPERATOR_API: {
       fetch: vi.fn(async (request: Request) => {
         adminCalls.push(request);
@@ -59,15 +90,18 @@ function fixture() {
       }),
     },
   } as unknown as OperatorEnv & AnalyticsEnv;
-  return { env, records, adminCalls };
+  return { env, records, adminCalls, auditRows };
 }
 
 const send = (env: OperatorEnv, url: string, init?: RequestInit) =>
   operatorFetch(new Request(url, init), env, context);
 
 /** Registers a client and runs consent → PKCE code exchange, granting `decision`. */
-async function connect(env: OperatorEnv, decision: "read" | "write") {
-  const registered = await send(env, `${OPERATOR_ISSUER}/oauth/register`, {
+async function connect(env: OperatorEnv, decision: "read" | "write", legacy = false) {
+  const issuer = legacy ? LEGACY_OPERATOR_ISSUER : OPERATOR_ISSUER;
+  const resource = legacy ? LEGACY_OPERATOR_RESOURCE : OPERATOR_RESOURCE;
+  const consentOrigin = legacy ? "https://admin.tomokichidiary.com" : origin;
+  const registered = await send(env, `${issuer}/oauth/register`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
@@ -87,29 +121,29 @@ async function connect(env: OperatorEnv, decision: "read" | "write") {
     response_type: "code",
     redirect_uri: redirectUri,
     scope: "operator:read",
-    resource: OPERATOR_RESOURCE,
+    resource,
     state: "private-state",
     code_challenge: Buffer.from(digest).toString("base64url"),
     code_challenge_method: "S256",
   });
-  const page = await send(env, `https://admin.tomokichidiary.com/operator-connect?${query}`, {
+  const page = await send(env, `${consentOrigin}/operator-connect?${query}`, {
     headers: { "cf-access-jwt-assertion": "signed" },
   });
   expect(page.status).toBe(200);
   const handle = (await page.text()).match(/name="handle" value="([^"]+)"/)?.[1];
-  const post = await send(env, "https://admin.tomokichidiary.com/operator-connect", {
+  const post = await send(env, `${consentOrigin}/operator-connect`, {
     method: "POST",
     headers: {
       "cf-access-jwt-assertion": "signed",
-      origin: "https://admin.tomokichidiary.com",
+      origin: consentOrigin,
       cookie: page.headers.get("set-cookie")!.split(";")[0]!,
     },
     body: new URLSearchParams({ handle: handle!, decision }),
   });
   expect(post.status).toBe(303);
   const redirect = new URL(post.headers.get("location")!);
-  expect(redirect.searchParams.get("iss")).toBe(OPERATOR_ISSUER);
-  const exchange = await send(env, `${OPERATOR_ISSUER}/oauth/token`, {
+  expect(redirect.searchParams.get("iss")).toBe(issuer);
+  const exchange = await send(env, `${issuer}/oauth/token`, {
     method: "POST",
     body: new URLSearchParams({
       client_id,
@@ -117,7 +151,7 @@ async function connect(env: OperatorEnv, decision: "read" | "write") {
       redirect_uri: redirectUri,
       code: redirect.searchParams.get("code")!,
       code_verifier: verifier,
-      resource: OPERATOR_RESOURCE,
+      resource,
     }),
   });
   expect(exchange.status).toBe(200);
@@ -183,8 +217,9 @@ describe("remote operator authorization", () => {
       await send(env, `${origin}/.well-known/oauth-authorization-server/operator`)
     ).json()) as Record<string, unknown>;
     expect(server.issuer).toBe(OPERATOR_ISSUER);
-    expect(server.authorization_endpoint).toBe("https://admin.tomokichidiary.com/operator-connect");
+    expect(server.authorization_endpoint).toBe(`${origin}/operator-connect`);
     expect(server.token_endpoint).toBe(`${OPERATOR_ISSUER}/oauth/token`);
+    expect(server.registration_endpoint).toBe(`${OPERATOR_ISSUER}/oauth/register`);
     expect(server.scopes_supported).toEqual(["operator:read", "operator:write", "offline_access"]);
     expect(server.code_challenge_methods_supported).toEqual(["S256"]);
   });
@@ -201,28 +236,28 @@ describe("remote operator authorization", () => {
     ).toBe(false);
   });
 
-  it("serves consent only on the admin host to the verified owner, same-origin", async () => {
+  it("serves consent on the dedicated MCP host only to the verified owner, same-origin", async () => {
     const { env } = fixture();
-    expect((await operatorConsent(new Request(`${origin}/operator-connect`), env)).status).toBe(
-      404,
-    );
     expect(
-      (await operatorConsent(new Request("https://admin.tomokichidiary.com/operator-connect"), env))
+      (await operatorConsent(new Request("https://untrusted.example/operator-connect"), env))
         .status,
-    ).toBe(403);
-    const crossOrigin = new Request("https://admin.tomokichidiary.com/operator-connect", {
+    ).toBe(404);
+    expect((await operatorConsent(new Request(`${origin}/operator-connect`), env)).status).toBe(
+      403,
+    );
+    const crossOrigin = new Request(`${origin}/operator-connect`, {
       method: "POST",
       headers: { "cf-access-jwt-assertion": "signed", origin: "https://evil.example" },
     });
     expect((await operatorConsent(crossOrigin, env)).status).toBe(403);
     const otherPerson = {
       ...env,
-      API: { fetch: async () => Response.json({ subject: "someone" }) },
+      CONSENT_IDENTITY: { fetch: async () => Response.json({ subject: "someone" }) },
     };
     expect(
       (
         await operatorConsent(
-          new Request("https://admin.tomokichidiary.com/operator-connect", {
+          new Request(`${origin}/operator-connect`, {
             headers: { "cf-access-jwt-assertion": "signed" },
           }),
           otherPerson,
@@ -234,9 +269,9 @@ describe("remote operator authorization", () => {
 
 describe("remote operator tools", () => {
   it("lists only read tools for a read grant and calls the admin API without any token", async () => {
-    const { env, records, adminCalls } = fixture();
+    const { env, records, adminCalls, auditRows } = fixture();
     const token = await connect(env, "read");
-    expect([...records.keys()].every((key) => key.startsWith("operator:"))).toBe(true);
+    expect([...records.keys()].every((key) => key.startsWith("operator-v2:"))).toBe(true);
     const names = await toolNames(env, token);
     expect(names).toContain("list_articles");
     expect(names).toContain("check_publishable");
@@ -250,6 +285,9 @@ describe("remote operator tools", () => {
     expect(adminCalls).toHaveLength(1);
     expect(new URL(adminCalls[0]!.url).pathname).toBe("/v1/admin/articles");
     expect(adminCalls[0]!.headers.get("authorization")).toBeNull();
+    expect(auditRows[0]?.values[8]).toBe("remote-mcp");
+    expect(auditRows[0]?.values[9]).toBe("mcp.tool.list_articles");
+    expect(auditRows[0]?.values[2]).toBe(adminCalls[0]!.headers.get("x-request-id"));
   });
 
   it("lists write tools for a write grant, still requiring the publish confirmation", async () => {
@@ -283,5 +321,80 @@ describe("remote operator tools", () => {
       method: "tools/list",
     });
     expect(closed.status).toBe(403);
+  });
+
+  it("keeps old and new issuer tokens separate and revokes issued access tokens with their grant", async () => {
+    const { env, records } = fixture();
+    const newToken = await connect(env, "read");
+    const oldTokenAtNewHost = await rpc(env, newToken, { method: "tools/list" });
+    expect(oldTokenAtNewHost.status).toBe(200);
+    const newTokenAtOldHost = await send(env, LEGACY_OPERATOR_RESOURCE, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${newToken}`,
+        host: new URL(LEGACY_OPERATOR_RESOURCE).hostname,
+        accept: "application/json, text/event-stream",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    expect(newTokenAtOldHost.status).toBe(401);
+
+    const oldToken = await connect(env, "read", true);
+    expect([...records.keys()].some((key) => key.startsWith("operator:"))).toBe(true);
+    expect((await rpc(env, oldToken, { method: "tools/list" })).status).toBe(401);
+
+    const helpers = operatorAuthorization.getOAuthApi({
+      ...env,
+      OAUTH_KV: prefixedKv(env.OAUTH_KV, "operator-v2:"),
+    });
+    const grants = await helpers.listUserGrants(encodeURIComponent(subject));
+    expect(grants.items).toHaveLength(1);
+    await helpers.revokeGrant(grants.items[0]!.id, encodeURIComponent(subject));
+    expect((await rpc(env, newToken, { method: "tools/list" })).status).toBe(401);
+  });
+
+  it("lists the private grant through the API binding and revokes its access token", async () => {
+    const { env } = fixture();
+    const token = await connect(env, "read");
+    const manager = Object.assign(Object.create(OperatorConnections.prototype), {
+      env,
+      ctx: { props: { caller: "tomokichi-diary-api" } },
+    }) as OperatorConnections;
+    const listed = await manager.fetch(new Request("https://internal/connections"));
+    expect(listed.status).toBe(200);
+    const data = (await listed.json()) as {
+      items: {
+        id: string;
+        issuer: string;
+        actorSubject: string;
+        clientId: string;
+        clientTrust: string;
+        scopes: string[];
+        redirectHost: string;
+      }[];
+    };
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0]).toMatchObject({
+      issuer: "operator",
+      actorSubject: subject,
+      clientTrust: "self-asserted",
+      scopes: ["operator:read"],
+      redirectHost: "chatgpt.com",
+    });
+    expect(data.items[0]!.clientId).toMatch(/^[a-f0-9]{32}$/);
+
+    const forbidden = Object.assign(Object.create(OperatorConnections.prototype), {
+      env,
+      ctx: { props: { caller: "untrusted-worker" } },
+    }) as OperatorConnections;
+    expect((await forbidden.fetch(new Request("https://internal/connections"))).status).toBe(403);
+    const revoked = await manager.fetch(
+      new Request(`https://internal/connections/operator/${data.items[0]!.id}/revoke`, {
+        method: "POST",
+      }),
+    );
+    expect(revoked.status).toBe(200);
+    expect((await rpc(env, token, { method: "tools/list" })).status).toBe(401);
   });
 });
