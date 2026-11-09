@@ -500,7 +500,6 @@ function ArticlePicker({
   );
 }
 
-
 function RankingPhotoPicker({ onPick }: { onPick: (asset: MediaAssetDto) => void }) {
   const [query, setQuery] = useState("");
   const library = usePagedSearch<MediaAssetDto>(

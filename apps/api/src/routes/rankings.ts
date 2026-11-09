@@ -36,7 +36,9 @@ async function rankingDtos(ctx: Ctx, only?: RankingId): Promise<RankingAdminDto[
     ),
   ];
   const photos = await Promise.all(photoIds.map((photoId) => ctx.repos.media.findById(photoId)));
-  const photoById = new Map(photos.filter((photo) => photo !== null).map((photo) => [photo.id, photo]));
+  const photoById = new Map(
+    photos.filter((photo) => photo !== null).map((photo) => [photo.id, photo]),
+  );
   const now = ctx.clock.now();
   return chosen.map((ranking) => {
     const photo = ranking.photoMediaId ? (photoById.get(ranking.photoMediaId) ?? null) : null;
