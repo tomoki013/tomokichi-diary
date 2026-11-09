@@ -19,7 +19,7 @@ ChatGPT（Codex）や Claude などの AI クライアントから、旅行記�
 
 一言日記は `list_diary_notes` / `get_diary_note` で旅行記事から分けて取得します。`create_diary_note_draft` と `save_diary_note_draft` はD1に下書きを保存します。公開前に `check_diary_note_publishable` を実行し、利用者が明示的に公開を頼んだ場合だけ `publish_diary_note` に `confirm: "publish"` を渡します。取り下げも明示指示と `confirm: "unpublish"` が必要です。関連記事の変更も日記を再公開するまで公開版に反映されません。
 
-ランキング（トップページの「ともきち的ランキング」）は `update_ranking` で順位・一言を保存し、`publish_site`（`confirm: "publish"` が必要）でサイト全体を再生成して反映します。記事は ID でも slug でも指定できます。サイトポリシー（/legal/ の固定ページ）は記事と同じツールで編集・公開します。
+ランキング（トップページの「ともきち的ランキング」）は `update_ranking` で順位・一言・写真（`photoMediaId`）を保存し、`publish_site`（`confirm: "publish"` が必要）でサイト全体を再生成して反映します。写真の ID は `search_media` で確認できます。記事は ID でも slug でも指定できます。サイトポリシー（/legal/ の固定ページ）は記事と同じツールで編集・公開します。
 
 ## 環境変数
 

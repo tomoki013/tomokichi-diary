@@ -1,13 +1,19 @@
 import { useEffect, useState, type FormEvent } from "react";
-import type { ArticleSummaryDto, RankingAdminDto } from "@tomokichi/contracts";
+import type {
+  ArticleSummaryDto,
+  MediaAssetDto,
+  RankingAdminDto,
+  RankingPhotoDto,
+} from "@tomokichi/contracts";
 import { api } from "../lib/api";
 import { experienceLabels } from "../lib/labels";
 import { href } from "../lib/route";
 import { seriesSiteState } from "../lib/series-site";
 import { SitePublication } from "../ui/SitePublication";
-import { useResource, useTitle, useUnsavedWarning } from "../ui/hooks";
+import { usePagedSearch, useResource, useTitle, useUnsavedWarning } from "../ui/hooks";
 import { Badge, EmptyState, ErrorState, PageHeader, Panel, SkeletonRows } from "../ui/parts";
 import { useToast } from "../ui/toast";
+import { MediaThumb } from "../ui/MediaThumb";
 
 const MAX_PICKS = 15;
 
@@ -32,7 +38,7 @@ export function RankingList() {
         }
       />
       <p className="muted">
-        トップページの「ともきち的ランキング」です。公開中の記事が1本も入っていないランキングはサイトに出ません。並びは表示順の小さい順です。変更はサイトの次回反映で公開されます。
+        トップページの「ともきち的ランキング」です。ランキングごとに写真を1枚選べます。公開中の記事が1本も入っていないランキングはサイトに出ません。並びは表示順の小さい順です。変更はサイトの次回反映で公開されます。
       </p>
       {rankings.error ? (
         <ErrorState error={rankings.error} onRetry={() => void rankings.reload()} />
@@ -75,6 +81,8 @@ interface FormState {
   title: string;
   note: string;
   experienceTag: string;
+  photoMediaId: string | null;
+  photo: RankingPhotoDto | null;
   sortOrder: string;
   picks: { articleId: string; comment: string }[];
 }
@@ -84,6 +92,8 @@ function formFrom(item: RankingAdminDto | null): FormState {
     title: item?.title ?? "",
     note: item?.note ?? "",
     experienceTag: item?.experienceTag ?? "",
+    photoMediaId: item?.photo?.mediaId ?? null,
+    photo: item?.photo ?? null,
     sortOrder: item ? String(item.sortOrder) : "",
     picks: item?.picks.map(({ articleId, comment }) => ({ articleId, comment })) ?? [],
   };
@@ -105,6 +115,7 @@ export function RankingEditor({ id }: { id: string }) {
   const [form, setForm] = useState<FormState | null>(null);
   const [baseline, setBaseline] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pickingPhoto, setPickingPhoto] = useState(false);
   const publication = useResource(() => api.publicationStatus(), "publication");
   const reloadPublication = publication.reload;
   useEffect(() => {
@@ -151,6 +162,7 @@ export function RankingEditor({ id }: { id: string }) {
         title: form.title,
         note: form.note,
         experienceTag: form.experienceTag === "" ? null : form.experienceTag,
+        photoMediaId: form.photoMediaId,
         picks: form.picks,
         ...(sortOrder === undefined ? {} : { sortOrder }),
       };
@@ -251,9 +263,52 @@ export function RankingEditor({ id }: { id: string }) {
           </label>
         </Panel>
 
+        <Panel
+          title="ランキング写真"
+          actions={
+            <>
+              <button type="button" onClick={() => setPickingPhoto((open) => !open)}>
+                {pickingPhoto ? "ライブラリを閉じる" : "ライブラリから選ぶ"}
+              </button>
+              {form.photoMediaId && (
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => set({ photoMediaId: null, photo: null })}
+                >
+                  外す
+                </button>
+              )}
+            </>
+          }
+        >
+          {form.photo ? (
+            <div className="ranking-photo-preview">
+              <MediaThumb url={form.photo.url} thumbnailUrl={form.photo.thumbnailUrl} />
+              <span className="muted small">{form.photo.label}</span>
+            </div>
+          ) : (
+            <p className="muted">写真は未選択です。選ぶとランキングカードに1枚表示されます。</p>
+          )}
+          {pickingPhoto && (
+            <RankingPhotoPicker
+              onPick={(asset) => {
+                const photo: RankingPhotoDto = {
+                  mediaId: asset.id,
+                  url: asset.url,
+                  thumbnailUrl: asset.thumbnailUrl ?? null,
+                  label: asset.slug ?? asset.originalName ?? asset.id,
+                };
+                set({ photoMediaId: asset.id, photo });
+                setPickingPhoto(false);
+              }}
+            />
+          )}
+        </Panel>
+
         <Panel title={`順位（${form.picks.length}/${MAX_PICKS}）`}>
           <p className="muted small">
-            1位から順に並べます。1位は記事のカバー写真つきで出ます。一言は空欄なら記事タイトルだけが出ます。下書きの記事も入れておけますが、公開されるまでサイトには出ません。
+            1位から順に並べます。一言は空欄なら記事タイトルだけが出ます。下書きの記事も入れておけますが、公開されるまでサイトには出ません。
           </p>
           {form.picks.length === 0 ? (
             <p className="muted">まだ記事が入っていません。下の検索から追加してください。</p>
@@ -440,6 +495,56 @@ function ArticlePicker({
       )}
       {articles && q !== "" && matches.length === 0 && (
         <p className="muted small">見つかりません。</p>
+      )}
+    </div>
+  );
+}
+
+function RankingPhotoPicker({ onPick }: { onPick: (asset: MediaAssetDto) => void }) {
+  const [query, setQuery] = useState("");
+  const library = usePagedSearch<MediaAssetDto>(
+    (q, offset) => api.searchMedia(q, offset, 48),
+    query,
+  );
+  return (
+    <div className="ranking-photo-picker">
+      <input
+        type="search"
+        aria-label="ランキング写真を検索"
+        placeholder="Slug・ファイル名・エリアで検索"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      {Boolean(library.error) && (
+        <ErrorState error={library.error} onRetry={() => library.reload()} />
+      )}
+      {library.loading && library.items.length === 0 ? (
+        <SkeletonRows rows={3} />
+      ) : library.items.length === 0 ? (
+        <p className="muted small">選べる画像がありません。</p>
+      ) : (
+        <div className="ranking-photo-picker__grid">
+          {library.items.map((asset) => (
+            <button
+              key={asset.id}
+              type="button"
+              aria-label={`ランキング写真にする：${asset.slug ?? asset.originalName ?? asset.id}`}
+              onClick={() => onPick(asset)}
+            >
+              <MediaThumb
+                url={asset.url}
+                thumbnailUrl={asset.thumbnailUrl}
+                width={asset.width}
+                height={asset.height}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+      {library.hasMore && (
+        <button type="button" disabled={library.loading} onClick={() => library.more()}>
+          {library.loading ? "読み込み中…" : "さらに表示"}
+        </button>
       )}
     </div>
   );

@@ -254,6 +254,7 @@ export interface RankingChanges {
   title?: string;
   note?: string;
   experienceTag?: string | null;
+  photoMediaId?: string | null;
   picks?: { articleId: string; comment: string }[];
   sortOrder?: number;
 }

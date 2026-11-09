@@ -221,6 +221,7 @@ export interface RankingAdminDto {
   readonly title: string;
   readonly note: string;
   readonly experienceTag: string | null;
+  readonly photo: RankingPhotoDto | null;
   readonly sortOrder: number;
   /** First is #1. */
   readonly picks: readonly RankingPickDto[];
@@ -228,6 +229,13 @@ export interface RankingAdminDto {
   readonly liveCount: number;
   /** Last saved in the admin; compared with the site's last deploy. */
   readonly updatedAt: string | null;
+}
+
+export interface RankingPhotoDto {
+  readonly mediaId: string;
+  readonly url: string;
+  readonly thumbnailUrl: string | null;
+  readonly label: string;
 }
 
 export interface RankingPickDto {

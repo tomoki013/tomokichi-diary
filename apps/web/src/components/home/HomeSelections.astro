@@ -2,15 +2,19 @@
 import type { ArticleView } from "@tomokichi/application";
 import Picture from "../Picture.astro";
 import { experienceHref } from "../../lib/experiences";
-import type { Ranking } from "@tomokichi/domain";
+import type { MediaAsset, Ranking } from "@tomokichi/domain";
 
 interface Props {
-  selections: { selection: Ranking; picks: { view: ArticleView; comment: string }[] }[];
+  selections: {
+    selection: Ranking;
+    photo: MediaAsset | null;
+    picks: { view: ArticleView; comment: string }[];
+  }[];
 }
 
 /**
  * Rankings side by side in a row that scrolls sideways, so there is room for as many as the author likes.
- * Each rank carries the author's one line on why it is there; #1 also shows its cover.
+ * Each rank carries the author's one line on why it is there; each board has one chosen photo.
  * Only the top few show on the home page; the rest fold away so one long ranking
  * does not stretch the whole row.
  */
@@ -32,7 +36,7 @@ const HOME_TOP = 5;
     </header>
 
     <div class="home-picks__row">
-      {selections.map(({ selection, picks }) => (
+      {selections.map(({ selection, photo, picks }) => (
         <section class="home-picks__board" aria-labelledby={`pick-${selection.id}`}>
           <header>
             <h3 id={`pick-${selection.id}`}>{selection.title}</h3>
@@ -42,11 +46,11 @@ const HOME_TOP = 5;
             {picks.slice(0, HOME_TOP).map(({ view, comment }, index) => (
               <li>
                 <a href={view.route.path}>
-                  {index === 0 && view.cover && (
+                  {index === 0 && photo && (
                     <span class="home-picks__photo">
                       <Picture
-                        storageKey={view.cover.asset.storageKey}
-                        alt={view.cover.usage.alt}
+                        storageKey={photo.storageKey}
+                        alt=""
                         sizes="(max-width: 760px) 80vw, 19rem"
                       />
                     </span>

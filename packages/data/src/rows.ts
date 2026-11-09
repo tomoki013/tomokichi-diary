@@ -633,6 +633,7 @@ export const rankingRow = {
       title: str(row, "title"),
       note: str(row, "note"),
       experienceTag: isExperienceTag(experienceTag) ? experienceTag : null,
+      photoMediaId: nullableStr(row, "photo_media_id") as Ranking["photoMediaId"],
       picks: json<unknown[]>(row, "picks", []).flatMap((pick) => {
         if (typeof pick !== "object" || pick === null) return [];
         const { articleId, comment } = pick as Record<string, unknown>;
@@ -654,6 +655,7 @@ export const rankingRow = {
     title: ranking.title,
     note: ranking.note,
     experience_tag: ranking.experienceTag,
+    photo_media_id: ranking.photoMediaId ?? null,
     picks: JSON.stringify(ranking.picks),
     sort_order: ranking.sortOrder,
     updated_at: ranking.updatedAt,

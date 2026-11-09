@@ -5,6 +5,7 @@ import {
   RANKING_LIMITS,
   type ArticleId,
   type DomainError,
+  type MediaId,
   type Ranking,
   type RankingId,
   type RankingPick,
@@ -17,6 +18,8 @@ export interface RankingInput {
   readonly note?: unknown;
   /** null clears the "more" link. */
   readonly experienceTag?: unknown;
+  /** null clears the ranking photo. */
+  readonly photoMediaId?: unknown;
   /** The whole list, first is #1; it replaces what was there. */
   readonly picks?: unknown;
   readonly sortOrder?: unknown;
@@ -80,6 +83,17 @@ async function apply(
       return err(fail(`unknown experience tag ${String(input.experienceTag)}`, "experienceTag"));
     next = { ...next, experienceTag: input.experienceTag };
   }
+  if (input.photoMediaId !== undefined) {
+    if (input.photoMediaId === null) {
+      next = { ...next, photoMediaId: null };
+    } else if (typeof input.photoMediaId !== "string") {
+      return err(fail("photoMediaId must be a media id or null", "photoMediaId"));
+    } else {
+      const photo = await ctx.repos.media.findById(input.photoMediaId as MediaId);
+      if (!photo) return err(fail(`no media ${input.photoMediaId}`, "photoMediaId"));
+      next = { ...next, photoMediaId: photo.id };
+    }
+  }
   if (input.picks !== undefined) {
     const picks = await parsePicks(ctx, input.picks);
     if (!picks.ok) return err(...picks.errors);
@@ -105,6 +119,7 @@ export async function createRanking(
     title: "",
     note: "",
     experienceTag: null,
+    photoMediaId: null,
     picks: [],
     sortOrder: existing.reduce((max, item) => Math.max(max, item.sortOrder), 0) + 10,
     updatedAt: null,
