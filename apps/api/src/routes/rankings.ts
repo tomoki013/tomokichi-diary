@@ -1,13 +1,19 @@
 import { Hono } from "hono";
 import { createRanking, updateRanking, type RankingInput } from "@tomokichi/application";
 import type { RankingAdminDto } from "@tomokichi/contracts";
-import { isPubliclyVisible, type RankingId, type RevisionId } from "@tomokichi/domain";
+import {
+  isPubliclyVisible,
+  type MediaId,
+  type RankingId,
+  type RevisionId,
+} from "@tomokichi/domain";
 import type { AppEnv } from "../app.js";
 import { domainErrorResponse, errorResponse } from "../http.js";
+import { thumbnailKey } from "../mappers.js";
 
 type Ctx = AppEnv["Variables"]["ctx"];
 
-/** Builds the DTOs for every ranking, naming each pick by its article's current title. */
+/** Builds ranking DTOs, naming picks and resolving the manually chosen photo. */
 async function rankingDtos(ctx: Ctx, only?: RankingId): Promise<RankingAdminDto[]> {
   const [rankings, articles] = await Promise.all([
     ctx.repos.rankings.listAll(),
@@ -22,8 +28,19 @@ async function rankingDtos(ctx: Ctx, only?: RankingId): Promise<RankingAdminDto[
     ),
   );
   const titleOf = new Map(revisions.map((revision) => [revision.articleId, revision.title]));
+  const photoIds = [
+    ...new Set(
+      chosen
+        .map((ranking) => ranking.photoMediaId)
+        .filter((photoId): photoId is MediaId => photoId !== null),
+    ),
+  ];
+  const photos = await Promise.all(photoIds.map((photoId) => ctx.repos.media.findById(photoId)));
+  const photoById = new Map(photos.filter((photo) => photo !== null).map((photo) => [photo.id, photo]));
   const now = ctx.clock.now();
   return chosen.map((ranking) => {
+    const photo = ranking.photoMediaId ? (photoById.get(ranking.photoMediaId) ?? null) : null;
+    const thumbnail = photo ? thumbnailKey(photo) : null;
     const picks = ranking.picks.map((pick) => {
       const article = articleById.get(pick.articleId);
       return {
@@ -39,6 +56,14 @@ async function rankingDtos(ctx: Ctx, only?: RankingId): Promise<RankingAdminDto[
       title: ranking.title,
       note: ranking.note,
       experienceTag: ranking.experienceTag,
+      photo: photo
+        ? {
+            mediaId: photo.id,
+            url: ctx.mediaUrls.resolve(photo.storageKey),
+            thumbnailUrl: thumbnail ? ctx.mediaUrls.resolve(thumbnail) : null,
+            label: photo.slug ?? photo.originalName ?? photo.id,
+          }
+        : null,
       sortOrder: ranking.sortOrder,
       picks,
       liveCount: picks.filter((pick) => pick.live).length,
@@ -62,6 +87,7 @@ function rankingInput(body: Record<string, unknown>): RankingInput {
     ...pick("title"),
     ...pick("note"),
     ...pick("experienceTag"),
+    ...pick("photoMediaId"),
     ...pick("picks"),
     ...pick("sortOrder"),
   };

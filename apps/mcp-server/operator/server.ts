@@ -558,7 +558,7 @@ export function createOperatorServer(
     {
       title: "List rankings",
       description:
-        "トップページの「ともきち的ランキング」の一覧（ID、名前、添え書き、もっと読むの体験タグ、表示順、順位ごとの記事と一言、公開中の本数）。公開中の記事が0本のランキングはサイトに出ません。",
+        "トップページの「ともきち的ランキング」の一覧（ID、名前、添え書き、選択中の写真、もっと読むの体験タグ、表示順、順位ごとの記事と一言、公開中の本数）。公開中の記事が0本のランキングはサイトに出ません。",
       inputSchema: {},
       annotations: READ,
     },
@@ -589,6 +589,12 @@ export function createOperatorServer(
   const rankingChanges = {
     note: z.string().max(40).optional(),
     experienceTag: experienceTag.optional(),
+    photoMediaId: z
+      .string()
+      .min(1)
+      .nullable()
+      .optional()
+      .describe("ランキングに表示する写真のメディア ID。null で外す"),
     picks: picks.optional(),
     sortOrder: z.number().int().min(0).optional(),
   };
@@ -627,7 +633,7 @@ export function createOperatorServer(
     {
       title: "Update ranking",
       description:
-        "ランキングの名前・添え書き・もっと読む・表示順・順位（記事と一言）を変更します。picks は丸ごと置き換え。下書きの記事も入れられますが、公開されるまでサイトには出ません。保存はDBだけで、トップページへの反映は publish_site。",
+        "ランキングの名前・添え書き・写真・もっと読む・表示順・順位（記事と一言）を変更します。picks は丸ごと置き換え。下書きの記事も入れられますが、公開されるまでサイトには出ません。保存はDBだけで、トップページへの反映は publish_site.",
       inputSchema: {
         rankingId: z.string().min(1),
         title: z.string().min(1).max(60).optional(),

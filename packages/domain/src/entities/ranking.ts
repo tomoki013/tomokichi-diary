@@ -1,4 +1,4 @@
-import type { ArticleId } from "../primitives/id.js";
+import type { ArticleId, MediaId } from "../primitives/id.js";
 import type { Brand } from "../primitives/brand.js";
 import type { Instant } from "../primitives/datetime.js";
 import type { ExperienceTag } from "./experience.js";
@@ -18,6 +18,8 @@ export interface Ranking {
   readonly note: string;
   /** Where the "more" link goes: the list of articles with this experience tag. */
   readonly experienceTag: ExperienceTag | null;
+  /** One editorially chosen image for the ranking card on the home page. */
+  readonly photoMediaId: MediaId | null;
   /** First is #1. */
   readonly picks: readonly RankingPick[];
   readonly sortOrder: number;

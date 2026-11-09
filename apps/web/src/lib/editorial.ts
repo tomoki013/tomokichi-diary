@@ -1,5 +1,5 @@
 import type { ArticleView } from "@tomokichi/application";
-import type { Ranking } from "@tomokichi/domain";
+import type { MediaAsset, Ranking } from "@tomokichi/domain";
 import { content } from "./content";
 
 /**
@@ -107,13 +107,16 @@ export function bestEpisodes(): { episode: BestEpisode; view: ArticleView }[] {
  */
 export function selections(): {
   selection: Ranking;
+  photo: MediaAsset | null;
   picks: { view: ArticleView; comment: string }[];
 }[] {
   const viewById = new Map(content.articleViews().map((view) => [view.article.id, view]));
+  const mediaById = new Map(content.snapshot.media.map((asset) => [asset.id, asset]));
   return (content.snapshot.rankings ?? [])
     .toSorted((a, b) => a.sortOrder - b.sortOrder)
     .map((selection) => ({
       selection,
+      photo: selection.photoMediaId ? (mediaById.get(selection.photoMediaId) ?? null) : null,
       picks: selection.picks.flatMap(({ articleId, comment }) => {
         const view = viewById.get(articleId);
         return view ? [{ view, comment }] : [];
