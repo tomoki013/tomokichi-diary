@@ -50,7 +50,7 @@ jobs:
             | grep -qvE '^(docs/|drafts/|migrations/|scripts/analytics/|apps/(admin|api|mcp-server|chagee)/)|\.md$|\.test\.ts$|/__tests__/'; then
             echo "SKIP_PERF=1" >> "$GITHUB_ENV"
           fi
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
       - uses: actions/cache@v6
         with:
           path: .cache/images
@@ -88,7 +88,7 @@ jobs:
       VERIFY_URL: ${{ vars.VERIFY_URL || 'https://tomokichi-diary-web.tomoki-ttttt.workers.dev' }}
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
       # Any lockfile change misses the exact prefix, so it falls back to the
       # latest cache of any build rather than starting empty (which re-fetches
       # every derivative, ~4 minutes). That is safe: media:build checks each

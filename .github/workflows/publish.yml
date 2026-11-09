@@ -35,7 +35,7 @@ jobs:
           date -u +%FT%TZ > .artifacts/runner-ready.txt
           echo '| Step | Result | Duration |' >> "$GITHUB_STEP_SUMMARY"
           echo '| --- | --- | --- |' >> "$GITHUB_STEP_SUMMARY"
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
       - name: Locate dependency store
         id: store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
