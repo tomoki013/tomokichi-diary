@@ -1,8 +1,9 @@
 import type { ExperienceCohortDto } from "@tomokichi/contracts";
 const percent = (n: number | null) => (n === null ? "—" : `${(100 * n).toFixed(1)}%`);
+const noPreviousCohorts: ExperienceCohortDto[] = [];
 export function AnalyticsExperience({
   cohorts,
-  previous = [],
+  previous = noPreviousCohorts,
 }: {
   cohorts: ExperienceCohortDto[];
   previous?: ExperienceCohortDto[];
