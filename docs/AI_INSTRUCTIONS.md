@@ -12,6 +12,7 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 2. `docs/DATA_MODEL.md`（entity）
 3. `docs/adr/*`（9 本、各 17 行）と `docs/DECISIONS.md`
 4. 触る領域の監査項目（`docs/audit/diary-2.0-full-audit.md`）
+5. 記事の文章を書く・直すときは `docs/WRITING.md`（構成・字数・締め方の型を作らない）
 
 ## Architecture rules
 

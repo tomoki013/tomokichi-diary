@@ -4,7 +4,7 @@
 
 シリーズ管理: [旅する雑学](https://admin.tomokichidiary.com/#/series/01a14ada-3597-7a7b-aaad-b37c319b87f0)
 
-[企画・編集方針 v1.1](./EDITORIAL-POLICY-v1.1.md)（[初版](./EDITORIAL-POLICY-v1.0.md)） / [2026-10-18 情報精査](./FACT-CHECK-2026-10-18.md)
+[企画・編集方針 v1.2](./EDITORIAL-POLICY-v1.2.md)（[v1.1](./EDITORIAL-POLICY-v1.1.md)）（[初版](./EDITORIAL-POLICY-v1.0.md)） / [2026-10-18 情報精査](./FACT-CHECK-2026-10-18.md)
 
 #001、#002の公開順は確定。#003以降は仮順です。本文はです・ます調で統一し、写真・出典・Markdown記号・空白を除き1,045〜1,205字。歴史的背景、具体的な仕組み、現地で見るポイントを補い、各2〜3個の小見出しを付けました。各記事のfrontmatterに出典、訪問記録、写真候補、編集上の確認事項があります。CMS本文には出典リンクと旅行記への導線を含めています。
 
