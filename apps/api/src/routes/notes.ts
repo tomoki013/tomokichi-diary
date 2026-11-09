@@ -60,7 +60,31 @@ export function diaryNoteRoutes(publishSite: (env: Env, deferBuild?: boolean) =>
     const summaries = (await listArticlesForAdmin(c.get("ctx"))).filter(
       ({ article }) => article.kind === "note",
     );
-    const routeTable = new RouteTable(await c.get("ctx").repos.routes.listAll());
+    const [routesList, memberships, categories, locations] = await Promise.all([
+      c.get("ctx").repos.routes.listAll(),
+      c.get("ctx").repos.collections.listMemberships(),
+      c.get("ctx").repos.relations.listArticleCategories(),
+      c.get("ctx").repos.relations.listArticleLocations(),
+    ]);
+    const routeTable = new RouteTable(routesList);
+    const membershipsByArticle = new Map<string, string[]>();
+    for (const relation of memberships) {
+      const items = membershipsByArticle.get(relation.articleId) ?? [];
+      items.push(relation.collectionId);
+      membershipsByArticle.set(relation.articleId, items);
+    }
+    const categoriesByArticle = new Map<string, string[]>();
+    for (const relation of categories) {
+      const items = categoriesByArticle.get(relation.articleId) ?? [];
+      items.push(relation.categoryId);
+      categoriesByArticle.set(relation.articleId, items);
+    }
+    const locationsByArticle = new Map<string, string[]>();
+    for (const relation of locations) {
+      const items = locationsByArticle.get(relation.articleId) ?? [];
+      items.push(relation.locationId);
+      locationsByArticle.set(relation.articleId, items);
+    }
     return c.json({
       items: summaries.map(({ article, title, hasUnpublishedChanges, isLive }) =>
         toArticleSummaryDto({
@@ -69,6 +93,9 @@ export function diaryNoteRoutes(publishSite: (env: Env, deferBuild?: boolean) =>
           path: routeTable.canonicalFor("article", article.id)?.path ?? null,
           hasUnpublishedChanges,
           isLive,
+          collectionIds: membershipsByArticle.get(article.id) ?? [],
+          categoryIds: categoriesByArticle.get(article.id) ?? [],
+          locationIds: locationsByArticle.get(article.id) ?? [],
         }),
       ),
       total: summaries.length,
