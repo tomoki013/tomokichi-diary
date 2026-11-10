@@ -9,6 +9,7 @@ import type {
   ArticleMedia,
   ArticlePlace,
   ArticleRevision,
+  RevisionStamp,
   ArticleTag,
   NoteRelatedArticle,
   ArticleCollection,
@@ -96,7 +97,20 @@ export interface RevisionRepository {
   listByArticle(articleId: ArticleId): Promise<readonly ArticleRevision[]>;
   /** Every revision of these articles in one query, for dating content changes. */
   listByArticles(articleIds: readonly ArticleId[]): Promise<readonly ArticleRevision[]>;
+  /** Every revision without its body: enough to title an article and date its changes. */
+  listStamps(): Promise<readonly RevisionStampRecord[]>;
+  /** Stores fingerprints computed for revisions saved before they were kept. */
+  recordFingerprints(
+    entries: readonly { readonly id: RevisionId; readonly readerFingerprint: string }[],
+  ): Promise<void>;
+  /** Saves the revision with its `readerFingerprint`. */
   save(revision: ArticleRevision): Promise<void>;
+}
+
+export interface RevisionStampRecord extends RevisionStamp {
+  readonly id: RevisionId;
+  readonly articleId: ArticleId;
+  readonly title: string;
 }
 
 export interface EmbedRepository {
@@ -242,6 +256,10 @@ export interface PublishedArticleMetadata {
 }
 export interface PublicationMetadataRepository {
   listAll(): Promise<readonly { revisionId: RevisionId; metadata: PublishedArticleMetadata }[]>;
+  /** Only these revisions' metadata, in one query. */
+  listByRevisions(
+    revisionIds: readonly RevisionId[],
+  ): Promise<readonly { revisionId: RevisionId; metadata: PublishedArticleMetadata }[]>;
   save(revisionId: RevisionId, metadata: PublishedArticleMetadata): Promise<void>;
 }
 

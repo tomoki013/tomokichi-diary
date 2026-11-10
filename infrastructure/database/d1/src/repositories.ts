@@ -19,7 +19,13 @@ import type {
   TaxonomyRepository,
   KnowledgeRepository,
 } from "@tomokichi/application";
-import type { MediaAsset } from "@tomokichi/domain";
+import {
+  readerFingerprint,
+  type ArticleId,
+  type Instant,
+  type MediaAsset,
+  type RevisionId,
+} from "@tomokichi/domain";
 import {
   aiArtifactRow,
   articleCategoryRow,
@@ -49,6 +55,11 @@ import {
   type Row,
 } from "@tomokichi/data";
 import type { SqlDatabase, SqlStatement } from "./sql.js";
+
+const metadataRow = (row: Row) => ({
+  revisionId: row["revision_id"] as RevisionId,
+  metadata: JSON.parse(String(row["metadata"])) as PublishedArticleMetadata,
+});
 
 /** `INSERT … ON CONFLICT DO UPDATE` for the given columns — one upsert helper for every table. */
 function upsert(
@@ -107,10 +118,16 @@ export function createRepositories(db: SqlDatabase): Repositories {
 
   const publicationMetadata: PublicationMetadataRepository = {
     listAll: async () =>
-      (await all("SELECT revision_id, metadata FROM publication_metadata")).map((row) => ({
-        revisionId: row["revision_id"] as import("@tomokichi/domain").RevisionId,
-        metadata: JSON.parse(String(row["metadata"])) as PublishedArticleMetadata,
-      })),
+      (await all("SELECT revision_id, metadata FROM publication_metadata")).map(metadataRow),
+    listByRevisions: async (revisionIds) =>
+      revisionIds.length === 0
+        ? []
+        : (
+            await all(
+              "SELECT revision_id, metadata FROM publication_metadata WHERE revision_id IN (SELECT value FROM json_each(?))",
+              JSON.stringify(revisionIds),
+            )
+          ).map(metadataRow),
     save: async (revisionId, metadata) => {
       await db
         .prepare(
@@ -246,8 +263,36 @@ export function createRepositories(db: SqlDatabase): Repositories {
           JSON.stringify(articleIds),
         )
       ).map(revisionRow.to),
+    listStamps: async () =>
+      (
+        await all(
+          "SELECT id, article_id, revision_number, title, created_at, reader_fingerprint FROM article_revisions",
+        )
+      ).map((row) => ({
+        id: row["id"] as RevisionId,
+        articleId: row["article_id"] as ArticleId,
+        revisionNumber: Number(row["revision_number"]),
+        title: String(row["title"]),
+        createdAt: row["created_at"] as Instant,
+        readerFingerprint: (row["reader_fingerprint"] as string | null) ?? null,
+      })),
+    recordFingerprints: async (entries) => {
+      if (entries.length === 0) return;
+      await db.batch(
+        entries.map((entry) =>
+          db
+            .prepare("UPDATE article_revisions SET reader_fingerprint = ? WHERE id = ?")
+            .bind(entry.readerFingerprint, entry.id),
+        ),
+      );
+    },
     save: async (revision) => {
-      await upsert(db, "article_revisions", revisionRow.from(revision), ["id"]).run();
+      await upsert(
+        db,
+        "article_revisions",
+        { ...revisionRow.from(revision), reader_fingerprint: readerFingerprint(revision) },
+        ["id"],
+      ).run();
     },
   };
 

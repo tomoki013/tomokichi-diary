@@ -4,6 +4,8 @@ import {
   isIndexable,
   isPubliclyVisible,
   contentChangedAt,
+  contentChangedAtFrom,
+  readerFingerprint,
   publicModifiedAt,
   publish,
   schedule,
@@ -365,5 +367,33 @@ describe("contentChangedAt", () => {
       "2026-10-07T00:00:00.000Z",
     );
     expect(contentChangedAt([rev(1, "01")], 2)).toBeNull();
+  });
+
+  it("dates the same change from stored fingerprints as from the bodies", () => {
+    const history = [
+      rev(1, "01"),
+      rev(2, "05", {
+        bodyMarkdown: prose.replace("## 見出し", "{{monetization:prose-ad}}\n\n## 見出し"),
+      }),
+      rev(3, "07", { title: "新しい題" }),
+      rev(4, "09", { bodyMarkdown: `${prose}\n\n` }),
+    ];
+    const stamps = history.map((revision) => ({
+      revisionNumber: revision.revisionNumber,
+      createdAt: revision.createdAt,
+      readerFingerprint: readerFingerprint(revision),
+    }));
+    for (const upTo of [1, 2, 3, 4])
+      expect(contentChangedAtFrom(stamps, upTo)).toBe(contentChangedAt(history, upTo));
+    expect(readerFingerprint(history[0]!)).toBe(readerFingerprint(history[1]!));
+    expect(readerFingerprint(history[1]!)).not.toBe(readerFingerprint(history[2]!));
+  });
+
+  it("knows nothing until every revision on the way has a fingerprint", () => {
+    const stamps = [
+      { revisionNumber: 1, createdAt: at("2026-10-01T00:00:00.000Z"), readerFingerprint: null },
+      { revisionNumber: 2, createdAt: at("2026-10-05T00:00:00.000Z"), readerFingerprint: "x" },
+    ];
+    expect(contentChangedAtFrom(stamps, 2)).toBeNull();
   });
 });

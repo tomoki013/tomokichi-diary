@@ -101,7 +101,9 @@ export async function analyticsDashboard(
           grain === "page"
             ? (row.articleId ?? row.path ?? row.key)
             : `${row.path ?? ""}\u0000${row.key}`;
-        grouped.set(key, [...(grouped.get(key) ?? []), row]);
+        const list = grouped.get(key);
+        if (list) list.push(row);
+        else grouped.set(key, [row]);
       }
     }
     return [...grouped.values()]

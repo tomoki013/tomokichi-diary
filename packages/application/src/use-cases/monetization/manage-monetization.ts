@@ -19,9 +19,8 @@ export async function articleMonetization(ctx: AppContext, id: ArticleId) {
   if (!article) return null;
   const draft = await ctx.repos.monetization.article(id);
   const metadata = article.publishedRevisionId
-    ? (await ctx.repos.publicationMetadata.listAll()).find(
-        (m) => m.revisionId === article.publishedRevisionId,
-      )?.metadata
+    ? (await ctx.repos.publicationMetadata.listByRevisions([article.publishedRevisionId]))[0]
+        ?.metadata
     : null;
   return {
     draft,
