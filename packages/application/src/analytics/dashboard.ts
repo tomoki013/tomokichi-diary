@@ -45,8 +45,8 @@ function project(
   return ANALYTICS_SOURCES.map((source) => {
     const sourceDays = selected.filter((day) => day.source === source);
     const rows = sourceDays.flatMap((day) => pageRows(day, articleId));
-    const metrics = rows.length ? addMetrics(rows) : {};
-    if (source === "ga4" && !articleId && rows.length) {
+    const metrics: Record<string, number | null> | null = rows.length ? addMetrics(rows) : null;
+    if (metrics && source === "ga4" && !articleId) {
       metrics["meanDailyUsers"] =
         rows.reduce((sum, row) => sum + (row.metrics["users"] ?? 0), 0) / rows.length;
       metrics["meanDailySessions"] =
@@ -57,6 +57,7 @@ function project(
         ? counts.find((c) => c.start === range.start && c.end === range.end)
         : undefined;
     if (
+      metrics &&
       count &&
       count.coveredDays > 0 &&
       count.coveredDays >= sourceDays.length &&
@@ -78,11 +79,56 @@ function project(
     };
   });
 }
+/** Parts of the dashboard a caller can ask for; the headline numbers always come. */
+export const DASHBOARD_SECTIONS = [
+  "daily",
+  "articles",
+  "pages",
+  "queries",
+  "breakdowns",
+  "experience",
+  "experiments",
+] as const;
+export type DashboardSection = (typeof DASHBOARD_SECTIONS)[number];
+/** What a caller gets without naming sections: everything but the A/B test cohorts. */
+export const DEFAULT_DASHBOARD_SECTIONS: readonly DashboardSection[] = DASHBOARD_SECTIONS.filter(
+  (section) => section !== "experiments",
+);
+
+export interface DashboardOptions {
+  readonly sections?: readonly DashboardSection[];
+  /** Rows per list (articles, pages, queries, breakdowns, experiments). */
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+/** How much of one list was returned, so a cut is never silent. */
+export interface ListPage {
+  readonly total: number;
+  readonly offset: number;
+  readonly returned: number;
+}
+
+const rowKey = (row: AnalyticsRow) =>
+  row.grain === "page"
+    ? (row.articleId ?? row.path ?? row.key)
+    : `${row.path ?? ""}\u0000${row.key}`;
+
 export async function analyticsDashboard(
   store: AnalyticsStore,
   range: DateRange,
   articleId?: string,
+  options: DashboardOptions = {},
 ) {
+  const sections = new Set(options.sections ?? DEFAULT_DASHBOARD_SECTIONS);
+  const limit = options.limit ?? 20;
+  const offset = options.offset ?? 0;
+  const lists: Record<string, ListPage> = {};
+  const page = <T>(name: string, items: readonly T[]): T[] => {
+    const slice = items.slice(offset, offset + limit);
+    lists[name] = { total: items.length, offset, returned: slice.length };
+    return slice;
+  };
   const previous = previousRange(range);
   const [days, statuses, counts] = await Promise.all([
     store.read({ start: previous.start, end: range.end }),
@@ -91,16 +137,11 @@ export async function analyticsDashboard(
   ]);
   const group = (grain: AnalyticsRow["grain"], source: AnalyticsSource, period = range) => {
     const grouped = new Map<string, AnalyticsRow[]>();
-    for (const day of days.filter(
-      (d) => d.date >= period.start && d.date <= period.end && d.source === source,
-    )) {
-      for (const row of day.rows.filter(
-        (r) => r.grain === grain && (!articleId || r.articleId === articleId),
-      )) {
-        const key =
-          grain === "page"
-            ? (row.articleId ?? row.path ?? row.key)
-            : `${row.path ?? ""}\u0000${row.key}`;
+    for (const day of days) {
+      if (day.source !== source || day.date < period.start || day.date > period.end) continue;
+      for (const row of day.rows) {
+        if (row.grain !== grain || (articleId && row.articleId !== articleId)) continue;
+        const key = rowKey(row);
         const list = grouped.get(key);
         if (list) list.push(row);
         else grouped.set(key, [row]);
@@ -112,41 +153,36 @@ export async function analyticsDashboard(
         (a, b) =>
           (b.metrics["pageViews"] ?? b.metrics["clicks"] ?? 0) -
           (a.metrics["pageViews"] ?? a.metrics["clicks"] ?? 0),
-      )
-      .slice(0, 100);
+      );
   };
-  return {
+  /** The previous period's rows for exactly the current rows returned, to compare like with like. */
+  const matching = (shown: readonly AnalyticsRow[], before: readonly AnalyticsRow[]) => {
+    const keys = new Set(shown.map(rowKey));
+    return before.filter((row) => keys.has(rowKey(row)));
+  };
+  const coverage = (period: DateRange) =>
+    new Set(
+      days
+        .filter((day) => day.source === "ga4" && day.date >= period.start && day.date <= period.end)
+        .filter((day) => day.rows.some((row) => row.grain === "experience"))
+        .map((day) => day.date),
+    ).size;
+
+  const result: Record<string, unknown> = {
     range,
     previousRange: previous,
-    readerCoverage: {
-      currentDays: new Set(
-        days
-          .filter((day) => day.source === "ga4" && day.date >= range.start && day.date <= range.end)
-          .filter((day) => day.rows.some((row) => row.grain === "experience"))
-          .map((day) => day.date),
-      ).size,
-      previousDays: new Set(
-        days
-          .filter(
-            (day) => day.source === "ga4" && day.date >= previous.start && day.date <= previous.end,
-          )
-          .filter((day) => day.rows.some((row) => row.grain === "experience"))
-          .map((day) => day.date),
-      ).size,
-    },
+    /**
+     * "site": search is in gsc_site. "article": search is in gsc_url and
+     * gsc_site has no data (null), because Search Console has no per-page
+     * site totals.
+     */
+    scope: articleId ? "article" : "site",
     current: project(days, range, articleId, counts),
     previous: project(days, previous, articleId, counts),
-    experience: {
-      current: experienceSummary(days, range, articleId),
-      previous: experienceSummary(days, previous, articleId),
-    },
-    experiments: {
-      current: experienceSummary(days, range, articleId, true),
-      previous: experienceSummary(days, previous, articleId, true),
-    },
-    articles: articleId ? [] : articleReading(days, range, previous),
     statuses,
-    daily: dates(range).map((date) => ({
+  };
+  if (sections.has("daily"))
+    result["daily"] = dates(range).map((date) => ({
       date,
       sources: ANALYTICS_SOURCES.map((source) => {
         const day = days.find((d) => d.date === date && d.source === source);
@@ -161,19 +197,82 @@ export async function analyticsDashboard(
           provisional: day?.provisional ?? null,
         };
       }),
-    })),
-    pages: { ga4: group("page", "ga4"), gsc: group("page", "gsc_url") },
-    pagesPrevious: { ga4: group("page", "ga4", previous), gsc: group("page", "gsc_url", previous) },
-    queries: group("query", "gsc_url"),
-    queriesPrevious: group("query", "gsc_url", previous),
-    breakdowns: {
-      sources: group("source", "ga4"),
-      devices: group("device", "ga4"),
-      events: group("event", "ga4"),
-      adUnits: group("ad_unit", "adsense"),
-      countries: group("country", "gsc_site"),
-      searchTypes: group("search_type", "gsc_site"),
-    },
-  };
+    }));
+  if (sections.has("articles"))
+    result["articles"] = articleId ? [] : page("articles", articleReading(days, range, previous));
+  if (sections.has("pages")) {
+    const ga4 = page("pages.ga4", group("page", "ga4"));
+    const gsc = page("pages.gsc", group("page", "gsc_url"));
+    result["pages"] = { ga4, gsc };
+    result["pagesPrevious"] = {
+      ga4: matching(ga4, group("page", "ga4", previous)),
+      gsc: matching(gsc, group("page", "gsc_url", previous)),
+    };
+  }
+  if (sections.has("queries")) {
+    const queries = page("queries", group("query", "gsc_url"));
+    result["queries"] = queries;
+    result["queriesPrevious"] = matching(queries, group("query", "gsc_url", previous));
+  }
+  if (sections.has("breakdowns"))
+    result["breakdowns"] = {
+      sources: page("breakdowns.sources", group("source", "ga4")),
+      devices: page("breakdowns.devices", group("device", "ga4")),
+      events: page("breakdowns.events", group("event", "ga4")),
+      adUnits: page("breakdowns.adUnits", group("ad_unit", "adsense")),
+      countries: page("breakdowns.countries", group("country", "gsc_site")),
+      searchTypes: page("breakdowns.searchTypes", group("search_type", "gsc_site")),
+    };
+  if (sections.has("experience")) {
+    result["readerCoverage"] = { currentDays: coverage(range), previousDays: coverage(previous) };
+    result["experience"] = {
+      current: experienceSummary(days, range, articleId),
+      previous: experienceSummary(days, previous, articleId),
+    };
+  }
+  if (sections.has("experiments")) {
+    // Cohorts that have enough data to judge come first.
+    const current = page(
+      "experiments",
+      experienceSummary(days, range, articleId, true).toSorted(
+        (a, b) => Number(b.reviewReady) - Number(a.reviewReady),
+      ),
+    );
+    const shown = new Set(
+      current.map((c) =>
+        JSON.stringify([c.articleId, c.layout, c.device, c.experimentId, c.variant]),
+      ),
+    );
+    result["experiments"] = {
+      current,
+      previous: experienceSummary(days, previous, articleId, true).filter((c) =>
+        shown.has(JSON.stringify([c.articleId, c.layout, c.device, c.experimentId, c.variant])),
+      ),
+    };
+  }
+  result["lists"] = lists;
+  return result as unknown as DashboardResult;
+}
+
+type Cohorts<T> = { current: T[]; previous: T[] };
+/** The dashboard; optional parts are present only when their section was asked for. */
+export interface DashboardResult {
+  range: DateRange;
+  previousRange: DateRange;
+  scope: "site" | "article";
+  current: ReturnType<typeof project>;
+  previous: ReturnType<typeof project>;
+  statuses: Awaited<ReturnType<AnalyticsStore["statuses"]>>;
+  lists: Record<string, ListPage>;
+  daily?: unknown[];
+  articles?: ReturnType<typeof articleReading>;
+  pages?: { ga4: AnalyticsRow[]; gsc: AnalyticsRow[] };
+  pagesPrevious?: { ga4: AnalyticsRow[]; gsc: AnalyticsRow[] };
+  queries?: AnalyticsRow[];
+  queriesPrevious?: AnalyticsRow[];
+  breakdowns?: Record<string, AnalyticsRow[]>;
+  readerCoverage?: { currentDays: number; previousDays: number };
+  experience?: Cohorts<ReturnType<typeof experienceSummary>[number]>;
+  experiments?: Cohorts<ReturnType<typeof experienceSummary>[number]>;
 }
 export type AnalyticsDashboard = Awaited<ReturnType<typeof analyticsDashboard>>;

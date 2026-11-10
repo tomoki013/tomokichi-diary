@@ -200,7 +200,8 @@ export function createOperationServer(options: OperationServerOptions): McpServe
             ? { ...shaped, ...options.extra }
             : shaped;
         return {
-          content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
+          // Compact: indentation alone made large results a third bigger.
+          content: [{ type: "text" as const, text: JSON.stringify(data) }],
           ...(data && typeof data === "object" && !Array.isArray(data)
             ? { structuredContent: data as Record<string, unknown> }
             : {}),
