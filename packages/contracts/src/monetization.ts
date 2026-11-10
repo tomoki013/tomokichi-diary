@@ -157,7 +157,7 @@ export const affiliateOfferSchema: Validator<AffiliateOffer> = v.object({
   checkedAt: timestamp,
   publicationApproved: v.optional(v.boolean(), false),
   updatedAt: v.optional(timestamp, null),
-});
+}) as Validator<AffiliateOffer>;
 export const adExperimentSchema: Validator<AdExperiment> = v.object({
   id: key,
   articleId: id,
@@ -171,7 +171,7 @@ export const adExperimentSchema: Validator<AdExperiment> = v.object({
   startedAt: timestamp,
   stoppedAt: timestamp,
   updatedAt: v.optional(timestamp, null),
-});
+}) as Validator<AdExperiment>;
 export interface MonetizationOverviewDto {
   publishedAdArticles: number;
   settings: MonetizationSettings;

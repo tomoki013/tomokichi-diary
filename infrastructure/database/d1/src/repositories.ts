@@ -666,6 +666,9 @@ export function createRepositories(db: SqlDatabase): Repositories {
     saveTravelFact: async (fact) => {
       await upsert(db, "travel_facts", travelFactRow.from(fact), ["id"]).run();
     },
+    deleteTravelFact: async (id) => {
+      await db.prepare("DELETE FROM travel_facts WHERE id = ?").bind(id).run();
+    },
     saveArticleKnowledge: async (articleKnowledge) => {
       await upsert(db, "article_knowledge", articleKnowledgeRow.from(articleKnowledge), [
         "article_id",

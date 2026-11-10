@@ -224,6 +224,8 @@ export interface KnowledgeRepository {
   saveSource(source: SourceReference): Promise<void>;
   saveTravelRoute(route: TravelRoute): Promise<void>;
   saveTravelFact(fact: TravelFact): Promise<void>;
+  /** Removes a fact that was never verified; references to it are the caller's to clear. */
+  deleteTravelFact(id: TravelFact["id"]): Promise<void>;
   saveArticleKnowledge(knowledge: ArticleKnowledge): Promise<void>;
 }
 

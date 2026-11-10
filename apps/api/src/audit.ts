@@ -25,12 +25,13 @@ export function parseOperatorAuditContext(request: Request): AuditContext | unde
   if (!raw || raw.length > 2048) return undefined;
   try {
     const value = JSON.parse(raw) as Record<string, unknown>;
-    if (value["actorType"] !== "remote-operator") return undefined;
+    const actorType = value["actorType"];
+    if (actorType !== "remote-operator" && actorType !== "remote-analytics") return undefined;
     const subject = clean(value["actorSubject"], 160);
     if (!subject) return undefined;
     const trust = value["clientTrust"];
     return {
-      actorType: "remote-operator",
+      actorType,
       actorSubject: subject,
       source: "remote-mcp",
       clientId: clean(value["clientId"], 64),
@@ -39,7 +40,8 @@ export function parseOperatorAuditContext(request: Request): AuditContext | unde
       clientTrust: trust === "confirmed" || trust === "self-asserted" ? trust : "unknown",
       oauthGrantRef: clean(value["oauthGrantRef"], 80),
       mcpToolName: clean(value["mcpToolName"], 100),
-      operatorWrite: value["operatorWrite"] === true,
+      // Analytics connections are read-only whatever they claim.
+      operatorWrite: actorType === "remote-operator" && value["operatorWrite"] === true,
     };
   } catch {
     return undefined;

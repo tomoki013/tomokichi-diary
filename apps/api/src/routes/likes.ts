@@ -132,15 +132,3 @@ export function photoLikeRoutes() {
 
   return routes;
 }
-
-/** Mounted under `/admin`, behind the admin guard. */
-export function likeAdminRoutes() {
-  const routes = new Hono<AppEnv>();
-
-  routes.get("/", async (c) => {
-    const activity: LikeActivityDto = await getLikeActivity(c.get("ctx"));
-    return c.json(activity);
-  });
-
-  return routes;
-}

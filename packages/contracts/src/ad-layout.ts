@@ -1,18 +1,15 @@
+import { bodyAdPlacementProblem, suggestAdParagraph } from "./article-markdown.js";
+import type { ArticleSummaryDto } from "./dto.js";
 import type {
   AdExperiment,
-  ArticleDetailDto,
   ArticleMonetization,
-  ArticleSummaryDto,
   MonetizationOverviewDto,
   MonetizationPlacement,
-} from "@tomokichi/contracts";
-import { bodyAdPlacementProblem, suggestAdParagraph } from "@tomokichi/contracts";
-import type { AdClient } from "./ad-client";
-import { draftFrom } from "./draft";
+} from "./monetization.js";
 
 /**
  * The one ad layout every article should have, decided here so neither the
- * editor nor the bulk tool asks the author to pick positions, statuses or
+ * editor, the bulk tool nor an MCP client asks the author to pick positions, statuses or
  * units by hand:
  *
  * - AdSense on, one ad at the article end, one ad in the body.
@@ -280,48 +277,4 @@ export function auditArticles(
         ...(testing ? { startedAt: testing.startedAt } : {}),
       };
     });
-}
-
-type Client = Omit<AdClient, "saveAdExperiment">;
-
-/**
- * Brings one live article to a layout and leaves it ready to publish. A body
- * with no qualifying paragraph gets the end ad only. Refuses when the article
- * moved since the list was read, so it never publishes someone's unrelated
- * edits along with the ad change.
- */
-export async function prepareLayout(
-  summary: ArticleSummaryDto,
-  overview: MonetizationOverviewDto,
-  target: Exclude<AdLayout, "none"> = "standard",
-  client: Client,
-): Promise<{ article: ArticleDetailDto; changes: string[] }> {
-  const article = await client.getArticle(summary.id);
-  if (!article.isLive || article.hasUnpublishedChanges || !article.currentRevision)
-    throw new Error("公開中の最新版ではありません。記事編集で確認してください");
-  const { draft } = await client.articleMonetization(article.id);
-  const experiment =
-    overview.experiments.find((e) => e.articleId === article.id && e.status === "running") ?? null;
-  const body = article.currentRevision.bodyMarkdown;
-  let plan = applyLayout(target, draft, body, experiment);
-  if ("error" in plan) {
-    plan = applyLayout("end-only", draft, body, experiment);
-    if ("error" in plan) throw new Error(plan.error);
-    // An unconfigured article already shows the end ad; record the choice once.
-    const rest = plan.changes.filter((c) => c !== "記事末尾の広告を表示");
-    plan.changes =
-      rest.length || !draft.updatedAt ? [...rest, "本文に置ける段落がないため末尾のみ"] : [];
-  }
-  if (plan.changes.length === 0) return { article, changes: [] };
-  // Body, then configuration, then the test: a failure part-way leaves an
-  // unpublished draft to finish in the editor, never a half-ended test.
-  if (plan.body !== article.currentRevision.bodyMarkdown)
-    await client.saveDraft(article.id, {
-      ...draftFrom(article),
-      bodyMarkdown: plan.body,
-      changeSummary: "広告配置を揃える（本文内容は維持）",
-    });
-  await client.saveArticleMonetization(article.id, plan.config);
-  if (plan.stopExperiment) await client.controlAdExperiment(plan.stopExperiment, "stop");
-  return { article: await client.getArticle(article.id), changes: plan.changes };
 }

@@ -13,7 +13,29 @@ export interface EditableKnowledgeBundle {
   readonly facts: readonly TravelFact[];
   readonly sources: readonly SourceReference[];
   readonly routes: readonly TravelRoute[];
-  readonly canSuggestWithAi: boolean;
+}
+
+/** What a verified fact claims; changing any of it puts the claim back in question. */
+const claimOf = (fact: TravelFact): string =>
+  JSON.stringify([
+    fact.kind,
+    fact.statement,
+    fact.provenance,
+    fact.experiencedAt,
+    fact.value,
+    fact.sourceIds,
+  ]);
+
+function asSaved(fact: TravelFact, existing: readonly TravelFact[]): TravelFact {
+  const previous = existing.find((entry) => entry.id === fact.id);
+  if (previous?.status === "verified" && claimOf(previous) === claimOf(fact))
+    return {
+      ...fact,
+      status: "verified",
+      verifiedAt: previous.verifiedAt,
+      verifiedBy: previous.verifiedBy,
+    };
+  return { ...fact, status: "candidate", verifiedAt: null, verifiedBy: null };
 }
 
 const mergeById = <T extends { readonly id: string }>(
@@ -51,7 +73,6 @@ export async function getEditableKnowledge(
     facts,
     sources: sources.filter((source) => sourceIds.has(source.id)),
     routes: routes.filter((route) => routeIds.has(route.id)),
-    canSuggestWithAi: ctx.ai !== null,
   };
 }
 
@@ -59,7 +80,7 @@ export async function getEditableKnowledge(
 export async function saveEditableKnowledge(
   ctx: AppContext,
   articleId: ArticleId,
-  input: Omit<EditableKnowledgeBundle, "canSuggestWithAi">,
+  input: EditableKnowledgeBundle,
 ): Promise<EditableKnowledgeBundle> {
   const [
     articles,
@@ -84,15 +105,13 @@ export async function saveEditableKnowledge(
     throw new Error("article knowledge cannot be moved to another article");
   if (input.article && input.article.revisionId !== article.currentRevisionId)
     throw new Error("article knowledge must target the current revision");
-  for (const fact of input.facts) {
+  for (const fact of input.facts)
     if (!fact.articleIds.includes(articleId))
       throw new Error(`fact ${fact.id} must reference this article`);
-    if (fact.status === "verified" && fact.provenance === "firsthand") {
-      const existing = existingFacts.find((entry) => entry.id === fact.id);
-      if (!existing || existing.status !== "verified")
-        throw new Error(`firsthand fact ${fact.id} must be verified with the review action`);
-    }
-  }
+  // Saving never verifies. A fact arrives verified only when it already was
+  // and still says the same thing; anything new or reworded is a candidate
+  // again, for the owner to confirm with the review action.
+  const facts = input.facts.map((fact) => asSaved(fact, existingFacts));
 
   const knowledge = input.article
     ? [
@@ -106,7 +125,7 @@ export async function saveEditableKnowledge(
   const graph = {
     sources: mergeById(existingSources, input.sources),
     travelRoutes: mergeById(existingRoutes, input.routes),
-    travelFacts: mergeById(existingFacts, input.facts),
+    travelFacts: mergeById(existingFacts, facts),
     articleKnowledge: knowledge,
   };
   const issues = validateKnowledgeGraph({
@@ -123,8 +142,8 @@ export async function saveEditableKnowledge(
 
   await Promise.all(input.sources.map((source) => ctx.repos.knowledge.saveSource(source)));
   await Promise.all(input.routes.map((route) => ctx.repos.knowledge.saveTravelRoute(route)));
-  await Promise.all(input.facts.map((fact) => ctx.repos.knowledge.saveTravelFact(fact)));
+  await Promise.all(facts.map((fact) => ctx.repos.knowledge.saveTravelFact(fact)));
   if (input.article) await ctx.repos.knowledge.saveArticleKnowledge(input.article);
-  await ctx.analytics?.track({ name: "knowledge_saved", articleId, factCount: input.facts.length });
+  await ctx.analytics?.track({ name: "knowledge_saved", articleId, factCount: facts.length });
   return getEditableKnowledge(ctx, articleId);
 }

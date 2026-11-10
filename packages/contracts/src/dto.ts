@@ -354,7 +354,6 @@ export interface ArticleKnowledgeBundleDto {
   readonly facts: readonly TravelFactDto[];
   readonly sources: readonly SourceReferenceDto[];
   readonly routes: readonly TravelRouteDto[];
-  readonly canSuggestWithAi: boolean;
 }
 
 // --- Inquiries (the shared inquiry platform, narrowed to this site) ---------
