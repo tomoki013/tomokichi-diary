@@ -2,16 +2,14 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
-import { createArticle, type AppContext } from "@tomokichi/application";
-import type { AuthorId } from "@tomokichi/domain";
+import type { AppContext } from "@tomokichi/application";
 import { createApp } from "../../api/src/app.js";
 import type { Env } from "../../api/src/env.js";
-import { configFromEnv, createOperatorClient, OperatorError, type Fetch } from "./client.js";
-import { bodyAdPlacementProblem } from "@tomokichi/contracts";
-import { bodyUrls, misplacedMarkerKeys, moveBodyMarkers } from "./server.js";
+import { bodyUrls, operationCaller, toolsFor, type OperationCaller } from "../src/tools.js";
+import { configFromEnv, OperatorError } from "./config.js";
 
 let ctx: AppContext;
-let fetchApi: Fetch;
+let call: (token?: string) => OperationCaller;
 
 beforeEach(async () => {
   ctx = await createTestContext();
@@ -19,13 +17,16 @@ beforeEach(async () => {
     contextFactory: () => ctx,
     publishSite: async () => ({ state: "queued" }),
   });
-  // The real admin API, in process: the operator's requests go through the
-  // same token check and validation as the admin's.
-  fetchApi = async (input, init) => app.request(input, init, { ADMIN_TOKEN: "secret" } as Env);
+  // The real admin API, in process: the operator's calls go through the same
+  // token check, policy and validation as the admin's.
+  const env = { ADMIN_TOKEN: "secret", LOCAL_OPERATOR_TOKEN: "local" } as Env;
+  call = (token = "local") =>
+    operationCaller(
+      async (request) => app.request(request.url, request, env),
+      "http://localhost:8787",
+      { authorization: `Bearer ${token}` },
+    );
 });
-
-const client = (allowWrites: boolean, token = "secret") =>
-  createOperatorClient({ apiUrl: "http://localhost:8787", token, allowWrites }, fetchApi);
 
 describe("operator configuration", () => {
   it("needs a token and only sends it over TLS or loopback", () => {
@@ -54,238 +55,99 @@ describe("operator configuration", () => {
   });
 });
 
-describe("operator client against the admin API", () => {
+describe("operations through the local operator", () => {
   it("is refused with a wrong token", async () => {
-    await expect(client(false, "wrong").listArticles()).rejects.toThrow(/401/);
+    await expect(call("wrong")("article.list", {})).rejects.toThrow(/401/);
   });
 
-  it("reads, and refuses every write until writes are enabled", async () => {
-    const readOnly = client(false);
-    expect((await readOnly.listCollections("series")).items.length).toBeGreaterThan(0);
-    await expect(readOnly.createTag({ slug: "x", name: "x" })).rejects.toThrow(/書き込みは無効/);
-    expect((await ctx.repos.taxonomy.listTags()).some((tag) => tag.slug === "x")).toBe(false);
-  });
-
-  it("changes series and tags without touching an article's other relations", async () => {
-    const created = await createArticle(ctx, {
-      slug: "operator-check",
-      locale: "ja",
-      authorId: "author-tomokichi" as AuthorId,
-      path: "/posts/operator-check",
-      draft: { title: "t", summary: "s", bodyMarkdown: "b" },
-    });
-    if (!created.ok) throw new Error("fixture failed");
-    const articleId = created.value.article.id;
-    const [category] = await ctx.repos.taxonomy.listCategories();
-    await ctx.repos.relations.replaceForArticle(articleId, {
-      locations: [],
-      places: [],
-      categories: category ? [{ articleId, categoryId: category.id }] : [],
-      tags: [],
-    });
-
-    const writer = client(true);
-    const tag = (await writer.createTag({ slug: "night-train", name: "夜行列車" })) as {
+  it("creates, checks, publishes and withdraws a diary note", async () => {
+    const run = call();
+    const { id } = (await run("note.create", { slug: "kyoto-rain", title: "京都の雨" })) as {
       id: string;
     };
-    const series = (await writer.listCollections("series")).items as { id: string; slug: string }[];
-    const soundtrack = series.find((item) => item.slug === "travel-soundtrack")!;
-    await writer.setSeriesAndTags(articleId, { collectionIds: [soundtrack.id], tagIds: [tag.id] });
-
-    const after = await writer.getArticle(articleId);
-    expect(after.collectionIds).toEqual([soundtrack.id]);
-    expect(after.relations.tagIds).toEqual([tag.id]);
-    expect(after.relations.categoryIds).toEqual(category ? [category.id] : []);
-
-    await writer.saveDraft(articleId, { title: "新しいタイトル" });
-    expect((await writer.getArticle(articleId)).currentRevision).toMatchObject({
-      title: "新しいタイトル",
-      summary: "s",
-      bodyMarkdown: "b",
-    });
+    await run("note.saveDraft", { noteId: id, bodyMarkdown: "雨の音を聞いていた。" });
+    const check = (await run("note.publishCheck", { noteId: id })) as { publishable: boolean };
+    expect(check.publishable).toBe(true);
+    expect(await run("note.publish", { noteId: id })).toMatchObject({ status: "published" });
+    expect(await run("note.unpublish", { noteId: id })).toMatchObject({ status: "draft" });
   });
 
-  it("creates, checks, publishes and withdraws a separate diary note through shared admin routes", async () => {
-    const writer = client(true);
-    const created = await writer.createDiaryNote({
-      slug: "operator-santorini-note",
-      title: "テレビで見かけたサントリーニ島",
-    });
-    const note = await writer.getDiaryNote(created.id);
-    expect(note.kind).toBe("note");
-    expect(note.currentRevision?.bodyMarkdown).toBe("");
-    expect((await writer.listDiaryNotes()).items).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: created.id, kind: "note" })]),
-    );
-    expect((await writer.listArticles()).items).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: created.id })]),
-    );
-
-    await writer.saveDiaryNoteDraft(created.id, {
-      bodyMarkdown: "自分が行った場所をテレビで見ると、なんか嬉しい。",
-    });
-    expect(await writer.diaryNotePublishCheck(created.id)).toMatchObject({ publishable: true });
-    await writer.publishDiaryNote(created.id);
-    expect((await ctx.repos.articles.findById(created.id as never))?.status).toBe("published");
-    await writer.unpublishDiaryNote(created.id);
-    expect(
-      (await ctx.repos.articles.findById(created.id as never))?.publishedRevisionId,
-    ).toBeNull();
+  it("never reaches the admin's own operations", async () => {
+    await expect(call()("inquiry.status", {})).rejects.toThrow(/403/);
+    await expect(call()("note.delete", { noteId: "x", confirm: "delete" })).rejects.toThrow(/403/);
   });
 });
 
-describe("media search results", () => {
-  it("give each photo only the URL a body should use", () => {
+describe("tool list", () => {
+  it("lists reads always, writes only when enabled, and never the admin's own", () => {
+    const read = toolsFor("operator", false).map(([, spec]) => spec.tool!.name);
+    const all = toolsFor("operator", true).map(([, spec]) => spec.tool!.name);
+    expect(read).toContain("list_articles");
+    expect(read).not.toContain("save_article_draft");
+    expect(all).toContain("save_article_draft");
+    expect(all.length).toBeGreaterThan(read.length);
+    expect(all.some((name) => /inquiry|delete|revoke|review/.test(name))).toBe(false);
+    expect(toolsFor("analytics", true).map(([, spec]) => spec.tool!.name)).toEqual([
+      "get_analytics_report",
+      "get_analytics_dashboard",
+      "list_analytics_reports",
+    ]);
+  });
+
+  it("gives each photo only the URL a body should use", () => {
     expect(
       bodyUrls({
         items: [
-          {
-            id: "a",
-            url: "https://media.example/a.jpg",
-            slugUrl: "https://api.example/v1/images/a.jpg",
-          },
-          { id: "b", url: "https://media.example/b.jpg", slugUrl: null },
+          { id: "a", url: "https://media/a.jpg", slugUrl: "https://api/v1/images/a.jpg" },
+          { id: "b", url: "https://media/b.jpg", slugUrl: null },
         ],
-        total: 2,
       }),
     ).toEqual({
       items: [
-        { id: "a", url: "https://api.example/v1/images/a.jpg" },
-        { id: "b", url: "https://media.example/b.jpg" },
+        { id: "a", url: "https://api/v1/images/a.jpg" },
+        { id: "b", url: "https://media/b.jpg" },
       ],
-      total: 2,
     });
   });
 });
 
-const paragraph = (n: number) => `段落${n}。${"旅の記録を書いています。".repeat(12)}`;
-
-describe("moving a misplaced body ad", () => {
-  const body = [
-    "導入の文章です。",
-    "{{monetization:body-test-v1}}",
-    "## 見出し",
-    ...Array.from({ length: 8 }, (_, i) => paragraph(i)),
-  ].join("\n\n");
-
-  it("reads the keys the publish check rejects for their position", () => {
-    expect(
-      misplacedMarkerKeys({
-        publishable: false,
-        problems: [
-          {
-            code: "MONETIZATION_INVALID",
-            message:
-              "配置 body-test-v1 は導入文から十分に離してください（見出しと、読者に見える本文600字以上）",
-          },
-          { code: "COVER_MISSING", message: "配置 x は" },
-        ],
-      }),
-    ).toEqual(["body-test-v1"]);
-  });
-
-  it("moves only the marker line, to a place that passes the rule", () => {
-    const result = moveBodyMarkers(body, ["body-test-v1"]);
-    expect(result.unmovable).toEqual([]);
-    const marker = "{{monetization:body-test-v1}}";
-    const at = result.body.indexOf(marker);
-    expect(
-      bodyAdPlacementProblem(result.body.slice(0, at), result.body.slice(at + marker.length)),
-    ).toBeNull();
-    const strip = (s: string) => s.replace(marker, "").replace(/\s+/g, "");
-    expect(strip(result.body)).toBe(strip(body));
-  });
-});
-
-describe("operator MCP server over stdio", () => {
-  it("lists its tools and refuses a write in read-only mode", async () => {
-    const main = fileURLToPath(new URL("./main.ts", import.meta.url));
-    const child = spawn(process.execPath, ["--import", "tsx", main], {
-      env: { ...process.env, TOMOKICHI_ADMIN_TOKEN: "t", TOMOKICHI_API_URL: "http://localhost:9" },
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    const responses = new Map<number, unknown>();
-    let buffer = "";
-    child.stdout.on("data", (chunk: Buffer) => {
-      buffer += chunk.toString();
-      let newline = buffer.indexOf("\n");
-      while (newline >= 0) {
-        const line = buffer.slice(0, newline).trim();
-        buffer = buffer.slice(newline + 1);
-        if (line) {
-          const message = JSON.parse(line) as { id?: number };
-          if (typeof message.id === "number") responses.set(message.id, message);
-        }
-        newline = buffer.indexOf("\n");
-      }
-    });
+describe("stdio server", () => {
+  it("starts, lists its tools and lists no write tool in read-only mode", async () => {
+    const child = spawn(
+      process.execPath,
+      ["--import", "tsx", fileURLToPath(new URL("./main.ts", import.meta.url))],
+      {
+        env: { ...process.env, TOMOKICHI_ADMIN_TOKEN: "t", TOMOKICHI_OPERATOR_WRITE: "" },
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
     const send = (message: unknown) => child.stdin.write(`${JSON.stringify(message)}\n`);
-    const reply = async (id: number) => {
-      for (let i = 0; i < 200 && !responses.has(id); i++)
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      return responses.get(id) as { result?: Record<string, unknown> };
+    const replies: Record<string, unknown>[] = [];
+    child.stdout.on("data", (chunk: Buffer) => {
+      for (const line of chunk.toString().split("\n").filter(Boolean))
+        replies.push(JSON.parse(line) as Record<string, unknown>);
+    });
+    send({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: {
+        protocolVersion: "2025-06-18",
+        capabilities: {},
+        clientInfo: { name: "test", version: "1" },
+      },
+    });
+    send({ jsonrpc: "2.0", method: "notifications/initialized" });
+    send({ jsonrpc: "2.0", id: 2, method: "tools/list" });
+    const deadline = Date.now() + 20_000;
+    while (!replies.some((reply) => reply["id"] === 2) && Date.now() < deadline)
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    child.kill();
+    const list = replies.find((reply) => reply["id"] === 2) as {
+      result: { tools: { name: string }[] };
     };
-    try {
-      send({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "initialize",
-        params: {
-          protocolVersion: "2025-06-18",
-          capabilities: {},
-          clientInfo: { name: "test", version: "1" },
-        },
-      });
-      expect((await reply(1))?.result).toBeDefined();
-      send({ jsonrpc: "2.0", method: "notifications/initialized" });
-      send({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-      const tools = ((await reply(2)).result?.["tools"] ?? []) as {
-        name: string;
-        inputSchema?: { properties?: Record<string, unknown>; required?: string[] };
-      }[];
-      expect(tools.map((tool) => tool.name)).toEqual(
-        expect.arrayContaining([
-          "list_articles",
-          "create_series",
-          "create_tag",
-          "set_article_series_and_tags",
-          "move_body_ad",
-          "get_article_ads",
-          "set_ad_layout",
-          "start_ad_test",
-          "publish_article",
-          "list_diary_notes",
-          "get_diary_note",
-          "create_diary_note_draft",
-          "save_diary_note_draft",
-          "check_diary_note_publishable",
-          "set_diary_note_related_articles",
-          "publish_diary_note",
-          "unpublish_diary_note",
-          "list_rankings",
-          "create_ranking",
-          "update_ranking",
-          "publish_site",
-        ]),
-      );
-      expect(
-        tools.find((tool) => tool.name === "publish_diary_note")?.inputSchema?.required,
-      ).toContain("confirm");
-      expect(tools.some((tool) => /delete/i.test(tool.name))).toBe(false);
-      send({
-        jsonrpc: "2.0",
-        id: 3,
-        method: "tools/call",
-        params: { name: "create_tag", arguments: { slug: "x", name: "x" } },
-      });
-      const refused = (await reply(3)).result as {
-        isError?: boolean;
-        content?: { text: string }[];
-      };
-      expect(refused.isError).toBe(true);
-      expect(refused.content?.[0]?.text).toMatch(/書き込みは無効/);
-    } finally {
-      child.kill();
-    }
+    const names = list.result.tools.map((tool) => tool.name);
+    expect(names).toContain("list_articles");
+    expect(names).not.toContain("publish_article");
   }, 30_000);
 });

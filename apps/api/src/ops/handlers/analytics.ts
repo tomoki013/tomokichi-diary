@@ -1,22 +1,10 @@
-import { analyticsDashboard, dateRange, shiftDate } from "@tomokichi/application";
+import { analyticsDashboard, completedRange, dateRange } from "@tomokichi/application";
 import type { AnalyticsDashboardDto } from "@tomokichi/contracts";
 import { createAnalyticsStore } from "@tomokichi/infra-d1";
 import { OpError, type Handlers, type OpScope } from "../scope.js";
 
 type Names =
   "analytics.report" | "analytics.dashboard" | "analytics.savedReports" | "analytics.recollect";
-
-/** The last week (Monday–Sunday) or month that has ended, in Japan time. */
-export function completedRange(period: "weekly" | "monthly", now = new Date()) {
-  const today = now.toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
-  if (period === "monthly") {
-    const end = shiftDate(`${today.slice(0, 7)}-01`, -1);
-    return dateRange(`${end.slice(0, 7)}-01`, end);
-  }
-  const weekday = new Date(`${today}T00:00:00Z`).getUTCDay();
-  const end = shiftDate(today, -((weekday + 6) % 7) - 1);
-  return dateRange(shiftDate(end, -6), end);
-}
 
 function rangeOf(start: string, end: string, maxDays: number, message: string) {
   try {
