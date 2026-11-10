@@ -149,7 +149,7 @@ reader-v1を維持し、新配置は `article-placement-v2` に分離します�
 - 最終追加分を含む `pnpm test`: 50ファイル、397成功、既存の期待失敗1件（WebMCPの未修正契約）。typecheck、lint、境界チェックと生成物チェックも通過。lintには既存AnalyticsExperienceの警告1件が残ります。
 - `pnpm --filter @tomokichi/web typecheck`: Astro 82ファイル、error 0、warning 0（既存hint 17）。
 - `pnpm exec tsx scripts/analytics/check-sql.ts`: Google BigQueryのsynthetic relationだけで既存集計と新layout／variant、allowlist外実験の拒否を確認。実訪問データを書き換えず、native exportを追加取得しません。
-- `node scripts/monetization/browser-check.mjs`: 19シナリオ成功。管理画面で案件作成→キーボードによる本文位置選択→配置追加→案件割当→保存／再読込→実験の開始／停止。公開側は幅1,440／390／320px×A/B×filled／同意待ち相当／AdBlock相当の18条件です。
+- （2026-11-10 削除）`node scripts/monetization/browser-check.mjs`: 旧管理画面向けのブラウザ確認で、19シナリオ成功していた。管理画面で案件作成→キーボードによる本文位置選択→配置追加→案件割当→保存／再読込→実験の開始／停止。公開側は幅1,440／390／320px×A/B×filled／同意待ち相当／AdBlock相当の18条件です。
 - 公開側の非選択枠はloader実行前にDOMから除去し、Googleの `push({})` による枠探索にも残しません。各表示で割当・広告対象は各1回、loader／pushは各最大1回。320pxはrequest 0。affiliate予定キーの文字、カード、リンク、空白枠は出ません。横はみ出しはありません。
 - モック条件のCLS最大約0.0000771。実画像・実広告・本番CMPのフィールド結果を保証する値ではありません。INPは実訪問の操作サンプルが必要です。LCP/INP/CLSは既存web-vitalsとLighthouseを使い続け、本番反映後に端末別の標本を確認してください。
 - ダークモードのカード／選択タブのコントラストと、モバイルの比較表の横スクロールを目視確認・修正。写真付き／テキスト／予約カードのpreviewは管理画面限定です。

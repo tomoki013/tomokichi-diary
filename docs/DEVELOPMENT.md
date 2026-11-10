@@ -51,7 +51,7 @@ pnpm --filter @tomokichi/api dev        # http://localhost:8787（cf dev、ロ�
 pnpm --filter @tomokichi/mcp-server dev # 公開 MCP
 ```
 
-Claude Code の `.claude/launch.json` には `api`（8795）と `admin`（5173、`VITE_API_URL=http://localhost:8795`）もある。ローカル D1 が空なら `apps/api` で `cf d1 migrations apply <DB ID> --local --persist-to .wrangler/state --dir ../../migrations` → `pnpm seed:sql` → `cf d1 raw <DB ID> --local --persist-to .wrangler/state --batch @../../.artifacts/seed.batch.json`。DB ID は `apps/api/cloudflare.config.ts` の `DB`。`--persist-to .wrangler/state` が無いと `cf dev` とは別の場所（`~/.config/cloudflare/state`）に書かれる。Admin の「お問い合わせ」は `INQUIRY_OPERATOR`（別 Worker への Service Binding）が要るので、ローカルでは基盤の `apps/api` を同時に立てるか、「未設定」表示のまま触る。
+Claude Code の `.claude/launch.json` には `api`（8795）と `admin`（5173、`VITE_API_URL=http://localhost:8795`）もある。ローカル D1 が空なら `apps/api` で `cf d1 migrations apply <DB ID> --local --persist-to .wrangler/state --dir ../../migrations` → `pnpm seed:sql` → `cf d1 raw <DB ID> --local --persist-to .wrangler/state --batch @../../.artifacts/seed.batch.json`。DB ID は `apps/api/cloudflare.config.ts` の `DB`。`--persist-to .wrangler/state` が無いと `cf dev` とは別の場所（`~/.config/cloudflare/state`）に書かれる。Admin の「問い合わせ」は `INQUIRY_OPERATOR`（別 Worker への Service Binding）、「MCP 接続」は `MCP_CONNECTIONS` が要るので、ローカルではそれぞれの Worker を同時に立てない限りエラー表示になる。
 
 公開サイトは `export/` から静的生成するので、**D1 が無くても動く**（ADR 0006）。記事を直したいときは Admin → API → D1 → `pnpm export:data` → commit の順。ローカルの D1 は `.data/tomokichi.db`（`pnpm import:legacy` か `export/` から復元）。
 
@@ -120,7 +120,7 @@ pnpm knowledge:backlog # 人手レビュー待ちの記事一覧
 | `SEO_IMAGE_URL_INVALID`                         | `mediaUrl()` の結果を `absoluteUrl()` に通した（`OPERATIONS.md`）                           |
 | `PERF_*`                                        | Chrome が無い / hero の `width`/`height` 欠落                                               |
 | `astro check` が `dataLayer` や `path` で落ちる | 2026-09-21 に修正済み。再発したら `apps/web/src/lib/analytics.ts` の `declare global`       |
-| Admin にログインできない                        | `VITE_API_URL` が空文字（`api.ts` のコメント）/ `ADMIN_TOKEN` 未設定 = API 閉鎖             |
+| Admin にログインできない                        | `VITE_API_URL` が空文字（`data/client.ts` のコメント）/ `ADMIN_TOKEN` 未設定 = API 閉鎖     |
 | 画像が 404                                      | `media/` にある → `media:build` → `media:sync`（`OPERATIONS.md` Media）                     |
 
 ## 関連

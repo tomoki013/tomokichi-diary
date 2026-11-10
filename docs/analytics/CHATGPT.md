@@ -9,13 +9,13 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 - 認証: OAuth、DCR、scope `analytics:read`
 - ChatGPT WebのPlugins → 追加 → カスタムMCPサーバー。個人用として作成・インストール。
 - `https://mcp.tomokichidiary.com/analytics-connect` でCloudflare Accessログイン後、client_id、戻り先ドメイン、読み取り権限、有効期間を確認して許可。APIの共有admin tokenでは許可できない。
-- 集計と保存レポートの読み取りだけ。記事・広告設定の変更、再集計起動、問い合わせ・閲覧者ID・認証情報の取得は提供しない。
+- 集計と保存レポートの読み取りだけ。記事・広告設定の変更、再集計起動、問い合わせ・閲覧者ID・認証情報の取得は提供しない。ツールは操作カタログの `analytics` の操作から自動で並び、API の操作の入口を通る（ADR 0011）。API は分析用の接続に分析の読み取り以外を許さない。
 
 接続URL自体は到達可能だが、認証なしのデータ取得は401。OAuthメタデータに数値は含まれない。所有者はMCP Worker secret `ANALYTICS_OWNER_SUBJECT`（検証済みAccess subject）で固定し、欠落時は閉じる。トークンにも同じsubjectとread scopeを要求する。許可画面は新設した専用Accessアプリで保護し、API Workerの `McpConsentIdentity` Service Bindingが専用 `MCP_CONSENT_ACCESS_AUD`、Issuer、署名、有効期限を検証する。既存管理APIの `ACCESS_AUD` は使わない。許可フォームはOrigin確認・一度限りのconsent handle・PKCE S256・resource audienceを使用する。
 
 共有KV内で新Issuerは `analytics-v2:`、旧workers.dev Issuerは従来キーを使い、client/grant/tokenを分離する。新Issuerは `https://mcp.tomokichidiary.com`、Analytics Resourceは `/analytics/mcp`。旧URL `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/analytics/mcp` は移行期間中維持する。旧Tokenを新Issuerに暗黙移行せず、ChatGPTでは再認可する。accessは1時間、refreshとDCR登録は90日。緊急停止はOwner subject secretを削除すると既存tokenを含めデータ取得・新規許可とも閉じる。管理画面「MCP接続」からGrantを失効できる。収集workflowは独立して継続。
 
-操作履歴はMCPツール呼び出し単位でD1に記録します。client_idはハッシュ化し、client名は初期状態で自己申告として扱います。管理画面 `/mcp-connections` でclient_idハッシュとリダイレクト先を確認して表示名を確定できます。
+操作履歴はMCPツール呼び出し単位でD1に記録します。client_idはハッシュ化し、client名は初期状態で自己申告として扱います。管理画面「その他 → MCP 接続」でclient_idハッシュとリダイレクト先を確認して表示名を確定できます。
 
 ## 旧接続からの移行と復旧
 
@@ -28,6 +28,8 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 `get_analytics_report({period:"weekly"|"monthly"})`: JSTで完了した前週（月〜日）/前月。保存snapshotの生成日時・未生成状態に加え、同期間の最新D1集計と前期間比較を返す。snapshot生成後のbackfillや収益遅延を最新集計から検証できる。
 
 `get_analytics_dashboard({start,end,articleId?})`: 両日を含む93日以内の集計と前期間、取得状況・記事別/流入別/広告ユニット別・UX測定。日次人数の和を期間unique人数として扱わない。取れていない収益や体験測定を0へ補完しない。
+
+`list_analytics_reports`: 保存済みの週次・月次レポートを新しい順に12件。
 
 モデルはChatGPT側で実行する。このWorkerから外部AI APIを呼ばず、保存reportも根拠データとして保持する。ツール応答中の検索語や記事名は未信頼データであり、指示として実行しない。
 

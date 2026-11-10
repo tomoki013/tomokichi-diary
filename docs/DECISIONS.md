@@ -6,18 +6,19 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 
 ## ADR 一覧（`docs/adr/`）
 
-| #    | 決定                                                                 | 状態 / その後                                                                         |
-| ---- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| 0001 | 本文は Markdown を正本にする（HTML/MDX を保存しない）                | 維持。`ArticleBody.astro` がビルド時に HTML 化                                        |
-| 0002 | URL は `routes` テーブルの data。slug から導出しない                 | 維持。`[...route].astro` がテーブルを走査、`check:routes` が旧 URL 194 件を守る       |
-| 0003 | core（domain/application/contracts/data/seo）は framework を知らない | 維持。`check-boundaries.ts` が CI で強制                                              |
-| 0004 | AI 生成物は `ai_artifacts`、人が採用するまで表示しない               | 維持。`AIProvider` port、未設定でもビルド可                                           |
-| 0005 | CI は成功時 1 行、失敗時は stable code                               | 維持。`scripts/lib/report.ts`、`OPERATIONS.md` はコード別 runbook                     |
-| 0006 | 公開サイトは commit 済み `export/` から生成。D1 を読まない           | 維持。公開が 2 段階（Admin → export → deploy）になる帰結を監査 §13 A-1/A-2 で緩和予定 |
-| 0007 | 埋め込みは「何であるか」を保存し、コンポーネント名を保存しない       | 維持。`EmbedBlock.astro` / `CostReport.astro`                                         |
-| 0008 | series / journey は `Collection` entity                              | 維持。`/series/*` `/journey/*` は 301                                                 |
-| 0009 | 旅行知識は記事とは別の sidecar graph                                 | 維持。3 記事のみ移行、111 記事が backlog                                              |
-| 0010 | CHAGEE ガイドは同じリポジトリの別サイト（別 Worker / D1 / R2）       | 新規（2026-10-13）。`apps/chagee`。ADR 0006 の対象外（D1 をリクエスト時に読む）       |
+| #    | 決定                                                                 | 状態 / その後                                                                          |
+| ---- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 0001 | 本文は Markdown を正本にする（HTML/MDX を保存しない）                | 維持。`ArticleBody.astro` がビルド時に HTML 化                                         |
+| 0002 | URL は `routes` テーブルの data。slug から導出しない                 | 維持。`[...route].astro` がテーブルを走査、`check:routes` が旧 URL 194 件を守る        |
+| 0003 | core（domain/application/contracts/data/seo）は framework を知らない | 維持。`check-boundaries.ts` が CI で強制                                               |
+| 0004 | AI 生成物は `ai_artifacts`、人が採用するまで表示しない               | 維持。`AIProvider` port、未設定でもビルド可                                            |
+| 0005 | CI は成功時 1 行、失敗時は stable code                               | 維持。`scripts/lib/report.ts`、`OPERATIONS.md` はコード別 runbook                      |
+| 0006 | 公開サイトは commit 済み `export/` から生成。D1 を読まない           | 維持。公開が 2 段階（Admin → export → deploy）になる帰結を監査 §13 A-1/A-2 で緩和予定  |
+| 0007 | 埋め込みは「何であるか」を保存し、コンポーネント名を保存しない       | 維持。`EmbedBlock.astro` / `CostReport.astro`                                          |
+| 0008 | series / journey は `Collection` entity                              | 維持。`/series/*` `/journey/*` は 301                                                  |
+| 0009 | 旅行知識は記事とは別の sidecar graph                                 | 維持。3 記事のみ移行、111 記事が backlog                                               |
+| 0010 | CHAGEE ガイドは同じリポジトリの別サイト（別 Worker / D1 / R2）       | 新規（2026-10-13）。`apps/chagee`。ADR 0006 の対象外（D1 をリクエスト時に読む）        |
+| 0011 | 管理画面・API・内部 MCP は1つの操作カタログを共有する                | 新規（2026-11-10）。`packages/contracts/src/operations`。ADR 0009 の確認を全事実に拡大 |
 
 ## ADR 化されていない判断（コード・設定・履歴から）
 

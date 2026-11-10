@@ -82,12 +82,12 @@ export const monetizationOperations = {
     input: v.object({
       articleId,
       layout: v.describe(
-        v.literalUnion(["standard", "end-only"] as const),
-        "standard（末尾＋本文中）か end-only（末尾のみ）",
+        v.literalUnion(["standard", "end-only", "none"] as const),
+        "standard（末尾＋本文中）、end-only（末尾のみ）、none（広告なし）",
       ),
     }),
     description:
-      "管理画面の「広告配置」と同じ規則で、公開中の記事の広告を「standard（末尾＋本文中）」か「end-only（末尾のみ）」に揃えて下書き保存します。本文に置ける段落がなければ末尾のみになります。動いているA/Bテストは終了します。公開は publish_article。",
+      "管理画面の「広告配置」と同じ規則で、公開中の記事の広告を「standard（末尾＋本文中）」「end-only（末尾のみ）」「none（広告なし）」のどれかに揃えて下書き保存します。本文に置ける段落がなければ末尾のみになります。動いているA/Bテストは終了します。公開は publish_article。",
     tool: { name: "set_ad_layout", title: "Set ad layout", destructive: true },
     target,
   }),

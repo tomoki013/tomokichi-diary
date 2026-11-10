@@ -23,6 +23,7 @@
 - `@tomokichi/infra-d1/testing-context` の `createTestContext()` が **in-memory SQLite に全 migration を適用**した `AppContext` を返す。R2 は in-memory storage。時計は固定、id は連番。
 - セキュリティ: `apps/api/src/__tests__/{access,api,analytics,media,monetization}.test.ts`、`apps/admin/worker/*.test.ts`、`apps/mcp-server/{operator/operator,src/__tests__/analytics}.test.ts`、`packages/contracts/src/__tests__/validation.test.ts`、`packages/{data,domain}/src/__tests__/monetization.test.ts`（非公開フィールドの除去）、`scripts/analytics/analytics.test.ts`、`scripts/lib/__tests__/publication-{originals,step}.test.ts`、`apps/admin/src/lib/ad-preview.test.ts`・`apps/chagee/src/__tests__/{markdown,seed,seo}.test.ts`（エスケープ）。
 - 管理画面: `apps/api/src/__tests__/api.test.ts`、`apps/admin/src/lib/{lib,article-state}.test.ts`。
+- 操作カタログ（ADR 0011）: `apps/api/src/__tests__/ops.test.ts`（全操作にハンドラがある・MCP に出さない例外が決まった一覧だけ・既存のツール名が残っている）、`apps/api/src/__tests__/operator.test.ts`（接続ごとの権限）、`apps/api/src/__tests__/knowledge.test.ts`（事実は候補として入り、確認は管理画面だけ）。
 - 一言日記: `apps/api/src/__tests__/api.test.ts`、`packages/data/src/__tests__/diary-notes.test.ts`、`apps/mcp-server/operator/operator.test.ts`、`packages/domain/src/__tests__/publishing.test.ts`。
 - お問い合わせ: `apps/api/src/__tests__/{contact,inquiry}.test.ts`、`packages/domain/src/__tests__/contact.test.ts`、`apps/chagee/src/__tests__/contact.test.ts`。
 - いいね: `apps/api/src/__tests__/{likes,photo-likes}.test.ts`、`apps/web/src/__tests__/my-trips.test.ts`、`scripts/lib/__tests__/seed-sql.test.ts`。

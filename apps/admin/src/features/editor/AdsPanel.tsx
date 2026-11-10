@@ -42,7 +42,7 @@ export function AdsPanel({ article }: { article: ArticleDetailDto }) {
                 </p>
               )}
               <div className="inline">
-                {(["standard", "end-only"] as const).map((layout) => (
+                {(["standard", "end-only", "none"] as const).map((layout) => (
                   <Button
                     key={layout}
                     disabled={!live}

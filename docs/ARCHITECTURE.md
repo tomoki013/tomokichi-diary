@@ -32,13 +32,23 @@ flowchart LR
 
 ## Applications
 
-| Path              | What it is                     | Notes                              |
-| ----------------- | ------------------------------ | ---------------------------------- |
-| `apps/web`        | Public site (Astro)            | Fully static, no client JavaScript |
-| `apps/admin`      | Admin UI (Vite + React)        | SPA, talks only to the API         |
-| `apps/api`        | Admin API (Hono, Workers)      | HTTP adapter; no business rules    |
-| `apps/mcp-server` | Public MCP + MCP App (Workers) | Read-only Streamable HTTP adapter  |
-| `apps/chagee`     | CHAGEE guide (Astro, Workers)  | Separate site, own D1/R2; ADR 0010 |
+| Path              | What it is                    | Notes                                                                                                 |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `apps/web`        | Public site (Astro)           | Fully static, no client JavaScript                                                                    |
+| `apps/admin`      | Admin UI (Vite + React)       | SPA; runs operations through the API                                                                  |
+| `apps/api`        | Admin API (Hono, Workers)     | HTTP adapter; no business rules                                                                       |
+| `apps/mcp-server` | MCP servers (Workers)         | Public read-only MCP + MCP App; private Operator and Analytics MCP built from the operation catalogue |
+| `apps/chagee`     | CHAGEE guide (Astro, Workers) | Separate site, own D1/R2; ADR 0010                                                                    |
+
+## The operation catalogue (ADR 0011)
+
+Everything the owner can do is an operation in `packages/contracts/src/operations`:
+its name, input validator, output type, kind (read / write / delete) and surface
+(operator / analytics / admin-only). The API runs it at `POST /v1/admin/ops/<name>`
+(`apps/api/src/ops`: one handler per operation, one place for the access policy and the
+audit entry). The admin calls it by name; the Operator and Analytics MCP servers list the
+operations of their surface as tools (`apps/mcp-server/src/tools.ts`) and call the same
+route through a Service Binding. Deletes and the admin-only exceptions never become tools.
 
 ## Packages
 
