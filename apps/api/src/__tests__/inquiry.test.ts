@@ -182,8 +182,12 @@ function app(bound = true) {
   });
 }
 
-function request(path: string, init: RequestInit = {}, bound = true) {
-  return app(bound).request(`/v1/admin/inquiry${path}`, { headers: auth, ...init }, env);
+function op(name: string, input: unknown = {}, bound = true) {
+  return app(bound).request(
+    `/v1/admin/ops/${name}`,
+    { method: "POST", headers: auth, body: JSON.stringify(input) },
+    env,
+  );
 }
 
 const last = (method: string) => calls.findLast((call) => call.method === method);
@@ -197,26 +201,30 @@ beforeEach(async () => {
 
 const calledWith = (method: string) => calls.filter((call) => call.method === method);
 
-describe("/v1/admin/inquiry", () => {
+describe("inquiry operations", () => {
   it("sits behind the admin gate", async () => {
-    const response = await app().request("/v1/admin/inquiry/tickets", {}, env);
+    const response = await app().request(
+      "/v1/admin/ops/inquiry.tickets",
+      { method: "POST", body: "{}" },
+      env,
+    );
     expect(response.status).toBe(401);
     expect(calls).toHaveLength(0);
   });
 
   it("reports an unbound platform instead of calling anything", async () => {
-    expect(await (await request("/status", {}, false)).json()).toEqual({
+    expect(await (await op("inquiry.status", {}, false)).json()).toEqual({
       configured: false,
       registered: false,
       mailConfigured: false,
       lanes: LANES,
     });
-    expect((await request("/tickets", {}, false)).status).toBe(503);
+    expect((await op("inquiry.tickets", {}, false)).status).toBe(503);
   });
 
   it("reports an unregistered project", async () => {
     answer.project = { ok: false, error: { code: "NOT_FOUND", message: "x" } };
-    expect(await (await request("/status")).json()).toEqual({
+    expect(await (await op("inquiry.status")).json()).toEqual({
       configured: true,
       registered: false,
       mailConfigured: false,
@@ -225,7 +233,7 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("names only this site's project, whatever the request says", async () => {
-    await request("/tickets?status=open&query=%E3%83%90%E3%82%B9&project=remeet");
+    await op("inquiry.tickets", { status: "open", query: "バス", project: "remeet" });
     expect(last("listTickets")?.args).toEqual([
       "tomokichi-diary",
       { query: "バス", limit: 100, offset: 0 },
@@ -245,7 +253,7 @@ describe("/v1/admin/inquiry", () => {
       ok: true,
       value: { items: query.offset === 0 ? many(0, 100) : many(100, 20), total: 120 },
     });
-    const body = await (await request("/tickets")).json();
+    const body = await (await op("inquiry.tickets")).json();
     expect(
       calledWith("listTickets").map((call) => (call.args[1] as { offset: number }).offset),
     ).toEqual([0, 100]);
@@ -274,7 +282,7 @@ describe("/v1/admin/inquiry", () => {
         total: 3,
       },
     };
-    const all = await (await request("/tickets")).json();
+    const all = await (await op("inquiry.tickets")).json();
     expect(all.items.map((item: { id: string }) => item.id)).toEqual([
       "media-new",
       "general-late",
@@ -289,22 +297,22 @@ describe("/v1/admin/inquiry", () => {
       byStatus: { CLOSED: 1, NEW: 1, IN_PROGRESS: 1 },
     });
 
-    const media = await (await request("/tickets?status=open&lane=media")).json();
+    const media = await (await op("inquiry.tickets", { status: "open", lane: "media" })).json();
     expect(media.items.map((item: { id: string }) => item.id)).toEqual(["media-new"]);
     expect(media.counts.all).toBe(3);
 
-    const closed = await (await request("/tickets?status=CLOSED")).json();
+    const closed = await (await op("inquiry.tickets", { status: "CLOSED" })).json();
     expect(closed.items.map((item: { id: string }) => item.id)).toEqual(["old-done"]);
   });
 
   it("ignores a status or lane filter it does not know", async () => {
-    const body = await (await request("/tickets?status=DROP%20TABLE&lane=x")).json();
+    const body = await (await op("inquiry.tickets", { status: "DROP TABLE", lane: "x" })).json();
     expect(last("listTickets")?.args[1]).toEqual({ limit: 100, offset: 0 });
     expect(body.total).toBe(1);
   });
 
   it("opens a ticket by number, as a notification link carries it", async () => {
-    const body = await (await request("/tickets/TK-000001")).json();
+    const body = await (await op("inquiry.ticket", { ticketId: "TK-000001" })).json();
     expect(last("getTicket")?.args).toEqual(["tomokichi-diary", "TK-000001", 0]);
     expect(body).toMatchObject({
       id: "t1",
@@ -326,21 +334,22 @@ describe("/v1/admin/inquiry", () => {
         total: 2,
       },
     };
-    const body = await (await request("/tickets")).json();
+    const body = await (await op("inquiry.tickets")).json();
     expect(body.items.map((item: { lane: string | null }) => item.lane)).toEqual(["media", null]);
   });
 
   it("answers 404 when the platform says the ticket is not this site's", async () => {
     answer.getTicket = { ok: false, error: { code: "NOT_FOUND", message: "secret detail" } };
-    const response = await request("/tickets/other");
+    const response = await op("inquiry.ticket", { ticketId: "other" });
     expect(response.status).toBe(404);
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
   });
 
   it("passes exactly the fields that were sent, and says who acted", async () => {
-    const response = await request("/tickets/t1", {
-      method: "PATCH",
-      body: JSON.stringify({ revision: 3, status: "ACKNOWLEDGED" }),
+    const response = await op("inquiry.changeTicket", {
+      ticketId: "t1",
+      revision: 3,
+      status: "ACKNOWLEDGED",
     });
     expect(response.status).toBe(200);
     expect(last("changeTicket")?.args).toEqual([
@@ -351,9 +360,11 @@ describe("/v1/admin/inquiry", () => {
     ]);
 
     // An explicit null clears; it is not dropped like an absent field.
-    await request("/tickets/t1", {
-      method: "PATCH",
-      body: JSON.stringify({ revision: 3, nextAction: null, nextActionAt: null }),
+    await op("inquiry.changeTicket", {
+      ticketId: "t1",
+      revision: 3,
+      nextAction: null,
+      nextActionAt: null,
     });
     expect(last("changeTicket")?.args[2]).toEqual({
       revision: 3,
@@ -363,9 +374,10 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("rejects a change it does not recognise before calling the platform", async () => {
-    const response = await request("/tickets/t1", {
-      method: "PATCH",
-      body: JSON.stringify({ revision: 3, status: "DELETED" }),
+    const response = await op("inquiry.changeTicket", {
+      ticketId: "t1",
+      revision: 3,
+      status: "DELETED",
     });
     expect(response.status).toBe(400);
     expect(last("changeTicket")).toBeUndefined();
@@ -376,24 +388,23 @@ describe("/v1/admin/inquiry", () => {
       ok: false,
       error: { code: "CONFLICT", message: "ほかの操作で更新されています" },
     };
-    const response = await request("/tickets/t1", {
-      method: "PATCH",
-      body: JSON.stringify({ revision: 1, status: "ACKNOWLEDGED" }),
+    const response = await op("inquiry.changeTicket", {
+      ticketId: "t1",
+      revision: 1,
+      status: "ACKNOWLEDGED",
     });
     expect(response.status).toBe(409);
     expect((await response.json()).error.code).toBe("API_CONFLICT");
   });
 
   it("takes a new ticket on before replying, then moves it where it was asked", async () => {
-    const response = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "お返事です",
-        idempotencyKey: "reply-key-1",
-        subject: null,
-        afterStatus: "WAITING_CUSTOMER",
-        to: "someone@example.com",
-      }),
+    const response = await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-1",
+      subject: null,
+      afterStatus: "WAITING_CUSTOMER",
+      to: "someone@example.com",
     });
     expect(await response.json()).toEqual({ ok: true, status: "WAITING_CUSTOMER" });
     expect(calledWith("changeTicket").map((call) => call.args[2])).toEqual([
@@ -415,17 +426,17 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("leaves the closing off when asked, and never adds it twice", async () => {
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-5", closing: false }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-5",
+      closing: false,
     });
     expect((last("reply")!.args[2] as { body: string }).body).toBe("お返事です");
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "お返事です\n\n以上、よろしくお願いいたします。\n",
-        idempotencyKey: "reply-key-6",
-      }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です\n\n以上、よろしくお願いいたします。\n",
+      idempotencyKey: "reply-key-6",
     });
     expect((last("reply")!.args[2] as { body: string }).body).toBe(
       "お返事です\n\n以上、よろしくお願いいたします。",
@@ -437,13 +448,11 @@ describe("/v1/admin/inquiry", () => {
       ok: true,
       value: ticket({ status: "RESOLVED", allowedStatuses: ["IN_PROGRESS", "CLOSED"] }),
     };
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "追記です",
-        idempotencyKey: "reply-key-2",
-        afterStatus: "RESOLVED",
-      }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "追記です",
+      idempotencyKey: "reply-key-2",
+      afterStatus: "RESOLVED",
     });
     expect((last("reply")!.args[2] as { reopenIfResolved: boolean }).reopenIfResolved).toBe(true);
     expect(last("changeTicket")?.args[2]).toEqual({
@@ -454,13 +463,11 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("sends a first reply under the subject typed in, through the subject carrier", async () => {
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "お返事です",
-        idempotencyKey: "reply-key-3",
-        subject: " 【{{appName}}】写真のご利用について ",
-      }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-3",
+      subject: " 【{{appName}}】写真のご利用について ",
     });
     expect(last("updateTemplate")?.args.slice(1, 3)).toEqual([
       "tpl-carrier",
@@ -474,20 +481,18 @@ describe("/v1/admin/inquiry", () => {
       ok: true,
       value: { body: "", unresolved: [], subject: "Re: 写真の件" },
     };
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "続きです",
-        idempotencyKey: "reply-key-4",
-        subject: "別の件名",
-      }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "続きです",
+      idempotencyKey: "reply-key-4",
+      subject: "別の件名",
     });
     expect(last("updateTemplate")).toBeUndefined();
     expect(last("reply")?.args[2]).not.toHaveProperty("templateId");
   });
 
   it("lays out a reply: greeting, subject, closing and signature", async () => {
-    const body = await (await request("/tickets/t1/compose")).json();
+    const body = await (await op("inquiry.compose", { ticketId: "t1" })).json();
     expect(body).toEqual({
       to: "reader@example.com",
       from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
@@ -508,14 +513,14 @@ describe("/v1/admin/inquiry", () => {
       ok: true,
       value: { body: "", unresolved: [], subject: "Re: 写真の件" },
     };
-    const later = await (await request("/tickets/t1/compose")).json();
+    const later = await (await op("inquiry.compose", { ticketId: "t1" })).json();
     expect(later).toMatchObject({ subject: "Re: 写真の件", subjectEditable: false });
   });
 
   it("starts the subject from the topic the reader picked, or else the lane", async () => {
     const subjectFor = async (subject: string) => {
       answer.getTicket = { ok: true, value: ticket({ subject }) };
-      return (await (await request("/tickets/t1/compose")).json()).subject;
+      return (await (await op("inquiry.compose", { ticketId: "t1" })).json()).subject;
     };
     expect(await subjectFor("お仕事・取材の相談")).toBe(
       "【ともきちの旅行日記】お仕事のご相談について",
@@ -535,7 +540,7 @@ describe("/v1/admin/inquiry", () => {
       templates = seeded();
       return listed;
     };
-    await request("/templates");
+    await op("inquiry.templates");
     const created = calledWith("createTemplate").map(
       (call) => (call.args[1] as { key: string }).key,
     );
@@ -555,7 +560,7 @@ describe("/v1/admin/inquiry", () => {
           ? { ...entry, body: "自分で書き直したお礼" }
           : entry,
     );
-    await request("/templates");
+    await op("inquiry.templates");
     const updated = calledWith("updateTemplate").map((call) => call.args.slice(1, 3));
     expect(updated).toEqual([
       [`tpl-${OPENING_KEY}`, { name: opening.name, subject: opening.subject, body: opening.body }],
@@ -563,9 +568,10 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("refuses a reply that still has a placeholder, naming it", async () => {
-    const response = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "{{userName}} 様 {{ 日付 }}", idempotencyKey: "reply-key-3" }),
+    const response = await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "{{userName}} 様 {{ 日付 }}",
+      idempotencyKey: "reply-key-3",
     });
     expect(response.status).toBe(400);
     expect((await response.json()).error.message).toContain("{{日付}}");
@@ -573,24 +579,20 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("fills the site's own placeholders, and refuses one left in the subject", async () => {
-    const refused = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "{{appName}}の記事です: {{siteUrl}}",
-        idempotencyKey: "reply-key-7",
-        subject: "{{articleTitle}}について",
-      }),
+    const refused = await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "{{appName}}の記事です: {{siteUrl}}",
+      idempotencyKey: "reply-key-7",
+      subject: "{{articleTitle}}について",
     });
     expect(refused.status).toBe(400);
     expect((await refused.json()).error.message).toContain("{{articleTitle}}");
 
-    await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({
-        body: "{{appName}}の記事です: {{siteUrl}}",
-        idempotencyKey: "reply-key-8",
-        closing: false,
-      }),
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "{{appName}}の記事です: {{siteUrl}}",
+      idempotencyKey: "reply-key-8",
+      closing: false,
     });
     expect((last("reply")!.args[2] as { body: string }).body).toBe(
       "ともきちの旅行日記の記事です: https://tomokichidiary.com",
@@ -599,9 +601,10 @@ describe("/v1/admin/inquiry", () => {
 
   it("says plainly when the platform could not mail the reply", async () => {
     answer.reply = { ok: false, error: { code: "MAIL_ERROR", message: "resend 500" } };
-    const response = await request("/tickets/t1/reply", {
-      method: "POST",
-      body: JSON.stringify({ body: "お返事です", idempotencyKey: "reply-key-4" }),
+    const response = await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-4",
     });
     expect(response.status).toBe(502);
     const body = await response.json();
@@ -610,14 +613,11 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("reads and sets the reply signature", async () => {
-    expect(await (await request("/signature")).json()).toEqual({
+    expect(await (await op("inquiry.signature")).json()).toEqual({
       signature: "",
       usesDefault: true,
     });
-    await request("/signature", {
-      method: "PUT",
-      body: JSON.stringify({ signature: "  ともきちの旅行日記\n  " }),
-    });
+    await op("inquiry.saveSignature", { signature: "  ともきちの旅行日記\n  " });
     expect(last("setSignature")?.args).toEqual([
       "tomokichi-diary",
       "ともきちの旅行日記",
@@ -626,7 +626,7 @@ describe("/v1/admin/inquiry", () => {
   });
 
   it("lists this site's templates, retired ones too, without the subject carrier", async () => {
-    const body = await (await request("/templates")).json();
+    const body = await (await op("inquiry.templates")).json();
     expect(last("listTemplates")?.args).toEqual(["tomokichi-diary", { includeInactive: true }]);
     const ids = body.items.map((item: { id: string }) => item.id);
     expect(ids).not.toContain("tpl-carrier");
@@ -641,14 +641,12 @@ describe("/v1/admin/inquiry", () => {
     answer.updateTemplate = { ok: true, value: template() };
     const input = { name: " お礼 ", subject: " ", body: "本文", isActive: true, sortOrder: 10 };
 
-    expect(
-      (await request("/templates", { method: "POST", body: JSON.stringify(input) })).status,
-    ).toBe(201);
+    expect((await op("inquiry.createTemplate", { ...input })).status).toBe(200);
     const [, created] = last("createTemplate")!.args as [string, Record<string, unknown>];
     expect(created).toMatchObject({ name: "お礼", subject: null, body: "本文", sortOrder: 10 });
     expect(created.key).toMatch(/^diary_[0-9a-f]{12}$/);
 
-    await request("/templates/tpl1", { method: "PATCH", body: JSON.stringify(input) });
+    await op("inquiry.updateTemplate", { templateId: "tpl1", ...input });
     expect(last("updateTemplate")?.args.slice(1, 3)).toEqual([
       "tpl1",
       { name: "お礼", subject: null, body: "本文", isActive: true, sortOrder: 10 },
@@ -665,10 +663,7 @@ describe("/v1/admin/inquiry", () => {
       }),
     );
     const body = await (
-      await request("/tickets/t1/apply-template", {
-        method: "POST",
-        body: JSON.stringify({ templateId: "tpl-x" }),
-      })
+      await op("inquiry.applyTemplate", { ticketId: "t1", templateId: "tpl-x" })
     ).json();
     expect(last("applyTemplate")?.args).toEqual(["tomokichi-diary", "t1", "tpl-x"]);
     expect(body).toEqual({
@@ -680,19 +675,13 @@ describe("/v1/admin/inquiry", () => {
 
   it("will not apply the subject carrier or the opening as a template", async () => {
     for (const id of ["tpl-carrier", `tpl-${OPENING_KEY}`]) {
-      const response = await request("/tickets/t1/apply-template", {
-        method: "POST",
-        body: JSON.stringify({ templateId: id }),
-      });
+      const response = await op("inquiry.applyTemplate", { ticketId: "t1", templateId: id });
       expect(response.status).toBe(404);
     }
   });
 
   it("adds an internal note with its idempotency key", async () => {
-    await request("/tickets/t1/notes", {
-      method: "POST",
-      body: JSON.stringify({ body: "調査中", idempotencyKey: "note-key-1" }),
-    });
+    await op("inquiry.addNote", { ticketId: "t1", body: "調査中", idempotencyKey: "note-key-1" });
     expect(last("addNote")?.args.slice(1, 3)).toEqual([
       "t1",
       { body: "調査中", idempotencyKey: "note-key-1" },
@@ -701,12 +690,12 @@ describe("/v1/admin/inquiry", () => {
 
   it("treats a binding that is not granted this project as configuration", async () => {
     answer.listTickets = { ok: false, error: { code: "FORBIDDEN", message: "props" } };
-    expect((await request("/tickets")).status).toBe(503);
+    expect((await op("inquiry.tickets")).status).toBe(503);
   });
 
   it("turns anything else the platform says into a plain 502", async () => {
     answer.listTickets = { ok: false, error: { code: "INTERNAL_ERROR", message: "secret detail" } };
-    const response = await request("/tickets");
+    const response = await op("inquiry.tickets");
     expect(response.status).toBe(502);
     expect(JSON.stringify(await response.json())).not.toContain("secret detail");
   });
