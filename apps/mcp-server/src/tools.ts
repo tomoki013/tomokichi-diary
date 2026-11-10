@@ -110,11 +110,13 @@ function shapeOf(schema: InputSchema): Record<string, ZodType> {
  * What a model should write into a body: the slug alias when a photo has one,
  * so a model picking a field by name cannot write the storage URL.
  */
+const swapUrl = (item: Record<string, unknown>) => {
+  const { slugUrl, ...rest } = item;
+  return { ...rest, url: slugUrl ?? item["url"] };
+};
+
 export function bodyUrls(page: unknown): unknown {
-  const swap = (item: Record<string, unknown>) => {
-    const { slugUrl, ...rest } = item;
-    return { ...rest, url: slugUrl ?? item["url"] };
-  };
+  const swap = swapUrl;
   if (!page || typeof page !== "object") return page;
   if ("items" in page && Array.isArray(page.items)) return { ...page, items: page.items.map(swap) };
   return "slugUrl" in page ? swap(page as Record<string, unknown>) : page;

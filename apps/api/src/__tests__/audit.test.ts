@@ -373,7 +373,7 @@ describe("management audit trail", () => {
       {
         method: "POST",
         headers: {
-          ...{ "cf-access-jwt-assertion": "valid-admin-app-token" },
+          "cf-access-jwt-assertion": "valid-admin-app-token",
           "content-type": "application/json",
         },
         body: JSON.stringify({ targetType: "series", result: "succeeded" }),

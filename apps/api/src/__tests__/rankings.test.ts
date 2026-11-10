@@ -21,14 +21,12 @@ async function createArticle(slug: string): Promise<string> {
   const response = await op("article.create", {
     slug,
     path: `/posts/${slug}`,
-    ...{
-      title: `${slug} の旅`,
-      summary: "要約",
-      bodyMarkdown: "本文".repeat(200),
-      seoTitleOverride: null,
-      seoDescriptionOverride: null,
-      changeSummary: null,
-    },
+    title: `${slug} の旅`,
+    summary: "要約",
+    bodyMarkdown: "本文".repeat(200),
+    seoTitleOverride: null,
+    seoDescriptionOverride: null,
+    changeSummary: null,
   });
   return ((await response.json()) as { id: string }).id;
 }

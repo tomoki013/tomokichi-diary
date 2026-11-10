@@ -48,6 +48,8 @@ async function listConnections(scope: OpScope): Promise<ConnectionDto[]> {
 }
 
 const HOME_LIST = 5;
+const href = (kind: string, id: string) => (kind === "note" ? `#/notes/${id}` : `#/articles/${id}`);
+const text = (value: unknown) => (typeof value === "string" ? value : null);
 
 export const siteHandlers: Handlers<Names> = {
   /*
@@ -69,12 +71,10 @@ export const siteHandlers: Handlers<Names> = {
         detail: publication.error ?? publication.errorCode,
         href: "#/site",
       });
-    const href = (kind: string, id: string) =>
-      kind === "note" ? `#/notes/${id}` : `#/articles/${id}`;
     const active = summaries
       .filter(({ article }) => article.status !== "archived")
       .toSorted((a, b) => b.article.updatedAt.localeCompare(a.article.updatedAt));
-    for (const { article, title } of active.filter(({ article }) => article.status === "scheduled"))
+    for (const { article, title } of active.filter((item) => item.article.status === "scheduled"))
       tasks.push({
         kind: "scheduled",
         title,
@@ -205,7 +205,6 @@ export const siteHandlers: Handlers<Names> = {
         .bind(...values, input.limit, (input.page - 1) * input.limit)
         .all<Record<string, unknown>>(),
     ]);
-    const text = (value: unknown) => (typeof value === "string" ? value : null);
     const items = rows.map((row): ActivityItemDto => ({
       id: String(row["id"]),
       occurredAt: String(row["occurred_at"]),

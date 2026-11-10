@@ -3,7 +3,6 @@ import sharp from "sharp";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
 import { loadContentSnapshot } from "@tomokichi/application";
-import type { ContactMessage } from "@tomokichi/domain";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 

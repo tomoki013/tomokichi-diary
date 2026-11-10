@@ -29,8 +29,8 @@ const input = (body = bytes, name = "photo.png", slug?: string) => ({
   ...(slug ? { slug } : {}),
 });
 const request = (path: string, init: RequestInit = {}) => app.request(`/v1${path}`, init, env);
-const op = (name: string, input: unknown = {}) =>
-  request(`/admin/ops/${name}`, { method: "POST", headers: auth, body: JSON.stringify(input) });
+const op = (name: string, payload: unknown = {}) =>
+  request(`/admin/ops/${name}`, { method: "POST", headers: auth, body: JSON.stringify(payload) });
 async function post(body = bytes, name = "photo.png", type = "image/png", slug = "photo") {
   const form = new FormData();
   form.append("file", new File([body], name, { type }));
@@ -83,8 +83,8 @@ describe("media upload API", () => {
   });
   it("looks up hashes only after authentication", async () => {
     const saved = await asset();
-    const anonymous = (name: string, input: unknown) =>
-      request(`/admin/ops/${name}`, { method: "POST", body: JSON.stringify(input) });
+    const anonymous = (name: string, payload: unknown) =>
+      request(`/admin/ops/${name}`, { method: "POST", body: JSON.stringify(payload) });
     expect((await anonymous("media.lookup", { sha256: saved.sha256 })).status).toBe(401);
     const lookup = await op("media.lookup", { sha256: saved.sha256 });
     expect((await lookup.json()).asset.id).toBe(saved.id);

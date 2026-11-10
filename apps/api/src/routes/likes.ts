@@ -1,8 +1,6 @@
 import { Hono, type Context } from "hono";
-import type { LikeActivityDto } from "@tomokichi/contracts";
 import {
   getArticleLikeState,
-  getLikeActivity,
   getMediaLikeState,
   listArticleLikeCounts,
   listMediaLikeCounts,

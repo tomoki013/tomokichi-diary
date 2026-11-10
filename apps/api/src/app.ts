@@ -1,7 +1,7 @@
 import { resendWebhook } from "./resend-webhook.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
-import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
+import type { SqlDatabase } from "@tomokichi/infra-d1";
 import { generateId, type MediaId } from "@tomokichi/domain";
 import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
