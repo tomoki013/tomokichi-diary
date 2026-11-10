@@ -5,6 +5,18 @@ import {
   type AnalyticsRow,
   type DateRange,
 } from "./model.js";
+import { experienceKey } from "./experience.js";
+
+/** Observations per reader measurement, each row's key parsed once. */
+function observationsBy(rows: readonly AnalyticsRow[]): Map<string, number> {
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    const measurement = experienceKey(row)?.measurement;
+    if (measurement === undefined) continue;
+    totals.set(measurement, (totals.get(measurement) ?? 0) + (row.metrics["observations"] ?? 0));
+  }
+  return totals;
+}
 
 const inRange = (date: string, r: DateRange) => date >= r.start && date <= r.end;
 
@@ -59,26 +71,10 @@ export function articleReading(days: AnalyticsDay[], range: DateRange, previous:
   }
   return [...byArticle]
     .map(([articleId, rows]) => {
-      const count = (measurement: string) =>
-        rows.experience
-          .filter((row) => {
-            try {
-              return JSON.parse(row.key).measurement === measurement;
-            } catch {
-              return false;
-            }
-          })
-          .reduce((sum, row) => sum + (row.metrics["observations"] ?? 0), 0);
-      const countPrevious = (measurement: string) =>
-        rows.experiencePrevious
-          .filter((row) => {
-            try {
-              return JSON.parse(row.key).measurement === measurement;
-            } catch {
-              return false;
-            }
-          })
-          .reduce((sum, row) => sum + (row.metrics["observations"] ?? 0), 0);
+      const observed = observationsBy(rows.experience);
+      const observedPrevious = observationsBy(rows.experiencePrevious);
+      const count = (measurement: string) => observed.get(measurement) ?? 0;
+      const countPrevious = (measurement: string) => observedPrevious.get(measurement) ?? 0;
       const views = count("article_view");
       const previousViews = countPrevious("article_view");
       const gsc = addMetrics(rows.gsc),

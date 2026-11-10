@@ -6,6 +6,39 @@ import {
   type AnalyticsRow,
   type DateRange,
 } from "./model.js";
+/** What a reader measurement row's key carries. */
+export interface ExperienceKey {
+  readonly layout?: string;
+  readonly device?: string;
+  readonly experimentId?: string;
+  readonly variant?: string;
+  readonly measurement?: string;
+  readonly placement?: string;
+  readonly vital?: string;
+}
+
+// Rows are read once per request but summarised many times over; parsing each
+// key once keeps the dashboard inside the Worker's CPU budget.
+const parsedKeys = new WeakMap<AnalyticsRow, ExperienceKey | null>();
+
+/** The parsed key of an experience row, or null when it is not valid JSON. */
+export function experienceKey(row: AnalyticsRow): ExperienceKey | null {
+  let parsed = parsedKeys.get(row);
+  if (parsed === undefined) {
+    try {
+      const value: unknown = JSON.parse(row.key);
+      parsed = value && typeof value === "object" ? (value as ExperienceKey) : null;
+    } catch {
+      parsed = null;
+    }
+    parsedKeys.set(row, parsed);
+  }
+  return parsed;
+}
+
+const bucketOf = (measurement?: string, placement?: string, vital?: string) =>
+  `${measurement ?? ""}\u0000${placement ?? ""}\u0000${vital ?? ""}`;
+
 export function experienceSummary(
   days: AnalyticsDay[],
   range: DateRange,
@@ -21,7 +54,7 @@ export function experienceSummary(
       device: string;
       experimentId: string;
       variant: string;
-      rows: AnalyticsRow[];
+      rows: Map<string, AnalyticsRow[]>;
       dates: Set<string>;
     }
   >();
@@ -29,12 +62,14 @@ export function experienceSummary(
     if (day.source !== "ga4" || day.date < range.start || day.date > range.end) continue;
     for (const row of day.rows) {
       if (row.grain !== "experience" || (articleId && row.articleId !== articleId)) continue;
-      let dimensions: { layout: string; device: string; experimentId: string; variant: string };
-      try {
-        dimensions = JSON.parse(row.key);
-      } catch {
-        continue;
-      }
+      const parsed = experienceKey(row);
+      if (!parsed) continue;
+      const dimensions = parsed as {
+        layout: string;
+        device: string;
+        experimentId: string;
+        variant: string;
+      };
       if (
         (experiments
           ? dimensions.layout !== "article-placement-v2" ||
@@ -57,30 +92,33 @@ export function experienceSummary(
         ...(experiments ? [row.articleId] : []),
       ]);
       const cohort = cohorts.get(key) ?? {
-        ...dimensions,
+        layout: dimensions.layout,
+        device: dimensions.device,
+        experimentId: dimensions.experimentId,
+        variant: dimensions.variant,
         articleId: experiments ? row.articleId : null,
         path: experiments ? row.path : null,
-        rows: [],
+        rows: new Map<string, AnalyticsRow[]>(),
         dates: new Set<string>(),
       };
-      cohort.rows.push(row);
-      if (JSON.parse(row.key).measurement === "article_view") cohort.dates.add(day.date);
+      // Filed under every (measurement, placement, vital) filter a summary asks for.
+      for (const bucket of new Set([
+        bucketOf(parsed.measurement),
+        bucketOf(parsed.measurement, parsed.placement),
+        bucketOf(parsed.measurement, undefined, parsed.vital),
+      ])) {
+        const list = cohort.rows.get(bucket);
+        if (list) list.push(row);
+        else cohort.rows.set(bucket, [row]);
+      }
+      if (parsed.measurement === "article_view") cohort.dates.add(day.date);
       cohorts.set(key, cohort);
     }
   }
   return [...cohorts.values()]
     .map((cohort) => {
       const sum = (measurement: string, placement?: string, vital?: string) =>
-        addMetrics(
-          cohort.rows.filter((row) => {
-            const d = JSON.parse(row.key);
-            return (
-              d.measurement === measurement &&
-              (!placement || d.placement === placement) &&
-              (!vital || d.vital === vital)
-            );
-          }),
-        );
+        addMetrics(cohort.rows.get(bucketOf(measurement, placement, vital)) ?? []);
       const count = (m: string, p?: string) => sum(m, p)["observations"] ?? 0;
       const views = count("article_view");
       const requests = count("ad_request"),

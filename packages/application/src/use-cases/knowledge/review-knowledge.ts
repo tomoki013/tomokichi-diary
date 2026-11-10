@@ -48,9 +48,7 @@ async function graph(ctx: AppContext) {
 async function problemsWith(ctx: AppContext, facts: readonly TravelFact[]): Promise<string[]> {
   const current = await graph(ctx);
   const ids = new Set(facts.map((fact) => fact.id as string));
-  const revisions = await ctx.repos.revisions.listByArticles(
-    current.articles.map((article) => article.id),
-  );
+  const revisions = await ctx.repos.revisions.listStamps();
   return validateKnowledgeGraph({
     sources: current.sources,
     travelRoutes: current.travelRoutes,

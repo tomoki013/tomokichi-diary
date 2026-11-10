@@ -187,27 +187,74 @@ function readerText(revision: ArticleRevision): string {
   ]);
 }
 
+const hex32 = (n: number) => (n >>> 0).toString(16).padStart(8, "0");
+
+/**
+ * A short, stable stand-in for what a reader of this revision sees: equal
+ * fingerprints mean the reader-visible content is the same. Stored with each
+ * revision, so dating a change never has to read the bodies again.
+ */
+export function readerFingerprint(revision: ArticleRevision): string {
+  const text = readerText(revision);
+  // cyrb53: two 32-bit FNV-style lanes. Not cryptographic; it only has to
+  // tell an edit from no edit, and the length guards the rare collision.
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ code, 2654435761);
+    h2 = Math.imul(h2 ^ code, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `${text.length.toString(36)}-${hex32(h2)}${hex32(h1)}`;
+}
+
+/** One revision as far as dating a content change needs it. */
+export interface RevisionStamp {
+  readonly revisionNumber: number;
+  readonly createdAt: Instant;
+  /** `readerFingerprint` of the revision; null when it is not known yet. */
+  readonly readerFingerprint: string | null;
+}
+
 /**
  * When the reader-visible content last changed, up to and including revision
  * `upTo` (by revision number): the creation time of the oldest revision in the
- * unbroken run that reads the same as it. Null when `upTo` is not in the list.
+ * unbroken run that reads the same as it. Null when `upTo` is not in the list,
+ * or when a revision on the way has no fingerprint yet.
  */
-export function contentChangedAt(
-  revisions: readonly ArticleRevision[],
+export function contentChangedAtFrom(
+  stamps: readonly RevisionStamp[],
   upTo: number,
 ): Instant | null {
-  const ordered = revisions
-    .filter((revision) => revision.revisionNumber <= upTo)
+  const ordered = stamps
+    .filter((stamp) => stamp.revisionNumber <= upTo)
     .toSorted((a, b) => a.revisionNumber - b.revisionNumber);
   if (ordered.at(-1)?.revisionNumber !== upTo) return null;
   let changedAt: Instant | null = null;
   let previous: string | null = null;
-  for (const revision of ordered) {
-    const text = readerText(revision);
-    if (text !== previous) changedAt = revision.createdAt;
-    previous = text;
+  for (const stamp of ordered) {
+    if (stamp.readerFingerprint === null) return null;
+    if (stamp.readerFingerprint !== previous) changedAt = stamp.createdAt;
+    previous = stamp.readerFingerprint;
   }
   return changedAt;
+}
+
+/** `contentChangedAtFrom` over full revisions, compared by what the reader sees. */
+export function contentChangedAt(
+  revisions: readonly ArticleRevision[],
+  upTo: number,
+): Instant | null {
+  return contentChangedAtFrom(
+    revisions.map((revision) => ({
+      revisionNumber: revision.revisionNumber,
+      createdAt: revision.createdAt,
+      readerFingerprint: readerText(revision),
+    })),
+    upTo,
+  );
 }
 
 /** `contentChangedAt` for one revision of an article, found among its history by id. */

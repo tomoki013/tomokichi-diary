@@ -6,7 +6,6 @@ import {
 } from "@tomokichi/application";
 import type { ArticleDetailDto, ArticleListDto, PublishCheckDto } from "@tomokichi/contracts";
 import {
-  contentChangedAtOf,
   hasUnpublishedChanges,
   isPubliclyVisible,
   RouteTable,
@@ -44,9 +43,8 @@ export async function listContent(
   query = "",
 ): Promise<ArticleListDto> {
   const summaries = (await listArticlesForAdmin(ctx)).filter(({ article }) => include(article));
-  const [routeList, history, memberships, categories, locations] = await Promise.all([
+  const [routeList, memberships, categories, locations] = await Promise.all([
     ctx.repos.routes.listAll(),
-    ctx.repos.revisions.listByArticles(summaries.map((summary) => summary.article.id)),
     ctx.repos.collections.listMemberships(),
     ctx.repos.relations.listArticleCategories(),
     ctx.repos.relations.listArticleLocations(),
@@ -74,10 +72,7 @@ export async function listContent(
       path: table.canonicalFor(routeKind(summary.article), summary.article.id)?.path ?? null,
       hasUnpublishedChanges: summary.hasUnpublishedChanges,
       isLive: summary.isLive,
-      contentUpdatedAt: contentChangedAtOf(
-        history.filter((revision) => revision.articleId === summary.article.id),
-        summary.article.currentRevisionId,
-      ),
+      contentUpdatedAt: summary.contentUpdatedAt,
       collectionIds: collectionIds.get(summary.article.id) ?? [],
       categoryIds: categoryIds.get(summary.article.id) ?? [],
       locationIds: locationIds.get(summary.article.id) ?? [],

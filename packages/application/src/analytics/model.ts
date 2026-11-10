@@ -131,14 +131,19 @@ export function comparison(current: number | null, previous: number | null): num
     ? (current - previous) / previous
     : null;
 }
+const DISTINCT_COUNTS = new Set(["users", "activeUsers", "sessions", "engagedSessions"]);
+
 /** Distinct counts cannot be added across dates or URL aliases. */
 export function addMetrics(rows: readonly AnalyticsRow[]): Record<string, number | null> {
   const result: Record<string, number | null> = {};
-  for (const row of rows)
-    for (const [key, value] of Object.entries(row.metrics)) {
-      if (["users", "activeUsers", "sessions", "engagedSessions"].includes(key)) continue;
-      if (value !== null) result[key] = (result[key] ?? 0) + value;
+  for (const row of rows) {
+    const metrics = row.metrics;
+    for (const key in metrics) {
+      if (DISTINCT_COUNTS.has(key)) continue;
+      const value = metrics[key];
+      if (value !== null && value !== undefined) result[key] = (result[key] ?? 0) + value;
     }
+  }
   if ("impressions" in result) {
     result["ctr"] = ratio(result["clicks"] ?? 0, result["impressions"] ?? 0);
     const weighted =

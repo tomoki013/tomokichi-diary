@@ -54,14 +54,19 @@ const refuse = (message: string) => new OpError("MONETIZATION_INVALID", message,
 
 async function overview(ctx: AppContext): Promise<MonetizationOverviewDto> {
   const repos = ctx.repos;
-  const [configs, offers, experiments, articles, metadata, settings] = await Promise.all([
+  const [configs, offers, experiments, articles, settings] = await Promise.all([
     repos.monetization.listArticles(),
     repos.monetization.offers(),
     repos.monetization.experiments(),
     repos.articles.listAll(),
-    repos.publicationMetadata.listAll(),
     repos.monetization.settings(),
   ]);
+  // Only what is live matters here; every older revision's metadata is not read.
+  const metadata = await repos.publicationMetadata.listByRevisions(
+    articles.flatMap((article) =>
+      article.publishedRevisionId ? [article.publishedRevisionId] : [],
+    ),
+  );
   const published = new Map(metadata.map((m) => [m.revisionId, m.metadata.monetization]));
   const articleById = new Map(articles.map((article) => [article.id as string, article]));
   const now = ctx.clock.now();

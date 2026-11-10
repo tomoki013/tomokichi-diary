@@ -25,6 +25,7 @@ import {
   type ContentSnapshot,
   type Row,
 } from "@tomokichi/data";
+import { readerFingerprint } from "@tomokichi/domain";
 
 /**
  * The seed as SQL. Nothing here is D1-specific -- the same statements load into
@@ -174,7 +175,13 @@ export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
     ...upsert("collections", snapshot.collections.map(collectionRow.from)),
     ...upsert("rankings", (snapshot.rankings ?? []).map(rankingRow.from)),
     ...upsert("articles", snapshot.articles.map(articleRow.from)),
-    ...upsert("article_revisions", snapshot.revisions.map(revisionRow.from)),
+    ...upsert(
+      "article_revisions",
+      snapshot.revisions.map((revision) => ({
+        ...revisionRow.from(revision),
+        reader_fingerprint: readerFingerprint(revision),
+      })),
+    ),
     ...upsert("article_embeds", snapshot.embeds.map(embedRow.from)),
     ...upsert("routes", snapshot.routes.map(routeRow.from)),
     ...upsert("article_media", snapshot.articleMedia.map(articleMediaRow.from)),

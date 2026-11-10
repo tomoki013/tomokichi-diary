@@ -7,7 +7,9 @@ import {
   disallowedHtml,
   err,
   ineffectiveBold,
+  contentChangedAtFrom,
   hasUnpublishedChanges,
+  readerFingerprint,
   inlineInternalLinks,
   isPubliclyVisible,
   nextRevision,
@@ -32,6 +34,7 @@ import {
   type RouteId,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
+import type { RevisionStampRecord } from "../../ports/repositories.js";
 import { linkBodyImages, withBodyUsages, type BodyImage } from "../content/media-links.js";
 
 export interface CreateArticleInput {
@@ -388,25 +391,59 @@ export interface ArticleAdminSummary {
   readonly title: string;
   readonly hasUnpublishedChanges: boolean;
   readonly isLive: boolean;
+  /** When the current revision's reader-visible content last changed; null while not yet known. */
+  readonly contentUpdatedAt: Instant | null;
 }
 
+/**
+ * How many older revisions one list read fingerprints. Each needs its body
+ * read once; capping it keeps a single request small, and the lists fill the
+ * rest in over the next few reads.
+ */
+export const FINGERPRINT_BACKFILL_LIMIT = 150;
+
+/** Every revision's stamp, with missing fingerprints filled in up to the limit. */
+async function revisionStamps(ctx: AppContext): Promise<readonly RevisionStampRecord[]> {
+  const stamps = await ctx.repos.revisions.listStamps();
+  const missing = stamps
+    .filter((stamp) => stamp.readerFingerprint === null)
+    .slice(0, FINGERPRINT_BACKFILL_LIMIT);
+  if (missing.length === 0) return stamps;
+  const revisions = await ctx.repos.revisions.listByIds(missing.map((stamp) => stamp.id));
+  const filled = new Map(revisions.map((revision) => [revision.id, readerFingerprint(revision)]));
+  await ctx.repos.revisions.recordFingerprints(
+    [...filled].map(([id, fingerprint]) => ({ id, readerFingerprint: fingerprint })),
+  );
+  return stamps.map((stamp) =>
+    stamp.readerFingerprint === null && filled.has(stamp.id)
+      ? { ...stamp, readerFingerprint: filled.get(stamp.id)! }
+      : stamp,
+  );
+}
+
+/** Every article with its title and change date, read without a single revision body. */
 export async function listArticlesForAdmin(
   ctx: AppContext,
 ): Promise<readonly ArticleAdminSummary[]> {
-  const articles = await ctx.repos.articles.listAll();
+  const [articles, stamps] = await Promise.all([ctx.repos.articles.listAll(), revisionStamps(ctx)]);
+  const byArticle = new Map<string, RevisionStampRecord[]>();
+  for (const stamp of stamps) {
+    const list = byArticle.get(stamp.articleId);
+    if (list) list.push(stamp);
+    else byArticle.set(stamp.articleId, [stamp]);
+  }
   const now = ctx.clock.now();
-  return Promise.all(
-    articles.map(async (article) => {
-      const revisionId = article.currentRevisionId;
-      const revision = revisionId ? await ctx.repos.revisions.findById(revisionId) : null;
-      return {
-        article,
-        title: revision?.title ?? "(untitled)",
-        hasUnpublishedChanges: hasUnpublishedChanges(article),
-        isLive: isPubliclyVisible(article, now),
-      };
-    }),
-  );
+  return articles.map((article) => {
+    const history = byArticle.get(article.id) ?? [];
+    const current = history.find((stamp) => stamp.id === article.currentRevisionId);
+    return {
+      article,
+      title: current?.title ?? "(untitled)",
+      hasUnpublishedChanges: hasUnpublishedChanges(article),
+      isLive: isPubliclyVisible(article, now),
+      contentUpdatedAt: current ? contentChangedAtFrom(history, current.revisionNumber) : null,
+    };
+  });
 }
 
 export interface ArticleBodyFinding {
