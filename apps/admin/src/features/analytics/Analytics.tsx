@@ -32,7 +32,13 @@ export function Analytics() {
   const [tab, setTab] = useState<"overview" | "articles" | "likes" | "data">("overview");
   const [start, setStart] = useState(jstDay(-28));
   const [end, setEnd] = useState(jstDay(-1));
-  const dashboard = useOp("analytics.dashboard", { start, end });
+  // Only what these tabs show: the A/B cohorts and page lists are left to the MCP.
+  const dashboard = useOp("analytics.dashboard", {
+    start,
+    end,
+    sections: ["articles", "queries"],
+    limit: 100,
+  });
   return (
     <Page title="分析" back={{ href: href.more(), label: "その他" }}>
       <div className="inline">
@@ -69,7 +75,7 @@ export function Analytics() {
 }
 
 const metric = (list: AnalyticsDashboardDto["current"], source: string, key: string) =>
-  list.find((s) => s.source === source)?.metrics[key] ?? null;
+  list.find((s) => s.source === source)?.metrics?.[key] ?? null;
 
 function Overview({ data }: { data: AnalyticsDashboardDto }) {
   return (
@@ -105,7 +111,7 @@ function Overview({ data }: { data: AnalyticsDashboardDto }) {
               </tr>
             </thead>
             <tbody>
-              {data.queries.slice(0, 30).map((row) => (
+              {(data.queries ?? []).slice(0, 30).map((row) => (
                 <tr key={row.key}>
                   <td>{row.key}</td>
                   <td className="num">{fmt(row.metrics["clicks"])}</td>
@@ -129,8 +135,15 @@ function ArticleTable({ data }: { data: AnalyticsDashboardDto }) {
   );
   const rows = (data.articles ?? []).toSorted((a, b) => (b.pageViews ?? 0) - (a.pageViews ?? 0));
   if (rows.length === 0) return <Empty>この期間の記事データはありません。</Empty>;
+  const listed = data.lists["articles"];
+  const more = listed ? listed.total - listed.offset - listed.returned : 0;
   return (
     <div className="table-wrap">
+      {more > 0 ? (
+        <p className="muted">
+          PV の多い {rows.length} 本を表示（ほか {more} 本）
+        </p>
+      ) : null}
       <table>
         <thead>
           <tr>

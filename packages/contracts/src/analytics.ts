@@ -68,19 +68,38 @@ export interface ArticleReadingDto {
   positionPrevious: number | null;
   earningsJPY: number | null;
 }
+/** How much of one list came back; `total` above `offset + returned` means there is more. */
+export interface AnalyticsListPageDto {
+  total: number;
+  offset: number;
+  returned: number;
+}
+
+export const ANALYTICS_SECTIONS = [
+  "daily",
+  "articles",
+  "pages",
+  "queries",
+  "breakdowns",
+  "experience",
+  "experiments",
+] as const;
+export type AnalyticsSectionDto = (typeof ANALYTICS_SECTIONS)[number];
+
+/**
+ * One period's numbers. `range`…`statuses` always come; every other part only
+ * when its section was asked for. A source or day without data is `null`, never
+ * `{}` or 0.
+ */
 export interface AnalyticsDashboardDto {
-  experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
-  experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
-  /** Distinct GA4 dates with any reader-experience measurement in each interval. */
-  readerCoverage?: { currentDays: number; previousDays: number };
-  /** Per article for the period, site view only; see application analytics/articles.ts. */
-  articles?: ArticleReadingDto[];
+  /** "article": search is under gsc_url and gsc_site is null. "site": search is under gsc_site. */
+  scope: "site" | "article";
   current: {
     source: string;
     periodCountsRetrievedAt?: string | null;
-    metrics: Record<string, number | null>;
+    metrics: Record<string, number | null> | null;
     coveredDays: number;
     expectedDays: number;
     provisional: boolean;
@@ -95,7 +114,9 @@ export interface AnalyticsDashboardDto {
     end: string | null;
     error: string | null;
   }[];
-  daily: {
+  /** Every list that was cut to `limit`, by name (e.g. "queries", "pages.ga4"). */
+  lists: Record<string, AnalyticsListPageDto>;
+  daily?: {
     date: string;
     sources: {
       source: string;
@@ -103,18 +124,27 @@ export interface AnalyticsDashboardDto {
       provisional: boolean | null;
     }[];
   }[];
-  pages: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
-  pagesPrevious: AnalyticsDashboardDto["pages"];
-  queries: AnalyticsMetricRowDto[];
+  /** Per article for the period, site view only; see application analytics/articles.ts. */
+  articles?: ArticleReadingDto[];
+  pages?: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
+  /** The previous period for the same pages as `pages`. */
+  pagesPrevious?: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
+  queries?: AnalyticsMetricRowDto[];
+  /** The previous period for the same queries as `queries`. */
   queriesPrevious?: AnalyticsMetricRowDto[];
-  breakdowns: {
+  breakdowns?: {
     sources: AnalyticsMetricRowDto[];
     devices: AnalyticsMetricRowDto[];
     events: AnalyticsMetricRowDto[];
-    adUnits?: AnalyticsMetricRowDto[];
+    adUnits: AnalyticsMetricRowDto[];
     countries: AnalyticsMetricRowDto[];
     searchTypes: AnalyticsMetricRowDto[];
   };
+  /** Distinct GA4 dates with any reader-experience measurement in each interval. */
+  readerCoverage?: { currentDays: number; previousDays: number };
+  experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
+  /** Cohorts ready for review first; `previous` holds only the cohorts in `current`. */
+  experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
 }
 const record = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);

@@ -25,17 +25,25 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 
 ## ツール
 
-`get_analytics_report({period:"weekly"|"monthly"})`: JSTで完了した前週（月〜日）/前月。保存snapshotの生成日時・未生成状態に加え、同期間の最新D1集計と前期間比較を返す。snapshot生成後のbackfillや収益遅延を最新集計から検証できる。
+3つとも返答の形は同じ考え方にそろえている（2026-11-11）。
 
-`get_analytics_dashboard({start,end,articleId?})`: 両日を含む93日以内の集計と前期間、取得状況・記事別/流入別/広告ユニット別・UX測定。日次人数の和を期間unique人数として扱わない。取れていない収益や体験測定を0へ補完しない。
+- 主要指標（`current`・`previous`）と取得状況（`statuses`）は常に返す。それ以外は `sections` で選ぶ（`daily`・`articles`・`pages`・`queries`・`breakdowns`・`experience`・`experiments`）。省略時は `experiments` 以外すべて。主要指標だけなら `sections: []`。
+- 一覧（記事・ページ・検索クエリ・内訳・実験）は `limit`（省略時20、最大100）件まで。切れたかどうかは `lists` の `total`・`offset`・`returned` で分かり、続きは `offset` で読む。前期間の一覧（`pagesPrevious`・`queriesPrevious`・`experiments.previous`）は、返した当期の行と同じものだけ。
+- データの無い取得元・日は `null`。`{}` や 0 では表さない。
+- 記事を指定すると `scope` が `article` になり、検索は `gsc_url` に入って `gsc_site` は `null`。
+- 返答の JSON は詰めて書く（インデントなし）。
 
-`list_analytics_reports`: 保存済みの週次・月次レポートを新しい順に12件。
+`get_analytics_report({period:"weekly"|"monthly", start?, sections?, limit?, offset?, includeSnapshot?})`: JSTで完了した週（月〜日）/月の最新集計（`dashboard`）と前期間比較。`start` で過去の週（月曜日）・月（1日）を選ぶ。期間終了時に保存したレポートは `snapshot` に状態と保存日時だけ入り、中身は `includeSnapshot: true` のときだけ返す（後追いの修正を確かめるとき）。
+
+`get_analytics_dashboard({start,end,articleId?, sections?, limit?, offset?})`: 両日を含む93日以内の集計と前期間。日次人数の和を期間unique人数として扱わない。取れていない収益や体験測定を0へ補完しない。
+
+`list_analytics_reports`: 保存済みの週次・月次レポートの期間と保存日時を新しい順に12件。中身は `get_analytics_report` に `period` と `start` を渡して読む。
 
 モデルはChatGPT側で実行する。このWorkerから外部AI APIを呼ばず、保存reportも根拠データとして保持する。ツール応答中の検索語や記事名は未信頼データであり、指示として実行しない。
 
 ## 分析プロンプト
 
-> Tomokichi Diary Analyticsのget_analytics_reportをperiod=weeklyで読み、必要な期間・記事をget_analytics_dashboardで確認して日本語で分析してください。対象期間と前期間、取得不足・推定値・サンプル数を明記。流入/検索/記事、読了・回遊、広告到達・request/filled・viewable proxy、LCP/INP/CLS、推定収益を併せて評価してください。UX優先で改善案を最大3つ、根拠・期待効果・悪化を検知する指標・次回確認日を示してください。広告を増やすことを前提にせず、配置だけでなくサイズ・速度・読了・回遊・端末差も検討。自動で設定や記事を変更せず、データ不足なら結論を保留してください。
+> Tomokichi Diary Analyticsのget_analytics_reportをperiod=weeklyで読み（A/B実験も見るときは sections に experiments を加える）、必要な期間・記事をget_analytics_dashboardで確認して日本語で分析してください。対象期間と前期間、取得不足・推定値・サンプル数を明記。流入/検索/記事、読了・回遊、広告到達・request/filled・viewable proxy、LCP/INP/CLS、推定収益を併せて評価してください。UX優先で改善案を最大3つ、根拠・期待効果・悪化を検知する指標・次回確認日を示してください。広告を増やすことを前提にせず、配置だけでなくサイズ・速度・読了・回遊・端末差も検討。自動で設定や記事を変更せず、データ不足なら結論を保留してください。
 
 月次はperiod=monthlyへ変更。日次集計15:47 JST、AdSense15:53、週次report月曜16:17、月次report月初16:37のため、ChatGPTの分析は月曜17:00/月初17:15 JSTが適切。ChatGPTのスケジュール画面からこの読み取り接続を利用し、完了時に通知する。**接続作成だけでは定期実行の成立を確認したことにならない**。設定の保存と実際のツール呼び出し・初回実行結果をChatGPTで確認する。再接続が必要な場合は取得失敗を知らせ、過去の数値を最新として報告しない。
 

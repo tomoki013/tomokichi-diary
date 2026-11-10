@@ -43,6 +43,9 @@ const dashboard = await analyticsDashboard(
       )[0]!.map((row) => JSON.parse(row.payload) as AnalyticsPeriodCounts),
   },
   range,
+  undefined,
+  // The saved evidence keeps every cohort, uncut.
+  { sections: ["experience", "experiments", "breakdowns"], limit: Number.MAX_SAFE_INTEGER },
 );
 if (!dashboard.current.some((s) => s.coveredDays)) throw new Error("ANALYTICS_SOURCE_NOT_READY");
 // Store evidence only. No external AI calls or content write capability.
@@ -53,7 +56,7 @@ const payload = JSON.stringify({
   previous: dashboard.previous,
   experience: dashboard.experience,
   experiments: dashboard.experiments,
-  adUnits: dashboard.breakdowns.adUnits,
+  adUnits: dashboard.breakdowns?.["adUnits"] ?? [],
   ai: {
     enabled: false,
     reason: "この保存レポートは集計データです。AI分析は接続先のChatGPTで実行します",
