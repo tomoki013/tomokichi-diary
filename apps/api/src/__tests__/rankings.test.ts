@@ -13,37 +13,29 @@ let ctx: AppContext;
 let app: ReturnType<typeof createApp>;
 
 const request = (path: string, init: RequestInit = {}) => app.request(path, init, env);
-const patch = (id: string, body: unknown) =>
-  request(`/v1/admin/rankings/${id}`, {
-    method: "PATCH",
-    headers: auth,
-    body: JSON.stringify(body),
-  });
+const op = (name: string, input: unknown = {}) =>
+  request(`/v1/admin/ops/${name}`, { method: "POST", headers: auth, body: JSON.stringify(input) });
+const patch = (id: string, body: unknown) => op("ranking.update", { rankingId: id, ...body });
 
 async function createArticle(slug: string): Promise<string> {
-  const response = await request("/v1/admin/articles", {
-    method: "POST",
-    headers: auth,
-    body: JSON.stringify({
-      slug,
-      locale: "ja",
-      path: `/posts/${slug}`,
-      draft: {
-        title: `${slug} の旅`,
-        summary: "要約",
-        bodyMarkdown: "本文".repeat(200),
-        seoTitleOverride: null,
-        seoDescriptionOverride: null,
-        changeSummary: null,
-      },
-    }),
+  const response = await op("article.create", {
+    slug,
+    path: `/posts/${slug}`,
+    ...{
+      title: `${slug} の旅`,
+      summary: "要約",
+      bodyMarkdown: "本文".repeat(200),
+      seoTitleOverride: null,
+      seoDescriptionOverride: null,
+      changeSummary: null,
+    },
   });
   return ((await response.json()) as { id: string }).id;
 }
 
 async function list(): Promise<RankingAdminDto[]> {
   return (
-    (await (await request("/v1/admin/rankings", { headers: auth })).json()) as {
+    (await (await op("ranking.list")).json()) as {
       items: RankingAdminDto[];
     }
   ).items;
@@ -71,8 +63,8 @@ describe("rankings", () => {
     const b = await createArticle("greece2");
     const response = await patch(first!.id, {
       picks: [
-        { articleId: a, comment: " 気球と一緒に浮かんでいた。 " },
-        { articleId: b, comment: "" },
+        { article: a, comment: " 気球と一緒に浮かんでいた。 " },
+        { article: b, comment: "" },
       ],
     });
     expect(response.status).toBe(200);
@@ -93,24 +85,21 @@ describe("rankings", () => {
   it("refuses an unknown or repeated article and an over-long comment", async () => {
     const [first] = await list();
     const a = await createArticle("india1");
-    expect((await patch(first!.id, { picks: [{ articleId: "nope" }] })).status).toBe(400);
-    expect((await patch(first!.id, { picks: [{ articleId: a }, { articleId: a }] })).status).toBe(
-      400,
-    );
+    expect((await patch(first!.id, { picks: [{ article: "nope" }] })).status).toBe(400);
+    expect((await patch(first!.id, { picks: [{ article: a }, { article: a }] })).status).toBe(400);
     expect(
-      (await patch(first!.id, { picks: [{ articleId: a, comment: "あ".repeat(81) }] })).status,
+      (await patch(first!.id, { picks: [{ article: a, comment: "あ".repeat(81) }] })).status,
     ).toBe(400);
     expect((await patch(first!.id, { experienceTag: "sleepy" })).status).toBe(400);
     expect((await patch("missing", { title: "x" })).status).toBe(404);
   });
 
   it("creates a new ranking at the end", async () => {
-    const response = await request("/v1/admin/rankings", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ title: "雨の日ランキング", note: "濡れても楽しい" }),
+    const response = await op("ranking.create", {
+      title: "雨の日ランキング",
+      note: "濡れても楽しい",
     });
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     const created = (await response.json()) as RankingAdminDto;
     const items = await list();
     expect(items.at(-1)?.id).toBe(created.id);
@@ -120,7 +109,7 @@ describe("rankings", () => {
   it("only takes published articles into the site snapshot", async () => {
     const [first] = await list();
     const draft = await createArticle("draft-only");
-    await patch(first!.id, { picks: [{ articleId: draft, comment: "まだ下書き" }] });
+    await patch(first!.id, { picks: [{ article: draft, comment: "まだ下書き" }] });
     const snapshot = await loadContentSnapshot(ctx);
     const ranking = snapshot.rankings?.find((item) => item.id === first!.id);
     expect(ranking?.picks).toEqual([]);

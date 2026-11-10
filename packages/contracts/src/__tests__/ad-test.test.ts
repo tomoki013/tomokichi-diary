@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { positionB } from "./ad-test";
+import { positionB } from "../ad-test.js";
 
 const paragraph = (n: number) => `段落${n}の終わり。${"旅の記録を書いています。".repeat(12)}`;
 const body = [

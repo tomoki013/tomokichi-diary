@@ -82,46 +82,44 @@ describe("admin MCP connection routes", () => {
     } as unknown as Env;
     const app = createApp({ contextFactory: () => context, auditDb });
     const headers = { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" };
-    const unauthenticated = await app.request("/v1/admin/connections", {}, env);
+    const op = (name: string, input: unknown, auth = headers) =>
+      app.request(
+        `/v1/admin/ops/${name}`,
+        { method: "POST", headers: auth, body: JSON.stringify(input) },
+        env,
+      );
+    const unauthenticated = await op("connection.list", {}, { "content-type": "application/json" });
     expect(unauthenticated.status).toBe(401);
 
-    const mismatched = await app.request(
-      `/v1/admin/connections/clients/${CLIENT_HASH}/label`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ redirectHost: "unregistered.example", displayName: "Muse" }),
-      },
-      env,
-    );
+    const mismatched = await op("connection.label", {
+      clientId: CLIENT_HASH,
+      redirectHost: "unregistered.example",
+      displayName: "Muse",
+    });
     expect(mismatched.status).toBe(404);
     expect(
       await auditDb.prepare("SELECT COUNT(*) AS count FROM operator_audit_client_names").first(),
     ).toEqual({ count: 0 });
 
-    const saved = await app.request(
-      `/v1/admin/connections/clients/${CLIENT_HASH}/label`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ redirectHost: "chatgpt.com", displayName: "Muse" }),
-      },
-      env,
-    );
+    const saved = await op("connection.label", {
+      clientId: CLIENT_HASH,
+      redirectHost: "chatgpt.com",
+      displayName: "Muse",
+    });
     expect(saved.status).toBe(200);
     expect(await saved.json()).toMatchObject({ clientTrust: "confirmed", displayName: "Muse" });
 
-    const listed = await app.request("/v1/admin/connections", { headers }, env);
+    const listed = await op("connection.list", {});
     expect(listed.status).toBe(200);
     expect(await listed.json()).toMatchObject({
       items: [{ clientName: "Muse", clientTrust: "confirmed", actorSubject: "owner-subject" }],
     });
 
-    const revoked = await app.request(
-      "/v1/admin/connections/operator/grant_123/revoke",
-      { method: "POST", headers, body: JSON.stringify({ confirm: "revoke" }) },
-      env,
-    );
+    const revoked = await op("connection.revoke", {
+      issuer: "operator",
+      grantId: "grant_123",
+      confirm: "revoke",
+    });
     expect(revoked.status).toBe(200);
     expect(await revoked.json()).toEqual({ revoked: true });
     expect(bindingCalls).toContain("GET /connections");

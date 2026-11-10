@@ -1,13 +1,19 @@
 import { createApp } from "./app.js";
 import type { Env } from "./env.js";
-import { parseOperatorAuditContext } from "./audit.js";
+import { parseOperatorAuditContext, type AuditContext } from "./audit.js";
 
 /** The one Worker that may call the operator entrypoint, as its binding's props name it. */
 export const OPERATOR_CALLER = "tomokichi-diary-mcp";
 /** How the admin gate and its logs name a request that came this way. */
 export const OPERATOR_ACTOR = "operator-mcp";
 
-const operatorApp = createApp({ operatorActor: OPERATOR_ACTOR });
+type App = {
+  fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>;
+};
+
+/** The admin app as this connection, which the policy then judges. */
+const operatorApp = (operatorAuditContext: AuditContext): App =>
+  createApp({ operatorActor: OPERATOR_ACTOR, operatorAuditContext });
 
 /**
  * The remote MCP servers' way into the admin API. The MCP Worker checks the
@@ -23,9 +29,7 @@ export function operatorFetch(
   env: Env,
   ctx: ExecutionContext,
   caller: unknown,
-  app: {
-    fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>;
-  } = operatorApp,
+  makeApp: (operatorAuditContext: AuditContext) => App = operatorApp,
 ): Response | Promise<Response> {
   if (caller !== OPERATOR_CALLER) return new Response("Forbidden", { status: 403 });
   if (!new URL(request.url).pathname.startsWith("/v1/admin/ops/"))
@@ -34,9 +38,5 @@ export function operatorFetch(
   const operatorAuditContext = parseOperatorAuditContext(request);
   // No verified context means no way to tell which connection this is.
   if (!operatorAuditContext) return new Response("Forbidden", { status: 403 });
-  if (app !== operatorApp) return app.fetch(request, env, ctx);
-  return createApp({
-    operatorActor: OPERATOR_ACTOR,
-    operatorAuditContext,
-  }).fetch(request, env, ctx);
+  return makeApp(operatorAuditContext).fetch(request, env, ctx);
 }

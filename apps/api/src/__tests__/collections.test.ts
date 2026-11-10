@@ -14,18 +14,15 @@ let ctx: AppContext;
 let app: ReturnType<typeof createApp>;
 
 const request = (path: string, init: RequestInit = {}) => app.request(path, init, env);
-const patch = (id: string, body: unknown) =>
-  request(`/v1/admin/collections/${id}`, {
-    method: "PATCH",
-    headers: auth,
-    body: JSON.stringify(body),
-  });
+const op = (name: string, input: unknown = {}) =>
+  request(`/v1/admin/ops/${name}`, { method: "POST", headers: auth, body: JSON.stringify(input) });
+const patch = (id: string, body: unknown) => op("series.update", { collectionId: id, ...body });
 
 async function createSeries(): Promise<CollectionAdminDto> {
-  const response = await request("/v1/admin/collections", {
-    method: "POST",
-    headers: auth,
-    body: JSON.stringify({ kind: "series", slug: "sunset", title: "世界の夕陽から" }),
+  const response = await op("series.create", {
+    kind: "series",
+    slug: "sunset",
+    title: "世界の夕陽から",
   });
   return (await response.json()) as CollectionAdminDto;
 }
@@ -91,7 +88,7 @@ describe("series theme music", () => {
     });
     expect(response.status).toBe(400);
     const after = (await (
-      await request(`/v1/admin/collections/${series.id}`, { headers: auth })
+      await op("series.get", { collectionId: series.id })
     ).json()) as CollectionAdminDto;
     expect(after.themeMusic).toBeNull();
   });
@@ -106,10 +103,9 @@ describe("series theme music", () => {
 
   it("requires an admin", async () => {
     const series = await createSeries();
-    const response = await request(`/v1/admin/collections/${series.id}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ themeMusic: null }),
+    const response = await request("/v1/admin/ops/series.update", {
+      method: "POST",
+      body: JSON.stringify({ collectionId: series.id, themeMusic: null }),
     });
     expect(response.status).toBe(401);
   });
@@ -136,13 +132,9 @@ describe("series theme music", () => {
 describe("series article defaults", () => {
   it("saves known tags, categories and experience tags, and lists them in the taxonomy", async () => {
     const series = await createSeries();
-    const tag = (await (
-      await request("/v1/admin/tags", {
-        method: "POST",
-        headers: auth,
-        body: JSON.stringify({ slug: "sunset-tag", name: "夕陽" }),
-      })
-    ).json()) as { id: string };
+    const tag = (await (await op("tag.create", { slug: "sunset-tag", name: "夕陽" })).json()) as {
+      id: string;
+    };
     const saved = (await (
       await patch(series.id, {
         articleDefaults: { tagIds: [tag.id], categoryIds: [], experienceTags: ["moving"] },
@@ -153,7 +145,7 @@ describe("series article defaults", () => {
       categoryIds: [],
       experienceTags: ["moving"],
     });
-    const taxonomy = (await (await request("/v1/admin/taxonomy", { headers: auth })).json()) as {
+    const taxonomy = (await (await op("taxonomy.get")).json()) as {
       collections: { id: string; articleDefaults: unknown }[];
     };
     expect(taxonomy.collections.find((c) => c.id === series.id)?.articleDefaults).toEqual(

@@ -74,6 +74,18 @@ export function operationRoutes(options: OperationRouteOptions) {
       return errorResponse(c, "API_FORBIDDEN", "この接続ではこの操作を実行できません", 403);
     }
 
+    // Refused before the body is read: an upload during maintenance never
+    // reaches storage, however large it is.
+    if (name === "media.upload" && c.env.MEDIA_UPLOADS_PAUSED === "1") {
+      c.header("Retry-After", "60");
+      return errorResponse(
+        c,
+        "API_CONFLICT",
+        "画像のメンテナンス中です。しばらくしてから再試行してください",
+        503,
+      );
+    }
+
     let raw: unknown;
     let upload: OpScope["upload"];
     if (c.req.header("content-type")?.startsWith("multipart/form-data")) {
@@ -91,10 +103,9 @@ export function operationRoutes(options: OperationRouteOptions) {
         return errorResponse(c, "API_VALIDATION_FAILED", "invalid JSON body", 400);
       }
     }
+    // Validated inside the audited section, so a refused input is on record too.
     const parsed = validate(spec.input, raw);
-    if (!parsed.ok)
-      return errorResponse(c, parsed.code, "invalid operation input", 400, parsed.issues);
-    const input = parsed.value as Record<string, unknown>;
+    const input = (parsed.ok ? parsed.value : (raw ?? {})) as Record<string, unknown>;
 
     const db = (): SqlDatabase => {
       if (options.auditDb) return options.auditDb;
@@ -118,7 +129,9 @@ export function operationRoutes(options: OperationRouteOptions) {
     // so a failed audit store blocks the operation instead of hiding it.
     const audited = spec.kind !== "read" || channel !== "admin";
     const auditDb = audited
-      ? (options.auditDb ?? (c.env.DB ? fromD1(c.env.DB) : undefined))
+      ? (options.auditDb ??
+        // Tests that inject a context bring their own audit database, or none.
+        (!options.testContext && c.env.DB ? fromD1(c.env.DB) : undefined))
       : undefined;
     if (audited && !auditDb && !options.testContext)
       return errorResponse(c, "API_INTERNAL", "operation audit is unavailable", 503);
@@ -165,6 +178,7 @@ export function operationRoutes(options: OperationRouteOptions) {
         scope: OpScope,
         input: unknown,
       ) => Promise<unknown>;
+      if (!parsed.ok) throw new OpError(parsed.code, "invalid operation input", 400, parsed.issues);
       output = await run(scope, input);
       response = c.json(output ?? null, 200, { "cache-control": "private, no-store" });
     } catch (error) {

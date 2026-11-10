@@ -203,7 +203,9 @@ export const monetizationHandlers: Handlers<Names> = {
   },
 
   "ads.saveArticle": async ({ ctx }, { articleId, config }) =>
-    unwrapAs<ArticleMonetization>(await saveArticleMonetization(ctx, articleId as ArticleId, config)),
+    unwrapAs<ArticleMonetization>(
+      await saveArticleMonetization(ctx, articleId as ArticleId, config),
+    ),
 
   "ads.validateArticle": async ({ ctx }, { articleId }) => ({
     problems: await validateArticleMonetization(ctx, articleId as ArticleId),

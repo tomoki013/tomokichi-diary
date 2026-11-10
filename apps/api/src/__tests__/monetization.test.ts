@@ -23,16 +23,29 @@ let app: ReturnType<typeof createApp>;
 let id: ArticleId;
 const env = { ADMIN_TOKEN: "test" } as Env;
 const headers = { authorization: "Bearer test", "content-type": "application/json" };
+const op = (name: string, input: unknown = {}, auth = headers) =>
+  app.request(
+    `/v1/admin/ops/${name}`,
+    { method: "POST", headers: auth, body: JSON.stringify(input) },
+    env,
+  );
+/** The old REST paths these cases were written against, as the operations that replaced them. */
 async function request(
   path: string,
   value?: unknown,
   method = value === undefined ? "GET" : "PUT",
 ) {
-  return app.request(
-    `/v1/admin/monetization${path}`,
-    { method, headers, ...(value === undefined ? {} : { body: JSON.stringify(value) }) },
-    env,
-  );
+  const [, area, key] = path.split("/");
+  if (area === "settings") return op("ads.saveSettings", { settings: value });
+  if (area === "articles")
+    return method === "GET"
+      ? op("ads.article", { articleId: key })
+      : op("ads.saveArticle", { articleId: key, config: value });
+  if (area === "offers")
+    return method === "DELETE"
+      ? op("offer.archive", { offerId: key })
+      : op("offer.update", { offer: value });
+  throw new Error(`unmapped ${method} ${path}`);
 }
 beforeEach(async () => {
   ctx = {
@@ -69,12 +82,14 @@ beforeEach(async () => {
   ]);
 });
 it("protects all operations and exposes no public monetization route", async () => {
-  for (const path of ["/", `/articles/${id}`, "/settings", "/offers/x", "/experiments/x/start"]) {
-    const response = await app.request(
-      `/v1/admin/monetization${path}`,
-      { method: path.includes("start") ? "POST" : "GET" },
-      env,
-    );
+  for (const name of [
+    "ads.overview",
+    "ads.article",
+    "ads.saveSettings",
+    "offer.update",
+    "ads.controlExperiment",
+  ]) {
+    const response = await op(name, { articleId: id }, { "content-type": "application/json" });
     expect(response.status).toBe(401);
   }
   expect((await app.request("/v1/monetization", {}, env)).status).toBe(404);

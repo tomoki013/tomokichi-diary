@@ -2,7 +2,7 @@ import { resendWebhook } from "./resend-webhook.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
 import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
-import { generateId } from "@tomokichi/domain";
+import { generateId, type MediaId } from "@tomokichi/domain";
 import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
@@ -305,6 +305,20 @@ export function createApp(options: AppOptions = {}) {
       testContext: Boolean(options.contextFactory),
     }),
   );
+
+  // The original file of a library photo, for the admin to download. Binary,
+  // so it is a plain GET beside the operations rather than one of them.
+  v1.get("/admin/media/:id/file", async (c) => {
+    const ctx = c.get("ctx");
+    const asset = await ctx.repos.media.findById(c.req.param("id") as MediaId);
+    const object = asset ? await ctx.storage.get(asset.storageKey) : null;
+    if (!asset || !object) return errorResponse(c, "MEDIA_NOT_FOUND", "image not found", 404);
+    return c.body(object.body, 200, {
+      "content-type": asset.mimeType,
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
+    });
+  });
 
   // Used only by the private MCP consent flow. A shared admin token is not a
   // human identity and must never authorize an OAuth grant.
