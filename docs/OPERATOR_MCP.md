@@ -1,25 +1,29 @@
-# ローカル操作用 MCP（operator）
+# 管理用 MCP（operator）
 
-ChatGPT（Codex）や Claude などの AI クライアントから、旅行記事・一言日記・シリーズ・タグを操作するための Operator MCP です。ローカル stdio 接続と ChatGPT 向けリモート接続の両方があります。
+ChatGPT や Claude などの AI クライアントから、管理画面でできることを操作するための MCP です。スマホの ChatGPT からも使えるリモート接続と、手元で起動するローカル stdio 接続があります。どちらも同じツールです。
 
-- 起動したクライアントと標準入出力（stdio）だけで通信します。**ポートを開かず、どこにもデプロイしません。**
-- 操作は既存の管理API `/v1/admin/*` を管理トークンで呼ぶだけです。入力検証・slug 重複チェック・公開条件はすべて API 側と同じです。
-- 既定は **読み取り専用**。`TOMOKICHI_OPERATOR_WRITE=1` を渡したときだけ作成・保存ができます。
-- 削除ツールはありません。公開（`publish_article`）は同じ記事IDを `confirmArticleId` に再入力したときだけ実行します。
-- 管理トークンは平文 HTTP では送りません（`https` か `localhost` のみ）。
+- **管理画面と同じ操作を使います。** ツールは操作カタログ（`packages/contracts/src/operations`）から自動で並び、`POST /v1/admin/ops/<名前>` を呼びます。入力検証・公開条件・操作ログは管理画面と同じ所で行います（ADR 0011）。
+- **出さないもの**：削除、問い合わせ（読むことも不可）、旅の事実の確認、MCP 接続の失効。これ以外を管理画面専用にするとテストが落ちます。
+- **権限は2段階**：読み取りツールは常に、書き込みツールは書き込みを許可した接続だけに出ます。API も同じ判定で拒否します。
+- **取り消しにくい操作には確認の入力が要ります**：`publish_article` は `confirmArticleId` に同じ ID、`publish_diary_note` と `publish_site` は `confirm: "publish"`、取り下げは `confirm: "unpublish"`、アーカイブは `confirm: "archive"`。
 
 ## ツール
 
-| 種類                                        | ツール                                                                                                                                                                                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 読み取り                                    | `list_articles` `get_article` `check_publishable` `audit_article_bodies` `list_diary_notes` `get_diary_note` `check_diary_note_publishable` `publication_status` `list_taxonomy` `list_series` `list_rankings` `search_media`                                                               |
-| 書き込み（要 `TOMOKICHI_OPERATOR_WRITE=1`） | `create_article_draft` `save_article_draft` `create_diary_note_draft` `save_diary_note_draft` `set_diary_note_related_articles` `create_series` `update_series` `create_tag` `create_ranking` `update_ranking` `publish_article` `publish_diary_note` `unpublish_diary_note` `publish_site` |
+既存のツール名は変えていません。主なもの（全部は接続したクライアントのツール一覧で見られます）:
 
-下書きの保存やシリーズ・タグの付け替えは公開サイトを変えません。公開中の記事は「変更を公開」（`publish_article`）で反映されます。
+| 領域     | 読み取り                                                                                                | 書き込み                                                                                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 記事     | `list_articles` `get_article` `check_publishable` `audit_article_bodies`                                | `create_article_draft` `save_article_draft` `publish_article` `unpublish_article` `archive_article` `schedule_article` `set_article_series_and_tags` `set_article_experience_tags` `set_article_media` |
+| 日記     | `list_diary_notes` `get_diary_note` `check_diary_note_publishable`                                      | `create_diary_note_draft` `save_diary_note_draft` `publish_diary_note` `unpublish_diary_note` `set_diary_note_date` `set_diary_note_related_articles`                                                  |
+| まとめ   | `list_series` `get_series` `list_taxonomy` `list_locations` `list_places` `list_rankings` `get_ranking` | `create_series` `update_series` `create_tag` `create_ranking` `update_ranking`                                                                                                                         |
+| 写真     | `search_media` `get_media_hash_status` `find_media_by_hash`                                             | `upload_media`（Base64、20MB まで） `update_media`                                                                                                                                                     |
+| 収益化   | `get_monetization` `get_article_ads` `check_article_ads`                                                | `set_ad_layout` `move_body_ad` `start_ad_test` `control_ad_experiment` `save_article_ads` `save_ad_experiment` `save_monetization_settings` `create_affiliate_offer` `update_affiliate_offer`          |
+| 旅の知識 | `get_article_knowledge` `list_articles_without_knowledge` `list_pending_facts`                          | `propose_travel_facts` `save_article_knowledge`（どちらも候補として入る）                                                                                                                              |
+| 運営     | `get_home` `publication_status` `get_like_activity` `list_activity` `list_mcp_connections`              | `publish_site` `label_mcp_client` `recollect_analytics`                                                                                                                                                |
 
-一言日記は `list_diary_notes` / `get_diary_note` で旅行記事から分けて取得します。`create_diary_note_draft` と `save_diary_note_draft` はD1に下書きを保存します。公開前に `check_diary_note_publishable` を実行し、利用者が明示的に公開を頼んだ場合だけ `publish_diary_note` に `confirm: "publish"` を渡します。取り下げも明示指示と `confirm: "unpublish"` が必要です。関連記事の変更も日記を再公開するまで公開版に反映されません。
+下書きの保存、分類や広告の変更は公開サイトを変えません。公開中の記事は `publish_article`（変更を公開）で、ランキングとシリーズは `publish_site` で反映されます。記事はランキングでは ID でも slug でも指定できます。
 
-ランキング（トップページの「ともきち的ランキング」）は `update_ranking` で順位・一言・写真（`photoMediaId`）を保存し、`publish_site`（`confirm: "publish"` が必要）でサイト全体を再生成して反映します。写真の ID は `search_media` で確認できます。記事は ID でも slug でも指定できます。サイトポリシー（/legal/ の固定ページ）は記事と同じツールで編集・公開します。
+旅の知識は、AI が本文を読んで `propose_travel_facts` で事実の候補を登録し、本人が管理画面で確認する流れです。確認は MCP からはできません。
 
 ## 環境変数
 
@@ -28,7 +32,7 @@ ChatGPT（Codex）や Claude などの AI クライアントから、旅行記�
 | `TOMOKICHI_ADMIN_TOKEN`          | 必須。API の secret `ADMIN_TOKEN` と同じ値。**リポジトリ内のファイルに書かない**                            |
 | `TOMOKICHI_LOCAL_OPERATOR_TOKEN` | 推奨。本番 API の専用 secret `LOCAL_OPERATOR_TOKEN` と同じ値。操作履歴でローカルOperatorを識別する          |
 | `TOMOKICHI_API_URL`              | 既定 `http://localhost:8787`（`pnpm --filter @tomokichi/api dev`）。本番は `https://api.tomokichidiary.com` |
-| `TOMOKICHI_OPERATOR_WRITE`       | `1` で書き込みを許可。未設定なら読み取りのみ                                                                |
+| `TOMOKICHI_OPERATOR_WRITE`       | `1` で書き込みツールを出す。未設定なら読み取りのみ                                                          |
 
 本番 API を相手にする場合、API Worker に `ADMIN_TOKEN` が設定されている必要があります（Cloudflare Access だけにしている場合はトークンが使えません）。
 
@@ -53,14 +57,13 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 
 ## ChatGPT（スマホ含む）からのリモート接続
 
-同じツール（`createOperatorServer`）を MCP Worker の `/operator/mcp` でも提供します。仕組みは分析用 `/analytics/mcp`（[analytics/CHATGPT.md](analytics/CHATGPT.md)）と同じで、本人だけが OAuth で接続できます。
+同じツールを MCP Worker の `/operator/mcp` でも提供します。仕組みは分析用 `/analytics/mcp`（[analytics/CHATGPT.md](analytics/CHATGPT.md)）と同じで、本人だけが OAuth で接続できます。
 
 - Server URL: `https://mcp.tomokichidiary.com/operator/mcp`
 - 認証: OAuth（DCR・PKCE S256）。新 issuer は `https://mcp.tomokichidiary.com/operator`。新旧Issuerのclient・grant・tokenは共有KVの `operator-v2:` / `operator:` に分離し、相互利用できません。
 - 許可できるのは MCP Worker secret `OPERATOR_OWNER_SUBJECT`（本人の検証済み Cloudflare Access subject）と一致する人だけ。許可画面は `https://mcp.tomokichidiary.com/operator-connect` で、専用Cloudflare AccessアプリのJWTを別Audienceで検証します。
 - スコープ: `operator:read`（読み取りツールのみ表示）と `operator:write`（書き込みツールも表示）。どちらにするかは許可画面のボタンで本人が選びます。
-- 削除ツールはありません。公開は `publish_article` の `confirmArticleId`、一言日記は `publish_diary_note` の `confirm: "publish"`、サイト全体は `publish_site` の `confirm: "publish"` が必要です。取り下げには一言日記専用の `unpublish_diary_note` が必要です。
-- **共有の `ADMIN_TOKEN` は MCP Worker に置きません。** ツールは API Worker の名前付き入口 `AdminOperator` を Service Binding（`OPERATOR_API`）で呼びます。この入口には公開URLがなく、`caller` が MCP Worker の場合だけOperator用に許可したAPIルートへ到達できます。読み取りGrantはGETだけ、書き込みGrantも許可済みルートのみで、`DELETE` は拒否します。D1にはOAuth主体、ハッシュ化したclient_id、自己申告名、MCPツール名、API更新を同じrequest_idで記録します。
+- **共有の `ADMIN_TOKEN` は MCP Worker に置きません。** ツールは API Worker の名前付き入口 `AdminOperator` を Service Binding（`OPERATOR_API`）で呼びます。この入口には公開URLがなく、`caller` が MCP Worker の場合だけ操作の入口（`/v1/admin/ops/*`）へ到達できます。どの操作を実行できるかは、接続の種類（管理か分析か）と書き込み権限から API が判定します。D1にはOAuth主体、ハッシュ化したclient_id、自己申告名、MCPツール名、操作名を記録します。
 - アクセストークンは1時間、接続（refresh）は最大30日。期限が切れたら ChatGPT から再接続します。
 
 移行期間中は旧URL `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/operator/mcp` も稼働します。旧IssuerのGrantは旧URLにだけ有効で、新URLではOAuthを再認可してください。旧Workerの許可画面 `https://admin.tomokichidiary.com/operator-connect` は既存接続のために残します。
@@ -96,7 +99,7 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 
 Workerも移行前へ戻す場合は、管理画面、MCPの初回先行バージョン、移行前のAPI、移行前のMCPの順で戻します。先行バージョンに戻すとAPIの新しい `McpConsentIdentity` への参照が外れ、移行前のAPIに戻すとMCPの新しい `OperatorConnections` への参照が外れます。D1の監査テーブルと新旧のOAuth KVは残し、旧接続の読み取りを確認します。Workerのバージョンを戻した後、新ドメインのルートとAccess設定も別途確認します。[Cloudflare Workersの切り戻し](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
 
-この実装ではclient名やUser-AgentからChatGPT/Museを推測しません。接続一覧の「自己申告名」は初期値にすぎません。管理画面 `/mcp-connections` でclient_idハッシュとリダイレクト先を確認した後、表示名を確認済みにできます。管理画面 `/activity` では操作履歴を検索でき、記事編集画面から記事単位の履歴を開けます。
+この実装ではclient名やUser-AgentからChatGPT/Museを推測しません。接続一覧の「自己申告名」は初期値にすぎません。管理画面「その他 → MCP 接続」でclient_idハッシュとリダイレクト先を確認した後、表示名を確認済みにできます。「操作ログ」では操作履歴を検索でき、記事編集画面から記事単位の履歴を開けます。
 
 ### 緊急停止
 
@@ -110,4 +113,4 @@ Workerも移行前へ戻す場合は、管理画面、MCPの初回先行バー�
 
 個別失効ではGrantと発行済みトークンをOAuthストアから削除します。すでに読み込まれたKVの値が各拠点で期限切れになるまで、失効の反映に時間がかかる場合があります。[Cloudflare Workers KVの整合性](https://developers.cloudflare.com/kv/concepts/how-kv-works/#consistency)
 
-ローカルstdio Operatorを履歴上で識別するには、API Workerに `LOCAL_OPERATOR_TOKEN` を設定し、クライアント環境に `TOMOKICHI_LOCAL_OPERATOR_TOKEN` を渡します。これはOperator用の読み書き許可ルートだけに通る専用bearer secretで、通常の `ADMIN_TOKEN` と異なる値にしてください。省略時も従来どおり `TOMOKICHI_ADMIN_TOKEN` で動作しますが、その場合は通常の管理APIトークンとして扱われ、Actorは `admin-token` になります。
+ローカルstdio Operatorを履歴上で識別するには、API Workerに `LOCAL_OPERATOR_TOKEN` を設定し、クライアント環境に `TOMOKICHI_LOCAL_OPERATOR_TOKEN` を渡します。これは操作の入口だけに通る専用bearer secretで、通常の `ADMIN_TOKEN` と異なる値にしてください。省略時も従来どおり `TOMOKICHI_ADMIN_TOKEN` で動作しますが、その場合は通常の管理APIトークンとして扱われ、Actorは `admin-token` になります。

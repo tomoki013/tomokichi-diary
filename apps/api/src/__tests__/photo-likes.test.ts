@@ -32,12 +32,12 @@ async function upload(body: ArrayBuffer): Promise<{ id: string; aiGenerated: boo
   const form = new FormData();
   form.append("file", new File([body], "photo.jpg", { type: "image/jpeg" }));
   form.append("slug", `photo-${++uploads}`);
-  const response = await request("/admin/media", {
+  const response = await request("/admin/ops/media.upload", {
     method: "POST",
     headers: { authorization: auth.authorization },
     body: form,
   });
-  expect(response.status).toBe(201);
+  expect(response.status).toBe(200);
   return (await response.json()) as { id: string; aiGenerated: boolean };
 }
 
@@ -66,10 +66,10 @@ describe("AI-generated flag", () => {
 
   it("can be switched by hand and is kept with the asset", async () => {
     const { id } = await upload(await image("red"));
-    const response = await request(`/admin/media/${id}`, {
-      method: "PATCH",
+    const response = await request("/admin/ops/media.update", {
+      method: "POST",
       headers: auth,
-      body: JSON.stringify({ aiGenerated: true }),
+      body: JSON.stringify({ mediaId: id, aiGenerated: true }),
     });
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ id, aiGenerated: true });
@@ -79,10 +79,10 @@ describe("AI-generated flag", () => {
   it("rejects an update that is neither a slug nor a boolean flag", async () => {
     const { id } = await upload(await image("red"));
     for (const body of [{}, { aiGenerated: "yes" }]) {
-      const response = await request(`/admin/media/${id}`, {
-        method: "PATCH",
+      const response = await request("/admin/ops/media.update", {
+        method: "POST",
         headers: auth,
-        body: JSON.stringify(body),
+        body: JSON.stringify({ mediaId: id, ...body }),
       });
       expect(response.status).toBe(400);
     }

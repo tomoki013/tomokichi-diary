@@ -29,13 +29,15 @@ const input = (body = bytes, name = "photo.png", slug?: string) => ({
   ...(slug ? { slug } : {}),
 });
 const request = (path: string, init: RequestInit = {}) => app.request(`/v1${path}`, init, env);
+const op = (name: string, payload: unknown = {}) =>
+  request(`/admin/ops/${name}`, { method: "POST", headers: auth, body: JSON.stringify(payload) });
 async function post(body = bytes, name = "photo.png", type = "image/png", slug = "photo") {
   const form = new FormData();
   form.append("file", new File([body], name, { type }));
   // Untrusted client dimensions must not be stored.
   form.append("width", "99999999");
   if (slug) form.append("slug", slug);
-  return request("/admin/media", {
+  return request("/admin/ops/media.upload", {
     method: "POST",
     headers: { authorization: auth.authorization },
     body: form,
@@ -57,7 +59,7 @@ describe("media upload API", () => {
     const put = vi.spyOn(ctx.storage, "put");
     const paused = { ...env, MEDIA_UPLOADS_PAUSED: "1" };
     const response = await app.request(
-      "/v1/admin/media",
+      "/v1/admin/ops/media.upload",
       {
         method: "POST",
         headers: { authorization: auth.authorization },
@@ -69,46 +71,29 @@ describe("media upload API", () => {
     expect(response.headers.get("Retry-After")).toBe("60");
     expect(put).not.toHaveBeenCalled();
     expect(await ctx.repos.media.listPendingUploads()).toHaveLength(0);
-    expect((await app.request("/v1/admin/media", { headers: auth }, paused)).status).toBe(200);
+    expect(
+      (
+        await app.request(
+          "/v1/admin/ops/media.list",
+          { method: "POST", headers: auth, body: "{}" },
+          paused,
+        )
+      ).status,
+    ).toBe(200);
   });
   it("looks up hashes only after authentication", async () => {
     const saved = await asset();
-    expect(
-      (
-        await request("/admin/media/lookup", {
-          method: "POST",
-          body: JSON.stringify({ sha256: saved.sha256 }),
-        })
-      ).status,
-    ).toBe(401);
-    const lookup = await request("/admin/media/lookup", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ sha256: saved.sha256 }),
-    });
+    const anonymous = (name: string, payload: unknown) =>
+      request(`/admin/ops/${name}`, { method: "POST", body: JSON.stringify(payload) });
+    expect((await anonymous("media.lookup", { sha256: saved.sha256 })).status).toBe(401);
+    const lookup = await op("media.lookup", { sha256: saved.sha256 });
     expect((await lookup.json()).asset.id).toBe(saved.id);
+    expect((await op("media.lookup", { sha256: "not-a-hash" })).status).toBe(400);
+    for (const name of ["media.list", "media.hashStatus"])
+      expect((await anonymous(name, {})).status).toBe(401);
+    expect((await request(`/admin/media/${saved.id}/file`)).status).toBe(401);
     expect(
-      (
-        await request("/admin/media/lookup", {
-          method: "POST",
-          headers: auth,
-          body: JSON.stringify({ sha256: "not-a-hash" }),
-        })
-      ).status,
-    ).toBe(400);
-    for (const path of [
-      "/admin/media",
-      "/admin/media/hash-status",
-      `/admin/media/${saved.id}/file`,
-    ])
-      expect((await request(path)).status).toBe(401);
-    expect(
-      (
-        await request(`/admin/media/${saved.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ slug: "unauthorized" }),
-        })
-      ).status,
+      (await anonymous("media.update", { mediaId: saved.id, slug: "unauthorized" })).status,
     ).toBe(401);
   });
   it("rejects forged MIME, text payloads, SVG, truncated images and oversized files", async () => {
@@ -135,13 +120,13 @@ describe("media upload API", () => {
     form.append("slug", "blue-photo");
     expect(
       (
-        await request("/admin/media", {
+        await request("/admin/ops/media.upload", {
           method: "POST",
           headers: { authorization: auth.authorization },
           body: form,
         })
       ).status,
-    ).toBe(201);
+    ).toBe(200);
     expect(await ctx.repos.media.listAll()).toHaveLength(2);
   });
   it("preserves CORS and request headers on authenticated binary responses", async () => {
@@ -164,7 +149,7 @@ describe("media upload API", () => {
     async (format) => {
       const body = await image("green", format);
       expect(inspectImage(body)?.mimeType).toBe(`image/${format}`);
-      expect((await post(body, `photo.${format}`, `image/${format}`)).status).toBe(201);
+      expect((await post(body, `photo.${format}`, `image/${format}`)).status).toBe(200);
     },
   );
   it("refuses an upload without a public slug", async () => {
@@ -205,9 +190,7 @@ describe("media search", () => {
 
     const ids = async (q: string) =>
       (
-        (await (
-          await request(`/admin/media?limit=10&q=${encodeURIComponent(q)}`, { headers: auth })
-        ).json()) as {
+        (await (await op("media.list", { limit: 10, query: q })).json()) as {
           items: { id: string }[];
         }
       ).items.map((item) => item.id);
@@ -228,20 +211,15 @@ const bodyDraft = (bodyMarkdown: string) => ({
   changeSummary: null,
 });
 const create = async (bodyMarkdown: string) => {
-  const created = await request("/admin/articles", {
-    method: "POST",
-    headers: auth,
-    body: JSON.stringify({
-      slug: "body-photos",
-      locale: "ja",
-      path: "/posts/body-photos",
-      draft: bodyDraft(bodyMarkdown),
-    }),
+  const created = await op("article.create", {
+    slug: "body-photos",
+    path: "/posts/body-photos",
+    ...bodyDraft(bodyMarkdown),
   });
   return ((await created.json()) as { id: string }).id;
 };
 const detail = async (id: string) =>
-  (await (await request(`/admin/articles/${id}`, { headers: auth })).json()) as {
+  (await (await op("article.get", { articleId: id })).json()) as {
     currentRevision: { bodyMarkdown: string };
     media: { mediaId: string; role: string; alt: string }[];
   };
@@ -285,20 +263,17 @@ describe("photos in an article body", () => {
 
     // An editor saving the list it loaded earlier cannot drop a body photo,
     // and a photo already listed keeps its role and alt.
-    await request(`/admin/media/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        media: [
-          {
-            mediaId: plain.value.asset.id,
-            role: "cover",
-            sortOrder: 0,
-            alt: "カバー",
-            caption: null,
-          },
-        ],
-      }),
+    await op("article.setMedia", {
+      articleId: id,
+      media: [
+        {
+          mediaId: plain.value.asset.id,
+          role: "cover",
+          sortOrder: 0,
+          alt: "カバー",
+          caption: null,
+        },
+      ],
     });
     expect((await detail(id)).media).toEqual([
       expect.objectContaining({ mediaId: plain.value.asset.id, role: "cover", alt: "カバー" }),
@@ -306,10 +281,9 @@ describe("photos in an article body", () => {
     ]);
 
     // A draft save lists a photo added later, written as its slug alias.
-    await request(`/admin/articles/${id}/draft`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify(bodyDraft("![塔](https://api.example/v1/images/eiffel-tower.png)")),
+    await op("article.saveDraft", {
+      articleId: id,
+      ...bodyDraft("![塔](https://api.example/v1/images/eiffel-tower.png)"),
     });
     expect((await detail(id)).media).toHaveLength(2);
   });

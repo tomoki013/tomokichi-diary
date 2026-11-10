@@ -33,7 +33,6 @@ const ctx: AppContext = {
   ids: uuidV7Generator,
   logger: silentLogger,
   mediaUrls: createMediaUrlResolver("https://media.tomokichidiary.com"),
-  ai: null,
   storage: {
     get: async (key) => {
       let path: string;

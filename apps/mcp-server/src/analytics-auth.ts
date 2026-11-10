@@ -7,7 +7,8 @@ import {
 import { createMcpHandler } from "agents/mcp/server";
 import type { D1Like } from "@tomokichi/infra-d1";
 import { ANALYTICS_SCOPE, createAnalyticsServer } from "./analytics-server.js";
-import { createMcpAudit } from "./audit.js";
+import { clientIdDigest, toolNameFromRequest } from "./request-context.js";
+import { operationCaller } from "./tools.js";
 
 export const MCP_ORIGIN = "https://mcp.tomokichidiary.com";
 export const LEGACY_MCP_ORIGIN = "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev";
@@ -21,6 +22,8 @@ export interface AnalyticsEnv {
   OAUTH_KV: KVNamespace;
   OAUTH_PROVIDER: OAuthHelpers;
   API: { fetch(request: Request): Promise<Response> };
+  /** The API's `AdminOperator` entrypoint, where every tool runs an operation. */
+  OPERATOR_API?: { fetch(request: Request): Promise<Response> };
   CONSENT_IDENTITY?: { fetch(request: Request): Promise<Response> };
   ANALYTICS_OWNER_SUBJECT?: string;
   OAUTH_REGISTRATION_LIMITER: { limit(options: { key: string }): Promise<{ success: boolean }> };
@@ -187,22 +190,29 @@ function createAnalyticsOptions(
         if (new URL(request.url).pathname !== "/analytics/mcp")
           return new Response("Not found", { status: 404 });
         const props = ctx.props as Record<string, unknown>;
+        const api = env.OPERATOR_API;
+        if (!api) return new Response("Analytics unavailable", { status: 503 });
+        const text = (key: string) => (typeof props[key] === "string" ? props[key] : undefined);
         const trust = props["clientTrust"];
-        const audit = createMcpAudit(env.DB, {
+        const clientId = auth?.clientId ?? text("clientId");
+        const toolName = await toolNameFromRequest(request);
+        // The API records the call and refuses anything but analytics reads.
+        const auditContext = {
           actorType: "remote-analytics",
-          actorSubject: typeof props["subject"] === "string" ? props["subject"] : "unknown",
-          clientId:
-            auth?.clientId ??
-            (typeof props["clientId"] === "string" ? props["clientId"] : undefined),
-          clientName: typeof props["clientName"] === "string" ? props["clientName"] : undefined,
-          clientRedirectHost:
-            typeof props["clientRedirectHost"] === "string"
-              ? props["clientRedirectHost"]
-              : undefined,
+          actorSubject: text("subject") ?? "unknown",
+          clientId: clientId ? await clientIdDigest(clientId) : undefined,
+          clientName: text("clientName"),
+          clientRedirectHost: text("clientRedirectHost"),
           clientTrust: trust === "confirmed" || trust === "self-asserted" ? trust : "unknown",
-          oauthGrantRef: typeof props["grantRef"] === "string" ? props["grantRef"] : undefined,
+          oauthGrantRef: text("grantRef"),
+          operatorWrite: false,
+          ...(toolName ? { mcpToolName: toolName } : {}),
+        };
+        const call = operationCaller((req) => api.fetch(req), "https://api.tomokichidiary.com", {
+          "x-request-id": crypto.randomUUID(),
+          "x-operator-audit-context": JSON.stringify(auditContext),
         });
-        return createMcpHandler(() => createAnalyticsServer(env.DB, audit), {
+        return createMcpHandler(() => createAnalyticsServer(call), {
           route: "/analytics/mcp",
         })(request, env, ctx);
       },

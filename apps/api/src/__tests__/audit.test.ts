@@ -76,7 +76,7 @@ describe("management audit trail", () => {
     const app = createApp({ contextFactory: () => context, auditDb });
     const testEnv = { ...env, DB: d1 } as unknown as Env;
     const created = await app.request(
-      "/v1/admin/collections",
+      "/v1/admin/ops/series.create",
       {
         method: "POST",
         headers: auth,
@@ -89,14 +89,18 @@ describe("management audit trail", () => {
       },
       testEnv,
     );
-    expect(created.status).toBe(201);
+    expect(created.status).toBe(200);
     const requestId = created.headers.get("x-request-id");
     expect(requestId).not.toBe("forged-public-request-id");
     const createdId = ((await created.json()) as { id: string }).id;
 
     const listed = await app.request(
-      "/v1/admin/activity?targetType=series&result=succeeded&page=1&limit=10",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ targetType: "series", result: "succeeded", page: 1, limit: 10 }),
+      },
       testEnv,
     );
     expect(listed.status, await listed.clone().text()).toBe(200);
@@ -128,7 +132,7 @@ describe("management audit trail", () => {
     expect(JSON.stringify(body.items[0]?.metadata)).not.toContain("記事本文");
 
     const rejected = await app.request(
-      "/v1/admin/collections",
+      "/v1/admin/ops/series.create",
       {
         method: "POST",
         headers: auth,
@@ -138,8 +142,12 @@ describe("management audit trail", () => {
     );
     expect(rejected.status).toBe(400);
     const failures = await app.request(
-      "/v1/admin/activity?result=rejected&page=1",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ result: "rejected", page: 1 }),
+      },
       testEnv,
     );
     expect(
@@ -159,7 +167,7 @@ describe("management audit trail", () => {
       actorSubject: "admin-token",
       source: "admin",
       clientTrust: "unknown",
-      action: "patch.articles.draft",
+      action: "article.saveDraft",
       targetType: "article",
       targetId: "end-of-day-article",
       result: "succeeded",
@@ -169,16 +177,24 @@ describe("management audit trail", () => {
     const app = createApp({ contextFactory: () => context, auditDb });
     const testEnv = { ...env, DB: d1 } as unknown as Env;
     const response = await app.request(
-      "/v1/admin/activity?end=2026-11-07&targetId=end-of-day-article",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ end: "2026-11-07", targetId: "end-of-day-article" }),
+      },
       testEnv,
     );
     expect(response.status).toBe(200);
     expect(((await response.json()) as { total: number }).total).toBe(1);
 
     const invalid = await app.request(
-      "/v1/admin/activity?end=2026-02-30",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ end: "2026-02-30" }),
+      },
       testEnv,
     );
     expect(invalid.status).toBe(400);
@@ -195,7 +211,7 @@ describe("management audit trail", () => {
       LOCAL_OPERATOR_TOKEN: "separate-local-operator-token",
     } as unknown as Env;
     const created = await app.request(
-      "/v1/admin/collections",
+      "/v1/admin/ops/series.create",
       {
         method: "POST",
         headers: {
@@ -211,16 +227,21 @@ describe("management audit trail", () => {
       },
       localEnv,
     );
-    expect(created.status).toBe(201);
+    expect(created.status).toBe(200);
+    // Outside the operations there is nothing for the local operator.
     const deniedAdminScreenRead = await app.request(
-      "/v1/admin/activity",
+      "/v1/admin/media/any/file",
       { headers: { authorization: "Bearer separate-local-operator-token" } },
       localEnv,
     );
     expect(deniedAdminScreenRead.status).toBe(403);
     const activity = await app.request(
-      "/v1/admin/activity?targetType=series&result=succeeded",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ targetType: "series", result: "succeeded" }),
+      },
       localEnv,
     );
     expect(activity.status, await activity.clone().text()).toBe(200);
@@ -265,7 +286,7 @@ describe("management audit trail", () => {
     } as unknown as SqlDatabase;
     const app = createApp({ contextFactory: () => context, auditDb: failingAuditDb });
     const response = await app.request(
-      "/v1/admin/collections",
+      "/v1/admin/ops/series.create",
       {
         method: "POST",
         headers: auth,
@@ -294,16 +315,27 @@ describe("management audit trail", () => {
       },
     });
     const testEnv = { ...env, DB: d1 } as unknown as Env;
-    const response = await app.request("/v1/admin/publication", { method: "GET" }, testEnv);
-    expect(response.status).toBe(200);
-    const activity = await app.request(
-      "/v1/admin/activity?targetType=publication&result=succeeded",
-      { headers: { authorization: `Bearer ${TOKEN}` } },
+    const response = await app.request(
+      "/v1/admin/ops/publication.status",
+      { method: "POST", body: "{}" },
       testEnv,
     );
-    const data = (await activity.json()) as { items: { action: string; result: string }[] };
+    expect(response.status).toBe(200);
+    const activity = await app.request(
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ targetType: "publication", result: "succeeded" }),
+      },
+      testEnv,
+    );
+    const data = (await activity.json()) as {
+      items: { action: string; mcpToolName: string; result: string }[];
+    };
     expect(data.items[0]).toMatchObject({
-      action: "mcp.tool.publication_status",
+      action: "publication.status",
+      mcpToolName: "publication_status",
       result: "succeeded",
     });
   });
@@ -324,7 +356,7 @@ describe("management audit trail", () => {
       ACCESS_AUD: "admin-access-audience",
     } as unknown as Env;
     const created = await app.request(
-      "/v1/admin/collections",
+      "/v1/admin/ops/series.create",
       {
         method: "POST",
         headers: {
@@ -335,10 +367,17 @@ describe("management audit trail", () => {
       },
       testEnv,
     );
-    expect(created.status).toBe(201);
+    expect(created.status).toBe(200);
     const activity = await app.request(
-      "/v1/admin/activity?targetType=series&result=succeeded",
-      { headers: { "cf-access-jwt-assertion": "valid-admin-app-token" } },
+      "/v1/admin/ops/activity.list",
+      {
+        method: "POST",
+        headers: {
+          "cf-access-jwt-assertion": "valid-admin-app-token",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ targetType: "series", result: "succeeded" }),
+      },
       testEnv,
     );
     const data = (await activity.json()) as {

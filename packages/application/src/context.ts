@@ -3,7 +3,6 @@ import type { IdGenerator } from "./ports/id-generator.js";
 import type { Logger } from "./ports/logger.js";
 import type { MediaUrlResolver, ObjectStorage } from "./ports/storage.js";
 import type { Repositories } from "./ports/repositories.js";
-import type { AIProvider } from "./ports/ai.js";
 import type { AnalyticsPort } from "./ports/analytics.js";
 import type { ContactInbox, ContactMailer } from "./ports/inquiry.js";
 
@@ -15,8 +14,6 @@ export interface AppContext {
   readonly logger: Logger;
   readonly storage: ObjectStorage;
   readonly mediaUrls: MediaUrlResolver;
-  /** Null when no provider is configured; every use case must tolerate that. */
-  readonly ai: AIProvider | null;
   /** Optional so the domain flow never depends on a tracking vendor being available. */
   readonly analytics?: AnalyticsPort;
   /** Absent where the inquiry platform is not bound: no copy is kept. */

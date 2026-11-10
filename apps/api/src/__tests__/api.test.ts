@@ -3,7 +3,6 @@ import sharp from "sharp";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import type { AppContext } from "@tomokichi/application";
 import { loadContentSnapshot } from "@tomokichi/application";
-import type { ContactMessage } from "@tomokichi/domain";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 
@@ -28,17 +27,21 @@ async function request(path: string, init: RequestInit = {}): Promise<Response> 
   return app.request(path, init, env);
 }
 
-async function createArticle(overrides: Record<string, unknown> = {}): Promise<string> {
-  const response = await request("/v1/admin/articles", {
+/** Runs one admin operation as the owner. */
+async function op(name: string, input: unknown = {}): Promise<Response> {
+  return request(`/v1/admin/ops/${name}`, {
     method: "POST",
     headers: auth,
-    body: JSON.stringify({
-      slug: "chagee-menu",
-      locale: "ja",
-      path: "/posts/chagee-menu",
-      draft,
-      ...overrides,
-    }),
+    body: JSON.stringify(input),
+  });
+}
+
+async function createArticle(overrides: Record<string, unknown> = {}): Promise<string> {
+  const response = await op("article.create", {
+    slug: "chagee-menu",
+    path: "/posts/chagee-menu",
+    ...draft,
+    ...overrides,
   });
   const body = (await response.json()) as { id: string };
   return body.id;
@@ -58,24 +61,32 @@ describe("authentication", () => {
 
   it("rejects admin requests without a valid token", async () => {
     for (const headers of [{}, { authorization: "Bearer wrong" }]) {
-      const response = await request("/v1/admin/articles", { headers });
+      const response = await request("/v1/admin/ops/article.list", {
+        method: "POST",
+        headers,
+        body: "{}",
+      });
       expect(response.status).toBe(401);
       expect((await response.json()).error.code).toBe("API_UNAUTHORIZED");
     }
   });
 
   it("closes the admin API when no token is configured", async () => {
-    const response = await app.request("/v1/admin/articles", { headers: auth }, {} as Env);
+    const response = await app.request(
+      "/v1/admin/ops/article.list",
+      { method: "POST", headers: auth, body: "{}" },
+      {} as Env,
+    );
     expect(response.status).toBe(401);
   });
 });
 
 describe("validation", () => {
   it("reports every invalid field with a path", async () => {
-    const response = await request("/v1/admin/articles", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ slug: "Not A Slug", locale: "fr", path: "", draft: { title: "" } }),
+    const response = await op("article.create", {
+      slug: "Not A Slug",
+      path: "",
+      title: "",
     });
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -94,18 +105,14 @@ describe("bulk publication through the authenticated article API", () => {
     const blocked = await createArticle({ slug: "blocked", path: "/posts/blocked" });
     const untouched = await createArticle({ slug: "untouched", kind: "page", path: "/untouched" });
     for (const id of [first, second, blocked]) {
-      const response = await request(`/v1/admin/articles/${id}/publish`, {
-        method: "POST",
-        headers: auth,
-        body: JSON.stringify({ deferBuild: true }),
-      });
+      const response = await op("article.publish", { articleId: id, deferBuild: true });
       expect(response.status).toBe(id === blocked ? 409 : 200);
     }
     expect(publishSite.mock.calls.map((call) => call[1])).toEqual([true, true]);
-    const final = await request("/v1/admin/publication/retry", { method: "POST", headers: auth });
-    expect(final.status).toBe(202);
+    const final = await op("publication.run");
+    expect(final.status).toBe(200);
     expect(publishSite.mock.calls.filter((call) => !call[1])).toHaveLength(1);
-    const list = await (await request("/v1/admin/articles", { headers: auth })).json();
+    const list = await (await op("article.list")).json();
     expect(
       list.items
         .filter((item: { isLive: boolean }) => item.isLive)
@@ -113,7 +120,7 @@ describe("bulk publication through the authenticated article API", () => {
         .toSorted(),
     ).toEqual([first, second].toSorted());
     for (const id of [blocked, untouched]) {
-      const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+      const detail = await (await op("article.get", { articleId: id })).json();
       expect(detail.publishedRevisionId).toBeNull();
     }
   });
@@ -122,25 +129,26 @@ describe("bulk publication through the authenticated article API", () => {
     const publishSite = vi.fn(async () => ({ state: "queued" }));
     app = createApp({ contextFactory: () => ctx, publishSite });
     const id = await createArticle({ kind: "page", path: "/page" });
-    for (const body of ['{"deferBuild":"yes"}', "{"]) {
-      expect(
-        (await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth, body }))
-          .status,
-      ).toBe(400);
+    for (const body of [`{"articleId":"${id}","deferBuild":"yes"}`, "{"]) {
+      const response = await request("/v1/admin/ops/article.publish", {
+        method: "POST",
+        headers: auth,
+        body,
+      });
+      expect(response.status).toBe(400);
     }
     expect(publishSite).not.toHaveBeenCalled();
-    expect(
-      (await request(`/v1/admin/articles/${id}/publish`, { method: "POST", headers: auth })).status,
-    ).toBe(200);
+    expect((await op("article.publish", { articleId: id })).status).toBe(200);
     expect(publishSite).toHaveBeenCalledWith(env, false);
   });
 
   it("requires authentication for deferred publication and the final dispatch", async () => {
-    for (const path of ["/v1/admin/articles/unknown/publish", "/v1/admin/publication/retry"]) {
-      expect(
-        (await request(path, { method: "POST", body: JSON.stringify({ deferBuild: true }) }))
-          .status,
-      ).toBe(401);
+    for (const name of ["article.publish", "publication.run"]) {
+      const response = await request(`/v1/admin/ops/${name}`, {
+        method: "POST",
+        body: JSON.stringify({ articleId: "unknown", deferBuild: true }),
+      });
+      expect(response.status).toBe(401);
     }
   });
 });
@@ -149,26 +157,22 @@ describe("diary notes", () => {
   it("keeps short note drafts separate and publishes a frozen revision with date and related articles", async () => {
     const publishSite = vi.fn(async () => ({ state: "queued" }));
     app = createApp({ contextFactory: () => ctx, publishSite });
-    const created = await request("/v1/admin/notes", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ slug: "santorini-memory", title: "テレビで見かけたサントリーニ島" }),
+    const created = await op("note.create", {
+      slug: "santorini-memory",
+      title: "テレビで見かけたサントリーニ島",
     });
-    expect(created.status).toBe(201);
+    expect(created.status).toBe(200);
     const { id } = (await created.json()) as { id: string };
 
-    const noteList = await (await request("/v1/admin/notes", { headers: auth })).json();
-    const articleList = await (await request("/v1/admin/articles", { headers: auth })).json();
+    const noteList = await (await op("note.list")).json();
+    const articleList = await (await op("article.list")).json();
     expect(noteList.items.map((item: { id: string }) => item.id)).toEqual([id]);
     expect(articleList.items.some((item: { id: string }) => item.id === id)).toBe(false);
 
-    const savedDraft = await request(`/v1/admin/notes/${id}/draft`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        title: "テレビで見かけたサントリーニ島",
-        bodyMarkdown: "自分が行った場所をテレビで見ると、なんか嬉しい。",
-      }),
+    const savedDraft = await op("note.saveDraft", {
+      noteId: id,
+      title: "テレビで見かけたサントリーニ島",
+      bodyMarkdown: "自分が行った場所をテレビで見ると、なんか嬉しい。",
     });
     expect(savedDraft.status).toBe(200);
     expect((await savedDraft.json()).revision.bodyMarkdown).toContain("なんか嬉しい");
@@ -182,29 +186,20 @@ describe("diary notes", () => {
       publishedRevisionId: targetArticle.currentRevisionId,
       publishedAt: "2026-08-30T00:00:00.000Z" as never,
     });
-    const related = await request(`/v1/admin/notes/${id}/related-articles`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({ relatedArticleIds: [target] }),
+    const related = await op("note.setRelatedArticles", {
+      noteId: id,
+      relatedArticleIds: [target],
     });
     expect(related.status).toBe(200);
     expect((await related.json()).relatedArticleIds).toEqual([target]);
 
-    const date = await request(`/v1/admin/notes/${id}/date`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({ date: "2025-06-15" }),
-    });
+    const date = await op("note.setDate", { noteId: id, date: "2025-06-15" });
     expect(date.status).toBe(200);
     expect((await date.json()).date).toBe("2025-06-15");
 
-    const checked = await request(`/v1/admin/notes/${id}/publish-check`, { headers: auth });
+    const checked = await op("note.publishCheck", { noteId: id });
     expect(await checked.json()).toMatchObject({ publishable: true, problems: [] });
-    const published = await request(`/v1/admin/notes/${id}/publish`, {
-      method: "POST",
-      headers: auth,
-      body: "{}",
-    });
+    const published = await op("note.publish", { noteId: id });
     expect(published.status).toBe(200);
     expect(publishSite).toHaveBeenCalledTimes(1);
 
@@ -219,13 +214,10 @@ describe("diary notes", () => {
       publicBeforeEdit.revisions.find((revision) => revision.id === publicRevisionId)?.bodyMarkdown,
     ).toContain("なんか嬉しい");
 
-    await request(`/v1/admin/notes/${id}/draft`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        title: "テレビで見かけたサントリーニ島",
-        bodyMarkdown: "公開後に書いた下書き。",
-      }),
+    await op("note.saveDraft", {
+      noteId: id,
+      title: "テレビで見かけたサントリーニ島",
+      bodyMarkdown: "公開後に書いた下書き。",
     });
     const afterDraft = await ctx.repos.articles.findById(id as never);
     expect(afterDraft?.currentRevisionId).not.toBe(publicRevisionId);
@@ -235,41 +227,22 @@ describe("diary notes", () => {
       stillPublic.revisions.find((revision) => revision.id === publicRevisionId)?.bodyMarkdown,
     ).toContain("なんか嬉しい");
 
-    const withdrawn = await request(`/v1/admin/notes/${id}/unpublish`, {
-      method: "POST",
-      headers: auth,
-    });
+    const withdrawn = await op("note.unpublish", { noteId: id });
     expect(withdrawn.status).toBe(200);
     expect(publishSite).toHaveBeenCalledTimes(2);
     expect((await ctx.repos.articles.findById(id as never))?.publishedRevisionId).toBeNull();
   });
 
   it("requires a real calendar date and protects delete with explicit confirmation", async () => {
-    const created = await request("/v1/admin/notes", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ slug: "delete-me-note", title: "削除確認" }),
-    });
+    const created = await op("note.create", { slug: "delete-me-note", title: "削除確認" });
     const { id } = (await created.json()) as { id: string };
     for (const date of ["2026-02-30", "20261104"]) {
-      const response = await request(`/v1/admin/notes/${id}/date`, {
-        method: "PUT",
-        headers: auth,
-        body: JSON.stringify({ date }),
-      });
+      const response = await op("note.setDate", { noteId: id, date });
       expect(response.status).toBe(400);
     }
-    const refused = await request(`/v1/admin/notes/${id}`, {
-      method: "DELETE",
-      headers: auth,
-      body: JSON.stringify({ confirm: "no" }),
-    });
+    const refused = await op("note.delete", { noteId: id, confirm: "no" });
     expect(refused.status).toBe(400);
-    const deleted = await request(`/v1/admin/notes/${id}`, {
-      method: "DELETE",
-      headers: auth,
-      body: JSON.stringify({ confirm: "delete" }),
-    });
+    const deleted = await op("note.delete", { noteId: id, confirm: "delete" });
     expect(deleted.status).toBe(200);
     expect(await ctx.repos.articles.findById(id as never)).toBeNull();
   });
@@ -278,11 +251,10 @@ describe("diary notes", () => {
 describe("travel knowledge control plane", () => {
   it("saves and reads a validated Quick Answer for the current revision", async () => {
     const id = await createArticle();
-    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
-    const response = await request(`/v1/admin/knowledge/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
+    const detail = await (await op("article.get", { articleId: id })).json();
+    const response = await op("knowledge.save", {
+      articleId: id,
+      bundle: {
         article: {
           articleId: id,
           revisionId: detail.currentRevision.id,
@@ -298,22 +270,18 @@ describe("travel knowledge control plane", () => {
         facts: [],
         sources: [],
         routes: [],
-      }),
+      },
     });
     expect(response.status).toBe(200);
-    const stored = await (
-      await request(`/v1/admin/knowledge/article/${id}`, { headers: auth })
-    ).json();
+    const stored = await (await op("knowledge.get", { articleId: id })).json();
     expect(stored.article.quickAnswer.summary).toContain("実飲");
-    expect(stored.canSuggestWithAi).toBe(false);
   });
 
   it("rejects malformed knowledge before it reaches the repository", async () => {
     const id = await createArticle();
-    const response = await request(`/v1/admin/knowledge/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({ article: "not-an-object" }),
+    const response = await op("knowledge.save", {
+      articleId: id,
+      bundle: { article: "not-an-object" },
     });
     expect(response.status).toBe(400);
   });
@@ -323,7 +291,7 @@ describe("article lifecycle", () => {
   it("creates, reads and lists an article", async () => {
     const id = await createArticle();
 
-    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+    const detail = await (await op("article.get", { articleId: id })).json();
     expect(detail).toMatchObject({
       slug: "chagee-menu",
       status: "draft",
@@ -331,16 +299,16 @@ describe("article lifecycle", () => {
     });
     expect(detail.currentRevision.revisionNumber).toBe(1);
 
-    const list = await (await request("/v1/admin/articles", { headers: auth })).json();
+    const list = await (await op("article.list")).json();
     expect(list.items).toHaveLength(1);
   });
 
   it("refuses a duplicate slug with a conflict", async () => {
     await createArticle();
-    const response = await request("/v1/admin/articles", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ slug: "chagee-menu", locale: "ja", path: "/posts/other", draft }),
+    const response = await op("article.create", {
+      slug: "chagee-menu",
+      path: "/posts/other",
+      ...draft,
     });
     expect(response.status).toBe(409);
     expect((await response.json()).error.code).toBe("API_CONFLICT");
@@ -349,18 +317,14 @@ describe("article lifecycle", () => {
   it("sets experience tags without creating a revision, and refuses unknown ones", async () => {
     const id = await createArticle();
     const put = (experienceTags: unknown) =>
-      request(`/v1/admin/articles/${id}/experience-tags`, {
-        method: "PUT",
-        headers: auth,
-        body: JSON.stringify({ experienceTags }),
-      });
+      op("article.setExperienceTags", { articleId: id, experienceTags });
 
     const saved = await put(["moving", "exciting", "moving"]);
     expect(saved.status).toBe(200);
     // De-duplicated and in vocabulary order, whatever order the editor clicked.
     expect(await saved.json()).toEqual({ experienceTags: ["exciting", "moving"] });
 
-    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+    const detail = await (await op("article.get", { articleId: id })).json();
     expect(detail.experienceTags).toEqual(["exciting", "moving"]);
     expect(detail.currentRevision.revisionNumber).toBe(1);
 
@@ -371,14 +335,11 @@ describe("article lifecycle", () => {
 
   it("reports only the bodies with raw HTML or in-sentence site links", async () => {
     await createArticle({
-      draft: {
-        ...draft,
-        bodyMarkdown: `${"本文".repeat(120)}\n\n詳しくは[メニュー](./other)で。<br>\n\n[カード](./card)`,
-      },
+      bodyMarkdown: `${"本文".repeat(120)}\n\n詳しくは[メニュー](./other)で。<br>\n\n[カード](./card)`,
     });
     await createArticle({ slug: "clean", path: "/posts/clean" });
 
-    const audit = await (await request("/v1/admin/articles/body-audit", { headers: auth })).json();
+    const audit = await (await op("article.bodyAudit")).json();
     expect(audit.items).toEqual([
       expect.objectContaining({
         slug: "chagee-menu",
@@ -390,7 +351,7 @@ describe("article lifecycle", () => {
   });
 
   it("returns 404 for an unknown article", async () => {
-    const response = await request("/v1/admin/articles/does-not-exist", { headers: auth });
+    const response = await op("article.get", { articleId: "does-not-exist" });
     expect(response.status).toBe(404);
     expect((await response.json()).error.code).toBe("ARTICLE_NOT_FOUND");
   });
@@ -398,16 +359,11 @@ describe("article lifecycle", () => {
   it("explains why publishing is blocked, publishes once fixed, and stays live under a new draft", async () => {
     const id = await createArticle();
 
-    const check = await (
-      await request(`/v1/admin/articles/${id}/publish-check`, { headers: auth })
-    ).json();
+    const check = await (await op("article.publishCheck", { articleId: id })).json();
     expect(check.publishable).toBe(false);
     expect(check.problems.map((p: { field: string }) => p.field)).toContain("media");
 
-    const blocked = await request(`/v1/admin/articles/${id}/publish`, {
-      method: "POST",
-      headers: auth,
-    });
+    const blocked = await op("article.publish", { articleId: id });
     expect(blocked.status).toBe(409);
 
     const upload = new FormData();
@@ -427,38 +383,28 @@ describe("article lifecycle", () => {
     );
     upload.append("slug", "cover");
     const uploaded = await (
-      await request("/v1/admin/media", {
+      await request("/v1/admin/ops/media.upload", {
         method: "POST",
         headers: { authorization: auth.authorization },
         body: upload,
       })
     ).json();
 
-    await request(`/v1/admin/media/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        media: [
-          { mediaId: uploaded.id, role: "cover", sortOrder: 0, alt: "カバー画像", caption: null },
-        ],
-      }),
+    await op("article.setMedia", {
+      articleId: id,
+      media: [
+        { mediaId: uploaded.id, role: "cover", sortOrder: 0, alt: "カバー画像", caption: null },
+      ],
     });
 
-    const published = await request(`/v1/admin/articles/${id}/publish`, {
-      method: "POST",
-      headers: auth,
-    });
+    const published = await op("article.publish", { articleId: id });
     expect(published.status).toBe(200);
     expect((await published.json()).status).toBe("published");
 
     // The published revision stays live while a new draft moves ahead.
-    await request(`/v1/admin/articles/${id}/draft`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({ ...draft, title: "編集後" }),
-    });
+    await op("article.saveDraft", { articleId: id, ...draft, title: "編集後" });
 
-    const detail = await (await request(`/v1/admin/articles/${id}`, { headers: auth })).json();
+    const detail = await (await op("article.get", { articleId: id })).json();
     expect(detail.hasUnpublishedChanges).toBe(true);
     expect(detail.isLive).toBe(true);
   });
@@ -469,7 +415,7 @@ describe("media", () => {
     const upload = new FormData();
     upload.append("file", new File([new Uint8Array([1])], "a.pdf", { type: "application/pdf" }));
     upload.append("slug", "a");
-    const response = await request("/v1/admin/media", {
+    const response = await request("/v1/admin/ops/media.upload", {
       method: "POST",
       headers: { authorization: auth.authorization },
       body: upload,
@@ -480,78 +426,10 @@ describe("media", () => {
 
   it("rejects image usage without alt text", async () => {
     const id = await createArticle();
-    const response = await request(`/v1/admin/media/article/${id}`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({
-        media: [{ mediaId: "m", role: "cover", sortOrder: 0, alt: "", caption: null }],
-      }),
+    const response = await op("article.setMedia", {
+      articleId: id,
+      media: [{ mediaId: "m", role: "cover", sortOrder: 0, alt: "", caption: null }],
     });
     expect(response.status).toBe(400);
-  });
-});
-
-describe("routes", () => {
-  it("resolves a path and reports a redirect after a move", async () => {
-    await createArticle();
-
-    const before = await (
-      await request("/v1/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
-    ).json();
-    expect(before.kind).toBe("target");
-
-    const moved = await request("/v1/admin/routes/move", {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ from: "/posts/chagee-menu", to: "/posts/chagee-menu-explained" }),
-    });
-    expect(moved.status).toBe(200);
-
-    const after = await (
-      await request("/v1/admin/routes/resolve?path=/posts/chagee-menu", { headers: auth })
-    ).json();
-    expect(after).toMatchObject({
-      kind: "redirect",
-      destination: "/posts/chagee-menu-explained",
-      status: 301,
-    });
-
-    const integrity = await (await request("/v1/admin/routes/integrity", { headers: auth })).json();
-    expect(integrity.ok).toBe(true);
-  });
-
-  it("404s an unknown path and 400s a missing parameter", async () => {
-    expect((await request("/v1/admin/routes/resolve?path=/nope", { headers: auth })).status).toBe(
-      404,
-    );
-    expect((await request("/v1/admin/routes/resolve", { headers: auth })).status).toBe(400);
-  });
-});
-
-describe("admin inbox", () => {
-  // New messages go to the inquiry platform (see contact.test.ts); the inbox
-  // still lists and re-files what arrived before the switch.
-  it("lists and re-files messages received before the switch", async () => {
-    await ctx.repos.contactMessages.save({
-      id: "m1",
-      name: "ともきち",
-      email: "reader@example.com",
-      subject: "記事の感想",
-      body: "CHAGEEの記事、とても参考になりました。",
-      ipHash: "abc",
-      status: "unread",
-      createdAt: "2026-08-30T00:00:00.000Z",
-    } as ContactMessage);
-    const listed = await (await request("/v1/admin/messages", { headers: auth })).json();
-    expect(listed.unread).toBe(1);
-
-    const id = listed.items[0].id;
-    const updated = await request(`/v1/admin/messages/${id}/status`, {
-      method: "PUT",
-      headers: auth,
-      body: JSON.stringify({ status: "read" }),
-    });
-    expect(updated.status).toBe(200);
-    expect((await (await request("/v1/admin/messages", { headers: auth })).json()).unread).toBe(0);
   });
 });

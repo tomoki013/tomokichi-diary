@@ -20,22 +20,19 @@ let app: ReturnType<typeof createApp>;
 
 async function createArticle(): Promise<string> {
   const response = await app.request(
-    "/v1/admin/articles",
+    "/v1/admin/ops/article.create",
     {
       method: "POST",
       headers: auth,
       body: JSON.stringify({
         slug: "wat-arun",
-        locale: "ja",
         path: "/posts/wat-arun",
-        draft: {
-          title: "ワット・アルン",
-          summary: "夕景",
-          bodyMarkdown: "本文".repeat(200),
-          seoTitleOverride: null,
-          seoDescriptionOverride: null,
-          changeSummary: null,
-        },
+        title: "ワット・アルン",
+        summary: "夕景",
+        bodyMarkdown: "本文".repeat(200),
+        seoTitleOverride: null,
+        seoDescriptionOverride: null,
+        changeSummary: null,
       }),
     },
     env,
@@ -180,9 +177,12 @@ describe("/v1/likes", () => {
   });
 });
 
-describe("/v1/admin/likes", () => {
+describe("like.activity", () => {
   it("requires the admin token", async () => {
-    expect((await app.request("/v1/admin/likes", {}, env)).status).toBe(401);
+    expect(
+      (await app.request("/v1/admin/ops/like.activity", { method: "POST", body: "{}" }, env))
+        .status,
+    ).toBe(401);
   });
 
   it("reports totals, per-article counts and recent likes without visitor hashes", async () => {
@@ -195,7 +195,11 @@ describe("/v1/admin/likes", () => {
         env,
       );
     }
-    const response = await app.request("/v1/admin/likes", { headers: auth }, env);
+    const response = await app.request(
+      "/v1/admin/ops/like.activity",
+      { method: "POST", headers: auth, body: "{}" },
+      env,
+    );
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toMatchObject({

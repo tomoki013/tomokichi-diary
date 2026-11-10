@@ -218,7 +218,7 @@ pnpm media:verify-ui
 
 - `scripts/media-backfill.ts`
 - `scripts/media-ui-preview.ts`
-- `scripts/verify-media-ui.ts`
+- `scripts/verify-media-ui.ts`（2026-11-10、旧管理画面とともに削除）
 - `scripts/lib/seed-sql.ts`
 - `scripts/lib/__tests__/seed-sql.test.ts`
 - `scripts/content-release.ts`

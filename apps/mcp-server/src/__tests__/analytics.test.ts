@@ -13,7 +13,7 @@ import {
   escapeHtml,
   type AnalyticsEnv,
 } from "../analytics-auth";
-import { completedRange } from "../analytics-server";
+import { completedRange } from "@tomokichi/application";
 
 const subject = "owner";
 const context = {
@@ -259,6 +259,19 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   expect(exchange.status).toBe(200);
   const tokens = (await exchange.json()) as { access_token: string; refresh_token: string };
   expect(tokens.refresh_token).toBeTruthy();
+  const calls: Request[] = [];
+  const operatorApi = {
+    fetch: vi.fn(async (request: Request) => {
+      calls.push(request);
+      return Response.json({
+        period: "weekly",
+        snapshotState: "not_generated",
+        latest: { current: [{ coveredDays: 0 }] },
+      });
+    }),
+  };
+  env.OPERATOR_API = operatorApi;
+  oauthEnv.OPERATOR_API = operatorApi;
   const list = await send("/analytics/mcp", {
     method: "POST",
     headers: {
@@ -274,17 +287,7 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   expect(text).toContain("get_analytics_report");
   expect(text).toContain("get_analytics_dashboard");
   expect(text).not.toContain("recalculate");
-  env.DB = {
-    prepare: () => ({
-      bind() {
-        return this;
-      },
-      run: async () => ({ success: true }),
-      all: async () => ({ results: [] }),
-      first: async () => null,
-    }),
-  } as unknown as AnalyticsEnv["DB"];
-  oauthEnv.DB = env.DB;
+  expect(text).not.toContain("recollect_analytics");
   const report = await send("/analytics/mcp", {
     method: "POST",
     headers: {
@@ -306,6 +309,15 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   expect(reportText).toContain("coveredDays");
   expect(reportText).not.toContain("cf-access-jwt");
   expect(reportText).not.toContain(tokens.access_token);
+  expect(reportText).toContain("analysisGuidance");
+  // Through the API as an analytics connection, which the API keeps read-only.
+  expect(new URL(calls[0]!.url).pathname).toBe("/v1/admin/ops/analytics.report");
+  expect(JSON.parse(calls[0]!.headers.get("x-operator-audit-context")!)).toMatchObject({
+    actorType: "remote-analytics",
+    actorSubject: subject,
+    operatorWrite: false,
+    mcpToolName: "get_analytics_report",
+  });
   const refreshed = await send("/analytics/oauth/token", {
     method: "POST",
     body: new URLSearchParams({

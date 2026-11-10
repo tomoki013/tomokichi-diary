@@ -38,6 +38,5 @@ export async function createTestContext(now = "2026-08-30T00:00:00.000Z"): Promi
     logger: silentLogger,
     storage: createMemoryStorage(),
     mediaUrls: createMediaUrlResolver("https://media.tomokichidiary.com"),
-    ai: null,
   };
 }

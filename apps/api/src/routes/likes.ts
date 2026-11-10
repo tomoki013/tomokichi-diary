@@ -1,8 +1,6 @@
 import { Hono, type Context } from "hono";
-import type { LikeActivityDto } from "@tomokichi/contracts";
 import {
   getArticleLikeState,
-  getLikeActivity,
   getMediaLikeState,
   listArticleLikeCounts,
   listMediaLikeCounts,
@@ -128,18 +126,6 @@ export function photoLikeRoutes() {
       visitorHash,
     );
     return state ? c.json(state) : errorResponse(c, "MEDIA_NOT_FOUND", "photo not found", 404);
-  });
-
-  return routes;
-}
-
-/** Mounted under `/admin`, behind the admin guard. */
-export function likeAdminRoutes() {
-  const routes = new Hono<AppEnv>();
-
-  routes.get("/", async (c) => {
-    const activity: LikeActivityDto = await getLikeActivity(c.get("ctx"));
-    return c.json(activity);
   });
 
   return routes;

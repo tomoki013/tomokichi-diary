@@ -47,7 +47,7 @@ export interface ArticleSummaryDto {
   readonly noindex: boolean;
 }
 
-/** `GET /v1/admin/likes`. Article titles are joined on the client from the article list. */
+/** `like.activity`. Article titles are joined on the client from the article list. */
 export interface LikeActivityDto {
   readonly total: number;
   readonly visitors: number;
@@ -143,15 +143,6 @@ export interface MediaHashStatusDto {
   readonly verified: number;
   readonly pending: number;
   readonly uploads: number;
-}
-
-export interface RouteDto {
-  readonly path: string;
-  readonly targetType: string;
-  readonly targetId: string | null;
-  readonly isCanonical: boolean;
-  readonly redirectTo: string | null;
-  readonly noindex: boolean;
 }
 
 export interface LocationDto {
@@ -354,7 +345,6 @@ export interface ArticleKnowledgeBundleDto {
   readonly facts: readonly TravelFactDto[];
   readonly sources: readonly SourceReferenceDto[];
   readonly routes: readonly TravelRouteDto[];
-  readonly canSuggestWithAi: boolean;
 }
 
 // --- Inquiries (the shared inquiry platform, narrowed to this site) ---------

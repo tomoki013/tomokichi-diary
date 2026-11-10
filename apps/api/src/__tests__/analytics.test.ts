@@ -50,62 +50,53 @@ describe("private analytics HTTP boundary", () => {
   });
   it("requires authentication; no public counterpart; Access token can read empty data without exposing secrets", async () => {
     const { app, env } = await fixture();
-    const path = "/v1/admin/analytics?start=2026-10-01&end=2026-10-07";
-    expect((await app.request(path, {}, env)).status).toBe(401);
+    const path = "/v1/admin/ops/analytics.dashboard";
+    const body = JSON.stringify({ start: "2026-10-01", end: "2026-10-07" });
+    expect((await app.request(path, { method: "POST", body }, env)).status).toBe(401);
     expect((await app.request("/v1/analytics", {}, env)).status).toBe(404);
-    const res = await app.request(path, { headers: { "cf-access-jwt-assertion": "valid" } }, env);
+    const res = await app.request(
+      path,
+      { method: "POST", body, headers: { "cf-access-jwt-assertion": "valid" } },
+      env,
+    );
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("private, no-store");
-    const body = await res.json();
-    expect(body.current.every((s: { coveredDays: number }) => s.coveredDays === 0)).toBe(true);
-    expect(JSON.stringify(body)).not.toContain("ADMIN_TOKEN");
+    const result = await res.json();
+    expect(
+      result.dashboard.current.every((s: { coveredDays: number }) => s.coveredDays === 0),
+    ).toBe(true);
+    expect(JSON.stringify(result)).not.toContain("ADMIN_TOKEN");
   });
   it("rejects SQL injection and invalid periods before querying; unconfigured manual dispatch is explicit", async () => {
     const { app, env } = await fixture();
     const headers = { authorization: "Bearer test", "content-type": "application/json" };
+    const op = (name: string, input: unknown) =>
+      app.request(
+        `/v1/admin/ops/${name}`,
+        { method: "POST", headers, body: JSON.stringify(input) },
+        env,
+      );
     expect(
-      (await app.request("/v1/admin/analytics?start=2026-02-30&end=2026-03-01", { headers }, env))
-        .status,
+      (await op("analytics.dashboard", { start: "2026-02-30", end: "2026-03-01" })).status,
     ).toBe(400);
     expect(
-      (
-        await app.request(
-          "/v1/admin/analytics?start=x%27%20OR%201=1--&end=2026-03-01",
-          { headers },
-          env,
-        )
-      ).status,
+      (await op("analytics.dashboard", { start: "x' OR 1=1--", end: "2026-03-01" })).status,
     ).toBe(400);
-    expect(
-      (
-        await app.request(
-          "/v1/admin/analytics/recalculate",
-          {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ start: "2026-10-01", end: "2026-10-07" }),
-          },
-          env,
-        )
-      ).status,
-    ).toBe(503);
+    const week = { start: "2026-10-01", end: "2026-10-07", scope: "all" };
+    expect((await op("analytics.recollect", week)).status).toBe(503);
     const send = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", send);
     env.ANALYTICS_GITHUB_TOKEN = "private";
-    const res = await app.request(
-      "/v1/admin/analytics/recalculate",
-      { method: "POST", headers, body: JSON.stringify({ start: "2026-10-01", end: "2026-10-07" }) },
-      env,
-    );
-    expect(res.status).toBe(202);
+    const res = await op("analytics.recollect", week);
+    expect(res.status).toBe(200);
     expect(send.mock.calls[0]?.[0]).toContain("tomoki013/tomokichi-diary");
     expect(JSON.parse(send.mock.calls[0]?.[1].body).ref).toBe("main");
-    const counts = await app.request(
-      "/v1/admin/analytics/counts",
-      { method: "POST", headers, body: JSON.stringify({ start: "2026-08-01", end: "2026-10-01" }) },
-      env,
-    );
-    expect(counts.status).toBe(202);
+    const counts = await op("analytics.recollect", {
+      start: "2026-08-01",
+      end: "2026-10-01",
+      scope: "counts",
+    });
+    expect(counts.status).toBe(200);
     expect(send.mock.calls[1]?.[0]).toContain("analytics-periods.yml");
   });
 });

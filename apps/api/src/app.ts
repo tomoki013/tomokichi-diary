@@ -1,41 +1,21 @@
 import { resendWebhook } from "./resend-webhook.js";
-import { monetizationRoutes } from "./routes/monetization.js";
 import { Hono } from "hono";
 import type { AppContext } from "@tomokichi/application";
-import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
-import { generateId } from "@tomokichi/domain";
+import type { SqlDatabase } from "@tomokichi/infra-d1";
+import { generateId, type MediaId } from "@tomokichi/domain";
 import type { Env } from "./env.js";
 import { errorResponse } from "./http.js";
 import { createContext } from "./context.js";
-import { analyticsRoutes } from "./routes/analytics.js";
-import { dashboardRoutes } from "./routes/dashboard.js";
-import { activityRoutes } from "./routes/activity.js";
-import { connectionRoutes } from "./routes/connections.js";
-import { articleRoutes } from "./routes/articles.js";
-import { diaryNoteRoutes } from "./routes/notes.js";
-import { publicationRoutes, requestPublication } from "./publication.js";
-import { mediaRoutes } from "./routes/media.js";
-import { collectionRoutes } from "./routes/collections.js";
-import { rankingRoutes } from "./routes/rankings.js";
+import { requestPublication } from "./publication.js";
 import { imageRoutes } from "./routes/images.js";
-import { referenceRoutes } from "./routes/reference.js";
-import { routeRoutes } from "./routes/routes.js";
 import { contactRoutes, verifyTurnstile } from "./routes/contact.js";
 import { verifyAccessJwt, type AccessIdentity } from "./access.js";
-import { isAllowedOperatorRequest } from "./operator-policy.js";
-import { messageRoutes } from "./routes/messages.js";
-import { likeAdminRoutes, likeRoutes, photoLikeRoutes } from "./routes/likes.js";
-import { knowledgeRoutes } from "./routes/knowledge.js";
-import { inquiryRoutes } from "./routes/inquiry.js";
+import { operationRoutes } from "./ops/route.js";
+import { likeRoutes, photoLikeRoutes } from "./routes/likes.js";
 import type { ProjectOperatorClient } from "@inquiry-platform/sdk";
 import { createInquiryOperator } from "./inquiry-operator.js";
 import { runStatusProbe } from "./status-probe.js";
-import {
-  finishAuditEvent,
-  insertAuditEvent,
-  type AuditContext,
-  type AuditEventInput,
-} from "./audit.js";
+import type { AuditContext } from "./audit.js";
 
 /** Verifies a Turnstile token. Injected so the HTTP layer stays testable. */
 export type ChallengeVerifier = (
@@ -89,10 +69,6 @@ export interface AppOptions {
 }
 
 /**
- * HTTP adapter only: routing, authentication, validation and response shaping.
- * Every decision about content lives in @tomokichi/application (instruction §7).
- */
-/**
  * Compares a shared secret without leaking its length or contents through
  * timing. Both sides are trimmed first: a secret set from a pipe can pick up a
  * trailing newline, and silently rejecting every request afterwards is a
@@ -110,6 +86,10 @@ function secretsMatch(expected: string, provided: string): boolean {
   return difference === 0;
 }
 
+/**
+ * HTTP adapter only: routing, authentication and response shaping. Every
+ * decision about content lives in @tomokichi/application (instruction §7).
+ */
 export function createApp(options: AppOptions = {}) {
   const buildContext = options.contextFactory ?? createContext;
   const verifyChallenge = options.verifyChallenge ?? verifyTurnstile;
@@ -275,7 +255,8 @@ export function createApp(options: AppOptions = {}) {
       provided &&
       secretsMatch(localOperatorToken, provided)
     ) {
-      if (!isAllowedOperatorRequest(c.req.raw, true))
+      // The local operator runs operations only; which ones is the policy's call.
+      if (!c.req.path.startsWith("/v1/admin/ops/"))
         return errorResponse(
           c,
           "API_UNAUTHORIZED",
@@ -310,202 +291,45 @@ export function createApp(options: AppOptions = {}) {
     await next();
   });
 
-  // Common audit coverage for every management API mutation. Remote MCP reads
-  // are included too, with the server-verified tool and client context.
-  v1.use("/admin/*", async (c, next) => {
-    const context = c.get("auditContext");
-    const method = c.req.method.toUpperCase();
-    const shouldAudit =
-      ["POST", "PUT", "PATCH", "DELETE"].includes(method) ||
-      context.source === "remote-mcp" ||
-      context.source === "local-mcp";
-    if (!shouldAudit) {
-      await next();
-      return;
-    }
-    const auditDb =
-      options.auditDb ?? (!options.contextFactory && c.env.DB ? fromD1(c.env.DB) : undefined);
-    // Unit fixtures inject the application context but not a D1 binding. The
-    // deployed Worker always has DB; a missing production binding fails closed.
-    if (!auditDb) {
-      if (options.contextFactory) {
-        await next();
-        return;
-      }
-      return errorResponse(c, "API_INTERNAL", "operation audit is unavailable", 503);
-    }
-    let resolvedContext = context;
-    if (context.clientId && context.clientRedirectHost) {
-      try {
-        const alias = await auditDb
-          .prepare(
-            "SELECT display_name FROM operator_audit_client_names WHERE client_id=? AND redirect_host=?",
-          )
-          .bind(context.clientId, context.clientRedirectHost)
-          .first<{ display_name: string }>();
-        if (alias)
-          resolvedContext = {
-            ...context,
-            clientName: alias.display_name,
-            clientTrust: "confirmed",
-          };
-      } catch {
-        return errorResponse(c, "API_INTERNAL", "client identity lookup failed", 503);
-      }
-    }
+  /*
+   * The whole admin surface: one route that runs a named operation. Who may
+   * run it, input validation and the audit entry all follow from the
+   * operation's definition (ops/route.ts, packages/contracts/operations).
+   */
+  v1.route(
+    "/admin/ops",
+    operationRoutes({
+      publishSite,
+      inquiryOperator,
+      ...(options.auditDb ? { auditDb: options.auditDb } : {}),
+      testContext: Boolean(options.contextFactory),
+    }),
+  );
 
-    const parts = new URL(c.req.url).pathname.split("/").filter(Boolean).slice(2);
-    const resource = (parts[0] ?? "admin").replace(/[^a-z0-9-]/gi, "").slice(0, 40);
-    const targetType =
-      (
-        {
-          articles: "article",
-          notes: "note",
-          collections: "series",
-          tags: "tag",
-          rankings: "ranking",
-          monetization: "ad",
-          publication: "publication",
-          connections: "connection",
-        } as Record<string, string>
-      )[resource] ?? resource;
-    const routeMarkers = new Set([
-      "retry",
-      "publish",
-      "unpublish",
-      "archive",
-      "draft",
-      "relations",
-      "publish-check",
-      "body-audit",
-      "taxonomy",
-      "experiments",
-      "articles",
-      "offers",
-      "settings",
-      "article",
-      "route",
-      "date",
-      "related-articles",
-      "schedule",
-      "cancel-schedule",
-      "media",
-      "revoke",
-    ]);
-    const targetId =
-      (resource === "connections"
-        ? parts[2]
-        : parts.slice(1).find((part) => !routeMarkers.has(part))
-      )?.slice(0, 120) ?? null;
-    const routeAction = parts
-      .slice(1)
-      .filter((part) => routeMarkers.has(part))
-      .join(".");
-    const action = `${method.toLowerCase()}.${resource}${routeAction ? `.${routeAction.replace(/[^a-z0-9.-]/gi, "").slice(0, 80)}` : ""}`;
-    const isToolInvocation =
-      resolvedContext.source === "remote-mcp" && !!resolvedContext.mcpToolName;
-    const asynchronousPublication =
-      method !== "GET" &&
-      (resource === "publication" || /(^|\.)(publish|unpublish|archive)(\.|$)/.test(action));
-    const event: AuditEventInput = {
-      ...resolvedContext,
-      id: crypto.randomUUID(),
-      occurredAt: new Date().toISOString(),
-      requestId: c.get("requestId"),
-      action: isToolInvocation ? `mcp.tool.${resolvedContext.mcpToolName}` : action,
-      targetType,
-      targetId,
-      result: "requested",
-      statusCode: null,
-      metadata: {
-        ...(resolvedContext.source === "remote-mcp" ? { apiAction: action } : {}),
-        ...(asynchronousPublication ? { phase: "request" } : {}),
-      },
-    };
-    try {
-      await insertAuditEvent(auditDb, event);
-    } catch (error) {
-      c.get("ctx").logger.error("audit.write_failed", {
-        requestId: event.requestId,
-        action: event.action,
-        error: error instanceof Error ? error.message : "unknown",
-      });
-      return errorResponse(c, "API_INTERNAL", "operation audit is unavailable", 503);
-    }
-
-    let thrown: unknown;
-    try {
-      await next();
-    } catch (error) {
-      thrown = error;
-    }
-    const statusCode = thrown ? 500 : c.res.status;
-    let publicationId: string | undefined;
-    let responseTargetId: string | undefined;
-    if (!thrown && statusCode < 400 && (asynchronousPublication || !targetId)) {
-      const response = (await c.res
-        .clone()
-        .json()
-        .catch(() => null)) as {
-        id?: unknown;
-        requestId?: unknown;
-        publication?: { requestId?: unknown };
-      } | null;
-      if (!targetId && typeof response?.id === "string")
-        responseTargetId = response.id.slice(0, 120);
-      const candidate = response?.publication?.requestId ?? response?.requestId;
-      if (asynchronousPublication && typeof candidate === "string")
-        publicationId = candidate.slice(0, 100);
-    }
-    const result =
-      statusCode >= 500
-        ? "failed"
-        : statusCode >= 400
-          ? "rejected"
-          : asynchronousPublication
-            ? "requested"
-            : "succeeded";
-    try {
-      await finishAuditEvent(
-        auditDb,
-        event.id,
-        result,
-        statusCode,
-        publicationId,
-        responseTargetId,
-      );
-    } catch (error) {
-      c.get("ctx").logger.error("audit.finalize_failed", {
-        requestId: event.requestId,
-        auditId: event.id,
-        error: error instanceof Error ? error.message : "unknown",
-      });
-      if (!thrown)
-        return errorResponse(c, "API_INTERNAL", "operation audit finalization failed", 503);
-    }
-    if (thrown) throw thrown;
+  // The original file of a library photo, for the admin to download. Binary,
+  // so it is a plain GET beside the operations rather than one of them.
+  v1.get("/admin/media/:id/file", async (c) => {
+    const ctx = c.get("ctx");
+    const asset = await ctx.repos.media.findById(c.req.param("id") as MediaId);
+    const object = asset ? await ctx.storage.get(asset.storageKey) : null;
+    if (!asset || !object) return errorResponse(c, "MEDIA_NOT_FOUND", "image not found", 404);
+    return c.body(object.body, 200, {
+      "content-type": asset.mimeType,
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
+    });
   });
 
-  v1.route("/admin/activity", activityRoutes());
-  v1.route("/admin/connections", connectionRoutes());
-  v1.route("/admin/analytics", analyticsRoutes());
-  v1.route("/admin/dashboard", dashboardRoutes());
-  v1.route("/admin/monetization", monetizationRoutes());
-  v1.route("/admin/articles", articleRoutes(publishSite));
-  v1.route("/admin/notes", diaryNoteRoutes(publishSite));
-  v1.route("/admin/publication", publicationRoutes(publishSite));
-  v1.route("/admin/media", mediaRoutes());
-  v1.route("/admin/likes", likeAdminRoutes());
-  v1.route("/admin/routes", routeRoutes());
-  v1.route("/admin/messages", messageRoutes());
-  v1.route("/admin/knowledge", knowledgeRoutes());
-  v1.route("/admin/rankings", rankingRoutes());
-  v1.route(
-    "/admin/inquiry",
-    inquiryRoutes((c) => inquiryOperator(c.env)),
-  );
-  v1.route("/admin", collectionRoutes());
-  v1.route("/admin", referenceRoutes());
+  // Used only by the private MCP consent flow. A shared admin token is not a
+  // human identity and must never authorize an OAuth grant.
+  v1.get("/admin/analytics/connection-identity", (c) => {
+    const actor = c.get("adminActor");
+    if (!actor.startsWith("access:"))
+      return errorResponse(c, "API_UNAUTHORIZED", "Access login required", 401);
+    return c.json({ subject: actor.slice("access:".length) }, 200, {
+      "cache-control": "private, no-store",
+    });
+  });
 
   app.route("/v1", v1);
 

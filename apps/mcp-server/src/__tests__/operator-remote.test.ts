@@ -283,11 +283,19 @@ describe("remote operator tools", () => {
     });
     expect(await called.text()).toContain("京都");
     expect(adminCalls).toHaveLength(1);
-    expect(new URL(adminCalls[0]!.url).pathname).toBe("/v1/admin/articles");
+    expect(new URL(adminCalls[0]!.url).pathname).toBe("/v1/admin/ops/article.list");
+    expect(adminCalls[0]!.method).toBe("POST");
     expect(adminCalls[0]!.headers.get("authorization")).toBeNull();
-    expect(auditRows[0]?.values[8]).toBe("remote-mcp");
-    expect(auditRows[0]?.values[9]).toBe("mcp.tool.list_articles");
-    expect(auditRows[0]?.values[2]).toBe(adminCalls[0]!.headers.get("x-request-id"));
+    // The API records the call; this Worker only says which grant and tool it was.
+    const sent = JSON.parse(adminCalls[0]!.headers.get("x-operator-audit-context")!);
+    expect(sent).toMatchObject({
+      actorType: "remote-operator",
+      actorSubject: subject,
+      operatorWrite: false,
+      mcpToolName: "list_articles",
+    });
+    expect(adminCalls[0]!.headers.get("x-request-id")).toBeTruthy();
+    expect(auditRows).toHaveLength(0);
   });
 
   it("lists write tools for a write grant, still requiring the publish confirmation", async () => {
@@ -297,6 +305,15 @@ describe("remote operator tools", () => {
     expect(names).toContain("save_article_draft");
     expect(names).toContain("publish_article");
     expect(names.some((name) => name.startsWith("delete_"))).toBe(false);
+    // Everything the admin can do, apart from the named exceptions.
+    for (const name of [
+      "upload_media",
+      "unpublish_article",
+      "propose_travel_facts",
+      "list_activity",
+    ])
+      expect(names).toContain(name);
+    for (const name of names) expect(name).not.toMatch(/inquiry|revoke|review/);
     const refused = await rpc(env, token, {
       method: "tools/call",
       params: { name: "publish_article", arguments: { articleId: "a1", confirmArticleId: "a2" } },

@@ -155,3 +155,15 @@ export function addMetrics(rows: readonly AnalyticsRow[]): Record<string, number
   }
   return result;
 }
+
+/** The last week (Monday–Sunday) or month that has ended, in Japan time. */
+export function completedRange(period: "weekly" | "monthly", now = new Date()) {
+  const today = now.toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+  if (period === "monthly") {
+    const end = shiftDate(`${today.slice(0, 7)}-01`, -1);
+    return dateRange(`${end.slice(0, 7)}-01`, end);
+  }
+  const weekday = new Date(`${today}T00:00:00Z`).getUTCDay();
+  const end = shiftDate(today, -((weekday + 6) % 7) - 1);
+  return dateRange(shiftDate(end, -6), end);
+}

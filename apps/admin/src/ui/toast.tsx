@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { describeError } from "../lib/api";
+import { describeError } from "../data/client";
 
 interface ToastMessage {
   id: number;

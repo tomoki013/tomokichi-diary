@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ArticleDetailDto } from "@tomokichi/contracts";
 import type { LocationDto } from "@tomokichi/contracts";
-import { href, parseRoute, section } from "./route";
+import { href, parseRoute, sectionOf } from "../app/router";
 import { treeOrder } from "./locations";
 import { bodyStats, draftFrom, isDirty, normalizeDraft } from "./draft";
 import { formatDateTime, formatRelative, isoToJstLocal, jstLocalToIso } from "./labels";
@@ -9,19 +9,23 @@ import { removeMarkdownImages } from "./markdown-image";
 
 describe("parseRoute", () => {
   it.each([
-    ["", { name: "dashboard" }],
-    ["#/articles/", { name: "articles" }],
+    ["", { name: "home" }],
+    ["#/articles/", { name: "articles", filter: null }],
+    ["#/articles?filter=draft", { name: "articles", filter: "draft" }],
     ["#/articles/a%2Fb", { name: "article", id: "a/b" }],
-    ["#/notes", { name: "diary-notes" }],
-    ["#/notes/note-1", { name: "diary-note", id: "note-1" }],
-    ["#/inquiries/archive", { name: "legacy-messages" }],
+    ["#/articles/new", { name: "new-article", kind: "article" }],
+    ["#/articles/new?kind=page", { name: "new-article", kind: "page" }],
+    ["#/notes", { name: "notes" }],
+    ["#/notes/note-1", { name: "note", id: "note-1" }],
+    ["#/inquiries/settings", { name: "inquiry-settings" }],
     ["#/inquiries/t-1", { name: "inquiry", id: "t-1" }],
-    ["#/likes", { name: "likes" }],
+    ["#/activity/article/a1", { name: "activity", targetType: "article", targetId: "a1" }],
+    ["#/knowledge", { name: "knowledge" }],
   ])("reads %s", (hash, expected) => {
     expect(parseRoute(hash)).toEqual(expected);
   });
 
-  it.each(["#/nope", "#/media/x", "#/likes/x", "#/articles/a/b"])(
+  it.each(["#/nope", "#/media/x", "#/likes", "#/routes", "#/articles/a/b"])(
     "does not guess at %s",
     (hash) => {
       expect(parseRoute(hash).name).toBe("not-found");
@@ -30,16 +34,17 @@ describe("parseRoute", () => {
 
   it("round-trips every link it builds", () => {
     expect(parseRoute(href.article("x y"))).toEqual({ name: "article", id: "x y" });
-    expect(parseRoute(href.diaryNote("note 1"))).toEqual({ name: "diary-note", id: "note 1" });
+    expect(parseRoute(href.note("note 1"))).toEqual({ name: "note", id: "note 1" });
     expect(parseRoute(href.inquiry("TK/1"))).toEqual({ name: "inquiry", id: "TK/1" });
-    expect(parseRoute(href.legacyMessages()).name).toBe("legacy-messages");
+    expect(parseRoute(href.newArticle("page"))).toEqual({ name: "new-article", kind: "page" });
+    expect(parseRoute(href.activity("note", "n 1"))).toMatchObject({ targetId: "n 1" });
   });
 
-  it("puts detail screens under their list in the menu", () => {
-    expect(section({ name: "article", id: "a" })).toBe("articles");
-    expect(section({ name: "diary-note", id: "n" })).toBe("diary-notes");
-    expect(section({ name: "legacy-messages" })).toBe("inquiries");
-    expect(section({ name: "not-found", path: "/x" })).toBeNull();
+  it("puts detail screens under their place on the bottom bar", () => {
+    expect(sectionOf({ name: "article", id: "a" })).toBe("articles");
+    expect(sectionOf({ name: "note", id: "n" })).toBe("notes");
+    expect(sectionOf({ name: "inquiry", id: "t" })).toBe("more");
+    expect(sectionOf({ name: "home" })).toBe("home");
   });
 });
 

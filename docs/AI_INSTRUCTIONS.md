@@ -45,7 +45,8 @@ DB保存を完了条件にしない。公開対象のコンテンツは、認証
 
 ## Naming / Directory
 
-- apps: `apps/web`（Astro）、`apps/admin`（Vite+React、hash router）、`apps/api`（Hono）、`apps/mcp-server`（公開MCP。`operator/` はローカル専用の操作MCPで、デプロイしない: docs/OPERATOR_MCP.md）。
+- apps: `apps/web`（Astro）、`apps/admin`（Vite+React、hash router。`features/` に領域ごとの画面）、`apps/api`（Hono。管理の操作は `src/ops/`）、`apps/mcp-server`（公開MCPと、操作カタログから作る管理用・分析用MCP。`operator/` はローカル stdio 版: docs/OPERATOR_MCP.md）。
+- 管理の機能を足すときは `packages/contracts/src/operations` に操作を1つ足し、`apps/api/src/ops/handlers` にハンドラを書く。管理画面と MCP の両方に自動で出る（ADR 0011）。管理画面だけ・MCP だけの機能は作らない。
 - packages: `domain`（entity / value / rule）、`application`（use case / port / read model）、`contracts`（DTO / zod / error code）、`data`（row ↔ entity、export 形式）、`seo`（純関数）。
 - Astro: `src/views/*Page.astro`（route type ごと）、`src/components/*.astro`、`src/lib/*.ts`。Home は `HomePage.astro` + `components/home/*` に分割済み。`IndexPage.astro` は残り 5 画面を持つ（分割予定、監査 §15）。HOME の選定は `lib/editorial.ts`、体験タグの表示名は `lib/experiences.ts`（`docs/EDITORIAL.md`）。
 - テスト: `src/__tests__/*.test.ts` か `__tests__/` 隣接。built-site の検査は `scripts/check-*.ts` + `scripts/lib/*`。

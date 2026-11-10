@@ -43,6 +43,5 @@ export async function createLocalContext(path = LOCAL_DB_PATH): Promise<AppConte
     mediaUrls: createMediaUrlResolver(
       process.env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com",
     ),
-    ai: null,
   };
 }

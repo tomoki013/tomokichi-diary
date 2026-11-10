@@ -1,9 +1,9 @@
 import { OAuthAuthorizationServer, OAuthResourceServer } from "@cloudflare/workers-oauth-provider";
 import { createMcpHandler } from "agents/mcp/server";
-import { createOperatorClient } from "../operator/client.js";
-import { createOperatorServer } from "../operator/server.js";
 import type { D1Like } from "@tomokichi/infra-d1";
-import { createMcpAudit } from "./audit.js";
+import { clientIdDigest, toolNameFromRequest } from "./request-context.js";
+import { createOperatorServer } from "./operator-server.js";
+import { operationCaller } from "./tools.js";
 import {
   CONSENT_ORIGIN,
   LEGACY_CONSENT_ORIGIN,
@@ -109,29 +109,6 @@ export const legacyOperatorAuthorization = createOperatorAuthorization(
   LEGACY_CONSENT_ORIGIN,
 );
 
-async function clientIdDigest(clientId: string | undefined): Promise<string | undefined> {
-  if (!clientId) return undefined;
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clientId));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 32);
-}
-
-async function toolNameFromRequest(request: Request): Promise<string | undefined> {
-  try {
-    // MCP names the tool inside the JSON-RPC call; ignore caller-supplied headers.
-    // The SDK validates that name against the server's registered tools.
-    const value = (await request.clone().json()) as {
-      method?: unknown;
-      params?: { name?: unknown };
-    };
-    if (value.method !== "tools/call" || typeof value.params?.name !== "string") return undefined;
-    return /^[A-Za-z0-9_.-]{1,100}$/.test(value.params.name) ? value.params.name : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 function createOperatorResource(
   authorization: typeof operatorAuthorization,
   issuer: string,
@@ -170,39 +147,13 @@ function createOperatorResource(
           operatorWrite: writes,
           ...(toolName ? { mcpToolName: toolName } : {}),
         };
-        const audit = toolName
-          ? createMcpAudit(env.DB, {
-              actorType: "remote-operator",
-              actorSubject: ctx.props.subject,
-              clientId: ctx.auth.clientId ?? ctx.props.clientId,
-              clientName: ctx.props.clientName,
-              clientRedirectHost: ctx.props.clientRedirectHost,
-              clientTrust:
-                ctx.props.clientTrust === "confirmed" || ctx.props.clientTrust === "self-asserted"
-                  ? ctx.props.clientTrust
-                  : "unknown",
-              oauthGrantRef: ctx.props.grantRef,
-            })
-          : undefined;
-        const client = createOperatorClient(
-          { apiUrl: "https://api.tomokichidiary.com", token: "", allowWrites: writes },
-          (input, init) => {
-            const headers = new Headers(init?.headers);
-            headers.set("x-request-id", requestId);
-            headers.set("x-operator-audit-context", JSON.stringify(auditContext));
-            return api.fetch(new Request(input, { ...init, headers }));
-          },
-        );
-        return createMcpHandler(
-          () =>
-            createOperatorServer(client, {
-              readOnly: !writes,
-              ...(audit ? { audit, auditRequestId: requestId } : {}),
-            }),
-          {
-            route: "/operator/mcp",
-          },
-        )(request, env, ctx);
+        const call = operationCaller((req) => api.fetch(req), "https://api.tomokichidiary.com", {
+          "x-request-id": requestId,
+          "x-operator-audit-context": JSON.stringify(auditContext),
+        });
+        return createMcpHandler(() => createOperatorServer(call, writes), {
+          route: "/operator/mcp",
+        })(request, env, ctx);
       },
     },
   });
@@ -254,7 +205,7 @@ export async function operatorConsent(request: Request, env: OperatorEnv): Promi
       `default-src 'none'; style-src 'unsafe-inline'; form-action 'self' ${new URL(info.redirectUri).origin}; frame-ancestors 'none'; base-uri 'none'`,
     );
     return new Response(
-      `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Diary管理操作の接続</title><style>body{font:17px/1.8 system-ui;max-width:640px;padding:32px 20px;margin:auto;color:#24313b;background:#fbfaf7}button{font:inherit;padding:10px 22px;margin:8px;border-radius:8px;border:1px solid #456}button[value=read]{background:#23443b;color:white}p{overflow-wrap:anywhere}</style><h1>非公開の管理操作を接続</h1><p>クライアント名（自己申告）: <strong>${escapeHtml(info.clientName)}</strong><br>client_id: <code>${escapeHtml(info.clientId)}</code><br>認証後の戻り先: <strong>${escapeHtml(info.redirectHost)}</strong>${info.clientDomain ? `<br>client_idのドメイン: ${escapeHtml(info.clientDomain)}（アプリ名は自己申告）` : ""}</p>${info.redirectIsLoopback ? "<p>ローカルアプリが戻り先です。他のローカルプロセスが受信する可能性があります。</p>" : ""}<p>読み取り（operator:read）: 記事・下書き本文・公開状態・分類・写真・広告設定を読めます。</p><p>読み書き（operator:write も）: 下書きの作成と保存、シリーズ・タグ、広告配置とA/Bテストを変更でき、公開する記事のIDや確認語を明示したときだけ公開できます。削除はできません。</p><p>接続の有効期間: 最大30日（アクセストークンは1時間）</p><form method="post" action="${CONSENT_PATH}"><input type="hidden" name="handle" value="${escapeHtml(transaction.handle)}"><button name="decision" value="read">読み取りのみ許可</button><button name="decision" value="write">読み書きを許可</button><button name="decision" value="deny">キャンセル</button></form></html>`,
+      `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Diary管理操作の接続</title><style>body{font:17px/1.8 system-ui;max-width:640px;padding:32px 20px;margin:auto;color:#24313b;background:#fbfaf7}button{font:inherit;padding:10px 22px;margin:8px;border-radius:8px;border:1px solid #456}button[value=read]{background:#23443b;color:white}p{overflow-wrap:anywhere}</style><h1>非公開の管理操作を接続</h1><p>クライアント名（自己申告）: <strong>${escapeHtml(info.clientName)}</strong><br>client_id: <code>${escapeHtml(info.clientId)}</code><br>認証後の戻り先: <strong>${escapeHtml(info.redirectHost)}</strong>${info.clientDomain ? `<br>client_idのドメイン: ${escapeHtml(info.clientDomain)}（アプリ名は自己申告）` : ""}</p>${info.redirectIsLoopback ? "<p>ローカルアプリが戻り先です。他のローカルプロセスが受信する可能性があります。</p>" : ""}<p>読み取り（operator:read）: 記事・下書き本文・公開状態・分類・写真・広告設定・操作ログを読めます。問い合わせは読めません。</p><p>読み書き（operator:write も）: 管理画面でできる操作（記事・日記・シリーズ・ランキング・写真・広告・旅の知識の候補など）を実行でき、公開・取り下げは記事のIDや確認語を明示したときだけ行います。削除、問い合わせ、事実の確認、接続の失効はできません。</p><p>接続の有効期間: 最大30日（アクセストークンは1時間）</p><form method="post" action="${CONSENT_PATH}"><input type="hidden" name="handle" value="${escapeHtml(transaction.handle)}"><button name="decision" value="read">読み取りのみ許可</button><button name="decision" value="write">読み書きを許可</button><button name="decision" value="deny">キャンセル</button></form></html>`,
       { headers },
     );
   }

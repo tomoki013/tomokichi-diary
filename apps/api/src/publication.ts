@@ -1,6 +1,4 @@
-import { Hono } from "hono";
 import { fromD1, type SqlDatabase } from "@tomokichi/infra-d1";
-import type { AppEnv } from "./app.js";
 import type { Env } from "./env.js";
 import type {
   SitePublicationStatus,
@@ -128,17 +126,4 @@ export async function requestPublication(
       .run();
   }
   return publicationStatus(db, true);
-}
-
-export function publicationRoutes(
-  publishSite: (env: Env) => Promise<unknown> = requestPublication,
-) {
-  const routes = new Hono<AppEnv>();
-  routes.get("/", (c) =>
-    publicationStatus(fromD1(c.env.DB), Boolean(c.env.GITHUB_PUBLISH_TOKEN)).then((status) =>
-      c.json(status),
-    ),
-  );
-  routes.post("/retry", (c) => publishSite(c.env).then((status) => c.json(status, 202)));
-  return routes;
 }

@@ -16,8 +16,7 @@ export function createContext(env: Env, requestId: string): AppContext {
     logger: createLogger(requestId),
     storage: createR2Storage(env.MEDIA),
     mediaUrls: createMediaUrlResolver(env.PUBLIC_MEDIA_URL ?? "https://media.tomokichidiary.com"),
-    // No AI provider is configured; every use case must work without one.
-    ai: null,
+
     ...(env.INQUIRY ? { inquiry: createInquiryInbox(env.INQUIRY) } : {}),
     ...(env.MAIL_API_KEY_TOMOKICHI_DIARY && env.CONTACT_MAIL_FROM && env.CONTACT_MAIL_TO
       ? {
