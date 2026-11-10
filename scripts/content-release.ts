@@ -205,6 +205,5 @@ function context() {
     logger: silentLogger,
     storage: createMemoryStorage(),
     mediaUrls: createMediaUrlResolver("https://media.tomokichidiary.com"),
-    ai: null,
   };
 }

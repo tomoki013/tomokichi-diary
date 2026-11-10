@@ -5,7 +5,6 @@ import type {
   LocationDto,
   MediaAssetDto,
   RevisionDto,
-  RouteDto,
 } from "@tomokichi/contracts";
 import type {
   Article,
@@ -14,7 +13,6 @@ import type {
   Location,
   LocationName,
   MediaAsset,
-  Route,
 } from "@tomokichi/domain";
 
 /** Entities never leave the process as-is; these are the wire shapes. */
@@ -134,17 +132,6 @@ export function toMediaAssetDto(
     hashVerified: Boolean(asset.contentSha256),
     slugUrl: publicImageUrl(asset, imageBase),
     thumbnailUrl: thumb && resolve ? resolve(thumb) : null,
-  };
-}
-
-export function toRouteDto(route: Route): RouteDto {
-  return {
-    path: route.path,
-    targetType: route.targetType,
-    targetId: route.targetId,
-    isCanonical: route.isCanonical,
-    redirectTo: route.redirectTo,
-    noindex: route.noindex,
   };
 }
 

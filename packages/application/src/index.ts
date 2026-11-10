@@ -3,7 +3,6 @@ export * from "./context.js";
 export * from "./ports/clock.js";
 export * from "./ports/id-generator.js";
 export * from "./ports/storage.js";
-export * from "./ports/ai.js";
 export * from "./ports/analytics.js";
 export * from "./ports/inquiry.js";
 export * from "./ports/logger.js";
