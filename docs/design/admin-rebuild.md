@@ -150,7 +150,7 @@ MCP に出るかどうかは `kind` と `surface` から機械的に決まる。
 ## 5. 無くすもの
 
 - 旧メッセージ: 画面と `/v1/admin/messages`。`contact_messages` テーブルは残す（消すなら別リリース）。
-- ダッシュボードのタスク・アイデア: 画面、`/v1/admin/dashboard`、`packages/contracts/src/dashboard.ts`。`dashboard_tasks`・`dashboard_ideas` テーブル（migration 0026）は切り替えでは消さない。中のデータが要らないと本人が確認してから、別リリースで drop する。
+- ダッシュボードのタスク・アイデア: 画面、`/v1/admin/dashboard`、`packages/contracts/src/dashboard.ts`。`dashboard_tasks`・`dashboard_ideas` テーブル（migration 0026）は migration 0029 で drop する。
 - URL の管理画面: 画面と `/v1/admin/routes`。`routes` テーブル、公開側の解決、CI の整合性チェック（`pnpm check:routes`）は変えない。URL を動かす必要が出たら migration で行う。
 - `apps/api/src/operator-policy.ts`、`apps/admin/src/lib/api.ts`、`apps/mcp-server/operator/client.ts`。
 
@@ -176,7 +176,7 @@ MCP に出るかどうかは `kind` と `surface` から機械的に決まる。
 1. ~~MCP のツール名~~ → 決定（2026-11-10）: いまの 31 個の名前を残す。仕様に `mcpName` を持たせ、新しく増える操作にも同じ流儀（`動詞_対象`）で付ける。
 2. ~~事実を確認済みにする操作~~ → 決定（2026-11-10）: 確認は管理画面の本人だけ。抽出は MCP 経由に一本化し、API の中の AI による抽出は無くす（§4.1）。
 3. ~~ホーム画面に出す内容~~ → 決定（2026-11-10）: 本人は「0 ベースで使いやすく」と一任。方針は §3.5。画面の実物を見せて確認する。
-4. ~~`dashboard_tasks`・`dashboard_ideas` のデータ~~ → 決定（2026-11-10）: 消してよい（本人は使っておらず、中身は無い見込み）。切り替え後の別リリースで drop する。drop の前に件数を確認し、行があれば本人に見せてから消す。
+4. ~~`dashboard_tasks`・`dashboard_ideas` のデータ~~ → 決定（2026-11-10）: 消してよい（本人は使っておらず、中身は無い見込み）。本人の判断で切り替えと同じリリースで drop する（migration 0029）。消えるのは使われていない2テーブルだけで、旧メッセージの `contact_messages` は過去の問い合わせを含むため残す。
 
 ## 8. この作り直しでやらないこと
 
