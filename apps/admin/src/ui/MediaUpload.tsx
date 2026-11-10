@@ -1,189 +1,86 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { MediaAssetDto } from "@tomokichi/contracts";
-import { describeError } from "../lib/api";
+import { useAction } from "../data/hooks";
 import { IMAGE_ACCEPT, uploadImage } from "../lib/media-upload";
+import { convertImage } from "../lib/media-convert";
+import { Button, Check, TextInput } from "./parts";
 
-type Item = {
-  id: number;
-  file: File;
-  /** Local object URL so the photo shows before it is uploaded. */
-  preview: string;
-  slug: string;
-  state: "queued" | "uploading" | "saved" | "duplicate" | "used" | "cancelled" | "failed";
-  asset?: MediaAssetDto;
-  error?: string;
-};
+const slugFrom = (name: string) =>
+  name
+    .replace(/\.[^.]+$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
-const missingSlug = (item: Item) => !item.slug.trim();
-
-export function MediaUpload({
-  onAsset,
-  disabled = false,
-}: {
-  onAsset: (asset: MediaAssetDto) => void;
-  disabled?: boolean;
-}) {
-  const [items, setItems] = useState<Item[]>([]);
-  const [busy, setBusy] = useState(false);
-  const locked = useRef(false);
-  const counter = useRef(0);
-  const previews = useRef(new Set<string>());
-  useEffect(() => {
-    const urls = previews.current;
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
-  }, []);
-  const patch = (id: number, changes: Partial<Item>) =>
-    setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
-
-  async function run(queue: Item[]): Promise<void> {
-    if (locked.current) return;
-    locked.current = true;
-    setBusy(true);
-    try {
-      for (const item of queue) {
-        patch(item.id, { state: "uploading", error: undefined });
-        try {
-          const result = await uploadImage(item.file, item.slug);
-          patch(item.id, { state: result.duplicate ? "duplicate" : "saved", asset: result.asset });
-          if (!result.duplicate) onAsset(result.asset);
-        } catch (error) {
-          patch(item.id, { state: "failed", error: describeError(error) });
+/**
+ * Adds a photo to the library. The same file twice is found by its hash and
+ * reused. Large photos can be shrunk to WebP in the browser first.
+ */
+export function MediaUpload({ onUploaded }: { onUploaded?: (asset: MediaAssetDto) => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [slug, setSlug] = useState("");
+  const [shrink, setShrink] = useState(true);
+  const { busy, run } = useAction();
+  async function upload() {
+    if (!file) return;
+    const result = await run(
+      "upload",
+      async () => {
+        let body: File = file;
+        if (shrink && file.type !== "image/gif" && file.size > 600 * 1024) {
+          const converted = await convertImage(file, {
+            format: "webp",
+            maxWidth: 2400,
+            quality: 0.85,
+          });
+          body = new File([converted], file.name.replace(/\.[^.]+$/, ".webp"), {
+            type: "image/webp",
+          });
         }
-      }
-    } finally {
-      locked.current = false;
-      setBusy(false);
-    }
+        return uploadImage(body, slug);
+      },
+      { touches: ["media"] },
+    );
+    if (!result) return;
+    setFile(null);
+    setSlug("");
+    onUploaded?.(result.asset);
   }
-
   return (
-    <div className="media-upload">
-      <label className="button">
-        画像を選択
-        <input
-          type="file"
-          accept={IMAGE_ACCEPT}
-          multiple
-          hidden
-          disabled={busy || disabled}
-          onChange={(event) => {
-            const selected: Item[] = [...(event.target.files ?? [])].map((file) => ({
-              id: ++counter.current,
-              file,
-              preview: URL.createObjectURL(file),
-              slug: "",
-              state: "queued",
-            }));
-            event.target.value = "";
-            selected.forEach((item) => previews.current.add(item.preview));
-            setItems((current) => [...current, ...selected]);
-          }}
-        />
-      </label>
-      {items.some((item) => item.state === "queued") && (
-        <button
-          type="button"
-          className="primary"
-          disabled={
-            busy || disabled || items.some((item) => item.state === "queued" && missingSlug(item))
-          }
-          onClick={() => void run(items.filter((item) => item.state === "queued"))}
-        >
-          アップロード
-        </button>
-      )}
-      {items.length > 0 && (
-        <ul className="upload-results" aria-live="polite">
-          {items.map((item) => (
-            <li key={item.id}>
-              <img src={item.asset?.url ?? item.preview} alt="" loading="lazy" />
-              <div className="upload-results__body">
-                <strong>{item.file.name}</strong>
-                {(item.state === "queued" || item.state === "failed") && (
-                  <label className="field">
-                    <span>公開画像Slug（必須）</span>
-                    <input
-                      required
-                      aria-label={`${item.file.name}のSlug`}
-                      placeholder="tokyo-trip"
-                      maxLength={96}
-                      value={item.slug}
-                      disabled={busy || disabled}
-                      onChange={(event) => patch(item.id, { slug: event.target.value })}
-                    />
-                  </label>
-                )}
-                {item.state === "uploading" && <span>アップロード中…</span>}
-                {item.state === "saved" && <span className="ok-line">保存しました</span>}
-                {item.state === "used" && <span className="ok-line">既存画像を選択しました</span>}
-                {item.state === "cancelled" && <span className="muted">キャンセルしました</span>}
-                {item.state === "duplicate" && item.asset && (
-                  <>
-                    <span>この画像はすでにアップロードされています</span>
-                    <span className="muted">
-                      {item.asset.originalName ?? item.asset.slug ?? item.asset.id}
-                    </span>
-                    <div className="row">
-                      <button
-                        type="button"
-                        className="primary"
-                        disabled={disabled}
-                        onClick={() => {
-                          onAsset(item.asset!);
-                          patch(item.id, { state: "used" });
-                        }}
-                      >
-                        既存画像を使用
-                      </button>
-                      <button type="button" onClick={() => patch(item.id, { state: "cancelled" })}>
-                        キャンセル
-                      </button>
-                    </div>
-                  </>
-                )}
-                {item.state === "failed" && (
-                  <>
-                    <span className="form-error">{item.error}</span>
-                    <button
-                      type="button"
-                      disabled={busy || disabled || missingSlug(item)}
-                      onClick={() => void run([item])}
-                    >
-                      再試行
-                    </button>
-                  </>
-                )}
-                {item.state === "queued" && (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => patch(item.id, { state: "cancelled" })}
-                  >
-                    キャンセル
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {items.length > 0 &&
-        !busy &&
-        !items.some((item) => ["duplicate", "queued", "failed"].includes(item.state)) && (
-          <button
-            type="button"
-            className="link"
-            onClick={() => {
-              items.forEach((item) => {
-                URL.revokeObjectURL(item.preview);
-                previews.current.delete(item.preview);
-              });
-              setItems([]);
-            }}
+    <div className="stack">
+      <input
+        type="file"
+        accept={IMAGE_ACCEPT}
+        aria-label="写真ファイル"
+        onChange={(event) => {
+          const picked = event.target.files?.[0] ?? null;
+          setFile(picked);
+          if (picked && !slug) setSlug(slugFrom(picked.name));
+        }}
+      />
+      {file && (
+        <>
+          <TextInput
+            label="公開画像Slug"
+            value={slug}
+            onChange={setSlug}
+            hint="写真の URL になります（英小文字・数字・ハイフン）"
+          />
+          <Check
+            label="大きい写真は WebP に縮めてから上げる"
+            checked={shrink}
+            onChange={setShrink}
+          />
+          <Button
+            kind="primary"
+            busy={busy === "upload"}
+            disabled={!slug.trim()}
+            onClick={() => void upload()}
           >
-            結果を閉じる
-          </button>
-        )}
+            アップロード
+          </Button>
+        </>
+      )}
     </div>
   );
 }

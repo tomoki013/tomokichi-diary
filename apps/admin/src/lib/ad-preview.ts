@@ -1,5 +1,5 @@
 import type { AffiliateOffer, ArticleMonetization } from "@tomokichi/contracts";
-import { adLayoutOf } from "./ad-standard";
+import { adLayoutOf } from "@tomokichi/contracts";
 
 /** What the draft preview needs to stand in for the ads readers will see. */
 export interface AdPreview {

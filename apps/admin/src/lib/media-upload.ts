@@ -1,5 +1,5 @@
 import type { MediaAssetDto } from "@tomokichi/contracts";
-import { api } from "./api";
+import { op, uploadFile } from "../data/client";
 
 export const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif";
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
@@ -16,10 +16,10 @@ export async function uploadImage(
   if (globalThis.crypto?.subtle) {
     const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
     const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-    const found = await api.lookupMedia(hash);
+    const found = await op("media.lookup", { sha256: hash });
     if (found.asset) return { asset: found.asset, duplicate: true };
   }
-  const uploaded = await api.uploadMedia(file, undefined, slug);
+  const uploaded = await uploadFile(file, slug);
   return { asset: uploaded, duplicate: uploaded.duplicate };
 }
 

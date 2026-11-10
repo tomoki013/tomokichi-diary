@@ -50,8 +50,7 @@
     "media:build": "tsx scripts/media-build.ts",
     "media:sync": "tsx scripts/media-sync.ts",
     "media:backfill": "tsx scripts/media-backfill.ts",
-    "media:preview": "tsx scripts/media-ui-preview.ts",
-    "media:verify-ui": "tsx scripts/verify-media-ui.ts"
+    "media:preview": "tsx scripts/media-ui-preview.ts"
   },
   "devDependencies": {
     "@tomokichi/application": "workspace:*",
