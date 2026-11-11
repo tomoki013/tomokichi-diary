@@ -8,6 +8,7 @@ import {
   previousRange,
   shiftDate,
   type AnalyticsDay,
+  type AnalyticsGrain,
   type AnalyticsPeriodCounts,
   type AnalyticsRow,
   type AnalyticsSource,
@@ -111,6 +112,20 @@ export interface ListPage {
   readonly returned: number;
 }
 
+/** The row grains each section is built from; the headline numbers need only the first. */
+function grainsFor(sections: ReadonlySet<DashboardSection>, articleId?: string): AnalyticsGrain[] {
+  const grains = new Set<AnalyticsGrain>([articleId ? "page" : "site"]);
+  const add = (...names: AnalyticsGrain[]) => names.forEach((name) => grains.add(name));
+  if (sections.has("articles") && !articleId) add("page", "experience");
+  if (sections.has("pages")) add("page");
+  if (sections.has("queries")) add("query");
+  if (sections.has("breakdowns"))
+    add("source", "device", "event", "ad_unit", "country", "search_type");
+  if (sections.has("acquisition")) add("entry");
+  if (sections.has("experience") || sections.has("experiments")) add("experience");
+  return [...grains];
+}
+
 const rowKey = (row: AnalyticsRow) =>
   row.grain === "page"
     ? (row.articleId ?? row.path ?? row.key)
@@ -133,7 +148,7 @@ export async function analyticsDashboard(
   };
   const previous = previousRange(range);
   const [days, statuses, counts] = await Promise.all([
-    store.read({ start: previous.start, end: range.end }),
+    store.read({ start: previous.start, end: range.end }, grainsFor(sections, articleId)),
     store.statuses(),
     store.readCounts?.([range, previous]) ?? Promise.resolve([]),
   ]);

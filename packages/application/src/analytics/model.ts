@@ -100,7 +100,12 @@ export interface AnalyticsStore {
     recent: DateRange,
   ): Promise<FactTotalRow[]>;
   readCounts?(ranges: DateRange[]): Promise<AnalyticsPeriodCounts[]>;
-  read(range: DateRange): Promise<AnalyticsDay[]>;
+  /**
+   * The collected days in a range. With `grains`, each day carries only the
+   * rows of those grains (the day itself is still returned, for coverage), so
+   * a caller that wants the headline numbers does not pay for search queries.
+   */
+  read(range: DateRange, grains?: readonly AnalyticsGrain[]): Promise<AnalyticsDay[]>;
   statuses(): Promise<AnalyticsStatus[]>;
 }
 export function validDate(value: string): boolean {
