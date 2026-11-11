@@ -52,6 +52,9 @@ export interface ExperimentCohortDto extends ExperienceCohortDto {
 export interface ArticleReadingDto {
   articleId: string;
   path: string | null;
+  /** The published title and first publication time, when the article still exists. */
+  title?: string | null;
+  publishedAt?: string | null;
   pageViews: number | null;
   measuredViews: number;
   body75Rate: number | null;
@@ -81,6 +84,7 @@ export const ANALYTICS_SECTIONS = [
   "pages",
   "queries",
   "breakdowns",
+  "acquisition",
   "experience",
   "experiments",
 ] as const;
@@ -140,6 +144,19 @@ export interface AnalyticsDashboardDto {
     countries: AnalyticsMetricRowDto[];
     searchTypes: AnalyticsMetricRowDto[];
   };
+  /**
+   * Visits (sessions, counted once on their first day) by channel, referring
+   * host and landing page. `null` when the period was collected before visits
+   * were measured. Channels are few, so they are never cut and come with the
+   * previous period.
+   */
+  acquisition?: {
+    coveredDays: number;
+    channels: AnalyticsMetricRowDto[];
+    channelsPrevious: AnalyticsMetricRowDto[];
+    referrers: AnalyticsMetricRowDto[];
+    landings: AnalyticsMetricRowDto[];
+  } | null;
   /** Distinct GA4 dates with any reader-experience measurement in each interval. */
   readerCoverage?: { currentDays: number; previousDays: number };
   experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
@@ -180,6 +197,7 @@ export function assertAnalyticsDay(value: unknown): void {
         "campaign",
         "experience",
         "ad_unit",
+        "entry",
       ].includes(String(row["grain"])) ||
       typeof row["key"] !== "string" ||
       row["key"].length > 4096 ||
@@ -218,6 +236,10 @@ export function assertAnalyticsDay(value: unknown): void {
       "vitalNeedsImprovement",
       "vitalPoor",
       "linkClicks",
+      "entrances",
+      "engagedEntrances",
+      "entryPageViews",
+      "singlePageEntrances",
       "pendingConversions",
       "confirmedConversions",
     ]) {

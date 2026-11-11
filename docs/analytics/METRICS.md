@@ -1,22 +1,26 @@
 # 指標と限界
 
-| 指標                    | 定義                                                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GA4 PV                  | page_view数。本番の2hostnameを持つpage_locationだけ対象                                                             |
-| 日次users               | user_pseudo_idのdaily DISTINCT。欠損IDは計上不可                                                                    |
-| 日次activeUsers         | is_active_user=trueのdaily DISTINCT                                                                                 |
-| 日次sessions            | 全イベントの(user_pseudo_id,ga_session_id)組DISTINCT。session_startの有無だけに依存しない                           |
-| engagedSessions         | session_engaged=1を持つsession組DISTINCT                                                                            |
-| engagementMs            | engagement_time_msec合計。UXの補助指標で、読了の推定ではない                                                        |
-| 流入元                  | traffic_sourceの初回ユーザー獲得source/medium。セッション流入元とは別                                               |
-| GSC全体click/impression | searchdata_site_impressionをproperty/dayでSUM                                                                       |
-| GSCページ/query         | searchdata_url_impressionをpage/query/dayでSUM。全体に足さない                                                      |
-| CTR                     | SUM(clicks)/SUM(impressions)。分母0はnull                                                                           |
-| 平均順位                | site: SUM(sum_top_position)/SUM(impressions)+1、URL: SUM(sum_position)/SUM(impressions)+1。分母0/position欠損はnull |
-| 前期間比較              | 同じ日数の直前期間。前値0/未取得は増減率null。coverageが違う場合は参考値                                            |
-| AdSense                 | JPYの推定収益、広告表示、広告PV、広告クリック。確定支払ではない                                                     |
-| AdSense RPM/CPC/CTR     | 収益/広告PV*1000、収益/広告click、広告click/広告impression。公式定義から未丸めの合計で計算                          |
-| Affiliate               | providerが報告するpending/confirmed成果・報酬を分離。GA4クリックから成果を推測しない                                |
+| 指標                     | 定義                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| GA4 PV                   | page_view数。本番の2hostnameを持つpage_locationだけ対象                                                                                   |
+| 日次users                | user_pseudo_idのdaily DISTINCT。欠損IDは計上不可                                                                                          |
+| 日次activeUsers          | is_active_user=trueのdaily DISTINCT                                                                                                       |
+| 日次sessions             | 全イベントの(user_pseudo_id,ga_session_id)組DISTINCT。session_startの有無だけに依存しない                                                 |
+| engagedSessions          | session_engaged=1を持つsession組DISTINCT                                                                                                  |
+| engagementMs             | engagement_time_msec合計。UXの補助指標で、読了の推定ではない                                                                              |
+| 流入元                   | traffic_sourceの初回ユーザー獲得source/medium。セッション流入元とは別                                                                     |
+| 訪問（entrances）        | (user_pseudo_id,ga_session_id)組を開始日に1回。日・週・月で足せる。日次sessionsは日をまたぐ訪問を両日に数えるので別の数字                 |
+| 流入経路（channel）      | 訪問の最初のページの参照元ホストとutmから分類。GA4の標準チャネルではない。Google Discoverはorganic_searchに入る（GSCのsearch_typeで分離） |
+| 入口ページ（landing）    | 訪問の最初のイベントのページ。記事のentrancesはその記事から始まった訪問                                                                   |
+| 初回訪問（newEntrances） | ga_session_number=1の訪問。Cookieを消した再訪は初回に数わる                                                                               |
+| GSC全体click/impression  | searchdata_site_impressionをproperty/dayでSUM                                                                                             |
+| GSCページ/query          | searchdata_url_impressionをpage/query/dayでSUM。全体に足さない                                                                            |
+| CTR                      | SUM(clicks)/SUM(impressions)。分母0はnull                                                                                                 |
+| 平均順位                 | site: SUM(sum_top_position)/SUM(impressions)+1、URL: SUM(sum_position)/SUM(impressions)+1。分母0/position欠損はnull                       |
+| 前期間比較               | 同じ日数の直前期間。前値0/未取得は増減率null。coverageが違う場合は参考値                                                                  |
+| AdSense                  | JPYの推定収益、広告表示、広告PV、広告クリック。確定支払ではない                                                                           |
+| AdSense RPM/CPC/CTR      | 収益/広告PV*1000、収益/広告click、広告click/広告impression。公式定義から未丸めの合計で計算                                                |
+| Affiliate                | providerが報告するpending/confirmed成果・報酬を分離。GA4クリックから成果を推測しない                                                      |
 
 日次distinct users/sessionsは日をまたいで合計できない。概要の期間ユーザー/sessionは別のbounded queryで期間全体の組DISTINCTを計算し、analytics_period_countsへ数値だけ保存する。7/28/90日・月間・前期間・完了済み週/月を日次収集時に更新。任意93日以内は「期間人数を集計」で独立Actionsから取得できる。日次値の足し算や平均で期間uniqueを代用しない。期間cacheが日次集計より古い場合は—。export未取得日がある場合は取得済み日だけの値として人数カードに取得日数を明記する。生の識別子をD1へ持ち込まない。
 

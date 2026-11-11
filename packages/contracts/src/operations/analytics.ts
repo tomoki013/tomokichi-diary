@@ -1,4 +1,8 @@
-import { ANALYTICS_SECTIONS, type AnalyticsDashboardDto } from "../analytics.js";
+import {
+  ANALYTICS_SECTIONS,
+  type AnalyticsDashboardDto,
+  type AnalyticsListPageDto,
+} from "../analytics.js";
 import { v } from "../validation.js";
 import { plainDate } from "./fields.js";
 import { operation } from "./spec.js";
@@ -30,6 +34,47 @@ export interface AnalyticsDashboardResultDto {
   readonly timeZone: "Asia/Tokyo";
   readonly dashboard: AnalyticsDashboardDto;
 }
+export const TREND_GRAINS = ["site", "channel", "article", "search_type"] as const;
+export interface AnalyticsTrendSeriesDto {
+  /** "" for the site, a channel name, a search type or an article id. */
+  readonly key: string;
+  /** For articles: the published title, path and first publication time. */
+  readonly title?: string | null;
+  readonly path?: string | null;
+  readonly publishedAt?: string | null;
+  /** Sums over the two halves in `compared`, to rank what fell or grew. */
+  readonly compared?: {
+    readonly pageViews: { readonly earlier: number | null; readonly recent: number | null };
+    readonly clicks: { readonly earlier: number | null; readonly recent: number | null };
+  };
+  /** One array per metric, aligned with `buckets`. null = not collected, never 0. */
+  readonly values: Readonly<Record<string, readonly (number | null)[]>>;
+}
+export interface AnalyticsTrendResultDto {
+  readonly generatedAt: string;
+  readonly range: AnalyticsRangeDto;
+  readonly bucket: "week" | "month";
+  readonly by: (typeof TREND_GRAINS)[number];
+  /** `complete` is false when the range cuts the week or month short. */
+  readonly buckets: readonly {
+    readonly start: string;
+    readonly end: string;
+    readonly days: number;
+    readonly complete: boolean;
+  }[];
+  /** Collected days per source in each bucket; fewer than `days` means a gap, not a fall. */
+  readonly coverage: readonly { readonly source: string; readonly days: readonly number[] }[];
+  readonly compared: {
+    readonly earlier: AnalyticsRangeDto;
+    readonly recent: AnalyticsRangeDto;
+  } | null;
+  readonly series: readonly AnalyticsTrendSeriesDto[];
+  readonly list: AnalyticsListPageDto | null;
+  /** Site only: articles first published in each bucket (Japan time). */
+  readonly published?: readonly number[];
+  readonly notes: readonly string[];
+}
+
 /** One saved report, without its contents (read them with analytics.report). */
 export interface SavedReportDto {
   readonly period: "weekly" | "monthly";
@@ -86,8 +131,44 @@ export const analyticsOperations = {
       ...shape,
     }),
     description:
-      "分析の根拠を詳しく調べるときに使います。両日を含む93日以内の期間、任意の記事IDについて流入・検索・広告収益・読書体験・取得状況・前期間比較を返します。sections で必要な部分だけに絞れます。記事を指定すると scope が article になり、検索は gsc_url に入って gsc_site は null です。生の訪問者ID、秘密、問い合わせは返しません。",
+      "分析の根拠を詳しく調べるときに使います。両日を含む93日以内の期間、任意の記事IDについて流入・検索・広告収益・読書体験・取得状況・前期間比較を返します。acquisition は訪問を流入経路（検索・AI・SNS・直接など）・参照元・入口ページ別に分けたものです。sections で必要な部分だけに絞れます。記事を指定すると scope が article になり、検索は gsc_url に入って gsc_site は null です。生の訪問者ID、秘密、問い合わせは返しません。",
     tool: { name: "get_analytics_dashboard", title: "期間・記事別の非公開集計" },
+    target,
+  }),
+  "analytics.trend": operation<AnalyticsTrendResultDto>()({
+    kind: "read",
+    surface: "analytics",
+    input: v.object({
+      start: plainDate,
+      end: plainDate,
+      bucket: v.describe(
+        v.maybe(v.literalUnion(["week", "month"] as const)),
+        "週（月曜始まり）か月でまとめる。省略時は week",
+      ),
+      by: v.describe(
+        v.maybe(v.literalUnion(TREND_GRAINS)),
+        "何ごとの推移か。site（全体）・channel（流入経路）・article（記事）・search_type（Google の web/discover/image など）。省略時は site",
+      ),
+      key: v.describe(
+        v.maybe(v.string({ min: 1, max: 100, pattern: /^[A-Za-z0-9_-]{1,100}$/ })),
+        "1本だけ見るときの記事ID・経路名・検索種別",
+      ),
+      sort: v.describe(
+        v.maybe(v.literalUnion(["total", "decline", "growth"] as const)),
+        "並び順。total は期間合計、decline は落ち幅の大きい順、growth は伸び幅の大きい順（compared の前半と後半の差）。省略時は total",
+      ),
+      limit: v.describe(
+        v.maybe(v.number({ min: 1, max: 100, integer: true })),
+        "返す本数（記事・経路）。省略時は20",
+      ),
+      offset: v.describe(
+        v.maybe(v.number({ min: 0, max: 10000, integer: true })),
+        "何本目から返すか",
+      ),
+    }),
+    description:
+      "長い目で増減を見るときに使います。最長800日を週または月にまとめ、全体・流入経路別・記事別・検索種別の PV・訪問（入口）・検索クリック/表示/順位・推定収益の推移を返します。下がっているのがどの経路・どの記事かを sort: decline で探せます。値は buckets と同じ並びの配列で、未取得は null（0 ではない）。coverage の日数が少ない週は欠けであって減少ではありません。人数（ユーザー）は日をまたいで足せないのでここには無く、get_analytics_dashboard で読みます。",
+    tool: { name: "get_analytics_trend", title: "長期の推移（週・月）" },
     target,
   }),
   "analytics.savedReports": operation<{ items: readonly SavedReportDto[] }>()({

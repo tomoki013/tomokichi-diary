@@ -1,3 +1,4 @@
+import { acquisition } from "./acquisition.js";
 import { articleReading } from "./articles.js";
 import { experienceSummary } from "./experience.js";
 import {
@@ -86,6 +87,7 @@ export const DASHBOARD_SECTIONS = [
   "pages",
   "queries",
   "breakdowns",
+  "acquisition",
   "experience",
   "experiments",
 ] as const;
@@ -223,6 +225,16 @@ export async function analyticsDashboard(
       countries: page("breakdowns.countries", group("country", "gsc_site")),
       searchTypes: page("breakdowns.searchTypes", group("search_type", "gsc_site")),
     };
+  if (sections.has("acquisition")) {
+    const now = acquisition(days, range, articleId);
+    result["acquisition"] = now && {
+      coveredDays: now.coveredDays,
+      channels: now.channels,
+      channelsPrevious: acquisition(days, previous, articleId)?.channels ?? [],
+      referrers: page("acquisition.referrers", now.referrers),
+      landings: page("acquisition.landings", now.landings),
+    };
+  }
   if (sections.has("experience")) {
     result["readerCoverage"] = { currentDays: coverage(range), previousDays: coverage(previous) };
     result["experience"] = {
@@ -271,6 +283,13 @@ export interface DashboardResult {
   queries?: AnalyticsRow[];
   queriesPrevious?: AnalyticsRow[];
   breakdowns?: Record<string, AnalyticsRow[]>;
+  acquisition?: {
+    coveredDays: number;
+    channels: AnalyticsRow[];
+    channelsPrevious: AnalyticsRow[];
+    referrers: AnalyticsRow[];
+    landings: AnalyticsRow[];
+  } | null;
   readerCoverage?: { currentDays: number; previousDays: number };
   experience?: Cohorts<ReturnType<typeof experienceSummary>[number]>;
   experiments?: Cohorts<ReturnType<typeof experienceSummary>[number]>;

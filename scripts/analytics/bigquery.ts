@@ -8,6 +8,7 @@ const project = "tomokichidiary-analytics";
 export const SQL_NAMES = [
   "ga4",
   "ga4_experience",
+  "ga4_entry",
   "gsc_site",
   "gsc_url",
   "ga4_available",

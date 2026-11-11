@@ -1,8 +1,11 @@
 import {
   analyticsDashboard,
+  analyticsTrend,
+  bucketStart,
   completedRange,
   dateRange,
   shiftDate,
+  TREND_MAX_DAYS,
   type DashboardSection,
 } from "@tomokichi/application";
 import type { AnalyticsDashboardDto } from "@tomokichi/contracts";
@@ -10,7 +13,50 @@ import { createAnalyticsStore } from "@tomokichi/infra-d1";
 import { OpError, type Handlers, type OpScope } from "../scope.js";
 
 type Names =
-  "analytics.report" | "analytics.dashboard" | "analytics.savedReports" | "analytics.recollect";
+  | "analytics.report"
+  | "analytics.dashboard"
+  | "analytics.trend"
+  | "analytics.savedReports"
+  | "analytics.recollect";
+
+interface ArticleLabel {
+  title: string | null;
+  path: string | null;
+  publishedAt: string | null;
+}
+/** Title, canonical path and first publication time for the given articles. */
+async function articleLabels(scope: OpScope, ids: readonly string[]) {
+  const labels = new Map<string, ArticleLabel>();
+  for (let at = 0; at < ids.length; at += 50) {
+    const part = ids.slice(at, at + 50);
+    const rows = await scope
+      .db()
+      .prepare(
+        `SELECT a.id,a.published_at,r.title,
+           (SELECT path FROM routes WHERE target_type='article' AND target_id=a.id AND is_canonical=1 LIMIT 1) AS path
+         FROM articles a LEFT JOIN article_revisions r ON r.id=a.published_revision_id
+         WHERE a.id IN (${part.map(() => "?").join(",")})`,
+      )
+      .bind(...part)
+      .all<{
+        id: string;
+        published_at: string | null;
+        title: string | null;
+        path: string | null;
+      }>();
+    for (const row of rows)
+      labels.set(row.id, { title: row.title, path: row.path, publishedAt: row.published_at });
+  }
+  return labels;
+}
+
+const TREND_NOTES = [
+  "日付は GA4・Search Console とも米国太平洋時間。日本時間とは16〜17時間ずれる",
+  "entrances は訪問（セッション）を開始日に1回だけ数えたもの。日・週で足せる",
+  "channel の organic_search には Google Discover も入る。Discover だけは by: search_type で分かれる",
+  "記事の entrances はその記事から訪問が始まった回数、pageViews は途中で読まれた分も含む",
+  "直近4日は暫定値。complete が false の週・月は途中までの合計",
+];
 
 function rangeOf(start: string, end: string, maxDays: number, message: string) {
   try {
@@ -26,17 +72,31 @@ interface Shape {
   offset?: number | undefined;
 }
 
-const dashboard = (
+async function dashboard(
   scope: OpScope,
   range: ReturnType<typeof dateRange>,
   articleId: string | undefined,
   { sections, limit, offset }: Shape,
-) =>
-  analyticsDashboard(createAnalyticsStore(scope.db()), range, articleId, {
+) {
+  const result = (await analyticsDashboard(createAnalyticsStore(scope.db()), range, articleId, {
     ...(sections ? { sections } : {}),
     ...(limit !== undefined ? { limit } : {}),
     ...(offset !== undefined ? { offset } : {}),
-  }) as unknown as Promise<AnalyticsDashboardDto>;
+  })) as unknown as AnalyticsDashboardDto;
+  // An id alone tells the reader nothing: name each article and say when it went out.
+  if (result.articles?.length) {
+    const labels = await articleLabels(
+      scope,
+      result.articles.map((row) => row.articleId),
+    );
+    for (const row of result.articles) {
+      const label = labels.get(row.articleId);
+      row.title = label?.title ?? null;
+      row.publishedAt = label?.publishedAt ?? null;
+    }
+  }
+  return result;
+}
 
 /** A completed week (Monday–Sunday) or month starting on `start`, or the latest one. */
 function reportRange(period: "weekly" | "monthly", start: string | undefined) {
@@ -100,6 +160,57 @@ export const analyticsHandlers: Handlers<Names> = {
       shape,
     ),
   }),
+
+  "analytics.trend": async (scope, { start, end, bucket = "week", by = "site", ...rest }) => {
+    const range = rangeOf(
+      start,
+      end,
+      TREND_MAX_DAYS,
+      `期間は実在する日付で${TREND_MAX_DAYS}日以内にしてください`,
+    );
+    const trend = await analyticsTrend(createAnalyticsStore(scope.db()), range, {
+      bucket,
+      by,
+      ...(rest.key !== undefined ? { key: rest.key } : {}),
+      ...(rest.sort !== undefined ? { sort: rest.sort } : {}),
+      ...(rest.limit !== undefined ? { limit: rest.limit } : {}),
+      ...(rest.offset !== undefined ? { offset: rest.offset } : {}),
+    });
+    const labels =
+      by === "article"
+        ? await articleLabels(
+            scope,
+            trend.series.map((line) => line.key),
+          )
+        : null;
+    let published: number[] | undefined;
+    if (by === "site") {
+      // How much was written is the first thing to hold against a fall.
+      const rows = await scope
+        .db()
+        .prepare(
+          "SELECT published_at FROM articles WHERE status='published' AND published_at IS NOT NULL",
+        )
+        .all<{ published_at: string }>();
+      const at = new Map(trend.buckets.map((b, i) => [b.start, i]));
+      published = trend.buckets.map(() => 0);
+      for (const row of rows) {
+        const time = Date.parse(row.published_at);
+        if (!Number.isFinite(time)) continue;
+        const day = new Date(time).toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+        if (day < range.start || day > range.end) continue;
+        const slot = at.get(bucketStart(day, bucket));
+        if (slot !== undefined) published[slot]! += 1;
+      }
+    }
+    return {
+      generatedAt: new Date().toISOString(),
+      ...trend,
+      series: trend.series.map((line) => ({ ...line, ...labels?.get(line.key) })),
+      ...(published ? { published } : {}),
+      notes: TREND_NOTES,
+    };
+  },
 
   // Only which reports exist: their contents are read one at a time, by period.
   "analytics.savedReports": async (scope) => {
