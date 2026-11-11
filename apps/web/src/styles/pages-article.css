@@ -174,105 +174,6 @@
     margin-top: 0.25rem;
   }
 
-  /* Story trail: onward by feeling and by place ----------------------- */
-  .story-trail {
-    padding-top: var(--band);
-    border-top: 1px solid var(--line);
-  }
-
-  .story-trail h2 {
-    margin-bottom: var(--space-md);
-    font-size: var(--step-h2);
-  }
-
-  .story-trail__rails {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    gap: var(--space-md);
-  }
-
-  .story-rail {
-    display: grid;
-    align-content: start;
-    gap: 0.7rem;
-    padding: var(--space-md);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .story-rail header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.2rem 0.7rem;
-  }
-
-  .story-rail h3 {
-    font-size: 1.08rem;
-  }
-
-  .story-rail__note {
-    color: var(--accent);
-    font-family: var(--font-hand);
-    font-size: var(--step-tiny);
-  }
-
-  .story-rail > ul {
-    display: grid;
-    gap: 0.2rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .story-rail > ul > li {
-    display: grid;
-    grid-template-columns: 4.6rem minmax(0, 1fr);
-    align-items: center;
-    gap: 0.8rem;
-    padding-block: 0.55rem;
-  }
-
-  .story-rail > ul > li + li {
-    border-top: 1px dashed var(--line-mid);
-  }
-
-  .story-rail__thumb img {
-    width: 4.6rem;
-    aspect-ratio: 1;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-  }
-
-  .story-rail > ul > li > div {
-    display: grid;
-    gap: 0.3rem;
-    min-width: 0;
-  }
-
-  .story-rail__title {
-    color: var(--ink);
-    font-size: var(--step-small);
-    line-height: 1.6;
-    text-decoration: none;
-  }
-
-  .story-rail__title:hover {
-    color: var(--accent-strong);
-    text-decoration: underline;
-  }
-
-  .story-rail__more {
-    justify-self: end;
-    font-size: var(--step-tiny);
-    text-decoration: none;
-  }
-
-  .story-rail__more:hover {
-    text-decoration: underline;
-  }
-
   .article-intro > p {
     color: var(--ink-soft);
     font-size: var(--step-small);
@@ -329,101 +230,47 @@
     color: var(--accent-strong);
   }
 
-  .article-endnote {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    margin-top: var(--band-tight);
-    padding: var(--space-md);
-    border-radius: var(--radius-lg);
-    background: var(--surface-alt);
+  /* After the related list: the furniture every blog has -------------- */
+  .article-onward {
+    margin-top: var(--space-lg);
   }
 
-  .article-endnote strong {
-    display: block;
-    font-family: var(--font-serif);
-    font-size: 1.02rem;
+  .article-onward h2 {
+    margin-bottom: var(--space-xs);
+    font-size: var(--step-h3);
   }
 
-  .article-endnote p {
-    margin-top: 0.2rem;
-    color: var(--ink-soft);
-    font-size: var(--step-small);
+  .article-onward ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .article-share {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    margin-top: var(--space-md);
-    padding-block: var(--space-md);
-    border-block: 1px solid var(--line);
+  .article-onward li + li {
+    border-top: 1px solid var(--line);
   }
 
-  .article-share__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .article-share small {
-    display: block;
-    color: var(--accent);
-    font-family: var(--font-label);
-    font-size: 0.62rem;
-    letter-spacing: 0.16em;
-  }
-
-  .article-share strong {
-    font-family: var(--font-serif);
-    font-size: 1.02rem;
-  }
-
-  .post-navigation {
+  .article-onward li > a {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-sm);
-    margin-top: var(--space-md);
-  }
-
-  .post-navigation__card {
-    display: grid;
-    gap: 0.3rem;
-    padding: var(--space-sm);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 5.5rem;
+    padding-block: 0.5rem;
     color: var(--ink);
     text-decoration: none;
-    transition:
-      border-color var(--speed) var(--ease),
-      box-shadow var(--speed) var(--ease);
   }
 
-  .post-navigation__card:hover {
-    border-color: var(--accent-line);
-    box-shadow: var(--shadow-sm);
+  .article-onward :is(img, .article-onward__blank) {
+    display: block;
+    width: 4.5rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    object-fit: cover;
   }
 
-  .post-navigation__card span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: var(--ink-faint);
-    font-family: var(--font-label);
-    font-size: var(--step-tiny);
-  }
-
-  .post-navigation__card svg {
-    width: 0.85rem;
-    height: 0.85rem;
-  }
-
-  .post-navigation__card strong {
+  .article-onward strong {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -432,6 +279,106 @@
     font-size: var(--step-small);
     font-weight: 600;
     line-height: 1.6;
+  }
+
+  .article-onward li > a:hover strong {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .article-onward__more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    margin-top: var(--space-xs);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--line);
+    font-size: var(--step-tiny);
+  }
+
+  .article-onward__more a {
+    text-decoration: none;
+  }
+
+  .article-onward__more a::after {
+    content: " →";
+  }
+
+  .article-after {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--line);
+  }
+
+  .article-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* Three buttons on one phone-width row. */
+  .article-actions :is(.like-button, .share-button) {
+    flex: 0 1 auto;
+    min-height: 2rem;
+    padding: 0.2rem 0.55rem;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .article-actions svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  /* Two columns at every width, so the pair costs one short row. */
+  .post-navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .post-navigation__card {
+    display: grid;
+    align-content: start;
+    gap: 0.15rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .post-navigation__card:hover strong {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .post-navigation__card span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--ink-faint);
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+  }
+
+  .post-navigation__card svg {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+
+  .post-navigation__card strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: var(--step-tiny);
+    font-weight: 500;
+    line-height: 1.5;
   }
 
   .post-navigation__card--next {
@@ -483,25 +430,7 @@
     text-decoration: none;
   }
 
-  .article-related {
-    padding-top: var(--band);
-    border-top: 1px solid var(--line);
-  }
-
-  .article-related h2 {
-    margin-bottom: var(--space-md);
-    font-size: var(--step-h2);
-  }
-
   /* Inside the article column, right after the story: two cards a row at most. */
-  .article-related--inline {
-    margin-top: var(--space-xl);
-    padding-top: var(--space-lg);
-  }
-
-  .article-related--inline .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  }
 
   /* Trip progress and the next article --------------------------------- */
   .journey-progress {
@@ -1289,15 +1218,6 @@
     }
     .article-content {
       padding-top: var(--space-md);
-    }
-    .post-navigation {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .post-navigation__card--next {
-      text-align: left;
-    }
-    .post-navigation__card--next span {
-      justify-content: flex-start;
     }
     .collection-members li {
       grid-template-columns: 2rem 6rem minmax(0, 1fr);

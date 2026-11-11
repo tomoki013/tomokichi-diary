@@ -20,6 +20,12 @@ export interface ExperienceCohortDto {
   adViewableProxyRate: number | null;
   visibleMsPerView: number | null;
   nextArticleRate: number | null;
+  /**
+   * Taps on to another article by where the link sat: the NEXT card, the
+   * related list, the series pair, the site-wide previous/next, a card in the
+   * body, and "none" for taps recorded before areas were.
+   */
+  nextArticleAreas?: Record<string, number>;
   shareActionRate: number | null;
   likeActionRate: number | null;
   vitals: {

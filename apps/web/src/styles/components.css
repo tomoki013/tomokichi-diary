@@ -1137,7 +1137,7 @@
   [data-read]
     :is(
       .card__title,
-      .story-rail__title,
+      .article-onward strong,
       .internal-link-card__copy strong,
       .post-navigation__card strong
     )::before {
