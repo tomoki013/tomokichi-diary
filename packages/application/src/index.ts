@@ -27,6 +27,8 @@ export * from "./use-cases/knowledge/manage-knowledge.js";
 export * from "./use-cases/articles/publish-due-articles.js";
 export * from "./analytics/model.js";
 export * from "./analytics/dashboard.js";
+export * from "./analytics/acquisition.js";
+export * from "./analytics/trend.js";
 
 export * from "./ports/monetization.js";
 export * from "./use-cases/monetization/manage-monetization.js";

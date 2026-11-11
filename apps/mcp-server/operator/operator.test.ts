@@ -90,6 +90,7 @@ describe("tool list", () => {
     expect(toolsFor("analytics", true).map(([, spec]) => spec.tool!.name)).toEqual([
       "get_analytics_report",
       "get_analytics_dashboard",
+      "get_analytics_trend",
       "list_analytics_reports",
     ]);
   });

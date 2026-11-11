@@ -25,9 +25,9 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 
 ## ツール
 
-3つとも返答の形は同じ考え方にそろえている（2026-11-11）。
+`get_analytics_report` と `get_analytics_dashboard` は返答の形を同じ考え方にそろえている（2026-11-11）。
 
-- 主要指標（`current`・`previous`）と取得状況（`statuses`）は常に返す。それ以外は `sections` で選ぶ（`daily`・`articles`・`pages`・`queries`・`breakdowns`・`experience`・`experiments`）。省略時は `experiments` 以外すべて。主要指標だけなら `sections: []`。
+- 主要指標（`current`・`previous`）と取得状況（`statuses`）は常に返す。それ以外は `sections` で選ぶ（`daily`・`articles`・`pages`・`queries`・`breakdowns`・`acquisition`・`experience`・`experiments`）。省略時は `experiments` 以外すべて。主要指標だけなら `sections: []`。
 - 一覧（記事・ページ・検索クエリ・内訳・実験）は `limit`（省略時20、最大100）件まで。切れたかどうかは `lists` の `total`・`offset`・`returned` で分かり、続きは `offset` で読む。前期間の一覧（`pagesPrevious`・`queriesPrevious`・`experiments.previous`）は、返した当期の行と同じものだけ。
 - データの無い取得元・日は `null`。`{}` や 0 では表さない。
 - 記事を指定すると `scope` が `article` になり、検索は `gsc_url` に入って `gsc_site` は `null`。
@@ -36,6 +36,10 @@ ChatGPTの個人用カスタムMCP接続で集計を読み、チャットまた�
 `get_analytics_report({period:"weekly"|"monthly", start?, sections?, limit?, offset?, includeSnapshot?})`: JSTで完了した週（月〜日）/月の最新集計（`dashboard`）と前期間比較。`start` で過去の週（月曜日）・月（1日）を選ぶ。期間終了時に保存したレポートは `snapshot` に状態と保存日時だけ入り、中身は `includeSnapshot: true` のときだけ返す（後追いの修正を確かめるとき）。
 
 `get_analytics_dashboard({start,end,articleId?, sections?, limit?, offset?})`: 両日を含む93日以内の集計と前期間。日次人数の和を期間unique人数として扱わない。取れていない収益や体験測定を0へ補完しない。
+
+`get_analytics_trend({start,end,bucket?,by?,key?,sort?,limit?,offset?})`: 最長800日を週（月曜始まり）または月にまとめた推移。`by` は site（全体）・channel（流入経路）・article（記事）・search_type（web/discover/image など）。値は `buckets` と同じ並びの配列で、PV・訪問（entrances）・初回訪問・検索クリック/表示/CTR/順位・推定収益。`coverage` は各週に取得できた日数で、少ない週は欠けであって減少ではない。`sort: "decline"` で、直近半分と手前半分（`compared`）を比べて落ちた順に並ぶ。site では `published` にその週に公開した記事数が入る。人数は足せないので含まない。
+
+`get_analytics_dashboard` の `sections` に `acquisition` を足した。期間内の訪問を流入経路（前期間つき）・参照元ホスト・入口ページ別に返す。記事を指定するとその記事から始まった訪問だけ。測り始める前の期間は `null`。`articles` の各行には記事名（`title`）と公開日時（`publishedAt`）が付く。
 
 `list_analytics_reports`: 保存済みの週次・月次レポートの期間と保存日時を新しい順に12件。中身は `get_analytics_report` に `period` と `start` を渡して読む。
 

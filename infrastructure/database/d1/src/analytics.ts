@@ -1,4 +1,4 @@
-import { dateRange, shiftDate } from "@tomokichi/application";
+import { dateRange, factsOf, shiftDate, TREND_MAX_DAYS } from "@tomokichi/application";
 import type {
   AnalyticsDay,
   AnalyticsPeriodCounts,
@@ -6,11 +6,57 @@ import type {
   AnalyticsStatus,
   AnalyticsStore,
   DateRange,
+  FactSeriesRow,
+  FactTotalRow,
 } from "@tomokichi/application";
 import type { SqlDatabase } from "./sql.js";
 
+const part = (column: string) => `SUM(CASE WHEN date BETWEEN ? AND ? THEN ${column} END)`;
+const FACT_SUMS = `SUM(page_views) AS pageViews,SUM(entrances) AS entrances,SUM(engaged_entrances) AS engagedEntrances,
+  SUM(new_entrances) AS newEntrances,SUM(clicks) AS clicks,SUM(impressions) AS impressions,
+  SUM(position_sum) AS positionSum,SUM(earnings_jpy) AS earningsJPY`;
+
 export function createAnalyticsStore(db: SqlDatabase): AnalyticsStore {
   return {
+    factSeries: async (grain, range, bucket, keys) => {
+      dateRange(range.start, range.end, TREND_MAX_DAYS);
+      if (keys && !keys.length) return [];
+      const start =
+        bucket === "week" ? "date(date,'weekday 0','-6 days')" : "substr(date,1,7)||'-01'";
+      return db
+        .prepare(
+          `SELECT source,key,${start} AS bucket,COUNT(*) AS days,${FACT_SUMS}
+           FROM analytics_facts WHERE grain=? AND date BETWEEN ? AND ?
+           ${keys ? `AND key IN (${keys.map(() => "?").join(",")})` : ""}
+           GROUP BY source,key,bucket ORDER BY bucket`,
+        )
+        .bind(grain, range.start, range.end, ...(keys ?? []))
+        .all<FactSeriesRow>();
+    },
+    factTotals: async (grain, range, earlier, recent) => {
+      dateRange(range.start, range.end, TREND_MAX_DAYS);
+      return db
+        .prepare(
+          `SELECT key,SUM(page_views) AS pageViews,SUM(clicks) AS clicks,SUM(entrances) AS entrances,
+             ${part("page_views")} AS recentPageViews,${part("clicks")} AS recentClicks,
+             ${part("page_views")} AS earlierPageViews,${part("clicks")} AS earlierClicks
+           FROM analytics_facts WHERE grain=? AND date BETWEEN ? AND ? GROUP BY key`,
+        )
+        .bind(
+          recent.start,
+          recent.end,
+          recent.start,
+          recent.end,
+          earlier.start,
+          earlier.end,
+          earlier.start,
+          earlier.end,
+          grain,
+          range.start,
+          range.end,
+        )
+        .all<FactTotalRow>();
+    },
     readCounts: async (ranges) => {
       const rows = await db
         .prepare(
@@ -80,6 +126,18 @@ export function analyticsReplacement(
     ...days.map((day) => ({
       sql: "INSERT INTO analytics_days(source,date,payload) VALUES (?,?,?)",
       params: [source, day.date, JSON.stringify(day)],
+    })),
+    // The same day again as compact lines for the long-range trend.
+    ...days.map((day) => ({
+      sql: "DELETE FROM analytics_facts WHERE source = ? AND date = ?",
+      params: [source, day.date],
+    })),
+    ...days.map((day) => ({
+      sql: `INSERT INTO analytics_facts(date,source,grain,key,page_views,entrances,engaged_entrances,new_entrances,clicks,impressions,position_sum,earnings_jpy)
+      SELECT ?,?,json_extract(value,'$.grain'),json_extract(value,'$.key'),json_extract(value,'$.pageViews'),json_extract(value,'$.entrances'),
+        json_extract(value,'$.engagedEntrances'),json_extract(value,'$.newEntrances'),json_extract(value,'$.clicks'),json_extract(value,'$.impressions'),
+        json_extract(value,'$.positionSum'),json_extract(value,'$.earningsJPY') FROM json_each(?)`,
+      params: [day.date, source, JSON.stringify(factsOf(day))],
     })),
     {
       sql: `INSERT INTO analytics_status(source,attempted_at,succeeded_at,latest_date,range_start,range_end,error) VALUES(?,?,?,?,?,?,NULL)

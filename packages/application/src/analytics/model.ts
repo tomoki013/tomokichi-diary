@@ -13,7 +13,13 @@ export type AnalyticsGrain =
   | "event"
   | "campaign"
   | "experience"
-  | "ad_unit";
+  | "ad_unit"
+  /** Stored: visits by referrer, utm and new/returning, with the landing page as path. */
+  | "entry"
+  /** Derived from entry rows when read; never stored. */
+  | "channel"
+  | "referrer"
+  | "landing";
 export interface AnalyticsRow {
   grain: AnalyticsGrain;
   key: string;
@@ -47,7 +53,52 @@ export interface AnalyticsPeriodCounts extends DateRange {
   expectedDays: number;
   metrics: Record<string, number>;
 }
+export type TrendBucket = "week" | "month";
+export type TrendGrain = "site" | "channel" | "article" | "search_type";
+/** Sums from the trend table. Every number is null when nothing was collected for it. */
+export interface FactSums {
+  pageViews: number | null;
+  entrances: number | null;
+  engagedEntrances: number | null;
+  newEntrances: number | null;
+  clicks: number | null;
+  impressions: number | null;
+  positionSum: number | null;
+  earningsJPY: number | null;
+}
+export interface FactSeriesRow extends FactSums {
+  source: AnalyticsSource;
+  key: string;
+  /** First day of the week (Monday) or month. */
+  bucket: string;
+  /** Days in the bucket that have a line for this key. */
+  days: number;
+}
+export interface FactTotalRow {
+  key: string;
+  pageViews: number | null;
+  clicks: number | null;
+  entrances: number | null;
+  recentPageViews: number | null;
+  recentClicks: number | null;
+  earlierPageViews: number | null;
+  earlierClicks: number | null;
+}
 export interface AnalyticsStore {
+  /** Bucketed sums for one grain; `keys` narrows to those lines. */
+  factSeries?(
+    grain: TrendGrain,
+    range: DateRange,
+    bucket: TrendBucket,
+    keys?: readonly string[],
+  ): Promise<FactSeriesRow[]>;
+  /** Whole-range totals per key, and the same for the two halves being compared. */
+  factTotals?(
+    grain: TrendGrain,
+    range: DateRange,
+    earlier: DateRange,
+    recent: DateRange,
+  ): Promise<FactTotalRow[]>;
   readCounts?(ranges: DateRange[]): Promise<AnalyticsPeriodCounts[]>;
   read(range: DateRange): Promise<AnalyticsDay[]>;
   statuses(): Promise<AnalyticsStatus[]>;
