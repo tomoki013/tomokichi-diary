@@ -27,7 +27,8 @@ WITH events AS (
       OR (STARTS_WITH(measurement,'ad_') AND placement IN ('article_end','body_slot') AND vital='none' AND value=1)
       OR (measurement='web_vital' AND placement='none' AND vital IN ('CLS','LCP','INP') AND value BETWEEN 0 AND IF(vital='CLS',100,600000))
       OR (measurement='visible_time' AND placement='none' AND vital='none' AND value BETWEEN 0 AND 1800000)
-      OR (measurement IN ('experiment_assignment','article_view','body_25','body_50','body_75','body_90','body_end','next_article','share_action','like_action') AND placement='none' AND vital='none' AND value=1))
+      OR (measurement='next_article' AND placement IN ('none','nav_next','nav_related','nav_series','nav_adjacent','nav_body') AND vital='none' AND value=1)
+      OR (measurement IN ('experiment_assignment','article_view','body_25','body_50','body_75','body_90','body_end','share_action','like_action') AND placement='none' AND vital='none' AND value=1))
 )
 SELECT CAST(date AS STRING) AS date, 'experience' AS grain,
   TO_JSON_STRING(STRUCT(layout,device,measurement,placement,vital,experimentId,variant,placementKey)) AS key, path,

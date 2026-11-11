@@ -154,6 +154,12 @@ export function experienceSummary(
         adViewableProxyRate: ratio(count("ad_viewable_proxy"), filled),
         visibleMsPerView: ratio(sum("visible_time")["valueSum"] ?? 0, views),
         nextArticleRate: ratio(count("next_article"), views),
+        // Which link took the reader on; "none" is from before areas were recorded.
+        nextArticleAreas: Object.fromEntries(
+          ["nav_next", "nav_related", "nav_series", "nav_adjacent", "nav_body", "none"].map(
+            (area) => [area, count("next_article", area)],
+          ),
+        ),
         shareActionRate: ratio(count("share_action"), views),
         likeActionRate: ratio(count("like_action"), views),
         vitals: ["LCP", "INP", "CLS"].map((vital) => {

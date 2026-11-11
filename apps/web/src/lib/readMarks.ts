@@ -36,7 +36,7 @@ export function decorateReadLinks(root: ParentNode = document): void {
     const path = normalise(new URL(link.href).pathname);
     if (path === here || !paths.has(path)) continue;
     link
-      .closest(".card, .internal-link-card, .story-rail li, .post-navigation__card")
+      .closest(".card, .internal-link-card, .article-onward li, .post-navigation__card")
       ?.setAttribute("data-read", "");
   }
 }

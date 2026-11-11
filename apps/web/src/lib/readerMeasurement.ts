@@ -51,18 +51,40 @@ export function measureReader(
  * the next article sends it with the first page's address and test arm.
  */
 const PENDING_NEXT = "tomokichi-next-article";
-function deferNextArticle(): void {
+/** Where on the page a link to another article sits. */
+export const NEXT_AREAS = [
+  "nav_next",
+  "nav_related",
+  "nav_series",
+  "nav_adjacent",
+  "nav_body",
+] as const;
+export type NextArea = (typeof NEXT_AREAS)[number];
+/** The NEXT card, the related list, the series pair, the site-wide pair, or a card in the body. */
+export function nextAreaOf(link: Element): NextArea {
+  if (link.closest(".next-read")) return "nav_next";
+  if (link.closest(".article-onward")) return "nav_related";
+  if (link.closest(".post-navigation--series")) return "nav_series";
+  if (link.closest(".post-navigation")) return "nav_adjacent";
+  return "nav_body";
+}
+function deferNextArticle(area: NextArea): void {
   try {
     sessionStorage.setItem(
       PENDING_NEXT,
-      JSON.stringify({ at: Date.now(), from: location.href, context: measurementContext() }),
+      JSON.stringify({ at: Date.now(), from: location.href, area, context: measurementContext() }),
     );
   } catch {
-    measureReader("next_article");
+    measureReader("next_article", 1, area);
   }
 }
 function sendPendingNextArticle(): void {
-  let note: { at?: number; from?: string; context?: ReturnType<typeof measurementContext> };
+  let note: {
+    at?: number;
+    from?: string;
+    area?: string;
+    context?: ReturnType<typeof measurementContext>;
+  };
   try {
     note = JSON.parse(sessionStorage.getItem(PENDING_NEXT) ?? "null") ?? {};
     sessionStorage.removeItem(PENDING_NEXT);
@@ -76,7 +98,7 @@ function sendPendingNextArticle(): void {
     ...note.context,
     measurement: "next_article",
     value: 1,
-    placement: "none",
+    placement: NEXT_AREAS.find((area) => area === note.area) ?? "none",
     vital: "none",
     page_location: note.from,
   });
@@ -150,17 +172,17 @@ export function mountReaderMeasurement(): void {
   document.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : null;
     const next = target?.closest<HTMLAnchorElement>(
-      ".post-navigation a, .article-related .card > a, .article-related .card__title a, .story-trail .story-rail__title, .story-trail .story-rail__thumb, .internal-link-card a",
+      ".post-navigation a, .article-onward li > a, .internal-link-card a",
     );
     if (next && !sent.has("next_article:none")) {
       const to = new URL(next.href, location.href);
       // Only an article runs this script to send the note; other pages get the old path.
       if (to.origin === location.origin && to.pathname.startsWith("/posts/")) {
         sent.add("next_article:none");
-        deferNextArticle();
-      } else once("next_article");
+        deferNextArticle(nextAreaOf(next));
+      } else once("next_article", nextAreaOf(next));
     }
-    if (target?.closest(".article-share__actions button")) once("share_action");
+    if (target?.closest(".article-actions .share-button")) once("share_action");
     if (target?.closest("[data-like-button]")) once("like_action");
   });
   // The library uses buffered performance entries; no attribution/DOM data is sent.
