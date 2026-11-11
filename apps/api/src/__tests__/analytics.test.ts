@@ -2,8 +2,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import { openInMemoryDatabase } from "@tomokichi/infra-d1/testing";
-import { analyticsReplacement } from "@tomokichi/infra-d1";
-import type { AnalyticsDay } from "@tomokichi/application";
+import { analyticsReplacement, createAnalyticsStore, fromD1 } from "@tomokichi/infra-d1";
+import { analyticsDashboard, type AnalyticsDay } from "@tomokichi/application";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 async function fixture() {
@@ -354,5 +354,77 @@ describe("the long view", () => {
       env,
     );
     expect(res.status).toBe(400);
+  });
+});
+
+describe("reading only what a request needs", () => {
+  async function stores() {
+    const { env, db } = await fixture();
+    seed(db);
+    db.prepare("INSERT INTO analytics_days(source,date,payload) VALUES (?,?,?)").run(
+      "gsc_site",
+      "2026-10-05",
+      JSON.stringify({
+        source: "gsc_site",
+        date: "2026-10-05",
+        retrievedAt: "2026-10-20T00:00:00.000Z",
+        provisional: true,
+        rows: [
+          {
+            grain: "site",
+            key: "",
+            path: null,
+            articleId: null,
+            metrics: { clicks: 4, impressions: 40, positionSum: 80 },
+          },
+          {
+            grain: "country",
+            key: "jpn",
+            path: null,
+            articleId: null,
+            metrics: { clicks: 4, impressions: 40, positionSum: 80 },
+          },
+        ],
+      }),
+    );
+    const narrowed = createAnalyticsStore(fromD1(env.DB as never));
+    // The same store, made to read whole days as it did before.
+    const whole = {
+      ...narrowed,
+      read: (range: { start: string; end: string }) => narrowed.read(range),
+    };
+    return { narrowed, whole };
+  }
+  const week = { start: "2026-10-05", end: "2026-10-11" };
+
+  it("gives a day only the rows of the grains asked for, and still gives the day", async () => {
+    const { narrowed } = await stores();
+    const days = await narrowed.read(week, ["site"]);
+    expect(days).toHaveLength(15);
+    const search = days.find((day) => day.source === "gsc_site")!;
+    expect(search).toMatchObject({ date: "2026-10-05", provisional: true });
+    expect(search.rows.map((row) => row.grain)).toEqual(["site"]);
+    expect(search.rows[0]!.metrics).toEqual({ clicks: 4, impressions: 40, positionSum: 80 });
+    const queries = days.filter((day) => day.source === "gsc_url");
+    expect(queries).toHaveLength(7);
+    expect(queries.every((day) => day.rows.length === 0 && day.provisional === false)).toBe(true);
+  });
+
+  it("answers exactly as a read of whole days does, for every combination asked", async () => {
+    const { narrowed, whole } = await stores();
+    for (const sections of [
+      undefined,
+      [],
+      ["daily"],
+      ["queries", "pages"],
+      ["articles"],
+      ["breakdowns", "acquisition"],
+      ["experience", "experiments"],
+    ] as const) {
+      const options = sections ? { sections } : {};
+      expect(await analyticsDashboard(narrowed, week, undefined, options)).toEqual(
+        await analyticsDashboard(whole, week, undefined, options),
+      );
+    }
   });
 });

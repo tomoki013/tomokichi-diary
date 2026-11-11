@@ -36,6 +36,8 @@ export interface AnalyticsMetricRowDto {
   key: string;
   path: string | null;
   articleId: string | null;
+  /** The article's published title, on landing pages only. */
+  title?: string | null;
   metrics: Record<string, number | null>;
 }
 export interface ExperimentCohortDto extends ExperienceCohortDto {

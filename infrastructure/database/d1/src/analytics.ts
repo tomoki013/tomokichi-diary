@@ -66,16 +66,26 @@ export function createAnalyticsStore(db: SqlDatabase): AnalyticsStore {
         .all<{ payload: string }>();
       return rows.map((row) => JSON.parse(row.payload) as AnalyticsPeriodCounts);
     },
-    read: async (range) => {
+    read: async (range, grains) => {
       dateRange(range.start, range.end, 186);
       const days: AnalyticsDay[] = [];
+      // Asked for some grains only: SQLite picks those rows out of each day,
+      // so the Worker never parses the rest (search queries and reader
+      // measurements are most of a day, and most reads do not need them).
+      const select = grains
+        ? `SELECT json_object('source',d.source,'date',d.date,'retrievedAt',json_extract(d.payload,'$.retrievedAt'),
+             'provisional',json(CASE WHEN json_extract(d.payload,'$.provisional') THEN 'true' ELSE 'false' END),
+             'rows',(SELECT json_group_array(json(j.value)) FROM json_each(d.payload,'$.rows') j
+                     WHERE json_extract(j.value,'$.grain') IN (${grains.map(() => "?").join(",")}))) AS payload
+           FROM analytics_days d WHERE d.date BETWEEN ? AND ? ORDER BY d.date`
+        : "SELECT payload FROM analytics_days WHERE date BETWEEN ? AND ? ORDER BY date";
       // Bound each D1 result to a week of summaries instead of returning
       // months of search-query rows in one oversized database response.
       for (let start = range.start; start <= range.end; start = shiftDate(start, 7)) {
         const end = shiftDate(start, 6) < range.end ? shiftDate(start, 6) : range.end;
         const rows = await db
-          .prepare("SELECT payload FROM analytics_days WHERE date BETWEEN ? AND ? ORDER BY date")
-          .bind(start, end)
+          .prepare(select)
+          .bind(...(grains ?? []), start, end)
           .all<{ payload: string }>();
         days.push(...rows.map((row) => JSON.parse(row.payload) as AnalyticsDay));
       }

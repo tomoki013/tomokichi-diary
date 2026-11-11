@@ -95,6 +95,14 @@ async function dashboard(
       row.publishedAt = label?.publishedAt ?? null;
     }
   }
+  const landings = result.acquisition?.landings.filter((row) => row.articleId);
+  if (landings?.length) {
+    const labels = await articleLabels(
+      scope,
+      landings.map((row) => row.articleId!),
+    );
+    for (const row of landings) row.title = labels.get(row.articleId!)?.title ?? null;
+  }
   return result;
 }
 
