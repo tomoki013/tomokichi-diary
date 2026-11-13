@@ -546,7 +546,7 @@ reply's template picker.
 
 The diary API reaches the platform through the `INQUIRY_OPERATOR` service
 binding to the core Worker's `ProjectOperator` entrypoint (inquiry-platform
-v0.10.0, the release the studio deploys), after this site's own admin gate has let the operator in. The
+v0.12.0, the release the studio deploys), after this site's own admin gate has let the operator in. The
 binding's `props` grant only `tomokichi-diary`: the platform filters every
 list to it and answers any other project's ticket as missing. Nothing is
 configured on the platform's API gateway (`admin.tmkch.io`) or its Access
@@ -600,7 +600,7 @@ summary, body length, a canonical route, and a cover image with alt text.
 
 - `STATUS_PROBE_TOKEN` が未設定、またはトークンが違うときは、存在しないルートと同じ 404 を返す。設定は `wrangler secret put STATUS_PROBE_TOKEN --name tomokichi-diary-api`。同じ値を tomokichi-status の Netlify 環境変数 `STATUS_PROBE_TOKEN_DIARY` に入れる。入れ替えるときは両方を同時に更新する（その間、ステータスは「確認できません」になる）。
 - 読むもの: `INQUIRY_OPERATOR` の `project()`（Core との疎通）と、`TURNSTILE_SECRET_KEY` の有無。チケット・メール・D1 には書き込まない。
-- `mail_delivery` は常に `UNKNOWN`。この初期プローブでは配送キューの集計を実装していないため、Core 疎通だけで配信正常とは判定しない。SDK は現在 v0.10.0。
+- `mail_delivery` は常に `UNKNOWN`。この初期プローブでは配送キューの集計を実装していないため、Core 疎通だけで配信正常とは判定しない。SDK は現在 v0.12.0。
 - レート制限は `STATUS_PROBE_RATE_LIMITER`（namespace 3003、毎分 6 回。既存のいいね制限 3002 と分離）。
 - `inquiry_core: DOWN` のときは、[Inquiry](#api) の `admin_bridge` 系のログと、inquiry-platform の運用文書を見る。
 
