@@ -34,3 +34,4 @@ export * from "./ports/monetization.js";
 export * from "./use-cases/monetization/manage-monetization.js";
 export * from "./use-cases/taxonomy/taxonomy-use-cases.js";
 export * from "./use-cases/rankings/ranking-use-cases.js";
+export * from "./use-cases/search/search-word-use-cases.js";

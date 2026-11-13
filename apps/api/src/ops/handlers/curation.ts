@@ -3,6 +3,7 @@ import {
   createRanking,
   createTag,
   updateCollection,
+  saveSearchWords,
   updateRanking,
   type AppContext,
 } from "@tomokichi/application";
@@ -37,7 +38,9 @@ type Names =
   | "ranking.list"
   | "ranking.get"
   | "ranking.create"
-  | "ranking.update";
+  | "ranking.update"
+  | "search.words"
+  | "search.saveWords";
 
 function count(values: readonly string[]): Map<string, number> {
   const counts = new Map<string, number>();
@@ -316,4 +319,12 @@ export const curationHandlers: Handlers<Names> = {
     );
     return oneRanking(ctx, id);
   },
+
+  "search.words": async ({ ctx }) => ({
+    items: (await ctx.repos.searchWords.listAll()).map(({ word, also }) => ({ word, also })),
+  }),
+
+  "search.saveWords": async ({ ctx }, { words }) => ({
+    items: unwrap(await saveSearchWords(ctx, words)).map(({ word, also }) => ({ word, also })),
+  }),
 };

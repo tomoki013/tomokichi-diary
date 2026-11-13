@@ -11,6 +11,7 @@ import type {
   ArticleCollection,
   Collection,
   Ranking,
+  SearchWord,
   Author,
   Category,
   Location,
@@ -49,6 +50,8 @@ export interface ContentSnapshot {
   readonly collections: readonly Collection[];
   /** Optional so archives written before rankings existed still read. */
   readonly rankings?: readonly Ranking[];
+  /** Search-only readings and spellings; optional so older archives still read. */
+  readonly searchWords?: readonly SearchWord[];
   readonly authors: readonly Author[];
   readonly media: readonly MediaAsset[];
   readonly mediaSlugAliases?: readonly { slug: string; mediaId: string }[];

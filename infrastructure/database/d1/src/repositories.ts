@@ -11,6 +11,7 @@ import type {
   PlaceRepository,
   CollectionRepository,
   RankingRepository,
+  SearchWordRepository,
   ContactMessageRepository,
   RelationRepository,
   Repositories,
@@ -39,6 +40,7 @@ import {
   categoryRow,
   collectionRow,
   rankingRow,
+  searchWordRow,
   contactMessageRow,
   embedRow,
   locationNameRow,
@@ -646,6 +648,18 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  const searchWords: SearchWordRepository = {
+    listAll: async () =>
+      (await all("SELECT * FROM search_words ORDER BY word")).map(searchWordRow.to),
+    // One batch: the list is replaced whole, never left half written.
+    replaceAll: async (words) => {
+      await db.batch([
+        db.prepare("DELETE FROM search_words"),
+        ...words.map((entry) => upsert(db, "search_words", searchWordRow.from(entry), ["word"])),
+      ]);
+    },
+  };
+
   const contactMessages: ContactMessageRepository = {
     save: async (message) => {
       await upsert(db, "contact_messages", contactMessageRow.from(message), ["id"]).run();
@@ -738,6 +752,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     relations,
     collections,
     rankings,
+    searchWords,
     contactMessages,
     authors,
     aiArtifacts,

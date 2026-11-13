@@ -11,6 +11,7 @@ import type {
   ArticleCollection,
   Collection,
   Ranking,
+  SearchWord,
   ContactMessage,
   Author,
   Category,
@@ -622,6 +623,21 @@ export const contactMessageRow = {
     ip_hash: message.ipHash,
     status: message.status,
     created_at: message.createdAt,
+  }),
+};
+
+export const searchWordRow = {
+  to: (row: Row): SearchWord => ({
+    word: str(row, "word"),
+    also: json<unknown[]>(row, "also", []).filter(
+      (item): item is string => typeof item === "string" && item !== "",
+    ),
+    updatedAt: nullableStr(row, "updated_at") as SearchWord["updatedAt"],
+  }),
+  from: (entry: SearchWord): Row => ({
+    word: entry.word,
+    also: JSON.stringify(entry.also),
+    updated_at: entry.updatedAt,
   }),
 };
 

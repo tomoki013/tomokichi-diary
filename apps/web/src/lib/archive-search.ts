@@ -7,13 +7,27 @@
 /**
  * One spelling for text that readers type several ways: full-width and
  * half-width, upper and lower case, hiragana and katakana ("ちゃじー" finds
- * "チャジー"), and the separators in a slug ("france-1" finds "france1").
+ * "チャジー"), small and full-size kana ("ばいえ" finds "バイェ"), and the
+ * separators in a slug ("france-1" finds "france1").
  */
+const SMALL_KANA: Record<string, string> = {
+  ァ: "ア",
+  ィ: "イ",
+  ゥ: "ウ",
+  ェ: "エ",
+  ォ: "オ",
+  ャ: "ヤ",
+  ュ: "ユ",
+  ョ: "ヨ",
+  ッ: "ツ",
+  ヮ: "ワ",
+};
 export function normalizeSearch(text: string): string {
   return text
     .normalize("NFKC")
     .toLocaleLowerCase("ja")
     .replace(/[ぁ-ゖ]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 0x60))
+    .replace(/[ァィゥェォャュョッヮ]/g, (char) => SMALL_KANA[char] ?? char)
     .replace(/[-_/・、。,.!?！？「」『』（）()｜|:：]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -48,4 +62,21 @@ export function matchScore(heading: string, text: string, terms: readonly string
   // naming one article: it leads the others that merely contain each word.
   if (terms.length > 1 && head.includes(terms.join(""))) score += 10;
   return score;
+}
+
+/**
+ * The search-only words an article answers to: every spelling of each entry
+ * that the article mentions in any spelling. `mention` is everything the
+ * article says (title, summary, tags, body). Spaces are ignored, so
+ * "ミラドール・デル・バジェ" in the body is found by "みらどーるでるばいえ".
+ */
+export function searchWordsFor(
+  mention: string,
+  words: readonly { readonly word: string; readonly also: readonly string[] }[],
+): string[] {
+  const said = squeeze(normalizeSearch(mention));
+  return words.flatMap((entry) => {
+    const spellings = [entry.word, ...entry.also].map(normalizeSearch).filter(Boolean);
+    return spellings.some((spelling) => said.includes(squeeze(spelling))) ? spellings : [];
+  });
 }

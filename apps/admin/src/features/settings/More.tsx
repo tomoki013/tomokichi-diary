@@ -14,6 +14,11 @@ export function More() {
         <Row href={href.series()} title="シリーズ・タグ" meta="シリーズ、旅程、タグ" />
         <Row href={href.rankings()} title="ランキング" meta="トップページのともきち的ランキング" />
         <Row
+          href={href.searchWords()}
+          title="検索の別名"
+          meta="読みや別の書き方でも記事が見つかるようにする"
+        />
+        <Row
           href={href.articles("pages")}
           title="固定ページ"
           meta="プライバシーポリシー・利用規約など"

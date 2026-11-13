@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchScore, normalizeSearch, searchTerms } from "../lib/archive-search";
+import { matchScore, normalizeSearch, searchTerms, searchWordsFor } from "../lib/archive-search";
 
 const card = (title: string, slug: string, rest = "") => ({
   heading: normalizeSearch(`${title} ${slug}`),
@@ -55,5 +55,39 @@ describe("archive search", () => {
 
   it("matches everything for an empty query", () => {
     expect(score(france, "  ")).toBeGreaterThan(0);
+  });
+
+  describe("search-only words", () => {
+    const words = [
+      { word: "CHAGEE", also: ["チャジー", "霸王茶姬"] },
+      { word: "Mirador del Valle", also: ["ミラドール・デル・バジェ", "ミラドール・デル・バイェ"] },
+    ];
+    const withWords = (title: string, slug: string, body: string) => {
+      const base = card(title, slug);
+      const extra = searchWordsFor(`${title} ${body}`, words).join(" ");
+      return { heading: base.heading, text: `${base.text} ${extra}` };
+    };
+
+    it("finds an article by a reading it never spells out", () => {
+      const menu = withWords("CHAGEEで頼むならこれ！", "shanghai-chagee-menu", "");
+      expect(score(menu, "ちゃじー")).toBeGreaterThan(0);
+      expect(score(menu, "チャジー おすすめ")).toBe(0);
+      expect(score(menu, "霸王茶姬")).toBeGreaterThan(0);
+    });
+
+    it("finds an article that only mentions the word in its body", () => {
+      const toledo = withWords(
+        "トレドで夜景を見た日",
+        "spain5",
+        "夕方、Mirador del Valle まで歩いた。",
+      );
+      expect(score(toledo, "みらどーるでるばいえ")).toBeGreaterThan(0);
+      expect(score(toledo, "ミラドール デル バジェ")).toBeGreaterThan(0);
+      expect(score(toledo, "ちゃじー")).toBe(0);
+    });
+
+    it("leaves articles that never mention the word alone", () => {
+      expect(searchWordsFor("パリ初日、凱旋門まで歩いた", words)).toEqual([]);
+    });
   });
 });

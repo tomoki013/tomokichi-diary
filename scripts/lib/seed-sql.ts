@@ -10,6 +10,7 @@ import {
   categoryRow,
   collectionRow,
   rankingRow,
+  searchWordRow,
   embedRow,
   locationNameRow,
   locationRow,
@@ -53,6 +54,7 @@ export const SEED_KEYS = {
   tags: ["id"],
   collections: ["id"],
   rankings: ["id"],
+  search_words: ["word"],
   articles: ["id"],
   article_revisions: ["id"],
   article_embeds: ["id"],
@@ -174,6 +176,7 @@ export function buildSeedStatements(snapshot: ContentSnapshot): string[] {
     ...upsert("tags", snapshot.tags.map(tagRow.from)),
     ...upsert("collections", snapshot.collections.map(collectionRow.from)),
     ...upsert("rankings", (snapshot.rankings ?? []).map(rankingRow.from)),
+    ...upsert("search_words", (snapshot.searchWords ?? []).map(searchWordRow.from)),
     ...upsert("articles", snapshot.articles.map(articleRow.from)),
     ...upsert(
       "article_revisions",
