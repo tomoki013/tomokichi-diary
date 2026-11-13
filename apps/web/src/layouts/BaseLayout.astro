@@ -426,6 +426,7 @@ const footerPhoto = {
       </aside>
     </div>
     <script>
+      import { matchScore, searchTerms } from "../lib/archive-search";
       import { decorateReadLinks } from "../lib/readMarks";
       decorateReadLinks();
       const body = document.body;
@@ -447,6 +448,8 @@ const footerPhoto = {
         publishedAt: string;
         categories: string[];
         locations: string[];
+        heading: string;
+        text: string;
       }> | null = null;
       const scrollLocks = new Set<string>();
 
@@ -594,21 +597,24 @@ const footerPhoto = {
 
       const renderGlobalSearch = () => {
         if (!searchInput || !searchResults || !searchStatus) return;
-        const query = searchInput.value.trim().toLocaleLowerCase("ja");
+        const query = searchInput.value.trim();
         searchAll?.setAttribute("href", archiveUrl(query));
         searchResults.replaceChildren();
         if (!query) {
           searchStatus.textContent = "キーワードを入力すると記事候補を表示します。";
           return;
         }
+        // Same rule as the article list: every word must be found, and a hit
+        // in the title or slug comes before one in the summary or tags.
+        const terms = searchTerms(query);
         const matches = (searchRecords ?? [])
-          .filter((record) =>
-            [record.title, record.summary, ...record.categories, ...record.locations]
-              .join(" ")
-              .toLocaleLowerCase("ja")
-              .includes(query),
+          .map((record) => ({ record, score: matchScore(record.heading, record.text, terms) }))
+          .filter((entry) => entry.score > 0)
+          .toSorted(
+            (a, b) => b.score - a.score || b.record.publishedAt.localeCompare(a.record.publishedAt),
           )
-          .slice(0, 6);
+          .slice(0, 6)
+          .map((entry) => entry.record);
         searchStatus.textContent =
           matches.length > 0 ? `${matches.length}件の候補` : "一致する記事がありません。";
         matches.forEach((record) => {
