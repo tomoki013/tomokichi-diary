@@ -86,6 +86,19 @@ describe("archive search", () => {
       expect(score(toledo, "ちゃじー")).toBe(0);
     });
 
+    it("puts an article that names the word in its title first", () => {
+      // What search-fields.ts builds: readings of a word in the title join the
+      // heading, readings of a word found anywhere join the text.
+      const fields = (title: string, slug: string, body: string) => ({
+        heading: `${normalizeSearch(`${title} ${slug}`)} ${searchWordsFor(title, words).join(" ")}`,
+        text: `${normalizeSearch(`${title} ${slug}`)} ${searchWordsFor(`${title} ${body}`, words).join(" ")}`,
+      });
+      const about = fields("CHAGEEで頼むならこれ！", "shanghai-chagee-menu", "");
+      const passing = fields("チャンギ空港への行き方", "city-to-changi", "空港でCHAGEEを買った。");
+      expect(score(passing, "ちゃじー")).toBeGreaterThan(0);
+      expect(score(about, "ちゃじー")).toBeGreaterThan(score(passing, "ちゃじー"));
+    });
+
     it("leaves articles that never mention the word alone", () => {
       expect(searchWordsFor("パリ初日、凱旋門まで歩いた", words)).toEqual([]);
     });

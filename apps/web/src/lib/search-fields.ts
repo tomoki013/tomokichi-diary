@@ -29,12 +29,14 @@ export function searchFields(view: ArticleView): { heading: string; text: string
     ...content.collectionsOf(view.article.id).map((item) => item.title),
     ...new Set(places),
   ].join(" ");
-  const aliases = searchWordsFor(
-    `${said} ${view.revision.bodyMarkdown}`,
-    content.snapshot.searchWords ?? [],
-  );
+  const words = content.snapshot.searchWords ?? [];
+  const title = `${view.revision.title} ${view.article.slug}`;
+  // A word the title uses puts its readings in the heading too, so "ちゃじー"
+  // lists the articles about CHAGEE before the ones that mention it in passing.
+  const titled = [...new Set(searchWordsFor(title, words))];
+  const mentioned = [...new Set(searchWordsFor(`${said} ${view.revision.bodyMarkdown}`, words))];
   return {
-    heading: normalizeSearch(`${view.revision.title} ${view.article.slug}`),
-    text: `${normalizeSearch(said)} ${[...new Set(aliases)].join(" ")}`.trim(),
+    heading: `${normalizeSearch(title)} ${titled.join(" ")}`.trim(),
+    text: `${normalizeSearch(said)} ${mentioned.join(" ")}`.trim(),
   };
 }
