@@ -2,6 +2,8 @@ import {
   checkPublishable,
   linkBodyImages,
   listArticlesForAdmin,
+  membershipsByArticle,
+  resolveJourneyMemberships,
   type AppContext,
 } from "@tomokichi/application";
 import type { ArticleDetailDto, ArticleListDto, PublishCheckDto } from "@tomokichi/contracts";
@@ -43,17 +45,15 @@ export async function listContent(
   query = "",
 ): Promise<ArticleListDto> {
   const summaries = (await listArticlesForAdmin(ctx)).filter(({ article }) => include(article));
-  const [routeList, memberships, categories, locations] = await Promise.all([
+  const [routeList, memberships, collections, categories, locations] = await Promise.all([
     ctx.repos.routes.listAll(),
     ctx.repos.collections.listMemberships(),
+    ctx.repos.collections.listAll(),
     ctx.repos.relations.listArticleCategories(),
     ctx.repos.relations.listArticleLocations(),
   ]);
-  const collectionIds = groupBy(
-    memberships,
-    (row) => row.articleId,
-    (row) => row.collectionId,
-  );
+  const knownJourneys = new Set(collections.filter((c) => c.kind === "journey").map((c) => c.id));
+  const groupedMemberships = membershipsByArticle(memberships);
   const categoryIds = groupBy(
     categories,
     (row) => row.articleId,
@@ -73,7 +73,12 @@ export async function listContent(
       hasUnpublishedChanges: summary.hasUnpublishedChanges,
       isLive: summary.isLive,
       contentUpdatedAt: summary.contentUpdatedAt,
-      collectionIds: collectionIds.get(summary.article.id) ?? [],
+      collectionIds: resolveJourneyMemberships(
+        groupedMemberships.get(summary.article.id) ?? [],
+        summary.article.id,
+        summary.journeyIds,
+        knownJourneys,
+      ).map((row) => row.collectionId),
       categoryIds: categoryIds.get(summary.article.id) ?? [],
       locationIds: locationIds.get(summary.article.id) ?? [],
     }),
@@ -128,14 +133,16 @@ export async function contentDetail(scope: OpScope, article: Article): Promise<A
       { resolve: (key) => ctx.mediaUrls.resolve(key) },
     ).images.map((image) => [image.asset.id as string, image.urls]),
   );
-  const [locations, places, categories, tags, memberships, noteRelated] = await Promise.all([
-    ctx.repos.relations.listArticleLocations(),
-    ctx.repos.relations.listArticlePlaces(),
-    ctx.repos.relations.listArticleCategories(),
-    ctx.repos.relations.listArticleTags(),
-    ctx.repos.collections.listMemberships(),
-    ctx.repos.relations.listNoteRelatedArticles(),
-  ]);
+  const [locations, places, categories, tags, memberships, collections, noteRelated] =
+    await Promise.all([
+      ctx.repos.relations.listArticleLocations(),
+      ctx.repos.relations.listArticlePlaces(),
+      ctx.repos.relations.listArticleCategories(),
+      ctx.repos.relations.listArticleTags(),
+      ctx.repos.collections.listMemberships(),
+      ctx.repos.collections.listAll(),
+      ctx.repos.relations.listNoteRelatedArticles(),
+    ]);
   return {
     ...toArticleSummaryDto({
       article,
@@ -169,7 +176,12 @@ export async function contentDetail(scope: OpScope, article: Article): Promise<A
       categoryIds: categories.filter((r) => r.articleId === id).map((r) => r.categoryId),
       tagIds: tags.filter((r) => r.articleId === id).map((r) => r.tagId),
     },
-    collectionIds: memberships.filter((m) => m.articleId === id).map((m) => m.collectionId),
+    collectionIds: resolveJourneyMemberships(
+      memberships.filter((m) => m.articleId === id),
+      id,
+      revision?.journeyIds,
+      new Set(collections.filter((c) => c.kind === "journey").map((c) => c.id)),
+    ).map((m) => m.collectionId),
     relatedArticleIds: noteRelated
       .filter((relation) => relation.noteId === id)
       .toSorted((a, b) => a.sortOrder - b.sortOrder)

@@ -3,6 +3,13 @@ import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { op } from "../../data/client";
 import { invalidate, useAction, useOp, useTitle } from "../../data/hooks";
 import { href } from "../../app/router";
+import {
+  GROUP_OPTIONS,
+  filedUnder,
+  groupArticles,
+  type GroupBy,
+  type GroupNames,
+} from "../../lib/article-groups";
 import { phaseOf, type Phase } from "../../lib/article-state";
 import { formatRelative } from "../../lib/labels";
 import { PhaseBadge } from "../../ui/PhaseBadge";
@@ -13,7 +20,9 @@ import {
   LinkButton,
   Loaded,
   Page,
+  Panel,
   Rows,
+  Select,
   Tabs,
   TextInput,
   confirmed,
@@ -40,13 +49,29 @@ const FILTERS: { value: Filter; label: string; test: (a: ArticleSummaryDto) => b
 const publishable = (phase: Phase) =>
   phase === "draft" || phase === "withdrawn" || phase === "changed";
 
+const GROUP_KEY = "admin.articles.groupBy";
+function storedGroup(): GroupBy {
+  try {
+    const value = localStorage.getItem(GROUP_KEY);
+    if (GROUP_OPTIONS.some((option) => option.value === value)) return value as GroupBy;
+  } catch {
+    // Private windows: the choice simply is not remembered.
+  }
+  return "trip";
+}
+
 /**
- * Every article and page. Picking several publishes them in one go: each
+ * Every article and page, in the piles an author looks for one in (a journey,
+ * a country, a category). Picking several publishes them in one go: each
  * passes its own publish check, and the site is rebuilt once at the end.
  */
 export function ArticleList({ filter }: { filter: string | null }) {
   useTitle("記事");
   const list = useOp("article.list");
+  const series = useOp("series.list", {});
+  const locations = useOp("location.list");
+  const taxonomy = useOp("taxonomy.get");
+  const [groupBy, setGroupBy] = useState<GroupBy>(storedGroup);
   const [tab, setTab] = useState<Filter>(
     (FILTERS.some((f) => f.value === filter) ? filter : "all") as Filter,
   );
@@ -54,18 +79,27 @@ export function ArticleList({ filter }: { filter: string | null }) {
   const [picked, setPicked] = useState<string[]>([]);
   const { busy, run } = useAction();
 
-  const items = useMemo(() => {
+  const names = useMemo<GroupNames>(
+    () => ({
+      collections: series.data?.items ?? [],
+      locations: locations.data?.items ?? [],
+      categories: taxonomy.data?.categories ?? [],
+    }),
+    [series.data, locations.data, taxonomy.data],
+  );
+  const needles = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const groups = useMemo(() => {
     const test = FILTERS.find((f) => f.value === tab)!.test;
-    const needle = query.trim().toLowerCase();
-    return (list.data?.items ?? [])
-      .filter(test)
-      .filter(
-        (a) => !needle || `${a.title} ${a.slug} ${a.path ?? ""}`.toLowerCase().includes(needle),
-      )
-      .toSorted((a, b) =>
-        (b.contentUpdatedAt ?? b.updatedAt).localeCompare(a.contentUpdatedAt ?? a.updatedAt),
-      );
-  }, [list.data, tab, query]);
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const items = (list.data?.items ?? []).filter(test).filter((a) => {
+      if (words.length === 0) return true;
+      const text = `${a.title} ${a.slug} ${a.path ?? ""} ${filedUnder(a, names)}`.toLowerCase();
+      return words.every((word) => text.includes(word));
+    });
+    // Pages are not filed anywhere: one flat list.
+    return groupArticles(items, tab === "pages" ? "none" : groupBy, names);
+  }, [list.data, tab, query, groupBy, names]);
+  const total = groups.reduce((sum, group) => sum + group.items.length, 0);
 
   async function publishPicked() {
     if (!confirmed(`${picked.length}件を公開します。よろしいですか？`)) return;
@@ -120,8 +154,23 @@ export function ArticleList({ filter }: { filter: string | null }) {
         type="search"
         value={query}
         onChange={setQuery}
-        placeholder="タイトル・slug・URL"
+        placeholder="タイトル・slug・旅程・国"
       />
+      {tab !== "pages" && (
+        <Select
+          label="まとめ方"
+          value={groupBy}
+          options={GROUP_OPTIONS}
+          onChange={(value) => {
+            setGroupBy(value);
+            try {
+              localStorage.setItem(GROUP_KEY, value);
+            } catch {
+              // Not remembered; the list still regroups.
+            }
+          }}
+        />
+      )}
       {picked.length > 0 && (
         <div className="spread">
           <span className="muted">
@@ -133,10 +182,8 @@ export function ArticleList({ filter }: { filter: string | null }) {
         </div>
       )}
       <Loaded resource={list} lines={8}>
-        {() =>
-          items.length === 0 ? (
-            <Empty>該当する記事はありません。</Empty>
-          ) : (
+        {() => {
+          const rows = (items: readonly ArticleSummaryDto[]) => (
             <Rows>
               {items.map((article) => (
                 <li key={article.id}>
@@ -172,8 +219,25 @@ export function ArticleList({ filter }: { filter: string | null }) {
                 </li>
               ))}
             </Rows>
-          )
-        }
+          );
+          if (total === 0) return <Empty>該当する記事はありません。</Empty>;
+          if (groups.length === 1 && groups[0]!.label === "") return rows(groups[0]!.items);
+          return (
+            <>
+              {groups.map((group, index) => (
+                <Panel
+                  key={group.key}
+                  title={group.label}
+                  hint={`${group.hint ? `${group.hint} · ` : ""}${group.items.length}件`}
+                  collapsible
+                  open={needles.length > 0 || index === 0}
+                >
+                  {rows(group.items)}
+                </Panel>
+              ))}
+            </>
+          );
+        }}
       </Loaded>
     </Page>
   );

@@ -11,6 +11,7 @@ import type {
   ArticleCollection,
   Collection,
   Ranking,
+  SearchWord,
   ContactMessage,
   Author,
   Category,
@@ -119,6 +120,7 @@ export const revisionRow = {
     seoTitleOverride: nullableStr(row, "seo_title_override"),
     seoDescriptionOverride: nullableStr(row, "seo_description_override"),
     changeSummary: nullableStr(row, "change_summary"),
+    ...journeyMetadataFromRow(row),
     createdAt: str(row, "created_at") as ArticleRevision["createdAt"],
     createdBy: str(row, "created_by") as ArticleRevision["createdBy"],
   }),
@@ -132,10 +134,16 @@ export const revisionRow = {
     seo_title_override: revision.seoTitleOverride,
     seo_description_override: revision.seoDescriptionOverride,
     change_summary: revision.changeSummary,
+    journey_ids: revision.journeyIds === undefined ? null : JSON.stringify(revision.journeyIds),
     created_at: revision.createdAt,
     created_by: revision.createdBy,
   }),
 };
+
+export function journeyMetadataFromRow(row: Row): Pick<ArticleRevision, "journeyIds"> {
+  const journeyIds = json<ArticleRevision["journeyIds"]>(row, "journey_ids", undefined);
+  return Array.isArray(journeyIds) ? { journeyIds } : {};
+}
 
 export const embedRow = {
   to: (row: Row): ArticleEmbed => ({
@@ -622,6 +630,21 @@ export const contactMessageRow = {
     ip_hash: message.ipHash,
     status: message.status,
     created_at: message.createdAt,
+  }),
+};
+
+export const searchWordRow = {
+  to: (row: Row): SearchWord => ({
+    word: str(row, "word"),
+    also: json<unknown[]>(row, "also", []).filter(
+      (item): item is string => typeof item === "string" && item !== "",
+    ),
+    updatedAt: nullableStr(row, "updated_at") as SearchWord["updatedAt"],
+  }),
+  from: (entry: SearchWord): Row => ({
+    word: entry.word,
+    also: JSON.stringify(entry.also),
+    updated_at: entry.updatedAt,
   }),
 };
 

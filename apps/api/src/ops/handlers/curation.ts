@@ -2,7 +2,10 @@ import {
   createCollection,
   createRanking,
   createTag,
+  membershipsByArticle,
+  resolveJourneyMemberships,
   updateCollection,
+  saveSearchWords,
   updateRanking,
   type AppContext,
 } from "@tomokichi/application";
@@ -37,7 +40,9 @@ type Names =
   | "ranking.list"
   | "ranking.get"
   | "ranking.create"
-  | "ranking.update";
+  | "ranking.update"
+  | "search.words"
+  | "search.saveWords";
 
 function count(values: readonly string[]): Map<string, number> {
   const counts = new Map<string, number>();
@@ -79,7 +84,7 @@ function suggestDefaults(
 
 /** Builds the DTOs for every collection in one pass over the tables. */
 async function collectionDtos(ctx: AppContext, only?: CollectionId): Promise<CollectionAdminDto[]> {
-  const [collections, memberships, articles, routes, articleTags, articleCategories] =
+  const [collections, memberships, articles, routes, articleTags, articleCategories, revisions] =
     await Promise.all([
       ctx.repos.collections.listAll(),
       ctx.repos.collections.listMemberships(),
@@ -87,6 +92,7 @@ async function collectionDtos(ctx: AppContext, only?: CollectionId): Promise<Col
       ctx.repos.routes.listAll(),
       ctx.repos.relations.listArticleTags(),
       ctx.repos.relations.listArticleCategories(),
+      ctx.repos.revisions.listStamps(),
     ]);
   const experienceTags = new Map<string, readonly string[]>(
     articles.map((article) => [article.id, article.experienceTags]),
@@ -95,10 +101,41 @@ async function collectionDtos(ctx: AppContext, only?: CollectionId): Promise<Col
   const live = new Set(
     articles.filter((article) => isPubliclyVisible(article, now)).map((article) => article.id),
   );
+  const journeyIds = new Set(
+    collections.filter((item) => item.kind === "journey").map((item) => item.id),
+  );
+  const groupedMemberships = membershipsByArticle(memberships);
+  const revisionJourneys = new Map(revisions.map((row) => [row.id, row.journeyIds]));
+  const draftMemberships = articles.flatMap((article) =>
+    resolveJourneyMemberships(
+      groupedMemberships.get(article.id) ?? [],
+      article.id,
+      article.kind === "article" && article.currentRevisionId
+        ? revisionJourneys.get(article.currentRevisionId)
+        : undefined,
+      journeyIds,
+    ),
+  );
+  const liveArticles = articles.filter((article) => live.has(article.id));
+  const publishedMetadata = await ctx.repos.publicationMetadata.listByRevisions(
+    liveArticles.flatMap((article) => article.publishedRevisionId ?? []),
+  );
+  const publishedMemberships = new Map(
+    publishedMetadata.map((row) => [row.revisionId, row.metadata.collections]),
+  );
+  const publishedJourneyMemberships = liveArticles.flatMap((article) => {
+    const revisionId = article.publishedRevisionId!;
+    return resolveJourneyMemberships(
+      publishedMemberships.get(revisionId) ?? groupedMemberships.get(article.id) ?? [],
+      article.id,
+      article.kind === "article" ? revisionJourneys.get(revisionId) : undefined,
+      journeyIds,
+    );
+  });
   const chosen = only ? collections.filter((item) => item.id === only) : collections;
   const items = await Promise.all(
     chosen.map(async (collection: Collection) => {
-      const members = memberships.filter((m) => m.collectionId === collection.id);
+      const members = draftMemberships.filter((m) => m.collectionId === collection.id);
       const route = routes.find(
         (r) => r.targetType === collection.kind && r.targetId === collection.id && r.isCanonical,
       );
@@ -116,7 +153,10 @@ async function collectionDtos(ctx: AppContext, only?: CollectionId): Promise<Col
         coverUrl: cover ? ctx.mediaUrls.resolve(thumb ?? cover.storageKey) : null,
         sortOrder: collection.sortOrder,
         path: route?.path ?? null,
-        publishedCount: members.filter((m) => live.has(m.articleId)).length,
+        publishedCount:
+          collection.kind === "journey"
+            ? publishedJourneyMemberships.filter((m) => m.collectionId === collection.id).length
+            : members.filter((m) => live.has(m.articleId)).length,
         memberCount: members.length,
         themeMusic: collection.themeMusic,
         articleDefaults: collection.articleDefaults,
@@ -316,4 +356,12 @@ export const curationHandlers: Handlers<Names> = {
     );
     return oneRanking(ctx, id);
   },
+
+  "search.words": async ({ ctx }) => ({
+    items: (await ctx.repos.searchWords.listAll()).map(({ word, also }) => ({ word, also })),
+  }),
+
+  "search.saveWords": async ({ ctx }, { words }) => ({
+    items: unwrap(await saveSearchWords(ctx, words)).map(({ word, also }) => ({ word, also })),
+  }),
 };

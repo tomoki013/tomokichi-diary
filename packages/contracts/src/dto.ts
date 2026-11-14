@@ -38,7 +38,7 @@ export interface ArticleSummaryDto {
    * Null where the list does not compute it.
    */
   readonly contentUpdatedAt?: string | null;
-  /** Formal D1 memberships and taxonomy relations, included in admin lists. */
+  /** Current draft collection memberships and taxonomy relations, included in admin lists. */
   readonly collectionIds?: readonly string[];
   readonly categoryIds?: readonly string[];
   readonly locationIds?: readonly string[];
@@ -68,6 +68,7 @@ export interface RevisionDto {
   readonly seoTitleOverride: string | null;
   readonly seoDescriptionOverride: string | null;
   readonly changeSummary: string | null;
+  readonly journeyIds?: readonly string[];
   readonly createdAt: string;
 }
 

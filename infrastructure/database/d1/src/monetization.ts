@@ -22,8 +22,8 @@ export function createMonetizationRepository(db: SqlDatabase): MonetizationRepos
     return [
       db
         .prepare(
-          `INSERT INTO article_revisions (id,article_id,revision_number,title,summary,body_markdown,seo_title_override,seo_description_override,change_summary,created_by,created_at,reader_fingerprint)
-        SELECT ?,article_id,revision_number+1,title,summary,body_markdown,seo_title_override,seo_description_override,'収益化設定',created_by,?,reader_fingerprint FROM article_revisions
+          `INSERT INTO article_revisions (id,article_id,revision_number,title,summary,body_markdown,seo_title_override,seo_description_override,change_summary,created_by,created_at,reader_fingerprint,journey_ids)
+        SELECT ?,article_id,revision_number+1,title,summary,body_markdown,seo_title_override,seo_description_override,'収益化設定',created_by,?,reader_fingerprint,journey_ids FROM article_revisions
         WHERE id=(SELECT current_revision_id FROM articles WHERE id=? AND current_revision_id=published_revision_id)`,
         )
         .bind(rid, now, id),

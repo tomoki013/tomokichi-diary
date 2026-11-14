@@ -143,7 +143,7 @@ export function enhanceBodyImages(html: string): string {
     // width:auto collapses unloaded pictures even when dimensions are present.
     const displaySize =
       image.width !== null && image.height !== null && image.width > 0 && image.height > 0
-        ? ` style="--body-image-size:min(100%, ${image.width}px, calc(min(40rem, 80svh) * ${image.width / image.height}))"`
+        ? ` style="--body-image-size:min(100%, ${image.width}px, calc(var(--body-image-max) * ${image.width / image.height}))"`
         : "";
     const sources = image.sources
       .map(

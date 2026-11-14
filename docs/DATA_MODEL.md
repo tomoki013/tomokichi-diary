@@ -95,6 +95,22 @@ columns; existing rows start with music off and no defaults.
   a ranking left with none is not rendered.
 - Never deleted; emptying the picks hides one.
 
+## SearchWord
+
+Readings and other spellings the site search answers to, edited in the admin
+(その他 → 検索の別名) or with `save_search_words`. Never shown on the site.
+
+- `word` — a spelling the articles use ("CHAGEE"); `also` — what readers type
+  instead ("チャジー", "霸王茶姬"). Stored as a JSON column; a spelling appears once
+  in the whole list.
+- At build time, an article that mentions `word` or any of `also` in its title,
+  summary, tags or body gets all of them in its search text. The body itself is
+  not put in the search text.
+- Kana type, width, case and small kana are folded by the search, so one of
+  each is enough.
+
+Migration `0032_search_words.sql` creates the (empty) table.
+
 Migration `0023_rankings.sql` creates the table and seeds the rankings with no picks.
 Migration `0028_ranking_photos.sql` adds the optional photo and carries over the
 current #1 cover as the initial choice where one exists.

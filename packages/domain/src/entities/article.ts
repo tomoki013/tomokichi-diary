@@ -3,6 +3,7 @@ import type { Instant, PlainDate } from "../primitives/datetime.js";
 import type { Locale } from "../primitives/locale.js";
 import type { Slug } from "../primitives/slug.js";
 import type { ExperienceTag } from "./experience.js";
+import type { CollectionId } from "./collection.js";
 
 /**
  * `page` covers standalone editorial pages (about, FAQ, legal). They carry the
@@ -58,6 +59,8 @@ export interface ArticleRevision {
   readonly seoTitleOverride: string | null;
   readonly seoDescriptionOverride: string | null;
   readonly changeSummary: string | null;
+  /** Undefined keeps legacy journey memberships. An empty list clears them. */
+  readonly journeyIds?: readonly CollectionId[];
   readonly createdAt: Instant;
   readonly createdBy: AuthorId;
 }

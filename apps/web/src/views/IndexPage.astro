@@ -15,6 +15,7 @@ import { EXPERIENCES } from "../lib/experiences";
 import { pickHeroPhotos, rankGallery } from "../lib/gallery";
 import { SearchIcon, ShareIcon, XIcon } from "../components/TravelIcons";
 import LikedPrivacyNote from "../components/LikedPrivacyNote.astro";
+import { searchFields } from "../lib/search-fields";
 
 interface Props {
   route: Route;
@@ -259,20 +260,6 @@ const archiveCountries = continents
   .flatMap((continent) => continent.countries)
   .filter((country) => country.count > 0)
   .toSorted((a, b) => b.count - a.count);
-const archiveSearchText = (view: (typeof articles)[number]) => {
-  const locations = view.locations.map(({ location }) =>
-    content.locations.nameOf(location.id, "ja"),
-  );
-  return [
-    view.revision.title,
-    view.revision.summary,
-    ...view.categories.map((item) => item.name),
-    ...view.tags.map((item) => item.name),
-    ...locations,
-  ]
-    .join(" ")
-    .toLocaleLowerCase("ja");
-};
 const archiveCategoryText = (view: (typeof articles)[number]) =>
   view.categories.map((item) => item.name.toLocaleLowerCase("ja")).join("|");
 const archiveCountryText = (view: (typeof articles)[number]) =>
@@ -495,7 +482,8 @@ const labelOf = (target: Route): string => {
                 eager={index < 3}
                 level={3}
                 variant="archive"
-                searchText={archiveSearchText(view)}
+                searchText={searchFields(view).text}
+                searchHeading={searchFields(view).heading}
                 categoryText={archiveCategoryText(view)}
                 countryText={archiveCountryText(view)}
                 experienceText={view.article.experienceTags.join("|")}
@@ -985,6 +973,7 @@ const labelOf = (target: Route): string => {
     </div>
   )}
   <script>
+    import { matchScore, searchTerms } from "../lib/archive-search";
     import { visitorId } from "../lib/like-visitor";
     import { onShelfChange, shelf } from "../lib/my-trips";
 
@@ -1242,15 +1231,22 @@ const labelOf = (target: Route): string => {
         return;
       }
       if (resetPage) archivePage = 1;
-      const archiveQuery = archiveSearch?.value.trim().toLocaleLowerCase("ja") ?? "";
+      const archiveQuery = archiveSearch?.value.trim() ?? "";
+      const archiveTerms = searchTerms(archiveQuery);
+      const scores = new Map<HTMLElement, number>();
       let visible = 0;
       const matchedCards = archiveCards.filter((card) => {
-        const haystack = card.dataset.search ?? "";
+        const score = matchScore(
+          card.dataset.searchTitle ?? "",
+          card.dataset.search ?? "",
+          archiveTerms,
+        );
+        scores.set(card, score);
         const categories = (card.dataset.category ?? "").split("|");
         const countries = (card.dataset.country ?? "").split("|");
         const experiences = (card.dataset.experience ?? "").split("|");
         const matches =
-          (!archiveQuery || haystack.includes(archiveQuery)) &&
+          score > 0 &&
           (activeExperience === "all" || experiences.includes(activeExperience)) &&
           (activeArchiveFilter === "all" || categories.includes(activeArchiveFilter)) &&
           (!likedOnly || likedPaths.has(card.dataset.path ?? "")) &&
@@ -1267,6 +1263,12 @@ const labelOf = (target: Route): string => {
           return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "", "ja");
         if (archiveSort?.value === "popular" && likesOf(a) !== likesOf(b))
           return likesOf(b) - likesOf(a);
+        // While searching in the default order, the closest match leads:
+        // a title or slug hit before one buried in the summary or tags.
+        if (archiveTerms.length > 0 && (archiveSort?.value ?? "newest") === "newest") {
+          const gap = (scores.get(b) ?? 0) - (scores.get(a) ?? 0);
+          if (gap !== 0) return gap;
+        }
         return (b.dataset.published ?? "").localeCompare(a.dataset.published ?? "");
       });
       if (archiveGrid) archiveGrid.append(...sorted);

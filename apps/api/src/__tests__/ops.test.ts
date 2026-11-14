@@ -78,6 +78,8 @@ describe("the operation catalogue", () => {
       "list_rankings",
       "create_ranking",
       "update_ranking",
+      "list_search_words",
+      "save_search_words",
       "publish_site",
       "publish_article",
       "publish_diary_note",

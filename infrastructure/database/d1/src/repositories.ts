@@ -11,6 +11,7 @@ import type {
   PlaceRepository,
   CollectionRepository,
   RankingRepository,
+  SearchWordRepository,
   ContactMessageRepository,
   RelationRepository,
   Repositories,
@@ -21,6 +22,7 @@ import type {
 } from "@tomokichi/application";
 import {
   readerFingerprint,
+  type ArticleCollection,
   type ArticleId,
   type Instant,
   type MediaAsset,
@@ -39,6 +41,7 @@ import {
   categoryRow,
   collectionRow,
   rankingRow,
+  searchWordRow,
   contactMessageRow,
   embedRow,
   locationNameRow,
@@ -46,6 +49,7 @@ import {
   mediaRow,
   placeRow,
   revisionRow,
+  journeyMetadataFromRow,
   routeRow,
   tagRow,
   sourceReferenceRow,
@@ -266,7 +270,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     listStamps: async () =>
       (
         await all(
-          "SELECT id, article_id, revision_number, title, created_at, reader_fingerprint FROM article_revisions",
+          "SELECT id, article_id, revision_number, title, created_at, reader_fingerprint, journey_ids FROM article_revisions",
         )
       ).map((row) => ({
         id: row["id"] as RevisionId,
@@ -275,6 +279,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
         title: String(row["title"]),
         createdAt: row["created_at"] as Instant,
         readerFingerprint: (row["reader_fingerprint"] as string | null) ?? null,
+        ...journeyMetadataFromRow(row),
       })),
     recordFingerprints: async (entries) => {
       if (entries.length === 0) return;
@@ -607,6 +612,27 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
   };
 
+  async function replaceMemberships(
+    articleId: ArticleId,
+    memberships: readonly ArticleCollection[],
+    seriesOnly: boolean,
+  ) {
+    const deletion =
+      "DELETE FROM article_collections WHERE article_id = ?" +
+      (seriesOnly
+        ? " AND collection_id IN (SELECT id FROM collections WHERE kind = 'series')"
+        : "");
+    await db.batch([
+      db.prepare(deletion).bind(articleId),
+      ...memberships.map((m) =>
+        upsert(db, "article_collections", articleCollectionRow.from(m), [
+          "article_id",
+          "collection_id",
+        ]),
+      ),
+    ]);
+  }
+
   const collections: CollectionRepository = {
     listAll: async () =>
       (await all("SELECT * FROM collections ORDER BY sort_order, slug")).map(collectionRow.to),
@@ -621,17 +647,10 @@ export function createRepositories(db: SqlDatabase): Repositories {
       (await all("SELECT * FROM article_collections ORDER BY collection_id, sort_order")).map(
         articleCollectionRow.to,
       ),
-    replaceForArticle: async (articleId, memberships) => {
-      await db.batch([
-        db.prepare("DELETE FROM article_collections WHERE article_id = ?").bind(articleId),
-        ...memberships.map((m) =>
-          upsert(db, "article_collections", articleCollectionRow.from(m), [
-            "article_id",
-            "collection_id",
-          ]),
-        ),
-      ]);
-    },
+    replaceForArticle: (articleId, memberships) =>
+      replaceMemberships(articleId, memberships, false),
+    replaceSeriesForArticle: (articleId, memberships) =>
+      replaceMemberships(articleId, memberships, true),
   };
 
   const rankings: RankingRepository = {
@@ -643,6 +662,18 @@ export function createRepositories(db: SqlDatabase): Repositories {
     },
     save: async (ranking) => {
       await upsert(db, "rankings", rankingRow.from(ranking), ["id"]).run();
+    },
+  };
+
+  const searchWords: SearchWordRepository = {
+    listAll: async () =>
+      (await all("SELECT * FROM search_words ORDER BY word")).map(searchWordRow.to),
+    // One batch: the list is replaced whole, never left half written.
+    replaceAll: async (words) => {
+      await db.batch([
+        db.prepare("DELETE FROM search_words"),
+        ...words.map((entry) => upsert(db, "search_words", searchWordRow.from(entry), ["word"])),
+      ]);
     },
   };
 
@@ -738,6 +769,7 @@ export function createRepositories(db: SqlDatabase): Repositories {
     relations,
     collections,
     rankings,
+    searchWords,
     contactMessages,
     authors,
     aiArtifacts,

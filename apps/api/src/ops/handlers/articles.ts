@@ -22,7 +22,7 @@ import {
   type TagId,
 } from "@tomokichi/domain";
 import { toRevisionDto } from "../../mappers.js";
-import { notFound, unwrap, type Handlers } from "../scope.js";
+import { invalid, notFound, unwrap, type Handlers } from "../scope.js";
 import { contentDetail, listContent, publishCheck, requireContent, siteAuthor } from "./content.js";
 
 type Names =
@@ -62,6 +62,7 @@ export const articleHandlers: Handlers<Names> = {
           seoTitleOverride: input.seoTitleOverride,
           seoDescriptionOverride: input.seoDescriptionOverride,
           changeSummary: input.changeSummary,
+          journeyIds: input.journeyIds as readonly CollectionId[] | undefined,
         },
         imageBase: env.PUBLIC_IMAGE_URL,
       }),
@@ -93,6 +94,7 @@ export const articleHandlers: Handlers<Names> = {
               ? (current?.seoDescriptionOverride ?? null)
               : input.seoDescriptionOverride,
           changeSummary: input.changeSummary ?? null,
+          journeyIds: input.journeyIds as readonly CollectionId[] | undefined,
         },
         article.authorId,
         env.PUBLIC_IMAGE_URL,
@@ -135,9 +137,13 @@ export const articleHandlers: Handlers<Names> = {
       throw notFound("ARTICLE_NOT_FOUND", `no article ${articleId}`);
     if (input.collectionIds) {
       // Checked before anything is written, so a bad id never half-saves.
-      const known = new Set((await ctx.repos.collections.listAll()).map((item) => item.id));
+      const known = new Map(
+        (await ctx.repos.collections.listAll()).map((item) => [item.id, item.kind]),
+      );
       const unknown = input.collectionIds.find((id) => !known.has(id as CollectionId));
       if (unknown) throw notFound("COLLECTION_NOT_FOUND", `no collection ${unknown}`);
+      if (input.collectionIds.some((id) => known.get(id as CollectionId) === "journey"))
+        throw invalid("旅程は記事の下書きの journeyIds で設定してください", "collectionIds");
     }
     const mine = <T extends { articleId: string }>(rows: readonly T[]) =>
       rows.filter((row) => row.articleId === articleId);
@@ -174,7 +180,7 @@ export const articleHandlers: Handlers<Names> = {
           .filter((m) => m.articleId === articleId)
           .map((m) => [m.collectionId, m.sortOrder]),
       );
-      await ctx.repos.collections.replaceForArticle(
+      await ctx.repos.collections.replaceSeriesForArticle(
         articleId,
         [...new Set(input.collectionIds)].map((id) => ({
           articleId,

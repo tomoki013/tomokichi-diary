@@ -13,6 +13,19 @@ const collectionKind = v.literalUnion(["series", "journey"] as const);
 const seriesTarget = { type: "series", idField: "collectionId" } as const;
 const rankingTarget = { type: "ranking", idField: "rankingId" } as const;
 
+/** One search-only word and the other ways readers type it. */
+export interface SearchWordDto {
+  readonly word: string;
+  readonly also: readonly string[];
+}
+const searchWord = v.object({
+  word: v.describe(v.string({ min: 1, max: 60 }), "記事に出てくる書き方（例: CHAGEE）"),
+  also: v.describe(
+    v.array(v.string({ min: 1, max: 60 }), { max: 12 }),
+    "読者が打つ別の書き方（例: チャジー、霸王茶姬）",
+  ),
+});
+
 export interface PlaceDto {
   readonly id: string;
   readonly slug: string;
@@ -187,5 +200,23 @@ export const curationOperations = {
       "ランキングの名前・添え書き・写真・もっと読む・表示順・順位（記事と一言）を変更します。picks は丸ごと置き換え。下書きの記事も入れられますが、公開されるまでサイトには出ません。保存はDBだけで、トップページへの反映は publish_site。",
     tool: { name: "update_ranking", title: "Update ranking" },
     target: rankingTarget,
+  }),
+  "search.words": operation<{ items: readonly SearchWordDto[] }>()({
+    kind: "read",
+    surface: "operator",
+    input: v.object({}),
+    description:
+      "サイト内検索だけに使う別名の一覧（記事に出てくる語と、読者が打つ別の書き方）。サイトには表示されません。",
+    tool: { name: "list_search_words", title: "List search words" },
+    target: { type: "search_words" },
+  }),
+  "search.saveWords": operation<{ items: readonly SearchWordDto[] }>()({
+    kind: "write",
+    surface: "operator",
+    input: v.object({ words: v.array(searchWord, { max: 300 }) }),
+    description:
+      "サイト内検索の別名を保存します（一覧を丸ごと置き換え）。word は記事に出てくる書き方、also は読みや別表記。記事の題・要約・タグ・本文に word か also のどれかが出てくる記事が、そのすべてで見つかるようになります。ひらがなとカタカナ、全角と半角、大文字と小文字は同じ扱いなので片方だけで足ります。保存はDBだけで、サイトへの反映は publish_site。",
+    tool: { name: "save_search_words", title: "Save search words" },
+    target: { type: "search_words" },
   }),
 };

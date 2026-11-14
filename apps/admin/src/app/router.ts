@@ -16,6 +16,7 @@ export type Route =
   | { name: "series-edit"; id: string }
   | { name: "rankings" }
   | { name: "ranking"; id: string }
+  | { name: "search-words" }
   | { name: "ads" }
   | { name: "knowledge" }
   | { name: "analytics" }
@@ -57,6 +58,7 @@ export function parseRoute(hash: string): Route {
       return second && third
         ? { name: "activity", targetType: second, targetId: third }
         : one({ name: "activity" });
+    case "search-words":
     case "media":
     case "ads":
     case "knowledge":
@@ -84,6 +86,7 @@ export const href = {
   seriesEdit: (id: string) => `#/series/${enc(id)}`,
   rankings: () => "#/rankings",
   ranking: (id: string) => `#/rankings/${enc(id)}`,
+  searchWords: () => "#/search-words",
   ads: () => "#/ads",
   knowledge: () => "#/knowledge",
   analytics: () => "#/analytics",

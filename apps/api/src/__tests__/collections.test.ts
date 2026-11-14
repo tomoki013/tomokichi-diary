@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
-import { loadContentSnapshot, type AppContext } from "@tomokichi/application";
+import { ContentIndex, loadContentSnapshot, type AppContext } from "@tomokichi/application";
 import type { CollectionAdminDto } from "@tomokichi/contracts";
+import type { ArticleId, CollectionId, MediaId } from "@tomokichi/domain";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 
@@ -162,4 +163,84 @@ describe("series article defaults", () => {
       expect((await patch(series.id, { articleDefaults })).status).toBe(400);
     }
   });
+});
+
+it("collects an article from its published journey metadata and preserves legacy memberships", async () => {
+  async function journey(slug: string): Promise<CollectionId> {
+    const response = await op("series.create", { kind: "journey", slug, title: slug });
+    expect(response.status).toBe(200);
+    return (await response.json()).id as CollectionId;
+  }
+  const first = await journey("first-trip");
+  const second = await journey("second-trip");
+  const series = (await createSeries()).id as CollectionId;
+  const created = await op("article.create", {
+    slug: "journey-story",
+    path: "/posts/journey-story",
+    title: "旅の話",
+    summary: "旅の記録です。",
+    bodyMarkdown: "旅先での出来事。".repeat(80),
+  });
+  expect(created.status).toBe(200);
+  const articleId = (await created.json()).id as ArticleId;
+  const mediaId = "journey-cover" as MediaId;
+  await ctx.repos.media.save({
+    id: mediaId,
+    storageKey: "journey-cover.jpg",
+    mimeType: "image/jpeg",
+    width: 300,
+    height: 200,
+    size: 100,
+    sha256: "b".repeat(64),
+    createdAt: ctx.clock.now(),
+  });
+  await ctx.repos.media.replaceForArticle(articleId, [
+    { articleId, mediaId, role: "cover", sortOrder: 0, alt: "旅の写真", caption: null },
+  ]);
+  await ctx.repos.collections.replaceForArticle(articleId, [
+    { articleId, collectionId: first, sortOrder: 7 },
+  ]);
+  const checkedOp = async (name: string, fields: Record<string, unknown> = {}) => {
+    const response = await op(name, { articleId, ...fields });
+    const result = await response.json();
+    expect(response.status, JSON.stringify(result)).toBe(200);
+    return result;
+  };
+  const index = async () => new ContentIndex(await loadContentSnapshot(ctx), ctx.clock.now());
+  await checkedOp("article.setRelations", { collectionIds: [series] });
+  expect((await index()).membersOf(first)).toHaveLength(0);
+  await checkedOp("article.publish");
+  const legacy = await index();
+  expect(legacy.membersOf(first).map((view) => view.article.id)).toEqual([articleId]);
+  expect(legacy.snapshot.articleCollections).toContainEqual({
+    articleId,
+    collectionId: first,
+    sortOrder: 7,
+  });
+
+  for (const invalidId of [series, "missing"]) {
+    expect((await op("article.saveDraft", { articleId, journeyIds: [invalidId] })).status).toBe(
+      400,
+    );
+  }
+  await checkedOp("article.saveDraft", { journeyIds: [second, second] });
+  const saved = await checkedOp("article.saveDraft", { summary: "旅の新しい要約です。" });
+  expect(saved.revision.journeyIds).toEqual([second]);
+  expect((await checkedOp("article.get")).collectionIds).toEqual([series, second]);
+  const beforePublish = await index();
+  expect(beforePublish.membersOf(first)).toHaveLength(1);
+  expect(beforePublish.membersOf(second)).toHaveLength(0);
+
+  await checkedOp("article.publish");
+  const moved = await index();
+  expect(moved.membersOf(first)).toHaveLength(0);
+  expect(moved.membersOf(second).map((view) => view.article.id)).toEqual([articleId]);
+  expect(moved.membersOf(series).map((view) => view.article.id)).toEqual([articleId]);
+
+  await checkedOp("article.saveDraft", { journeyIds: [] });
+  await checkedOp("article.publish");
+  const cleared = await index();
+  expect(cleared.membersOf(first)).toHaveLength(0);
+  expect(cleared.membersOf(second)).toHaveLength(0);
+  expect(cleared.membersOf(series)).toHaveLength(1);
 });

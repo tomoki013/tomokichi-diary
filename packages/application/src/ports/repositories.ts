@@ -16,6 +16,7 @@ import type {
   Collection,
   CollectionId,
   Ranking,
+  SearchWord,
   RankingId,
   ContactMessage,
   ContactMessageId,
@@ -111,6 +112,7 @@ export interface RevisionStampRecord extends RevisionStamp {
   readonly id: RevisionId;
   readonly articleId: ArticleId;
   readonly title: string;
+  readonly journeyIds?: ArticleRevision["journeyIds"];
 }
 
 export interface EmbedRepository {
@@ -199,6 +201,10 @@ export interface CollectionRepository {
   save(collection: Collection): Promise<void>;
   listMemberships(): Promise<readonly ArticleCollection[]>;
   replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
+  replaceSeriesForArticle(
+    articleId: ArticleId,
+    memberships: readonly ArticleCollection[],
+  ): Promise<void>;
 }
 
 /** The home page's rankings. Never deleted: an empty one is simply not shown. */
@@ -263,6 +269,12 @@ export interface PublicationMetadataRepository {
   save(revisionId: RevisionId, metadata: PublishedArticleMetadata): Promise<void>;
 }
 
+/** The search-only word list, always read and written whole. */
+export interface SearchWordRepository {
+  listAll(): Promise<readonly SearchWord[]>;
+  replaceAll(words: readonly SearchWord[]): Promise<void>;
+}
+
 /** Everything a use case may reach for, assembled at the composition root. */
 export interface Repositories {
   readonly monetization: MonetizationRepository;
@@ -280,6 +292,7 @@ export interface Repositories {
   readonly relations: RelationRepository;
   readonly collections: CollectionRepository;
   readonly rankings: RankingRepository;
+  readonly searchWords: SearchWordRepository;
   readonly contactMessages: ContactMessageRepository;
   readonly authors: AuthorRepository;
   readonly aiArtifacts: AIArtifactRepository;

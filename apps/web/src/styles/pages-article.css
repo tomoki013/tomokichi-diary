@@ -704,17 +704,22 @@
     pointer-events: auto;
   }
 
+  /* A card in the corner the button sits in, not a band across the screen:
+     the list is short lines of text, and on a tablet a full-width sheet was
+     mostly empty. */
   .mobile-toc-sheet {
     position: absolute;
-    inset: auto 0 0;
+    inset: auto 0.75rem calc(0.75rem + var(--cookie-banner-space, 0px)) auto;
     display: grid;
     gap: 0.7rem;
-    max-height: 78svh;
-    padding: 1.1rem 1.2rem 1.6rem;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: min(22rem, calc(100% - 1.5rem));
+    max-height: 70svh;
+    padding: 1rem 1.1rem 1.2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     background: var(--bg);
     overflow-y: auto;
-    transform: translateY(100%);
+    transform: translateY(calc(100% + 1.5rem));
     transition: transform 260ms var(--ease);
   }
 
