@@ -54,14 +54,15 @@ export interface ArticleWithRevision {
   readonly revision: ArticleRevision;
 }
 
+const invalidJourney = (message: string) =>
+  err<DraftInput["journeyIds"]>({ code: "API_VALIDATION_FAILED", message, field: "journeyIds" });
+
 async function validateJourneys(
   ctx: AppContext,
   kind: Article["kind"],
   journeyIds: DraftInput["journeyIds"],
 ): Promise<Result<DraftInput["journeyIds"]>> {
   if (journeyIds === undefined) return ok(undefined);
-  const invalidJourney = (message: string) =>
-    err<DraftInput["journeyIds"]>({ code: "API_VALIDATION_FAILED", message, field: "journeyIds" });
   if (kind !== "article") return invalidJourney("旅程を設定できるのは旅行記事のみです");
   if (journeyIds.length === 0) return ok([]);
   const known = new Set(
