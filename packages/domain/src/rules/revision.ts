@@ -9,6 +9,7 @@ export interface DraftInput {
   readonly seoTitleOverride?: string | null;
   readonly seoDescriptionOverride?: string | null;
   readonly changeSummary?: string | null;
+  readonly journeyIds?: ArticleRevision["journeyIds"];
 }
 
 /**
@@ -34,6 +35,7 @@ export function nextRevision(params: {
     seoTitleOverride: input.seoTitleOverride ?? null,
     seoDescriptionOverride: input.seoDescriptionOverride ?? null,
     changeSummary: input.changeSummary ?? null,
+    ...(input.journeyIds === undefined ? {} : { journeyIds: input.journeyIds }),
     createdAt: now,
     createdBy,
   };

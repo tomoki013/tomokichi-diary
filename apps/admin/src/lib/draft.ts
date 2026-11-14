@@ -8,6 +8,7 @@ export interface DraftInput {
   seoTitleOverride: string | null;
   seoDescriptionOverride: string | null;
   changeSummary: string | null;
+  journeyIds?: string[];
 }
 
 /** The editable draft for an article, starting from its current revision. */
@@ -20,6 +21,7 @@ export function draftFrom(article: ArticleDetailDto): DraftInput {
     seoTitleOverride: revision?.seoTitleOverride ?? null,
     seoDescriptionOverride: revision?.seoDescriptionOverride ?? null,
     changeSummary: null,
+    ...(revision?.journeyIds === undefined ? {} : { journeyIds: [...revision.journeyIds] }),
   };
 }
 
@@ -37,6 +39,7 @@ export function isDirty(draft: DraftInput, saved: DraftInput): boolean {
     draft.title !== saved.title ||
     draft.summary !== saved.summary ||
     draft.bodyMarkdown !== saved.bodyMarkdown ||
+    JSON.stringify(draft.journeyIds) !== JSON.stringify(saved.journeyIds) ||
     blank(draft.seoTitleOverride) !== blank(saved.seoTitleOverride) ||
     blank(draft.seoDescriptionOverride) !== blank(saved.seoDescriptionOverride)
   );

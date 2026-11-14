@@ -26,6 +26,7 @@ export function toRevisionDto(revision: ArticleRevision): RevisionDto {
     seoTitleOverride: revision.seoTitleOverride,
     seoDescriptionOverride: revision.seoDescriptionOverride,
     changeSummary: revision.changeSummary,
+    ...(revision.journeyIds === undefined ? {} : { journeyIds: revision.journeyIds }),
     createdAt: revision.createdAt,
   };
 }

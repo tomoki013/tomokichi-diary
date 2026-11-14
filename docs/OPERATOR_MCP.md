@@ -25,6 +25,8 @@ ChatGPT や Claude などの AI クライアントから、管理画面ででき
 
 旅の知識は、AI が本文を読んで `propose_travel_facts` で事実の候補を登録し、本人が管理画面で確認する流れです。確認は MCP からはできません。
 
+旅行記事の旅程は `create_article_draft` または `save_article_draft` の `journeyIds` に設定します。`list_taxonomy` で `kind: "journey"` の ID を確認できます。省略時は現在の設定を引き継ぎ、`[]` は全解除です。保存後に記事を公開すると旅程ページに反映されます。既存記事は初めて設定するまで従来の所属と表示順を引き継ぎます。
+
 ## 環境変数
 
 | 変数                             | 内容                                                                                                        |

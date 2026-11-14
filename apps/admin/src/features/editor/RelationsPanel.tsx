@@ -86,7 +86,13 @@ export function RelationsPanel({ article }: { article: ArticleDetailDto }) {
         if (changedRelations)
           await op("article.setRelations", {
             articleId: article.id,
-            collectionIds: choice.collectionIds,
+            ...(taxonomy.data
+              ? {
+                  collectionIds: choice.collectionIds.filter((id) =>
+                    taxonomy.data?.collections.some((c) => c.id === id && c.kind === "series"),
+                  ),
+                }
+              : {}),
             tagIds: choice.tagIds,
             categoryIds: choice.categoryIds,
             locations: choice.locations,
@@ -133,13 +139,15 @@ export function RelationsPanel({ article }: { article: ArticleDetailDto }) {
           />
         )}
       </Field>
-      <Field label="シリーズ・旅程">
+      <Field label="シリーズ">
         {() => (
           <Chips
-            options={(taxonomy.data?.collections ?? []).map((c) => ({
-              value: c.id,
-              label: c.title,
-            }))}
+            options={(taxonomy.data?.collections ?? [])
+              .filter((c) => c.kind === "series")
+              .map((c) => ({
+                value: c.id,
+                label: c.title,
+              }))}
             selected={choice.collectionIds}
             onToggle={joinSeries}
           />

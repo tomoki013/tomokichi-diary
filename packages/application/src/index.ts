@@ -9,6 +9,7 @@ export * from "./ports/logger.js";
 export * from "./ports/repositories.js";
 
 export * from "./read/content-index.js";
+export * from "./read/journey-memberships.js";
 export * from "./read/travel-knowledge.js";
 export * from "./read/knowledge-catalog.js";
 

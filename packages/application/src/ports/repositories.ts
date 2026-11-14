@@ -112,6 +112,7 @@ export interface RevisionStampRecord extends RevisionStamp {
   readonly id: RevisionId;
   readonly articleId: ArticleId;
   readonly title: string;
+  readonly journeyIds?: ArticleRevision["journeyIds"];
 }
 
 export interface EmbedRepository {
@@ -200,6 +201,10 @@ export interface CollectionRepository {
   save(collection: Collection): Promise<void>;
   listMemberships(): Promise<readonly ArticleCollection[]>;
   replaceForArticle(articleId: ArticleId, memberships: readonly ArticleCollection[]): Promise<void>;
+  replaceSeriesForArticle(
+    articleId: ArticleId,
+    memberships: readonly ArticleCollection[],
+  ): Promise<void>;
 }
 
 /** The home page's rankings. Never deleted: an empty one is simply not shown. */

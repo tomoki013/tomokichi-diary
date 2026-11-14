@@ -54,6 +54,25 @@ export interface ArticleWithRevision {
   readonly revision: ArticleRevision;
 }
 
+async function validateJourneys(
+  ctx: AppContext,
+  kind: Article["kind"],
+  journeyIds: DraftInput["journeyIds"],
+): Promise<Result<DraftInput["journeyIds"]>> {
+  if (journeyIds === undefined) return ok(undefined);
+  const invalidJourney = (message: string) =>
+    err<DraftInput["journeyIds"]>({ code: "API_VALIDATION_FAILED", message, field: "journeyIds" });
+  if (kind !== "article") return invalidJourney("旅程を設定できるのは旅行記事のみです");
+  if (journeyIds.length === 0) return ok([]);
+  const known = new Set(
+    (await ctx.repos.collections.listAll()).filter((c) => c.kind === "journey").map((c) => c.id),
+  );
+  const unknown = journeyIds.find((id) => !known.has(id));
+  return unknown === undefined
+    ? ok([...new Set(journeyIds)])
+    : invalidJourney(`旅程が見つかりません: ${unknown}`);
+}
+
 /**
  * The body decides which photos an article shows: a library photo written into
  * it, by whatever URL, is pointed at its slug alias and listed on the article.
@@ -94,6 +113,8 @@ export async function createArticle(
   if (!slug.ok) return err(...slug.errors);
   const path = parseRoutePath(input.path);
   if (!path.ok) return err(...path.errors);
+  const journeys = await validateJourneys(ctx, input.kind ?? "article", input.draft.journeyIds);
+  if (!journeys.ok) return journeys;
 
   if (await ctx.repos.articles.findBySlug(slug.value, input.locale)) {
     return err({
@@ -110,7 +131,11 @@ export async function createArticle(
     });
   }
 
-  const { draft, images } = await linkDraftImages(ctx, input.draft, input.imageBase);
+  const { draft, images } = await linkDraftImages(
+    ctx,
+    { ...input.draft, journeyIds: journeys.value },
+    input.imageBase,
+  );
   const now = ctx.clock.now();
   const id = ctx.ids.next<ArticleId>();
   const article: Article = {
@@ -175,15 +200,28 @@ export async function updateArticleDraft(
 ): Promise<Result<ArticleWithRevision>> {
   const article = await ctx.repos.articles.findById(articleId);
   if (!article) return err({ code: "ARTICLE_NOT_FOUND", message: `no article ${articleId}` });
-  const { draft, images } = await linkDraftImages(ctx, input, imageBase);
+  const journeys = await validateJourneys(ctx, article.kind, input.journeyIds);
+  if (!journeys.ok) return journeys;
+  const { draft, images } = await linkDraftImages(
+    ctx,
+    { ...input, journeyIds: journeys.value },
+    imageBase,
+  );
 
   const previous = await ctx.repos.revisions.findLatest(articleId);
+  // A failed save can leave a newer revision that was never selected as the draft.
+  const current =
+    previous?.id === article.currentRevisionId
+      ? previous
+      : article.currentRevisionId
+        ? await ctx.repos.revisions.findById(article.currentRevisionId)
+        : null;
   const now = ctx.clock.now();
   const revision = nextRevision({
     article,
     previous,
     id: ctx.ids.next<RevisionId>(),
-    input: draft,
+    input: { ...draft, journeyIds: draft.journeyIds ?? current?.journeyIds },
     createdBy: editedBy,
     now,
   });
@@ -389,6 +427,7 @@ export async function scheduleArticle(
 export interface ArticleAdminSummary {
   readonly article: Article;
   readonly title: string;
+  readonly journeyIds: ArticleRevision["journeyIds"];
   readonly hasUnpublishedChanges: boolean;
   readonly isLive: boolean;
   /** When the current revision's reader-visible content last changed; null while not yet known. */
@@ -439,6 +478,7 @@ export async function listArticlesForAdmin(
     return {
       article,
       title: current?.title ?? "(untitled)",
+      journeyIds: current?.journeyIds,
       hasUnpublishedChanges: hasUnpublishedChanges(article),
       isLive: isPubliclyVisible(article, now),
       contentUpdatedAt: current ? contentChangedAtFrom(history, current.revisionNumber) : null,

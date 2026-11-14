@@ -7,7 +7,7 @@ import { draftFrom, isDirty, normalizeDraft, type DraftInput } from "../../lib/d
 import { formatRelative } from "../../lib/labels";
 import type { AdPreview } from "../../lib/ad-preview";
 import { PhaseBadge } from "../../ui/PhaseBadge";
-import { Button, Loaded, Page, Panel, TextArea, TextInput } from "../../ui/parts";
+import { Button, Chips, Field, Loaded, Page, Panel, TextArea, TextInput } from "../../ui/parts";
 import { BodyPanel } from "../editor/BodyPanel";
 import { PublishPanel } from "../editor/PublishPanel";
 import { MediaPanel } from "../editor/MediaPanel";
@@ -43,6 +43,7 @@ function Editor({ article }: { article: ArticleDetailDto }) {
   useTitle(draft.title || article.slug);
   const { busy, run } = useAction();
   const monetization = useOp("ads.overview");
+  const taxonomy = useOp("taxonomy.get");
   const set = (change: Partial<DraftInput>) => setDraft((current) => ({ ...current, ...change }));
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -72,6 +73,12 @@ function Editor({ article }: { article: ArticleDetailDto }) {
       }
     : null;
   const page = article.kind === "page";
+  const journeys = taxonomy.data?.collections.filter((collection) => collection.kind === "journey");
+  const legacyJourneyIds =
+    journeys
+      ?.filter((journey) => article.collectionIds.includes(journey.id))
+      .map((journey) => journey.id) ?? [];
+  const selectedJourneys = draft.journeyIds ?? legacyJourneyIds;
 
   return (
     <Page
@@ -135,6 +142,39 @@ function Editor({ article }: { article: ArticleDetailDto }) {
               max={400}
               rows={2}
             />
+            {!page && (
+              <Field label="旅程" hint="記事を公開すると、選択した旅程のページに掲載されます。">
+                {() => (
+                  <Loaded resource={taxonomy} lines={1}>
+                    {() => (
+                      <>
+                        <Chips
+                          options={(journeys ?? []).map((journey) => ({
+                            value: journey.id,
+                            label: journey.title,
+                          }))}
+                          selected={selectedJourneys}
+                          onToggle={(id) => {
+                            const next = selectedJourneys.includes(id)
+                              ? selectedJourneys.filter((value) => value !== id)
+                              : [...selectedJourneys, id];
+                            set({ journeyIds: next });
+                          }}
+                        />
+                        {draft.journeyIds === undefined && legacyJourneyIds.length > 0 && (
+                          <Button
+                            kind="quiet"
+                            onClick={() => set({ journeyIds: legacyJourneyIds })}
+                          >
+                            現在の旅程を記事に設定
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </Loaded>
+                )}
+              </Field>
+            )}
           </div>
         </div>
         <BodyPanel

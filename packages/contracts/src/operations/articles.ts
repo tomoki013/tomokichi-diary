@@ -6,6 +6,10 @@ import { operation } from "./spec.js";
 
 const target = { type: "article", idField: "articleId" } as const;
 const relation = v.literalUnion(["primary", "visited", "mentioned", "related"] as const);
+const journeyIds = v.describe(
+  v.maybe(v.array(id, { max: 10 })),
+  "旅程のコレクション ID。公開すると旅程ページに自動で掲載されます。省略で変更なし、[] で全解除",
+);
 
 export interface ArticleListDto {
   readonly items: readonly ArticleSummaryDto[];
@@ -69,6 +73,7 @@ export const articleOperations = {
       seoTitleOverride: v.nullable(v.string({ max: 120 })),
       seoDescriptionOverride: v.nullable(v.string({ max: 400 })),
       changeSummary: v.nullable(v.string({ max: 400 })),
+      journeyIds,
     }),
     description:
       "新しい記事を下書きとして作成します。公開はされません。URL は path で明示します（例: /posts/slug）。Apple Music は共有 URL を本文に1行で書くとプレーヤーになります。本文の写真は search_media の url を使います（保存時に記事の画像にも自動で追加されます）。",
@@ -86,6 +91,7 @@ export const articleOperations = {
       seoTitleOverride: v.maybe(v.nullable(v.string({ max: 120 }))),
       seoDescriptionOverride: v.maybe(v.nullable(v.string({ max: 400 }))),
       changeSummary: v.maybe(v.nullable(v.string({ max: 400 }))),
+      journeyIds,
     }),
     description:
       "記事の下書きを保存します。指定しなかった項目は現在の内容のまま。公開中の記事でも、公開版は変わりません（公開は publish_article）。本文の写真は search_media の url を使います（保存時に記事の画像にも自動で追加されます）。",
@@ -173,7 +179,7 @@ export const articleOperations = {
     surface: "operator",
     input: v.object({
       articleId,
-      collectionIds: v.describe(v.maybe(v.array(id, { max: 10 })), "所属シリーズ・旅程の ID"),
+      collectionIds: v.describe(v.maybe(v.array(id, { max: 10 })), "所属シリーズの ID"),
       tagIds: v.describe(v.maybe(v.array(id, { max: 50 })), "タグの ID"),
       categoryIds: v.describe(v.maybe(v.array(id, { max: 10 })), "カテゴリーの ID"),
       locations: v.describe(
@@ -186,7 +192,7 @@ export const articleOperations = {
       ),
     }),
     description:
-      "記事の所属シリーズ・タグ・カテゴリー・地域・スポットを設定します（指定した項目だけ丸ごと置き換え、指定しなかった項目は変更しません）。ID は list_taxonomy・list_locations・list_places で調べます。公開中の記事は「変更を公開」で反映されます。",
+      "記事の所属シリーズ・タグ・カテゴリー・地域・スポットを設定します（指定した項目だけ丸ごと置き換え、指定しなかった項目は変更しません）。旅程は save_article_draft の journeyIds で設定します。ID は list_taxonomy・list_locations・list_places で調べます。公開中の記事は「変更を公開」で反映されます。",
     tool: { name: "set_article_series_and_tags", title: "Set article series, tags and places" },
     target,
   }),

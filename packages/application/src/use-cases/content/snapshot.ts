@@ -3,6 +3,7 @@ import { publicMonetizationOnly } from "@tomokichi/data";
 import type { AppContext } from "../../context.js";
 import type { ContentSnapshot } from "@tomokichi/data";
 import { canonicalImageLinks } from "./media-links.js";
+import { membershipsByArticle, resolveJourneyMemberships } from "../../read/journey-memberships.js";
 
 export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnapshot> {
   const { repos } = ctx;
@@ -164,6 +165,9 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     ...current.filter((row) => !frozen.has(row.articleId as import("@tomokichi/domain").ArticleId)),
     ...[...metadataByArticle.values()].flatMap((m) => saved(m)),
   ];
+  const knownJourneys = new Set(collections.filter((c) => c.kind === "journey").map((c) => c.id));
+  const memberships = replace(snapshot.articleCollections, (m) => m.collections);
+  const groupedMemberships = membershipsByArticle(memberships);
   return {
     ...snapshot,
     monetization: publicMonetizationOnly(
@@ -178,7 +182,16 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articlePlaces: replace(snapshot.articlePlaces, (m) => m.places),
     articleCategories: replace(snapshot.articleCategories, (m) => m.categories),
     articleTags: replace(snapshot.articleTags, (m) => m.tags),
-    articleCollections: replace(snapshot.articleCollections, (m) => m.collections),
+    articleCollections: articles.flatMap((article) =>
+      resolveJourneyMemberships(
+        groupedMemberships.get(article.id) ?? [],
+        article.id,
+        article.kind === "article" && article.publishedRevisionId
+          ? revisionById.get(article.publishedRevisionId)?.journeyIds
+          : undefined,
+        knownJourneys,
+      ),
+    ),
     noteRelatedArticles: [
       ...(snapshot.noteRelatedArticles ?? []).filter(
         (relation) =>
