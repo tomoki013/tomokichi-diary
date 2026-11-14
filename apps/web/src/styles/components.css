@@ -1006,37 +1006,6 @@
     font-size: var(--step-small);
   }
 
-  .table-scroll {
-    overflow-x: auto;
-    margin-block: var(--space-md);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .cost-table {
-    width: 100%;
-    min-width: 30rem;
-    font-size: var(--step-small);
-  }
-
-  .cost-table :is(th, td) {
-    padding: 0.7rem 0.9rem;
-    border-bottom: 1px solid var(--line);
-    text-align: left;
-  }
-
-  .cost-table thead th {
-    background: var(--surface-alt);
-    font-family: var(--font-label);
-    font-size: var(--step-tiny);
-    letter-spacing: 0.06em;
-  }
-
-  .cost-table tbody tr:last-child :is(th, td) {
-    border-bottom: 0;
-  }
-
   /* Loading placeholders -------------------------------------------- */
   .skeleton {
     position: relative;

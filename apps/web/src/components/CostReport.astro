@@ -10,8 +10,15 @@ interface Props {
 
 const { payload } = Astro.props;
 const currency = payload.costs?.currency ?? payload.budget?.currency ?? "JPY";
-const items = Object.entries(payload.costs?.items ?? {});
+const recorded = Object.entries(payload.costs?.items ?? {}).filter(([, value]) =>
+  Number.isFinite(value),
+);
+const items = (
+  recorded.some(([, value]) => value !== 0) ? recorded.filter(([, value]) => value !== 0) : recorded
+).toSorted(([, a], [, b]) => b - a);
 const total = items.reduce((sum, [, value]) => sum + value, 0);
+const max = items[0]?.[1] ?? 0;
+const showBars = max > 0 && items.every(([, value]) => value > 0);
 
 const LABELS: Record<string, string> = {
   flight: "航空券",
@@ -23,36 +30,92 @@ const LABELS: Record<string, string> = {
   other: "その他",
 };
 
-const format = (value: number): string =>
-  new Intl.NumberFormat("ja-JP", { style: "currency", currency, maximumFractionDigits: 0 }).format(
-    value,
-  );
+const amount = new Intl.NumberFormat("ja-JP", { style: "currency", currency });
 ---
 
 {items.length > 0 && (
-  <div class="table-scroll">
-    <table class="cost-table">
-      <caption>費用の内訳</caption>
-      <thead>
-        <tr>
-          <th scope="col">項目</th>
-          <th scope="col">金額</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map(([key, value]) => (
-          <tr>
-            <th scope="row">{LABELS[key] ?? key}</th>
-            <td>{format(value)}</td>
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th scope="row">合計</th>
-          <td>{format(total)}</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+  <figure class="cost-report">
+    <figcaption class="cost-report__caption">
+      <span>費用の内訳</span>
+      <span class="cost-report__total">
+        合計 <strong>{amount.format(total)}</strong>
+      </span>
+    </figcaption>
+    <ul class="cost-report__items" role="list">
+      {items.map(([key, value]) => (
+        <li class="cost-report__item">
+          <span>{LABELS[key] ?? key}</span>
+          <span class="cost-report__amount">{amount.format(value)}</span>
+          {showBars && (
+            <span class="cost-report__track" aria-hidden="true">
+              <span class="cost-report__bar" style={`width: ${(value / max) * 100}%`} />
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </figure>
 )}
+
+<style>
+  .cost-report {
+    margin-block: var(--space-md);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .cost-report__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    margin: 0 0 var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: var(--step-body);
+    text-align: start;
+  }
+  .cost-report__total {
+    font-size: var(--step-small);
+    font-variant-numeric: tabular-nums;
+  }
+  .cost-report__total strong {
+    margin-inline-start: 0.3rem;
+    font-size: 1.25rem;
+  }
+  .cost-report__items {
+    display: grid;
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+  }
+  .cost-report__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    font-size: var(--step-small);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .cost-report__amount {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .cost-report__track {
+    grid-column: 1 / -1;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--surface-alt);
+  }
+  .cost-report__bar {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+  }
+</style>

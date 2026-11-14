@@ -16,6 +16,7 @@ import {
 } from "@tomokichi/contracts";
 import { content } from "../lib/content";
 import { withHeadingIds } from "../lib/article-headings";
+import { placeCostReport } from "../lib/cost-report-placement";
 
 interface Props {
   slug: string;
@@ -42,6 +43,7 @@ const PLACEHOLDER = /<p>\s*\{\{((?:embed|monetization):[a-z0-9]+(?:-[a-z0-9]+)*)
 // Rendered by the same function as the admin preview, never by Astro's own
 // Markdown pipeline, so the editor's preview and the page cannot drift apart.
 const html = renderArticleMarkdown(entry.body ?? "");
+const body = embedByAnchor.get("cost-report")?.type === "table" ? placeCostReport(html) : html;
 const escapeHtml = (value: string) =>
   value
     .replaceAll("&", "&amp;")
@@ -107,7 +109,7 @@ const internalCard = (href: string): string | null => {
 const segments = replaceLoneLinks(
   withHeadingIds(
     enhanceInlineAffiliates(
-      enhanceAppleMusic(enhanceBodyImages(html)),
+      enhanceAppleMusic(enhanceBodyImages(body)),
       affiliates.map((placement) => placement.url),
     ),
   ),
