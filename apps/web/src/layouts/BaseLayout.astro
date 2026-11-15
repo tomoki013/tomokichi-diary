@@ -16,8 +16,6 @@ import {
   XIcon,
   YouTubeIcon,
 } from "../components/TravelIcons";
-import Picture from "../components/Picture.astro";
-import MyTripsShelf from "../components/MyTripsShelf.astro";
 import { searchSuggestions } from "../lib/search-suggestions";
 
 interface Props {
@@ -72,11 +70,6 @@ const socialLinks = [
   { href: "https://x.com/tomokichi178694", label: "X", Icon: XBrandIcon },
   { href: "/rss.xml", label: "RSS", Icon: RssIcon },
 ];
-/* The footer's closing photograph: one of the author's own, not stock. */
-const footerPhoto = {
-  storageKey: "images/Greece/oia-castle-sunset-view.jpg",
-  alt: "夕暮れのイアの街並みと海",
-};
 ---
 
 <!doctype html>
@@ -324,24 +317,6 @@ const footerPhoto = {
 
       <footer class="site-footer">
         <div class="wrap site-footer__inner">
-          <section class="site-footer__next" aria-labelledby="footer-next-title">
-            <Picture
-              storageKey={footerPhoto.storageKey}
-              alt={footerPhoto.alt}
-              sizes="(min-width: 74rem) 74rem, 100vw"
-              class="site-footer__next-photo"
-            />
-            <div class="site-footer__next-shade"></div>
-            <div class="site-footer__next-body">
-              <p class="site-footer__script">Next Adventure Awaits</p>
-              <h2 id="footer-next-title">さぁ、あなたはどこへ行く？</h2>
-              <p>気になった旅の話は、ここからいつでも読み返せます。</p>
-            </div>
-            <div class="site-footer__next-actions">
-              <MyTripsShelf />
-            </div>
-          </section>
-
           <section class="site-footer__body">
             <div class="site-footer__brand">
               <a href="/" class="site-footer__logo">
@@ -428,7 +403,18 @@ const footerPhoto = {
     <script>
       import { matchScore, searchTerms } from "../lib/archive-search";
       import { decorateReadLinks } from "../lib/readMarks";
+      import { onShelfChange, shelf, syncLikedFlag } from "../lib/my-trips";
       decorateReadLinks();
+      // The head script guessed "has likes" from raw storage; settle it against
+      // the parsed shelf, and keep the menu's liked count current.
+      const updateLikedCounts = () =>
+        document.querySelectorAll<HTMLElement>("[data-shelf-count]").forEach((badge) => {
+          const count = shelf("liked").length;
+          badge.textContent = count > 0 ? String(count) : "";
+        });
+      syncLikedFlag();
+      updateLikedCounts();
+      onShelfChange(updateLikedCounts);
       const body = document.body;
       const siteHeader = document.querySelector<HTMLElement>(".site-header");
       const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");

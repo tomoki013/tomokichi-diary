@@ -18,6 +18,7 @@ export function More() {
           title="検索の別名"
           meta="読みや別の書き方でも記事が見つかるようにする"
         />
+        <Row href={href.faq()} title="よくある質問" meta="FAQ ページの質問と答え" />
         <Row
           href={href.articles("pages")}
           title="固定ページ"

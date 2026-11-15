@@ -223,4 +223,4 @@ pnpm media:verify-ui
 - `scripts/lib/__tests__/seed-sql.test.ts`
 - `scripts/content-release.ts`
 - `package.json`
-- `docs/media-deduplication.md`
+- `docs/features/media-deduplication.md`

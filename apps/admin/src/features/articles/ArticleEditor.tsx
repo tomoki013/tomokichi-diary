@@ -126,6 +126,11 @@ function Editor({ article }: { article: ArticleDetailDto }) {
           ),
         )}
       </nav>
+      {article.path === "/faq" && (
+        <p className="muted">
+          よくある質問は <a href={href.faq()}>その他 → よくある質問</a> で質問ごとに編集できます。
+        </p>
+      )}
       <div className="editor">
         <div className="panel">
           <div className="panel__body" style={{ paddingTop: 12 }}>

@@ -147,7 +147,16 @@ export const inquiryOperations = {
     description: "テンプレートを、この問い合わせの相手の名前などで埋めて返します。",
     target,
   }),
-  "inquiry.reply": operation<{ ok: true; status: InquiryTicketStatus }>()({
+  "inquiry.reply": operation<{
+    ok: true;
+    status: InquiryTicketStatus;
+    /**
+     * What became of `ccSelf`: copied, no operator address set on the platform
+     * (sent without the copy), or the address already receives the mail.
+     * Null when no copy was asked for.
+     */
+    selfCopy: "copied" | "not_configured" | "is_recipient" | null;
+  }>()({
     kind: "write",
     ...adminOnly,
     input: v.object({
@@ -157,6 +166,8 @@ export const inquiryOperations = {
       subject: v.nullable(v.string({ max: 200 })),
       afterStatus: v.nullable(v.literalUnion(["WAITING_CUSTOMER", "RESOLVED"] as const)),
       closing: v.optional(v.boolean(), true),
+      /** Also Cc the operator's own address, which the platform holds; never one named here. */
+      ccSelf: v.optional(v.boolean(), false),
     }),
     description: "問い合わせの相手に返信メールを送ります。",
     target,

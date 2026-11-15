@@ -20,13 +20,10 @@ starts only after the `Check` job is green and runs the sequence below. Its
 `production` environment (never repository secrets, so pull request runs cannot
 read them), attached only to the steps that talk to Cloudflare.
 
-- To reload `export/` into D1 as part of a release (after a batch edit made
-  through the local tooling, such as `pnpm content:experiences`), run the
-  workflow by hand on `main` with **seed** ticked.
-- Until the cutover the site is verified on workers.dev; set the environment
-  variable `VERIFY_URL` to `https://tomokichidiary.com` once the domain points
-  at the Worker. The production build must also carry
-  `PUBLIC_INDEXABLE=true`; all other builds are noindex by default.
+- To reload `export/` into D1 as part of a release (rare: a batch edit made to
+  `export/` first), run the workflow by hand on `main` with **seed** ticked.
+- The production build must carry `PUBLIC_INDEXABLE=true`; all other builds
+  are noindex by default.
 - Media sync always lists the **current R2 origin** and compares object key, size,
   ETag (byte digest) and Cache-Control. `.cache/r2-manifest.json` is diagnostic
   only; losing it does not resend the bucket. Missing objects are repaired even
@@ -63,41 +60,8 @@ package installation receives no Cloudflare credentials. The existing token must
 allow R2 object listing/reading as well as writes. The final timings collector
 uses Actions read permission and a short-lived GitHub token, never the admin token.
 
-See [publication-pipeline.md](publication-pipeline.md) for migration order,
+See [publication-pipeline.md](features/publication-pipeline.md) for migration order,
 request/execution fencing, recovery, measured results and remaining production checks.
-
-### Domain cutover preflight
-
-`verify:live` checks legacy URL coverage, but it cannot detect a wrong
-canonical host, a preview accidentally becoming indexable, a missing `www` or
-HTTP redirect, or a site/API CORS mismatch. After the web Worker and DNS are
-ready, run both checks against the real domain:
-
-```bash
-pnpm verify:live https://tomokichidiary.com
-pnpm verify:cutover https://tomokichidiary.com
-```
-
-`verify:cutover` is intentionally strict. It checks the home page canonical,
-robots.txt, sitemap host consistency, apex HTTPS, `www` and HTTP redirects,
-the service worker, a representative media asset, and the API health/CORS
-origin. Do not proceed to Search Console resubmission or announce the cutover
-while it is failing.
-
-Before changing DNS:
-
-- keep the current Netlify domain attached for the rollback window;
-- lower DNS TTL ahead of the change and switch apex and `www` together;
-- confirm the Cloudflare custom domain/redirect rules are ready, because the
-  web Worker's `cloudflare.config.ts` deliberately does not contain a guessed zone
-  ID or an automatic domain binding;
-- deploy API and web in the documented order, then point `VERIFY_URL` at the
-  custom domain;
-- check the production contact form, API health, media URL, GSC URL
-  inspection, and GA4 realtime after the two automated checks pass.
-
-If any check fails, leave DNS on Netlify. The existing workers.dev deployment
-and Netlify site remain the safe rollback paths.
 
 Two details that are easy to lose:
 
@@ -274,7 +238,7 @@ depending on whether first paint lands before the initial style-and-layout task.
   `content-visibility: auto` so they are skipped until scrolled near.
 - Re-run one page: `pnpm perf` (edit `lighthouserc.json` to narrow the URL list).
 - Known structural costs and planned work are listed in
-  [audit §11.3](audit/diary-2.0-full-audit.md#113-20-で残る改善点) (P-6 onwards).
+  [audit §11.3](archive/2026-09-diary-2.0-full-audit.md#113-20-で残る改善点) (P-6 onwards).
 
 ### `PERF_REGRESSION`
 
@@ -313,22 +277,9 @@ rebuilds it from `export/` (the previous file is kept beside it as `.bak`).
 
 ### Editing content without the admin
 
-`pnpm content:revise <file.md>` publishes a new revision of an existing
-article through the same use cases the admin API calls, against the local
-database. The file's frontmatter names the `slug`, optional `title`,
-`summary`, `seoDescription`, a required `changeSummary` and an optional
-`updatedAt` (`keep` for a metadata-only change); the body replaces the article
-body when present. `publishedAt` is never touched. Travel knowledge attached
-to the previous revision is carried over. Always:
-
-```bash
-pnpm db:restore-local
-pnpm content:revise path/to/revision.md
-pnpm export:data && pnpm legacy:export   # legacy:export until the cutover
-```
-
-then commit `export/` (and the legacy repository) and release as usual
-(`pnpm db:seed` puts the new revision into D1).
+Article text lives in production D1. Change it in the admin or through the
+operator MCP ([OPERATOR_MCP.md](OPERATOR_MCP.md)); editing `export/` or the
+local database does not reach the public site.
 
 `db:seed` upserts on each table's primary key (`scripts/lib/seed-sql.ts`), so
 it is safe to rerun against production: rows the export does not carry --
@@ -336,27 +287,6 @@ reader likes, contact messages, admin drafts -- are left alone. It must never
 go back to `INSERT OR REPLACE`: REPLACE deletes before inserting, and the
 `ON DELETE CASCADE` on `article_likes` and the revision tables turns that into
 a wipe (`scripts/lib/__tests__/seed-sql.test.ts` fails if it does).
-
-### `CONTENT_PARITY_MISMATCH` (temporary, until the cutover)
-
-The previous Next.js site (`../travel-diary`, or `LEGACY_REPO`) serves an
-article that differs from `export/` — a different title, description, body,
-heading, image, link, date, or an article missing on one side.
-`pnpm content:parity --report` lists every field in
-`docs/migration/content-parity-report.md`.
-
-Diary 2.0 is canonical, so the fix depends on which side moved:
-
-- **2.0 changed** (the usual case): `pnpm legacy:export`, then commit and push
-  the legacy repository. CI on this repository checks out the legacy `main`,
-  so push the legacy repository first or the check stays red.
-- **The legacy repository was edited directly**: do not copy the text back by
-  hand. Fold the change into 2.0 with `pnpm content:revise` (or the admin),
-  `pnpm export:data`, then `pnpm legacy:export`.
-- **The legacy checkout is missing**: the step is skipped, not failed.
-
-The whole mechanism is deleted after the cutover — see
-`scripts/legacy-sync/README.md` and `docs/migration/legacy-content-sync.md`.
 
 ## Media
 
@@ -527,6 +457,14 @@ tickets on the inquiry platform, from `admin.tomokichidiary.com`.
   to an inactive carrier template (`diary_system_subject`, never listed) just
   before sending. After the first reply the platform keeps the conversation's
   `Re:` subject, and the screen shows it read-only.
+- **Recipient, sender and Cc** are the platform's: it mails the person who
+  wrote in, keeps reply-all Cc from their mail, and threads each reply onto the
+  latest mail in the conversation (yours included). 「自分のアドレスを CC に入れる」
+  sends `ccSelf`, and the platform adds the operator's own notification address
+  (`mailSettings[].notificationEmail`, else the deployment's
+  `NOTIFICATION_EMAIL`); no address is ever sent from here. If none is set the
+  reply still goes, without the copy, and the toast says so. The tick is
+  remembered per browser.
 
 A reply that still contains a `{{...}}` placeholder is refused, and a send the
 platform could not mail answers `INQUIRY_MAIL_FAILED`. The reader's answer
@@ -610,7 +548,7 @@ summary, body length, a canonical route, and a cover image with alt text.
 
 ## MONETIZATION_INVALID
 
-収益化設定の公開前検証・参照・状態遷移に問題があります。重複／消失マーカー、見出しと本文600字未満、画像・カード隣接、1枠上限、未登録ユニット、別記事の実験・未登録案件の参照を確認してください。実施済み実験の条件書換え・再開はできません。DBを直接修正せず、管理画面から修正・保存後、公開チェックを再実行します。切り戻しと機能フラグは [収益化Phase 2](monetization-phase2.md#切り戻し) を参照してください。0017はexpandのみで、旧版へコードを戻す際にもdropは不要です。
+収益化設定の公開前検証・参照・状態遷移に問題があります。重複／消失マーカー、見出しと本文600字未満、画像・カード隣接、1枠上限、未登録ユニット、別記事の実験・未登録案件の参照を確認してください。実施済み実験の条件書換え・再開はできません。DBを直接修正せず、管理画面から修正・保存後、公開チェックを再実行します。切り戻しと機能フラグは [収益化Phase 2](features/monetization-phase2.md#切り戻し) を参照してください。0017はexpandのみで、旧版へコードを戻す際にもdropは不要です。
 
 ## 問い合わせの返信メールと配信通知
 

@@ -8,6 +8,7 @@ import { op } from "../../data/client";
 import { useAction, useOp, useTitle } from "../../data/hooks";
 import { href } from "../../app/router";
 import { replaceReplyOpening } from "../../lib/inquiry-compose";
+import { useToast } from "../../ui/toast";
 import {
   formatDateTime,
   isOpenTicket,
@@ -117,6 +118,8 @@ function ReplyForm({
   );
   const [subject, setSubject] = useState(compose.subject);
   const [closing, setClosing] = useState(true);
+  const [ccSelf, setCcSelf] = useState(readCcSelf);
+  const toast = useToast();
   const [after, setAfter] = useState<"" | "WAITING_CUSTOMER" | "RESOLVED">("WAITING_CUSTOMER");
   const [idempotencyKey] = useState(key);
   const { busy, run } = useAction();
@@ -130,7 +133,7 @@ function ReplyForm({
   }
   async function send() {
     if (!confirmed(`${compose.to ?? "相手"} に返信を送ります。送ると取り消せません。`)) return;
-    await run(
+    const sent = await run(
       "send",
       () =>
         op("inquiry.reply", {
@@ -140,8 +143,17 @@ function ReplyForm({
           subject: compose.subjectEditable ? subject : null,
           afterStatus: after || null,
           closing,
+          ccSelf,
         }),
-      { done: "返信を送りました", touches },
+      { touches },
+    );
+    if (!sent) return;
+    toast.info(
+      sent.selfCopy === "not_configured"
+        ? "返信を送りました。自分のアドレスが基盤に設定されていないため、CC なしで送っています"
+        : sent.selfCopy === "copied"
+          ? "返信を送りました（自分にも CC）"
+          : "返信を送りました",
     );
   }
   return (
@@ -187,6 +199,14 @@ function ReplyForm({
         checked={closing}
         onChange={setClosing}
       />
+      <Check
+        label="自分のアドレスを CC に入れる"
+        checked={ccSelf}
+        onChange={(next) => {
+          setCcSelf(next);
+          writeCcSelf(next);
+        }}
+      />
       <pre className="muted" style={{ whiteSpace: "pre-wrap", margin: 0 }}>
         {compose.signature}
       </pre>
@@ -210,6 +230,23 @@ function ReplyForm({
       </Button>
     </Panel>
   );
+}
+
+/** The CC choice is a per-browser habit, so it is remembered here only. */
+const CC_SELF_KEY = "diary-admin-reply-cc-self";
+function readCcSelf(): boolean {
+  try {
+    return localStorage.getItem(CC_SELF_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeCcSelf(on: boolean): void {
+  try {
+    localStorage.setItem(CC_SELF_KEY, on ? "1" : "0");
+  } catch {
+    // Storage refused: the box simply starts unticked next time.
+  }
 }
 
 function StatusPanel({ ticket }: { ticket: InquiryTicketDetailDto }) {

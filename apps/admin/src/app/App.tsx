@@ -12,6 +12,7 @@ import { MediaLibrary } from "../features/media/MediaLibrary";
 import { SeriesList, SeriesEdit } from "../features/curation/Series";
 import { RankingList, RankingEdit } from "../features/curation/Rankings";
 import { SearchWords } from "../features/curation/SearchWords";
+import { Faq } from "../features/curation/Faq";
 import { Ads } from "../features/ads/Ads";
 import { KnowledgeReview } from "../features/knowledge/KnowledgeReview";
 import { Analytics } from "../features/analytics/Analytics";
@@ -58,6 +59,8 @@ function screen(route: Route): ReactNode {
       return <RankingEdit key={route.id} id={route.id} />;
     case "search-words":
       return <SearchWords />;
+    case "faq":
+      return <Faq />;
     case "ads":
       return <Ads />;
     case "knowledge":

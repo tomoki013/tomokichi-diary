@@ -475,6 +475,7 @@ export const inquiryHandlers: Handlers<Names> = {
           idempotencyKey: input.idempotencyKey,
           reopenIfResolved: !isOpen(ticket.status),
           ...(templateId ? { templateId } : {}),
+          ...(input.ccSelf ? { ccSelf: true } : {}),
         },
         who(scope),
       ),
@@ -496,6 +497,6 @@ export const inquiryHandlers: Handlers<Names> = {
       // The reply is out either way; a refused move only leaves it 対応中.
       if (moved.ok) status = moved.value.status;
     }
-    return { ok: true, status };
+    return { ok: true, status, selfCopy: input.ccSelf ? (sent.selfCopy ?? null) : null };
   },
 };
