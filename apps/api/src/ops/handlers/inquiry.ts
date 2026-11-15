@@ -129,6 +129,7 @@ function toSummary(ticket: OperatorTicketSummary): InquiryTicketSummaryDto {
     number: ticket.number,
     status: ticket.status,
     subject: ticket.subject,
+    mailSubject: ticket.mailSubject ?? null,
     lane: laneOf(ticket.subject),
     requesterEmail: ticket.requesterEmail,
     priority: ticket.priority,

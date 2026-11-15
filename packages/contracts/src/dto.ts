@@ -390,7 +390,13 @@ export interface InquiryTicketSummaryDto {
   /** Human-facing, e.g. `TK-000123`. */
   readonly number: string;
   readonly status: InquiryTicketStatus;
+  /** The ticket's heading: the form topic, or the first mail's subject. */
   readonly subject: string;
+  /**
+   * The conversation's subject now (the latest mail's; the next reply is `Re:`
+   * this). Null before any mail on a form message.
+   */
+  readonly mailSubject: string | null;
   /**
    * The lane the subject's topic belongs to; null for a subject no topic
    * names (a ticket that did not come from the form).
@@ -414,6 +420,8 @@ export type InquiryTimelineItemDto =
       readonly sender: string | null;
       /** Who a mail went to: the person first, then every Cc, comma-separated. */
       readonly recipient: string | null;
+      /** The mail's subject as sent or received; null for notes and older mail. */
+      readonly subject: string | null;
       readonly body: string;
       readonly createdAt: string;
     }

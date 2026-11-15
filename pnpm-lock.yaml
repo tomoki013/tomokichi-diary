@@ -131,8 +131,8 @@ importers:
   apps/api:
     dependencies:
       '@inquiry-platform/sdk':
-        specifier: github:tomoki013/inquiry-platform#v0.14.0&path:/packages/sdk
-        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/967cb98ef721f9d953a9f73cc2d3bdc69b6bd998#path:/packages/sdk
+        specifier: github:tomoki013/inquiry-platform#v0.15.0&path:/packages/sdk
+        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/154ac3b3463694409c0f0ce66120160653201cb3#path:/packages/sdk
       '@tomokichi/application':
         specifier: workspace:*
         version: link:../../packages/application
@@ -171,8 +171,8 @@ importers:
         specifier: ^14.3.4
         version: 14.3.4(@types/node@26.4.0)(astro@7.3.5(@types/node@26.4.0)(tsx@4.23.12)(yaml@2.9.1))(esbuild@0.28.2)(tsx@4.23.12)(wrangler@4.151.3(@cloudflare/workers-types@5.20260925.1)(@types/node@26.4.0))(yaml@2.9.1)
       '@inquiry-platform/sdk':
-        specifier: github:tomoki013/inquiry-platform#v0.14.0&path:/packages/sdk
-        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/967cb98ef721f9d953a9f73cc2d3bdc69b6bd998#path:/packages/sdk
+        specifier: github:tomoki013/inquiry-platform#v0.15.0&path:/packages/sdk
+        version: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/154ac3b3463694409c0f0ce66120160653201cb3#path:/packages/sdk
       astro:
         specifier: ^7.3.5
         version: 7.3.5(@types/node@26.4.0)(tsx@4.23.12)(yaml@2.9.1)
@@ -1327,9 +1327,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/967cb98ef721f9d953a9f73cc2d3bdc69b6bd998#path:/packages/sdk':
-    resolution: {gitHosted: true, integrity: sha512-IvsxNj7qbYEc8JAGl++WiFdUQANuRYsyrfbET3DhgshQJbkqDdzRCjajJku4PISK73etOKHznII3cXKwWpaNGQ==, path: /packages/sdk, tarball: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/967cb98ef721f9d953a9f73cc2d3bdc69b6bd998}
-    version: 0.10.0
+  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/154ac3b3463694409c0f0ce66120160653201cb3#path:/packages/sdk':
+    resolution: {gitHosted: true, integrity: sha512-vuWxO05E+SrU9Eerkt6Wx3iecD67uW8I+Oo7extM4KpIMKlRXpcSq7twPzoJwPmrXNRBCPuVUG99EPGARSSf6w==, path: /packages/sdk, tarball: https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/154ac3b3463694409c0f0ce66120160653201cb3}
+    version: 0.11.0
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5230,7 +5230,7 @@ snapshots:
   '@img/sharp-win32-x64@0.35.5':
     optional: true
 
-  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/967cb98ef721f9d953a9f73cc2d3bdc69b6bd998#path:/packages/sdk': {}
+  '@inquiry-platform/sdk@https://codeload.github.com/tomoki013/inquiry-platform/tar.gz/154ac3b3463694409c0f0ce66120160653201cb3#path:/packages/sdk': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

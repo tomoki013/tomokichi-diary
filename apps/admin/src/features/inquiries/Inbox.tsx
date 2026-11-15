@@ -79,8 +79,17 @@ export function Inbox() {
                   <Row
                     key={ticket.id}
                     href={href.inquiry(ticket.id)}
-                    title={ticket.subject}
-                    meta={`${ticket.number} · ${ticket.requesterEmail ?? ""} · ${formatRelative(ticket.createdAt)}`}
+                    title={ticket.mailSubject ?? ticket.subject}
+                    meta={[
+                      ...(ticket.mailSubject && ticket.mailSubject !== ticket.subject
+                        ? [ticket.subject]
+                        : []),
+                      ticket.number,
+                      ticket.requesterEmail ?? "",
+                      formatRelative(ticket.createdAt),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                     aside={
                       <Badge
                         tone={

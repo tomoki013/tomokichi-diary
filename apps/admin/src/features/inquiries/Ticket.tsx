@@ -45,14 +45,16 @@ export function Ticket({ id }: { id: string }) {
 }
 
 function TicketView({ ticket }: { ticket: InquiryTicketDetailDto }) {
-  useTitle(ticket.subject);
+  const title = ticket.mailSubject ?? ticket.subject;
+  useTitle(title);
   return (
-    <Page title={ticket.subject} back={{ href: href.inquiries(), label: "問い合わせ" }}>
+    <Page title={title} back={{ href: href.inquiries(), label: "問い合わせ" }}>
       <div className="inline">
         <Badge tone={isOpenTicket(ticket.status) ? "warn" : "neutral"}>
           {ticketStatusLabels[ticket.status]}
         </Badge>
         <span className="muted">
+          {ticket.mailSubject && ticket.mailSubject !== ticket.subject && `${ticket.subject} · `}
           {ticket.number} · {ticket.requesterEmail} · {formatDateTime(ticket.createdAt)}
         </span>
       </div>
@@ -71,7 +73,9 @@ function TicketView({ ticket }: { ticket: InquiryTicketDetailDto }) {
                     : (item.sender ?? "受信")}{" "}
                 · {formatDateTime(item.createdAt)}
               </span>
-              {item.direction !== "note" && <Recipients recipient={item.recipient} />}
+              {item.direction !== "note" && (
+                <Recipients recipient={item.recipient} subject={item.subject} />
+              )}
               {item.body}
             </li>
           ) : (
@@ -258,17 +262,22 @@ function ReplyForm({
   );
 }
 
-/** Who a mail went to: the person first, then every Cc. */
-function Recipients({ recipient }: { recipient: string | null }) {
+/** A mail's header as received or sent: who it went to (the person, then every Cc) and its subject. */
+function Recipients({ recipient, subject }: { recipient: string | null; subject: string | null }) {
   const [first, ...copies] = (recipient ?? "")
     .split(",")
     .map((address) => address.trim())
     .filter(Boolean);
-  if (!first) return null;
+  if (!first && !subject) return null;
   return (
     <span className="message__meta">
-      宛先 {first}
-      {copies.length > 0 && <> · CC {copies.join(", ")}</>}
+      {first && (
+        <span className="message__header">
+          宛先 {first}
+          {copies.length > 0 && <> · CC {copies.join(", ")}</>}
+        </span>
+      )}
+      {subject && <span className="message__header">件名 {subject}</span>}
     </span>
   );
 }
