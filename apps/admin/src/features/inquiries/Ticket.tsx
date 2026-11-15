@@ -78,6 +78,15 @@ function TicketView({ ticket }: { ticket: InquiryTicketDetailDto }) {
           ),
         )}
       </ol>
+      <p>
+        <a
+          href={`https://admin.tmkch.io/inquiry-sharing/tomokichi-diary#${encodeURIComponent(ticket.id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          AIへの共有を準備（別タブ）
+        </a>
+      </p>
       {ticket.canReply && <Reply ticket={ticket} />}
       <StatusPanel ticket={ticket} />
       <NotePanel ticket={ticket} />
