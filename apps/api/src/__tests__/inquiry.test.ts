@@ -125,6 +125,15 @@ function platformDefault(method: string, args: unknown[]): unknown {
       return { items: [ticket()], total: 1 };
     case "listTemplates":
       return templates;
+    case "previewReply":
+      return {
+        from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
+        to: ["reader@example.com"],
+        cc: ["friend@example.com"],
+        self: { address: "owner@example.com", outcome: "copied" },
+        subject: "Re: 写真の件",
+        overridesAllowed: true,
+      };
     case "applyTemplate": {
       const found = templates.find((entry) => entry.id === args[2]);
       return {
@@ -407,7 +416,6 @@ describe("inquiry operations", () => {
       idempotencyKey: "reply-key-1",
       subject: null,
       afterStatus: "WAITING_CUSTOMER",
-      to: "someone@example.com",
     });
     expect(await response.json()).toEqual({
       ok: true,
@@ -440,7 +448,6 @@ describe("inquiry operations", () => {
       subject: null,
       afterStatus: null,
       ccSelf: true,
-      cc: "someone@example.com",
     });
     expect((await response.json()).selfCopy).toBe("not_configured");
     // Only the flag goes up: the address is the platform's, never one named here.
@@ -521,10 +528,13 @@ describe("inquiry operations", () => {
   it("lays out a reply: greeting, subject, closing and signature", async () => {
     const body = await (await op("inquiry.compose", { ticketId: "t1" })).json();
     expect(body).toEqual({
-      to: "reader@example.com",
+      to: ["reader@example.com"],
+      cc: ["friend@example.com"],
+      self: { address: "owner@example.com", outcome: "copied" },
       from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
       subject: "【ともきちの旅行日記】記事についてのお問い合わせ",
-      subjectEditable: true,
+      subjectSetsThread: true,
+      overridesAllowed: true,
       opening: expect.stringContaining("ともきち 様"),
       openings: {
         takagi: expect.stringContaining("ともきちの旅行日記を運営しております、髙木です。"),
@@ -541,7 +551,39 @@ describe("inquiry operations", () => {
       value: { body: "", unresolved: [], subject: "Re: 写真の件" },
     };
     const later = await (await op("inquiry.compose", { ticketId: "t1" })).json();
-    expect(later).toMatchObject({ subject: "Re: 写真の件", subjectEditable: false });
+    expect(later).toMatchObject({ subject: "Re: 写真の件", subjectSetsThread: false });
+  });
+
+  it("sends a chosen To, Cc and later subject as this mail's, and rejects what is not an address", async () => {
+    answer.applyTemplate = {
+      ok: true,
+      value: { body: "", unresolved: [], subject: "Re: 写真の件" },
+    };
+    await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-override",
+      subject: "写真の件（追記）",
+      afterStatus: null,
+      to: ["reader@example.com", "colleague@example.com"],
+      cc: [],
+    });
+    expect(last("reply")?.args[2]).toMatchObject({
+      to: ["reader@example.com", "colleague@example.com"],
+      cc: [],
+      subject: "写真の件（追記）",
+    });
+    expect(last("reply")?.args[2]).not.toHaveProperty("templateId");
+
+    const refused = await op("inquiry.reply", {
+      ticketId: "t1",
+      body: "お返事です",
+      idempotencyKey: "reply-key-bad",
+      subject: null,
+      afterStatus: null,
+      cc: ["名前 <evil@example.com>"],
+    });
+    expect(refused.status).toBe(400);
   });
 
   it("starts the subject from the topic the reader picked, or else the lane", async () => {

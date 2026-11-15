@@ -457,14 +457,21 @@ tickets on the inquiry platform, from `admin.tomokichidiary.com`.
   to an inactive carrier template (`diary_system_subject`, never listed) just
   before sending. After the first reply the platform keeps the conversation's
   `Re:` subject, and the screen shows it read-only.
-- **Recipient, sender and Cc** are the platform's: it mails the person who
-  wrote in, keeps reply-all Cc from their mail, and threads each reply onto the
-  latest mail in the conversation (yours included). 「自分のアドレスを CC に入れる」
-  sends `ccSelf`, and the platform adds the operator's own notification address
+- **The mail header** is shown like a mail client's, from the platform's
+  `previewReply`: 差出人 (fixed), 宛先, CC (reply-all from the person's latest
+  mail) and 件名, each as it would go out. The binding has
+  `allowReplyOverrides: true` (`apps/api/cloudflare.config.ts`), so 宛先 (1–5)
+  and CC (0–10) can be changed for one reply; only changed lists are sent, and
+  the platform refuses the support address and anything that is not a bare
+  address. A changed subject on a later reply applies to that mail only (the
+  platform adds the ticket number at the end if it is missing); on a first
+  reply to a form message it still becomes the conversation's subject.
+- **自分も CC** sends `ccSelf`; the platform adds the operator's own address
   (`mailSettings[].notificationEmail`, else the deployment's
-  `NOTIFICATION_EMAIL`); no address is ever sent from here. If none is set the
-  reply still goes, without the copy, and the toast says so. The tick is
-  remembered per browser.
+  `NOTIFICATION_EMAIL`), shown next to the box. No address for it is ever sent
+  from here. The tick is remembered per browser.
+- **Each mail in the timeline** shows who it went to and every Cc
+  (`recipient`). Replies thread onto the latest mail in the conversation.
 
 A reply that still contains a `{{...}}` placeholder is refused, and a send the
 platform could not mail answers `INQUIRY_MAIL_FAILED`. The reader's answer

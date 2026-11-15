@@ -33,8 +33,10 @@ import { invalid, notFound, OpError, type Handlers, type OpScope } from "../scop
 /**
  * The admin's inbox for this site's contacts on the shared inquiry platform:
  * where they are listed, worked as tickets, annotated and answered. A reply is
- * mailed by the platform, which decides the recipient and sender from the
- * ticket; the body and, for a first reply, the subject go up from here.
+ * mailed by the platform. It works out the sender, To, reply-all Cc and
+ * subject from the ticket and shows them first (`previewReply`); this site's
+ * binding may choose To, Cc and the subject for one reply
+ * (`allowReplyOverrides`). The sender is always the platform's.
  *
  * Every operation here is `admin-only`: no MCP server can read or send. The
  * platform's `ProjectOperator` binding scopes each call to this site's
@@ -374,15 +376,19 @@ export const inquiryHandlers: Handlers<Names> = {
     await ensureSignature(operator).catch(() => undefined);
     const ticket = take(scope, await operator.getTicket(ticketId));
     const project = take(scope, await operator.project());
+    const preview = take(scope, await operator.previewReply(ticket.id));
     const carrier = templates.find((template) => template.key === SUBJECT_KEY);
     const opening = templates.find((template) => template.key === OPENING_KEY);
 
-    let subject = defaultSubject(findContactTopic(ticket.subject));
-    let subjectEditable = true;
+    // A first reply to a form message names the conversation's subject (the
+    // lane's default, through the carrier template); after that the platform's
+    // `Re:` subject is the starting point.
+    let subject = preview.subject;
+    let subjectSetsThread = false;
     if (carrier && ticket.canReply) {
       const probed = take(scope, await subjectOf(operator, ticket.id, carrier));
-      subjectEditable = probed.editable;
-      if (!subjectEditable) subject = probed.subject;
+      subjectSetsThread = probed.editable;
+      if (subjectSetsThread) subject = defaultSubject(findContactTopic(ticket.subject));
     }
     let greeting = "";
     if (opening?.isActive && ticket.canReply) {
@@ -390,10 +396,13 @@ export const inquiryHandlers: Handlers<Names> = {
       if (applied.ok) greeting = fillSiteVariables(applied.value.body).trim();
     }
     return {
-      to: ticket.requesterEmail,
-      from: REPLY_FROM,
+      to: preview.to,
+      cc: preview.cc,
+      self: preview.self,
+      from: preview.from || REPLY_FROM,
       subject,
-      subjectEditable,
+      subjectSetsThread,
+      overridesAllowed: preview.overridesAllowed,
       opening: greeting.replaceAll("{{operatorName}}", "ともきち"),
       openings: {
         takagi: greeting.replaceAll("{{operatorName}}", "髙木"),
@@ -453,6 +462,9 @@ export const inquiryHandlers: Handlers<Names> = {
     }
 
     let templateId: string | undefined;
+    // A subject on a first form reply becomes the conversation's (the carrier
+    // template); any other changed subject goes for this one mail only.
+    let subjectOverride: string | undefined;
     if (subject) {
       const carrier = (await templatesOf(scope, operator)).find(
         (template) => template.key === SUBJECT_KEY,
@@ -463,6 +475,8 @@ export const inquiryHandlers: Handlers<Names> = {
         if (carrier.subject !== subject)
           take(scope, await operator.updateTemplate(carrier.id, { subject }, who(scope)));
         templateId = carrier.id;
+      } else {
+        subjectOverride = subject;
       }
     }
 
@@ -476,6 +490,9 @@ export const inquiryHandlers: Handlers<Names> = {
           reopenIfResolved: !isOpen(ticket.status),
           ...(templateId ? { templateId } : {}),
           ...(input.ccSelf ? { ccSelf: true } : {}),
+          ...(input.to ? { to: input.to } : {}),
+          ...(input.cc ? { cc: input.cc } : {}),
+          ...(subjectOverride ? { subject: subjectOverride } : {}),
         },
         who(scope),
       ),

@@ -412,6 +412,8 @@ export type InquiryTimelineItemDto =
       /** `note` is an internal note: never sent, never shown to the sender. */
       readonly direction: "inbound" | "outbound" | "note";
       readonly sender: string | null;
+      /** Who a mail went to: the person first, then every Cc, comma-separated. */
+      readonly recipient: string | null;
       readonly body: string;
       readonly createdAt: string;
     }
@@ -459,15 +461,25 @@ export interface InquiryTicketPageDto extends PageDto<InquiryTicketSummaryDto> {
 
 /** What a reply to one ticket will look like, before anything is written. */
 export interface InquiryComposeDto {
-  readonly to: string | null;
+  /** What the platform would send to, as a mail client shows it before sending. */
+  readonly to: readonly string[];
+  /** Reply-all: everyone else on the person's latest mail. */
+  readonly cc: readonly string[];
+  /** The operator's own copy: the address `ccSelf` adds (null when none is set). */
+  readonly self: {
+    readonly address: string | null;
+    readonly outcome: "copied" | "not_configured" | "is_recipient";
+  };
   readonly from: string;
   /**
-   * The subject the reply goes out with. Only the first reply to a form
-   * message chooses one; after that the platform keeps the conversation's
-   * `Re:` subject and `subjectEditable` is false.
+   * The subject the reply goes out with. On the first reply to a form message
+   * it becomes the conversation's (`subjectSetsThread`); later a changed
+   * subject applies to that one mail and the next reply is `Re:` again.
    */
   readonly subject: string;
-  readonly subjectEditable: boolean;
+  readonly subjectSetsThread: boolean;
+  /** Whether To, Cc and the subject can be changed for one reply. */
+  readonly overridesAllowed: boolean;
   /** The greeting, filled in for this reader, that a new reply starts with. */
   readonly opening: string;
   readonly openings: Readonly<Record<"takagi" | "tomokichi", string>>;

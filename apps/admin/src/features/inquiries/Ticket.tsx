@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import type {
   InquiryComposeDto,
   InquiryTicketDetailDto,
@@ -9,6 +9,7 @@ import { useAction, useOp, useTitle } from "../../data/hooks";
 import { href } from "../../app/router";
 import { replaceReplyOpening } from "../../lib/inquiry-compose";
 import { useToast } from "../../ui/toast";
+import { AddressField, HeaderRow, sameAddresses } from "./MailHeader";
 import {
   formatDateTime,
   isOpenTicket,
@@ -70,6 +71,7 @@ function TicketView({ ticket }: { ticket: InquiryTicketDetailDto }) {
                     : (item.sender ?? "受信")}{" "}
                 · {formatDateTime(item.createdAt)}
               </span>
+              {item.direction !== "note" && <Recipients recipient={item.recipient} />}
               {item.body}
             </li>
           ) : (
@@ -117,6 +119,9 @@ function ReplyForm({
     compose.openings.tomokichi ? `${compose.openings.tomokichi}\n\n` : "",
   );
   const [subject, setSubject] = useState(compose.subject);
+  const [to, setTo] = useState<string[]>([...compose.to]);
+  const [cc, setCc] = useState<string[]>([...compose.cc]);
+  const editable = compose.overridesAllowed;
   const [closing, setClosing] = useState(true);
   const [ccSelf, setCcSelf] = useState(readCcSelf);
   const toast = useToast();
@@ -129,10 +134,22 @@ function ReplyForm({
     );
     if (!applied) return;
     setBody((current) => `${current.trimEnd()}\n\n${applied.body}`.trimStart());
-    if (applied.subject && compose.subjectEditable) setSubject(applied.subject);
+    if (applied.subject) setSubject(applied.subject);
   }
+  const copies = [...cc, ...(ccSelf && compose.self.address ? [compose.self.address] : [])];
   async function send() {
-    if (!confirmed(`${compose.to ?? "相手"} に返信を送ります。送ると取り消せません。`)) return;
+    if (to.length === 0) {
+      toast.error(new Error("宛先がありません"));
+      return;
+    }
+    const lines = [
+      `宛先: ${to.join(", ")}`,
+      ...(copies.length > 0 ? [`CC: ${copies.join(", ")}`] : []),
+      `件名: ${subject.trim()}`,
+    ];
+    if (!confirmed(`この内容で返信を送ります。送ると取り消せません。\n\n${lines.join("\n")}`))
+      return;
+    const subjectChanged = subject.trim() !== compose.subject;
     const sent = await run(
       "send",
       () =>
@@ -140,7 +157,9 @@ function ReplyForm({
           ticketId: ticket.id,
           body,
           idempotencyKey,
-          subject: compose.subjectEditable ? subject : null,
+          subject: compose.subjectSetsThread || subjectChanged ? subject.trim() : null,
+          to: sameAddresses(to, compose.to) ? null : to,
+          cc: sameAddresses(cc, compose.cc) ? null : cc,
           afterStatus: after || null,
           closing,
           ccSelf,
@@ -158,14 +177,52 @@ function ReplyForm({
   }
   return (
     <Panel title="返信">
-      <p className="muted">
-        宛先 {compose.to} · 差出人 {compose.from}
-      </p>
-      {compose.subjectEditable ? (
-        <TextInput label="件名" value={subject} onChange={setSubject} max={200} />
-      ) : (
-        <p className="muted">件名: {compose.subject}</p>
-      )}
+      <div className="mail-header">
+        <HeaderRow label="差出人">
+          <span>{compose.from}</span>
+        </HeaderRow>
+        <AddressField label="宛先" value={to} onChange={setTo} max={5} readOnly={!editable} />
+        <AddressField label="CC" value={cc} onChange={setCc} max={10} readOnly={!editable} />
+        <HeaderRow label="自分">
+          {compose.self.address ? (
+            <Check
+              label={`${compose.self.address} も CC に入れる`}
+              checked={ccSelf}
+              onChange={(next) => {
+                setCcSelf(next);
+                writeCcSelf(next);
+              }}
+            />
+          ) : (
+            <span className="muted">CC 用の自分のアドレスが基盤に設定されていません</span>
+          )}
+        </HeaderRow>
+        <SubjectRow
+          value={subject}
+          onChange={setSubject}
+          readOnly={!editable && !compose.subjectSetsThread}
+        />
+        {compose.subjectSetsThread ? (
+          <p className="field__hint">最初の返信の件名は、このあとのやり取りの件名になります。</p>
+        ) : (
+          subject.trim() !== compose.subject && (
+            <p className="field__hint">
+              変えた件名はこのメールだけに使われます。受付番号が無ければ末尾に付きます。
+            </p>
+          )
+        )}
+        {editable && (!sameAddresses(to, compose.to) || !sameAddresses(cc, compose.cc)) && (
+          <Button
+            kind="quiet"
+            onClick={() => {
+              setTo([...compose.to]);
+              setCc([...compose.cc]);
+            }}
+          >
+            宛先と CC を元に戻す
+          </Button>
+        )}
+      </div>
       <Select
         label="名乗り"
         value={identity}
@@ -199,14 +256,6 @@ function ReplyForm({
         checked={closing}
         onChange={setClosing}
       />
-      <Check
-        label="自分のアドレスを CC に入れる"
-        checked={ccSelf}
-        onChange={(next) => {
-          setCcSelf(next);
-          writeCcSelf(next);
-        }}
-      />
       <pre className="muted" style={{ whiteSpace: "pre-wrap", margin: 0 }}>
         {compose.signature}
       </pre>
@@ -223,12 +272,54 @@ function ReplyForm({
       <Button
         kind="primary"
         busy={busy === "send"}
-        disabled={!body.trim()}
+        disabled={!body.trim() || to.length === 0 || !subject.trim()}
         onClick={() => void send()}
       >
         送信
       </Button>
     </Panel>
+  );
+}
+
+/** Who a mail went to: the person first, then every Cc. */
+function Recipients({ recipient }: { recipient: string | null }) {
+  const [first, ...copies] = (recipient ?? "")
+    .split(",")
+    .map((address) => address.trim())
+    .filter(Boolean);
+  if (!first) return null;
+  return (
+    <span className="message__meta">
+      宛先 {first}
+      {copies.length > 0 && <> · CC {copies.join(", ")}</>}
+    </span>
+  );
+}
+
+function SubjectRow({
+  value,
+  onChange,
+  readOnly,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  readOnly: boolean;
+}) {
+  const id = useId();
+  return (
+    <HeaderRow label="件名" htmlFor={readOnly ? undefined : id}>
+      {readOnly ? (
+        <span>{value}</span>
+      ) : (
+        <input
+          id={id}
+          type="text"
+          value={value}
+          maxLength={200}
+          onChange={(event) => onChange(event.target.value.replace(/[\r\n]+/g, " "))}
+        />
+      )}
+    </HeaderRow>
   );
 }
 
