@@ -2,7 +2,7 @@
 
 - 日付: 2026-10-12
 - ブランチ: `feat/design-system-tokens`
-- 基準: [design-system.md](./design-system.md)（設計書 v1.0）
+- 基準: [design-system.md](../design/design-system.md)（設計書 v1.0）
 - 範囲: 公開サイト `apps/web` のみ（admin は対象外）。**フォントの変更は保留**（本人の指示）
 - 本番反映: していない
 

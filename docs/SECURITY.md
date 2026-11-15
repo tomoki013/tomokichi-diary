@@ -1,6 +1,6 @@
 # Security
 
-最終更新: 2026-09-21。秘密の値は書かない。監査の詳細は `audit/diary-2.0-full-audit.md` §15、テストは `TESTING.md`。
+最終更新: 2026-09-21。秘密の値は書かない。監査の詳細は `archive/2026-09-diary-2.0-full-audit.md` §15、テストは `TESTING.md`。
 
 ## Threat surface
 

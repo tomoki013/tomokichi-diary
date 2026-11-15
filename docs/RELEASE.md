@@ -1,6 +1,6 @@
 # Release
 
-最終更新: 2026-09-21。手順の正本は [OPERATIONS.md](OPERATIONS.md#releasing)。ここは「いつ・どの順で・何を根拠に」。
+最終更新: 2026-11-15。手順の正本は [OPERATIONS.md](OPERATIONS.md#releasing)。ここは「いつ・どの順で・何を根拠に」。
 
 ## Branch strategy
 
@@ -11,7 +11,7 @@
 
 ## Versioning
 
-- サイトにバージョンは無い。「いつのコンテンツか」は `export/manifest.json` の `generatedAt` と git の履歴。
+- サイトにバージョンは無い。「いつのコンテンツか」は公開マーカー `/__publication/<build-id>.json` と管理画面の「サイト反映」の履歴。
 - API は URL に `/v1`。互換を壊す変更は `/v2` を足し、`/v1` は静的 HTML（フォーム）とキャッシュが参照し続けるので残す。
 - D1 migration は `migrations/000N_*.sql` を **追記のみ**、expand/contract（`OPERATIONS.md` DB_MIGRATION_FAILED）。
 - Knowledge snapshot は `ArticleKnowledge.schemaVersion`（`DATA_MODEL.md`）。
@@ -23,38 +23,12 @@
 - `PUBLIC_SITE_URL=https://tomokichidiary.com PUBLIC_INDEXABLE=true` を **media:build と build の両方**に付ける。
 - Admin は API が deploy された **後**に `VITE_API_URL=https://api.tomokichidiary.com` でビルドする。
 
-## Test（出す前）
+## Test と Release
 
-1. `main` が clean、`pnpm run ci` green。
-2. コンテンツを変えたなら `pnpm export:data` が commit 済み（`export/` と D1 の一致）。
-3. `pnpm knowledge:catalog` が最新（WebMCP / MCP の read model）。
-4. 切替（Phase 2）の前は `pnpm verify:live https://tomokichi-diary-web.tomoki-ttttt.workers.dev` で 194/194。
-
-## Release（順序固定）
-
-```
-media:sync → db:migrate → deploy:api → deploy:mcp → deploy:web → (admin build) → deploy:admin → verify:live
-```
-
-migration は旧 API が動いている間に当たる。だから expand/contract。
-
-一言日記の初回コードリリースでは、`0024_diary_notes.sql` が
-`note_related_articles` と `/notes` の静的ルートを追加する。既存行を
-変更・削除しない expand migration。production D1 migration を API の前に
-適用し、API、公開サイト、Admin の順に更新する。Operator MCP はローカル
-stdio プロセスなので独立した Worker deploy はなく、利用者側で再起動すると
-新しい日記ツールが読み込まれる。公開ページは Admin または Operator MCP の
-publish 操作から既存の `Publish content` workflow で生成・検証・反映される。
-初回記事はこの機能リリースでは作成しない。
-
-## Cutover（Netlify → Cloudflare、1 回だけ）
-
-`audit/diary-2.0-full-audit.md` §12 の Phase 0〜3。要約:
-
-1. Phase 0: og:image 修正（済）、GA4（済・本番ホスト名のみで計測）、ads.txt / sw.js の引き継ぎ（済）、お問い合わせフォームの Turnstile site key（済）、Search Console の確認（DNS 方式なら不要）、URL 移動の判断（GSC データが要る）。
-2. Phase 2: DNS の apex/www を `tomokichi-diary-web` の custom domain へ。Netlify はドメインを外すだけで 30 日残す。
-3. `pnpm verify:live https://tomokichidiary.com` と `pnpm verify:cutover https://tomokichidiary.com` が通ることを確認 → GSC で sitemap 再送信 → GA4 のリアルタイム。
-4. Phase 3: 30 日観測。切り戻しは DNS を戻す（5 分）。
+- `main` への push で `ci.yml` の `Check` → `Deploy` が順に走る。`Check` が緑でなければ deploy されない。
+- Deploy は本番 D1 の公開版を取得してビルドし、`db:migrate → deploy:api → deploy:mcp / web / admin → verify:live → 公開マーカー確認` の順。
+- 記事の公開・取り下げ・サイト反映はコードのリリースと別に `publish.yml`（管理画面か operator MCP から依頼、5 分ごとに確認）が行う。
+- migration は旧 API が動いている間に当たる。だから expand/contract（`OPERATIONS.md` の `DB_MIGRATION_FAILED`）。
 
 ## Rollback
 
@@ -63,9 +37,8 @@ publish 操作から既存の `Publish content` workflow で生成・検証・�
 | Web / Admin / MCP Worker | `wrangler rollback --name <Worker 名>`（前の version）か、前のコミットで `deploy:*`                  |
 | API                      | 同上。ただし **migration が contract 済みなら旧 API は動かない** — contract は次のリリースで、を守る |
 | D1                       | Time Travel（30 日）。expand のみの migration なら戻す必要は無い                                     |
-| コンテンツ               | `export/` の前のコミットを `pnpm db:seed` で D1 に戻す（`restore.test` が seed 復元を保証）          |
+| コンテンツ               | D1 の Time Travel。最後の手段として `export/` の前のコミットを `pnpm db:seed` で戻す                 |
 | メディア                 | R2 は追記のみ（`media:sync` は既存を上書きしない）                                                   |
-| ドメイン切替             | DNS を Netlify に戻す（切替後 30 日間）                                                              |
 
 ## Hotfix
 

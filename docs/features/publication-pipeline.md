@@ -126,10 +126,10 @@ A〜C/Eは1,762派生画像すべて再利用し、再生成0件。Dは初回だ
 - `apps/mcp-server/package.json`
 - `docs/ADMIN.md`
 - `docs/OPERATIONS.md`
-- `docs/publication-performance-baseline.json`
-- `docs/publication-performance-local.json`
-- `docs/publication-performance-production.json`
-- `docs/publication-pipeline.md`
+- `docs/features/publication-performance-baseline.json`
+- `docs/features/publication-performance-local.json`
+- `docs/features/publication-performance-production.json`
+- `docs/features/publication-pipeline.md`
 - `migrations/0020_publication_progress.sql`
 - `package.json`
 - `packages/contracts/src/index.ts`

@@ -54,4 +54,4 @@ LCP/INP/CLSは公式web-vitalsライブラリの数値だけを送信し、要�
 
 ## Phase 2 配置テスト
 
-`article-placement-v2` は `article-end-v1` と別cohort。初期experiment_idは `chagee-placement-v1`、variant_idはA/B、placement_keyは64文字以内のキー。一般の個別配置はexperiment_id/variant_id=none。既存の同一bounded experience queryで取得し、期間別・端末別に比較します。広告ブロックでも割当と広告対象を計測し、リクエスト・filled/unfilledとは分離します。GA4自体をブロック／同意で拒否した訪問の割当は観測できません。A/Bの公式収益はユニットの排他的利用と公式粒度が確認されるまで未取得で、サイト収益を按分しません。各200表示・14計測日を超えても勝者や統計的有意差を自動判定しません。手順: [収益化Phase 2](../monetization-phase2.md)。
+`article-placement-v2` は `article-end-v1` と別cohort。初期experiment_idは `chagee-placement-v1`、variant_idはA/B、placement_keyは64文字以内のキー。一般の個別配置はexperiment_id/variant_id=none。既存の同一bounded experience queryで取得し、期間別・端末別に比較します。広告ブロックでも割当と広告対象を計測し、リクエスト・filled/unfilledとは分離します。GA4自体をブロック／同意で拒否した訪問の割当は観測できません。A/Bの公式収益はユニットの排他的利用と公式粒度が確認されるまで未取得で、サイト収益を按分しません。各200表示・14計測日を超えても勝者や統計的有意差を自動判定しません。手順: [収益化Phase 2](../features/monetization-phase2.md)。

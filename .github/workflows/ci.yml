@@ -82,10 +82,7 @@ jobs:
       # indexable; a build with the defaults is a noindex preview.
       PUBLIC_SITE_URL: https://tomokichidiary.com
       PUBLIC_INDEXABLE: "true"
-      # Until the cutover (docs/RELEASE.md) the public Worker is only on
-      # workers.dev; set the `VERIFY_URL` variable on the environment to
-      # https://tomokichidiary.com once the domain points at it.
-      VERIFY_URL: ${{ vars.VERIFY_URL || 'https://tomokichi-diary-web.tomoki-ttttt.workers.dev' }}
+      VERIFY_URL: ${{ vars.VERIFY_URL || 'https://tomokichidiary.com' }}
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4

@@ -40,7 +40,6 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 | **タグの slug がハッシュ（`tag-xxxxxxxx`）**                                                        | `export/tags.json`、`slugify` が非ラテンで諦める（`primitives.test`）         | 日本語タグ名から slug を作れないため。タグページを作る時に人が付ける                                                                       |
 | **お問い合わせの保持期限を決めていない**                                                            | schema に期限列無し                                                           | 未決定                                                                                                                                     |
 | **likes にレート制限を付けない**                                                                    | `routes/likes.ts`                                                             | Reason unknown。監査 §15 で追加を提案                                                                                                      |
-| **切替まで旧サイト（travel-diary）へ NEW → OLD の一方向同期、比較は NormalizedArticle**             | `scripts/legacy-sync/`、`docs/migration/legacy-content-sync.md`               | 暫定。双方向にしない（更新ループ・古い文章の復活・updatedAt 破壊を避ける）。切替後に丸ごと削除                                             |
 | **experienceTags は閉じた語彙で、`articles` の JSON 列**                                            | `entities/experience.ts`、migration 0009、`docs/EDITORIAL.md`                 | 気分から記事に入る導線の軸なので表記揺れを許さない。語彙は小さく常に記事と一緒に読むため join table にしない。既存 `tags` は自由語彙のまま |
 | **HOME の選定（ベストエピソード・ランキング）は記事 metadata に持たない**                           | `apps/web/src/lib/editorial.ts`                                               | 記事の内容を表す情報と、ページ上の編集的な見せ方を分ける                                                                                   |
 | **Lighthouse は desktop preset**                                                                    | `lighthouserc.json`                                                           | Reason unknown。mobile は 93〜95（監査 §11）                                                                                               |
@@ -73,11 +72,11 @@ ADR の索引と、ADR になっていないが実装から読み取れる判断
 
 ## 2026-10-17 — 収益化 Phase 2
 
-収益化の下書きは専用D1テーブル、公開AdSense設定は既存publication_metadataに固定する。管理APIをAccess配下に置き、公開snapshot/exportの書込・読込でallowlistを再適用する。アフィリエイト案件と予定枠の管理情報は公開projectionを持たず、フラグを変更しても配信できない。広告は1枠、初期実験はCHAGEE記事1本に限定する。停止は既存の記事公開／静的再ビルドを通す。詳細: [monetization-phase2.md](monetization-phase2.md)。
+収益化の下書きは専用D1テーブル、公開AdSense設定は既存publication_metadataに固定する。管理APIをAccess配下に置き、公開snapshot/exportの書込・読込でallowlistを再適用する。アフィリエイト案件と予定枠の管理情報は公開projectionを持たず、フラグを変更しても配信できない。広告は1枠、初期実験はCHAGEE記事1本に限定する。停止は既存の記事公開／静的再ビルドを通す。詳細: [monetization-phase2.md](features/monetization-phase2.md)。
 
 ## 2026-10-17 — 承認済みアフィリエイトの公開
 
-所有者の正式リンク掲載指示に基づき、準備専用のPhase 2を拡張する。既定無効を維持し、サイト方針・記事モード・配置状態・確認済み案件の明示承認で公開を許可する。公開用allowlistと静的rendererは正式な提携リンクと表示内容だけを扱い、管理メモや未承認案件を排除する。案件変更・停止や公開方針の切替は影響記事を原子的に公開待ちへ進め、通常の再公開で反映する。外部ASPの審査・報酬の自動同期は行わない。詳細: [affiliate-release.md](affiliate-release.md)。
+所有者の正式リンク掲載指示に基づき、準備専用のPhase 2を拡張する。既定無効を維持し、サイト方針・記事モード・配置状態・確認済み案件の明示承認で公開を許可する。公開用allowlistと静的rendererは正式な提携リンクと表示内容だけを扱い、管理メモや未承認案件を排除する。案件変更・停止や公開方針の切替は影響記事を原子的に公開待ちへ進め、通常の再公開で反映する。外部ASPの審査・報酬の自動同期は行わない。詳細: [affiliate-release.md](features/affiliate-release.md)。
 
 2026-10-27: トップのヒーロー写真はベストエピソードのカバーから独立して選び、既存メディアを記事への導線とセットで表示する。気分別の先頭5本は新しい順より編集選定を優先し、非公開や体験タグ変更時は該当する公開記事で補う。詳細: [EDITORIAL.md](EDITORIAL.md)。
 

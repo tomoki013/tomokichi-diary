@@ -53,9 +53,9 @@ pnpm --filter @tomokichi/mcp-server dev # 公開 MCP
 
 Claude Code の `.claude/launch.json` には `api`（8795）と `admin`（5173、`VITE_API_URL=http://localhost:8795`）もある。ローカル D1 が空なら `apps/api` で `cf d1 migrations apply <DB ID> --local --persist-to .wrangler/state --dir ../../migrations` → `pnpm seed:sql` → `cf d1 raw <DB ID> --local --persist-to .wrangler/state --batch @../../.artifacts/seed.batch.json`。DB ID は `apps/api/cloudflare.config.ts` の `DB`。`--persist-to .wrangler/state` が無いと `cf dev` とは別の場所（`~/.config/cloudflare/state`）に書かれる。Admin の「問い合わせ」は `INQUIRY_OPERATOR`（別 Worker への Service Binding）、「MCP 接続」は `MCP_CONNECTIONS` が要るので、ローカルではそれぞれの Worker を同時に立てない限りエラー表示になる。
 
-公開サイトは `export/` から静的生成するので、**D1 が無くても動く**（ADR 0006）。記事を直したいときは Admin → API → D1 → `pnpm export:data` → commit の順。ローカルの D1 は `.data/tomokichi.db`（`pnpm import:legacy` か `export/` から復元）。
+公開サイトは `export/` から静的生成するので、ローカルでは **D1 が無くても動く**（ADR 0006）。記事の正本は本番 D1 で、本番のビルドは D1 の公開版を取得して作る。Git の `export/` はローカル開発とコード CI 用のスナップショットなので、ここを直しても本番には出ない。記事を直すときは管理画面か operator MCP（[OPERATOR_MCP.md](OPERATOR_MCP.md)）。ローカルの DB は `.data/tomokichi.db`（`pnpm db:restore-local` で `export/` から作り直せる）。
 
-一言日記は記事と同じ revision・公開版・メディア管理を使い、Admin の「一言日記」または Operator MCP から編集する。通常記事の一覧や Knowledge には混ぜない。日記の公開・取り下げも既存のサイト公開パイプラインを通る。DB / export 形式を変える場合は [RELEASE.md](RELEASE.md) と [publication-pipeline.md](publication-pipeline.md) の順序を確認する。
+一言日記は記事と同じ revision・公開版・メディア管理を使い、Admin の「一言日記」または Operator MCP から編集する。通常記事の一覧や Knowledge には混ぜない。日記の公開・取り下げも既存のサイト公開パイプラインを通る。DB / export 形式を変える場合は [RELEASE.md](RELEASE.md) と [publication-pipeline.md](features/publication-pipeline.md) の順序を確認する。
 
 ## Build
 
@@ -101,10 +101,10 @@ cf は beta（`1.0.0-beta.*` を exact で固定）。Vite / Astro を cf のフ
 
 ```bash
 pnpm run ci            # format / lint / typecheck / boundaries / knowledge / test / media / build / routes / agents / seo / links / perf
-pnpm test              # vitest（18 ファイル）
+pnpm test              # vitest
 pnpm format            # prettier --write
 pnpm lint              # oxlint + eslint(astro)
-pnpm export:data       # D1 → export/
+pnpm export:data       # ローカル DB → export/（本番には出ない）
 pnpm knowledge:catalog # export → WebMCP/MCP の read model
 pnpm knowledge:backlog # 人手レビュー待ちの記事一覧
 ```
@@ -128,4 +128,4 @@ pnpm knowledge:backlog # 人手レビュー待ちの記事一覧
 - 構成: [ARCHITECTURE.md](ARCHITECTURE.md)、[DATA_MODEL.md](DATA_MODEL.md)
 - テスト: [TESTING.md](TESTING.md)
 - リリース・切替: [RELEASE.md](RELEASE.md)、[OPERATIONS.md](OPERATIONS.md)
-- 監査: [audit/diary-2.0-full-audit.md](audit/diary-2.0-full-audit.md)
+- 監査: [audit/diary-2.0-full-audit.md](archive/2026-09-diary-2.0-full-audit.md)

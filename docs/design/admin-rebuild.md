@@ -181,5 +181,5 @@ MCP に出るかどうかは `kind` と `surface` から機械的に決まる。
 ## 8. この作り直しでやらないこと
 
 - 読者向けの公開 MCP と WebMCP、公開サイト（Astro）。
-- OAuth の保存先（KV）の変更。Zakkary との日次枠の取り合いは `docs/ZAKKARY_KV_INVESTIGATION_AND_FIX.md` の別件。
+- OAuth の保存先（KV）の変更。Zakkary との日次枠の取り合いは `docs/archive/2026-11-zakkary-kv-investigation.md` の別件。
 - 新機能の追加。

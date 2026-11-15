@@ -4,14 +4,14 @@ AI コーディングエージェント向け。最終更新: 2026-09-21。
 
 ## Project goal
 
-個人の旅行ブログ（114 記事、日本語）。**URL と一次体験の価値を壊さずに**、人間・検索エンジン・LLM・AI Agent の 4 者に読ませる。現在は Netlify の旧サイトから Cloudflare の 2.0 へ切替直前（`audit/diary-2.0-full-audit.md` §12）。
+個人の旅行ブログ（114 記事、日本語）。**URL と一次体験の価値を壊さずに**、人間・検索エンジン・LLM・AI Agent の 4 者に読ませる。現在は Netlify の旧サイトから Cloudflare の 2.0 へ切替直前（`archive/2026-09-diary-2.0-full-audit.md` §12）。
 
 ## 最初に読むもの
 
 1. `README.md` → `docs/ARCHITECTURE.md`（層と依存、コマンド）
 2. `docs/DATA_MODEL.md`（entity）
 3. `docs/adr/*`（9 本、各 17 行）と `docs/DECISIONS.md`
-4. 触る領域の監査項目（`docs/audit/diary-2.0-full-audit.md`）
+4. 触る領域の監査項目（`docs/archive/2026-09-diary-2.0-full-audit.md`）
 5. 記事の文章を書く・直すときは `docs/WRITING.md`（構成・字数・締め方の型を作らない）
 
 ## Architecture rules
@@ -72,14 +72,13 @@ DB保存を完了条件にしない。公開対象のコンテンツは、認証
 - `packages/seo` の純関数で metadata / JSON-LD を組む。View に直書きしない。
 - `<h1>` は 1 つ、記事タイトルをそのまま描画（`check:seo` の h1 検査）。
 - noindex は `article.noindex` か `route.noindex`。旧サイトで index だったページを noindex にしない（`SEO_NOINDEX_REGRESSION`）。
-- 内部リンクは本文の `](./slug)` 形式（記事基準で解決、カード化される）。
+- 内部リンクは本文の `](slug)` 形式（記事基準で解決、カード化される）。
 - 一次体験と一般情報は `TravelFact.provenance` で分ける。本文の言い回しで濁さない。
 
 ## Do not
 
 - `pnpm ci`（clean install）。`pnpm run ci` を使う。
-- `export/` を手で編集しない（Admin → API → D1 → `pnpm export:data`、またはローカルで `pnpm db:restore-local` → `pnpm content:revise` → `pnpm export:data`）。
-- 旧サイト（`../travel-diary`）の `posts/` を手で編集しない。切替までは `pnpm legacy:export` の出力だけを置く（`docs/migration/legacy-content-sync.md`）。
+- 記事の変更のために `export/` を編集・commit しない。正本は本番 D1。本文は管理画面か operator MCP で直す（`export/` は本番ビルドが D1 から作り直すスナップショット）。
 - `dist/` を commit しない。
 - `IndexPage.astro` に画面を増やさない（分割の方向）。
 - `WebMcpTools.astro` の inline JSON に大きなデータを足さない（fetch に変える方向、監査 §9）。

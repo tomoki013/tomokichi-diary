@@ -4,7 +4,7 @@
 **Date:** 2026-10-12
 **Status:** 採用方針・実装基準
 
-> 実装状況と監査結果は [design-audit.md](./design-audit.md)。トークンの実体は `apps/web/src/styles/tokens.css`、コントラストの自動検証は `apps/web/src/__tests__/design-tokens.test.ts`。
+> 実装状況と監査結果は [design-audit.md](../archive/2026-10-12-design-audit.md)。トークンの実体は `apps/web/src/styles/tokens.css`、コントラストの自動検証は `apps/web/src/__tests__/design-tokens.test.ts`。
 > フォント（§5 のうち書体の変更）は 2026-10-12 時点で**保留**。現状はシステムフォントのまま。
 
 ## 1. 目的と基本方針
