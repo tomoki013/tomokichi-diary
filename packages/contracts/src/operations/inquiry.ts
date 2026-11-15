@@ -13,7 +13,8 @@ import { operation } from "./spec.js";
 
 /**
  * The inbox is the one area the MCP servers never see, to read or to write:
- * it holds readers' addresses and sends mail in the owner's name.
+ * it holds readers' addresses and sends mail in the owner's name. The reply
+ * templates are the exception: the site's own wording, nothing of a reader's.
  */
 export const INQUIRY_STATUSES = [
   "NEW",
@@ -70,25 +71,33 @@ export const inquiryOperations = {
     description: "返信の署名を保存します。空にすると基盤の既定の署名に戻ります。",
     target: { type: "inquiry" },
   }),
+  // The one part of the inbox an MCP server may touch: the reply templates
+  // hold this site's wording only, never a reader's message or address.
   "inquiry.templates": operation<{ items: readonly InquiryReplyTemplateDto[] }>()({
     kind: "read",
-    ...adminOnly,
+    surface: "operator",
     input: v.object({}),
-    description: "返信テンプレートの一覧（停止中のものも含む）。",
+    description:
+      "問い合わせの返信テンプレートの一覧（停止中のものも含む）。role が opening のものは返信の書き出しに毎回入るあいさつ文、reply は返信画面で選んで足す定型文。本文では {{userName}}（相手の名前）、{{appName}}（サイト名）、{{supportUrl}} が置き換わります。",
+    tool: { name: "list_inquiry_templates", title: "List inquiry reply templates" },
     target: { type: "inquiry" },
   }),
   "inquiry.createTemplate": operation<InquiryReplyTemplateDto>()({
     kind: "write",
-    ...adminOnly,
+    surface: "operator",
     input: v.object(template),
-    description: "返信テンプレートを作ります。",
+    description:
+      "問い合わせの返信テンプレートを作ります。subject はフォームからの最初の返信の件名にだけ使われます。読者の情報は入れないでください。",
+    tool: { name: "create_inquiry_template", title: "Create inquiry reply template" },
     target: { type: "inquiry" },
   }),
   "inquiry.updateTemplate": operation<InquiryReplyTemplateDto>()({
     kind: "write",
-    ...adminOnly,
+    surface: "operator",
     input: v.object({ templateId: v.string({ min: 1, max: 200 }), ...template }),
-    description: "返信テンプレートを更新します。",
+    description:
+      "問い合わせの返信テンプレートを更新します（name・subject・body・isActive・sortOrder をすべて指定。list_inquiry_templates の値を元に変える）。",
+    tool: { name: "update_inquiry_template", title: "Update inquiry reply template" },
     target: { type: "inquiry", idField: "templateId" },
   }),
   "inquiry.tickets": operation<InquiryTicketPageDto>()({

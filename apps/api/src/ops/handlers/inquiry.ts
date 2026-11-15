@@ -286,8 +286,13 @@ export const inquiryHandlers: Handlers<Names> = {
       ),
     ),
 
-  "inquiry.updateTemplate": async (scope, { templateId, ...input }) =>
-    toTemplate(
+  // The subject carrier is the API's own; it is never listed, so never edited.
+  "inquiry.updateTemplate": async (scope, { templateId, ...input }) => {
+    const carrier = (await templatesOf(scope, client(scope))).find(
+      (template) => template.key === SUBJECT_KEY,
+    );
+    if (carrier?.id === templateId) throw notFound("API_NOT_FOUND", "no such template");
+    return toTemplate(
       take(
         scope,
         await client(scope).updateTemplate(
@@ -302,7 +307,8 @@ export const inquiryHandlers: Handlers<Names> = {
           who(scope),
         ),
       ),
-    ),
+    );
+  },
 
   /*
    * The whole inbox: every ticket, counted, then narrowed by status (`open`,

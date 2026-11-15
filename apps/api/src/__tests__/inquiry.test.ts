@@ -705,6 +705,17 @@ describe("inquiry operations", () => {
     expect(body.items[0]).not.toHaveProperty("key");
   });
 
+  it("never edits the API's own subject carrier, which is never listed", async () => {
+    const response = await op("inquiry.updateTemplate", {
+      templateId: "tpl-carrier",
+      name: "x",
+      subject: "書き換え",
+      body: "x",
+    });
+    expect(response.status).toBe(404);
+    expect(last("updateTemplate")).toBeUndefined();
+  });
+
   it("creates and edits a template, choosing the platform's key itself", async () => {
     answer.createTemplate = { ok: true, value: template() };
     answer.updateTemplate = { ok: true, value: template() };
