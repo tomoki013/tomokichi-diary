@@ -466,10 +466,6 @@ tickets on the inquiry platform, from `admin.tomokichidiary.com`.
   address. A changed subject on a later reply applies to that mail only (the
   platform adds the ticket number at the end if it is missing); on a first
   reply to a form message it still becomes the conversation's subject.
-- **自分も CC** sends `ccSelf`; the platform adds the operator's own address
-  (`mailSettings[].notificationEmail`, else the deployment's
-  `NOTIFICATION_EMAIL`), shown next to the box. No address for it is ever sent
-  from here. The tick is remembered per browser.
 - **Each mail in the timeline** shows who it went to and every Cc
   (`recipient`). Replies thread onto the latest mail in the conversation.
 

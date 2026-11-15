@@ -286,8 +286,13 @@ export const inquiryHandlers: Handlers<Names> = {
       ),
     ),
 
-  "inquiry.updateTemplate": async (scope, { templateId, ...input }) =>
-    toTemplate(
+  // The subject carrier is the API's own; it is never listed, so never edited.
+  "inquiry.updateTemplate": async (scope, { templateId, ...input }) => {
+    const carrier = (await templatesOf(scope, client(scope))).find(
+      (template) => template.key === SUBJECT_KEY,
+    );
+    if (carrier?.id === templateId) throw notFound("API_NOT_FOUND", "no such template");
+    return toTemplate(
       take(
         scope,
         await client(scope).updateTemplate(
@@ -302,7 +307,8 @@ export const inquiryHandlers: Handlers<Names> = {
           who(scope),
         ),
       ),
-    ),
+    );
+  },
 
   /*
    * The whole inbox: every ticket, counted, then narrowed by status (`open`,
@@ -398,7 +404,6 @@ export const inquiryHandlers: Handlers<Names> = {
     return {
       to: preview.to,
       cc: preview.cc,
-      self: preview.self,
       from: preview.from || REPLY_FROM,
       subject,
       subjectSetsThread,
@@ -489,7 +494,6 @@ export const inquiryHandlers: Handlers<Names> = {
           idempotencyKey: input.idempotencyKey,
           reopenIfResolved: !isOpen(ticket.status),
           ...(templateId ? { templateId } : {}),
-          ...(input.ccSelf ? { ccSelf: true } : {}),
           ...(input.to ? { to: input.to } : {}),
           ...(input.cc ? { cc: input.cc } : {}),
           ...(subjectOverride ? { subject: subjectOverride } : {}),
@@ -514,6 +518,6 @@ export const inquiryHandlers: Handlers<Names> = {
       // The reply is out either way; a refused move only leaves it 対応中.
       if (moved.ok) status = moved.value.status;
     }
-    return { ok: true, status, selfCopy: input.ccSelf ? (sent.selfCopy ?? null) : null };
+    return { ok: true, status };
   },
 };

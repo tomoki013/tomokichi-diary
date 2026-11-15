@@ -86,7 +86,11 @@ describe("tool list", () => {
     expect(read).not.toContain("save_article_draft");
     expect(all).toContain("save_article_draft");
     expect(all.length).toBeGreaterThan(read.length);
-    expect(all.some((name) => /inquiry|delete|revoke|review/.test(name))).toBe(false);
+    // The reply templates are the one part of the inbox an operator may edit.
+    const inboxTools = all.filter(
+      (name) => !/^(list|create|update)_inquiry_templates?$/.test(name),
+    );
+    expect(inboxTools.some((name) => /inquiry|delete|revoke|review/.test(name))).toBe(false);
     expect(toolsFor("analytics", true).map(([, spec]) => spec.tool!.name)).toEqual([
       "get_analytics_report",
       "get_analytics_dashboard",

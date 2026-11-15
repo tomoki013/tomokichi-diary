@@ -123,7 +123,6 @@ function ReplyForm({
   const [cc, setCc] = useState<string[]>([...compose.cc]);
   const editable = compose.overridesAllowed;
   const [closing, setClosing] = useState(true);
-  const [ccSelf, setCcSelf] = useState(readCcSelf);
   const toast = useToast();
   const [after, setAfter] = useState<"" | "WAITING_CUSTOMER" | "RESOLVED">("WAITING_CUSTOMER");
   const [idempotencyKey] = useState(key);
@@ -136,7 +135,6 @@ function ReplyForm({
     setBody((current) => `${current.trimEnd()}\n\n${applied.body}`.trimStart());
     if (applied.subject) setSubject(applied.subject);
   }
-  const copies = [...cc, ...(ccSelf && compose.self.address ? [compose.self.address] : [])];
   async function send() {
     if (to.length === 0) {
       toast.error(new Error("宛先がありません"));
@@ -144,7 +142,7 @@ function ReplyForm({
     }
     const lines = [
       `宛先: ${to.join(", ")}`,
-      ...(copies.length > 0 ? [`CC: ${copies.join(", ")}`] : []),
+      ...(cc.length > 0 ? [`CC: ${cc.join(", ")}`] : []),
       `件名: ${subject.trim()}`,
     ];
     if (!confirmed(`この内容で返信を送ります。送ると取り消せません。\n\n${lines.join("\n")}`))
@@ -162,18 +160,11 @@ function ReplyForm({
           cc: sameAddresses(cc, compose.cc) ? null : cc,
           afterStatus: after || null,
           closing,
-          ccSelf,
         }),
       { touches },
     );
     if (!sent) return;
-    toast.info(
-      sent.selfCopy === "not_configured"
-        ? "返信を送りました。自分のアドレスが基盤に設定されていないため、CC なしで送っています"
-        : sent.selfCopy === "copied"
-          ? "返信を送りました（自分にも CC）"
-          : "返信を送りました",
-    );
+    toast.info("返信を送りました");
   }
   return (
     <Panel title="返信">
@@ -183,20 +174,6 @@ function ReplyForm({
         </HeaderRow>
         <AddressField label="宛先" value={to} onChange={setTo} max={5} readOnly={!editable} />
         <AddressField label="CC" value={cc} onChange={setCc} max={10} readOnly={!editable} />
-        <HeaderRow label="自分">
-          {compose.self.address ? (
-            <Check
-              label={`${compose.self.address} も CC に入れる`}
-              checked={ccSelf}
-              onChange={(next) => {
-                setCcSelf(next);
-                writeCcSelf(next);
-              }}
-            />
-          ) : (
-            <span className="muted">CC 用の自分のアドレスが基盤に設定されていません</span>
-          )}
-        </HeaderRow>
         <SubjectRow
           value={subject}
           onChange={setSubject}
@@ -321,23 +298,6 @@ function SubjectRow({
       )}
     </HeaderRow>
   );
-}
-
-/** The CC choice is a per-browser habit, so it is remembered here only. */
-const CC_SELF_KEY = "diary-admin-reply-cc-self";
-function readCcSelf(): boolean {
-  try {
-    return localStorage.getItem(CC_SELF_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-function writeCcSelf(on: boolean): void {
-  try {
-    localStorage.setItem(CC_SELF_KEY, on ? "1" : "0");
-  } catch {
-    // Storage refused: the box simply starts unticked next time.
-  }
 }
 
 function StatusPanel({ ticket }: { ticket: InquiryTicketDetailDto }) {

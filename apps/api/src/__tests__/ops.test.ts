@@ -32,9 +32,12 @@ describe("the operation catalogue", () => {
       .map(([name]) => name)
       .filter((name) => !adminOnlyAllowed(name));
     expect(hidden).toEqual([]);
-    // And the exceptions really are hidden: the inbox never reaches an MCP server.
+    // And the exceptions really are hidden: the inbox never reaches an MCP server,
+    // except the reply templates, which hold the site's wording and no reader's.
+    const templateOps = ["inquiry.templates", "inquiry.createTemplate", "inquiry.updateTemplate"];
     for (const [name, spec] of specs)
-      if (name.startsWith("inquiry.")) expect(spec.surface).toBe("admin-only");
+      if (name.startsWith("inquiry."))
+        expect(spec.surface, name).toBe(templateOps.includes(name) ? "operator" : "admin-only");
   });
 
   it("gives every MCP operation one unique tool name and every delete none", () => {

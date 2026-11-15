@@ -59,7 +59,8 @@ export function findOperation(name: string): OperationSpec | null {
  * is a property of the code, not a habit.
  */
 export const ADMIN_ONLY_OPERATIONS: Readonly<Record<string, string>> = {
-  "inquiry.*": "問い合わせ・メールは MCP に出さない（閲覧も不可）",
+  "inquiry.*":
+    "問い合わせ・メールは MCP に出さない（閲覧も不可）。返信テンプレートの一覧・作成・更新だけは例外",
   "connection.revoke": "MCP 接続の失効は管理画面だけ",
   "knowledge.reviewFact": "事実の確認は管理画面の本人だけ",
 };
