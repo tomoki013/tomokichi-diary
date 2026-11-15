@@ -872,3 +872,71 @@ th.num {
     bottom: 20px;
   }
 }
+
+/* A reply laid out like a mail client's header: label on the left, value on the right. */
+.mail-header {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  background: var(--surface);
+}
+.mail-header__row {
+  display: grid;
+  grid-template-columns: 3.6rem minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--line);
+}
+.mail-header__row:last-of-type {
+  border-bottom: 0;
+}
+.mail-header__label {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+.mail-header__value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mail-header__value input:not([type="checkbox"]) {
+  min-height: 36px;
+  border-color: transparent;
+  padding-inline: 4px;
+}
+.mail-header__value input:not([type="checkbox"]):focus {
+  border-color: var(--line-strong);
+}
+.mail-header__addresses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding-block: 4px;
+}
+.mail-header__addresses input {
+  flex: 1 1 10rem;
+  width: auto;
+}
+.address-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  padding: 2px 4px 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.address-chip button {
+  min-width: 28px;
+  min-height: 28px;
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  cursor: pointer;
+}

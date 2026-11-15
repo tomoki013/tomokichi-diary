@@ -72,7 +72,13 @@ export default defineConfig({
       INQUIRY_OPERATOR: bindings.worker({
         worker: "tomokichi-admin-core",
         exportName: "ProjectOperator",
-        props: { caller: "tomokichi-diary-api", projects: ["tomokichi-diary"] },
+        // allowReplyOverrides: the admin may choose a reply's To, Cc and subject
+        // (inquiry-platform v0.14.0+). Every inquiry operation is admin-only.
+        props: {
+          caller: "tomokichi-diary-api",
+          projects: ["tomokichi-diary"],
+          allowReplyOverrides: true,
+        },
       }),
       // One submission per sender (salted IP hash) per minute. Turnstile already
       // keeps bots out; this is what stops one person pressing send in a loop.

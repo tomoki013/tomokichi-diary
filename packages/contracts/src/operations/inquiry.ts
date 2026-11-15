@@ -36,6 +36,8 @@ export const INQUIRY_RESOLUTIONS = [
 ] as const;
 
 const ticketId = v.string({ min: 1, max: 200 });
+/** A bare address, as the platform takes it: no display name, no line breaks. */
+const email = v.string({ min: 3, max: 254, pattern: /^[^\s@<>,"]+@[^\s@<>,"]+\.[^\s@<>,"]+$/ });
 const target = { type: "inquiry", idField: "ticketId" } as const;
 const template = {
   name: v.string({ min: 1, max: 160 }),
@@ -137,7 +139,8 @@ export const inquiryOperations = {
     kind: "read",
     ...adminOnly,
     input: v.object({ ticketId }),
-    description: "返信の書き出しに必要なもの: 宛先、差出人、件名、あいさつ文、結び、署名。",
+    description:
+      "返信の書き出しに必要なもの: 宛先・CC・差出人・件名（このまま送った場合）、あいさつ文、結び、署名。",
     target,
   }),
   "inquiry.applyTemplate": operation<InquiryAppliedTemplateDto>()({
@@ -168,6 +171,9 @@ export const inquiryOperations = {
       closing: v.optional(v.boolean(), true),
       /** Also Cc the operator's own address, which the platform holds; never one named here. */
       ccSelf: v.optional(v.boolean(), false),
+      /** In place of the platform's To / reply-all Cc; null keeps the platform's. */
+      to: v.maybe(v.nullable(v.array(email, { max: 5 }))),
+      cc: v.maybe(v.nullable(v.array(email, { max: 10 }))),
     }),
     description: "問い合わせの相手に返信メールを送ります。",
     target,
