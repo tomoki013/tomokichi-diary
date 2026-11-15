@@ -465,11 +465,6 @@ export interface InquiryComposeDto {
   readonly to: readonly string[];
   /** Reply-all: everyone else on the person's latest mail. */
   readonly cc: readonly string[];
-  /** The operator's own copy: the address `ccSelf` adds (null when none is set). */
-  readonly self: {
-    readonly address: string | null;
-    readonly outcome: "copied" | "not_configured" | "is_recipient";
-  };
   readonly from: string;
   /**
    * The subject the reply goes out with. On the first reply to a form message

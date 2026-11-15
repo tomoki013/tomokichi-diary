@@ -130,7 +130,6 @@ function platformDefault(method: string, args: unknown[]): unknown {
         from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
         to: ["reader@example.com"],
         cc: ["friend@example.com"],
-        self: { address: "owner@example.com", outcome: "copied" },
         subject: "Re: 写真の件",
         overridesAllowed: true,
       };
@@ -167,7 +166,6 @@ function platformDefault(method: string, args: unknown[]): unknown {
           revision: 9,
           allowedStatuses: ["WAITING_CUSTOMER", "RESOLVED"],
         }),
-        ...((args[2] as { ccSelf?: boolean }).ccSelf ? { selfCopy: "not_configured" } : {}),
       };
     default:
       return ticket();
@@ -420,7 +418,6 @@ describe("inquiry operations", () => {
     expect(await response.json()).toEqual({
       ok: true,
       status: "WAITING_CUSTOMER",
-      selfCopy: null,
     });
     expect(calledWith("changeTicket").map((call) => call.args[2])).toEqual([
       { revision: 3, status: "ACKNOWLEDGED" },
@@ -438,25 +435,6 @@ describe("inquiry operations", () => {
       },
       { id: "admin-token" },
     ]);
-  });
-
-  it("asks the platform to copy the operator only when ticked, and says what became of it", async () => {
-    const response = await op("inquiry.reply", {
-      ticketId: "t1",
-      body: "お返事です",
-      idempotencyKey: "reply-key-cc",
-      subject: null,
-      afterStatus: null,
-      ccSelf: true,
-    });
-    expect((await response.json()).selfCopy).toBe("not_configured");
-    // Only the flag goes up: the address is the platform's, never one named here.
-    expect(last("reply")?.args[2]).toEqual({
-      body: "お返事です\n\n以上、よろしくお願いいたします。",
-      idempotencyKey: "reply-key-cc",
-      reopenIfResolved: false,
-      ccSelf: true,
-    });
   });
 
   it("leaves the closing off when asked, and never adds it twice", async () => {
@@ -530,7 +508,6 @@ describe("inquiry operations", () => {
     expect(body).toEqual({
       to: ["reader@example.com"],
       cc: ["friend@example.com"],
-      self: { address: "owner@example.com", outcome: "copied" },
       from: "ともきちの旅行日記 <contact@tomokichidiary.com>",
       subject: "【ともきちの旅行日記】記事についてのお問い合わせ",
       subjectSetsThread: true,
