@@ -17,6 +17,7 @@ export type Route =
   | { name: "rankings" }
   | { name: "ranking"; id: string }
   | { name: "search-words" }
+  | { name: "faq" }
   | { name: "ads" }
   | { name: "knowledge" }
   | { name: "analytics" }
@@ -59,6 +60,7 @@ export function parseRoute(hash: string): Route {
         ? { name: "activity", targetType: second, targetId: third }
         : one({ name: "activity" });
     case "search-words":
+    case "faq":
     case "media":
     case "ads":
     case "knowledge":
@@ -87,6 +89,7 @@ export const href = {
   rankings: () => "#/rankings",
   ranking: (id: string) => `#/rankings/${enc(id)}`,
   searchWords: () => "#/search-words",
+  faq: () => "#/faq",
   ads: () => "#/ads",
   knowledge: () => "#/knowledge",
   analytics: () => "#/analytics",

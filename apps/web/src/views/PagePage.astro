@@ -237,7 +237,7 @@ const aboutCountries = content.snapshot.locations
       </section>
     </article>
   ) : isFaq ? (
-    <FaqPage markdown={view.revision.bodyMarkdown} />
+    <FaqPage markdown={view.revision.bodyMarkdown} lead={view.revision.summary} />
   ) : isContact ? (
     <ContactPage />
   ) : (

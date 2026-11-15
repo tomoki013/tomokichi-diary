@@ -1,12 +1,17 @@
 ---
+import { parseFaqMarkdown, renderArticleMarkdown } from "@tomokichi/contracts";
+
 interface Props {
   markdown: string;
+  /** The page's summary, edited with the questions in the admin. */
+  lead: string;
 }
 
-const { markdown } = Astro.props;
+const { markdown, lead } = Astro.props;
 
 const plainText = (value: string) =>
   value
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
@@ -14,22 +19,19 @@ const plainText = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-const groups = markdown
-  .replace(/^##\s+/, "")
-  .split(/\n##\s+/)
-  .flatMap((section) => {
-    const [title = "", ...rest] = section.split("\n");
-    const questions = rest
-      .join("\n")
-      .split(/\n###\s+/)
-      .slice(1)
-      .flatMap((block) => {
-        const [question = "", ...answer] = block.split("\n");
-        const text = plainText(answer.join("\n"));
-        return question && text ? [{ question: plainText(question), answer: text }] : [];
-      });
-    return title && questions.length > 0 ? [{ title: plainText(title), questions }] : [];
-  });
+// One reader for the stored shape, shared with the admin's FAQ editor.
+const groups = parseFaqMarkdown(markdown)
+  .map((group) => ({
+    title: group.title,
+    questions: group.items
+      .filter((item) => item.question && item.answer)
+      .map((item) => ({
+        question: item.question,
+        html: renderArticleMarkdown(item.answer),
+        text: plainText(item.answer),
+      })),
+  }))
+  .filter((group) => group.title && group.questions.length > 0);
 ---
 
 <article class="faq-page">
@@ -41,7 +43,7 @@ const groups = markdown
         <br />
         ここで軽くする。
       </h1>
-      <p>記事の探し方から旅行記の読み方まで。よくいただく質問を、目的別にまとめました。</p>
+      {lead && <p>{lead}</p>}
     </div>
     <label class="faq-search">
       <span>質問を検索</span>
@@ -71,7 +73,7 @@ const groups = markdown
             {group.questions.map((item) => (
               <details
                 data-faq-item
-                data-search-text={`${item.question} ${item.answer}`.toLocaleLowerCase("ja")}
+                data-search-text={`${item.question} ${item.text}`.toLocaleLowerCase("ja")}
               >
                 <summary>
                   <span>Q</span>
@@ -80,7 +82,7 @@ const groups = markdown
                 </summary>
                 <div>
                   <span>A</span>
-                  <p>{item.answer}</p>
+                  <div class="faq-answer" set:html={item.html} />
                 </div>
               </details>
             ))}
@@ -99,7 +101,7 @@ const groups = markdown
         <br />
         気軽に聞いてください。
       </h2>
-      <p>掲載内容の確認、旅先のリクエスト、お仕事のご相談も受け付けています。</p>
+      <p>記事の訂正、旅先のリクエスト、感想はお問い合わせからどうぞ。</p>
       <a href="/contact">お問い合わせへ&nbsp; →</a>
     </aside>
   </div>

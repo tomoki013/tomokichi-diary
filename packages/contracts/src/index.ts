@@ -7,6 +7,7 @@ export * from "./apple-music.js";
 export * from "./theme-music.js";
 export * from "./publication.js";
 export * from "./article-markdown.js";
+export * from "./faq.js";
 export * from "./operations/index.js";
 export * from "./ad-layout.js";
 export * from "./ad-test.js";
