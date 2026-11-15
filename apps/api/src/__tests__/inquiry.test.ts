@@ -48,6 +48,7 @@ function ticket(overrides: Partial<OperatorTicketDetail> = {}): OperatorTicketDe
     resolution: null,
     priority: "P3",
     subject: "記事について",
+    mailSubject: "お問い合わせを受け付けました: 記事について [TK-000001]",
     requesterEmail: "reader@example.com",
     slaState: "OK",
     nextAction: "返信する",
@@ -346,6 +347,23 @@ describe("inquiry operations", () => {
     };
     const body = await (await op("inquiry.tickets")).json();
     expect(body.items.map((item: { lane: string | null }) => item.lane)).toEqual(["media", null]);
+  });
+
+  it("carries the conversation's mail subject beside the ticket's heading", async () => {
+    answer.listTickets = {
+      ok: true,
+      value: { items: [ticket(), ticket({ id: "b", mailSubject: null })], total: 2 },
+    };
+    const body = await (await op("inquiry.tickets")).json();
+    expect(
+      body.items.map((item: { subject: string; mailSubject: string | null }) => [
+        item.subject,
+        item.mailSubject,
+      ]),
+    ).toEqual([
+      ["記事について", "お問い合わせを受け付けました: 記事について [TK-000001]"],
+      ["記事について", null],
+    ]);
   });
 
   it("answers 404 when the platform says the ticket is not this site's", async () => {

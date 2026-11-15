@@ -940,3 +940,6 @@ th.num {
   font: inherit;
   cursor: pointer;
 }
+.message__header {
+  display: block;
+}
