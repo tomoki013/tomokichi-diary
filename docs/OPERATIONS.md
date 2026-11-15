@@ -457,6 +457,14 @@ tickets on the inquiry platform, from `admin.tomokichidiary.com`.
   to an inactive carrier template (`diary_system_subject`, never listed) just
   before sending. After the first reply the platform keeps the conversation's
   `Re:` subject, and the screen shows it read-only.
+- **Recipient, sender and Cc** are the platform's: it mails the person who
+  wrote in, keeps reply-all Cc from their mail, and threads each reply onto the
+  latest mail in the conversation (yours included). 「自分のアドレスを CC に入れる」
+  sends `ccSelf`, and the platform adds the operator's own notification address
+  (`mailSettings[].notificationEmail`, else the deployment's
+  `NOTIFICATION_EMAIL`); no address is ever sent from here. If none is set the
+  reply still goes, without the copy, and the toast says so. The tick is
+  remembered per browser.
 
 A reply that still contains a `{{...}}` placeholder is refused, and a send the
 platform could not mail answers `INQUIRY_MAIL_FAILED`. The reader's answer
