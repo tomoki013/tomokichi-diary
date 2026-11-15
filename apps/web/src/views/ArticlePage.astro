@@ -23,7 +23,6 @@ import { getEntry } from "astro:content";
 import { renderArticleMarkdown } from "@tomokichi/contracts";
 import ArticleKnowledge from "../components/ArticleKnowledge.astro";
 import ShareButton from "../components/ShareButton.astro";
-import CopyLinkButton from "../components/CopyLinkButton.astro";
 import { ChevronLeftIcon, ChevronRightIcon } from "../components/TravelIcons";
 import WebMcpTools from "../components/WebMcpTools.astro";
 import ExperienceChips from "../components/ExperienceChips.astro";
@@ -187,7 +186,9 @@ const seriesTitle = episode > 0 ? journey?.title : otherSeries?.title;
 // Short on the button; the full title is the navigation's accessible name.
 const seriesLabel = episode > 0 ? "この旅" : "シリーズ";
 const seriesPrevious = seriesIndex > 0 ? seriesMembers[seriesIndex - 1] : undefined;
-const seriesNext = seriesIndex >= 0 ? seriesMembers[seriesIndex + 1] : undefined;
+// The NEXT card above already offers the next episode; do not offer it twice.
+const seriesNextCandidate = seriesIndex >= 0 ? seriesMembers[seriesIndex + 1] : undefined;
+const seriesNext = seriesNextCandidate?.article.id === nextReadId ? undefined : seriesNextCandidate;
 const knowledge = content.knowledgeOf(article.id);
 const seriesMusic = seriesMusicOf(content.collectionsOf(article.id));
 const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
@@ -272,7 +273,10 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
       ) : (
         <p>{revision.summary}</p>
       )}
-      <LikeButton articleId={article.id} title={revision.title} path={route.path} />
+      <div class="article-overview__actions">
+        <LikeButton articleId={article.id} title={revision.title} path={route.path} />
+        <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
+      </div>
     </div>
 
     {journey && episode > 0 && journeyMembers.length > 1 && (
@@ -357,11 +361,6 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
         {/* From here down is the furniture every blog has. It stays small on
             purpose: nobody has to press it. */}
         <div class="article-after">
-          <div class="article-actions">
-            <LikeButton articleId={article.id} title={revision.title} path={route.path} />
-            <CopyLinkButton url={metadata.canonical} title={revision.title} />
-            <ShareButton title={revision.title} text={revision.summary} url={metadata.canonical} />
-          </div>
           {(seriesPrevious || seriesNext) && (
             <nav
               class="post-navigation post-navigation--series"

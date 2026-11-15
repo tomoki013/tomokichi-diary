@@ -19,12 +19,10 @@ const { title, text, url } = Astro.props;
   data-url={url}
 >
   <ShareIcon />
-  <span data-share-label>この旅を共有する</span>
+  <span data-share-label>共有</span>
 </button>
 
 <script>
-  import { remember } from "../lib/my-trips";
-
   document.querySelectorAll<HTMLButtonElement>("[data-share-button]").forEach((button) => {
     button.addEventListener("click", async () => {
       const payload = {
@@ -39,10 +37,9 @@ const { title, text, url } = Astro.props;
           await navigator.clipboard.writeText(payload.url);
           if (label) label.textContent = "リンクをコピーしました";
           window.setTimeout(() => {
-            if (label) label.textContent = "この旅を共有する";
+            if (label) label.textContent = "共有";
           }, 2200);
         }
-        remember("shared", new URL(payload.url, location.href).pathname, payload.title);
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
         if (label) label.textContent = "共有できませんでした";

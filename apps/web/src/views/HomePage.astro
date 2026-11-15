@@ -11,7 +11,6 @@ import HomeTravelMap from "../components/home/HomeTravelMap.astro";
 import HomeSelections from "../components/home/HomeSelections.astro";
 import HomeGallery from "../components/home/HomeGallery.astro";
 import HomeAbout from "../components/home/HomeAbout.astro";
-import HomeLikedTrips from "../components/home/HomeLikedTrips.astro";
 import { content } from "../lib/content";
 import { bestEpisodes, heroStories, selections } from "../lib/editorial";
 import { seoConfig, siteDescription } from "../lib/site";
@@ -47,7 +46,6 @@ const latest: ArticleView[] = content.articleViews().slice(0, 8);
 >
   <div class="home">
     <HomeHero stories={heroes} />
-    <HomeLikedTrips />
     <HomeExperiencePicker shownElsewhere={new Set(episodes.map(({ view }) => view.article.id))} />
     <HomeBestEpisodes episodes={episodes} />
 

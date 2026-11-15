@@ -730,77 +730,6 @@
     contain-intrinsic-size: auto 22rem;
   }
 
-  /* Closing photograph: pulled up over the page edge so the band reads as
-     a bridge between the ivory page and the dark footer. */
-  .site-footer__next {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-md);
-    min-height: 12.5rem;
-    margin-top: calc(-1 * var(--band-tight) - 1.6rem);
-    padding: var(--space-lg) var(--space-lg);
-    overflow: hidden;
-    border-radius: var(--radius-lg);
-    isolation: isolate;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .site-footer__next-photo,
-  .site-footer__next picture {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-  }
-
-  .site-footer__next picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 60%;
-  }
-
-  .site-footer__next-shade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      linear-gradient(
-        90deg,
-        rgb(20 18 15 / 78%) 0%,
-        rgb(20 18 15 / 45%) 55%,
-        rgb(20 18 15 / 30%) 100%
-      ),
-      linear-gradient(180deg, rgb(20 18 15 / 10%) 0%, rgb(20 18 15 / 55%) 100%);
-  }
-
-  .site-footer__next-body {
-    display: grid;
-    gap: 0.45rem;
-    max-width: 30rem;
-  }
-
-  .site-footer__next-body h2 {
-    font-size: var(--step-h2);
-    color: #fff;
-    letter-spacing: 0.04em;
-  }
-
-  .site-footer__next-body p:last-child {
-    color: rgb(255 255 255 / 82%);
-    font-size: var(--step-small);
-  }
-
-  .site-footer__next-body p:last-child::after {
-    content: "";
-    display: block;
-    width: 2.6rem;
-    height: 1px;
-    margin-top: 0.9rem;
-    background: var(--footer-gold);
-  }
-
   /* Handwritten-style eyebrow shared by the band and the aside. */
   .site-footer__script {
     font-family: var(--font-label);
@@ -808,12 +737,6 @@
     font-size: 0.9rem;
     letter-spacing: 0.04em;
     color: var(--footer-gold);
-  }
-
-  .site-footer__next-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
   }
 
   .site-footer__cta {
@@ -856,124 +779,6 @@
   .site-footer__cta--primary:hover {
     border-color: transparent;
     background: var(--accent-strong);
-  }
-
-  /* The reader's shelf ("♡した旅" / "共有した旅") ----------------------- */
-  .my-trips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-
-  .my-trips__button {
-    cursor: pointer;
-    font: inherit;
-    font-size: var(--step-small);
-  }
-
-  .my-trips__icon {
-    display: inline-grid;
-    place-items: center;
-    width: 1.1rem;
-  }
-
-  .my-trips__button small {
-    min-width: 1.2rem;
-    padding: 0 0.35rem;
-    border-radius: 999px;
-    background: rgb(255 255 255 / 22%);
-    font-size: 0.7rem;
-    text-align: center;
-  }
-
-  .my-trips__button small:empty {
-    display: none;
-  }
-
-  .my-trips__dialog {
-    width: min(30rem, calc(100vw - 2rem));
-    max-height: min(34rem, 80svh);
-    padding: var(--space-md);
-    border: 0;
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .my-trips__dialog::backdrop {
-    background: rgb(20 18 14 / 55%);
-  }
-
-  .my-trips__dialog header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-sm);
-    padding-bottom: var(--space-xs);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .my-trips__dialog h2 {
-    font-size: var(--step-h3);
-  }
-
-  .my-trips__dialog header button {
-    display: grid;
-    place-items: center;
-    width: 2.2rem;
-    height: 2.2rem;
-    border: 0;
-    border-radius: 50%;
-    background: none;
-    color: var(--ink-soft);
-  }
-
-  .my-trips__dialog ul {
-    display: grid;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .my-trips__dialog li {
-    display: grid;
-    gap: 0.1rem;
-    padding-block: 0.6rem;
-    border-bottom: 1px dashed var(--line-mid);
-  }
-
-  .my-trips__dialog li a {
-    color: var(--ink);
-    font-size: var(--step-small);
-    text-decoration: none;
-  }
-
-  .my-trips__dialog li a:hover {
-    color: var(--accent-strong);
-    text-decoration: underline;
-  }
-
-  .my-trips__dialog li small,
-  .my-trips__note {
-    color: var(--ink-faint);
-    font-size: var(--step-tiny);
-  }
-
-  .my-trips__empty {
-    color: var(--ink-soft);
-    font-size: var(--step-small);
-  }
-
-  .my-trips__note {
-    margin-top: var(--space-sm);
-  }
-
-  .my-trips__all {
-    display: inline-block;
-    margin-top: var(--space-sm);
-    color: var(--accent-strong);
-    font-size: var(--step-small);
   }
 
   .site-footer__body {
@@ -1242,11 +1047,6 @@
   }
 
   @media (max-width: 52rem) {
-    .site-footer__next {
-      grid-template-columns: minmax(0, 1fr);
-      margin-top: calc(-1 * var(--band-tight) - 1.2rem);
-      padding: var(--space-md);
-    }
     .site-footer__body {
       grid-template-columns: minmax(0, 1fr);
     }

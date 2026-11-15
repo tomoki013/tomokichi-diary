@@ -1,5 +1,5 @@
 /**
- * The reader's own shelf: stories they liked and stories they shared, kept in
+ * The reader's own shelf: stories they liked, kept in
  * this browser only. Likes are counted on the server per anonymous visitor,
  * but the server has no "list what I liked" call and does not need one — the
  * shelf is a convenience, so losing it (private mode, cleared storage) costs
@@ -7,7 +7,7 @@
  *
  * Browser-only: imported from component `<script>`s, never from frontmatter.
  */
-export type ShelfKind = "liked" | "shared";
+export type ShelfKind = "liked";
 
 export interface ShelfEntry {
   readonly path: string;
@@ -43,10 +43,9 @@ function read(): Shelves {
     const parsed = JSON.parse(localStorage.getItem(KEY) ?? "null") as Partial<Shelves> | null;
     return {
       liked: Array.isArray(parsed?.liked) ? parsed.liked.filter(isEntry) : [],
-      shared: Array.isArray(parsed?.shared) ? parsed.shared.filter(isEntry) : [],
     };
   } catch {
-    return { liked: [], shared: [] };
+    return { liked: [] };
   }
 }
 

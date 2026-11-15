@@ -312,25 +312,19 @@
     border-top: 1px solid var(--line);
   }
 
-  .article-actions {
+  /* Like and share beside the story's facts, small enough for one phone row. */
+  .article-overview__actions {
     display: flex;
-    align-items: center;
-    gap: 0.3rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
   }
 
-  /* Three buttons on one phone-width row. */
-  .article-actions :is(.like-button, .share-button) {
-    flex: 0 1 auto;
-    min-height: 2rem;
-    padding: 0.2rem 0.55rem;
-    gap: 0.3rem;
-    font-size: 0.72rem;
+  .article-overview__actions :is(.like-button, .share-button) {
+    min-height: 2.2rem;
+    padding: 0.3rem 0.8rem;
+    gap: 0.35rem;
     white-space: nowrap;
-  }
-
-  .article-actions svg {
-    width: 0.9rem;
-    height: 0.9rem;
   }
 
   /* Two columns at every width, so the pair costs one short row. */
