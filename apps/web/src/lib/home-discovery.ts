@@ -105,17 +105,49 @@ export const DISCOVERY_SCENES: Record<ExperienceTag, DiscoveryScene> = {
 /** Stories per feeling. */
 export const DISCOVERY_LIMIT = 5;
 
-/** Lead with lived scenes that carry each feeling, rather than the latest guide. */
+/**
+ * Lead with lived scenes that carry each feeling, rather than the latest guide.
+ * No story is picked for two feelings: many stories carry several tags, and
+ * the same five under two moods made switching look like nothing happened.
+ * Chosen 2026-11-15 from what readers actually read to the end (GA4,
+ * 2026-08-18 → 2026-11-10); `笑える` has only five stories, so it takes all.
+ */
 export const DISCOVERY_PICKS: Readonly<Record<ExperienceTag, readonly string[]>> = {
-  moving: ["turkey3", "greece2", "spain6", "india2", "sunset1"],
-  exciting: ["egypt2", "china3", "malaysia1", "singapore2", "turkey1"],
-  thrilling: ["egypt4", "india1", "greece3", "turkey2", "china1"],
-  disaster: ["greece1", "egypt4", "turkey2", "india7", "thai4"],
-  funny: ["thai2", "malaysia3", "malaysia2", "thai4", "hokkaido1"],
-  discovery: ["travel-history2", "china2", "india6", "spain5", "malaysia-before-thailand"],
-  challenge: ["india5", "india4", "egypt3", "france2", "indonesia2"],
-  unforgettable: ["india6", "turkey3", "greece2", "egypt2", "spain6"],
+  moving: ["spain6", "greece2", "developing-country-sunset", "landscape1", "sunset1"],
+  exciting: ["china3", "malaysia-night-vibes", "singapore2", "china4", "malaysia1"],
+  thrilling: ["greece3", "china1", "putra-mosque-ramadan-hours", "india1", "thai1"],
+  disaster: ["egypt4", "egypt3", "greece1", "turkey2", "thai6"],
+  funny: ["malaysia3", "malaysia2", "thai4", "hokkaido1", "thai2"],
+  discovery: [
+    "spain5",
+    "malaysia-before-thailand",
+    "china2",
+    "abu-simbel-temple-relocation",
+    "bali-canang-sari-offerings",
+  ],
+  challenge: [
+    "changi-airport-overnight",
+    "bathing-ganga",
+    "bangkok-localbus",
+    "india-street-food-tips",
+    "france2",
+  ],
+  unforgettable: ["turkey3", "egypt2", "india5", "travel-history2", "architecture1"],
 };
+
+/** Each pick and the feeling it belongs to, so fallbacks can leave it to that feeling. */
+const PICKED_FOR = new Map(
+  Object.entries(DISCOVERY_PICKS).flatMap(([tag, slugs]) => slugs.map((slug) => [slug, tag])),
+);
+
+/**
+ * The summary as a teaser: a leading series marker such as `【周遊旅行記
+ * 第10回】` is dropped, since the card is only two or three lines long and
+ * the marker would fill most of it. The stored summary is left as it is.
+ */
+export function discoverySummary(summary: string): string {
+  return summary.replace(/^\s*【[^】]*】\s*/u, "");
+}
 
 /** The URL query that carries the selection. Home stays canonical to `/`. */
 export const HOME_EXPERIENCE_PARAM = "homeExperience";
@@ -166,8 +198,10 @@ export interface RecommendOptions {
  * 1. must carry the tag (duplicates by id are dropped)
  * 2. articles with a cover photo first (the layout leads with a photo)
  * 3. editorial picks in their chosen order
- * 4. remaining articles not already shown elsewhere on the page first
- * 5. the incoming order (newest first), then slug
+ * 4. among the rest, stories picked for another feeling last, so a
+ *    fallback does not repeat what that feeling already shows
+ * 5. remaining articles not already shown elsewhere on the page first
+ * 6. the incoming order (newest first), then slug
  *
  * No engagement or "how moving" score exists in the data, so none is used.
  */
@@ -196,6 +230,8 @@ export function recommend<T extends DiscoveryCandidate>(
         rank(!a.candidate.cover) - rank(!b.candidate.cover) ||
         (picks.get(a.candidate.article.slug) ?? Infinity) -
           (picks.get(b.candidate.article.slug) ?? Infinity) ||
+        rank(prioritizePicks && pickedForOther(a.candidate.article.slug, tag)) -
+          rank(prioritizePicks && pickedForOther(b.candidate.article.slug, tag)) ||
         rank(shownElsewhere.has(a.candidate.article.id)) -
           rank(shownElsewhere.has(b.candidate.article.id)) ||
         a.order - b.order ||
@@ -206,6 +242,11 @@ export function recommend<T extends DiscoveryCandidate>(
 }
 
 const rank = (late: boolean) => (late ? 1 : 0);
+
+const pickedForOther = (slug: string, tag: ExperienceTag) => {
+  const owner = PICKED_FOR.get(slug);
+  return owner !== undefined && owner !== tag;
+};
 
 /** `2024-03-08` → `2024.03`; anything malformed reads as unknown. */
 export function travelMonthOf(date: string | null | undefined): string | null {

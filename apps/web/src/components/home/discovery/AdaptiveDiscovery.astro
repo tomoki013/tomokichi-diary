@@ -6,6 +6,7 @@ import { EXPERIENCES } from "../../../lib/experiences";
 import {
   HOME_EXPERIENCE_PARAM,
   defaultExperience,
+  discoverySummary,
   placeLabel,
   recommend,
   travelMonthOf,
@@ -37,7 +38,7 @@ const toItem = (view: ArticleView): DiscoveryItem => {
     slug: view.article.slug,
     path: view.route.path,
     title: view.revision.title,
-    summary: view.revision.summary,
+    summary: discoverySummary(view.revision.summary),
     cover: view.cover
       ? { storageKey: view.cover.asset.storageKey, alt: view.cover.usage.alt }
       : null,
