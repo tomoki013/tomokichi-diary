@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { ExperienceTag } from "@tomokichi/domain";
 import {
   DISCOVERY_PICKS,
+  byTravelDate,
   discoverySummary,
+  latLonLabel,
   recommend,
+  sceneBackdrop,
+  timeSince,
   type DiscoveryCandidate,
 } from "../lib/home-discovery";
 
@@ -54,5 +58,47 @@ describe("discoverySummary", () => {
     expect(discoverySummary("夕日を見に行った。【追記】あり")).toBe(
       "夕日を見に行った。【追記】あり",
     );
+  });
+});
+
+describe("timeSince", () => {
+  it("reads like someone remembering a trip", () => {
+    expect(timeSince("2026-11-01", "2026-11-15")).toBe("今月");
+    expect(timeSince("2026-03-08", "2026-11-15")).toBe("8か月前");
+    expect(timeSince("2024-10-01", "2026-11-15")).toBe("2年前");
+    expect(timeSince("2024-03-01", "2026-11-15")).toBe("2年半前");
+  });
+
+  it("says nothing for an unknown or future date", () => {
+    expect(timeSince(null, "2026-11-15")).toBeNull();
+    expect(timeSince("2027-01-01", "2026-11-15")).toBeNull();
+  });
+});
+
+describe("latLonLabel", () => {
+  it("writes the place as a field note would", () => {
+    expect(latLonLabel([31.63, 22.34])).toBe("北緯22.3° 東経31.6°");
+    expect(latLonLabel([-3.7, -40.42])).toBe("南緯40.4° 西経3.7°");
+  });
+});
+
+describe("byTravelDate", () => {
+  it("puts the oldest trip first and undated ones last", () => {
+    const items = [
+      { travelDate: "2025-01-01", id: "b" },
+      { travelDate: null, id: "x" },
+      { travelDate: "2023-05-01", id: "a" },
+    ];
+    expect(byTravelDate(items).map((item) => item.id)).toEqual(["a", "b", "x"]);
+  });
+});
+
+const photo = (storageKey: string) => ({ cover: { storageKey, alt: "" } });
+
+describe("sceneBackdrop", () => {
+  it("takes the last cover, or the first for glow", () => {
+    const items = [photo("first"), { cover: null }, photo("last"), { cover: null }];
+    expect(sceneBackdrop("spotlight", items)?.storageKey).toBe("last");
+    expect(sceneBackdrop("glow", items)?.storageKey).toBe("first");
   });
 });

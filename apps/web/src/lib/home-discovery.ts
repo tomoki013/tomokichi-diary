@@ -260,13 +260,89 @@ export function placeLabel(primary: string | null, country: string | null): stri
   return country && country !== primary ? `${primary} / ${country}` : primary;
 }
 
-/** What a template draws for one article: plain, already-resolved strings. */
+/** What every look is given. */
+export interface LookProps {
+  readonly items: readonly DiscoveryItem[];
+  /** The build's date, `YYYY-MM-DD`, for "how long ago". */
+  readonly today: string;
+}
+
+export interface DiscoveryPhoto {
+  readonly storageKey: string;
+  readonly alt: string;
+}
+
+/** What a template draws for one article: plain, already-resolved values. */
 export interface DiscoveryItem {
   readonly slug: string;
   readonly path: string;
   readonly title: string;
   readonly summary: string;
-  readonly cover: { readonly storageKey: string; readonly alt: string } | null;
+  readonly cover: DiscoveryPhoto | null;
+  /** Photos from inside the story, cover excluded, in the author's order. */
+  readonly photos: readonly DiscoveryPhoto[];
   readonly place: string | null;
   readonly travelMonth: string | null;
+  /** First day of the trip, `YYYY-MM-DD`, when the story records one. */
+  readonly travelDate: string | null;
+  /** `[longitude, latitude]` of the story's main place, when known. */
+  readonly coordinates: readonly [number, number] | null;
+  /** Where the story sits in its trip, when it is one episode of several. */
+  readonly episode: {
+    readonly trip: string;
+    readonly number: number;
+    readonly total: number;
+  } | null;
+}
+
+/**
+ * How long ago a trip was, from its first day to `today` (both
+ * `YYYY-MM-DD`), in the plain words of someone remembering it: `8か月前`,
+ * `2年前`, `2年半前`. Nothing for an unknown or future date.
+ */
+export function timeSince(date: string | null, today: string): string | null {
+  const from = date?.match(/^(\d{4})-(\d{2})/);
+  const to = today.match(/^(\d{4})-(\d{2})/);
+  if (!from || !to) return null;
+  const months = (Number(to[1]) - Number(from[1])) * 12 + (Number(to[2]) - Number(from[2]));
+  if (months < 0) return null;
+  if (months === 0) return "今月";
+  if (months < 12) return `${months}か月前`;
+  const years = Math.floor(months / 12);
+  return months % 12 >= 6 ? `${years}年半前` : `${years}年前`;
+}
+
+/** `[31.63, 22.34]` → `北緯22.3° 東経31.6°`, as a field note would write it. */
+export function latLonLabel([lon, lat]: readonly [number, number]): string {
+  return `${degrees(lat, "北緯", "南緯")} ${degrees(lon, "東経", "西経")}`;
+}
+
+const degrees = (value: number, positive: string, negative: string) =>
+  `${value >= 0 ? positive : negative}${Math.abs(value).toFixed(1)}°`;
+
+/** Oldest trip first; stories without a date keep their order at the end. */
+export function byTravelDate<T extends Pick<DiscoveryItem, "travelDate">>(
+  items: readonly T[],
+): T[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .toSorted(
+      (a, b) =>
+        rank(a.item.travelDate === null) - rank(b.item.travelDate === null) ||
+        (a.item.travelDate ?? "").localeCompare(b.item.travelDate ?? "") ||
+        a.index - b.index,
+    )
+    .map(({ item }) => item);
+}
+
+/**
+ * The photo behind a scene's catch line. `glow` takes the first story's
+ * because its lead card has no photo of its own; the rest take the last
+ * story with a cover, so the photo does not repeat the first card.
+ */
+export function sceneBackdrop(
+  look: DiscoveryLookId,
+  items: readonly Pick<DiscoveryItem, "cover">[],
+): DiscoveryPhoto | null {
+  return (look === "glow" ? items : items.toReversed()).find((item) => item.cover)?.cover ?? null;
 }

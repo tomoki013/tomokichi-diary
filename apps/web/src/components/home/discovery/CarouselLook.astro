@@ -1,10 +1,8 @@
 ---
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import type { LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
  * ワクワク: a row of postcards to swipe through, like flicking past places

@@ -1,14 +1,14 @@
 ---
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import type { LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
- * 感動: one story in the spotlight on a dark stage — a large frame with the
- * title over its lower edge — and the rest as smaller moments beside it.
+ * 感動: one story in the spotlight on a dark stage — a large frame, then a
+ * row of the photos the story itself carries, so the moment shows before a
+ * word is read — and the rest as smaller moments beside it. This is the
+ * feeling the page opens on, so it is the one most readers see.
  */
 const { items } = Astro.props;
 const [lead, ...rest] = items;
@@ -26,8 +26,25 @@ const [lead, ...rest] = items;
           />
         )}
       </span>
+      {lead.photos.length > 0 && (
+        <span class="look-spotlight__film">
+          {lead.photos.map((photo) => (
+            <span>
+              <Picture
+                storageKey={photo.storageKey}
+                alt={photo.alt}
+                sizes="(max-width: 46rem) 30vw, 14rem"
+              />
+            </span>
+          ))}
+        </span>
+      )}
       <div class="look-spotlight__caption">
-        {lead.place && <p class="look-pill">{lead.place}</p>}
+        {(lead.place || lead.episode) && (
+          <p class="look-pill">
+            {[lead.place, lead.episode && `第${lead.episode.number}回`].filter(Boolean).join("・")}
+          </p>
+        )}
         <h4>
           <a href={lead.path} data-discovery-article={lead.slug}>
             {lead.title}

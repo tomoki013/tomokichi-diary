@@ -1,28 +1,19 @@
 ---
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import type { LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
- * これは終わった…: a sticky note of the usual ways a trip falls apart, and
- * prints that landed askew in the rain, drained of colour. Pointing at one
- * (where there is a pointer) brings it back upright and in colour. The note
- * lists kinds of trouble in general, not what happened in these stories.
+ * これは終わった…: prints that landed askew in the rain, drained of colour.
+ * Pointing at one (where there is a pointer) brings it back upright and in
+ * colour. Only what these stories carry is shown: no generic list of
+ * troubles that did not happen in them.
  */
 const { items } = Astro.props;
-const TROUBLES = ["フライト遅延", "予約ミス", "体調不良", "荷物トラブル"];
 ---
 
 <div class="look-storm">
-  <ul class="look-storm__note" aria-label="よくある「終わった」">
-    {TROUBLES.map((trouble) => (
-      <li>{trouble}</li>
-    ))}
-    <li class="look-storm__etc">etc...</li>
-  </ul>
   <ul class="look-storm__pile">
     {items.map((item) => (
       <li class="look-storm__print">

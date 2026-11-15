@@ -4,6 +4,9 @@ import { content } from "../../lib/content";
 import { EXPERIENCES, experienceHref } from "../../lib/experiences";
 import { searchSuggestions } from "../../lib/search-suggestions";
 import AdaptiveDiscovery from "./discovery/AdaptiveDiscovery.astro";
+import Picture from "../Picture.astro";
+import type { ExperienceTag } from "@tomokichi/domain";
+import { lookFor, recommend, sceneBackdrop } from "../../lib/home-discovery";
 
 interface Props {
   /** Article ids featured elsewhere on the home page, passed on to the discovery area. */
@@ -17,9 +20,20 @@ interface Props {
  * look it brings), without it they open the filtered archive.
  */
 const { shownElsewhere = new Set<string>() } = Astro.props;
+const views = content.articleViews();
+// Each tile carries a small round crop of the photo its scene opens on, so
+// the feelings below the first look different before they are opened.
+const photoOf = (tag: ExperienceTag) =>
+  sceneBackdrop(
+    lookFor(tag),
+    recommend(views, tag, { shownElsewhere, prioritizePicks: false }).map((view) => ({
+      cover: view.cover ? { storageKey: view.cover.asset.storageKey, alt: "" } : null,
+    })),
+  );
 const chips = EXPERIENCES.map((experience) => ({
   ...experience,
   count: content.withExperience(experience.tag).length,
+  photo: photoOf(experience.tag),
 })).filter((chip) => chip.count > 0);
 const suggestions = searchSuggestions();
 ---
@@ -61,6 +75,11 @@ const suggestions = searchSuggestions();
               href={experienceHref(chip.tag)}
               data-discovery-chip={chip.tag}
             >
+              {chip.photo && (
+                <span class="home-picker__tile-photo" aria-hidden="true">
+                  <Picture storageKey={chip.photo.storageKey} alt="" sizes="2rem" loading="lazy" />
+                </span>
+              )}
               <span class="home-picker__tile-label">{chip.label}</span>
               <small>{chip.count}本</small>
             </a>

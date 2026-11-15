@@ -443,6 +443,20 @@
     background: var(--scene-tint);
   }
 
+  /* The story's own photos, a strip of film under the frame. */
+  .look-spotlight__film {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .look-spotlight__film > span {
+    aspect-ratio: 4 / 3;
+    background: var(--scene-tint);
+  }
+
   .look-spotlight__caption {
     display: grid;
     gap: 0.4rem;
@@ -553,7 +567,7 @@
     position: relative;
     display: grid;
     gap: 0.8rem;
-    padding-left: 1.4rem !important;
+    padding-left: 1.7rem !important;
   }
 
   /* The route: a dashed line down the left with a stop at every story. */
@@ -561,7 +575,7 @@
     position: absolute;
     top: 0.6rem;
     bottom: 0.6rem;
-    left: 0.45rem;
+    left: 0.65rem;
     border-left: 3px dashed color-mix(in srgb, var(--scene-accent) 55%, transparent);
     content: "";
   }
@@ -577,17 +591,63 @@
     box-shadow: var(--scene-shadow);
   }
 
-  .look-route__stop::before {
+  /* Each stop wears the number it has on the map. */
+  .look-route__number {
     position: absolute;
     top: 50%;
-    left: -1.32rem;
-    width: 0.9rem;
-    height: 0.9rem;
-    border: 3px solid var(--scene-bg);
+    left: -1.7rem;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--scene-bg);
     border-radius: 50%;
     background: var(--scene-accent);
-    content: "";
+    color: #fff;
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    font-weight: 700;
     translate: 0 -50%;
+  }
+
+  /* Where it happened: a small map, the trips joined in the order they came. */
+  .look-route__map {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.9rem;
+    border: 1px solid var(--scene-line);
+    border-radius: var(--radius);
+    background: #eaf1f4;
+  }
+
+  .look-route__land path {
+    fill: var(--scene-tint);
+    stroke: #fff;
+    stroke-width: 0.6;
+  }
+
+  .look-route__line {
+    fill: none;
+    stroke: var(--scene-accent);
+    stroke-dasharray: 2 5;
+    stroke-linecap: round;
+    stroke-width: 2.5;
+  }
+
+  .look-route__point circle {
+    fill: var(--scene-accent);
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  .look-route__point text {
+    fill: #fff;
+    font-family: var(--font-label);
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
   }
 
   /* The first stop is where it went wrong first: hazard tape all round. */
@@ -665,46 +725,6 @@
   .look-storm {
     display: grid;
     gap: 1rem;
-  }
-
-  .look-storm__note {
-    justify-self: end;
-    display: grid;
-    gap: 0.2rem;
-    width: fit-content;
-    position: relative;
-    z-index: 3;
-    margin: -6.4rem 0.2rem -1.6rem 0 !important;
-    padding: 0.7rem 1rem 0.8rem !important;
-    background: #fff3a6;
-    box-shadow: 0 6px 14px rgb(40 40 20 / 20%);
-    color: #3b3420;
-    font-family: var(--font-hand);
-    font-size: 0.85rem;
-    transform: rotate(3deg);
-  }
-
-  .look-storm__note li {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .look-storm__note li:not(.look-storm__etc)::before {
-    width: 0.8rem;
-    height: 0.8rem;
-    border: 1.5px solid currentcolor;
-    border-radius: 2px;
-    background:
-      linear-gradient(45deg, transparent 40%, #c7461f 41% 52%, transparent 53%),
-      linear-gradient(-45deg, transparent 44%, #c7461f 45% 56%, transparent 57%) 0.15rem 0 / 0.6rem
-        0.6rem no-repeat;
-    content: "";
-  }
-
-  .look-storm__etc {
-    padding-left: 1.2rem;
-    color: #7a7055;
   }
 
   .look-storm__pile {
@@ -939,6 +959,20 @@
     font-size: 0.9rem;
   }
 
+  /* The note's heading: where exactly, and when. */
+  .look-atlas__coord {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+    margin: 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px dashed var(--scene-line);
+    color: var(--scene-accent);
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.03em;
+  }
+
   .look-atlas__find:not(:first-child) :is(.look-summary, .look-meta) {
     display: none;
   }
@@ -990,8 +1024,17 @@
     border-radius: 50%;
     background: var(--scene-bg);
     color: var(--scene-accent);
-    font-size: 0.68rem;
+    font-size: 0.78rem;
     font-weight: 700;
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .look-ascent__mark small {
+    display: block;
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    font-weight: 400;
   }
 
   .look-ascent__step:last-child .look-ascent__mark {
@@ -1119,8 +1162,29 @@
   }
 
   .look-glow__photo {
+    position: relative;
     aspect-ratio: 1;
     background: #ddd3c4;
+  }
+
+  .look-glow__ago {
+    margin: 0;
+    color: var(--scene-accent);
+    font-family: var(--font-hand);
+    font-size: 0.9rem;
+  }
+
+  /* The date stamp an instant camera prints in the corner. */
+  .look-glow__stamp {
+    position: absolute;
+    right: 0.35rem;
+    bottom: 0.3rem;
+    color: #ffb347;
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 4px rgb(0 0 0 / 70%);
   }
 
   .look-glow__print h4 {

@@ -1,8 +1,9 @@
 ---
 import type { ArticleView } from "@tomokichi/application";
 import DiscoveryPanel from "./DiscoveryPanel.astro";
-import { content } from "../../../lib/content";
+import { content, now } from "../../../lib/content";
 import { EXPERIENCES } from "../../../lib/experiences";
+import { PLACE_COORDINATES } from "../../../lib/place-coordinates";
 import {
   HOME_EXPERIENCE_PARAM,
   defaultExperience,
@@ -31,6 +32,36 @@ const { shownElsewhere } = Astro.props;
 const nameOf = (id: Parameters<typeof content.locations.nameOf>[0]) =>
   content.locations.nameOf(id, "ja");
 
+// Episodes of a trip are the journey's members that are also in the travel
+// diary, the same reckoning the article page uses for "第N回".
+const diary = content
+  .articleViews()
+  .flatMap((view) => content.collectionsOf(view.article.id))
+  .find((collection) => collection.kind === "series" && collection.slug === "travel-diary");
+const diaryIds = new Set(diary ? content.membersOf(diary.id).map((view) => view.article.id) : []);
+
+const episodeOf = (view: ArticleView): DiscoveryItem["episode"] => {
+  if (!diaryIds.has(view.article.id)) return null;
+  const journey = content
+    .collectionsOf(view.article.id)
+    .find((collection) => collection.kind === "journey");
+  if (!journey) return null;
+  const episodes = content
+    .membersOf(journey.id)
+    .filter((member) => diaryIds.has(member.article.id));
+  const number = episodes.findIndex((member) => member.article.id === view.article.id) + 1;
+  return number > 0 && episodes.length > 1
+    ? { trip: journey.title, number, total: episodes.length }
+    : null;
+};
+
+const coordinatesOf = (view: ArticleView): DiscoveryItem["coordinates"] => {
+  const place = content.primaryLocationOf(view.article.id);
+  if (!place) return null;
+  if (place.latitude != null && place.longitude != null) return [place.longitude, place.latitude];
+  return PLACE_COORDINATES[place.slug] ?? null;
+};
+
 const toItem = (view: ArticleView): DiscoveryItem => {
   const primary = content.primaryLocationOf(view.article.id);
   const country = content.countryOf(view.article.id);
@@ -42,14 +73,28 @@ const toItem = (view: ArticleView): DiscoveryItem => {
     cover: view.cover
       ? { storageKey: view.cover.asset.storageKey, alt: view.cover.usage.alt }
       : null,
+    photos: view.media
+      .filter(
+        ({ usage, asset }) =>
+          (usage.role === "inline" || usage.role === "gallery") &&
+          !asset.aiGenerated &&
+          asset.id !== view.cover?.asset.id,
+      )
+      .slice(0, 3)
+      .map(({ usage, asset }) => ({ storageKey: asset.storageKey, alt: usage.alt })),
     place: placeLabel(primary ? nameOf(primary.id) : null, country ? nameOf(country.id) : null),
     travelMonth: travelMonthOf(view.article.travelStartDate),
+    travelDate: view.article.travelStartDate ?? null,
+    coordinates: coordinatesOf(view),
+    episode: episodeOf(view),
   };
 };
 
 const views = content.articleViews();
+const today = now.slice(0, 10);
 const panels = EXPERIENCES.map(({ tag }) => ({
   tag,
+  today,
   total: content.withExperience(tag).length,
   items: recommend(views, tag, { shownElsewhere }).map(toItem),
   backdropItems: recommend(views, tag, { shownElsewhere, prioritizePicks: false }).map(toItem),

@@ -13,6 +13,7 @@ import { EXPERIENCE_COPY, experienceHref } from "../../../lib/experiences";
 import {
   DISCOVERY_SCENES,
   lookFor,
+  sceneBackdrop,
   type DiscoveryItem,
   type DiscoveryLookId,
 } from "../../../lib/home-discovery";
@@ -24,6 +25,8 @@ interface Props {
   backdropItems?: readonly DiscoveryItem[];
   /** Every story with this feeling, not just the ones shown. */
   total: number;
+  /** The build's date, `YYYY-MM-DD`. */
+  today: string;
 }
 
 /**
@@ -32,15 +35,13 @@ interface Props {
  * the same place — the feeling's name, its English name in script and how
  * many stories it has. Below it, the feeling's own look.
  */
-const { tag, items, total, backdropItems = items } = Astro.props;
+const { tag, items, total, today, backdropItems = items } = Astro.props;
 const copy = EXPERIENCE_COPY[tag];
 const scene = DISCOVERY_SCENES[tag];
 const look = lookFor(tag);
 // Retain the scene's original photo selection, independently of the curated
-// cards below. "Glow" uses the first photo because its lead has no photo.
-const backdrop =
-  (look === "glow" ? backdropItems : backdropItems.toReversed()).find((item) => item.cover)
-    ?.cover ?? null;
+// cards below.
+const backdrop = sceneBackdrop(look, backdropItems);
 
 const LOOKS: Record<DiscoveryLookId, typeof CarouselLook> = {
   carousel: CarouselLook,
@@ -92,7 +93,7 @@ const Look = LOOKS[look];
     <div class="home-discovery__body">
       <p class="scene-section">{scene.section}</p>
       <div class="home-discovery__look">
-        <Look items={items} />
+        <Look items={items} today={today} />
       </div>
       <a class="home-discovery__more" href={experienceHref(tag)}>
         <span>{copy.label}の旅をもっと見る</span>
