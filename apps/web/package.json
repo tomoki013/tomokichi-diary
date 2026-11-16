@@ -33,7 +33,7 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "@types/topojson-client": "^3.1.5",
-    "cf": "1.0.0-beta.20",
+    "cf": "1.0.0-beta.31",
     "wrangler": "^4.151.3"
   }
 }
