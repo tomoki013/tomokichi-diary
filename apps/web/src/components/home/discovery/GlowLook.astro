@@ -1,22 +1,24 @@
 ---
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import { timeSince, type LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
  * 忘れられない: instant prints strung along a gentle wave, lit like a
  * lantern festival, and the first story set apart as a remembered line.
+ * Each says how long ago the trip was, counted from its own date: the time
+ * it has stayed with the author.
  */
-const { items } = Astro.props;
+const { items, today } = Astro.props;
 const [lead, ...rest] = items;
+const ago = (item: (typeof items)[number]) => timeSince(item.travelDate, today);
 ---
 
 <div class="look-glow">
   {lead && (
     <div class="look-glow__quote">
+      {ago(lead) && <p class="look-glow__ago">{ago(lead)}の旅</p>}
       <h4>
         <a href={lead.path} data-discovery-article={lead.slug}>
           {lead.title}
@@ -40,6 +42,7 @@ const [lead, ...rest] = items;
                 sizes="(max-width: 46rem) 42vw, 11rem"
               />
             )}
+            {ago(item) && <span class="look-glow__stamp">{ago(item)}</span>}
           </span>
           <h4>
             <a href={item.path} data-discovery-article={item.slug}>

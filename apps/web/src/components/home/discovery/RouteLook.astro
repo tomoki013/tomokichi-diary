@@ -1,22 +1,102 @@
 ---
+import { geoDistance, geoMercator, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import world from "world-atlas/countries-110m.json";
+import type { FeatureCollection, Geometry } from "geojson";
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import { byTravelDate, type DiscoveryItem, type LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
- * ハラハラ: the trip drawn as a dotted route on a map, every story a stop
- * along it, and hazard tape around the first — the one where it went
- * wrong first. The order is just the reading order, not a real itinerary.
+ * ハラハラ: where it went wrong, on a real map. The stories run in the order
+ * the trips happened, each a numbered stop at its actual place, joined by a
+ * dotted line from the first trouble to the latest; the first card wears
+ * hazard tape. Drawn at build time as plain SVG, like the journey route map.
  */
-const { items } = Astro.props;
+const items = byTravelDate<DiscoveryItem>(Astro.props.items);
+
+const WIDTH = 360;
+const HEIGHT = 190;
+const located = items.flatMap((item, index) =>
+  item.coordinates
+    ? [{ number: index + 1, lon: item.coordinates[0], lat: item.coordinates[1] }]
+    : [],
+);
+const lons = located.map((stop) => stop.lon);
+const lats = located.map((stop) => stop.lat);
+const drawable = new Set(located.map((stop) => `${stop.lon},${stop.lat}`)).size >= 2;
+const pad = Math.max(4, (Math.max(...lons) - Math.min(...lons)) * 0.12);
+const projection = geoMercator().fitExtent(
+  [
+    [18, 18],
+    [WIDTH - 18, HEIGHT - 18],
+  ],
+  {
+    type: "MultiPoint",
+    coordinates: [
+      [Math.min(...lons) - pad, Math.min(...lats) - pad],
+      [Math.max(...lons) + pad, Math.max(...lats) + pad],
+    ],
+  } as never,
+);
+const path = geoPath(projection).digits(1);
+const countries = feature(
+  world as never,
+  (world as unknown as { objects: { countries: unknown } }).objects.countries as never,
+) as unknown as FeatureCollection<Geometry>;
+const land = drawable
+  ? countries.features.flatMap((country) => {
+      const [[x0, y0], [x1, y1]] = path.bounds(country);
+      if (x1 < 0 || y1 < 0 || x0 > WIDTH || y0 > HEIGHT) return [];
+      const d = path(country);
+      return d ? [d] : [];
+    })
+  : [];
+// Stops within about 50 km share one point: "1・3".
+const round = (n: number) => Math.round(n * 10) / 10;
+const points: { lon: number; lat: number; x: number; y: number; numbers: number[] }[] = [];
+for (const stop of located) {
+  const near = points.find(
+    (point) => geoDistance([point.lon, point.lat], [stop.lon, stop.lat]) * 6371 < 50,
+  );
+  if (near) {
+    near.numbers.push(stop.number);
+    continue;
+  }
+  const [x, y] = projection([stop.lon, stop.lat]) ?? [0, 0];
+  points.push({ lon: stop.lon, lat: stop.lat, x: round(x), y: round(y), numbers: [stop.number] });
+}
+const line = located
+  .map((stop) => points.find((point) => point.numbers.includes(stop.number))!)
+  .map((point) => `${point.x},${point.y}`)
+  .join(" ");
 ---
 
+{drawable && (
+  <svg class="look-route__map" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-hidden="true">
+    <g class="look-route__land">
+      {land.map((d) => (
+        <path d={d} />
+      ))}
+    </g>
+    <polyline class="look-route__line" points={line} />
+    {points.map((point) => (
+      <g class="look-route__point">
+        <circle cx={point.x} cy={point.y} r={point.numbers.length > 1 ? 13 : 10.5} />
+        <text x={point.x} y={point.y + 4.3}>
+          {point.numbers.join("・")}
+        </text>
+      </g>
+    ))}
+  </svg>
+)}
 <ol class="look-route">
   {items.map((item, index) => (
     <li class:list={["look-route__stop", index === 0 && "is-hazard"]}>
+      <span class="look-route__number" aria-hidden="true">
+        {index + 1}
+      </span>
       <span class="look-route__thumb">
         {item.cover && (
           <Picture
@@ -27,7 +107,11 @@ const { items } = Astro.props;
         )}
       </span>
       <div class="look-route__body">
-        {item.place && <p class="look-pill">{item.place.split(" / ").at(-1)}</p>}
+        {(item.place || item.travelMonth) && (
+          <p class="look-pill">
+            {[item.place?.split(" / ").at(-1), item.travelMonth].filter(Boolean).join("　")}
+          </p>
+        )}
         <h4>
           <a href={item.path} data-discovery-article={item.slug}>
             {item.title}

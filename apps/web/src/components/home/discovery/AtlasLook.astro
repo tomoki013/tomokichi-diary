@@ -1,14 +1,14 @@
 ---
 import Picture from "../../Picture.astro";
-import type { DiscoveryItem } from "../../../lib/home-discovery";
+import { latLonLabel, type LookProps } from "../../../lib/home-discovery";
 
-interface Props {
-  items: readonly DiscoveryItem[];
-}
+type Props = LookProps;
 
 /**
  * 発見: field notes from places. Each photo carries a map-pin tag with where
- * it was; the first find gets a wide card of its own.
+ * it was, and each note is headed the way a field note is: the spot's real
+ * latitude and longitude, and when it was seen. The first find gets a wide
+ * card of its own.
  */
 const { items } = Astro.props;
 ---
@@ -27,15 +27,19 @@ const { items } = Astro.props;
         {item.place && <span class="look-atlas__pin">{item.place.split(" / ")[0]}</span>}
       </span>
       <div class="look-atlas__body">
+        {(item.coordinates || item.travelMonth) && (
+          <p class="look-atlas__coord">
+            {item.coordinates && <span>{latLonLabel(item.coordinates)}</span>}
+            {item.travelMonth && <span>{item.travelMonth}</span>}
+          </p>
+        )}
         <h4>
           <a href={item.path} data-discovery-article={item.slug}>
             {item.title}
           </a>
         </h4>
         <p class="look-summary">{item.summary}</p>
-        {(item.place || item.travelMonth) && (
-          <p class="look-meta">{[item.place, item.travelMonth].filter(Boolean).join("　")}</p>
-        )}
+        {item.place && <p class="look-meta">{item.place}</p>}
       </div>
     </li>
   ))}
