@@ -8,6 +8,9 @@ import {
   type ProjectOperatorApi,
 } from "@inquiry-platform/sdk";
 import { readFileSync } from "node:fs";
+import { fromNodeSqlite, openInMemoryDatabase } from "@tomokichi/infra-d1/testing";
+import type { SqlDatabase } from "@tomokichi/infra-d1";
+import type { AuditContext } from "../audit.js";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 import { INQUIRY_PROJECT_SLUG } from "../inquiry.js";
@@ -782,5 +785,147 @@ describe("inquiry operations", () => {
     expect(binding).toMatch(/exportName: "ProjectOperator"/);
     expect(binding).toContain(`projects: ["${INQUIRY_PROJECT_SLUG}"]`);
     expect(config).not.toContain("INQUIRY_API_ORIGIN");
+  });
+});
+
+/** The admin's settings table, with the audit log beside it. */
+async function settingsDb() {
+  const sql = fromNodeSqlite(openInMemoryDatabase());
+  for (const file of ["0027_operator_audit_events.sql", "0034_admin_settings.sql"])
+    await sql.exec(readFileSync(`migrations/${file}`, "utf8"));
+  return sql;
+}
+
+/** One operation request, as the admin or the operator entrypoint sends it. */
+const opRequest = (name: string, input: unknown, headers: Record<string, string> = auth) =>
+  new Request(`https://api/v1/admin/ops/${name}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(input),
+  });
+
+describe("reading the inbox from the Operator MCP", () => {
+  const operatorContext: AuditContext = {
+    source: "remote-mcp",
+    actorType: "remote-operator",
+    actorSubject: "owner",
+    clientTrust: "unknown",
+    operatorWrite: true,
+  } as AuditContext;
+
+  function apps(db: SqlDatabase) {
+    const base = {
+      contextFactory: () => ctx,
+      inquiryOperator: () => createProjectOperatorClient(platform, INQUIRY_PROJECT_SLUG),
+      auditDb: db,
+    };
+    return {
+      admin: (name: string, input: unknown = {}) =>
+        createApp(base).fetch(opRequest(name, input), env, {} as ExecutionContext),
+      mcp: (name: string, input: unknown = {}) =>
+        createApp({
+          ...base,
+          operatorActor: "operator",
+          operatorAuditContext: operatorContext,
+        }).fetch(
+          opRequest(name, input, { "content-type": "application/json" }),
+          env,
+          {} as ExecutionContext,
+        ),
+    };
+  }
+
+  it("is refused until the owner allows it, and stops again when they stop it", async () => {
+    const db = await settingsDb();
+    const { admin, mcp } = apps(db);
+    expect((await mcp("inquiry.tickets")).status).toBe(403);
+    expect((await mcp("inquiry.ticket", { ticketId: "TK-000001" })).status).toBe(403);
+    expect(calledWith("listTickets")).toHaveLength(0);
+    expect(calledWith("getTicket")).toHaveLength(0);
+    expect(await (await admin("inquiry.mcpAccess")).json()).toEqual({
+      allowed: false,
+      changedAt: null,
+    });
+
+    const allowed = (await (await admin("inquiry.setMcpAccess", { allowed: true })).json()) as {
+      allowed: boolean;
+      changedAt: string | null;
+    };
+    expect(allowed.allowed).toBe(true);
+    expect(allowed.changedAt).not.toBeNull();
+
+    const page = (await (await mcp("inquiry.tickets")).json()) as {
+      items: { requesterEmail: string }[];
+    };
+    expect(page.items[0]?.requesterEmail).toBe("reader@example.com");
+    const detail = (await (await mcp("inquiry.ticket", { ticketId: "TK-000001" })).json()) as {
+      timeline: { body?: string }[];
+    };
+    expect(detail.timeline[0]?.body).toBe("バスの時刻を教えてください");
+
+    await admin("inquiry.setMcpAccess", { allowed: false });
+    expect((await mcp("inquiry.tickets")).status).toBe(403);
+  });
+
+  it("never lets an MCP caller grant itself access, send, or change a ticket", async () => {
+    const db = await settingsDb();
+    const { mcp, admin } = apps(db);
+    await admin("inquiry.setMcpAccess", { allowed: true });
+    for (const [name, input] of [
+      ["inquiry.setMcpAccess", { allowed: true }],
+      ["inquiry.mcpAccess", {}],
+      [
+        "inquiry.reply",
+        { ticketId: "t1", body: "x", idempotencyKey: "12345678", subject: null, afterStatus: null },
+      ],
+      ["inquiry.changeTicket", { ticketId: "t1", revision: 3, status: "RESOLVED" }],
+      ["inquiry.addNote", { ticketId: "t1", body: "x", idempotencyKey: "12345678" }],
+      ["inquiry.compose", { ticketId: "t1" }],
+    ] as const)
+      expect((await mcp(name, input)).status, name).toBe(403);
+    expect(calledWith("reply")).toHaveLength(0);
+    expect(calledWith("changeTicket")).toHaveLength(0);
+    expect(calledWith("addNote")).toHaveLength(0);
+  });
+
+  it("records each MCP read of the inbox in the operation log", async () => {
+    const db = await settingsDb();
+    const { mcp, admin } = apps(db);
+    await admin("inquiry.setMcpAccess", { allowed: true });
+    await mcp("inquiry.ticket", { ticketId: "TK-000001" });
+    const rows = await db
+      .prepare("SELECT action, result FROM operator_audit_events ORDER BY occurred_at")
+      .all<{ action: string; result: string }>();
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        { action: "inquiry.setMcpAccess", result: "succeeded" },
+        { action: "inquiry.ticket", result: "succeeded" },
+      ]),
+    );
+  });
+});
+
+describe("the default reply templates", () => {
+  it("each have a unique key, a category, and only placeholders the operator fills", () => {
+    const keys = DEFAULT_TEMPLATES.map((entry) => entry.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const entry of DEFAULT_TEMPLATES) {
+      expect(entry.name, entry.key).toMatch(/^[^：]+：.+/);
+      expect(entry.key, entry.key).toMatch(/^diary_[a-z_]+$/);
+    }
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        "diary_removal_done",
+        "diary_correction_kept",
+        "diary_question_unknown",
+        "diary_work_terms",
+        "diary_work_published",
+        "diary_taking_time",
+        "diary_late_apology",
+        "diary_follow_up",
+        "diary_reply_thanks",
+        "diary_thanks_mention",
+      ]),
+    );
   });
 });

@@ -313,11 +313,13 @@ describe("remote operator tools", () => {
       "list_activity",
     ])
       expect(names).toContain(name);
-    // The reply templates are the one part of the inbox an operator may edit.
+    // The reply templates are the one part of the inbox an operator may edit,
+    // and the tickets the one part it may read (once the owner allowed it).
+    expect(names).toEqual(expect.arrayContaining(["list_inquiries", "get_inquiry"]));
     for (const name of names)
-      expect(name.replace(/^(list|create|update)_inquiry_templates?$/, "")).not.toMatch(
-        /inquiry|revoke|review/,
-      );
+      expect(
+        name.replace(/^((list|create|update)_inquiry_templates?|list_inquiries|get_inquiry)$/, ""),
+      ).not.toMatch(/inquiry|revoke|review/);
     const refused = await rpc(env, token, {
       method: "tools/call",
       params: { name: "publish_article", arguments: { articleId: "a1", confirmArticleId: "a2" } },

@@ -3,7 +3,8 @@
 ChatGPT や Claude などの AI クライアントから、管理画面でできることを操作するための MCP です。スマホの ChatGPT からも使えるリモート接続と、手元で起動するローカル stdio 接続があります。どちらも同じツールです。
 
 - **管理画面と同じ操作を使います。** ツールは操作カタログ（`packages/contracts/src/operations`）から自動で並び、`POST /v1/admin/ops/<名前>` を呼びます。入力検証・公開条件・操作ログは管理画面と同じ所で行います（ADR 0011）。
-- **出さないもの**：削除、問い合わせ（読むことも不可。返信テンプレートの一覧・作成・更新 `list_inquiry_templates` / `create_inquiry_template` / `update_inquiry_template` だけは例外）、旅の事実の確認、MCP 接続の失効。これ以外を管理画面専用にするとテストが落ちます。
+- **出さないもの**：削除、問い合わせへの返信・状態の変更・メモ・署名、問い合わせを MCP に見せる許可の切り替え、旅の事実の確認、MCP 接続の失効。これ以外を管理画面専用にするとテストが落ちます。
+- **問い合わせ**：返信テンプレートの一覧・作成・更新（`list_inquiry_templates` / `create_inquiry_template` / `update_inquiry_template`）はいつでも。問い合わせの一覧・1件（`list_inquiries` / `get_inquiry`。相手のアドレスとやり取りをすべて含む）は、本人が管理画面の［問い合わせ → 設定 → MCP からの閲覧］で許可しているときだけ読めます（許可は D1 の `admin_settings`、毎回の呼び出しで確認。切れば次の呼び出しから 403）。許可中は、ホーム（`get_home`）にも未対応の件数が出ます。
 - **権限は2段階**：読み取りツールは常に、書き込みツールは書き込みを許可した接続だけに出ます。API も同じ判定で拒否します。
 - **取り消しにくい操作には確認の入力が要ります**：`publish_article` は `confirmArticleId` に同じ ID、`publish_diary_note` と `publish_site` は `confirm: "publish"`、取り下げは `confirm: "unpublish"`、アーカイブは `confirm: "archive"`。
 

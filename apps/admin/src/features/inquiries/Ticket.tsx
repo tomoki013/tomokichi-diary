@@ -188,7 +188,7 @@ function ReplyForm({
         ) : (
           subject.trim() !== compose.subject && (
             <p className="field__hint">
-              変えた件名はこのメールだけに使われます。受付番号が無ければ末尾に付きます。
+              変えた件名は書いたとおりに送られ、このあとのやり取りの件名になります。受付番号が無ければ末尾に付きます。
             </p>
           )
         )}

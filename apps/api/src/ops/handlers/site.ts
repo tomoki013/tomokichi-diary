@@ -2,6 +2,7 @@ import { getLikeActivity, listArticlesForAdmin, listPendingFacts } from "@tomoki
 import type { ActivityItemDto, ConnectionDto, HomeTaskDto } from "@tomokichi/contracts";
 import { publicationStatus } from "../../publication.js";
 import { invalid, notFound, OpError, type Handlers, type OpScope } from "../scope.js";
+import { mcpAccess } from "./inquiry.js";
 
 type Names =
   | "home.get"
@@ -97,8 +98,14 @@ export const siteHandlers: Handlers<Names> = {
         href: "#/articles?filter=changed",
         count: changed.length - HOME_LIST,
       });
-    if (scope.channel === "admin") {
-      // The inbox belongs to the admin alone; an MCP caller never learns its size.
+    const inbox =
+      scope.channel === "admin" ||
+      (await mcpAccess(scope).then(
+        (access) => access.allowed,
+        () => false,
+      ));
+    if (inbox) {
+      // An MCP caller learns the inbox's size only once the owner allowed it to read it.
       const operator = scope.inquiry();
       const page = operator
         ? await operator.listTickets({ limit: 100, offset: 0 }).catch(() => null)

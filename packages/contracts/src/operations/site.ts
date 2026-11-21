@@ -77,7 +77,7 @@ export const siteOperations = {
     surface: "operator",
     input: v.object({}),
     description:
-      "いま手を付けるものの一覧: サイト反映の失敗、公開していない変更、書きかけの下書き、予約公開、確認待ちの事実。管理画面のホームと同じ内容です（問い合わせは管理画面だけに出ます）。",
+      "いま手を付けるものの一覧: サイト反映の失敗、公開していない変更、書きかけの下書き、予約公開、確認待ちの事実。管理画面のホームと同じ内容です（未対応の問い合わせの件数は、本人が MCP からの閲覧を許可しているときだけ出ます）。",
     tool: { name: "get_home", title: "Get what needs attention" },
     target: { type: "admin" },
   }),
