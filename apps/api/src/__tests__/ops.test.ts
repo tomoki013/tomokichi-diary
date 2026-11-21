@@ -34,10 +34,21 @@ describe("the operation catalogue", () => {
     expect(hidden).toEqual([]);
     // And the exceptions really are hidden: the inbox never reaches an MCP server,
     // except the reply templates, which hold the site's wording and no reader's.
-    const templateOps = ["inquiry.templates", "inquiry.createTemplate", "inquiry.updateTemplate"];
+    // and the tickets to read, which the handler lets through only once the
+    // owner allowed it (inquiry.test.ts).
+    const operatorOps = new Set([
+      "inquiry.templates",
+      "inquiry.createTemplate",
+      "inquiry.updateTemplate",
+      "inquiry.tickets",
+      "inquiry.ticket",
+    ]);
     for (const [name, spec] of specs)
       if (name.startsWith("inquiry."))
-        expect(spec.surface, name).toBe(templateOps.includes(name) ? "operator" : "admin-only");
+        expect(spec.surface, name).toBe(operatorOps.has(name) ? "operator" : "admin-only");
+    for (const [name, spec] of specs)
+      if (name.startsWith("inquiry.") && spec.surface === "operator" && !name.endsWith("emplate"))
+        expect(spec.kind, name).toBe("read");
   });
 
   it("gives every MCP operation one unique tool name and every delete none", () => {

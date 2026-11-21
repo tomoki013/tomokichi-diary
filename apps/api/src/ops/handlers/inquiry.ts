@@ -2,6 +2,7 @@ import { CONTACT_LANES, CONTACT_LANE_LABELS, findContactTopic } from "@tomokichi
 import {
   INQUIRY_STATUSES,
   type InquiryCountsDto,
+  type InquiryMcpAccessDto,
   type InquiryReplyTemplateDto,
   type InquirySignatureDto,
   type InquiryTicketDetailDto,
@@ -30,6 +31,40 @@ import {
 } from "../../inquiry-templates.js";
 import { invalid, notFound, OpError, type Handlers, type OpScope } from "../scope.js";
 
+const MCP_ACCESS_KEY = "inquiry.mcp_access";
+
+/** Whether the owner has let the Operator MCP read the inbox, and since when. */
+export async function mcpAccess(scope: OpScope): Promise<InquiryMcpAccessDto> {
+  const row = await scope
+    .db()
+    .prepare("SELECT value, updated_at FROM admin_settings WHERE key = ?")
+    .bind(MCP_ACCESS_KEY)
+    .first<{ value: string; updated_at: string }>();
+  return { allowed: row?.value === "1", changedAt: row?.updated_at ?? null };
+}
+
+/**
+ * The inbox's reads reach an MCP caller only after the owner allowed it in the
+ * admin. Checked on every call, so turning it off stops the next one.
+ */
+async function requireReader(scope: OpScope): Promise<void> {
+  if (scope.channel === "admin") return;
+  // Closed when it cannot be read: no answer is not a yes.
+  if (
+    await mcpAccess(scope).then(
+      (access) => access.allowed,
+      () => false,
+    )
+  )
+    return;
+  scope.ctx.logger.warn("inquiry.mcp_refused", { code: "API_FORBIDDEN" });
+  throw new OpError(
+    "API_FORBIDDEN",
+    "問い合わせは、本人が管理画面の［問い合わせ → 設定］で MCP からの閲覧を許可したときだけ読めます",
+    403,
+  );
+}
+
 /**
  * The admin's inbox for this site's contacts on the shared inquiry platform:
  * where they are listed, worked as tickets, annotated and answered. A reply is
@@ -38,13 +73,18 @@ import { invalid, notFound, OpError, type Handlers, type OpScope } from "../scop
  * binding may choose To, Cc and the subject for one reply
  * (`allowReplyOverrides`). The sender is always the platform's.
  *
- * Every operation here is `admin-only`: no MCP server can read or send. The
+ * Nothing here that sends, changes a ticket or grants access reaches an MCP
+ * server. The reply templates do, and the tickets and their messages may be
+ * read by the Operator MCP once the owner allowed it (`inquiry.setMcpAccess`,
+ * checked on every call by `requireReader`). The
  * platform's `ProjectOperator` binding scopes each call to this site's
  * project, applies the ticket rules, and audits each change as this API and
  * the person who passed the gate.
  */
 type Names =
   | "inquiry.status"
+  | "inquiry.mcpAccess"
+  | "inquiry.setMcpAccess"
   | "inquiry.signature"
   | "inquiry.saveSignature"
   | "inquiry.templates"
@@ -317,6 +357,7 @@ export const inquiryHandlers: Handlers<Names> = {
    * the lane filter are exact; the platform cannot filter by lane.
    */
   "inquiry.tickets": async (scope, { status, lane, query, offset }) => {
+    await requireReader(scope);
     const all = take(scope, await everything(client(scope), query.trim() || undefined));
     const matching = all
       .filter((ticket) =>
@@ -344,8 +385,25 @@ export const inquiryHandlers: Handlers<Names> = {
   },
 
   /** `ticketId` is a ticket id or its number, as a notification link carries. */
-  "inquiry.ticket": async (scope, { ticketId, offset }) =>
-    toDetail(take(scope, await client(scope).getTicket(ticketId, offset))),
+  "inquiry.ticket": async (scope, { ticketId, offset }) => {
+    await requireReader(scope);
+    return toDetail(take(scope, await client(scope).getTicket(ticketId, offset)));
+  },
+
+  "inquiry.mcpAccess": async (scope) => mcpAccess(scope),
+
+  "inquiry.setMcpAccess": async (scope, { allowed }) => {
+    await scope
+      .db()
+      .prepare(
+        `INSERT INTO admin_settings (key, value, updated_at, updated_by) VALUES (?, ?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at,
+           updated_by = excluded.updated_by`,
+      )
+      .bind(MCP_ACCESS_KEY, allowed ? "1" : "0", new Date().toISOString(), scope.actor ?? null)
+      .run();
+    return mcpAccess(scope);
+  },
 
   // Only what was sent: a status change must not clear the next action.
   "inquiry.changeTicket": async (scope, { ticketId, revision, ...change }) => {

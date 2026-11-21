@@ -60,7 +60,7 @@ export function findOperation(name: string): OperationSpec | null {
  */
 export const ADMIN_ONLY_OPERATIONS: Readonly<Record<string, string>> = {
   "inquiry.*":
-    "問い合わせ・メールは MCP に出さない（閲覧も不可）。返信テンプレートの一覧・作成・更新だけは例外",
+    "問い合わせの返信・状態の変更・メモ・署名と、MCP への閲覧の許可は管理画面だけ。MCP に出すのは返信テンプレートの一覧・作成・更新と、本人が許可したときの問い合わせの閲覧（一覧・1件）",
   "connection.revoke": "MCP 接続の失効は管理画面だけ",
   "knowledge.reviewFact": "事実の確認は管理画面の本人だけ",
 };

@@ -369,6 +369,16 @@ export interface InquiryLaneDto {
 }
 
 /** The signature the platform puts under this site's replies. */
+/**
+ * Whether the Operator MCP may read the inbox (tickets, their messages and
+ * addresses). Only the admin turns it on or off; off until it does.
+ */
+export interface InquiryMcpAccessDto {
+  readonly allowed: boolean;
+  /** When it was last turned on or off; null when never. */
+  readonly changedAt: string | null;
+}
+
 export interface InquirySignatureDto {
   readonly signature: string;
   /** No signature of its own: replies are signed with the deployment's. */

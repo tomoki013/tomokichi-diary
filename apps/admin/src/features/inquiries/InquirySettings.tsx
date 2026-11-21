@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { InquiryReplyTemplateDto } from "@tomokichi/contracts";
+import type { InquiryMcpAccessDto, InquiryReplyTemplateDto } from "@tomokichi/contracts";
 import { op } from "../../data/client";
 import { useAction, useOp, useTitle } from "../../data/hooks";
 import { href } from "../../app/router";
@@ -21,6 +21,7 @@ export function InquirySettings() {
   useTitle("返信の設定");
   const signature = useOp("inquiry.signature");
   const templates = useOp("inquiry.templates");
+  const access = useOp("inquiry.mcpAccess");
   const [editing, setEditing] = useState<InquiryReplyTemplateDto | "new" | null>(null);
   return (
     <Page title="返信の設定" back={{ href: href.inquiries(), label: "問い合わせ" }}>
@@ -29,6 +30,7 @@ export function InquirySettings() {
           <Signature key={data.signature} value={data.signature} usesDefault={data.usesDefault} />
         )}
       </Loaded>
+      <Loaded resource={access}>{(data) => <McpAccess access={data} />}</Loaded>
       <Panel title="テンプレート" actions={<Button onClick={() => setEditing("new")}>追加</Button>}>
         <Loaded resource={templates}>
           {(data) => (
@@ -74,6 +76,34 @@ function Signature({ value, usesDefault }: { value: string; usesDefault: boolean
         }
       >
         保存
+      </Button>
+    </Panel>
+  );
+}
+
+/** Whether the Operator MCP (an AI connected to the admin) may read the inbox. */
+function McpAccess({ access }: { access: InquiryMcpAccessDto }) {
+  const { busy, run } = useAction();
+  const set = (allowed: boolean) =>
+    void run("access", () => op("inquiry.setMcpAccess", { allowed }), {
+      done: allowed ? "MCP から読めるようにしました" : "MCP から読めないようにしました",
+      touches: ["inquiry"],
+    });
+  return (
+    <Panel
+      title="MCP からの閲覧"
+      hint={
+        access.allowed
+          ? "許可中：管理用の MCP につないだ AI が、問い合わせの一覧・やり取り・相手のアドレスを読めます（返信・状態の変更はできません）"
+          : "許可していません：MCP からは問い合わせを読めません"
+      }
+    >
+      <Button
+        kind={access.allowed ? "quiet" : "primary"}
+        busy={busy === "access"}
+        onClick={() => set(!access.allowed)}
+      >
+        {access.allowed ? "許可をやめる" : "MCP からの閲覧を許可する"}
       </Button>
     </Panel>
   );
