@@ -152,6 +152,10 @@ export function buildExportFiles(snapshot: ContentSnapshot): ExportFile[] {
         {
           version: EXPORT_MANIFEST_VERSION,
           generatedAt: snapshot.generatedAt,
+          adPolicy: {
+            adsEnabled: snapshot.adPolicy?.adsEnabled ?? true,
+            anchorExperimentEnabled: snapshot.adPolicy?.anchorExperimentEnabled ?? true,
+          },
           counts: Object.fromEntries(JSON_PARTS.map((part) => [part, snapshot[part]?.length ?? 0])),
         },
         null,
@@ -178,16 +182,21 @@ export function parseExportFiles(read: (path: string) => string | null): Content
     return Array.isArray(parsed) ? (parsed as T[]) : [];
   };
   const manifest = read("manifest.json");
-  const generatedAt = manifest
-    ? ((JSON.parse(manifest) as { generatedAt?: string }).generatedAt ?? new Date(0).toISOString())
-    : new Date(0).toISOString();
+  const metadata = (manifest ? JSON.parse(manifest) : {}) as Pick<
+    ContentSnapshot,
+    "generatedAt" | "adPolicy"
+  >;
 
   const parts = Object.fromEntries(
     JSON_PARTS.map((name) => [name, part(FILE_NAMES[name])]),
   ) as unknown as Omit<ContentSnapshot, "generatedAt" | "aiArtifacts">;
 
   return {
-    generatedAt,
+    generatedAt: metadata.generatedAt ?? new Date(0).toISOString(),
+    adPolicy: {
+      adsEnabled: metadata.adPolicy?.adsEnabled ?? true,
+      anchorExperimentEnabled: metadata.adPolicy?.anchorExperimentEnabled ?? true,
+    },
     aiArtifacts: [],
     ...parts,
     monetization: publicMonetizationOnly(parts.monetization ?? []),

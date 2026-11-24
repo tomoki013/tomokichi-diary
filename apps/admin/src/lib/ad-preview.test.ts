@@ -43,7 +43,8 @@ const preview = (patch: Partial<AdPreview> = {}): AdPreview => ({
       publicationApproved: true,
     },
   ],
-  testMarker: null,
+  siteAdsEnabled: true,
+  legacyKeys: [],
   ...patch,
 });
 const render = (body: string, p: AdPreview | null) =>

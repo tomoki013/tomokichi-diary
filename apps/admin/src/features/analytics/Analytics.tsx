@@ -32,7 +32,7 @@ export function Analytics() {
   const [tab, setTab] = useState<"overview" | "articles" | "likes" | "data">("overview");
   const [start, setStart] = useState(jstDay(-28));
   const [end, setEnd] = useState(jstDay(-1));
-  // Only what these tabs show: the A/B cohorts and page lists are left to the MCP.
+  // Only what these tabs show: anchor test results are shown under monetization.
   const dashboard = useOp("analytics.dashboard", {
     start,
     end,

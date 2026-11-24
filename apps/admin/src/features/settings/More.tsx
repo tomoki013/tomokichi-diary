@@ -33,7 +33,7 @@ export function More() {
       </Rows>
       <h2>運営</h2>
       <Rows>
-        <Row href={href.ads()} title="収益化" meta="広告・位置テスト・アフィリエイト" />
+        <Row href={href.ads()} title="収益化" meta="広告配置・アンカー広告テスト・アフィリエイト" />
         <Row href={href.analytics()} title="分析" meta="PV・検索・収益・いいね" />
         <Row href={href.inquiries()} title="問い合わせ" meta="読者からのメッセージと返信" />
       </Rows>

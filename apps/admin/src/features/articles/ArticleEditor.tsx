@@ -55,23 +55,26 @@ function Editor({ article }: { article: ArticleDetailDto }) {
     return result !== undefined;
   }, [article.id, draft, run]);
 
-  const adPreview: AdPreview | null = monetization.data
-    ? {
-        config: monetization.data.articles.find((a) => a.articleId === article.id)?.config ?? {
-          mode: "ads",
-          adsEnabled: true,
-          maxAds: 1,
-          experimentId: null,
-          placements: [],
-          updatedAt: null,
-        },
-        offers: monetization.data.offers,
-        testMarker:
-          monetization.data.experiments.find(
-            (e) => e.articleId === article.id && e.status === "running",
-          )?.markerKey ?? null,
-      }
-    : null;
+  const adPreview: AdPreview | null =
+    article.kind === "article" && monetization.data
+      ? {
+          config: monetization.data.articles.find((a) => a.articleId === article.id)?.config ?? {
+            mode: "ads",
+            adsEnabled: true,
+            maxAds: 1,
+            experimentId: null,
+            placements: [],
+            updatedAt: null,
+          },
+          offers: monetization.data.offers,
+          siteAdsEnabled: monetization.data.settings.adsEnabled,
+          legacyKeys: monetization.data.experiments
+            .filter((e) => e.articleId === article.id && e.status === "running")
+            .flatMap((e) =>
+              [e.markerKeyA, e.markerKey].filter((key): key is string => Boolean(key)),
+            ),
+        }
+      : null;
   const page = article.kind === "page";
   const journeys = taxonomy.data?.collections.filter((collection) => collection.kind === "journey");
   const legacyJourneyIds =
@@ -211,7 +214,9 @@ function Editor({ article }: { article: ArticleDetailDto }) {
         </Panel>
         <MediaPanel article={article} />
         <RelationsPanel article={article} />
-        {!page && <AdsPanel article={article} />}
+        {!page && (
+          <AdsPanel article={article} preview={adPreview} body={draft.bodyMarkdown} dirty={dirty} />
+        )}
         {!page && <KnowledgePanel article={article} />}
         <a className="muted" href={href.activity("article", article.id)}>
           この記事の操作ログ

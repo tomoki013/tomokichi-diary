@@ -1,3 +1,4 @@
+import { ANCHOR_AD_EXPERIMENT } from "@tomokichi/contracts";
 import { measureReader } from "./readerMeasurement";
 
 declare global {
@@ -98,7 +99,6 @@ export function mountArticleAd(
       observer.disconnect();
       loadAdSense(
         doc,
-        browser,
         ad.dataset["adClient"]!,
         () => {
           browser.adsbygoogle ??= [];
@@ -122,55 +122,51 @@ export function mountArticleAd(
   });
 }
 
-/** Selection happens before any mount, including eligibility measurement for ad blockers. */
+/** Both arms load the library at the same time. Each manual unit still waits until approached. */
 export function mountArticleAds(
   doc: Document = document,
   browser: typeof globalThis = globalThis,
 ): void {
-  const variant = doc.documentElement.dataset["adVariant"] ?? "A";
+  if (!["tomokichidiary.com", "www.tomokichidiary.com"].includes(browser.location.hostname)) return;
   const slots = [...doc.querySelectorAll<HTMLElement>("[data-article-ad]")];
-  // A page shows its static slots (the end ad, and an optional body ad), or
-  // the one A/B alternative this visit was assigned.
-  const shown = (slot: HTMLElement): boolean =>
-    !slot.dataset["variant"] ||
-    slot.dataset["variant"] === "static" ||
-    slot.dataset["variant"] === variant;
-  // AdSense push({}) discovers an unprocessed ins itself. Hidden alternatives
-  // must leave the DOM before the loader can inspect them.
-  for (const slot of slots) if (!shown(slot)) slot.remove();
-  for (const slot of slots) if (shown(slot)) mountArticleAd(slot, doc, browser);
+  const client = slots[0]?.querySelector<HTMLElement>(".article-ad__unit")?.dataset["adClient"];
+  if (client && doc.documentElement.dataset["adExperiment"] === ANCHOR_AD_EXPERIMENT) {
+    const load = () => loadAdSense(doc, client);
+    if (doc.readyState === "complete") load();
+    else browser.addEventListener("load", load, { once: true });
+  }
+  for (const slot of slots) mountArticleAd(slot, doc, browser);
 }
 
 const loaders = new WeakMap<
   Document,
   { status: "loading" | "loaded" | "failed"; ready: (() => void)[]; errors: (() => void)[] }
 >();
-function loadAdSense(
-  doc: Document,
-  _browser: typeof globalThis,
-  client: string,
-  ready: () => void,
-  error: () => void,
-): void {
+function loadAdSense(doc: Document, client: string, ready?: () => void, error?: () => void): void {
   const existing = loaders.get(doc);
   if (existing) {
-    if (existing.status === "loaded") ready();
-    else if (existing.status === "failed") error();
+    if (existing.status === "loaded") ready?.();
+    else if (existing.status === "failed") error?.();
     else {
-      existing.ready.push(ready);
-      existing.errors.push(error);
+      if (ready) existing.ready.push(ready);
+      if (error) existing.errors.push(error);
     }
     return;
   }
   const state = {
     status: "loading" as "loading" | "loaded" | "failed",
-    ready: [ready],
-    errors: [error],
+    ready: ready ? [ready] : [],
+    errors: error ? [error] : [],
   };
   loaders.set(doc, state);
   const script = doc.createElement("script");
   script.async = true;
   script.crossOrigin = "anonymous";
+  // Google's documented opt-in to a regular, dismissible bottom anchor.
+  // The site's account-level Auto ads are off for the control group.
+  const assignment = doc.documentElement.dataset;
+  if (assignment["adExperiment"] === ANCHOR_AD_EXPERIMENT && assignment["adVariant"] === "B")
+    script.dataset["overlays"] = "collapsed-bottom";
   script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
   script.addEventListener(
     "load",

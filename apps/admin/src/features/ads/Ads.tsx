@@ -1,12 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  adAuditLabels,
-  auditArticles,
-  autoFixKinds,
-  targetFor,
-  testDay,
-  TEST_MIN_DAYS,
   type AffiliateOffer,
+  type AnchorTestCohort,
+  type MonetizationOverviewDto,
   type MonetizationSettings,
 } from "@tomokichi/contracts";
 import { op } from "../../data/client";
@@ -42,14 +38,16 @@ export function Ads() {
         value={tab}
         onChange={setTab}
         options={[
-          { value: "articles", label: "記事の広告" },
-          { value: "tests", label: "位置テスト" },
+          { value: "articles", label: "基本配置" },
+          { value: "tests", label: "アンカー広告テスト" },
           { value: "offers", label: "アフィリエイト" },
           { value: "settings", label: "設定" },
         ]}
       />
-      {tab === "articles" && <ArticleAds />}
-      {tab === "tests" && <Tests />}
+      {tab === "articles" && (
+        <Loaded resource={overview}>{(data) => <ArticleAds data={data} />}</Loaded>
+      )}
+      {tab === "tests" && <Loaded resource={overview}>{(data) => <Tests data={data} />}</Loaded>}
       {tab === "offers" && (
         <Loaded resource={overview}>{(data) => <Offers offers={data.offers} />}</Loaded>
       )}
@@ -62,124 +60,221 @@ export function Ads() {
   );
 }
 
-/**
- * Every article against the ad standard. The ones that drifted can be put
- * right in one go: each is fixed and published on its own, then the site is
- * rebuilt once.
- */
-function ArticleAds() {
-  const overview = useOp("ads.overview");
+function ArticleAds({ data }: { data: MonetizationOverviewDto }) {
   const articles = useOp("article.list");
-  const { busy, run } = useAction();
-  const audit = useMemo(
-    () => (overview.data && articles.data ? auditArticles(articles.data.items, overview.data) : []),
-    [overview.data, articles.data],
-  );
-  const fixable = audit.filter((a) => a.fixable && autoFixKinds.includes(a.kind));
-  async function fixAll() {
-    if (!confirmed(`${fixable.length}件の広告を標準に揃えて公開します。よろしいですか？`)) return;
-    await run(
-      "fix",
-      async () => {
-        for (const item of fixable) {
-          await op("ads.setLayout", { articleId: item.article.id, layout: targetFor(item.kind) });
-          await op("article.publish", { articleId: item.article.id, deferBuild: true });
-        }
-        await op("publication.run");
-      },
-      {
-        done: "揃えて公開しました。サイトに反映しています",
-        touches: ["ads", "article", "publication"],
-      },
-    );
-  }
-  if (!overview.data || !articles.data) return <Loaded resource={overview}>{() => null}</Loaded>;
   return (
     <>
-      <p className="muted">公開中で広告がある記事 {overview.data.publishedAdArticles}本</p>
-      {fixable.length > 0 && (
-        <div className="spread">
-          <span>{fixable.length}件が標準からずれています</span>
-          <Button kind="primary" busy={busy === "fix"} onClick={() => void fixAll()}>
-            まとめて揃えて公開
-          </Button>
-        </div>
-      )}
-      <Rows>
-        {audit
-          .filter((a) => a.kind !== "not-live")
-          .toSorted((a, b) => Number(b.fixable) - Number(a.fixable))
-          .map((item) => {
-            const label = adAuditLabels[item.kind];
-            return (
-              <Row
-                key={item.article.id}
-                href={href.article(item.article.id)}
-                title={item.article.title}
-                aside={<Badge tone={label.tone}>{label.label}</Badge>}
-              />
-            );
-          })}
-      </Rows>
+      <Panel title="公開記事の基本配置" hint={data.settings.adsEnabled ? "広告オン" : "広告オフ"}>
+        <p>
+          本文中に1枠、記事末尾に1枠を置きます。本文が短いなど、広告を置ける段落がない記事は末尾の1枠だけです。
+        </p>
+        <p className="muted">
+          対象は広告が有効な公開記事{data.publishedAdArticles}
+          本です。新しく公開する記事にもこのルールを使います。
+        </p>
+      </Panel>
+      <Loaded resource={articles}>
+        {({ items }) => {
+          const excluded = new Set(
+            data.articles.filter((a) => a.published?.enabled === false).map((a) => a.articleId),
+          );
+          const exceptions = items.filter(
+            (a) => a.kind === "article" && a.isLive && excluded.has(a.id),
+          );
+          return (
+            <Panel title="個別に広告を外している記事" hint={`${exceptions.length}本`} collapsible>
+              {exceptions.length ? (
+                <Rows>
+                  {exceptions.map((a) => (
+                    <Row key={a.id} title={a.title} href={href.article(a.id)} />
+                  ))}
+                </Rows>
+              ) : (
+                <Empty>すべての公開記事が基本配置の対象です。</Empty>
+              )}
+            </Panel>
+          );
+        }}
+      </Loaded>
     </>
   );
 }
 
-function Tests() {
-  const overview = useOp("ads.overview");
-  const articles = useOp("article.list");
+const reportDay = (ago: number) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(Date.now() - ago * 86_400_000));
+
+const metricRows = [
+  { key: "views", label: "計測表示数", scale: 1, unit: "回", difference: "回", digits: 0 },
+  {
+    key: "bodyEndRate",
+    label: "読了率（本文末到達）",
+    scale: 100,
+    unit: "%",
+    difference: " pt",
+    digits: 1,
+  },
+  {
+    key: "visibleMsPerView",
+    label: "平均可視滞在時間",
+    scale: 0.001,
+    unit: "秒",
+    difference: "秒",
+    digits: 1,
+  },
+  {
+    key: "nextArticleRate",
+    label: "次の記事への移動率",
+    scale: 100,
+    unit: "%",
+    difference: " pt",
+    digits: 1,
+  },
+  { key: "measuredDays", label: "計測日数", scale: 1, unit: "日", difference: "日", digits: 0 },
+] as const;
+
+function Tests({ data }: { data: MonetizationOverviewDto }) {
   const { busy, run } = useAction();
-  const titleOf = (id: string) => articles.data?.items.find((a) => a.id === id)?.title ?? id;
+  const [days, setDays] = useState("28");
+  const [device, setDevice] = useState<AnchorTestCohort["device"]>("all");
+  const dashboard = useOp("analytics.dashboard", {
+    start: reportDay(Number(days)),
+    end: reportDay(1),
+    sections: ["anchorTest"],
+  });
+  const active = data.settings.anchorExperimentEnabled ?? true;
   return (
-    <Loaded resource={overview}>
-      {(data) => {
-        const tests = data.experiments.toSorted((a, b) =>
-          (b.startedAt ?? "").localeCompare(a.startedAt ?? ""),
-        );
-        return tests.length === 0 ? (
-          <Empty>位置テストはまだありません。記事の「広告」から始められます。</Empty>
-        ) : (
-          <Rows>
-            {tests.map((test) => (
-              <Row
-                key={test.id}
-                title={titleOf(test.articleId)}
-                meta={
-                  test.status === "running"
-                    ? `${testDay(test)}日目${testDay(test) < TEST_MIN_DAYS ? `（${TEST_MIN_DAYS}日以上で判断）` : ""} · B ${test.shareB}%`
-                    : test.status === "stopped"
-                      ? `終了 ${test.stoppedAt?.slice(0, 10) ?? ""}`
-                      : "下書き"
-                }
-                aside={
-                  test.status === "running" ? (
-                    <Button
-                      busy={busy === test.id}
-                      onClick={() =>
-                        confirmed("このテストを終了します。再開はできません。") &&
-                        void run(
-                          test.id,
-                          () =>
-                            op("ads.controlExperiment", { experimentId: test.id, action: "stop" }),
-                          {
-                            done: "終了しました",
-                            touches: ["ads"],
-                          },
-                        )
-                      }
-                    >
-                      終了
-                    </Button>
-                  ) : (
-                    <Badge>{test.status === "stopped" ? "終了" : "下書き"}</Badge>
-                  )
-                }
-              />
-            ))}
-          </Rows>
-        );
-      }}
-    </Loaded>
+    <>
+      <Panel
+        title="アンカー広告の有無"
+        hint={
+          <Badge tone={active && data.settings.adsEnabled ? "ok" : "neutral"}>
+            {!data.settings.adsEnabled ? "広告全体がオフ" : active ? "設定オン" : "設定オフ"}
+          </Badge>
+        }
+      >
+        <p>
+          広告が有効な公開記事で、表示ごとに半数ずつ割り当てます。Aは基本配置、Bは同じ配置に画面下のアンカー広告を追加します。短い記事も対象です。
+        </p>
+        <div className="inline">
+          <Button
+            busy={busy === "test"}
+            onClick={() =>
+              void run(
+                "test",
+                () =>
+                  op("ads.saveSettings", {
+                    settings: { ...data.settings, anchorExperimentEnabled: !active },
+                  }),
+                {
+                  done: "設定を保存しました。反映状況は「サイト反映」で確認できます",
+                  touches: ["ads", "publication"],
+                },
+              )
+            }
+          >
+            {active ? "テストを停止" : "テストを開始"}
+          </Button>
+          <a href={href.site()}>サイト反映</a>
+        </div>
+      </Panel>
+      <Panel title="読まれ方の比較">
+        <div className="inline">
+          <Select
+            label="集計期間"
+            value={days}
+            onChange={setDays}
+            options={[
+              { value: "7", label: "直近7日" },
+              { value: "14", label: "直近14日" },
+              { value: "28", label: "直近28日" },
+            ]}
+          />
+          <Select
+            label="端末"
+            value={device}
+            onChange={setDevice}
+            options={[
+              { value: "all", label: "すべて" },
+              { value: "mobile", label: "スマートフォン" },
+              { value: "desktop", label: "パソコン" },
+              { value: "tablet", label: "タブレット" },
+            ]}
+          />
+        </div>
+        <Loaded resource={dashboard}>
+          {({ dashboard: result }) => {
+            const rows = result.anchorTest ?? [];
+            const a = rows.find((r) => r.device === device && r.variant === "A");
+            const b = rows.find((r) => r.device === device && r.variant === "B");
+            const enough = [a, b].every((r) => r && r.views >= 200 && r.measuredDays >= 14);
+            return (
+              <>
+                <p className="muted">
+                  {result.range.start} 〜 {result.range.end}（米国太平洋時間）
+                </p>
+                {!a && !b ? (
+                  <Empty>この期間・端末のアンカー広告テストの計測値はまだありません。</Empty>
+                ) : (
+                  <>
+                    <div className="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th scope="col">指標</th>
+                            <th scope="col">A なし</th>
+                            <th scope="col">B あり</th>
+                            <th scope="col">差（B − A）</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {metricRows.map(({ key, label, scale, unit, difference, digits }) => {
+                            const left = a?.[key],
+                              right = b?.[key];
+                            const format = (value: number | undefined | null, diff = false) =>
+                              value == null
+                                ? "—"
+                                : (value * scale).toLocaleString("ja-JP", {
+                                    maximumFractionDigits: digits,
+                                    signDisplay: diff ? "exceptZero" : "auto",
+                                  }) + (diff ? difference : unit);
+                            return (
+                              <tr key={key}>
+                                <th scope="row">{label}</th>
+                                <td>{format(left)}</td>
+                                <td>{format(right)}</td>
+                                <td>
+                                  {format(
+                                    left != null && right != null ? right - left : null,
+                                    true,
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    {!enough && (
+                      <p className="muted">
+                        計測中です。各群200表示・14計測日を比較の目安にしてください。
+                      </p>
+                    )}
+                    <p className="muted">
+                      読了率は計測表示のうち本文末に到達した割合です。可視滞在時間はページが画面に出ていた時間を計測表示数で割った値です。Bには広告が配信されなかった表示も含みます。
+                    </p>
+                  </>
+                )}
+              </>
+            );
+          }}
+        </Loaded>
+      </Panel>
+    </>
   );
 }
 
@@ -385,10 +480,7 @@ function Settings({ settings }: { settings: MonetizationSettings }) {
   const [unitId, setUnitId] = useState("");
   const [unitName, setUnitName] = useState("");
   const { busy, run } = useAction();
-  const flag = (
-    key: "adsEnabled" | "placementsEnabled" | "experimentsEnabled" | "affiliateEnabled",
-    label: string,
-  ) => (
+  const flag = (key: "adsEnabled" | "affiliateEnabled", label: string) => (
     <Check
       label={label}
       checked={form[key]}
@@ -397,9 +489,7 @@ function Settings({ settings }: { settings: MonetizationSettings }) {
   );
   return (
     <Panel title="サイト全体の設定">
-      {flag("adsEnabled", "広告を出す")}
-      {flag("placementsEnabled", "記事ごとの広告配置を使う")}
-      {flag("experimentsEnabled", "位置テストを使う")}
+      {flag("adsEnabled", "公開記事に広告を出す")}
       {flag("affiliateEnabled", "アフィリエイトを出す")}
       <h3>広告ユニット</h3>
       <Rows>
@@ -440,8 +530,8 @@ function Settings({ settings }: { settings: MonetizationSettings }) {
         busy={busy === "save"}
         onClick={() =>
           void run("save", () => op("ads.saveSettings", { settings: form }), {
-            done: "保存しました",
-            touches: ["ads"],
+            done: "設定を保存しました",
+            touches: ["ads", "publication"],
           })
         }
       >

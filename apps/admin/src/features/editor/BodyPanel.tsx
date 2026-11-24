@@ -10,6 +10,7 @@ import { insertMarkdownImage } from "../../lib/markdown-image";
 import {
   approvedInlineAffiliateUrls,
   markersToPlaceholders,
+  previewAdBody,
   withAdMocks,
   type AdPreview,
 } from "../../lib/ad-preview";
@@ -51,21 +52,23 @@ export function BodyPanel({
   const [preview, setPreview] = useState(false);
   const toast = useToast();
   const stats = bodyStats(body);
-  const html = useMemo(
-    () =>
-      preview
-        ? replaceLoneLinks(
-            enhanceInlineAffiliates(
-              enhanceAppleMusic(
-                withAdMocks(renderArticleMarkdown(markersToPlaceholders(body)), adPreview),
-              ),
-              approvedInlineAffiliateUrls(adPreview),
-            ),
-            linkCardPreview,
-          )
-        : "",
-    [preview, body, adPreview],
-  );
+  const html = useMemo(() => {
+    if (!preview) return "";
+    const placement = previewAdBody(body, adPreview);
+    return replaceLoneLinks(
+      enhanceInlineAffiliates(
+        enhanceAppleMusic(
+          withAdMocks(
+            renderArticleMarkdown(markersToPlaceholders(placement.markdown)),
+            adPreview,
+            placement.markerKey,
+          ),
+        ),
+        approvedInlineAffiliateUrls(adPreview),
+      ),
+      linkCardPreview,
+    );
+  }, [preview, body, adPreview]);
   const place = (next: { body: string; cursor: number }) => {
     onChange(next.body);
     requestAnimationFrame(() => area.current?.setSelectionRange(next.cursor, next.cursor));

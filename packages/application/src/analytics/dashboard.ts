@@ -1,6 +1,6 @@
 import { acquisition } from "./acquisition.js";
 import { articleReading } from "./articles.js";
-import { experienceSummary } from "./experience.js";
+import { anchorTestSummary, experienceSummary } from "./experience.js";
 import {
   ANALYTICS_SOURCES,
   addMetrics,
@@ -91,11 +91,12 @@ export const DASHBOARD_SECTIONS = [
   "acquisition",
   "experience",
   "experiments",
+  "anchorTest",
 ] as const;
 export type DashboardSection = (typeof DASHBOARD_SECTIONS)[number];
-/** What a caller gets without naming sections: everything but the A/B test cohorts. */
+/** What a caller gets without naming sections: everything but the A/B comparisons. */
 export const DEFAULT_DASHBOARD_SECTIONS: readonly DashboardSection[] = DASHBOARD_SECTIONS.filter(
-  (section) => section !== "experiments",
+  (section) => section !== "experiments" && section !== "anchorTest",
 );
 
 export interface DashboardOptions {
@@ -122,7 +123,8 @@ function grainsFor(sections: ReadonlySet<DashboardSection>, articleId?: string):
   if (sections.has("breakdowns"))
     add("source", "device", "event", "ad_unit", "country", "search_type");
   if (sections.has("acquisition")) add("entry");
-  if (sections.has("experience") || sections.has("experiments")) add("experience");
+  if (sections.has("experience") || sections.has("experiments") || sections.has("anchorTest"))
+    add("experience");
   return [...grains];
 }
 
@@ -257,6 +259,7 @@ export async function analyticsDashboard(
       previous: experienceSummary(days, previous, articleId),
     };
   }
+  if (sections.has("anchorTest")) result["anchorTest"] = anchorTestSummary(days, range, articleId);
   if (sections.has("experiments")) {
     // Cohorts that have enough data to judge come first.
     const current = page(
@@ -307,6 +310,7 @@ export interface DashboardResult {
   } | null;
   readerCoverage?: { currentDays: number; previousDays: number };
   experience?: Cohorts<ReturnType<typeof experienceSummary>[number]>;
+  anchorTest?: ReturnType<typeof anchorTestSummary>;
   experiments?: Cohorts<ReturnType<typeof experienceSummary>[number]>;
 }
 export type AnalyticsDashboard = Awaited<ReturnType<typeof analyticsDashboard>>;

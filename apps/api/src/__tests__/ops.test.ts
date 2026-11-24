@@ -88,7 +88,7 @@ describe("the operation catalogue", () => {
       "move_body_ad",
       "get_article_ads",
       "set_ad_layout",
-      "start_ad_test",
+      "save_monetization_settings",
       "list_rankings",
       "create_ranking",
       "update_ranking",

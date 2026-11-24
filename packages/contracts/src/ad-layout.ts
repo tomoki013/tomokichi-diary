@@ -1,4 +1,8 @@
-import { bodyAdPlacementProblem, suggestAdParagraph } from "./article-markdown.js";
+import {
+  bodyAdPlacementProblem,
+  renderArticleMarkdown,
+  suggestAdParagraph,
+} from "./article-markdown.js";
 import type { ArticleSummaryDto } from "./dto.js";
 import type {
   AdExperiment,
@@ -68,6 +72,33 @@ export function removeMarker(body: string, key: string): string {
 
 export function insertMarker(body: string, offset: number, key: string): string {
   return `${body.slice(0, offset).trimEnd()}\n\n{{monetization:${key}}}\n\n${body.slice(offset).trimStart()}`;
+}
+
+/** Resolve the one body slot against the actual published text, without editing an article revision. */
+export function resolveStandardAdBody(
+  markdown: string,
+  preferredKeys: readonly string[] = [],
+  reservedKeys: readonly string[] = [],
+): { markdown: string; markerKey: string | null } {
+  const keys = markerKeys(markdown);
+  for (const key of preferredKeys) {
+    if (
+      reservedKeys.includes(key) ||
+      keys.filter((value) => value === key).length !== 1 ||
+      !bodyAdFits(markdown, key)
+    )
+      continue;
+    // A standalone marker in a fenced example or HTML comment is not a rendered slot.
+    const marker = `{{monetization:${key}}}`;
+    if (renderArticleMarkdown(markdown).includes(`<p>${marker}</p>`))
+      return { markdown, markerKey: key };
+  }
+  const spot = suggestAdParagraph(markdown);
+  if (!spot) return { markdown, markerKey: null };
+  const occupied = new Set([...keys, ...reservedKeys]);
+  let key = BODY_AD_KEY;
+  for (let i = 2; occupied.has(key); i++) key = `${BODY_AD_KEY}-${i}`;
+  return { markdown: insertMarker(markdown, spot.offset, key), markerKey: key };
 }
 
 export interface StandardPlan {

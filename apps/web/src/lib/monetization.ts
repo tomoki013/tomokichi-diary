@@ -1,4 +1,7 @@
 import {
+  ANCHOR_AD_EXPERIMENT,
+  DEFAULT_AD_UNIT,
+  resolveStandardAdBody,
   isPublicAffiliatePlacement,
   type PublicAffiliatePlacement,
   isAdExperimentForArticle,
@@ -11,93 +14,67 @@ import {
 } from "@tomokichi/domain";
 export interface AdPlan {
   layout: "article-end-v1" | "article-placement-v2";
-  end: { unit: string; variant: "static" } | null;
-  marker: { key: string; unit: string; variant: "B" | "static" } | null;
-  /** In a position test, A's body ad (B's is `marker`). */
-  markerA?: { key: string; unit: string; variant: "A" } | null;
-  experiment: PublicMonetization["experiment"];
+  end: { unit: string } | null;
+  marker: { key: string; unit: string } | null;
+  markdown: string;
+  experiment: typeof ANCHOR_AD_EXPERIMENT | null;
 }
-const legacy = (): AdPlan => ({
-  layout: "article-end-v1",
-  end: { unit: "7152502134", variant: "static" },
-  marker: null,
-  experiment: null,
-});
-const valid = (p: { key: string; adUnit: string }): boolean =>
-  /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.key) && /^\d{1,20}$/.test(p.adUnit);
-/** Revalidate the public snapshot at build time, independently of admin flags. */
+
+/** Apply the site policy to the published revision, including articles without an ad snapshot. */
 export function buildAdPlan(
   config: PublicMonetization | undefined,
   markdown: string,
-  flags: { placements: boolean; experiments: boolean } = { placements: true, experiments: true },
+  flags: { placements: boolean; experiments: boolean; adsEnabled?: boolean } = {
+    placements: true,
+    experiments: true,
+  },
 ): AdPlan {
-  if (!config) return legacy();
-  const empty: AdPlan = {
+  const plan: AdPlan = {
     layout: "article-placement-v2",
     end: null,
     marker: null,
+    markdown,
     experiment: null,
   };
-  if (!config.enabled) return empty;
-  if (!flags.placements || (config.experiment && !flags.experiments)) return legacy();
-  const candidate =
-    flags.experiments && isAdExperimentForArticle(config.experiment?.id, config.articleId)
+  if (config?.enabled === false || flags.adsEnabled === false) return plan;
+  if (!flags.placements)
+    return { ...plan, layout: "article-end-v1", end: { unit: DEFAULT_AD_UNIT } };
+
+  // A published position test can still supply a known-safe slot. Both arms
+  // now use the same position and ad unit, independent of that historical test.
+  const previous =
+    config && isAdExperimentForArticle(config.experiment?.id, config.articleId)
       ? config.experiment
       : null;
-  const markerFits = (p: { key: string; adUnit: string }): boolean =>
-    validateMonetization(
-      {
-        ...defaultArticleMonetization(),
-        placements: [{ ...p, position: "marker", kind: "adsense", status: "ready", offerId: null }],
-      },
-      markdown,
-      { ...DEFAULT_MONETIZATION_SETTINGS, adUnits: [{ id: p.adUnit, name: "published" }] },
-    ).length === 0;
-
-  // An experiment compares where the body ad goes: both arms keep the end
-  // ad, A's body ad is at markerKeyA and B's at markerKey. Older tests have
-  // no markerKeyA, and A shows the end ad alone. One that cannot run leaves
-  // the article on its end ad.
-  const experiment =
-    candidate &&
-    Number.isInteger(candidate.shareB) &&
-    candidate.shareB >= 10 &&
-    candidate.shareB <= 90 &&
-    /^\d{1,20}$/.test(candidate.adUnitA) &&
-    valid({ key: candidate.markerKey, adUnit: candidate.adUnitB }) &&
-    markerFits({ key: candidate.markerKey, adUnit: candidate.adUnitB }) &&
-    (!candidate.markerKeyA ||
-      (candidate.markerKeyA !== candidate.markerKey &&
-        valid({ key: candidate.markerKeyA, adUnit: candidate.adUnitA }) &&
-        markerFits({ key: candidate.markerKeyA, adUnit: candidate.adUnitA })))
-      ? candidate
-      : null;
-  if (experiment)
-    return {
-      ...empty,
-      end: { unit: experiment.adUnitA, variant: "static" },
-      marker: { key: experiment.markerKey, unit: experiment.adUnitB, variant: "B" },
-      markerA: experiment.markerKeyA
-        ? { key: experiment.markerKeyA, unit: experiment.adUnitA, variant: "A" }
-        : null,
-      experiment,
-    };
-
-  // Every other article: the fixed article-end ad, plus at most one in the
-  // body. Snapshots from before inline ads carried a body ad as `placement`.
-  const placed = config.placement && valid(config.placement) ? config.placement : null;
-  const end =
-    placed?.position === "article_end" ? placed : { key: "article-end", adUnit: "7152502134" };
-  const inline = config.inline ?? (placed?.position === "marker" ? placed : null);
-  const marker = inline && valid(inline) && markerFits(inline) ? inline : null;
+  const placement = config?.placement;
+  const units = [
+    config?.inline,
+    placement?.position === "marker" ? placement : null,
+    previous?.markerKeyA ? { key: previous.markerKeyA, adUnit: previous.adUnitA } : null,
+    previous ? { key: previous.markerKey, adUnit: previous.adUnitB } : null,
+  ].filter(
+    (slot): slot is { key: string; adUnit: string } => !!slot && /^\d{1,20}$/.test(slot.adUnit),
+  );
+  const body = resolveStandardAdBody(
+    markdown,
+    units.map((slot) => slot.key),
+    config?.affiliates?.map((slot) => slot.key),
+  );
+  const endUnit =
+    placement?.position === "article_end" && /^\d{1,20}$/.test(placement.adUnit)
+      ? placement.adUnit
+      : DEFAULT_AD_UNIT;
   return {
-    ...empty,
-    layout:
-      !marker && end.key === "article-end" && end.adUnit === "7152502134"
-        ? "article-end-v1"
-        : "article-placement-v2",
-    end: { unit: end.adUnit, variant: "static" },
-    marker: marker && { key: marker.key, unit: marker.adUnit, variant: "static" },
+    layout: "article-placement-v2",
+    end: { unit: endUnit },
+    marker: body.markerKey
+      ? {
+          key: body.markerKey,
+          unit: units.find((slot) => slot.key === body.markerKey)?.adUnit ?? endUnit,
+        }
+      : null,
+    markdown: body.markdown,
+    experiment: flags.experiments ? ANCHOR_AD_EXPERIMENT : null,
   };
 }
 

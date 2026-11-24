@@ -12,12 +12,7 @@ import {
 import {
   affiliateOfferSchema,
   applyLayout,
-  bodyAdFits,
-  defaultCondition,
   insertMarker,
-  markerKeys,
-  nextExperimentId,
-  positionB,
   suggestAdParagraph,
   validate,
   type AdExperiment,
@@ -43,9 +38,6 @@ type Names =
   | "ads.validateArticle"
   | "ads.setLayout"
   | "ads.moveBodyAds"
-  | "ads.startTest"
-  | "ads.saveExperiment"
-  | "ads.controlExperiment"
   | "offer.create"
   | "offer.update"
   | "offer.archive";
@@ -74,7 +66,7 @@ async function overview(ctx: AppContext): Promise<MonetizationOverviewDto> {
     if (!article.publishedRevisionId) return false;
     const live = published.get(article.publishedRevisionId);
     // A snapshot from before monetization metadata shows the default ad.
-    return live ? Boolean(live.enabled && (live.placement || live.experiment)) : true;
+    return live?.enabled ?? true;
   };
   return {
     publishedAdArticles: articles.filter(
@@ -190,8 +182,14 @@ export function misplacedMarkerKeys(
 export const monetizationHandlers: Handlers<Names> = {
   "ads.overview": ({ ctx }) => overview(ctx),
 
-  "ads.saveSettings": async ({ ctx }, { settings }) =>
-    unwrapAs<MonetizationSettings>(await saveMonetizationSettings(ctx, settings)),
+  "ads.saveSettings": async ({ ctx, publishSite }, { settings }) => {
+    const previous = await ctx.repos.monetization.settings();
+    const saved = unwrapAs<MonetizationSettings>(await saveMonetizationSettings(ctx, settings));
+    const rebuild =
+      saved.adsEnabled !== previous.adsEnabled ||
+      (saved.anchorExperimentEnabled ?? true) !== (previous.anchorExperimentEnabled ?? true);
+    return { ...saved, publication: rebuild ? await publishSite() : null };
+  },
 
   "ads.article": async ({ ctx }, { articleId }) => {
     const [monetization, settings, experiments] = await Promise.all([
@@ -272,112 +270,6 @@ export const monetizationHandlers: Handlers<Names> = {
         "本文中の広告位置を公開ルールに合わせる（本文内容は維持）",
       );
     return { moved: result.moved, unmovable: result.unmovable };
-  },
-
-  /*
-   * Starts a position test on one article and leaves it ready to publish. A's
-   * body ad is the article's own (added by the standard rule when missing);
-   * B's marker is added at `positionB`. Both pass the publish check's rule.
-   */
-  "ads.startTest": async ({ ctx, env }, input) => {
-    const { article, revision, draft } = await liveArticle(ctx, input.articleId);
-    const [settings, experiments] = await Promise.all([
-      ctx.repos.monetization.settings(),
-      ctx.repos.monetization.experiments(),
-    ]);
-    const adsOn = !draft.updatedAt || (draft.adsEnabled && ["ads", "hybrid"].includes(draft.mode));
-    if (
-      article.noindex ||
-      !adsOn ||
-      experiments.some(
-        (e) => e.articleId === article.id && (e.status === "running" || e.status === "draft"),
-      )
-    )
-      throw refuse("公開中で未公開の変更がなく、テスト中でない記事だけで始められます");
-    const base = defaultCondition(settings.adUnits[0]?.id);
-    const condition = {
-      ...base,
-      adUnitA: input.adUnitA ?? base.adUnitA,
-      adUnitB: input.adUnitB ?? base.adUnitB,
-      shareB: input.shareB ?? base.shareB,
-      ...(input.afterText ? { afterText: input.afterText } : {}),
-    };
-    const plan = applyLayout("standard", draft, revision.bodyMarkdown, null);
-    if ("error" in plan) throw refuse(plan.error);
-    const bodyAd = plan.config.placements.find(
-      (p) => p.kind === "adsense" && p.position === "marker" && p.status === "ready",
-    );
-    if (!bodyAd || !bodyAdFits(plan.body, bodyAd.key))
-      throw refuse("本文中の広告の位置を記事編集で確認してください");
-    const spot = positionB(plan.body, bodyAd.key, condition.afterText);
-    if (!spot)
-      throw refuse(
-        condition.afterText
-          ? "指定した段落の後には公開ルール上置けません"
-          : "Bの本文中の広告を置ける別の段落がありません",
-      );
-    const present = new Set(markerKeys(plan.body));
-    const bKey = ["body-ad-b", "body-ad-b-2", "body-ad-b-3"].find((key) => !present.has(key));
-    if (!bKey) throw refuse("Bの本文中の広告の位置を記事編集で確認してください");
-    const nextBody = insertMarker(plan.body, spot.offset, bKey);
-    if (!bodyAdFits(nextBody, bKey) || !bodyAdFits(nextBody, bodyAd.key))
-      throw refuse("Bの本文中の広告の位置を記事編集で確認してください");
-    if (nextBody !== revision.bodyMarkdown)
-      await saveBody(
-        ctx,
-        env.PUBLIC_IMAGE_URL,
-        article,
-        revision,
-        nextBody,
-        "広告の位置テスト用に本文中の広告の候補位置を追加（本文内容は維持）",
-      );
-    const experiment: AdExperiment = {
-      id: nextExperimentId(article.id, experiments),
-      articleId: article.id,
-      name: `${condition.name} · ${revision.title}`.slice(0, 150),
-      markerKey: bKey,
-      markerKeyA: bodyAd.key,
-      adUnitA: condition.adUnitA,
-      adUnitB: condition.adUnitB,
-      shareB: condition.shareB,
-      status: "draft",
-      startedAt: null,
-      stoppedAt: null,
-      updatedAt: null,
-    };
-    const saved = unwrapAs<AdExperiment>(await saveAdExperiment(ctx, experiment));
-    // B's marker is configured but paused: only one body ad is "ready" outside
-    // the test, and the test itself shows each arm its own.
-    unwrapAs<ArticleMonetization>(
-      await saveArticleMonetization(ctx, article.id, {
-        ...plan.config,
-        experimentId: experiment.id,
-        placements: [
-          ...plan.config.placements,
-          {
-            key: bKey,
-            kind: "adsense",
-            position: "marker",
-            status: "paused",
-            adUnit: condition.adUnitB,
-            offerId: null,
-          },
-        ],
-      }),
-    );
-    unwrapAs<AdExperiment>(await saveAdExperiment(ctx, saved, "start"));
-    return { experimentId: experiment.id, hasUnpublishedChanges: true };
-  },
-
-  "ads.saveExperiment": async ({ ctx }, { experiment }) =>
-    unwrapAs<AdExperiment>(await saveAdExperiment(ctx, experiment)),
-
-  "ads.controlExperiment": async ({ ctx }, { experimentId, action }) => {
-    const experiment = (await ctx.repos.monetization.experiments()).find(
-      (e) => e.id === experimentId,
-    );
-    if (!experiment) throw notFound("API_NOT_FOUND", "実験がありません");
-    return unwrapAs<AdExperiment>(await saveAdExperiment(ctx, experiment, action));
   },
 
   "offer.create": async ({ ctx }, { offer }) => {

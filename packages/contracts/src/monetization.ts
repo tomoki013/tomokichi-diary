@@ -4,6 +4,8 @@ export interface MonetizationSettings {
   adsEnabled: boolean;
   placementsEnabled: boolean;
   experimentsEnabled: boolean;
+  /** Site-wide anchor test. Settings saved before its introduction default to on. */
+  anchorExperimentEnabled?: boolean;
   affiliateEnabled: boolean;
   maxAds: 1;
   adUnits: { id: string; name: string }[];
@@ -137,6 +139,7 @@ export const monetizationSettingsSchema = v.object({
   adsEnabled: v.boolean(),
   placementsEnabled: v.boolean(),
   experimentsEnabled: v.boolean(),
+  anchorExperimentEnabled: v.optional<boolean | undefined>(v.boolean(), undefined),
   affiliateEnabled: v.boolean(),
   maxAds: v.number({ min: 1, max: 1, integer: true }),
   adUnits: v.array(v.object({ id: unit, name: v.string({ min: 1, max: 100 }) }), { max: 10 }),
@@ -187,6 +190,7 @@ export interface MonetizationOverviewDto {
 
 /** Public experiment identifiers are bounded and tied to one internal article, never free text. */
 export const LEGACY_AD_EXPERIMENT = "chagee-placement-v1";
+export const ANCHOR_AD_EXPERIMENT = "anchor-v1";
 export const LEGACY_AD_ARTICLE = "52b1cb6d-eb74-85a3-b6a1-392f83313051";
 const articleUuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 /**
@@ -204,7 +208,11 @@ export function adExperimentRound(value: unknown): number | null {
   return match ? Number(match[2] ?? 1) : null;
 }
 export function isAdExperimentId(value: unknown): value is string {
-  return value === LEGACY_AD_EXPERIMENT || adExperimentRound(value) !== null;
+  return (
+    value === ANCHOR_AD_EXPERIMENT ||
+    value === LEGACY_AD_EXPERIMENT ||
+    adExperimentRound(value) !== null
+  );
 }
 export function isAdExperimentForArticle(value: unknown, articleId: string): value is string {
   if (value === LEGACY_AD_EXPERIMENT) return articleId === LEGACY_AD_ARTICLE;

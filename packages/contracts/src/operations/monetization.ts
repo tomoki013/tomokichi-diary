@@ -1,5 +1,4 @@
 import {
-  adExperimentSchema,
   affiliateOfferSchema,
   articleMonetizationSchema,
   monetizationSettingsSchema,
@@ -10,12 +9,12 @@ import {
   type MonetizationSettings,
   type PublicMonetization,
 } from "../monetization.js";
+import type { SitePublicationStatus } from "../publication.js";
 import { v } from "../validation.js";
 import { articleId, id } from "./fields.js";
 import { operation } from "./spec.js";
 
 const target = { type: "ad", idField: "articleId" } as const;
-const unit = v.string({ min: 1, max: 20, pattern: /^\d+$/ });
 
 /** One article's ads: what is saved, what readers get, and its tests. */
 export interface ArticleAdsDto {
@@ -37,16 +36,18 @@ export const monetizationOperations = {
     surface: "operator",
     input: v.object({}),
     description:
-      "収益化の全体像: 全体設定（広告の入切、広告ユニット）、記事ごとの広告配置、アフィリエイト案件、A/Bテストの一覧。",
+      "収益化の全体設定、記事ごとの広告配置、アフィリエイト案件、旧位置テストの履歴を返します。",
     tool: { name: "get_monetization", title: "Get monetization overview" },
     target: { type: "ad" },
   }),
-  "ads.saveSettings": operation<MonetizationSettings>()({
+  "ads.saveSettings": operation<
+    MonetizationSettings & { publication?: SitePublicationStatus | null }
+  >()({
     kind: "write",
     surface: "operator",
     input: v.object({ settings: monetizationSettingsSchema }),
     description:
-      "収益化の全体設定（広告・配置・A/Bテスト・アフィリエイトの入切、広告ユニットの一覧）を保存します。現在の値は get_monetization の settings で確認し、変える項目以外はそのまま渡します。",
+      "収益化の全体設定を保存します。アンカー広告テストは anchorExperimentEnabled で切り替えます。広告全体またはアンカーテストを切り替えると公開済みの記事からサイトを再生成します。変更しない項目は get_monetization の settings の値を渡してください。",
     tool: { name: "save_monetization_settings", title: "Save monetization settings" },
     target: { type: "ad" },
   }),
@@ -55,7 +56,7 @@ export const monetizationOperations = {
     surface: "operator",
     input: v.object({ articleId }),
     description:
-      "記事の広告設定（本文中・末尾の配置、公開中の内容、A/Bテスト）と、サイトに登録済みの広告ユニット一覧を返します。",
+      "記事の広告設定と公開版の設定、旧位置テストの履歴、登録済みの広告ユニットを返します。",
     tool: { name: "get_article_ads", title: "Get article ads" },
     target,
   }),
@@ -82,12 +83,12 @@ export const monetizationOperations = {
     input: v.object({
       articleId,
       layout: v.describe(
-        v.literalUnion(["standard", "end-only", "none"] as const),
-        "standard（末尾＋本文中）、end-only（末尾のみ）、none（広告なし）",
+        v.literalUnion(["standard", "none"] as const),
+        "standard（本文中に置ける段落があれば本文中＋末尾、短い記事は末尾のみ）、none（広告なし）",
       ),
     }),
     description:
-      "管理画面の「広告配置」と同じ規則で、公開中の記事の広告を「standard（末尾＋本文中）」「end-only（末尾のみ）」「none（広告なし）」のどれかに揃えて下書き保存します。本文に置ける段落がなければ末尾のみになります。動いているA/Bテストは終了します。公開は publish_article。",
+      "公開中の記事の広告を標準配置または広告なしに揃えて下書き保存します。標準配置は本文に置ける段落があれば本文中と末尾に表示します。記事単位での変更の公開には publish_article を使います。",
     tool: { name: "set_ad_layout", title: "Set ad layout", destructive: true },
     target,
   }),
@@ -99,51 +100,9 @@ export const monetizationOperations = {
     surface: "operator",
     input: v.object({ articleId }),
     description:
-      "公開チェックで「導入文から離して」「画像・関連リンクから離して」と言われた本文中の収益化マーカーを、管理画面の広告標準と同じ選び方の段落へ移して下書き保存します。本文の文章は変えません。A/Bテスト中の記事もテストは続きます。公開は publish_article。",
+      "公開チェックで位置の調整が必要な収益化マーカーを適切な段落へ移して下書き保存します。公開は publish_article。",
     tool: { name: "move_body_ad", title: "Move body ad" },
     target,
-  }),
-  "ads.startTest": operation<{ experimentId: string; hasUnpublishedChanges: boolean }>()({
-    kind: "write",
-    surface: "operator",
-    input: v.object({
-      articleId,
-      adUnitA: v.maybe(unit),
-      adUnitB: v.maybe(unit),
-      shareB: v.describe(
-        v.maybe(v.number({ integer: true, min: 10, max: 90 })),
-        "Bを見せる割合（%）。省くと50",
-      ),
-      afterText: v.describe(
-        v.maybe(v.string({ min: 2, max: 140 })),
-        "末尾がこの文を含む段落の後をBの位置にする",
-      ),
-    }),
-    description:
-      "管理画面の「広告テスト」と同じ規則で、公開中の記事に本文中の広告の位置のA/Bテストを作って開始し、下書き保存します。A・Bとも記事末尾の広告あり、Aは今の本文中の位置、Bは別の段落。afterText を渡すと、末尾がその文を含む段落の後をBにします（公開ルールに合う段落だけ）。省くとAから離れた段落を自動で選びます。ユニットを省くと登録済みの最初のユニット。公開は publish_article。",
-    tool: { name: "start_ad_test", title: "Start ad test" },
-    target,
-  }),
-  "ads.saveExperiment": operation<AdExperiment>()({
-    kind: "write",
-    surface: "operator",
-    input: v.object({ experiment: adExperimentSchema }),
-    description:
-      "A/Bテストの設定を細かく指定して保存します。ふつうは start_ad_test を使ってください。",
-    tool: { name: "save_ad_experiment", title: "Save ad experiment" },
-    target: { type: "ad" },
-  }),
-  "ads.controlExperiment": operation<AdExperiment>()({
-    kind: "write",
-    surface: "operator",
-    input: v.object({
-      experimentId: id,
-      action: v.literalUnion(["start", "stop"] as const),
-    }),
-    description:
-      "A/Bテストを開始（start）または終了（stop）します。終了したテストは再開できません。",
-    tool: { name: "control_ad_experiment", title: "Start or stop ad experiment" },
-    target: { type: "ad", idField: "experimentId" },
   }),
   "offer.create": operation<AffiliateOffer>()({
     kind: "write",

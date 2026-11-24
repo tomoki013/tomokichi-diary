@@ -43,10 +43,13 @@ const body = (await getEntry("articles", article.slug))?.body;
 const headings = articleHeadings(body === undefined ? null : renderArticleMarkdown(body));
 const adPlan = buildAdPlan(
   snapshot.monetization?.find((c) => c.articleId === article.id),
-  revision.bodyMarkdown,
+  body ?? revision.bodyMarkdown,
   {
+    adsEnabled: snapshot.adPolicy?.adsEnabled ?? true,
     placements: process.env.MONETIZATION_PLACEMENTS_ENABLED !== "false",
-    experiments: process.env.AD_EXPERIMENTS_ENABLED !== "false",
+    experiments:
+      snapshot.adPolicy?.anchorExperimentEnabled !== false &&
+      process.env.AD_EXPERIMENTS_ENABLED !== "false",
   },
 );
 
@@ -200,8 +203,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
   <article
     class="article-page"
     data-ad-layout={adPlan.layout}
-    data-ad-key={adPlan.marker?.key ?? "article-end"}
-    data-ad-key-a={adPlan.markerA?.key}
+    data-ad-key={adPlan.marker ? "standard" : "article-end"}
   >
     <Breadcrumbs trail={trail} />
     <header class="article-hero">
@@ -326,7 +328,7 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
             <AffiliateBlock placement={p} />
           ))}
         {placeStories.length > 0 && <PlaceStories views={placeStories} />}
-        {adPlan.end && <ArticleAd unit={adPlan.end.unit} variant={adPlan.end.variant} />}
+        {adPlan.end && <ArticleAd unit={adPlan.end.unit} />}
         <NextRead candidates={nextReadCandidates} />
         {/* The main way on ends here: one card, then one list. */}
         {onward.length > 0 && (

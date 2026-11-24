@@ -89,8 +89,13 @@ export async function saveMonetizationSettings(ctx: AppContext, settings: Moneti
     )
   )
     return invalid("実験で使用中の広告ユニットは削除できません");
-  const saved = { ...settings, updatedAt: ctx.clock.now() };
   const previous = await ctx.repos.monetization.settings();
+  const saved = {
+    ...settings,
+    anchorExperimentEnabled:
+      settings.anchorExperimentEnabled ?? previous.anchorExperimentEnabled ?? true,
+    updatedAt: ctx.clock.now(),
+  };
   const affected =
     previous.affiliateEnabled !== saved.affiliateEnabled
       ? configs.filter((a) => a.config.placements.some((p) => p.kind === "affiliate"))

@@ -22,6 +22,7 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   adsEnabled: true,
   placementsEnabled: false,
   experimentsEnabled: false,
+  anchorExperimentEnabled: true,
   affiliateEnabled: false,
   maxAds: 1,
   adUnits: [{ id: "7152502134", name: "記事末尾 300×250" }],
@@ -108,30 +109,26 @@ export function publicMonetization(
   experiment: AdExperiment | null,
   offers: readonly AffiliateOffer[] = [],
 ): PublicMonetization {
-  const enabled =
-    settings.adsEnabled && config.adsEnabled && ["ads", "hybrid"].includes(config.mode);
+  // The manifest applies the global switch to all articles together at build time.
+  // Publishing during a site-wide pause must preserve the article's own choice.
+  const enabled = config.adsEnabled && ["ads", "hybrid"].includes(config.mode);
   const ready = config.placements.filter((p) => p.kind === "adsense" && p.status === "ready");
-  const selected = ready[0];
-  const stopped = config.experimentId && experiment?.status === "stopped";
-  // An article in a placement experiment keeps its single A/B ad. Every other
-  // article always has the article-end ad and may add one in the body.
   const end = ready.find((p) => p.position === "article_end");
   const body = ready.find((p) => p.position === "marker");
-  const fixed = !config.experimentId;
-  const placement =
-    fixed && enabled
-      ? settings.placementsEnabled && end
-        ? { key: end.key, position: "article_end" as const, adUnit: end.adUnit }
-        : { key: "article-end", position: "article_end" as const, adUnit: "7152502134" }
-      : stopped && enabled
-        ? { key: "article-end", position: "article_end" as const, adUnit: experiment.adUnitA }
-        : !enabled
-          ? null
-          : !settings.placementsEnabled
-            ? { key: "article-end", position: "article_end" as const, adUnit: "7152502134" }
-            : selected
-              ? { key: selected.key, position: selected.position, adUnit: selected.adUnit }
-              : null;
+  // Republished articles may still reference a retired position test. Preserve
+  // a preferred body position for the standard layout if no fixed slot exists.
+  const previous =
+    experiment?.id === config.experimentId && experiment?.articleId === articleId
+      ? experiment
+      : null;
+  const inline =
+    body ??
+    (previous
+      ? {
+          key: previous.markerKeyA || previous.markerKey,
+          adUnit: previous.markerKeyA ? previous.adUnitA : previous.adUnitB,
+        }
+      : null);
   const affiliates =
     AFFILIATE_ENABLED &&
     AFFILIATE_RELEASE_APPROVED &&
@@ -167,27 +164,18 @@ export function publicMonetization(
     ...(affiliates.length ? { affiliates } : {}),
     articleId,
     enabled,
-    placement,
+    placement: enabled
+      ? {
+          key: (settings.placementsEnabled && end?.key) || "article-end",
+          position: "article_end",
+          adUnit: (settings.placementsEnabled && end?.adUnit) || "7152502134",
+        }
+      : null,
     inline:
-      fixed && enabled && settings.placementsEnabled && body
-        ? { key: body.key, adUnit: body.adUnit }
+      enabled && settings.placementsEnabled && inline
+        ? { key: inline.key, adUnit: inline.adUnit }
         : null,
-    experiment:
-      enabled &&
-      settings.placementsEnabled &&
-      settings.experimentsEnabled &&
-      experiment?.status === "running" &&
-      experiment.articleId === articleId &&
-      config.experimentId === experiment.id
-        ? {
-            id: experiment.id,
-            markerKey: experiment.markerKey,
-            markerKeyA: experiment.markerKeyA ?? null,
-            adUnitA: experiment.adUnitA,
-            adUnitB: experiment.adUnitB,
-            shareB: experiment.shareB,
-          }
-        : null,
+    experiment: null,
   };
 }
 /** Pure, page-scoped randomisation. No storage, cookie or visitor identifier. */

@@ -217,16 +217,6 @@ function measurementContext(): {
     layout_version: "article-placement-v2",
     experiment_id: experiment ? experimentId : "none",
     variant_id: experiment && (variant === "A" || variant === "B") ? variant : "none",
-    // A's body ad in a position test, or the end ad alone in an older one.
-    placement_key:
-      experiment && variant === "A"
-        ? /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(article.dataset["adKeyA"] ?? "") &&
-          (article.dataset["adKeyA"]?.length ?? 0) <= 64
-          ? article.dataset["adKeyA"]!
-          : "article-end"
-        : /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(article.dataset["adKey"] ?? "") &&
-            (article.dataset["adKey"]?.length ?? 0) <= 64
-          ? article.dataset["adKey"]!
-          : "none",
+    placement_key: article.dataset["adKey"] === "standard" ? "standard" : "article-end",
   };
 }

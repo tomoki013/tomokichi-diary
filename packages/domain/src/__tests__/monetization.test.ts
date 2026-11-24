@@ -38,3 +38,11 @@ it("does not expose unapproved affiliate offers even with the global flag enable
   expect(result.placement).toBeNull();
   expect(JSON.stringify(result)).not.toContain("SECRET");
 });
+it("preserves an article's enrollment when it is published during a site-wide pause", () => {
+  const settings = { ...DEFAULT_MONETIZATION_SETTINGS, adsEnabled: false };
+  const on = defaultArticleMonetization();
+  expect(publicMonetization("article", on, settings, null).enabled).toBe(true);
+  expect(publicMonetization("article", { ...on, adsEnabled: false }, settings, null).enabled).toBe(
+    false,
+  );
+});

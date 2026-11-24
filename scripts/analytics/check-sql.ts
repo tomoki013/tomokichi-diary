@@ -210,3 +210,18 @@ assert.ok(roundRows.every((r) => JSON.parse(r["key"]!).experimentId === `${expan
 for (const bad of [`${expandedId}-r1`, `${expandedId}-r100`, `${expandedId}-x2`])
   assert.equal(withId(bad).length, 0, bad);
 process.stdout.write("BigQuery synthetic multi-article experiment identifier checks passed\n");
+
+const anchorSql = experimentSql
+  .replace(
+    "STRUCT('experiment_id',STRUCT('chagee-placement-v1'",
+    "STRUCT('experiment_id',STRUCT('anchor-v1'",
+  )
+  .replace("STRUCT('placement_key',STRUCT('answer-end'", "STRUCT('placement_key',STRUCT('standard'")
+  .replaceAll("/posts/shanghai-chagee-menu", "/posts/another-article");
+assert.equal(query(anchorSql).length, 2);
+assert.equal(query(anchorSql.replaceAll("/posts/another-article", "/privacy")).length, 0);
+assert.equal(
+  query(anchorSql.replace("STRUCT('variant_id',STRUCT('B'", "STRUCT('variant_id',STRUCT('none'"))
+    .length,
+  0,
+);

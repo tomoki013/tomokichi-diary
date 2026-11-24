@@ -1,4 +1,8 @@
-import { isAdExperimentForArticle } from "@tomokichi/contracts";
+import {
+  ANCHOR_AD_EXPERIMENT,
+  isAdExperimentForArticle,
+  type AnchorTestCohort,
+} from "@tomokichi/contracts";
 import {
   addMetrics,
   ratio,
@@ -73,7 +77,10 @@ export function experienceSummary(
       if (
         (experiments
           ? dimensions.layout !== "article-placement-v2" ||
-            !isAdExperimentForArticle(dimensions.experimentId, row.articleId ?? "") ||
+            !(
+              isAdExperimentForArticle(dimensions.experimentId, row.articleId ?? "") ||
+              (dimensions.experimentId === ANCHOR_AD_EXPERIMENT && row.articleId)
+            ) ||
             !["A", "B"].includes(dimensions.variant)
           : !(
               dimensions.layout === "article-end-v1" ||
@@ -186,4 +193,75 @@ export function experienceSummary(
       };
     })
     .toSorted((a, b) => b.views - a.views);
+}
+
+/** An all-articles experiment is one randomized comparison. Pool the underlying
+ * counts and durations before dividing, including across devices in the total. */
+export function anchorTestSummary(
+  days: AnalyticsDay[],
+  range: DateRange,
+  articleId?: string,
+): AnchorTestCohort[] {
+  const groups = new Map<
+    string,
+    {
+      variant: AnchorTestCohort["variant"];
+      device: AnchorTestCohort["device"];
+      dates: Set<string>;
+      views: number;
+      ends: number;
+      visibleMs: number | null;
+      next: number;
+    }
+  >();
+  for (const day of days) {
+    if (day.source !== "ga4" || day.date < range.start || day.date > range.end) continue;
+    for (const row of day.rows) {
+      if (
+        row.grain !== "experience" ||
+        !row.articleId ||
+        (articleId && articleId !== row.articleId)
+      )
+        continue;
+      const key = experienceKey(row);
+      if (key?.experimentId !== ANCHOR_AD_EXPERIMENT || key.layout !== "article-placement-v2")
+        continue;
+      const { device, variant, measurement } = key;
+      if (
+        (variant !== "A" && variant !== "B") ||
+        (device !== "desktop" && device !== "mobile" && device !== "tablet")
+      )
+        continue;
+      for (const segment of [device, "all"] as const) {
+        const id = variant + ":" + segment;
+        const group = groups.get(id) ?? {
+          variant,
+          device: segment,
+          dates: new Set<string>(),
+          views: 0,
+          ends: 0,
+          visibleMs: null,
+          next: 0,
+        };
+        const count = row.metrics["observations"] ?? 0;
+        if (measurement === "article_view") {
+          group.views += count;
+          if (count > 0) group.dates.add(day.date);
+        } else if (measurement === "body_end") group.ends += count;
+        else if (measurement === "visible_time" && row.metrics["valueSum"] != null)
+          group.visibleMs = (group.visibleMs ?? 0) + row.metrics["valueSum"];
+        else if (measurement === "next_article") group.next += count;
+        groups.set(id, group);
+      }
+    }
+  }
+  return [...groups.values()].map((group) => ({
+    variant: group.variant,
+    device: group.device,
+    measuredDays: group.dates.size,
+    views: group.views,
+    bodyEndRate: ratio(group.ends, group.views),
+    nextArticleRate: ratio(group.next, group.views),
+    visibleMsPerView: group.visibleMs === null ? null : ratio(group.visibleMs, group.views),
+  }));
 }

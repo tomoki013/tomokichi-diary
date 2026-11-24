@@ -88,7 +88,7 @@ const sectionList = ANALYTICS_SECTIONS.join("・");
 const shape = {
   sections: v.describe(
     v.maybe(v.array(v.literalUnion(ANALYTICS_SECTIONS), { max: ANALYTICS_SECTIONS.length })),
-    `返す部分（${sectionList}）。主要指標（current・previous）と取得状況は常に返す。省略時は experiments 以外すべて。主要指標だけなら [] を渡す`,
+    `返す部分（${sectionList}）。主要指標（current・previous）と取得状況は常に返す。anchorTest は全記事のアンカー有無別の読了率と可視滞在時間。省略時は experiments と anchorTest 以外すべて。主要指標だけなら [] を渡す`,
   ),
   limit: v.describe(
     v.maybe(v.number({ min: 1, max: 100, integer: true })),
