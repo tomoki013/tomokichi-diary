@@ -1,5 +1,5 @@
 import type { AffiliateOffer, ArticleMonetization } from "@tomokichi/contracts";
-import { adLayoutOf } from "@tomokichi/contracts";
+import { adLayoutOf, resolveStandardAdBody } from "@tomokichi/contracts";
 
 /** What the draft preview needs to stand in for the ads readers will see. */
 export interface AdPreview {
@@ -8,8 +8,24 @@ export interface AdPreview {
     AffiliateOffer,
     "id" | "name" | "heading" | "provider" | "url" | "status" | "publicationApproved"
   >[];
-  /** A running test's B slot: shown to B readers only, whatever its stored status. */
-  testMarker: string | null;
+  siteAdsEnabled: boolean;
+  legacyKeys: string[];
+}
+
+export function previewAdBody(markdown: string, preview: AdPreview | null) {
+  if (!preview?.siteAdsEnabled || adLayoutOf(preview.config) === "none")
+    return { markdown, markerKey: null };
+  const placements = preview.config.placements;
+  return resolveStandardAdBody(
+    markdown,
+    [
+      ...placements
+        .filter((p) => p.kind === "adsense" && p.position === "marker" && p.status === "ready")
+        .map((p) => p.key),
+      ...preview.legacyKeys,
+    ],
+    placements.filter((p) => p.kind === "affiliate").map((p) => p.key),
+  );
 }
 
 const escape = (text: string) =>
@@ -35,15 +51,16 @@ export function markersToPlaceholders(markdown: string): string {
  * article-end ad. Without a configuration (still loading, or a page) every
  * marker shows as a neutral slot so none silently disappears.
  */
-export function withAdMocks(html: string, preview: AdPreview | null): string {
+export function withAdMocks(
+  html: string,
+  preview: AdPreview | null,
+  bodyKey: string | null = null,
+): string {
   const config = preview?.config;
   const body = html.replace(/<div data-ad-preview="([a-z0-9-]+)"><\/div>/g, (_, key: string) => {
     if (!config) return box("unknown", "広告枠", key);
     const slot = config.placements.find((p) => p.key === key);
-    if (key === preview.testMarker)
-      return box("ad", "広告", "本文中 300×250・テストのB（半数の読者）のみ");
-    if (preview.testMarker && slot?.kind === "adsense")
-      return box("off", "非表示の枠", "テスト中はBの枠だけが出ます");
+    if (key === bodyKey) return box("ad", "広告", "本文中 300×250");
     if (!slot || slot.status !== "ready")
       return box(
         "off",
@@ -59,9 +76,12 @@ export function withAdMocks(html: string, preview: AdPreview | null): string {
       );
     }
     if (adLayoutOf(config) === "none") return box("off", "非表示の枠", "広告なしの設定");
-    return box("ad", "広告", "本文中 300×250");
+    return box("off", "非表示の枠", "本文中の広告は基本配置の1枠のみ");
   });
-  const end = config && adLayoutOf(config) !== "none" ? box("ad", "広告", "記事末尾 300×250") : "";
+  const end =
+    preview?.siteAdsEnabled && config && adLayoutOf(config) !== "none"
+      ? box("ad", "広告", "記事末尾 300×250")
+      : "";
   return body + end;
 }
 

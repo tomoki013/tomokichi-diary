@@ -321,28 +321,11 @@ builds and Lighthouse never report into it or pay for it. Semantic events go
 through `trackSemanticEvent` (`apps/web/src/lib/analytics.ts`) as
 `gtag("event", …)`.
 
-AdSense: `public/ads.txt` and the `google-adsense-account` meta are shipped.
-The sole display unit `7152502134` is fixed at 300×250, after article text,
-thanks and share controls. Home, indexes, galleries and legal/contact pages
-have no ad slots. `ArticleAd.astro` reserves the space before rendering;
-`lib/ads.ts` requests the script only on the production apex/www, after page
-load and when the slot is within 200px of the viewport. Narrow containers
-under 300px do not request an ad. Previews/local builds never contact AdSense.
-Blocked or failed scripts do not retry or collapse the reserved space.
+AdSense manual unit `7152502134` is fixed at 300×250. Eligible travel articles get the end slot and at most one body slot at a suitable paragraph. Short articles can have just the end slot. Static pages, indexes and diary notes do not run the experiment. Manual slots reserve space and request ads near the viewport on production hosts only.
 
-2026-10-13: Diary's AdSense Auto ads and Auto optimize were both switched off
-with the user's UX-first authorization; the manual unit was created in the
-existing account. Keep Auto ads/Auto optimize off: turning them on can insert
-additional ads independently of this template. No anchor/vignette/side-rail,
-offerwall or ad-block recovery prompt is used. The existing published Google
-CMP European message for this site includes consent, refusal and management
-choices. The ad privacy link uses Google's revocation flow when available and
-otherwise opens the cookie policy. Other sites' messages/settings are unchanged.
-AdSense report OAuth is a separate integration and is still disabled.
+Keep site-wide Auto ads and Auto optimize off in AdSense (set on 2026-10-13). The site assigns each eligible page view to control A or treatment B. Only B adds `data-overlays="collapsed-bottom"` to the AdSense script for a regular, dismissible bottom anchor. Changing account-wide formats independently can contaminate the comparison. The existing Google CMP provides consent, refusal and privacy choices. [AdSense anchor code](https://support.google.com/adsense/answer/7478225)
 
-To stop ads, remove `<ArticleAd />` from `ArticlePage.astro` and release through
-the usual CI path; ads.txt and the verification meta may remain. Do not add
-slots or enable automatic optimization based on revenue alone.
+The owner can stop the anchor comparison from the monetization screen and keep both standard slots. A public rebuild applies the global setting using published article revisions. The deployment override `AD_EXPERIMENTS_ENABLED=false` also disables the comparison.
 
 ## API
 

@@ -47,9 +47,10 @@ export function createMonetizationRepository(db: SqlDatabase): MonetizationRepos
     ];
   }
   return {
-    settings: async () =>
-      (await read<MonetizationSettings>("monetization_settings"))[0] ??
-      structuredClone(DEFAULT_MONETIZATION_SETTINGS),
+    settings: async () => ({
+      ...structuredClone(DEFAULT_MONETIZATION_SETTINGS),
+      ...(await read<MonetizationSettings>("monetization_settings"))[0],
+    }),
     saveSettings: async (s, changes = []) => {
       await db.batch([
         ...changes.flatMap((c) => draftStatements(c.articleId, c.revisionId, c.now)),

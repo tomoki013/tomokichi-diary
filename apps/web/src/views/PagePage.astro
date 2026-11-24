@@ -245,7 +245,9 @@ const aboutCountries = content.snapshot.locations
       <Breadcrumbs trail={trail} />
       <header class="page-header">
         <h1>{pageTitle}</h1>
-        {view.revision.summary && <p>{view.revision.summary}</p>}
+        {!route.path.startsWith("/legal/") && view.revision.summary && (
+          <p>{view.revision.summary}</p>
+        )}
         <div class="meta">
           <span>
             更新 <time datetime={updated}>{updated}</time>

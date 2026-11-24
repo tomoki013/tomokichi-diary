@@ -42,7 +42,7 @@ const embedByAnchor = new Map(embeds.map((embed) => [embed.anchorKey, embed]));
 const PLACEHOLDER = /<p>\s*\{\{((?:embed|monetization):[a-z0-9]+(?:-[a-z0-9]+)*)\}\}\s*<\/p>/g;
 // Rendered by the same function as the admin preview, never by Astro's own
 // Markdown pipeline, so the editor's preview and the page cannot drift apart.
-const html = renderArticleMarkdown(entry.body ?? "");
+const html = renderArticleMarkdown(adPlan?.markdown ?? entry.body ?? "");
 const body = embedByAnchor.get("cost-report")?.type === "table" ? placeCostReport(html) : html;
 const escapeHtml = (value: string) =>
   value
@@ -122,19 +122,7 @@ const segments = replaceLoneLinks(
     index % 2 === 1 ? (
       segment.startsWith("monetization:") ? (
         adPlan?.marker?.key === segment.slice(13) ? (
-          <ArticleAd
-            unit={adPlan.marker.unit}
-            placement="body_slot"
-            slotKey={adPlan.marker.key}
-            variant={adPlan.marker.variant}
-          />
-        ) : adPlan?.markerA?.key === segment.slice(13) ? (
-          <ArticleAd
-            unit={adPlan.markerA.unit}
-            placement="body_slot"
-            slotKey={adPlan.markerA.key}
-            variant="A"
-          />
+          <ArticleAd unit={adPlan.marker.unit} placement="body_slot" slotKey={adPlan.marker.key} />
         ) : affiliates.some((p) => p.position === "marker" && p.key === segment.slice(13)) ? (
           <AffiliateBlock
             placement={affiliates.find(

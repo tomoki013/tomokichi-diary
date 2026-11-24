@@ -4,14 +4,8 @@ interface Props {
   unit?: string;
   placement?: "article_end" | "body_slot";
   slotKey?: string;
-  variant?: "A" | "B" | "static";
 }
-const {
-  unit = articleAdSlot,
-  placement = "article_end",
-  slotKey = "article-end",
-  variant = "static",
-} = Astro.props;
+const { unit = articleAdSlot, placement = "article_end", slotKey = "article-end" } = Astro.props;
 ---
 
 <aside
@@ -19,7 +13,6 @@ const {
   data-article-ad
   data-placement={placement}
   data-slot-key={slotKey}
-  data-variant={variant}
   aria-label="広告"
 >
   <small>広告</small>
@@ -62,8 +55,7 @@ const {
     margin: 0 auto 0.5rem;
   }
   @media (max-width: 349px) {
-    .article-ad,
-    html[data-ad-variant="B"] .article-ad[data-variant="B"] {
+    .article-ad {
       display: none;
     }
   }

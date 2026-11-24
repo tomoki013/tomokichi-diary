@@ -87,7 +87,7 @@ it("protects all operations and exposes no public monetization route", async () 
     "ads.article",
     "ads.saveSettings",
     "offer.update",
-    "ads.controlExperiment",
+    "ads.setLayout",
   ]) {
     const response = await op(name, { articleId: id }, { "content-type": "application/json" });
     expect(response.status).toBe(401);

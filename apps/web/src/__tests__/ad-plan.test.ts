@@ -28,20 +28,40 @@ const test = {
   shareB: 50,
 };
 
-describe("ad plan for a position test", () => {
-  it("gives both arms the end ad and each its own body ad", () => {
+describe("site-wide anchor test", () => {
+  it("uses one shared body slot from a migrated position test", () => {
     const plan = buildAdPlan(config({ ...test, markerKeyA: "body-ad" }), body);
-    expect(plan.end).toEqual({ unit: "7152502134", variant: "static" });
-    expect(plan.marker).toEqual({ key: "body-ad-b", unit: "7152502134", variant: "B" });
-    expect(plan.markerA).toEqual({ key: "body-ad", unit: "7152502134", variant: "A" });
+    expect(plan.end).toEqual({ unit: "7152502134" });
+    expect(plan.marker).toEqual({ key: "body-ad", unit: "7152502134" });
+    expect(plan.experiment).toBe("anchor-v1");
   });
 
-  it("keeps an older test's A on the end ad alone", () => {
-    expect(buildAdPlan(config(test), body).markerA).toBeNull();
+  it("creates the default layout from a published body without any saved configuration", () => {
+    const original = body.replace(/\{\{monetization:[^}]+\}\}/g, "");
+    const plan = buildAdPlan(undefined, original);
+    expect(plan.marker?.key).toBe("body-ad");
+    expect(plan.markdown).toContain("{{monetization:body-ad}}");
+    expect(plan.end?.unit).toBe("7152502134");
+    expect(plan.experiment).toBe("anchor-v1");
   });
 
-  it("does not run a test whose A and B share one position", () => {
-    const plan = buildAdPlan(config({ ...test, markerKeyA: "body-ad-b" }), body);
-    expect(plan.experiment).toBeNull();
+  it("enrolls short articles with just their end slot", () => {
+    const plan = buildAdPlan(config(test), "短い記事です。");
+    expect(plan.marker).toBeNull();
+    expect(plan.end?.unit).toBe("7152502134");
+    expect(plan.experiment).toBe("anchor-v1");
+  });
+
+  it("keeps the common baseline when the test is stopped, and respects global and per-article opt-outs", () => {
+    const standard = buildAdPlan(config(test), body);
+    expect(buildAdPlan(config(test), body, { placements: true, experiments: false })).toEqual({
+      ...standard,
+      experiment: null,
+    });
+    for (const plan of [
+      buildAdPlan({ ...config(test), enabled: false }, body),
+      buildAdPlan(undefined, body, { placements: true, experiments: true, adsEnabled: false }),
+    ])
+      expect(plan).toMatchObject({ marker: null, end: null, experiment: null });
   });
 });

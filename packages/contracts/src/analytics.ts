@@ -57,6 +57,15 @@ export interface ExperimentCohortDto extends ExperienceCohortDto {
   body75Rate: number | null;
   body90Rate: number | null;
 }
+export interface AnchorTestCohort {
+  device: "all" | "desktop" | "mobile" | "tablet";
+  variant: "A" | "B";
+  measuredDays: number;
+  views: number;
+  bodyEndRate: number | null;
+  visibleMsPerView: number | null;
+  nextArticleRate: number | null;
+}
 export interface ArticleReadingDto {
   articleId: string;
   path: string | null;
@@ -95,6 +104,7 @@ export const ANALYTICS_SECTIONS = [
   "acquisition",
   "experience",
   "experiments",
+  "anchorTest",
 ] as const;
 export type AnalyticsSectionDto = (typeof ANALYTICS_SECTIONS)[number];
 
@@ -168,6 +178,8 @@ export interface AnalyticsDashboardDto {
   /** Distinct GA4 dates with any reader-experience measurement in each interval. */
   readerCoverage?: { currentDays: number; previousDays: number };
   experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
+  /** All eligible articles pooled by measured page views, before any list pagination. */
+  anchorTest?: AnchorTestCohort[];
   /** Cohorts ready for review first; `previous` holds only the cohorts in `current`. */
   experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
 }
@@ -265,6 +277,7 @@ export function assertAnalyticsDay(value: unknown): void {
 }
 
 export interface AnalyticsReportDto {
+  anchorTest?: AnchorTestCohort[];
   adUnits?: AnalyticsMetricRowDto[];
   experience?: AnalyticsDashboardDto["experience"];
   experiments?: AnalyticsDashboardDto["experiments"];

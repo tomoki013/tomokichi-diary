@@ -45,7 +45,10 @@ const dashboard = await analyticsDashboard(
   range,
   undefined,
   // The saved evidence keeps every cohort, uncut.
-  { sections: ["experience", "experiments", "breakdowns"], limit: Number.MAX_SAFE_INTEGER },
+  {
+    sections: ["experience", "experiments", "anchorTest", "breakdowns"],
+    limit: Number.MAX_SAFE_INTEGER,
+  },
 );
 if (!dashboard.current.some((s) => s.coveredDays)) throw new Error("ANALYTICS_SOURCE_NOT_READY");
 // Store evidence only. No external AI calls or content write capability.
@@ -56,6 +59,7 @@ const payload = JSON.stringify({
   previous: dashboard.previous,
   experience: dashboard.experience,
   experiments: dashboard.experiments,
+  anchorTest: dashboard.anchorTest,
   adUnits: dashboard.breakdowns?.["adUnits"] ?? [],
   ai: {
     enabled: false,

@@ -47,6 +47,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     travelFacts,
     articleKnowledge,
     publicationMetadata,
+    adSettings,
   ] = await Promise.all([
     repos.revisions.listByIds(revisionIds),
     repos.embeds.listByRevisions(revisionIds),
@@ -75,6 +76,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.knowledge.listTravelFacts(),
     repos.knowledge.listArticleKnowledge(),
     repos.publicationMetadata.listAll(),
+    repos.monetization.settings(),
   ]);
   const history = await historyRead;
   const publishedIds = new Set<string>(
@@ -97,6 +99,10 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   const articleMedia = articles.flatMap((article) => usagesByArticle.get(article.id) ?? []);
 
   const snapshot: ContentSnapshot = {
+    adPolicy: {
+      adsEnabled: adSettings.adsEnabled,
+      anchorExperimentEnabled: adSettings.anchorExperimentEnabled ?? true,
+    },
     generatedAt: ctx.clock.now(),
     articles,
     // Revisions are never mutated in D1; only what the build reads is rewritten.
