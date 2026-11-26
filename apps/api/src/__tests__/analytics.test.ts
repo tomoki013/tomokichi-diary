@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { createTestContext } from "@tomokichi/infra-d1/testing-context";
 import { openInMemoryDatabase } from "@tomokichi/infra-d1/testing";
 import { analyticsReplacement, createAnalyticsStore, fromD1 } from "@tomokichi/infra-d1";
-import { analyticsDashboard, type AnalyticsDay } from "@tomokichi/application";
+import { analyticsView, type AnalyticsDay } from "@tomokichi/application";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 async function fixture() {
@@ -11,6 +11,12 @@ async function fixture() {
   db.exec(readFileSync("migrations/0015_analytics.sql", "utf8"));
   db.exec(readFileSync("migrations/0016_analytics_period_counts.sql", "utf8"));
   db.exec(readFileSync("migrations/0031_analytics_facts.sql", "utf8"));
+  // What the view reads to name articles and tell affiliate clicks apart.
+  db.exec(readFileSync("migrations/0001_initial.sql", "utf8"));
+  db.exec("CREATE TABLE publication_metadata(revision_id TEXT PRIMARY KEY,metadata TEXT)");
+  db.exec(
+    "CREATE TABLE affiliate_offers(id TEXT PRIMARY KEY,status TEXT,payload TEXT,updated_at TEXT)",
+  );
   const DB = {
     prepare: (sql: string) => {
       let params: never[] = [];
@@ -83,18 +89,114 @@ function seed(db: Awaited<ReturnType<typeof fixture>>["db"]) {
     JSON.stringify({ big: "x".repeat(1000) }),
   );
 }
+it("keeps URL × query ties distinct in D1 and matches only the shown prior row", async () => {
+  const { db, env } = await fixture();
+  for (const [date, names] of [
+    ["2026-11-15", ["b", "c"]],
+    ["2026-11-16", ["b", "a"]],
+  ] as const) {
+    const rows = names.map((id) => ({
+      articleId: id,
+      path: "/posts/" + id,
+      grain: "query",
+      key: "同じ語",
+      metrics: { clicks: 3, impressions: 30, positionSum: 60 },
+    }));
+    db.prepare("INSERT INTO analytics_days(source,date,payload) VALUES (?,?,?)").run(
+      "gsc_url",
+      date,
+      JSON.stringify({ source: "gsc_url", date, rows, retrievedAt: date, provisional: false }),
+    );
+  }
+  const read = async (offset: number, articleId?: string) =>
+    (
+      await analyticsView(
+        createAnalyticsStore(fromD1(env.DB)),
+        { start: "2026-11-16", end: "2026-11-16" },
+        articleId,
+        { limit: 1, offset },
+      )
+    ).queries;
+  const first = await read(0),
+    second = await read(1);
+  expect(first.rows[0]).toMatchObject({ articleId: "a", clicksPrevious: null });
+  expect(second.rows[0]).toMatchObject({ articleId: "b", clicks: 3, clicksPrevious: 3 });
+  const end = await read(2);
+  expect([end.total, end.offset, end.returned]).toEqual([2, 2, 0]);
+  expect((await read(0, "b")).total).toBe(1);
+});
+
+it("names and classifies articles from the published version, and counts clicks to offers", async () => {
+  const { app, db, env } = await fixture();
+  db.exec(`INSERT INTO authors(id,name) VALUES('owner','筆者');
+   INSERT INTO articles(id,status,locale,slug,author_id,published_revision_id,created_at,updated_at) VALUES('a','published','ja','tea','owner','published','2026-01-01','2026-01-01');
+   INSERT INTO article_revisions(id,article_id,revision_number,title,summary,body_markdown,created_at,created_by) VALUES('draft','a',1,'非公開版','','','2026-01-01','owner'),('published','a',2,'旅行記','要約','','2026-01-02','owner');
+   INSERT INTO routes(id,path,locale,target_type,target_id,is_canonical) VALUES('r','/posts/tea','ja','article','a',1);
+   INSERT INTO tags VALUES('tag','tea','チャジー');
+   INSERT INTO publication_metadata VALUES('published','{"tags":[{"tagId":"tag"}]}');`);
+  db.prepare("INSERT INTO affiliate_offers VALUES(?,?,?,?)").run(
+    "o",
+    "ready",
+    JSON.stringify({ provider: "Trip.com", url: "https://www.trip.com/t/secret-id" }),
+    "2026-11-16",
+  );
+  const date = "2026-11-16";
+  db.prepare("INSERT INTO analytics_days(source,date,payload) VALUES (?,?,?)").run(
+    "ga4",
+    date,
+    JSON.stringify({
+      source: "ga4",
+      date,
+      retrievedAt: date,
+      provisional: false,
+      rows: [
+        {
+          grain: "site",
+          key: "",
+          articleId: null,
+          path: null,
+          metrics: { pageViews: 10, outboundClicks: 1 },
+        },
+        {
+          grain: "page",
+          key: "tea",
+          articleId: "a",
+          path: "/posts/tea",
+          metrics: { pageViews: 3 },
+        },
+        {
+          grain: "outbound",
+          key: "www.trip.com",
+          articleId: "a",
+          path: "/posts/tea",
+          metrics: { eventCount: 1 },
+        },
+      ],
+    }),
+  );
+  const res = await app.request(
+    "/v1/admin/ops/analytics.dashboard",
+    {
+      method: "POST",
+      headers: { "cf-access-jwt-assertion": "valid", "content-type": "application/json" },
+      body: JSON.stringify({ start: date, end: date }),
+    },
+    env,
+  );
+  const { dashboard } = await res.json();
+  // The tag names the brand though the published title does not; the draft title never shows.
+  expect(dashboard.articles.rows[0]).toMatchObject({
+    title: "旅行記",
+    path: "/posts/tea",
+    theme: "chagee",
+    affiliateClicks: 1,
+  });
+  expect(dashboard.themes[0]).toMatchObject({ theme: "chagee", pageViews: 3, share: 0.3 });
+  expect(dashboard.totals.current.affiliateClicks).toBe(1);
+  expect(JSON.stringify(dashboard)).not.toContain("secret-id");
+});
 afterEach(() => vi.unstubAllGlobals());
 describe("private analytics HTTP boundary", () => {
-  it("requires a verified Access identity rather than a shared admin token for ChatGPT consent", async () => {
-    const { app, env } = await fixture();
-    const path = "/v1/admin/analytics/connection-identity";
-    expect(
-      (await app.request(path, { headers: { authorization: "Bearer test" } }, env)).status,
-    ).toBe(401);
-    const res = await app.request(path, { headers: { "cf-access-jwt-assertion": "signed" } }, env);
-    expect(await res.json()).toEqual({ subject: "operator" });
-    expect(res.headers.get("cache-control")).toBe("private, no-store");
-  });
   it("requires authentication; no public counterpart; Access token can read empty data without exposing secrets", async () => {
     const { app, env } = await fixture();
     const path = "/v1/admin/ops/analytics.dashboard";
@@ -110,8 +212,9 @@ describe("private analytics HTTP boundary", () => {
     expect(res.headers.get("cache-control")).toBe("private, no-store");
     const result = await res.json();
     expect(
-      result.dashboard.current.every((s: { coveredDays: number }) => s.coveredDays === 0),
+      result.dashboard.sources.every((s: { coveredDays: number }) => s.coveredDays === 0),
     ).toBe(true);
+    expect(result.dashboard.totals.current.pageViews).toBeNull();
     expect(JSON.stringify(result)).not.toContain("ADMIN_TOKEN");
   });
   it("rejects SQL injection and invalid periods before querying; unconfigured manual dispatch is explicit", async () => {
@@ -147,7 +250,7 @@ describe("private analytics HTTP boundary", () => {
     expect(send.mock.calls[1]?.[0]).toContain("analytics-periods.yml");
   });
 
-  it("returns only the asked-for sections, says where a list was cut, and marks no data as null", async () => {
+  it("always answers in the same shape, pages the lists, and marks no data as null", async () => {
     const { app, env, db } = await fixture();
     seed(db);
     const headers = { authorization: "Bearer test", "content-type": "application/json" };
@@ -162,23 +265,33 @@ describe("private analytics HTTP boundary", () => {
     const week = { start: "2026-10-05", end: "2026-10-11" };
 
     const full = (await op("analytics.dashboard", week)).body.dashboard;
-    expect(full.experiments).toBeUndefined();
-    expect(full.queries).toHaveLength(20);
-    expect(full.lists.queries).toEqual({ total: 30, offset: 0, returned: 20 });
+    expect(Object.keys(full).toSorted()).toEqual(
+      [
+        "anchorTest",
+        "articles",
+        "breakdowns",
+        "daily",
+        "notes",
+        "previousRange",
+        "queries",
+        "range",
+        "scope",
+        "sources",
+        "themes",
+        "totals",
+      ].toSorted(),
+    );
+    expect(full.queries).toMatchObject({ total: 30, offset: 0, returned: 20 });
     expect(full.scope).toBe("site");
-    expect(full.current.find((s: any) => s.source === "adsense").metrics).toBeNull();
-    expect(full.current.find((s: any) => s.source === "ga4").metrics.pageViews).toBe(700);
+    expect(full.totals.current.adsenseJPY).toBeNull();
+    expect(full.totals.current.pageViews).toBe(700);
+    expect(full.totals.current.searchClicks).toBeNull();
 
+    // Old callers that still send sections get the same answer.
     const next = (await op("analytics.dashboard", { ...week, sections: ["queries"], offset: 20 }))
       .body.dashboard;
-    expect(next.queries.map((q: any) => q.key)).toEqual(
+    expect(next.queries.rows.map((q: any) => q.query)).toEqual(
       Array.from({ length: 10 }, (_, i) => `query ${20 + i}`),
-    );
-    expect(next.daily).toBeUndefined();
-
-    const headline = (await op("analytics.dashboard", { ...week, sections: [] })).body.dashboard;
-    expect(Object.keys(headline).toSorted()).toEqual(
-      ["current", "lists", "previous", "previousRange", "range", "scope", "statuses"].toSorted(),
     );
 
     const list = (await op("analytics.savedReports", {})).body;
@@ -191,15 +304,10 @@ describe("private analytics HTTP boundary", () => {
       },
     ]);
 
-    const report = (
-      await op("analytics.report", { period: "weekly", start: "2026-10-05", sections: [] })
-    ).body;
+    const report = (await op("analytics.report", { period: "weekly", start: "2026-10-05" })).body;
     expect(report.range).toEqual(week);
     expect(report.snapshot).toEqual({ state: "saved", generatedAt: "2026-10-12T07:00:00.000Z" });
-    const withSnapshot = (
-      await op("analytics.report", { period: "weekly", start: "2026-10-05", includeSnapshot: true })
-    ).body;
-    expect(withSnapshot.snapshot.data).toEqual({ big: "x".repeat(1000) });
+    expect(report.dashboard.totals).toEqual(full.totals);
     expect((await op("analytics.report", { period: "weekly", start: "2026-10-06" })).status).toBe(
       400,
     );
@@ -222,14 +330,12 @@ const entry = (referrer: string, entrances: number) => ({
 describe("the long view", () => {
   /** Four weeks from Monday 2026-09-07: search halves in the last two, and one day is missing. */
   function collect(db: Awaited<ReturnType<typeof fixture>>["db"]) {
-    db.exec(
-      "CREATE TABLE articles(id TEXT PRIMARY KEY,status TEXT,published_at TEXT,published_revision_id TEXT);" +
-        "CREATE TABLE article_revisions(id TEXT PRIMARY KEY,title TEXT);" +
-        "CREATE TABLE routes(path TEXT,target_type TEXT,target_id TEXT,is_canonical INTEGER);" +
-        "INSERT INTO articles VALUES('a','published','2026-09-20T16:00:00.000Z','r1');" +
-        "INSERT INTO article_revisions VALUES('r1','上海のお茶');" +
-        "INSERT INTO routes VALUES('/posts/a','article','a',1);",
-    );
+    db.exec(`INSERT INTO authors(id,name) VALUES('owner','筆者');
+      INSERT INTO articles(id,status,locale,slug,author_id,published_revision_id,published_at,created_at,updated_at)
+        VALUES('a','published','ja','a','owner','r1','2026-09-20T16:00:00.000Z','2026-09-01','2026-09-01');
+      INSERT INTO article_revisions(id,article_id,revision_number,title,summary,body_markdown,created_at,created_by)
+        VALUES('r1','a',1,'上海のお茶','','','2026-09-01','owner');
+      INSERT INTO routes(id,path,locale,target_type,target_id,is_canonical) VALUES('r','/posts/a','ja','article','a',1);`);
     const ga4: AnalyticsDay[] = [];
     const gsc: AnalyticsDay[] = [];
     for (let i = 0; i < 28; i++) {
@@ -410,21 +516,11 @@ describe("reading only what a request needs", () => {
     expect(queries.every((day) => day.rows.length === 0 && day.provisional === false)).toBe(true);
   });
 
-  it("answers exactly as a read of whole days does, for every combination asked", async () => {
+  it("answers exactly as a read of whole days does", async () => {
     const { narrowed, whole } = await stores();
-    for (const sections of [
-      undefined,
-      [],
-      ["daily"],
-      ["queries", "pages"],
-      ["articles"],
-      ["breakdowns", "acquisition"],
-      ["experience", "experiments"],
-    ] as const) {
-      const options = sections ? { sections } : {};
-      expect(await analyticsDashboard(narrowed, week, undefined, options)).toEqual(
-        await analyticsDashboard(whole, week, undefined, options),
+    for (const articleId of [undefined, "a"])
+      expect(await analyticsView(narrowed, week, articleId)).toEqual(
+        await analyticsView(whole, week, articleId),
       );
-    }
   });
 });

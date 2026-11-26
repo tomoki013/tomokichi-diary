@@ -55,7 +55,7 @@ export interface ActivityPageDto {
 
 export interface ConnectionDto {
   readonly id: string;
-  readonly issuer: "analytics" | "analytics-legacy" | "operator" | "operator-legacy";
+  readonly issuer: "analytics" | "operator";
   /** A hash of the OAuth client id; the id itself never leaves the MCP Worker. */
   readonly clientId: string;
   readonly clientName: string;
@@ -163,12 +163,7 @@ export const siteOperations = {
     kind: "write",
     surface: "admin-only",
     input: v.object({
-      issuer: v.literalUnion([
-        "analytics",
-        "analytics-legacy",
-        "operator",
-        "operator-legacy",
-      ] as const),
+      issuer: v.literalUnion(["analytics", "operator"] as const),
       grantId: v.string({ min: 1, max: 80, pattern: /^[A-Za-z0-9_-]+$/ }),
       confirm: v.literalUnion(["revoke"] as const),
     }),

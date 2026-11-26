@@ -1,7 +1,10 @@
 name: Analytics collect
 on:
   schedule:
-    - cron: "47 6 * * *" # 15:47 JST; availability still checked per source.
+    # 15:47 JST is the requested time; GitHub has been starting it 8–11 hours
+    # late (00:00–03:00 JST). Everything after collection runs as steps of this
+    # job, in order, so a late start cannot reorder them.
+    - cron: "47 6 * * *"
   workflow_dispatch:
     inputs:
       start:
@@ -36,12 +39,6 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: tomokichidiary-analytics
-      - name: Estimate bounded query scans
-        env:
-          ANALYTICS_START: ${{ inputs.start }}
-          ANALYTICS_END: ${{ inputs.end }}
-          ANALYTICS_GSC_PROPERTY: ${{ vars.ANALYTICS_GSC_PROPERTY || 'https://tomokichidiary.com/' }}
-        run: pnpm exec tsx scripts/analytics/run.ts --dry-run
       - name: Collect and validate private aggregates
         env:
           ANALYTICS_ENABLED: "1"
@@ -50,5 +47,30 @@ jobs:
           ANALYTICS_GSC_PROPERTY: ${{ vars.ANALYTICS_GSC_PROPERTY || 'https://tomokichidiary.com/' }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.ANALYTICS_CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # Each finished BigQuery job prints its processed and billed bytes.
         run: pnpm exec tsx scripts/analytics/run.ts --persist
+      # AdSense and the saved reports used to be separate scheduled workflows,
+      # each installing and building the repository again. A failure above
+      # does not skip them; each records its own status.
+      - name: Read AdSense (failure does not block GA4/GSC)
+        if: ${{ !cancelled() && vars.ADSENSE_ENABLED == '1' && !inputs.start }}
+        continue-on-error: true
+        env:
+          ANALYTICS_ENABLED: "1"
+          ADSENSE_ENABLED: "1"
+          ADSENSE_ACCOUNT: ${{ vars.ADSENSE_ACCOUNT }}
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+          ADSENSE_CLIENT_SECRET: ${{ secrets.ADSENSE_CLIENT_SECRET }}
+          ADSENSE_REFRESH_TOKEN: ${{ secrets.ADSENSE_REFRESH_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.ANALYTICS_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec tsx scripts/analytics/revenue.ts --persist
+      - name: Save the completed week and month once (no BigQuery scans)
+        if: ${{ !cancelled() && !inputs.start }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.ANALYTICS_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          pnpm exec tsx scripts/analytics/report.ts weekly --if-missing
+          pnpm exec tsx scripts/analytics/report.ts monthly --if-missing
       # Private rows are deliberately never uploaded as Actions artifacts.

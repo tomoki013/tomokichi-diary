@@ -11,8 +11,6 @@ import {
   isOperatorPath,
   operatorConsent,
   operatorFetch,
-  LEGACY_OPERATOR_ISSUER,
-  LEGACY_OPERATOR_RESOURCE,
   OPERATOR_ISSUER,
   OPERATOR_RESOURCE,
   operatorAuthorization,
@@ -97,10 +95,10 @@ const send = (env: OperatorEnv, url: string, init?: RequestInit) =>
   operatorFetch(new Request(url, init), env, context);
 
 /** Registers a client and runs consent → PKCE code exchange, granting `decision`. */
-async function connect(env: OperatorEnv, decision: "read" | "write", legacy = false) {
-  const issuer = legacy ? LEGACY_OPERATOR_ISSUER : OPERATOR_ISSUER;
-  const resource = legacy ? LEGACY_OPERATOR_RESOURCE : OPERATOR_RESOURCE;
-  const consentOrigin = legacy ? "https://admin.tomokichidiary.com" : origin;
+async function connect(env: OperatorEnv, decision: "read" | "write") {
+  const issuer = OPERATOR_ISSUER;
+  const resource = OPERATOR_RESOURCE;
+  const consentOrigin = origin;
   const registered = await send(env, `${issuer}/oauth/register`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -346,26 +344,24 @@ describe("remote operator tools", () => {
     expect(closed.status).toBe(403);
   });
 
-  it("keeps old and new issuer tokens separate and revokes issued access tokens with their grant", async () => {
-    const { env, records } = fixture();
+  it("answers only on mcp.tomokichidiary.com and revokes issued access tokens with their grant", async () => {
+    const { env } = fixture();
     const newToken = await connect(env, "read");
-    const oldTokenAtNewHost = await rpc(env, newToken, { method: "tools/list" });
-    expect(oldTokenAtNewHost.status).toBe(200);
-    const newTokenAtOldHost = await send(env, LEGACY_OPERATOR_RESOURCE, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${newToken}`,
-        host: new URL(LEGACY_OPERATOR_RESOURCE).hostname,
-        accept: "application/json, text/event-stream",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
-    });
-    expect(newTokenAtOldHost.status).toBe(401);
-
-    const oldToken = await connect(env, "read", true);
-    expect([...records.keys()].some((key) => key.startsWith("operator:"))).toBe(true);
-    expect((await rpc(env, oldToken, { method: "tools/list" })).status).toBe(401);
+    expect((await rpc(env, newToken, { method: "tools/list" })).status).toBe(200);
+    // The old workers.dev issuer and the admin consent page were retired.
+    for (const url of [
+      "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/operator/mcp",
+      "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/operator-connect",
+      "https://admin.tomokichidiary.com/operator-connect",
+    ])
+      expect(
+        (
+          await send(env, url, {
+            method: "POST",
+            headers: { authorization: `Bearer ${newToken}`, "cf-access-jwt-assertion": "signed" },
+          })
+        ).status,
+      ).toBe(404);
 
     const helpers = operatorAuthorization.getOAuthApi({
       ...env,

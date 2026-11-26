@@ -57,7 +57,29 @@ export interface ExperimentCohortDto extends ExperienceCohortDto {
   body75Rate: number | null;
   body90Rate: number | null;
 }
-export interface AnchorTestCohort {
+export interface AnchorTestCohort extends Pick<
+  ExperimentCohortDto,
+  | "experimentId"
+  | "layout"
+  | "assignments"
+  | "body25Rate"
+  | "body50Rate"
+  | "body75Rate"
+  | "body90Rate"
+  | "adEligible"
+  | "adRequests"
+  | "adFilled"
+  | "adUnfilled"
+  | "adScriptErrors"
+  | "adRequestRate"
+  | "adFillRate"
+  | "adViewableProxy"
+  | "adViewableProxyRate"
+  | "vitals"
+> {
+  adMeasurementScope: "article_slots";
+  anchorUnitRequests: null;
+  anchorUnitFilled: null;
   device: "all" | "desktop" | "mobile" | "tablet";
   variant: "A" | "B";
   measuredDays: number;
@@ -66,27 +88,131 @@ export interface AnchorTestCohort {
   visibleMsPerView: number | null;
   nextArticleRate: number | null;
 }
-export interface ArticleReadingDto {
-  articleId: string;
-  path: string | null;
-  /** The published title and first publication time, when the article still exists. */
-  title?: string | null;
-  publishedAt?: string | null;
+
+/** An article's classification for the CHAGEE share, from its published title, path and tags. */
+export type AnalyticsThemeDto = "chagee" | "non_chagee" | "unknown";
+
+/** One period's headline. null = not collected (never 0). */
+export interface AnalyticsTotalsDto {
   pageViews: number | null;
-  measuredViews: number;
-  body75Rate: number | null;
-  body75RatePrevious?: number | null;
-  bodyEndRate: number | null;
-  bodyEndRatePrevious?: number | null;
-  nextArticleRate: number | null;
-  nextArticleRatePrevious?: number | null;
-  measuredViewsPrevious?: number;
+  /** Distinct over the whole period from GA4 (not a sum of days); null when not counted. */
+  users: number | null;
+  searchClicks: number | null;
+  searchImpressions: number | null;
+  ctr: number | null;
+  position: number | null;
+  /** AdSense estimate for the site. */
+  adsenseJPY: number | null;
+  /** The part of adsenseJPY that Google attributed to a page; the rest is never apportioned. */
+  adsensePagesJPY: number | null;
+  /** GA4 outbound clicks to registered affiliate offers. */
+  affiliateClicks: number | null;
+  /** Imported ASP reports only. */
+  affiliateRewardJPY: number | null;
+}
+export interface AnalyticsSourceStateDto {
+  source: string;
+  coveredDays: number;
+  expectedDays: number;
+  provisional: boolean;
+  succeededAt: string | null;
+  error: string | null;
+}
+export interface AnalyticsThemeRowDto {
+  theme: AnalyticsThemeDto;
+  pageViews: number | null;
+  pageViewsPrevious: number | null;
+  /** Of the site's page views in the same period. */
+  share: number | null;
+  sharePrevious: number | null;
+  searchClicks: number | null;
+  searchClicksPrevious: number | null;
+  adsenseJPY: number | null;
+}
+/** One article for the period, with the previous period alongside. */
+export interface AnalyticsArticleRowDto {
+  articleId: string;
+  title: string | null;
+  path: string | null;
+  publishedAt: string | null;
+  theme: AnalyticsThemeDto;
+  pageViews: number | null;
+  pageViewsPrevious: number | null;
   clicks: number | null;
   clicksPrevious: number | null;
   impressions: number | null;
   position: number | null;
   positionPrevious: number | null;
-  earningsJPY: number | null;
+  /** reader-v1 article views: the denominator of the three rates below. */
+  measuredViews: number;
+  measuredViewsPrevious: number;
+  bodyEndRate: number | null;
+  bodyEndRatePrevious: number | null;
+  nextArticleRate: number | null;
+  nextArticleRatePrevious: number | null;
+  /** Moves on to another article this period, by where the link was (nav_body, nav_related, ...). */
+  nextArticleAreas: Record<string, number>;
+  adsenseJPY: number | null;
+  affiliateClicks: number | null;
+  body75Rate: number | null;
+  body75RatePrevious: number | null;
+  /** Seconds on screen per measured view. */
+  visibleSecondsPerView: number | null;
+  /** The same reading measurements per device (mobile, desktop, tablet). */
+  devices: Record<
+    string,
+    { measuredViews: number; bodyEndRate: number | null; nextArticleRate: number | null }
+  >;
+  /** Visits that started on this article, and from where (null when visits were not measured). */
+  entrances: number | null;
+  entrancesPrevious: number | null;
+  entranceChannels: Record<string, number> | null;
+}
+/** A count this period and the same count the period before. */
+export interface AnalyticsCountRowDto {
+  key: string;
+  /** For landing pages: the article's title. */
+  title?: string | null;
+  current: number | null;
+  previous: number | null;
+}
+export interface AnalyticsBreakdownsDto {
+  /** GA4 page views by device. */
+  devices: AnalyticsCountRowDto[];
+  /** Visits (entrances) by channel: organic_search, ai_assistant, social, referral, direct... */
+  channels: AnalyticsCountRowDto[];
+  /** Visits by referring host or utm tag, top 20. */
+  referrers: AnalyticsCountRowDto[];
+  /** Visits by the article they started on, top 20 (site only). */
+  landings: AnalyticsCountRowDto[];
+  /** Search Console clicks by search type: web, discover, image, news (site only). */
+  searchTypes: AnalyticsCountRowDto[];
+  /** Days in the period with visit measurement; 0 means channels and referrers are not collected. */
+  entryDays: number;
+}
+export interface AnalyticsDailyDto {
+  date: string;
+  pageViews: number | null;
+  searchClicks: number | null;
+  adsenseJPY: number | null;
+  /** Site scope: CHAGEE articles' page views that day. */
+  chageePageViews: number | null;
+  measuredViews: number;
+  bodyEndRate: number | null;
+  nextArticleRate: number | null;
+  provisional: boolean;
+}
+export type AnalyticsQueryIntentDto = "brand" | "chagee_specific" | "non_chagee" | "unknown";
+export interface AnalyticsQueryRowDto {
+  query: string;
+  intent: AnalyticsQueryIntentDto;
+  path: string | null;
+  articleId: string | null;
+  clicks: number | null;
+  impressions: number | null;
+  ctr: number | null;
+  position: number | null;
+  clicksPrevious: number | null;
 }
 /** How much of one list came back; `total` above `offset + returned` means there is more. */
 export interface AnalyticsListPageDto {
@@ -94,95 +220,33 @@ export interface AnalyticsListPageDto {
   offset: number;
   returned: number;
 }
-
-export const ANALYTICS_SECTIONS = [
-  "daily",
-  "articles",
-  "pages",
-  "queries",
-  "breakdowns",
-  "acquisition",
-  "experience",
-  "experiments",
-  "anchorTest",
-] as const;
-export type AnalyticsSectionDto = (typeof ANALYTICS_SECTIONS)[number];
-
 /**
- * One period's numbers. `range`…`statuses` always come; every other part only
- * when its section was asked for. A source or day without data is `null`, never
- * `{}` or 0.
+ * The whole analytics answer, the same for the admin and ChatGPT: always the
+ * same parts, lists paged by limit/offset.
  */
-export interface AnalyticsDashboardDto {
+export interface AnalyticsViewDto {
   range: { start: string; end: string };
   previousRange: { start: string; end: string };
-  /** "article": search is under gsc_url and gsc_site is null. "site": search is under gsc_site. */
+  /** "article" when one article was asked for. */
   scope: "site" | "article";
-  current: {
-    source: string;
-    periodCountsRetrievedAt?: string | null;
-    metrics: Record<string, number | null> | null;
-    coveredDays: number;
-    expectedDays: number;
-    provisional: boolean;
-  }[];
-  previous: AnalyticsDashboardDto["current"];
-  statuses: {
-    source: string;
-    attemptedAt: string | null;
-    succeededAt: string | null;
-    latestDate: string | null;
-    start: string | null;
-    end: string | null;
-    error: string | null;
-  }[];
-  /** Every list that was cut to `limit`, by name (e.g. "queries", "pages.ga4"). */
-  lists: Record<string, AnalyticsListPageDto>;
-  daily?: {
-    date: string;
-    sources: {
-      source: string;
-      metrics: Record<string, number | null> | null;
-      provisional: boolean | null;
-    }[];
-  }[];
-  /** Per article for the period, site view only; see application analytics/articles.ts. */
-  articles?: ArticleReadingDto[];
-  pages?: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
-  /** The previous period for the same pages as `pages`. */
-  pagesPrevious?: { ga4: AnalyticsMetricRowDto[]; gsc: AnalyticsMetricRowDto[] };
-  queries?: AnalyticsMetricRowDto[];
-  /** The previous period for the same queries as `queries`. */
-  queriesPrevious?: AnalyticsMetricRowDto[];
-  breakdowns?: {
-    sources: AnalyticsMetricRowDto[];
-    devices: AnalyticsMetricRowDto[];
-    events: AnalyticsMetricRowDto[];
-    adUnits: AnalyticsMetricRowDto[];
-    countries: AnalyticsMetricRowDto[];
-    searchTypes: AnalyticsMetricRowDto[];
-  };
-  /**
-   * Visits (sessions, counted once on their first day) by channel, referring
-   * host and landing page. `null` when the period was collected before visits
-   * were measured. Channels are few, so they are never cut and come with the
-   * previous period.
-   */
-  acquisition?: {
-    coveredDays: number;
-    channels: AnalyticsMetricRowDto[];
-    channelsPrevious: AnalyticsMetricRowDto[];
-    referrers: AnalyticsMetricRowDto[];
-    landings: AnalyticsMetricRowDto[];
-  } | null;
-  /** Distinct GA4 dates with any reader-experience measurement in each interval. */
-  readerCoverage?: { currentDays: number; previousDays: number };
-  experience?: { current: ExperienceCohortDto[]; previous: ExperienceCohortDto[] };
-  /** All eligible articles pooled by measured page views, before any list pagination. */
-  anchorTest?: AnchorTestCohort[];
-  /** Cohorts ready for review first; `previous` holds only the cohorts in `current`. */
-  experiments?: { current: ExperimentCohortDto[]; previous: ExperimentCohortDto[] };
+  sources: AnalyticsSourceStateDto[];
+  totals: { current: AnalyticsTotalsDto; previous: AnalyticsTotalsDto };
+  themes: AnalyticsThemeRowDto[];
+  articles: AnalyticsListPageDto & { rows: AnalyticsArticleRowDto[] };
+  queries: AnalyticsListPageDto & { rows: AnalyticsQueryRowDto[] };
+  breakdowns: AnalyticsBreakdownsDto;
+  daily: AnalyticsDailyDto[];
+  anchorTest: AnchorTestCohort[];
+  notes: string[];
 }
+/** What the API knows of each article, to name and classify it. */
+export interface AnalyticsArticleLabel {
+  title: string | null;
+  path: string | null;
+  publishedAt: string | null;
+  tags: string[];
+}
+
 const record = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const textOrNull = (v: unknown) => v === null || typeof v === "string";
@@ -218,6 +282,7 @@ export function assertAnalyticsDay(value: unknown): void {
         "experience",
         "ad_unit",
         "entry",
+        "outbound",
       ].includes(String(row["grain"])) ||
       typeof row["key"] !== "string" ||
       row["key"].length > 4096 ||
@@ -256,6 +321,7 @@ export function assertAnalyticsDay(value: unknown): void {
       "vitalNeedsImprovement",
       "vitalPoor",
       "linkClicks",
+      "outboundClicks",
       "entrances",
       "engagedEntrances",
       "entryPageViews",
@@ -274,18 +340,4 @@ export function assertAnalyticsDay(value: unknown): void {
   }
   if (new TextEncoder().encode(JSON.stringify(value)).byteLength > 800000)
     throw new Error("ANALYTICS_DAY_TOO_LARGE");
-}
-
-export interface AnalyticsReportDto {
-  anchorTest?: AnchorTestCohort[];
-  adUnits?: AnalyticsMetricRowDto[];
-  experience?: AnalyticsDashboardDto["experience"];
-  experiments?: AnalyticsDashboardDto["experiments"];
-  period: string;
-  start: string;
-  end: string;
-  generatedAt: string;
-  current: AnalyticsDashboardDto["current"];
-  previous: AnalyticsDashboardDto["current"];
-  ai: { enabled: boolean; reason: string };
 }

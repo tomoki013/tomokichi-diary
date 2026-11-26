@@ -1,4 +1,4 @@
-import { addMetrics, type AnalyticsDay, type AnalyticsRow, type DateRange } from "./model.js";
+import type { AnalyticsDay, AnalyticsRow } from "./model.js";
 
 /** What an entry row's key carries: where one group of visits came from. */
 export interface EntryKey {
@@ -138,88 +138,6 @@ export function classifyChannel(key: EntryKey): Channel {
     return "organic_search";
   if (/(^|\.)pinterest\.[a-z.]{2,6}$/.test(referrer) || within(referrer, SOCIAL)) return "social";
   return "referral";
-}
-
-/** Entry metrics plus the share that were first visits. */
-function entryMetrics(rows: readonly AnalyticsRow[]): Record<string, number | null> {
-  const metrics = addMetrics(rows);
-  metrics["newEntrances"] = rows.reduce(
-    (sum, row) => sum + (entryKey(row)?.visitor === "new" ? (row.metrics["entrances"] ?? 0) : 0),
-    0,
-  );
-  return metrics;
-}
-
-function grouped(
-  rows: readonly AnalyticsRow[],
-  grain: AnalyticsRow["grain"],
-  keyOf: (row: AnalyticsRow) => string | null,
-  shape: (key: string, first: AnalyticsRow) => Pick<AnalyticsRow, "path" | "articleId">,
-): AnalyticsRow[] {
-  const groups = new Map<string, AnalyticsRow[]>();
-  for (const row of rows) {
-    const key = keyOf(row);
-    if (key === null) continue;
-    const list = groups.get(key);
-    if (list) list.push(row);
-    else groups.set(key, [row]);
-  }
-  return [...groups]
-    .map(([key, list]) => ({
-      grain,
-      key,
-      ...shape(key, list[0]!),
-      metrics: entryMetrics(list),
-    }))
-    .toSorted((a, b) => (b.metrics["entrances"] ?? 0) - (a.metrics["entrances"] ?? 0));
-}
-
-const none = () => ({ path: null, articleId: null });
-
-/**
- * Visits for a period by channel, by referring host and by landing page. With
- * an article, only the visits that landed on it. `null` when no day in the
- * period has entry rows (collected before this was measured).
- */
-export function acquisition(days: readonly AnalyticsDay[], range: DateRange, articleId?: string) {
-  const selected = days.filter(
-    (day) => day.source === "ga4" && day.date >= range.start && day.date <= range.end,
-  );
-  const measured = selected.filter((day) => day.rows.some((row) => row.grain === "entry"));
-  if (!measured.length) return null;
-  const rows = measured
-    .flatMap((day) => day.rows)
-    .filter((row) => row.grain === "entry" && (!articleId || row.articleId === articleId));
-  return {
-    coveredDays: measured.length,
-    channels: grouped(
-      rows,
-      "channel",
-      (row) => {
-        const key = entryKey(row);
-        return key ? classifyChannel(key) : null;
-      },
-      none,
-    ),
-    referrers: grouped(
-      rows,
-      "referrer",
-      (row) => {
-        const key = entryKey(row);
-        if (!key) return null;
-        return key.source || key.medium
-          ? `utm:${key.source || "(none)"}/${key.medium || "(none)"}`
-          : key.referrer || "(direct)";
-      },
-      none,
-    ),
-    landings: grouped(
-      rows,
-      "landing",
-      (row) => row.articleId ?? row.path,
-      (_key, first) => ({ path: first.path, articleId: first.articleId }),
-    ),
-  };
 }
 
 /** One compact line per day for the long-range trend table. */

@@ -115,9 +115,9 @@ single-file MCP App. After deployment, run
 `pnpm verify:mcp https://mcp.tomokichidiary.com` to exercise
 protocol negotiation, tools, firsthand filtering and the UI resource against production.
 
-The MCP Worker keeps its `workers.dev` host live during migration. The OAuth issuer,
-resource and KV prefixes are separate for the new custom domain; clients must reauthorize
-at `https://mcp.tomokichidiary.com`. Configure a dedicated Cloudflare Access application
+The MCP Worker's `workers.dev` host serves only the public `/mcp`; the old private
+issuers there and the admin consent proxy were retired on 2026-11-27. Clients connect
+and authorize at `https://mcp.tomokichidiary.com`. Configure a dedicated Cloudflare Access application
 for exactly `/analytics-connect` and `/operator-connect`, then set its Audience Tag as
 `MCP_CONSENT_ACCESS_AUD` in the GitHub Actions `production` environment and pass it
 to manual API deploys. Leave MCP, OAuth, and discovery endpoints outside Access so

@@ -8,9 +8,7 @@ import { Badge, Button, Empty, Loaded, Page, Panel, TextInput, confirmed } from 
 
 const issuerLabel: Record<ConnectionDto["issuer"], string> = {
   operator: "管理",
-  "operator-legacy": "管理（旧URL）",
   analytics: "分析",
-  "analytics-legacy": "分析（旧URL）",
 };
 
 /** Who is connected to the private MCP servers, and the way to cut one off. */

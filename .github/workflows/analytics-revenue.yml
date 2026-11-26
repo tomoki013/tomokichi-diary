@@ -1,7 +1,6 @@
 name: Analytics AdSense (optional)
+# Runs daily as a step of "Analytics collect"; this is for a manual re-read.
 on:
-  schedule:
-    - cron: "53 6 * * *"
   workflow_dispatch:
 permissions:
   contents: read

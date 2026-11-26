@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { assertAnalyticsDay } from "@tomokichi/contracts";
 import { dateRange } from "@tomokichi/application";
-import { buildDays } from "./collect.js";
+import { buildDays, overdue } from "./collect.js";
+import { periodWindows } from "./periods.js";
 import { queryConfig } from "./bigquery.js";
 import { adsenseUrl, parseAdSensePages } from "./adsense.js";
 import type { Route } from "@tomokichi/domain";
@@ -104,5 +105,69 @@ describe("AdSense page earnings", () => {
     expect(rows[0]).toMatchObject({ grain: "page", path: "/posts/shanghai-chagee-menu" });
     expect(rows[0]!.metrics["estimatedEarningsJPY"]).toBe(15);
     expect(days[0]!.rows.some((row) => row.grain === "site")).toBe(false);
+  });
+});
+describe("daily collection upkeep", () => {
+  it("treats the routine export lag as pending, and only an older gap as incomplete", () => {
+    const week = dateRange("2026-11-20", "2026-11-26");
+    const collected = buildDays(
+      "ga4",
+      week,
+      ["2026-11-20", "2026-11-21", "2026-11-22", "2026-11-23", "2026-11-24"],
+      [],
+      [],
+      "2026-11-26T17:19:00Z",
+    );
+    // 02:19 JST on 11-27: 11-25 and 11-26 are not exported yet, as on every run.
+    expect(overdue(week, collected, "2026-11-26T17:19:00Z")).toEqual([]);
+    expect(overdue(week, collected.slice(1), "2026-11-26T17:19:00Z")).toEqual(["2026-11-20"]);
+  });
+  it("keeps the outbound marker on the site row only", () => {
+    const [day] = buildDays(
+      "ga4",
+      range,
+      ["2026-10-01"],
+      [
+        {
+          date: "2026-10-01",
+          grain: "site",
+          key: "",
+          path: null,
+          pageViews: "3",
+          outboundClicks: "1",
+        },
+        {
+          date: "2026-10-01",
+          grain: "page",
+          key: "/posts/a",
+          path: "/posts/a",
+          pageViews: "3",
+          outboundClicks: null,
+        },
+        {
+          date: "2026-10-01",
+          grain: "outbound",
+          key: "www.trip.com",
+          path: "/posts/a",
+          eventCount: "1",
+          outboundClicks: null,
+        },
+      ],
+      [],
+      now,
+    );
+    expect(day!.rows.map((r) => [r.grain, "outboundClicks" in r.metrics])).toEqual([
+      ["site", true],
+      ["page", false],
+      ["outbound", false],
+    ]);
+    expect(() => assertAnalyticsDay(day)).not.toThrow();
+  });
+  it("counts people for the week, month and 7/28 days without a 186-day scan", () => {
+    const windows = periodWindows(dateRange("2026-11-20", "2026-11-26"));
+    const earliest = windows.map((w) => w.start).toSorted()[0]!;
+    expect(earliest >= "2026-09-01").toBe(true);
+    expect(windows).toContainEqual({ start: "2026-10-01", end: "2026-10-31" });
+    expect(windows).toContainEqual({ start: "2026-10-30", end: "2026-11-26" });
   });
 });

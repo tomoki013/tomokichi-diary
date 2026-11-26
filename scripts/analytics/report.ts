@@ -1,12 +1,10 @@
+import { analyticsView, dateRange, shiftDate } from "@tomokichi/application";
 import {
-  analyticsDashboard,
-  dateRange,
-  shiftDate,
-  type AnalyticsDay,
-  type AnalyticsPeriodCounts,
-  type AnalyticsStatus,
-} from "@tomokichi/application";
-import { d1 } from "./cloudflare.js";
+  analyticsAffiliateHosts,
+  analyticsArticleLabels,
+  createAnalyticsStore,
+} from "@tomokichi/infra-d1";
+import { d1, restDatabase } from "./cloudflare.js";
 const period = process.argv[2];
 if (!["weekly", "monthly"].includes(period ?? "")) throw new Error("ANALYTICS_INVALID_RANGE");
 const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
@@ -20,52 +18,30 @@ if (period === "weekly") {
   start = `${end.slice(0, 7)}-01`;
 }
 const range = dateRange(start, end);
-const dashboard = await analyticsDashboard(
-  {
-    read: async (r) =>
-      (
-        await d1<{ payload: string }>([
-          {
-            sql: "SELECT payload FROM analytics_days WHERE date BETWEEN ? AND ?",
-            params: [r.start, r.end],
-          },
-        ])
-      )[0]!.map((stored) => JSON.parse(stored.payload) as AnalyticsDay),
-    statuses: async () => [] as AnalyticsStatus[],
-    readCounts: async (ranges) =>
-      (
-        await d1<{ payload: string }>([
-          {
-            sql: `SELECT payload FROM analytics_period_counts WHERE ${ranges.map(() => "(start=? AND end=?)").join(" OR ")}`,
-            params: ranges.flatMap((r) => [r.start, r.end]),
-          },
-        ])
-      )[0]!.map((row) => JSON.parse(row.payload) as AnalyticsPeriodCounts),
-  },
-  range,
-  undefined,
-  // The saved evidence keeps every cohort, uncut.
-  {
-    sections: ["experience", "experiments", "anchorTest", "breakdowns"],
-    limit: Number.MAX_SAFE_INTEGER,
-  },
-);
-if (!dashboard.current.some((s) => s.coveredDays)) throw new Error("ANALYTICS_SOURCE_NOT_READY");
-// Store evidence only. No external AI calls or content write capability.
-const payload = JSON.stringify({
-  range,
-  previousRange: dashboard.previousRange,
-  current: dashboard.current,
-  previous: dashboard.previous,
-  experience: dashboard.experience,
-  experiments: dashboard.experiments,
-  anchorTest: dashboard.anchorTest,
-  adUnits: dashboard.breakdowns?.["adUnits"] ?? [],
-  ai: {
-    enabled: false,
-    reason: "この保存レポートは集計データです。AI分析は接続先のChatGPTで実行します",
-  },
+// The daily collection saves each period once, after its first run on or after
+// the period ends, so a late or missed schedule still saves it, in order.
+if (process.argv.includes("--if-missing")) {
+  const [saved] = await d1([
+    {
+      sql: "SELECT 1 FROM analytics_reports WHERE period=? AND start=? AND end=?",
+      params: [period, start, end],
+    },
+  ]);
+  if (saved!.length) {
+    process.stdout.write(`${period}: ${start}..${end} already saved\n`);
+    process.exit(0);
+  }
+}
+// The same store, labels and view as the admin and ChatGPT, over the REST API.
+const db = restDatabase();
+const view = await analyticsView(createAnalyticsStore(db), range, undefined, {
+  labels: (ids) => analyticsArticleLabels(db, ids),
+  affiliateHosts: () => analyticsAffiliateHosts(db),
+  limit: 100,
 });
+if (!view.sources.some((s) => s.coveredDays)) throw new Error("ANALYTICS_SOURCE_NOT_READY");
+// Store evidence only. No external AI calls or content write capability.
+const payload = JSON.stringify({ version: 2, ...view });
 await d1([
   {
     sql: "INSERT INTO analytics_reports(period,start,end,generated_at,payload) VALUES(?,?,?,?,?) ON CONFLICT(period,start,end) DO UPDATE SET generated_at=excluded.generated_at,payload=excluded.payload",

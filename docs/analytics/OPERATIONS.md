@@ -31,13 +31,13 @@ pnpm exec tsx scripts/analytics/run.ts --start 2026-08-01 --end 2026-10-10 --per
 pnpm exec vitest run scripts/analytics apps/api/src/__tests__/analytics.test.ts apps/mcp-server/src/__tests__/analytics.test.ts
 ```
 
-Actionsは日次15:47 JST予定。GitHubの混雑・公開repoの無活動による停止は起こりうる。source毎のtable/ExportLog readinessを確認し、当日intradayは含めない。7日を毎回置換し、遅延・訂正に対応。1GB/jobの上限を超えると停止（cost planを見直さず上限を無限にしない）。
+Actionsは日次15:47 JST予定（2026-11は実際には8〜11時間遅れて翌0〜3時 JSTに開始）。GitHubの混雑・公開repoの無活動による停止は起こりうる。同じジョブで収集→AdSense→完了週・月のレポート保存（未保存のときだけ）の順に実行する。各BigQueryジョブは処理・課金バイト数をログに出す。直近3日以内の未公開日は遅延として扱い、それより古い欠けだけを `ANALYTICS_INCOMPLETE_EXPORT` にする。source毎のtable/ExportLog readinessを確認し、当日intradayは含めない。7日を毎回置換し、遅延・訂正に対応。1GB/jobの上限を超えると停止（cost planを見直さず上限を無限にしない）。
 
-Admin `#/analytics` で7/28/90日、月間、任意93日以内、前期間比較、記事クリックによる詳細、取得状況を確認。「この期間を再集計」は31日以内でmainの独立workflowを起動。「期間人数を集計」は93日以内の正確なdistinctをanalytics-periods workflowで取得。過去backfillは両dateを指定。片方だけ指定は拒否。再集計を重ねてもsource/day主キーは増えない。APIは最新状態を手動reloadするだけでpollしない。
+Admin `#/analytics` で7/28日、月間、任意93日以内、前期間比較、記事クリックによる詳細、取得状況を確認。「この期間を再集計」は31日以内でmainの独立workflowを起動。「期間人数を集計」は93日以内の正確なdistinctをanalytics-periods workflowで取得。過去backfillは両dateを指定。片方だけ指定は拒否。再集計を重ねてもsource/day主キーは増えない。APIは最新状態を手動reloadするだけでpollしない。
 
-週次は月曜16:17 JSTに前週月〜日、月次は月初16:37 JSTに前月をD1から読む。sourceのcoverage/provisionalを保持。`GET /v1/admin/analytics/reports`で保存レポートを確認できる。AI provider未設定を明記し、モデルを呼ばない。
+週次は前週月〜日、月次は前月を、その期間が終わってから最初の日次収集のあとに一度だけD1から作って保存する。作り直しは「Analytics period reports」を手動実行（上書き）。sourceのcoverage/provisionalを保持。`GET /v1/admin/analytics/reports`で保存レポートを確認できる。AI provider未設定を明記し、モデルを呼ばない。
 
-AdSenseはrepository variable ADSENSE_ENABLED=1のときだけ別workflowで読取。OAuth不足、空実績、API警告/truncationはsite収集を妨げない。API提供値を無理に0へ補完せず、推定/確定を分離する。AffiliateはASP確定後、.data/analytics/配下の共通モデルJSONを実adapterで生成し、`ANALYTICS_START`/`ANALYTICS_END`を指定して `revenue.ts --affiliate .data/analytics/import.json` で検証。`--persist` は全providerを含む完全日次snapshotに限る。個人情報を含むASP CSVはそのままこのJSONへ入れない。
+AdSenseはrepository variable ADSENSE_ENABLED=1のときだけ日次収集の後続ステップで読取（手動の再取得は「Analytics AdSense」）。OAuth不足、空実績、API警告/truncationはsite収集を妨げない。API提供値を無理に0へ補完せず、推定/確定を分離する。AffiliateはASP確定後、.data/analytics/配下の共通モデルJSONを実adapterで生成し、`ANALYTICS_START`/`ANALYTICS_END`を指定して `revenue.ts --affiliate .data/analytics/import.json` で検証。`--persist` は全providerを含む完全日次snapshotに限る。個人情報を含むASP CSVはそのままこのJSONへ入れない。
 
 ## 失敗・復旧
 

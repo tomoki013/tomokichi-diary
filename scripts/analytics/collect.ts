@@ -14,6 +14,20 @@ import { analyticsReplacement } from "@tomokichi/infra-d1";
 import { BigQuery, type SqlName } from "./bigquery.js";
 import { d1 } from "./cloudflare.js";
 export const COLLECT_SOURCES = ["ga4", "gsc_site", "gsc_url"] as const;
+/**
+ * GA4 and Search Console publish a day one to three days later, so the newest
+ * days of every window are routinely missing. Only a day older than that is
+ * an incomplete export; flagging the routine lag made the error permanent and
+ * hid the real failures (it was set on every run until 2026-11-27).
+ */
+export const EXPORT_LAG_DAYS = 3;
+export function overdue(range: DateRange, days: readonly AnalyticsDay[], now: string): string[] {
+  const today = new Date(now).toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+  const have = new Set(days.map((day) => day.date));
+  return dates(range).filter(
+    (date) => !have.has(date) && date < shiftDate(today, -EXPORT_LAG_DAYS),
+  );
+}
 export function buildDays(
   source: AnalyticsSource,
   range: DateRange,
@@ -50,6 +64,8 @@ export function buildDays(
     for (const [key, value] of Object.entries(raw))
       if (!["date", "grain", "key", "path"].includes(key))
         row.metrics[key] = value === null ? null : Number(value);
+    // Only the site row carries it; stored nowhere else rather than as null on every row.
+    if (row.metrics["outboundClicks"] === null) delete row.metrics["outboundClicks"];
     day.rows.push(row);
   }
   for (const day of result) {
@@ -70,6 +86,7 @@ export function buildDays(
                   engagedSessions: 0,
                   engagementMs: 0,
                   eventCount: 0,
+                  outboundClicks: 0,
                 }
               : { clicks: 0, impressions: 0, positionSum: 0 },
         });
@@ -123,7 +140,7 @@ export async function collectSource(
     );
     if (persist) {
       await d1(analyticsReplacement(source, range, days, now));
-      if (days.length < dates(range).length)
+      if (overdue(range, days, now).length)
         await recordFailure(source, "ANALYTICS_INCOMPLETE_EXPORT");
     } else {
       mkdirSync(".data/analytics", { recursive: true });

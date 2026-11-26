@@ -17,7 +17,11 @@ export function periodWindows(requested: DateRange): DateRange[] {
     { start: shiftDate(sunday, -6), end: sunday },
     { start: `${previousMonthEnd.slice(0, 7)}-01`, end: previousMonthEnd },
     requested,
-    ...[7, 28, 90].map((length) => ({
+    // Rolling 7/28 days match the admin's default views. A 90-day window would
+    // make every daily run read 186 days of GA4 export (about two thirds of all
+    // scanning) for a view nobody opens by default; any range up to 93 days is
+    // still counted on demand by the analytics-periods workflow.
+    ...[7, 28].map((length) => ({
       start: shiftDate(requested.end, 1 - length),
       end: requested.end,
     })),

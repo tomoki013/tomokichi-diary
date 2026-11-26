@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { acquisition, classifyChannel, factsOf, type EntryKey } from "./acquisition.js";
+import { classifyChannel, factsOf, type EntryKey } from "./acquisition.js";
 import type { AnalyticsDay, AnalyticsRow } from "./model.js";
 
 const key = (referrer: string, extra: Partial<EntryKey> = {}): EntryKey => ({
@@ -49,36 +49,6 @@ describe("channel of a visit", () => {
     expect(classifyChannel(key("", { source: "x", medium: "" }))).toBe("social");
     expect(classifyChannel(key("", { source: "chatgpt.com", medium: "" }))).toBe("ai_assistant");
     expect(classifyChannel(key("", { source: "partner", medium: "banner" }))).toBe("campaign");
-  });
-});
-
-describe("visits for a period", () => {
-  const days = [
-    day("ga4", "2026-10-10", [
-      entry(key("www.google.com"), 10),
-      entry(key("www.google.com", { visitor: "returning" }), 4),
-      entry(key("chatgpt.com"), 3, null, "/"),
-    ]),
-    day("ga4", "2026-10-11", [entry(key("www.google.com"), 5)]),
-    day("ga4", "2026-10-12", [
-      { grain: "site", key: "", path: null, articleId: null, metrics: { pageViews: 9 } },
-    ]),
-  ];
-  const range = { start: "2026-10-10", end: "2026-10-12" };
-  it("groups by channel, referrer and landing page, and counts first visits", () => {
-    const result = acquisition(days, range)!;
-    expect(result.coveredDays).toBe(2);
-    expect(result.channels.map((row) => [row.key, row.metrics["entrances"]])).toEqual([
-      ["organic_search", 19],
-      ["ai_assistant", 3],
-    ]);
-    expect(result.channels[0]!.metrics["newEntrances"]).toBe(15);
-    expect(result.referrers[0]).toMatchObject({ key: "www.google.com" });
-    expect(result.landings[0]).toMatchObject({ articleId: "a", path: "/posts/a" });
-    expect(acquisition(days, range, "a")!.channels).toHaveLength(1);
-  });
-  it("is null, not zero, where visits were not measured", () => {
-    expect(acquisition(days, { start: "2026-10-12", end: "2026-10-12" })).toBeNull();
   });
 });
 

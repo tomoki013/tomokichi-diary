@@ -16,14 +16,14 @@ export default defineConfig({
     // router takes over. The build output directory is set in wrangler.config.ts.
     assets: {
       notFoundHandling: "single-page-application",
-      // Access/OAuth navigations must reach the Worker, even with Accept:text/html.
-      runWorkerFirst: ["/api/*", "/analytics-connect", "/operator-connect"],
+      // API requests must reach the Worker, even with Accept:text/html. MCP
+      // consent lives only on mcp.tomokichidiary.com.
+      runWorkerFirst: ["/api/*"],
     },
     env: {
       ASSETS: bindings.assets(),
       // The API is reached over the internal network, never over the internet.
       API: bindings.worker({ worker: "tomokichi-diary-api" }),
-      ANALYTICS_MCP: bindings.worker({ worker: "tomokichi-diary-mcp" }),
     },
   },
 });

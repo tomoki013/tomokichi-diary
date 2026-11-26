@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fromNodeSqlite, openInMemoryDatabase } from "@tomokichi/infra-d1/testing";
+import { analyticsHandlers } from "../../../api/src/ops/handlers/analytics";
+import type { OpScope } from "../../../api/src/ops/scope";
 import { describe, it, expect, vi } from "vitest";
 vi.mock("cloudflare:workers", () => ({
   WorkerEntrypoint: class {
@@ -259,10 +263,42 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   expect(exchange.status).toBe(200);
   const tokens = (await exchange.json()) as { access_token: string; refresh_token: string };
   expect(tokens.refresh_token).toBeTruthy();
+  const db = openInMemoryDatabase();
+  for (const migration of ["0015_analytics", "0016_analytics_period_counts", "0001_initial"])
+    db.exec(readFileSync("migrations/" + migration + ".sql", "utf8"));
+  db.exec("CREATE TABLE publication_metadata(revision_id TEXT PRIMARY KEY,metadata TEXT)");
+  db.exec(
+    "CREATE TABLE affiliate_offers(id TEXT PRIMARY KEY,status TEXT,payload TEXT,updated_at TEXT)",
+  );
+  const date = "2026-11-16";
+  db.prepare("INSERT INTO analytics_days(source,date,payload) VALUES (?,?,?)").run(
+    "gsc_url",
+    date,
+    JSON.stringify({
+      date,
+      source: "gsc_url",
+      retrievedAt: date,
+      provisional: false,
+      rows: [
+        {
+          grain: "query",
+          path: "/posts/a",
+          articleId: null,
+          key: "上海 空港",
+          metrics: { clicks: 3, impressions: 10, positionSum: 50 },
+        },
+      ],
+    }),
+  );
+  const scope = { db: () => fromNodeSqlite(db) } as OpScope;
   const calls: Request[] = [];
   const operatorApi = {
     fetch: vi.fn(async (request: Request) => {
       calls.push(request);
+      if (new URL(request.url).pathname.endsWith("/analytics.dashboard"))
+        return Response.json(
+          await analyticsHandlers["analytics.dashboard"](scope, await request.json()),
+        );
       return Response.json({
         period: "weekly",
         snapshotState: "not_generated",
@@ -284,6 +320,24 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
   });
   expect(list.status).toBe(200);
   const text = await list.text();
+  const json =
+    text
+      .split("\n")
+      .find((line) => line.startsWith("data:"))
+      ?.slice(5) ?? text;
+  const listed = JSON.parse(json).result.tools as {
+    name: string;
+    inputSchema: { properties: Record<string, any>; required: string[] };
+  }[];
+  for (const [name, fields, required] of [
+    ["get_analytics_report", ["period", "start", "limit", "offset"], ["period"]],
+    ["get_analytics_dashboard", ["start", "end", "articleId", "limit", "offset"], ["start", "end"]],
+  ] as const) {
+    const schema = listed.find((t) => t.name === name)!.inputSchema;
+    expect(Object.keys(schema.properties).toSorted()).toEqual([...fields].toSorted());
+    expect(schema.required.toSorted()).toEqual([...required].toSorted());
+    expect(schema.properties["limit"]).toMatchObject({ minimum: 1, maximum: 100, type: "integer" });
+  }
   expect(text).toContain("get_analytics_report");
   expect(text).toContain("get_analytics_dashboard");
   expect(text).not.toContain("recalculate");
@@ -318,6 +372,52 @@ it("completes owner consent → PKCE → authenticated read-only tools, rejects 
     operatorWrite: false,
     mcpToolName: "get_analytics_report",
   });
+  const readDashboard = async (input: Record<string, unknown>) => {
+    const response = await send("/analytics/mcp", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${tokens.access_token}`,
+        host: new URL(origin).hostname,
+        accept: "application/json, text/event-stream",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 3,
+        method: "tools/call",
+        params: { name: "get_analytics_dashboard", arguments: input },
+      }),
+    });
+    const reply = await response.text();
+    return JSON.parse(
+      reply
+        .split("\n")
+        .find((line) => line.startsWith("data:"))
+        ?.slice(5) ?? reply,
+    ).result;
+  };
+  const options = {
+    start: date,
+    end: date,
+    limit: 1,
+    offset: 0,
+  };
+  const throughMcp = await readDashboard(options);
+  const admin = await analyticsHandlers["analytics.dashboard"](scope, options);
+  expect(throughMcp.structuredContent.dashboard).toEqual(admin.dashboard);
+  expect(JSON.parse(throughMcp.content[0].text)).toEqual(throughMcp.structuredContent);
+  expect(throughMcp.structuredContent.dashboard.queries.rows[0]).toMatchObject({
+    query: "上海 空港",
+    intent: "non_chagee",
+    clicks: 3,
+  });
+  for (const invalid of [{ limit: 101 }, { offset: -1 }, { start: "2026-02-30" }])
+    expect((await readDashboard({ ...options, ...invalid })).isError).toBe(true);
+  // A prompt written for the old tool definition still gets an answer.
+  expect(
+    (await readDashboard({ ...options, sections: ["themes"], includeSnapshot: true })).isError,
+  ).not.toBe(true);
+  db.close();
   const refreshed = await send("/analytics/oauth/token", {
     method: "POST",
     body: new URLSearchParams({
