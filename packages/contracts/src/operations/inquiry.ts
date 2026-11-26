@@ -81,7 +81,7 @@ export const inquiryOperations = {
     surface: "operator",
     input: v.object({}),
     description:
-      "問い合わせの返信テンプレートの一覧（停止中のものも含む）。role が opening のものは返信の書き出しに毎回入るあいさつ文、reply は返信画面で選んで足す定型文。本文では {{userName}}（相手の名前）、{{appName}}（サイト名）、{{supportUrl}} が置き換わります。",
+      "問い合わせの返信テンプレートの一覧（停止中のものも含む）。role が opening のものは返信の書き出しに毎回入るあいさつ文、receipt は自動受付メール、reply は返信画面で選んで足す定型文。本文では {{userName}}（相手の名前）、{{appName}}（サイト名）、{{supportUrl}} が置き換わります。",
     tool: { name: "list_inquiry_templates", title: "List inquiry reply templates" },
     target: { type: "inquiry" },
   }),

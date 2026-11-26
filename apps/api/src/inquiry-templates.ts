@@ -29,6 +29,8 @@ export const REPLY_CLOSING = "以上、よろしくお願いいたします。";
  */
 export const REPLY_FROM = "ともきちの旅行日記 <contact@tomokichidiary.com>";
 
+// The inquiry platform looks up this project-specific key for both form and email intake.
+export const RECEIPT_KEY = "inquiry_receipt_tomokichi_diary";
 export const OPENING_KEY = "diary_opening";
 
 /**
@@ -120,6 +122,23 @@ const lines = (...text: string[]): string => text.join("\n");
  * and `{{supportUrl}}` are this site's.
  */
 export const DEFAULT_TEMPLATES: readonly DefaultTemplate[] = [
+  {
+    key: RECEIPT_KEY,
+    name: "自動受付メール",
+    subject: null,
+    sortOrder: 1,
+    body: lines(
+      "ともきちの旅行日記にお問い合わせいただき、ありがとうございます。",
+      "お問い合わせを受け付けました。",
+      "",
+      "受付番号: {{ticketNumber}}",
+      "",
+      "内容を確認のうえ、必要に応じて返信いたします。",
+      "営業・勧誘などのご連絡を含め、内容によっては返信を差し控える場合がございます。あらかじめご了承ください。",
+      "",
+      "※本メールは、お問い合わせの受付をお知らせする自動送信メールです。",
+    ),
+  },
   {
     key: OPENING_KEY,
     name: "冒頭：宛名・名乗り",
@@ -834,9 +853,9 @@ const SHIPPED_V1: readonly DefaultTemplate[] = [
 
 const SYSTEM = { id: "service:diary-defaults" };
 
-/** Nobody picks these: the opening goes in by itself, the subject carrier is plumbing. */
+/** Only manual reply bodies belong in the reply composer. */
 export const isPickable = (template: OperatorReplyTemplate): boolean =>
-  template.key !== OPENING_KEY && template.key !== SUBJECT_KEY;
+  template.key !== RECEIPT_KEY && template.key !== OPENING_KEY && template.key !== SUBJECT_KEY;
 
 const shippedDefaults = [...SHIPPED_V1, ...SHIPPED_V2];
 

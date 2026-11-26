@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import type { ArticleSummaryDto } from "@tomokichi/contracts";
 import { op } from "../../data/client";
 import { invalidate, useAction, useOp, useTitle } from "../../data/hooks";
-import { href } from "../../app/router";
+import { href, type Route } from "../../app/router";
+import { ArticleEditor } from "./ArticleEditor";
 import {
   GROUP_OPTIONS,
   filedUnder,
@@ -65,16 +66,30 @@ function storedGroup(): GroupBy {
  * a country, a category). Picking several publishes them in one go: each
  * passes its own publish check, and the site is rebuilt once at the end.
  */
-export function ArticleList({ filter }: { filter: string | null }) {
-  useTitle("記事");
+export function ArticleList({
+  route,
+}: {
+  route: Extract<Route, { name: "articles" | "article" }>;
+}) {
+  const detailId = route.name === "article" ? route.id : null;
+  useTitle(detailId ? "" : "記事");
   const list = useOp("article.list");
   const series = useOp("series.list", {});
   const locations = useOp("location.list");
   const taxonomy = useOp("taxonomy.get");
   const [groupBy, setGroupBy] = useState<GroupBy>(storedGroup);
-  const [tab, setTab] = useState<Filter>(
-    (FILTERS.some((f) => f.value === filter) ? filter : "all") as Filter,
-  );
+  const filter = route.name === "articles" ? route.filter : null;
+  const [selectedTab, setTab] = useState<Filter | null>(null);
+  const currentArticle = detailId ? list.data?.items.find((item) => item.id === detailId) : null;
+  const defaultTab =
+    currentArticle?.kind === "page"
+      ? "pages"
+      : currentArticle?.status === "archived"
+        ? "archived"
+        : "all";
+  const tab = selectedTab ?? FILTERS.find((f) => f.value === filter)?.value ?? defaultTab;
+  // Keep the displayed order for this editing session, even when saving reorders the list.
+  const [sequence, setSequence] = useState<readonly ArticleSummaryDto[]>([]);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
   const { busy, run } = useAction();
@@ -99,7 +114,8 @@ export function ArticleList({ filter }: { filter: string | null }) {
     // Pages are not filed anywhere: one flat list.
     return groupArticles(items, tab === "pages" ? "none" : groupBy, names);
   }, [list.data, tab, query, groupBy, names]);
-  const total = groups.reduce((sum, group) => sum + group.items.length, 0);
+  const ordered = useMemo(() => groups.flatMap((group) => group.items), [groups]);
+  const total = ordered.length;
 
   async function publishPicked() {
     if (!confirmed(`${picked.length}件を公開します。よろしいですか？`)) return;
@@ -123,6 +139,19 @@ export function ArticleList({ filter }: { filter: string | null }) {
     );
     setPicked(failed);
     if (failed.length > 0) invalidate("article");
+  }
+
+  if (detailId) {
+    const order = sequence.some((item) => item.id === detailId) ? sequence : ordered;
+    const index = order.findIndex((item) => item.id === detailId);
+    return (
+      <ArticleEditor
+        key={detailId}
+        id={detailId}
+        next={index >= 0 ? order[index + 1] : undefined}
+        onNavigate={() => setSequence(order)}
+      />
+    );
   }
 
   return (
@@ -204,6 +233,10 @@ export function ArticleList({ filter }: { filter: string | null }) {
                     <a
                       className="row__main"
                       href={href.article(article.id)}
+                      onClick={() => {
+                        setSequence(ordered);
+                        setTab(tab);
+                      }}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       <span className="row__title">{article.title || article.slug}</span>

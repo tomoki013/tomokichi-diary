@@ -4,7 +4,6 @@ import { SignIn } from "./SignIn";
 import { SiteState } from "./SiteState";
 import { Home } from "../features/home/Home";
 import { ArticleList } from "../features/articles/ArticleList";
-import { ArticleEditor } from "../features/articles/ArticleEditor";
 import { NewArticle } from "../features/articles/NewArticle";
 import { NoteList } from "../features/notes/NoteList";
 import { NoteEditor } from "../features/notes/NoteEditor";
@@ -38,9 +37,8 @@ function screen(route: Route): ReactNode {
     case "home":
       return <Home />;
     case "articles":
-      return <ArticleList filter={route.filter} />;
     case "article":
-      return <ArticleEditor key={route.id} id={route.id} />;
+      return <ArticleList route={route} />;
     case "new-article":
       return <NewArticle kind={route.kind} />;
     case "notes":

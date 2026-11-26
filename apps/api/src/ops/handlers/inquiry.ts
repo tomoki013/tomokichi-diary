@@ -24,6 +24,7 @@ import {
   fillSiteVariables,
   isPickable,
   OPENING_KEY,
+  RECEIPT_KEY,
   REPLY_CLOSING,
   REPLY_FROM,
   SUBJECT_KEY,
@@ -208,7 +209,8 @@ const toSignature = (project: OperatorProject): InquirySignatureDto => ({
 /** The platform's `key` is its handle, not something the admin chooses or sees. */
 const toTemplate = (template: OperatorReplyTemplate): InquiryReplyTemplateDto => ({
   id: template.id,
-  role: template.key === OPENING_KEY ? "opening" : "reply",
+  role:
+    template.key === RECEIPT_KEY ? "receipt" : template.key === OPENING_KEY ? "opening" : "reply",
   name: template.name,
   subject: template.subject,
   body: template.body,

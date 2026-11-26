@@ -505,7 +505,7 @@ export interface InquiryComposeDto {
 export interface InquiryReplyTemplateDto {
   readonly id: string;
   /** `opening` is put in front of every new reply; the rest are picked. */
-  readonly role: "opening" | "reply";
+  readonly role: "opening" | "receipt" | "reply";
   readonly name: string;
   /** The reply's subject; null uses the platform's default. */
   readonly subject: string | null;

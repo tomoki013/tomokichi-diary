@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { ArticleDetailDto } from "@tomokichi/contracts";
+import type { ArticleDetailDto, ArticleSummaryDto } from "@tomokichi/contracts";
 import { op } from "../../data/client";
 import { useAction, useOp, useTitle, useUnsavedWarning } from "../../data/hooks";
 import { href } from "../../app/router";
@@ -7,7 +7,17 @@ import { draftFrom, isDirty, normalizeDraft, type DraftInput } from "../../lib/d
 import { formatRelative } from "../../lib/labels";
 import type { AdPreview } from "../../lib/ad-preview";
 import { PhaseBadge } from "../../ui/PhaseBadge";
-import { Button, Chips, Field, Loaded, Page, Panel, TextArea, TextInput } from "../../ui/parts";
+import {
+  Button,
+  Chips,
+  Field,
+  Loaded,
+  Page,
+  Panel,
+  TextArea,
+  TextInput,
+  confirmed,
+} from "../../ui/parts";
 import { BodyPanel } from "../editor/BodyPanel";
 import { PublishPanel } from "../editor/PublishPanel";
 import { MediaPanel } from "../editor/MediaPanel";
@@ -25,17 +35,28 @@ const PARTS = [
   ["knowledge", "旅の知識"],
 ] as const;
 
-export function ArticleEditor({ id }: { id: string }) {
+interface ArticleNavigation {
+  next: ArticleSummaryDto | undefined;
+  onNavigate: () => void;
+}
+
+export function ArticleEditor({ id, ...navigation }: { id: string } & ArticleNavigation) {
   const article = useOp("article.get", { articleId: id });
   return (
     <Loaded resource={article} lines={10}>
-      {(data) => <Editor key={data.currentRevision?.id ?? data.id} article={data} />}
+      {(data) => (
+        <Editor key={data.currentRevision?.id ?? data.id} article={data} {...navigation} />
+      )}
     </Loaded>
   );
 }
 
 /** One article: the text first, then everything else folded until needed. */
-function Editor({ article }: { article: ArticleDetailDto }) {
+function Editor({
+  article,
+  next: nextArticle,
+  onNavigate,
+}: { article: ArticleDetailDto } & ArticleNavigation) {
   const saved = useMemo(() => draftFrom(article), [article]);
   const [draft, setDraft] = useState<DraftInput>(saved);
   const dirty = isDirty(draft, saved);
@@ -89,6 +110,25 @@ function Editor({ article }: { article: ArticleDetailDto }) {
         <>
           {draft.title || "（無題）"} <PhaseBadge article={article} />
         </>
+      }
+      actions={
+        nextArticle && (
+          <a
+            className="button button--secondary"
+            href={href.article(nextArticle.id)}
+            title={nextArticle.title || nextArticle.slug}
+            onClick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              if (dirty && !confirmed("未保存の変更を破棄して次へ移動しますか？")) {
+                event.preventDefault();
+                return;
+              }
+              onNavigate();
+            }}
+          >
+            {nextArticle.kind === "page" ? "次の固定ページへ" : "次の記事へ"} →
+          </a>
+        )
       }
       back={{
         href: href.articles(page ? "pages" : undefined),

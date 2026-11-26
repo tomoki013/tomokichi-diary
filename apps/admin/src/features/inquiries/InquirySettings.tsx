@@ -151,7 +151,11 @@ function TemplateForm({
         </div>
         <TextInput label="名前" value={name} onChange={setName} max={160} />
         <TextInput
-          label="件名（初回返信のときだけ使われる）"
+          label={
+            template?.role === "receipt"
+              ? "フォームからの自動受付メールの件名（任意）"
+              : "件名（初回返信のときだけ使われる）"
+          }
           value={subject}
           onChange={setSubject}
           max={200}
@@ -162,7 +166,11 @@ function TemplateForm({
           onChange={setBody}
           rows={8}
           max={20000}
-          hint="{{userName}} {{appName}} {{siteUrl}} が使えます"
+          hint={
+            template?.role === "receipt"
+              ? "受付番号は {{ticketNumber}} で差し込めます"
+              : "{{userName}} {{appName}} {{siteUrl}} が使えます"
+          }
         />
         <TextInput label="表示順" type="number" value={sortOrder} onChange={setSortOrder} />
         <Check label="使う" checked={active} onChange={setActive} />

@@ -14,7 +14,7 @@ import type { AuditContext } from "../audit.js";
 import { createApp } from "../app.js";
 import type { Env } from "../env.js";
 import { INQUIRY_PROJECT_SLUG } from "../inquiry.js";
-import { DEFAULT_TEMPLATES, OPENING_KEY, SUBJECT_KEY } from "../inquiry-templates.js";
+import { DEFAULT_TEMPLATES, OPENING_KEY, RECEIPT_KEY, SUBJECT_KEY } from "../inquiry-templates.js";
 
 /*
  * The admin's inquiry screen works this site's tickets through the platform's
@@ -614,6 +614,21 @@ describe("inquiry operations", () => {
     expect(created).toEqual([...DEFAULT_TEMPLATES.map((entry) => entry.key), SUBJECT_KEY]);
   });
 
+  it("reserves the project receipt for automatic intake and keeps its ticket number", async () => {
+    const { items } = await (await op("inquiry.templates")).json();
+    expect(items.find((item: { role: string }) => item.role === "receipt")).toMatchObject({
+      id: "tpl-inquiry_receipt_tomokichi_diary",
+      subject: null,
+      isActive: true,
+      body: expect.stringContaining("受付番号: {{ticketNumber}}"),
+    });
+    const response = await op("inquiry.applyTemplate", {
+      ticketId: "t1",
+      templateId: `tpl-${RECEIPT_KEY}`,
+    });
+    expect(response.status).toBe(404);
+  });
+
   it("moves an untouched first default to the current one, and keeps an edited one", async () => {
     const opening = DEFAULT_TEMPLATES.find((entry) => entry.key === OPENING_KEY)!;
     const thanks = DEFAULT_TEMPLATES.find((entry) => entry.key === "diary_thanks_feedback")!;
@@ -699,7 +714,7 @@ describe("inquiry operations", () => {
     expect(ids).not.toContain("tpl-carrier");
     expect(ids).toHaveLength(DEFAULT_TEMPLATES.length);
     expect(body.items[0]).toMatchObject({ id: `tpl-${OPENING_KEY}`, role: "opening" });
-    expect(body.items[1]).toMatchObject({ role: "reply" });
+    expect(body.items).toContainEqual(expect.objectContaining({ role: "reply" }));
     expect(body.items[0]).not.toHaveProperty("key");
   });
 
@@ -910,6 +925,7 @@ describe("the default reply templates", () => {
     const keys = DEFAULT_TEMPLATES.map((entry) => entry.key);
     expect(new Set(keys).size).toBe(keys.length);
     for (const entry of DEFAULT_TEMPLATES) {
+      if (entry.key === RECEIPT_KEY) continue;
       expect(entry.name, entry.key).toMatch(/^[^：]+：.+/);
       expect(entry.key, entry.key).toMatch(/^diary_[a-z_]+$/);
     }

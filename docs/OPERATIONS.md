@@ -456,11 +456,15 @@ A reply that still contains a `{{...}}` placeholder is refused, and a send the
 platform could not mail answers `INQUIRY_MAIL_FAILED`. The reader's answer
 joins the same ticket and moves it back to 対応中.
 
-お問い合わせ → 署名・テンプレート holds the signature and this site's reply
+問い合わせ → 返信の設定 holds the signature and this site's reply
 templates. The defaults (`apps/api/src/inquiry-templates.ts`: the greeting and
 replies for articles, requests, questions, work and press, photo use, sales
 pitches and closing a ticket) are created the first time the templates or a
 reply are opened, only when their key is missing, so edits in the admin win.
+After deploying the API, open 問い合わせ → 返信の設定 once to register
+the site's 自動受付メール. The platform uses the active
+`inquiry_receipt_tomokichi_diary` template for new form and email inquiries.
+Keep the `受付番号: {{ticketNumber}}` line when editing the receipt.
 The signature is set to the site's own the first time a reply is opened, if
 the project still signs with the deployment's Tomokichi Studio signature. A
 template fills `{{userName}}` with the name the reader typed and `{{appName}}`
