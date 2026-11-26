@@ -1,15 +1,9 @@
 import { createMcpHandler } from "agents/mcp/server";
-import {
-  analyticsOAuth,
-  analyticsOAuthEnv,
-  MCP_ORIGIN,
-  type AnalyticsEnv,
-} from "./analytics-auth.js";
+import { analyticsOAuth, analyticsOAuthEnv, type AnalyticsEnv } from "./analytics-auth.js";
 import { isOperatorPath, operatorFetch, type OperatorEnv } from "./operator-auth.js";
 import { createServer } from "./server.js";
+import { servedHere } from "./hosts.js";
 import evidenceAppHtml from "../ui-dist/index.html";
-
-const WORKERS_DEV_ORIGIN = "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev";
 export { OperatorConnections } from "./connections.js";
 
 const privateHeaders = (response: Response) => {
@@ -26,13 +20,7 @@ interface Env extends AnalyticsEnv, OperatorEnv {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    // Private connections (OAuth, consent, analytics, operator) answer only on
-    // mcp.tomokichidiary.com; the old workers.dev issuers and the admin consent
-    // proxy were retired on 2026-11-27. workers.dev keeps the public /mcp only.
-    const publicOnly = url.origin === WORKERS_DEV_ORIGIN;
-    if (url.origin !== MCP_ORIGIN && !publicOnly) return new Response("Not found", { status: 404 });
-    if (publicOnly && url.pathname !== "/mcp" && url.pathname !== "/health")
-      return new Response("Not found", { status: 404 });
+    if (!servedHere(url)) return new Response("Not found", { status: 404 });
     if (
       (url.pathname === "/analytics/oauth/register" ||
         url.pathname === "/operator/oauth/register") &&

@@ -4,13 +4,11 @@ vi.mock("cloudflare:workers", () => ({
     fetch() {}
   },
 }));
-vi.mock("../../ui-dist/index.html", () => ({ default: "<html></html>" }));
-const { default: worker } = await import("../index");
+import { servedHere } from "../hosts";
 
-it("answers private connections only on mcp.tomokichidiary.com", async () => {
-  const env = {} as never;
-  const ctx = {} as never;
-  const status = async (url: string) => (await worker.fetch(new Request(url), env, ctx)).status;
+const served = (url: string) => servedHere(new URL(url));
+
+it("answers private connections only on mcp.tomokichidiary.com", () => {
   // The retired consent paths and issuers: gone from the old host and the admin.
   for (const url of [
     "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/analytics-connect",
@@ -20,7 +18,8 @@ it("answers private connections only on mcp.tomokichidiary.com", async () => {
     "https://admin.tomokichidiary.com/analytics-connect",
     "https://admin.tomokichidiary.com/operator-connect",
   ])
-    expect(await status(url)).toBe(404);
-  // The public travel MCP stays on the old host.
-  expect(await status("https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/health")).toBe(200);
+    expect(served(url)).toBe(false);
+  // The public travel MCP stays on the old host; everything is served on the new one.
+  expect(served("https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/mcp")).toBe(true);
+  expect(served("https://mcp.tomokichidiary.com/analytics-connect")).toBe(true);
 });
