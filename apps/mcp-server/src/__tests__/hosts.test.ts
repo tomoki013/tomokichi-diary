@@ -6,8 +6,9 @@ vi.mock("cloudflare:workers", () => ({
 }));
 import { servedHere } from "../hosts";
 
+const served = (url: string) => servedHere(new URL(url));
+
 it("answers private connections only on mcp.tomokichidiary.com", () => {
-  const served = (url: string) => servedHere(new URL(url));
   // The retired consent paths and issuers: gone from the old host and the admin.
   for (const url of [
     "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/analytics-connect",

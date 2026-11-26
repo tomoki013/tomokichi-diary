@@ -1,10 +1,5 @@
 import { createMcpHandler } from "agents/mcp/server";
-import {
-  analyticsOAuth,
-  analyticsOAuthEnv,
-  MCP_ORIGIN,
-  type AnalyticsEnv,
-} from "./analytics-auth.js";
+import { analyticsOAuth, analyticsOAuthEnv, type AnalyticsEnv } from "./analytics-auth.js";
 import { isOperatorPath, operatorFetch, type OperatorEnv } from "./operator-auth.js";
 import { createServer } from "./server.js";
 import { servedHere } from "./hosts.js";
