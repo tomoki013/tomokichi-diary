@@ -16,6 +16,8 @@ export type AnalyticsGrain =
   | "ad_unit"
   /** Stored: visits by referrer, utm and new/returning, with the landing page as path. */
   | "entry"
+  /** Stored: GA4 outbound-link clicks, key = destination host, path = the page clicked on. */
+  | "outbound"
   /** Derived from entry rows when read; never stored. */
   | "channel"
   | "referrer"
@@ -85,6 +87,17 @@ export interface FactTotalRow {
   earlierClicks: number | null;
 }
 export interface AnalyticsStore {
+  queryPage?(
+    current: DateRange,
+    previous: DateRange,
+    articleId: string | undefined,
+    limit: number,
+    offset: number,
+  ): Promise<{
+    rows: AnalyticsRow[];
+    previous: AnalyticsRow[];
+    total: number;
+  }>;
   /** Bucketed sums for one grain; `keys` narrows to those lines. */
   factSeries?(
     grain: TrendGrain,
@@ -137,6 +150,14 @@ export function dates(range: DateRange): string[] {
 }
 export function previousRange(range: DateRange): DateRange {
   const length = dates(range).length;
+  if (
+    range.start.endsWith("-01") &&
+    range.start.slice(0, 7) === range.end.slice(0, 7) &&
+    shiftDate(range.end, 1).endsWith("-01")
+  ) {
+    const end = shiftDate(range.start, -1);
+    return { start: end.slice(0, 7) + "-01", end };
+  }
   return { start: shiftDate(range.start, -length), end: shiftDate(range.start, -1) };
 }
 export function normalizeAnalyticsUrl(value: string): string | null {
@@ -201,7 +222,8 @@ export function addMetrics(rows: readonly AnalyticsRow[]): Record<string, number
     }
   }
   if ("impressions" in result) {
-    result["ctr"] = ratio(result["clicks"] ?? 0, result["impressions"] ?? 0);
+    result["ctr"] =
+      result["clicks"] == null ? null : ratio(result["clicks"], result["impressions"] ?? 0);
     const weighted =
       result["positionSum"] != null
         ? ratio(result["positionSum"], result["impressions"] ?? 0)

@@ -1,15 +1,17 @@
 import {
-  analyticsDashboard,
   analyticsTrend,
+  analyticsView,
   bucketStart,
   completedRange,
   dateRange,
   shiftDate,
   TREND_MAX_DAYS,
-  type DashboardSection,
 } from "@tomokichi/application";
-import type { AnalyticsDashboardDto } from "@tomokichi/contracts";
-import { createAnalyticsStore } from "@tomokichi/infra-d1";
+import {
+  analyticsAffiliateHosts,
+  analyticsArticleLabels,
+  createAnalyticsStore,
+} from "@tomokichi/infra-d1";
 import { OpError, type Handlers, type OpScope } from "../scope.js";
 
 type Names =
@@ -18,37 +20,6 @@ type Names =
   | "analytics.trend"
   | "analytics.savedReports"
   | "analytics.recollect";
-
-interface ArticleLabel {
-  title: string | null;
-  path: string | null;
-  publishedAt: string | null;
-}
-/** Title, canonical path and first publication time for the given articles. */
-async function articleLabels(scope: OpScope, ids: readonly string[]) {
-  const labels = new Map<string, ArticleLabel>();
-  for (let at = 0; at < ids.length; at += 50) {
-    const part = ids.slice(at, at + 50);
-    const rows = await scope
-      .db()
-      .prepare(
-        `SELECT a.id,a.published_at,r.title,
-           (SELECT path FROM routes WHERE target_type='article' AND target_id=a.id AND is_canonical=1 LIMIT 1) AS path
-         FROM articles a LEFT JOIN article_revisions r ON r.id=a.published_revision_id
-         WHERE a.id IN (${part.map(() => "?").join(",")})`,
-      )
-      .bind(...part)
-      .all<{
-        id: string;
-        published_at: string | null;
-        title: string | null;
-        path: string | null;
-      }>();
-    for (const row of rows)
-      labels.set(row.id, { title: row.title, path: row.path, publishedAt: row.published_at });
-  }
-  return labels;
-}
 
 const TREND_NOTES = [
   "日付は GA4・Search Console とも米国太平洋時間。日本時間とは16〜17時間ずれる",
@@ -66,44 +37,25 @@ function rangeOf(start: string, end: string, maxDays: number, message: string) {
   }
 }
 
-interface Shape {
-  sections?: readonly DashboardSection[] | undefined;
+interface Paging {
   limit?: number | undefined;
   offset?: number | undefined;
 }
 
-async function dashboard(
+/** The one view, with articles named and affiliate clicks told apart; the same for the admin and ChatGPT. */
+function view(
   scope: OpScope,
   range: ReturnType<typeof dateRange>,
   articleId: string | undefined,
-  { sections, limit, offset }: Shape,
+  { limit, offset }: Paging,
 ) {
-  const result = (await analyticsDashboard(createAnalyticsStore(scope.db()), range, articleId, {
-    ...(sections ? { sections } : {}),
+  const db = scope.db();
+  return analyticsView(createAnalyticsStore(db), range, articleId, {
+    labels: (ids) => analyticsArticleLabels(db, ids),
+    affiliateHosts: () => analyticsAffiliateHosts(db),
     ...(limit !== undefined ? { limit } : {}),
     ...(offset !== undefined ? { offset } : {}),
-  })) as unknown as AnalyticsDashboardDto;
-  // An id alone tells the reader nothing: name each article and say when it went out.
-  if (result.articles?.length) {
-    const labels = await articleLabels(
-      scope,
-      result.articles.map((row) => row.articleId),
-    );
-    for (const row of result.articles) {
-      const label = labels.get(row.articleId);
-      row.title = label?.title ?? null;
-      row.publishedAt = label?.publishedAt ?? null;
-    }
-  }
-  const landings = result.acquisition?.landings.filter((row) => row.articleId);
-  if (landings?.length) {
-    const labels = await articleLabels(
-      scope,
-      landings.map((row) => row.articleId!),
-    );
-    for (const row of landings) row.title = labels.get(row.articleId!)?.title ?? null;
-  }
-  return result;
+  });
 }
 
 /** A completed week (Monday–Sunday) or month starting on `start`, or the latest one. */
@@ -135,15 +87,13 @@ function reportRange(period: "weekly" | "monthly", start: string | undefined) {
 }
 
 export const analyticsHandlers: Handlers<Names> = {
-  "analytics.report": async (scope, { period, start, includeSnapshot, ...shape }) => {
+  "analytics.report": async (scope, { period, start, ...paging }) => {
     const range = reportRange(period, start);
     const row = await scope
       .db()
-      .prepare(
-        "SELECT generated_at,payload FROM analytics_reports WHERE period=? AND start=? AND end=?",
-      )
+      .prepare("SELECT generated_at FROM analytics_reports WHERE period=? AND start=? AND end=?")
       .bind(period, range.start, range.end)
-      .first<{ generated_at: string; payload: string }>();
+      .first<{ generated_at: string }>();
     return {
       period,
       range,
@@ -152,20 +102,19 @@ export const analyticsHandlers: Handlers<Names> = {
       snapshot: {
         state: row ? "saved" : "not_generated",
         generatedAt: row?.generated_at ?? null,
-        ...(row && includeSnapshot ? { data: JSON.parse(row.payload) as unknown } : {}),
       },
-      dashboard: await dashboard(scope, range, undefined, shape),
+      dashboard: await view(scope, range, undefined, paging),
     };
   },
 
-  "analytics.dashboard": async (scope, { start, end, articleId, ...shape }) => ({
+  "analytics.dashboard": async (scope, { start, end, articleId, ...paging }) => ({
     generatedAt: new Date().toISOString(),
     timeZone: "Asia/Tokyo",
-    dashboard: await dashboard(
+    dashboard: await view(
       scope,
       rangeOf(start, end, 93, "期間は実在する日付で93日以内にしてください"),
       articleId,
-      shape,
+      paging,
     ),
   }),
 
@@ -186,8 +135,8 @@ export const analyticsHandlers: Handlers<Names> = {
     });
     const labels =
       by === "article"
-        ? await articleLabels(
-            scope,
+        ? await analyticsArticleLabels(
+            scope.db(),
             trend.series.map((line) => line.key),
           )
         : null;
@@ -214,7 +163,12 @@ export const analyticsHandlers: Handlers<Names> = {
     return {
       generatedAt: new Date().toISOString(),
       ...trend,
-      series: trend.series.map((line) => ({ ...line, ...labels?.get(line.key) })),
+      series: trend.series.map((line) => {
+        const label = labels?.get(line.key);
+        return label
+          ? { ...line, title: label.title, path: label.path, publishedAt: label.publishedAt }
+          : line;
+      }),
       ...(published ? { published } : {}),
       notes: TREND_NOTES,
     };

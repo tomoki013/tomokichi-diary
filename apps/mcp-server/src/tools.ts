@@ -172,7 +172,7 @@ export function createOperationServer(options: OperationServerOptions): McpServe
       {
         title: tool.title,
         description: spec.description,
-        inputSchema: shape,
+        inputSchema: z.object(shape),
         annotations: {
           readOnlyHint: read,
           ...(read ? {} : { destructiveHint: tool.destructive ?? false }),
@@ -181,8 +181,8 @@ export function createOperationServer(options: OperationServerOptions): McpServe
         },
         ...(options.meta ? { _meta: options.meta } : {}),
       },
-      async (args: Record<string, unknown>) => {
-        const input = { ...args };
+      async (args) => {
+        const input = { ...(args as Record<string, unknown>) };
         if (confirm) {
           const given = input[confirm.field];
           delete input[confirm.field];

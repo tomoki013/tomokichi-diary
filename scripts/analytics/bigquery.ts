@@ -43,7 +43,7 @@ export function queryConfig(name: SqlName, range: DateRange, extra: Record<strin
 }
 interface BqJob {
   jobReference: { jobId: string };
-  statistics?: { query?: { totalBytesProcessed?: string } };
+  statistics?: { query?: { totalBytesProcessed?: string; totalBytesBilled?: string } };
   status?: { state: string; errorResult?: unknown };
 }
 interface BqResult {
@@ -97,6 +97,11 @@ export class BigQuery {
       });
     }
     if (job.status.errorResult) throw new Error("ANALYTICS_QUERY_FAILED");
+    // The real figure from the finished job, so a separate dry run is not needed to watch scanning.
+    const stats = job.statistics?.query;
+    process.stdout.write(
+      `${name}: processed bytes ${stats?.totalBytesProcessed ?? "unknown"}, billed ${stats?.totalBytesBilled ?? "unknown"}\n`,
+    );
     const output: Record<string, string | null>[] = [];
     let pageToken: string | undefined;
     let resultFields: { name: string }[] = [];

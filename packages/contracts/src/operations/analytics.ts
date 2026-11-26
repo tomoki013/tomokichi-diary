@@ -1,8 +1,4 @@
-import {
-  ANALYTICS_SECTIONS,
-  type AnalyticsDashboardDto,
-  type AnalyticsListPageDto,
-} from "../analytics.js";
+import { type AnalyticsListPageDto, type AnalyticsViewDto } from "../analytics.js";
 import { v } from "../validation.js";
 import { plainDate } from "./fields.js";
 import { operation } from "./spec.js";
@@ -18,21 +14,17 @@ export interface AnalyticsReportResultDto {
   readonly range: AnalyticsRangeDto;
   readonly timeZone: "Asia/Tokyo";
   readonly generatedAt: string;
-  /**
-   * The report saved when the period closed. Its contents (`data`) come only
-   * with includeSnapshot: the current numbers are in `dashboard`.
-   */
+  /** Whether the report was saved when the period closed; the numbers below are always current. */
   readonly snapshot: {
     readonly state: "saved" | "not_generated";
     readonly generatedAt: string | null;
-    readonly data?: unknown;
   };
-  readonly dashboard: AnalyticsDashboardDto;
+  readonly dashboard: AnalyticsViewDto;
 }
 export interface AnalyticsDashboardResultDto {
   readonly generatedAt: string;
   readonly timeZone: "Asia/Tokyo";
-  readonly dashboard: AnalyticsDashboardDto;
+  readonly dashboard: AnalyticsViewDto;
 }
 export const TREND_GRAINS = ["site", "channel", "article", "search_type"] as const;
 export interface AnalyticsTrendSeriesDto {
@@ -83,19 +75,14 @@ export interface SavedReportDto {
   readonly generatedAt: string;
 }
 
-const sectionList = ANALYTICS_SECTIONS.join("・");
-/** What to return; shared by the report and the dashboard. */
+/** Paging for the two lists (articles and search queries); shared by the report and the dashboard. */
 const shape = {
-  sections: v.describe(
-    v.maybe(v.array(v.literalUnion(ANALYTICS_SECTIONS), { max: ANALYTICS_SECTIONS.length })),
-    `返す部分（${sectionList}）。主要指標（current・previous）と取得状況は常に返す。anchorTest は全記事のアンカー有無別の読了率と可視滞在時間。省略時は experiments と anchorTest 以外すべて。主要指標だけなら [] を渡す`,
-  ),
   limit: v.describe(
     v.maybe(v.number({ min: 1, max: 100, integer: true })),
-    "一覧（記事・ページ・検索クエリ・内訳・実験）ごとの最大件数。省略時は20。全件数は lists に入る",
+    "記事一覧・検索クエリ一覧それぞれの最大件数。省略時は20。全件数は各一覧の total",
   ),
   offset: v.describe(
-    v.maybe(v.number({ min: 0, max: 10000, integer: true })),
+    v.maybe(v.number({ min: 0, max: 100000, integer: true })),
     "一覧の何件目から返すか（次のページを読むとき）。省略時は0",
   ),
 };
@@ -111,13 +98,9 @@ export const analyticsOperations = {
         "過去の週（月曜日）または月（1日）を読むときの開始日。省略時は完了した直近の週・月。保存済みの期間は list_analytics_reports で分かる",
       ),
       ...shape,
-      includeSnapshot: v.describe(
-        v.maybe(v.boolean()),
-        "期間終了時に保存したレポートの中身も返す（集計の後追い修正を確かめるときだけ）。省略時は返さない",
-      ),
     }),
     description:
-      "週次/月次分析や定期分析をするときに使います。完了した週（月〜日）または月の最新集計と前期間比較を返します。sections で必要な部分だけに絞れます。データの無い取得元は null、一覧が limit で切れたときは lists に全件数が入ります。広告・記事の変更はできません。",
+      "週次/月次分析や定期分析をするときに使います。完了した週（月〜日）または月について、get_analytics_dashboard と同じ形（取得状況・全体の前期比・CHAGEE/非CHAGEE・記事別・検索クエリ・流入と端末の内訳・日別・アンカー広告A/B）を返します。広告・記事の変更はできません。",
     tool: { name: "get_analytics_report", title: "週次・月次の非公開分析データ" },
     target,
   }),
@@ -131,7 +114,7 @@ export const analyticsOperations = {
       ...shape,
     }),
     description:
-      "分析の根拠を詳しく調べるときに使います。両日を含む93日以内の期間、任意の記事IDについて流入・検索・広告収益・読書体験・取得状況・前期間比較を返します。acquisition は訪問を流入経路（検索・AI・SNS・直接など）・参照元・入口ページ別に分けたものです。sections で必要な部分だけに絞れます。記事を指定すると scope が article になり、検索は gsc_url に入って gsc_site は null です。生の訪問者ID、秘密、問い合わせは返しません。",
+      "期間・記事を指定して調べるときに使います。両日を含む93日以内の期間について、いつも同じ形で返します：sources（取得元ごとの取得日数・暫定・エラー）、totals（PV・期間ユーザー・検索クリック/表示/CTR/順位・AdSense・アフィリエイトのクリックと報酬、当期と前期）、themes（CHAGEE/非CHAGEE/分類不明のPVと構成比）、articles（記事別のPV・検索・末尾到達率・次記事回遊率と導線・AdSense・アフィリクリック、前期つき）、queries（URL×検索語、検索意図つき）、breakdowns（端末・流入経路・参照元・入口記事・検索種別、前期つき）、daily（日別）、anchorTest（アンカー広告A/Bの全体と端末別）、notes。記事行には端末別の読了・回遊、本文75%到達、可視秒、訪問の入口数も入ります。null は未取得で0ではありません。一覧は limit/offset で続きを読みます。articleId を指定するとその記事だけになります。生の訪問者ID、秘密、問い合わせは返しません。",
     tool: { name: "get_analytics_dashboard", title: "期間・記事別の非公開集計" },
     target,
   }),

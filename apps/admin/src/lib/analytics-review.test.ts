@@ -1,21 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { ArticleReadingDto } from "@tomokichi/contracts";
-import { reviewReasons } from "./analytics-review";
+import { reviewReasons, type ReviewedRow } from "./analytics-review";
 
-const row = (over: Partial<ArticleReadingDto>): ArticleReadingDto => ({
-  articleId: "a",
-  path: "/posts/a",
+const row = (over: Partial<ReviewedRow>): ReviewedRow => ({
   pageViews: 100,
   measuredViews: 90,
-  body75Rate: 0.4,
-  bodyEndRate: 0.3,
-  nextArticleRate: 0.1,
   clicks: 50,
   clicksPrevious: 50,
   impressions: 1000,
   position: 5,
   positionPrevious: 5,
-  earningsJPY: 10,
   ...over,
 });
 const now = Date.parse("2026-10-30T00:00:00Z");

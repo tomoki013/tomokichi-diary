@@ -144,7 +144,7 @@ function Tests({ data }: { data: MonetizationOverviewDto }) {
   const dashboard = useOp("analytics.dashboard", {
     start: reportDay(Number(days)),
     end: reportDay(1),
-    sections: ["anchorTest"],
+    limit: 1,
   });
   const active = data.settings.anchorExperimentEnabled ?? true;
   return (

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { Route } from "@tomokichi/domain";
+import type { SqlDatabase, SqlStatement } from "@tomokichi/infra-d1";
 import { requestJson } from "./http.js";
 export interface Statement {
   sql: string;
@@ -50,4 +51,24 @@ export async function loadRoutes(persist: boolean): Promise<Route[]> {
     isLegacy: Boolean(r.is_legacy),
     noindex: Boolean(r.noindex),
   })) as Route[];
+}
+/** The production database over the REST API, shaped like D1 so the API's own store and queries run here. */
+export function restDatabase(): SqlDatabase {
+  const statement = (sql: string, params: unknown[] = []): SqlStatement => ({
+    bind: (...values) => statement(sql, [...values]),
+    all: async <T>() => ((await d1<T>([{ sql, params }]))[0] ?? []) as T[],
+    first: async <T>() => (((await d1<T>([{ sql, params }]))[0] ?? [])[0] ?? null) as T | null,
+    run: async () => {
+      await d1([{ sql, params }]);
+    },
+  });
+  return {
+    prepare: (sql) => statement(sql),
+    batch: async () => {
+      throw new Error("ANALYTICS_READ_ONLY");
+    },
+    exec: async () => {
+      throw new Error("ANALYTICS_READ_ONLY");
+    },
+  };
 }

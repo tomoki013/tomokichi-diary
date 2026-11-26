@@ -14,5 +14,9 @@
     "../admin/src/lib/ad-standard.ts",
     "../admin/src/lib/ad-test.ts",
     "../admin/src/lib/draft.ts"
-  ]
+  ],
+  // This test runs the API's own analytics handler over node:sqlite to prove the
+  // MCP returns the admin's numbers unchanged; like apps/api's tests, it is
+  // type-checked by vitest rather than by this Workers-only project.
+  "exclude": ["src/__tests__/analytics.test.ts"]
 }

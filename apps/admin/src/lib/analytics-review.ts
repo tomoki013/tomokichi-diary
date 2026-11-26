@@ -1,4 +1,4 @@
-import type { ArticleReadingDto } from "@tomokichi/contracts";
+import type { AnalyticsArticleRowDto } from "@tomokichi/contracts";
 
 const number = (n: number | null) =>
   n === null ? "—" : n.toLocaleString("ja-JP", { maximumFractionDigits: 1 });
@@ -8,8 +8,18 @@ const number = (n: number | null) =>
  * author decides. Search falling or slipping, or a well-read article that has
  * not been touched in a year.
  */
+export type ReviewedRow = Pick<
+  AnalyticsArticleRowDto,
+  | "clicks"
+  | "clicksPrevious"
+  | "impressions"
+  | "position"
+  | "positionPrevious"
+  | "pageViews"
+  | "measuredViews"
+>;
 export function reviewReasons(
-  row: ArticleReadingDto,
+  row: ReviewedRow,
   updatedAt: string | null,
   now = Date.now(),
 ): string[] {
