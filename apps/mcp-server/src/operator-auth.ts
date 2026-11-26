@@ -4,14 +4,7 @@ import type { D1Like } from "@tomokichi/infra-d1";
 import { clientIdDigest, toolNameFromRequest } from "./request-context.js";
 import { createOperatorServer } from "./operator-server.js";
 import { operationCaller } from "./tools.js";
-import {
-  CONSENT_ORIGIN,
-  LEGACY_CONSENT_ORIGIN,
-  LEGACY_MCP_ORIGIN,
-  escapeHtml,
-  MCP_ORIGIN,
-  ownerIdentity,
-} from "./analytics-auth.js";
+import { CONSENT_ORIGIN, escapeHtml, MCP_ORIGIN, ownerIdentity } from "./analytics-auth.js";
 
 export const OPERATOR_READ = "operator:read";
 export const OPERATOR_WRITE = "operator:write";
@@ -19,11 +12,8 @@ export const OPERATOR_WRITE = "operator:write";
 // grants and tokens, so neither connection can be used as the other.
 export const OPERATOR_ISSUER = `${MCP_ORIGIN}/operator`;
 export const OPERATOR_RESOURCE = `${MCP_ORIGIN}/operator/mcp`;
-export const LEGACY_OPERATOR_ISSUER = `${LEGACY_MCP_ORIGIN}/operator`;
-export const LEGACY_OPERATOR_RESOURCE = `${LEGACY_MCP_ORIGIN}/operator/mcp`;
 const CONSENT_PATH = "/operator-connect";
-const NEW_KV_PREFIX = "operator-v2:";
-const LEGACY_KV_PREFIX = "operator:";
+export const OPERATOR_KV_PREFIX = "operator-v2:";
 
 export interface OperatorEnv {
   DB: D1Like;
@@ -65,9 +55,9 @@ export function prefixedKv(kv: KVNamespace, prefix: string): KVNamespace {
     },
   } as unknown as KVNamespace;
 }
-const oauthEnv = (env: OperatorEnv, prefix = NEW_KV_PREFIX): OperatorEnv => ({
+export const oauthEnv = (env: OperatorEnv): OperatorEnv => ({
   ...env,
-  OAUTH_KV: prefixedKv(env.OAUTH_KV, prefix),
+  OAUTH_KV: prefixedKv(env.OAUTH_KV, OPERATOR_KV_PREFIX),
 });
 
 export function authorizedOperator(
@@ -103,17 +93,11 @@ export const operatorAuthorization = createOperatorAuthorization(
   OPERATOR_RESOURCE,
   CONSENT_ORIGIN,
 );
-export const legacyOperatorAuthorization = createOperatorAuthorization(
-  LEGACY_OPERATOR_ISSUER,
-  LEGACY_OPERATOR_RESOURCE,
-  LEGACY_CONSENT_ORIGIN,
-);
 
 function createOperatorResource(
   authorization: typeof operatorAuthorization,
   issuer: string,
   resource: string,
-  prefix: string,
 ) {
   return new OAuthResourceServer<OperatorEnv, OperatorProps>({
     resourceMetadata: {
@@ -123,7 +107,7 @@ function createOperatorResource(
     },
     requiredScopes: [OPERATOR_READ],
     validateToken: (env) => (target, token) =>
-      authorization.validateToken<OperatorProps>(target, token, oauthEnv(env, prefix)),
+      authorization.validateToken<OperatorProps>(target, token, oauthEnv(env)),
     handler: {
       async fetch(request, env, ctx) {
         if (!authorizedOperator(env, ctx.props, ctx.auth.scope))
@@ -159,33 +143,20 @@ function createOperatorResource(
   });
 }
 
-/** The public resource accepts only tokens from the new issuer and its KV prefix. */
 export const operatorResource = createOperatorResource(
   operatorAuthorization,
   OPERATOR_ISSUER,
   OPERATOR_RESOURCE,
-  NEW_KV_PREFIX,
-);
-/** Old tokens remain usable only against the old workers.dev resource. */
-export const legacyOperatorResource = createOperatorResource(
-  legacyOperatorAuthorization,
-  LEGACY_OPERATOR_ISSUER,
-  LEGACY_OPERATOR_RESOURCE,
-  LEGACY_KV_PREFIX,
 );
 
 export async function operatorConsent(request: Request, env: OperatorEnv): Promise<Response> {
   const url = new URL(request.url);
-  const legacy = url.origin === LEGACY_CONSENT_ORIGIN;
-  // New grants are confirmed on the dedicated mcp.tomokichidiary.com Access app.
-  // The old admin proxy remains only for legacy workers.dev grants.
-  if ((url.origin !== CONSENT_ORIGIN && !legacy) || url.pathname !== CONSENT_PATH)
+  // Grants are confirmed on the dedicated mcp.tomokichidiary.com Access app.
+  if (url.origin !== CONSENT_ORIGIN || url.pathname !== CONSENT_PATH)
     return new Response("Not found", { status: 404 });
   const subject = await ownerIdentity(request, env, env.OPERATOR_OWNER_SUBJECT);
   if (!subject) return new Response("Owner login required", { status: 403 });
-  const authorization = legacy ? legacyOperatorAuthorization : operatorAuthorization;
-  const oauthEnvForRequest = oauthEnv(env, legacy ? LEGACY_KV_PREFIX : NEW_KV_PREFIX);
-  const oauth = authorization.getOAuthApi(oauthEnvForRequest);
+  const oauth = operatorAuthorization.getOAuthApi(oauthEnv(env));
   if (request.method === "GET") {
     const auth = await oauth.parseAuthRequest(request);
     if (
@@ -279,8 +250,7 @@ export async function operatorFetch(
 ): Promise<Response> {
   const url = new URL(request.url);
   const { pathname } = url;
-  const legacy = url.origin === LEGACY_CONSENT_ORIGIN || url.origin === LEGACY_MCP_ORIGIN;
-  if (!legacy && url.origin !== MCP_ORIGIN) return new Response("Not found", { status: 404 });
+  if (url.origin !== MCP_ORIGIN) return new Response("Not found", { status: 404 });
   if (pathname === CONSENT_PATH) {
     try {
       return await operatorConsent(request, env);
@@ -293,11 +263,6 @@ export async function operatorFetch(
     pathname.startsWith("/operator/mcp/") ||
     pathname.startsWith("/.well-known/oauth-protected-resource/")
   )
-    return (legacy ? legacyOperatorResource : operatorResource).fetch(request, env, ctx);
-  const authorization = legacy ? legacyOperatorAuthorization : operatorAuthorization;
-  return authorization.fetch(
-    request,
-    oauthEnv(env, legacy ? LEGACY_KV_PREFIX : NEW_KV_PREFIX),
-    ctx,
-  );
+    return operatorResource.fetch(request, env, ctx);
+  return operatorAuthorization.fetch(request, oauthEnv(env), ctx);
 }

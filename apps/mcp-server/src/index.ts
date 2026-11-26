@@ -2,15 +2,14 @@ import { createMcpHandler } from "agents/mcp/server";
 import {
   analyticsOAuth,
   analyticsOAuthEnv,
-  LEGACY_CONSENT_ORIGIN,
-  LEGACY_MCP_ORIGIN,
   MCP_ORIGIN,
-  legacyAnalyticsOAuth,
   type AnalyticsEnv,
 } from "./analytics-auth.js";
 import { isOperatorPath, operatorFetch, type OperatorEnv } from "./operator-auth.js";
 import { createServer } from "./server.js";
 import evidenceAppHtml from "../ui-dist/index.html";
+
+const WORKERS_DEV_ORIGIN = "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev";
 export { OperatorConnections } from "./connections.js";
 
 const privateHeaders = (response: Response) => {
@@ -27,10 +26,12 @@ interface Env extends AnalyticsEnv, OperatorEnv {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const consentProxy =
-      url.origin === LEGACY_CONSENT_ORIGIN &&
-      (url.pathname === "/analytics-connect" || url.pathname === "/operator-connect");
-    if (url.origin !== MCP_ORIGIN && url.origin !== LEGACY_MCP_ORIGIN && !consentProxy)
+    // Private connections (OAuth, consent, analytics, operator) answer only on
+    // mcp.tomokichidiary.com; the old workers.dev issuers and the admin consent
+    // proxy were retired on 2026-11-27. workers.dev keeps the public /mcp only.
+    const publicOnly = url.origin === WORKERS_DEV_ORIGIN;
+    if (url.origin !== MCP_ORIGIN && !publicOnly) return new Response("Not found", { status: 404 });
+    if (publicOnly && url.pathname !== "/mcp" && url.pathname !== "/health")
       return new Response("Not found", { status: 404 });
     if (
       (url.pathname === "/analytics/oauth/register" ||
@@ -58,10 +59,7 @@ export default {
       url.pathname === "/analytics-connect" ||
       url.pathname.startsWith("/.well-known/oauth-")
     ) {
-      const provider =
-        url.origin === LEGACY_MCP_ORIGIN || consentProxy ? legacyAnalyticsOAuth : analyticsOAuth;
-      const oauthEnv = provider === analyticsOAuth ? analyticsOAuthEnv(env) : env;
-      return privateHeaders(await provider.fetch(request, oauthEnv, ctx));
+      return privateHeaders(await analyticsOAuth.fetch(request, analyticsOAuthEnv(env), ctx));
     }
     if (url.pathname !== "/mcp") return new Response("Not found", { status: 404 });
     return createMcpHandler(() => createServer(env.SITE_ORIGIN, evidenceAppHtml))(

@@ -11,11 +11,8 @@ import { clientIdDigest, toolNameFromRequest } from "./request-context.js";
 import { operationCaller } from "./tools.js";
 
 export const MCP_ORIGIN = "https://mcp.tomokichidiary.com";
-export const LEGACY_MCP_ORIGIN = "https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev";
 export const ANALYTICS_RESOURCE = `${MCP_ORIGIN}/analytics/mcp`;
-export const LEGACY_ANALYTICS_RESOURCE = `${LEGACY_MCP_ORIGIN}/analytics/mcp`;
 export const CONSENT_ORIGIN = MCP_ORIGIN;
-export const LEGACY_CONSENT_ORIGIN = "https://admin.tomokichidiary.com";
 export const NEW_ANALYTICS_KV_PREFIX = "analytics-v2:";
 export interface AnalyticsEnv {
   DB: D1Like;
@@ -43,21 +40,13 @@ export async function ownerIdentity(
   if (!owner) return null;
   const assertion = request.headers.get("cf-access-jwt-assertion");
   if (!assertion) return null;
-  const origin = new URL(request.url).origin;
-  const response =
-    origin === MCP_ORIGIN
-      ? await env.CONSENT_IDENTITY?.fetch(
-          new Request("https://internal/mcp-consent-identity", {
-            headers: { "cf-access-jwt-assertion": assertion },
-          }),
-        )
-      : origin === LEGACY_CONSENT_ORIGIN
-        ? await env.API.fetch(
-            new Request("https://api.tomokichidiary.com/v1/admin/analytics/connection-identity", {
-              headers: { "cf-access-jwt-assertion": assertion },
-            }),
-          )
-        : null;
+  // Consent pages live only on mcp.tomokichidiary.com, behind their own Access app.
+  if (new URL(request.url).origin !== MCP_ORIGIN) return null;
+  const response = await env.CONSENT_IDENTITY?.fetch(
+    new Request("https://internal/mcp-consent-identity", {
+      headers: { "cf-access-jwt-assertion": assertion },
+    }),
+  );
   if (!response?.ok) return null;
   const { subject } = (await response.json()) as { subject?: string };
   return subject === owner ? subject : null;
@@ -73,10 +62,8 @@ export function authorizedOwner(env: AnalyticsEnv, props: unknown, scope: string
 }
 export async function consent(request: Request, env: AnalyticsEnv): Promise<Response> {
   const url = new URL(request.url);
-  const legacy = url.origin === LEGACY_CONSENT_ORIGIN;
-  // The new consent page is hosted on mcp.tomokichidiary.com and is separately
-  // Access-protected. Keep the former admin proxy alive for existing clients.
-  if ((url.origin !== CONSENT_ORIGIN && !legacy) || url.pathname !== "/analytics-connect")
+  // The consent page is hosted on mcp.tomokichidiary.com and is separately Access-protected.
+  if (url.origin !== CONSENT_ORIGIN || url.pathname !== "/analytics-connect")
     return new Response("Not found", { status: 404 });
   const subject = await ownerIdentity(request, env, env.ANALYTICS_OWNER_SUBJECT);
   if (!subject) return new Response("Owner login required", { status: 403 });
@@ -242,17 +229,10 @@ function createAnalyticsOptions(
   };
 }
 
-/** New issuer and KV namespace prefix. Existing workers.dev grants remain valid only there. */
-const newAnalyticsOptions = createAnalyticsOptions(MCP_ORIGIN, ANALYTICS_RESOURCE, CONSENT_ORIGIN);
-const legacyAnalyticsOptions = createAnalyticsOptions(
-  LEGACY_MCP_ORIGIN,
-  LEGACY_ANALYTICS_RESOURCE,
-  LEGACY_CONSENT_ORIGIN,
-);
-export const analyticsOAuth = new OAuthProvider<AnalyticsEnv>(newAnalyticsOptions);
-export const legacyAnalyticsOAuth = new OAuthProvider<AnalyticsEnv>(legacyAnalyticsOptions);
+/** The issuer, with its records under their own KV prefix. */
+const analyticsOptions = createAnalyticsOptions(MCP_ORIGIN, ANALYTICS_RESOURCE, CONSENT_ORIGIN);
+export const analyticsOAuth = new OAuthProvider<AnalyticsEnv>(analyticsOptions);
 
-export function analyticsOAuthHelpers(env: AnalyticsEnv, legacy = false): OAuthHelpers {
-  const selected = legacy ? legacyAnalyticsOptions : newAnalyticsOptions;
-  return getOAuthApi(selected, legacy ? env : analyticsOAuthEnv(env));
+export function analyticsOAuthHelpers(env: AnalyticsEnv): OAuthHelpers {
+  return getOAuthApi(analyticsOptions, analyticsOAuthEnv(env));
 }

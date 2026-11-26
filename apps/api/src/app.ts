@@ -320,17 +320,6 @@ export function createApp(options: AppOptions = {}) {
     });
   });
 
-  // Used only by the private MCP consent flow. A shared admin token is not a
-  // human identity and must never authorize an OAuth grant.
-  v1.get("/admin/analytics/connection-identity", (c) => {
-    const actor = c.get("adminActor");
-    if (!actor.startsWith("access:"))
-      return errorResponse(c, "API_UNAUTHORIZED", "Access login required", 401);
-    return c.json({ subject: actor.slice("access:".length) }, 200, {
-      "cache-control": "private, no-store",
-    });
-  });
-
   app.route("/v1", v1);
 
   app.notFound((c) => errorResponse(c, "API_NOT_FOUND", `no route for ${c.req.path}`, 404));

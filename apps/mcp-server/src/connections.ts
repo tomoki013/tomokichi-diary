@@ -2,20 +2,13 @@ import { WorkerEntrypoint } from "cloudflare:workers";
 import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import { fromD1 } from "@tomokichi/infra-d1";
 import { analyticsOAuthHelpers, type AnalyticsEnv } from "./analytics-auth.js";
-import {
-  legacyOperatorAuthorization,
-  operatorAuthorization,
-  prefixedKv,
-  type OperatorEnv,
-} from "./operator-auth.js";
+import { operatorAuthorization, oauthEnv, type OperatorEnv } from "./operator-auth.js";
 
 const API_CALLER = "tomokichi-diary-api";
-const OPERATOR_NEW_PREFIX = "operator-v2:";
-const OPERATOR_OLD_PREFIX = "operator:";
 interface ConnectionEnv extends AnalyticsEnv, OperatorEnv {}
 interface ConnectionRow {
   id: string;
-  issuer: "analytics" | "analytics-legacy" | "operator" | "operator-legacy";
+  issuer: "analytics" | "operator";
   clientId: string;
   clientName: string;
   clientTrust: "confirmed" | "self-asserted" | "unknown";
@@ -58,10 +51,9 @@ export class OperatorConnections extends WorkerEntrypoint<ConnectionEnv> {
       const items = await this.listConnections();
       return Response.json({ items }, { headers: { "cache-control": "no-store" } });
     }
-    const match =
-      /^\/connections\/(analytics|analytics-legacy|operator|operator-legacy)\/([A-Za-z0-9_-]{1,80})\/revoke$/.exec(
-        url.pathname,
-      );
+    const match = /^\/connections\/(analytics|operator)\/([A-Za-z0-9_-]{1,80})\/revoke$/.exec(
+      url.pathname,
+    );
     if (match && request.method === "POST") {
       const result = await this.revoke(match[1] as ConnectionRow["issuer"], match[2]!);
       return result
@@ -80,39 +72,19 @@ export class OperatorConnections extends WorkerEntrypoint<ConnectionEnv> {
     }[] = [];
     if (this.env.OPERATOR_OWNER_SUBJECT) {
       const userId = encodeURIComponent(this.env.OPERATOR_OWNER_SUBJECT);
-      sources.push(
-        {
-          issuer: "operator",
-          api: operatorAuthorization.getOAuthApi({
-            ...this.env,
-            OAUTH_KV: prefixedKv(this.env.OAUTH_KV, OPERATOR_NEW_PREFIX),
-          }),
-          userId,
-        },
-        {
-          issuer: "operator-legacy",
-          api: legacyOperatorAuthorization.getOAuthApi({
-            ...this.env,
-            OAUTH_KV: prefixedKv(this.env.OAUTH_KV, OPERATOR_OLD_PREFIX),
-          }),
-          userId,
-        },
-      );
+      sources.push({
+        issuer: "operator",
+        api: operatorAuthorization.getOAuthApi(oauthEnv(this.env)),
+        userId,
+      });
     }
     if (this.env.ANALYTICS_OWNER_SUBJECT) {
       const analyticsUserId = encodeURIComponent(this.env.ANALYTICS_OWNER_SUBJECT);
-      sources.push(
-        {
-          issuer: "analytics",
-          api: analyticsOAuthHelpers(this.env),
-          userId: analyticsUserId,
-        },
-        {
-          issuer: "analytics-legacy",
-          api: analyticsOAuthHelpers(this.env, true),
-          userId: analyticsUserId,
-        },
-      );
+      sources.push({
+        issuer: "analytics",
+        api: analyticsOAuthHelpers(this.env),
+        userId: analyticsUserId,
+      });
     }
     const db = fromD1(this.env.DB);
     for (const source of sources) {
@@ -167,31 +139,14 @@ export class OperatorConnections extends WorkerEntrypoint<ConnectionEnv> {
   }
 
   private async revoke(issuer: ConnectionRow["issuer"], grantId: string): Promise<boolean> {
-    const owner = issuer.startsWith("analytics")
-      ? this.env.ANALYTICS_OWNER_SUBJECT
-      : this.env.OPERATOR_OWNER_SUBJECT;
+    const owner =
+      issuer === "analytics" ? this.env.ANALYTICS_OWNER_SUBJECT : this.env.OPERATOR_OWNER_SUBJECT;
     if (!owner) return false;
     const userId = encodeURIComponent(owner);
-    let api: OAuthHelpers;
-    switch (issuer) {
-      case "analytics":
-        api = analyticsOAuthHelpers(this.env);
-        break;
-      case "analytics-legacy":
-        api = analyticsOAuthHelpers(this.env, true);
-        break;
-      case "operator":
-        api = operatorAuthorization.getOAuthApi({
-          ...this.env,
-          OAUTH_KV: prefixedKv(this.env.OAUTH_KV, OPERATOR_NEW_PREFIX),
-        });
-        break;
-      default:
-        api = legacyOperatorAuthorization.getOAuthApi({
-          ...this.env,
-          OAUTH_KV: prefixedKv(this.env.OAUTH_KV, OPERATOR_OLD_PREFIX),
-        });
-    }
+    const api: OAuthHelpers =
+      issuer === "analytics"
+        ? analyticsOAuthHelpers(this.env)
+        : operatorAuthorization.getOAuthApi(oauthEnv(this.env));
     const grants = await allGrants(api, userId);
     if (!grants.some((grant) => grant.id === grantId)) return false;
     await api.revokeGrant(grantId, userId);

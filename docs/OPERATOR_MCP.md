@@ -63,13 +63,13 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 同じツールを MCP Worker の `/operator/mcp` でも提供します。仕組みは分析用 `/analytics/mcp`（[analytics/CHATGPT.md](analytics/CHATGPT.md)）と同じで、本人だけが OAuth で接続できます。
 
 - Server URL: `https://mcp.tomokichidiary.com/operator/mcp`
-- 認証: OAuth（DCR・PKCE S256）。新 issuer は `https://mcp.tomokichidiary.com/operator`。新旧Issuerのclient・grant・tokenは共有KVの `operator-v2:` / `operator:` に分離し、相互利用できません。
+- 認証: OAuth（DCR・PKCE S256）。issuer は `https://mcp.tomokichidiary.com/operator`。client・grant・tokenは共有KVの `operator-v2:` に置き、分析の接続とは相互利用できません。
 - 許可できるのは MCP Worker secret `OPERATOR_OWNER_SUBJECT`（本人の検証済み Cloudflare Access subject）と一致する人だけ。許可画面は `https://mcp.tomokichidiary.com/operator-connect` で、専用Cloudflare AccessアプリのJWTを別Audienceで検証します。
 - スコープ: `operator:read`（読み取りツールのみ表示）と `operator:write`（書き込みツールも表示）。どちらにするかは許可画面のボタンで本人が選びます。
 - **共有の `ADMIN_TOKEN` は MCP Worker に置きません。** ツールは API Worker の名前付き入口 `AdminOperator` を Service Binding（`OPERATOR_API`）で呼びます。この入口には公開URLがなく、`caller` が MCP Worker の場合だけ操作の入口（`/v1/admin/ops/*`）へ到達できます。どの操作を実行できるかは、接続の種類（管理か分析か）と書き込み権限から API が判定します。D1にはOAuth主体、ハッシュ化したclient_id、自己申告名、MCPツール名、操作名を記録します。
 - アクセストークンは1時間、接続（refresh）は最大30日。期限が切れたら ChatGPT から再接続します。
 
-移行期間中は旧URL `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/operator/mcp` も稼働します。旧IssuerのGrantは旧URLにだけ有効で、新URLではOAuthを再認可してください。旧Workerの許可画面 `https://admin.tomokichidiary.com/operator-connect` は既存接続のために残します。
+旧URL `https://tomokichi-diary-mcp.tomoki-ttttt.workers.dev/operator/mcp` と、管理画面（admin.tomokichidiary.com）経由の許可画面は2026-11-27に廃止しました。接続と許可はすべて `https://mcp.tomokichidiary.com` で行います。workers.dev には公開の旅行情報 `/mcp` だけが残ります。
 
 ### 接続手順
 
@@ -98,7 +98,7 @@ claude mcp add tomokichi-diary --env TOMOKICHI_API_URL=https://api.tomokichidiar
 | 定期タスク | 週次・月次の実行履歴に、新URLへ移した接続でのツール呼び出しが残る                                                                             |
 | 既存機能   | 旧URLの公開MCPと既存Grant、公開サイトの検索・画像、管理画面、ローカルstdio Operatorを使える                                                   |
 
-新接続だけに問題がある場合は旧URLに戻します。旧トークンは旧Issuerのリソースで使えます。
+旧URLは廃止済みのため、新接続に問題がある場合はMCP Workerを直前のバージョンに戻して調べます。
 
 Workerも移行前へ戻す場合は、管理画面、MCPの初回先行バージョン、移行前のAPI、移行前のMCPの順で戻します。先行バージョンに戻すとAPIの新しい `McpConsentIdentity` への参照が外れ、移行前のAPIに戻すとMCPの新しい `OperatorConnections` への参照が外れます。D1の監査テーブルと新旧のOAuth KVは残し、旧接続の読み取りを確認します。Workerのバージョンを戻した後、新ドメインのルートとAccess設定も別途確認します。[Cloudflare Workersの切り戻し](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/)
 
