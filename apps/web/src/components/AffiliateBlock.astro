@@ -9,6 +9,7 @@ const { placement: p, inline = p.format === "text" } = Astro.props;
 
 <aside
   class:list={["affiliate-block", { "affiliate-block--text": inline }]}
+  data-affiliate-placement={p.key}
   aria-label={`広告・${p.provider}の予約案内`}
 >
   {inline ? (

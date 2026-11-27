@@ -12,7 +12,11 @@ import {
   type MonetizationSettings,
 } from "@tomokichi/domain";
 import type { AppContext } from "../../context.js";
-import { isAffiliateUrl, isAdExperimentForArticle } from "@tomokichi/contracts";
+import {
+  isAffiliateUrl,
+  isAdExperimentForArticle,
+  undisclosedAffiliateLinks,
+} from "@tomokichi/contracts";
 const invalid = (message: string) => err({ code: "MONETIZATION_INVALID" as const, message });
 export async function articleMonetization(ctx: AppContext, id: ArticleId) {
   const article = await ctx.repos.articles.findById(id);
@@ -64,12 +68,11 @@ export async function saveArticleMonetization(
 }
 export async function saveMonetizationSettings(ctx: AppContext, settings: MonetizationSettings) {
   if (
-    settings.maxAds !== 1 ||
     !settings.adUnits.some((unit) => unit.id === "7152502134") ||
     new Set(settings.adUnits.map((u) => u.id)).size !== settings.adUnits.length
   )
     return invalid(
-      "機能フラグ・広告ユニット・上限を確認してください。既存記事用ユニット7152502134は維持してください",
+      "広告ユニットの重複を確認してください。既存記事用ユニット7152502134は維持してください",
     );
   const configs = await ctx.repos.monetization.listArticles();
   if (
@@ -214,14 +217,16 @@ export async function validateArticleMonetization(
     : null;
   const config = await ctx.repos.monetization.article(id);
   const settings = await ctx.repos.monetization.settings();
-  const errors = validateMonetization(config, revision?.bodyMarkdown ?? "", settings);
-  errors.push(
-    ...unbackedInlineAffiliates(
-      config,
-      await ctx.repos.monetization.offers(),
-      revision?.bodyMarkdown ?? "",
-    ),
-  );
+  const markdown = revision?.bodyMarkdown ?? "";
+  const errors = validateMonetization(config, markdown, settings);
+  errors.push(...unbackedInlineAffiliates(config, await ctx.repos.monetization.offers(), markdown));
+  if (undisclosedAffiliateLinks(markdown).length)
+    errors.push({
+      code: "MONETIZATION_INVALID",
+      field: "monetization",
+      message:
+        '本文のアフィリエイトリンクは、段落内に [リンク名](URL "広告") の形式で記載してください。',
+    });
   const experiment =
     override ??
     (await ctx.repos.monetization.experiments()).find((e) => e.id === config.experimentId);

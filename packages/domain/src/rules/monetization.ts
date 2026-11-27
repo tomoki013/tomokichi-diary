@@ -24,7 +24,6 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   experimentsEnabled: false,
   anchorExperimentEnabled: true,
   affiliateEnabled: false,
-  maxAds: 1,
   adUnits: [{ id: "7152502134", name: "記事末尾 300×250" }],
   updatedAt: null,
 };
@@ -32,7 +31,6 @@ export function defaultArticleMonetization(): ArticleMonetization {
   return {
     mode: "ads",
     adsEnabled: true,
-    maxAds: 1,
     experimentId: null,
     placements: [
       {
@@ -71,7 +69,6 @@ export function validateMonetization(
   if (new Set(keys).size !== keys.length) reject("本文の収益化マーカーが重複しています");
   if (new Set(config.placements.map((p) => p.key)).size !== config.placements.length)
     reject("配置キーが重複しています");
-  if (config.maxAds !== 1) reject("広告は1記事1枠までです");
   if (config.placements.filter((p) => p.kind === "affiliate" && p.status === "ready").length > 2)
     reject("アフィリエイト紹介は1記事2件までです");
   // One fixed ad after the story, plus at most one the author places in the body.
@@ -154,6 +151,7 @@ export function publicMonetization(
                     description: o.description,
                     url: o.url,
                     format: o.format as "text" | "booking_card",
+                    trackingOfferId: o.id,
                   },
                 ]
               : [];

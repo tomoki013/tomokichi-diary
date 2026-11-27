@@ -202,6 +202,19 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
   <AdAssignment plan={adPlan} />
   <article
     class="article-page"
+    data-article-slug={article.slug}
+    data-affiliate-tracking={
+      affiliates.length
+        ? JSON.stringify(
+            affiliates.map(({ key, provider, url, trackingOfferId }) => ({
+              key,
+              provider,
+              url,
+              trackingOfferId,
+            })),
+          )
+        : undefined
+    }
     data-ad-layout={adPlan.layout}
     data-ad-key={adPlan.marker ? "standard" : "article-end"}
   >
@@ -446,9 +459,11 @@ const knowledgeCatalog = buildKnowledgeCatalog(snapshot);
 </BaseLayout>
 
 <script>
+  import { mountArticleLinkTracking } from "../lib/articleTracking";
   import { mountReaderMeasurement } from "../lib/readerMeasurement";
   import { markRead } from "../lib/readMarks";
   mountReaderMeasurement();
+  mountArticleLinkTracking();
   // Read means the last paragraph came into view.
   const last = document.querySelector(".article-content > :last-child");
   if (last && "IntersectionObserver" in window) {

@@ -82,7 +82,6 @@ function Editor({
           config: monetization.data.articles.find((a) => a.articleId === article.id)?.config ?? {
             mode: "ads",
             adsEnabled: true,
-            maxAds: 1,
             experimentId: null,
             placements: [],
             updatedAt: null,

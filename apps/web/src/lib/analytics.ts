@@ -9,9 +9,8 @@ declare global {
 
 /**
  * One semantic browser boundary; the analytics vendor plugs in here, not in
- * components. GA4 (`gtag`) is only defined on the production hostname (see
- * `BaseLayout.astro`), so previews and local builds dispatch the DOM event and
- * nothing else.
+ * components. GA4 (`gtag`) is defined on production and on the explicitly
+ * configured DebugView host. Other builds only dispatch the DOM event.
  */
 export function trackSemanticEvent(event: SemanticEvent): void {
   globalThis.dispatchEvent(new CustomEvent("tomokichi:analytics", { detail: event }));

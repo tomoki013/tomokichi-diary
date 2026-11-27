@@ -1,5 +1,6 @@
 import Slugger from "github-slugger";
 import { Marked } from "marked";
+import { isAffiliateUrl } from "./monetization.js";
 
 /**
  * The one Markdown renderer for article bodies. The public site and the admin
@@ -306,6 +307,26 @@ export const INLINE_AFFILIATE_TITLE = "広告";
 const DISCLOSURE =
   '<small class="affiliate-inline-disclosure">広告：このリンク経由の予約で当サイトが報酬を受け取る場合があります。料金・条件は予約先でご確認ください。</small>';
 
+/** Find tracking links that need the article's disclosure syntax before publishing. */
+export function undisclosedAffiliateLinks(markdown: string): string[] {
+  const html = renderArticleMarkdown(markdown);
+  const supported = html.replace(/<(p|li)\b[^>]*>[\s\S]*?<\/\1>/gi, (block) =>
+    block.replace(/<a\b[^>]*>/gi, (tag) => {
+      const href = /\shref="[^"]+"/i.test(tag);
+      const title = /\stitle="([^"]*)"/i.exec(tag)?.[1];
+      const rel = /\srel="([^"]*)"/i.exec(tag)?.[1] ?? "";
+      return href && (title === INLINE_AFFILIATE_TITLE || rel.split(/\s+/).includes("sponsored"))
+        ? ""
+        : tag;
+    }),
+  );
+  return [...supported.matchAll(/<a\b[^>]*\shref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/gi)]
+    .map((match) => (match[1] ?? match[2] ?? match[3]!).replaceAll("&amp;", "&"))
+    .filter((url) =>
+      ["Trip.com", "Agoda", "Omio"].some((provider) => isAffiliateUrl(provider, url)),
+    );
+}
+
 /**
  * Inline affiliate links use the same approved placements and kill switch as
  * the cards: a link to a URL not in `allowedUrls` keeps only its label.
@@ -316,21 +337,19 @@ export function enhanceInlineAffiliates(html: string, allowedUrls: readonly stri
   let approvedLinks = 0;
   const result = html.replace(/<(p|li)\b[^>]*>[\s\S]*?<\/\1>/gi, (block) => {
     let kept = 0;
-    let titled = 0;
     const transformed = block.replace(
       /<a\b([^>]*)>([\s\S]*?)<\/a>/gi,
       (anchor, attributes: string, label: string) => {
-        const href = /\bhref="([^"]*)"/i.exec(attributes)?.[1];
-        const title = /\btitle="([^"]*)"/i.exec(attributes)?.[1];
+        const href = /\shref="([^"]*)"/i.exec(attributes)?.[1];
+        const title = /\stitle="([^"]*)"/i.exec(attributes)?.[1];
         if (title === INLINE_AFFILIATE_TITLE) {
           if (!href || !allowed.has(href)) return label;
           approvedLinks++;
           kept++;
-          titled++;
           return `<a href="${href}" rel="sponsored nofollow noopener">${label}</a>`;
         }
         // Bodies published before the title marker carry the rel and the note as HTML.
-        const rel = /\brel="([^"]*)"/i.exec(attributes)?.[1] ?? "";
+        const rel = /\srel="([^"]*)"/i.exec(attributes)?.[1] ?? "";
         if (!rel.split(/\s+/).includes("sponsored")) return anchor;
         if (!href || !allowed.has(href)) return label;
         approvedLinks++;
@@ -339,7 +358,9 @@ export function enhanceInlineAffiliates(html: string, allowedUrls: readonly stri
       },
     );
     if (!kept) return transformed.replace(disclosure, "");
-    if (!titled || transformed.includes('class="affiliate-inline-disclosure"')) return transformed;
+    const existing = [...transformed.matchAll(disclosure)];
+    if (existing.some(([note]) => /広告|PR|プロモーション/.test(note.replace(/<[^>]+>/g, ""))))
+      return transformed;
     return transformed.replace(/<\/(p|li)>$/i, `\n${DISCLOSURE}</$1>`);
   });
   return approvedLinks ? result : result.replace(disclosure, "");

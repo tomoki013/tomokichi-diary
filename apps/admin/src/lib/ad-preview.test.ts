@@ -19,7 +19,6 @@ const end = {
 const config = (patch: Partial<ArticleMonetization> = {}): ArticleMonetization => ({
   mode: "hybrid",
   adsEnabled: true,
-  maxAds: 1,
   experimentId: null,
   placements: [
     end,

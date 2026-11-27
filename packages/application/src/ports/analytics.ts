@@ -14,6 +14,25 @@ export type SemanticEvent =
       readonly page_location?: string;
     }
   | { readonly name: "article_published"; readonly articleId: string }
+  | {
+      readonly name: "internal_link_click";
+      readonly source_slug: string;
+      readonly destination_slug: string;
+      readonly body_position: "intro" | "middle" | "end";
+    }
+  | {
+      readonly name: "affiliate_click";
+      readonly source_slug: string;
+      readonly provider: string;
+      readonly offer_id?: string;
+      readonly placement_id: string;
+    }
+  | {
+      readonly name: "ad_slot_rendered";
+      readonly source_slug: string;
+      readonly slot_type: "body_slot" | "article_end" | "anchor";
+      readonly ad_status: "filled" | "unfilled" | "unfill-optimized" | "script_error";
+    }
   | { readonly name: "knowledge_saved"; readonly articleId: string; readonly factCount: number }
   | {
       readonly name: "firsthand_fact_verified";
