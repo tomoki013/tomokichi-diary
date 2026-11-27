@@ -1,4 +1,5 @@
 import { ANCHOR_AD_EXPERIMENT } from "@tomokichi/contracts";
+import { trackAdSlotRendered } from "./articleTracking";
 import { measureReader } from "./readerMeasurement";
 
 declare global {
@@ -25,13 +26,22 @@ export function mountArticleAd(
   const measure = (name: Parameters<typeof measureReader>[0]) => measureReader(name, 1, placement);
   measure("ad_eligible");
   let statusSent = false;
+  let resultSent = false;
   const status = new browser.MutationObserver(() => {
     const value = ad.dataset["adStatus"];
-    if (statusSent || !["filled", "unfilled"].includes(value ?? "")) return;
-    statusSent = true;
-    measure(value === "filled" ? "ad_filled" : "ad_unfilled");
-    status.disconnect();
-    updateView();
+    if (
+      !resultSent &&
+      (value === "filled" || value === "unfilled" || value === "unfill-optimized")
+    ) {
+      resultSent = true;
+      trackAdSlotRendered(doc, placement, value);
+    }
+    if (!statusSent && (value === "filled" || value === "unfilled")) {
+      statusSent = true;
+      measure(value === "filled" ? "ad_filled" : "ad_unfilled");
+      status.disconnect();
+      updateView();
+    }
   });
   status.observe(ad, { attributes: true, attributeFilter: ["data-ad-status"] });
   let halfVisible = false,
@@ -104,7 +114,10 @@ export function mountArticleAd(
           browser.adsbygoogle ??= [];
           browser.adsbygoogle.push({});
         },
-        () => measure("ad_script_error"),
+        () => {
+          measure("ad_script_error");
+          if (!resultSent) trackAdSlotRendered(doc, placement, "script_error");
+        },
       );
     },
     { rootMargin: "200px 0px", threshold: 0 },
@@ -131,11 +144,38 @@ export function mountArticleAds(
   const slots = [...doc.querySelectorAll<HTMLElement>("[data-article-ad]")];
   const client = slots[0]?.querySelector<HTMLElement>(".article-ad__unit")?.dataset["adClient"];
   if (client && doc.documentElement.dataset["adExperiment"] === ANCHOR_AD_EXPERIMENT) {
-    const load = () => loadAdSense(doc, client);
+    const load = () => {
+      if (doc.documentElement.dataset["adVariant"] === "B") observeAnchorResult(doc, browser);
+      loadAdSense(doc, client);
+    };
     if (doc.readyState === "complete") load();
     else browser.addEventListener("load", load, { once: true });
   }
   for (const slot of slots) mountArticleAd(slot, doc, browser);
+}
+
+const anchorObservers = new WeakSet<Document>();
+function observeAnchorResult(doc: Document, browser: typeof globalThis): void {
+  if (anchorObservers.has(doc) || !browser.MutationObserver || !doc.body) return;
+  anchorObservers.add(doc);
+  const selector = 'ins.adsbygoogle[data-anchor-status], ins.adsbygoogle[data-ad-format="anchor"]';
+  const check = () => {
+    for (const anchor of doc.querySelectorAll<HTMLElement>(selector)) {
+      const value = anchor.dataset["adStatus"];
+      if (value !== "filled" && value !== "unfilled" && value !== "unfill-optimized") continue;
+      trackAdSlotRendered(doc, "anchor", value);
+      observer.disconnect();
+      break;
+    }
+  };
+  const observer = new browser.MutationObserver(check);
+  observer.observe(doc.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["data-ad-status", "data-anchor-status"],
+  });
+  check();
 }
 
 const loaders = new WeakMap<

@@ -31,6 +31,8 @@ const { metadata, jsonLd = [], width = "wide", headerOverlay = false } = Astro.p
 const structuredData = jsonLd.filter((node) => node !== null);
 const suggestions = searchSuggestions();
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const debugHostname = process.env.PUBLIC_GA_DEBUG_HOSTNAME;
+const debugMeasurementId = process.env.PUBLIC_GA_DEBUG_MEASUREMENT_ID;
 
 const primaryNav = [
   { href: "/", label: "Home" },
@@ -117,22 +119,32 @@ const socialLinks = [
         // Storage refused or unreadable: the page simply shows no shortcuts.
       }
     </script>
-    {/* GA4, on the production hostname only. The queue is defined up front
+    {/* The queue is defined up front
         so events fired early are kept; gtag.js itself is fetched once the page
         has loaded and the main thread is idle, so it never competes with the
         page for bandwidth or blocks first paint. */}
-    <script is:inline define:vars={{ gaMeasurementId, analyticsHostnames }}>
+    <script
+      is:inline
+      define:vars={{ gaMeasurementId, analyticsHostnames, debugHostname, debugMeasurementId }}
+    >
+      const productionAnalytics = analyticsHostnames.includes(location.hostname);
+      const debugAnalytics =
+        !productionAnalytics &&
+        location.hostname === debugHostname &&
+        debugMeasurementId !== gaMeasurementId &&
+        /^G-[A-Z0-9]+$/.test(debugMeasurementId ?? "");
+      const measurementId = productionAnalytics ? gaMeasurementId : debugMeasurementId;
       function loadGtag() {
         const script = document.createElement("script");
         script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
         document.head.append(script);
       }
       function loadGtagWhenIdle() {
         if ("requestIdleCallback" in window) requestIdleCallback(loadGtag, { timeout: 4000 });
         else setTimeout(loadGtag, 1500);
       }
-      if (analyticsHostnames.includes(location.hostname)) {
+      if (productionAnalytics || debugAnalytics) {
         window.dataLayer = window.dataLayer || [];
         window.gtag = function () {
           window.dataLayer.push(arguments);
@@ -150,7 +162,11 @@ const socialLinks = [
         } catch {
           // Storage refused: count the visit as a reader's.
         }
-        window.gtag("config", gaMeasurementId, internal ? { traffic_type: "internal" } : {});
+        window.gtag(
+          "config",
+          measurementId,
+          debugAnalytics ? { debug_mode: true } : internal ? { traffic_type: "internal" } : {},
+        );
         if (document.readyState === "complete") loadGtagWhenIdle();
         else addEventListener("load", loadGtagWhenIdle, { once: true });
       }

@@ -7,7 +7,6 @@ export interface MonetizationSettings {
   /** Site-wide anchor test. Settings saved before its introduction default to on. */
   anchorExperimentEnabled?: boolean;
   affiliateEnabled: boolean;
-  maxAds: 1;
   adUnits: { id: string; name: string }[];
   updatedAt: string | null;
 }
@@ -22,7 +21,6 @@ export interface MonetizationPlacement {
 export interface ArticleMonetization {
   mode: "none" | "ads" | "affiliate" | "hybrid";
   adsEnabled: boolean;
-  maxAds: 1;
   experimentId: string | null;
   placements: MonetizationPlacement[];
   updatedAt: string | null;
@@ -71,8 +69,10 @@ export interface PublicAffiliatePlacement {
   description: string;
   url: string;
   format: "text" | "booking_card";
+  /** Opaque offer ID used to attribute clicks on a published placement. */
+  trackingOfferId?: string;
 }
-/** Public presentation only. Never includes offer IDs, notes or unapproved offers. */
+/** Published presentation and click attribution only. */
 export interface PublicMonetization {
   affiliates?: PublicAffiliatePlacement[];
   articleId: string;
@@ -130,7 +130,6 @@ export const placementSchema = v.object({
 export const articleMonetizationSchema: Validator<ArticleMonetization> = v.object({
   mode: v.literalUnion(["none", "ads", "affiliate", "hybrid"]),
   adsEnabled: v.boolean(),
-  maxAds: v.number({ min: 1, max: 1, integer: true }),
   experimentId: v.nullable(key),
   placements: v.array(placementSchema, { max: 30 }),
   updatedAt: v.optional(timestamp, null),
@@ -141,7 +140,6 @@ export const monetizationSettingsSchema = v.object({
   experimentsEnabled: v.boolean(),
   anchorExperimentEnabled: v.optional<boolean | undefined>(v.boolean(), undefined),
   affiliateEnabled: v.boolean(),
-  maxAds: v.number({ min: 1, max: 1, integer: true }),
   adUnits: v.array(v.object({ id: unit, name: v.string({ min: 1, max: 100 }) }), { max: 10 }),
   updatedAt: v.optional(timestamp, null),
 }) as Validator<MonetizationSettings>;

@@ -189,7 +189,6 @@ export function applyLayout(
       ...config,
       mode: modeFor(adsOn, placements),
       adsEnabled: adsOn,
-      maxAds: 1,
       experimentId: null,
       placements,
     },
@@ -258,7 +257,6 @@ export interface AdAudit {
 export const blankConfig = (): ArticleMonetization => ({
   mode: "ads",
   adsEnabled: true,
-  maxAds: 1,
   experimentId: null,
   placements: [],
   updatedAt: null,

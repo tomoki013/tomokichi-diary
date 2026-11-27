@@ -4,6 +4,7 @@ import {
   enhanceInlineAffiliates,
   renderArticleMarkdown,
   replaceLoneLinks,
+  undisclosedAffiliateLinks,
   visibleTextLength,
 } from "../article-markdown.js";
 
@@ -26,6 +27,18 @@ describe("enhanceInlineAffiliates", () => {
     const html = `<p><a href="${URL}" rel="sponsored nofollow noopener">Omio</a>\n<small class="affiliate-inline-disclosure">広告</small></p>`;
     expect(enhanceInlineAffiliates(html, [URL])).toBe(html);
     expect(enhanceInlineAffiliates(html, [])).toBe("<p>Omio\n</p>");
+  });
+
+  it("adds a disclosure on an approved legacy link when its note is missing", () => {
+    const html = `<p><a href="${URL}" rel="sponsored">Omio</a></p>`;
+    expect(enhanceInlineAffiliates(html, [URL])).toContain("広告：このリンク経由");
+  });
+
+  it("flags bare tracking links and allows editorial or marked links", () => {
+    expect(undisclosedAffiliateLinks(`予約先は[Omio](${URL})です。`)).toEqual([URL]);
+    expect(
+      undisclosedAffiliateLinks(`予約先は[Omio](${URL} "広告")です。[公式](https://www.omio.com/)`),
+    ).toEqual([]);
   });
 
   it("leaves ordinary links alone", () => {

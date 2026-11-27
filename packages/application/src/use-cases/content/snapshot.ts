@@ -48,6 +48,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     articleKnowledge,
     publicationMetadata,
     adSettings,
+    offers,
   ] = await Promise.all([
     repos.revisions.listByIds(revisionIds),
     repos.embeds.listByRevisions(revisionIds),
@@ -77,6 +78,7 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
     repos.knowledge.listArticleKnowledge(),
     repos.publicationMetadata.listAll(),
     repos.monetization.settings(),
+    repos.monetization.offers(),
   ]);
   const history = await historyRead;
   const publishedIds = new Set<string>(
@@ -174,11 +176,23 @@ export async function loadContentSnapshot(ctx: AppContext): Promise<ContentSnaps
   const knownJourneys = new Set(collections.filter((c) => c.kind === "journey").map((c) => c.id));
   const memberships = replace(snapshot.articleCollections, (m) => m.collections);
   const groupedMemberships = membershipsByArticle(memberships);
+  const monetization = publicMonetizationOnly(
+    [...metadataByArticle.values()].flatMap((m) => (m.monetization ? [m.monetization] : [])),
+  );
+  // Old publication snapshots predate click attribution. Only an exact,
+  // unambiguous match can associate one of their public links with an offer.
+  for (const config of monetization) {
+    for (const placement of config.affiliates ?? []) {
+      if (placement.trackingOfferId) continue;
+      const matching = offers.filter(
+        (offer) => offer.provider === placement.provider && offer.url === placement.url,
+      );
+      if (matching.length === 1) placement.trackingOfferId = matching[0]!.id;
+    }
+  }
   return {
     ...snapshot,
-    monetization: publicMonetizationOnly(
-      [...metadataByArticle.values()].flatMap((m) => (m.monetization ? [m.monetization] : [])),
-    ),
+    monetization,
     articles: articles.map((a) => ({
       ...a,
       experienceTags: metadataByArticle.get(a.id)?.experienceTags ?? a.experienceTags,

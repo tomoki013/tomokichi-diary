@@ -4,6 +4,7 @@ import {
   createArticle,
   loadContentSnapshot,
   publishArticle,
+  updateArticleDraft,
   type AppContext,
 } from "@tomokichi/application";
 import { buildExportFiles } from "@tomokichi/data";
@@ -93,6 +94,25 @@ it("protects all operations and exposes no public monetization route", async () 
     expect(response.status).toBe(401);
   }
   expect((await app.request("/v1/monetization", {}, env)).status).toBe(404);
+});
+it("refuses to publish a tracking link with no advertising disclosure marker", async () => {
+  const draft = await updateArticleDraft(
+    ctx,
+    id,
+    {
+      title: "体験したおすすめメニューの紹介",
+      summary: "実際に訪ねた体験をもとにまとめた記事です。",
+      bodyMarkdown: `${body}\n\n[予約先](https://www.trip.com/t/FixtureLink)`,
+    },
+    authorId,
+  );
+  expect(draft.ok).toBe(true);
+  const result = await publishArticle(ctx, id);
+  expect(result.ok).toBe(false);
+  if (!result.ok) {
+    expect(result.errors.some((error) => error.code === "MONETIZATION_INVALID")).toBe(true);
+  }
+  expect((await ctx.repos.articles.findById(id))?.publishedRevisionId).toBeNull();
 });
 it("keeps offer content private, archives referenced offers, and retains assignments", async () => {
   const offer = {

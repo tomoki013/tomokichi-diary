@@ -6,6 +6,8 @@ import {
 const key = (s: unknown): s is string =>
   typeof s === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s) && s.length <= 64;
 const unit = (s: unknown): s is string => typeof s === "string" && /^\d{1,20}$/.test(s);
+const trackingOfferId = (s: unknown): s is string =>
+  typeof s === "string" && /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(s);
 
 /** Build boundary repeats the allowlist, even if a stored JSON document has extra properties. */
 export function publicMonetizationOnly(
@@ -31,6 +33,9 @@ export function publicMonetizationOnly(
                 description: item.description,
                 url: item.url,
                 format: item.format,
+                ...(trackingOfferId(item.trackingOfferId)
+                  ? { trackingOfferId: item.trackingOfferId }
+                  : {}),
               })),
             }
           : {}),
